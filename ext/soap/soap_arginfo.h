@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2f76351542b32b1bb958f7aee0394fee7d5301be */
+ * Stub hash: f9ef5d7512d7ff89cf0dd1661ab66db0c52d91bc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -406,6 +406,13 @@ static zend_class_entry *register_class_SoapServer(void)
 	zend_declare_property_ex(class_entry, property_service_name, &property_service_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_service_name);
 
+	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
+	zval property___soap_fault_default_value;
+	ZVAL_NULL(&property___soap_fault_default_value);
+	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
+	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
+	zend_string_release(property___soap_fault_name);
+
 	return class_entry;
 }
 
@@ -475,6 +482,163 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property_httpurl_name = zend_string_init("httpurl", sizeof("httpurl") - 1, 1);
 	zend_declare_property_ex(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_httpurl_name);
+
+	zval property__login_default_value;
+	ZVAL_NULL(&property__login_default_value);
+	zend_string *property__login_name = zend_string_init("_login", sizeof("_login") - 1, 1);
+	zend_declare_typed_property(class_entry, property__login_name, &property__login_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__login_name);
+
+	zval property__password_default_value;
+	ZVAL_NULL(&property__password_default_value);
+	zend_string *property__password_name = zend_string_init("_password", sizeof("_password") - 1, 1);
+	zend_declare_typed_property(class_entry, property__password_name, &property__password_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__password_name);
+
+	zval property__use_digest_default_value;
+	ZVAL_BOOL(&property__use_digest_default_value, 0);
+	zend_string *property__use_digest_name = zend_string_init("_use_digest", sizeof("_use_digest") - 1, 1);
+	zend_declare_typed_property(class_entry, property__use_digest_name, &property__use_digest_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__use_digest_name);
+
+	zval property__digest_default_value;
+	ZVAL_NULL(&property__digest_default_value);
+	zend_string *property__digest_name = zend_string_init("_digest", sizeof("_digest") - 1, 1);
+	zend_declare_typed_property(class_entry, property__digest_name, &property__digest_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__digest_name);
+
+	zval property__proxy_host_default_value;
+	ZVAL_NULL(&property__proxy_host_default_value);
+	zend_string *property__proxy_host_name = zend_string_init("_proxy_host", sizeof("_proxy_host") - 1, 1);
+	zend_declare_typed_property(class_entry, property__proxy_host_name, &property__proxy_host_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__proxy_host_name);
+
+	zval property__proxy_port_default_value;
+	ZVAL_NULL(&property__proxy_port_default_value);
+	zend_string *property__proxy_port_name = zend_string_init("_proxy_port", sizeof("_proxy_port") - 1, 1);
+	zend_declare_typed_property(class_entry, property__proxy_port_name, &property__proxy_port_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__proxy_port_name);
+
+	zval property__proxy_login_default_value;
+	ZVAL_NULL(&property__proxy_login_default_value);
+	zend_string *property__proxy_login_name = zend_string_init("_proxy_login", sizeof("_proxy_login") - 1, 1);
+	zend_declare_typed_property(class_entry, property__proxy_login_name, &property__proxy_login_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__proxy_login_name);
+
+	zval property__proxy_password_default_value;
+	ZVAL_NULL(&property__proxy_password_default_value);
+	zend_string *property__proxy_password_name = zend_string_init("_proxy_password", sizeof("_proxy_password") - 1, 1);
+	zend_declare_typed_property(class_entry, property__proxy_password_name, &property__proxy_password_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__proxy_password_name);
+
+	zval property__exceptions_default_value;
+	ZVAL_BOOL(&property__exceptions_default_value, 1);
+	zend_string *property__exceptions_name = zend_string_init("_exceptions", sizeof("_exceptions") - 1, 1);
+	zend_declare_typed_property(class_entry, property__exceptions_name, &property__exceptions_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__exceptions_name);
+
+	zval property__encoding_default_value;
+	ZVAL_NULL(&property__encoding_default_value);
+	zend_string *property__encoding_name = zend_string_init("_encoding", sizeof("_encoding") - 1, 1);
+	zend_declare_typed_property(class_entry, property__encoding_name, &property__encoding_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__encoding_name);
+
+	zval property__classmap_default_value;
+	ZVAL_NULL(&property__classmap_default_value);
+	zend_string *property__classmap_name = zend_string_init("_classmap", sizeof("_classmap") - 1, 1);
+	zend_declare_typed_property(class_entry, property__classmap_name, &property__classmap_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
+	zend_string_release(property__classmap_name);
+
+	zval property__features_default_value;
+	ZVAL_NULL(&property__features_default_value);
+	zend_string *property__features_name = zend_string_init("_features", sizeof("_features") - 1, 1);
+	zend_declare_typed_property(class_entry, property__features_name, &property__features_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__features_name);
+
+	zval property__connection_timeout_default_value;
+	ZVAL_LONG(&property__connection_timeout_default_value, 0);
+	zend_string *property__connection_timeout_name = zend_string_init("_connection_timeout", sizeof("_connection_timeout") - 1, 1);
+	zend_declare_typed_property(class_entry, property__connection_timeout_name, &property__connection_timeout_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property__connection_timeout_name);
+
+	zval property__stream_context_default_value;
+	ZVAL_NULL(&property__stream_context_default_value);
+	zend_string *property__stream_context_name = zend_string_init("_stream_context", sizeof("_stream_context") - 1, 1);
+	zend_declare_property_ex(class_entry, property__stream_context_name, &property__stream_context_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property__stream_context_name);
+
+	zval property__user_agent_default_value;
+	ZVAL_NULL(&property__user_agent_default_value);
+	zend_string *property__user_agent_name = zend_string_init("_user_agent", sizeof("_user_agent") - 1, 1);
+	zend_declare_typed_property(class_entry, property__user_agent_name, &property__user_agent_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__user_agent_name);
+
+	zval property__keep_alive_default_value;
+	ZVAL_BOOL(&property__keep_alive_default_value, 1);
+	zend_string *property__keep_alive_name = zend_string_init("_keep_alive", sizeof("_keep_alive") - 1, 1);
+	zend_declare_typed_property(class_entry, property__keep_alive_name, &property__keep_alive_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__keep_alive_name);
+
+	zval property__ssl_method_default_value;
+	ZVAL_NULL(&property__ssl_method_default_value);
+	zend_string *property__ssl_method_name = zend_string_init("_ssl_method", sizeof("_ssl_method") - 1, 1);
+	zend_declare_typed_property(class_entry, property__ssl_method_name, &property__ssl_method_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__ssl_method_name);
+
+	zval property__soap_version_default_value;
+	ZVAL_UNDEF(&property__soap_version_default_value);
+	zend_string *property__soap_version_name = zend_string_init("_soap_version", sizeof("_soap_version") - 1, 1);
+	zend_declare_typed_property(class_entry, property__soap_version_name, &property__soap_version_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property__soap_version_name);
+
+	zval property__use_proxy_default_value;
+	ZVAL_NULL(&property__use_proxy_default_value);
+	zend_string *property__use_proxy_name = zend_string_init("_use_proxy", sizeof("_use_proxy") - 1, 1);
+	zend_declare_typed_property(class_entry, property__use_proxy_name, &property__use_proxy_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__use_proxy_name);
+
+	zval property__cookies_default_value;
+	ZVAL_NULL(&property__cookies_default_value);
+	zend_string *property__cookies_name = zend_string_init("_cookies", sizeof("_cookies") - 1, 1);
+	zend_declare_typed_property(class_entry, property__cookies_name, &property__cookies_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
+	zend_string_release(property__cookies_name);
+
+	zval property___default_headers_default_value;
+	ZVAL_NULL(&property___default_headers_default_value);
+	zend_string *property___default_headers_name = zend_string_init("__default_headers", sizeof("__default_headers") - 1, 1);
+	zend_declare_typed_property(class_entry, property___default_headers_name, &property___default_headers_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
+	zend_string_release(property___default_headers_name);
+
+	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
+	zval property___soap_fault_default_value;
+	ZVAL_NULL(&property___soap_fault_default_value);
+	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
+	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
+	zend_string_release(property___soap_fault_name);
+
+	zval property___last_request_default_value;
+	ZVAL_NULL(&property___last_request_default_value);
+	zend_string *property___last_request_name = zend_string_init("__last_request", sizeof("__last_request") - 1, 1);
+	zend_declare_typed_property(class_entry, property___last_request_name, &property___last_request_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property___last_request_name);
+
+	zval property___last_response_default_value;
+	ZVAL_NULL(&property___last_response_default_value);
+	zend_string *property___last_response_name = zend_string_init("__last_response", sizeof("__last_response") - 1, 1);
+	zend_declare_typed_property(class_entry, property___last_response_name, &property___last_response_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property___last_response_name);
+
+	zval property___last_request_headers_default_value;
+	ZVAL_NULL(&property___last_request_headers_default_value);
+	zend_string *property___last_request_headers_name = zend_string_init("__last_request_headers", sizeof("__last_request_headers") - 1, 1);
+	zend_declare_typed_property(class_entry, property___last_request_headers_name, &property___last_request_headers_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property___last_request_headers_name);
+
+	zval property___last_response_headers_default_value;
+	ZVAL_NULL(&property___last_response_headers_default_value);
+	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, 1);
+	zend_declare_typed_property(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property___last_response_headers_name);
 
 	return class_entry;
 }

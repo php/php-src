@@ -32,23 +32,22 @@ static zend_string *get_http_headers(php_stream *socketd);
 /* Proxy HTTP Authentication */
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 {
-	zval *login, *password;
-
-	if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login")-1)) != NULL &&
-	    Z_TYPE_P(login) == IS_STRING) {
-		zend_string *buf;
+	zval *login = Z_CLIENT_PROXY_LOGIN_P(this_ptr);
+	ZVAL_DEREF(login);
+	if (Z_TYPE_P(login) == IS_STRING) {
 		smart_str auth = {0};
-
-		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
+		smart_str_append(&auth, Z_STR_P(login));
 		smart_str_appendc(&auth, ':');
-		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password")-1)) != NULL &&
-		    Z_TYPE_P(password) == IS_STRING) {
-			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
+
+		zval *password = Z_CLIENT_PROXY_PASSWORD_P(this_ptr);
+		ZVAL_DEREF(password);
+		if (Z_TYPE_P(password) == IS_STRING) {
+			smart_str_append(&auth, Z_STR_P(password));
 		}
 		smart_str_0(&auth);
-		buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
+		zend_string *buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
 		smart_str_append_const(soap_headers, "Proxy-Authorization: Basic ");
-		smart_str_appendl(soap_headers, (char*)ZSTR_VAL(buf), ZSTR_LEN(buf));
+		smart_str_append(soap_headers, buf);
 		smart_str_append_const(soap_headers, "\r\n");
 		zend_string_release_ex(buf, 0);
 		smart_str_free(&auth);
@@ -60,24 +59,25 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 /* HTTP Authentication */
 int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 {
-	zval *login, *password, *use_digest;
+	zval *login = Z_CLIENT_LOGIN_P(this_ptr);
+	zval *use_digest = Z_CLIENT_USE_DIGEST_P(this_ptr);
+	ZVAL_DEREF(login);
+	ZVAL_DEREF(use_digest);
 
-	if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login")-1)) != NULL &&
-	    Z_TYPE_P(login) == IS_STRING &&
-	    ((use_digest = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_use_digest", sizeof("_use_digest")-1)) == 0 || Z_TYPE_P(use_digest) != IS_TRUE)) {
-		zend_string* buf;
+	if (Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(use_digest) != IS_TRUE) {
 		smart_str auth = {0};
-
-		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
+		smart_str_append(&auth, Z_STR_P(login));
 		smart_str_appendc(&auth, ':');
-		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL &&
-		    Z_TYPE_P(password) == IS_STRING) {
-			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
+
+		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
+		ZVAL_DEREF(password);
+		if (Z_TYPE_P(password) == IS_STRING) {
+			smart_str_append(&auth, Z_STR_P(password));
 		}
 		smart_str_0(&auth);
-		buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
+		zend_string *buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
 		smart_str_append_const(soap_headers, "Authorization: Basic ");
-		smart_str_appendl(soap_headers, (char*)ZSTR_VAL(buf), ZSTR_LEN(buf));
+		smart_str_append(soap_headers, buf);
 		smart_str_append_const(soap_headers, "\r\n");
 		zend_string_release_ex(buf, 0);
 		smart_str_free(&auth);
@@ -159,7 +159,7 @@ void http_context_headers(php_stream_context* context,
 static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, php_stream_context *context, int *use_proxy)
 {
 	php_stream *stream;
-	zval *proxy_host, *proxy_port, *tmp, ssl_proxy_peer_name;
+	zval *tmp, ssl_proxy_peer_name;
 	char *host;
 	char *name;
 	char *protocol;
@@ -169,10 +169,11 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	struct timeval tv;
 	struct timeval *timeout = NULL;
 
-	if ((proxy_host = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1)) != NULL &&
-	    Z_TYPE_P(proxy_host) == IS_STRING &&
-	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
-	    Z_TYPE_P(proxy_port) == IS_LONG) {
+	zval *proxy_host = Z_CLIENT_PROXY_HOST_P(this_ptr);
+	zval *proxy_port = Z_CLIENT_PROXY_PORT_P(this_ptr);
+	ZVAL_DEREF(proxy_host);
+	ZVAL_DEREF(proxy_port);
+	if (Z_TYPE_P(proxy_host) == IS_STRING && Z_TYPE_P(proxy_port) == IS_LONG) {
 		host = Z_STRVAL_P(proxy_host);
 		port = Z_LVAL_P(proxy_port);
 		*use_proxy = 1;
@@ -180,10 +181,12 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		host = ZSTR_VAL(phpurl->host);
 		port = phpurl->port;
 	}
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_connection_timeout", sizeof("_connection_timeout")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
-	  tv.tv_sec = Z_LVAL_P(tmp);
-	  tv.tv_usec = 0;
+
+	tmp = Z_CLIENT_CONNECTION_TIMEOUT_P(this_ptr);
+	ZVAL_DEREF(tmp);
+	if (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) > 0) {
+		tv.tv_sec = Z_LVAL_P(tmp);
+		tv.tv_usec = 0;
 		timeout = &tv;
 	}
 
@@ -192,8 +195,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 
 	/* Changed ternary operator to an if/else so that additional comparisons can be done on the ssl_method property */
 	if (use_ssl && !*use_proxy) {
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_LONG) {
+		tmp = Z_CLIENT_SSL_METHOD_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (Z_TYPE_P(tmp) == IS_LONG) {
 			/* uses constants declared in soap.c to determine ssl uri protocol */
 			switch (Z_LVAL_P(tmp)) {
 				case SOAP_SSL_METHOD_TLS:
@@ -280,8 +284,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 			/* if a stream is created without encryption, check to see if SSL method parameter is specified and use
 			   proper encrypyion method based on constants defined in soap.c */
 			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
-			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method")-1)) != NULL &&
-				Z_TYPE_P(tmp) == IS_LONG) {
+			tmp = Z_CLIENT_SSL_METHOD_P(this_ptr);
+			ZVAL_DEREF(tmp);
+			if (Z_TYPE_P(tmp) == IS_LONG) {
 				switch (Z_LVAL_P(tmp)) {
 					case SOAP_SSL_METHOD_TLS:
 						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
@@ -420,7 +425,9 @@ int make_http_soap_request(zval        *this_ptr,
 	tmp = Z_CLIENT_HTTPSOCKET_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 		php_stream_from_zval_no_verify(stream,tmp);
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1)) != NULL && Z_TYPE_P(tmp) == IS_LONG) {
+		tmp = Z_CLIENT_USE_PROXY_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (Z_TYPE_P(tmp) == IS_LONG) {
 			use_proxy = Z_LVAL_P(tmp);
 		}
 	} else {
@@ -431,8 +438,8 @@ int make_http_soap_request(zval        *this_ptr,
 		phpurl = php_url_parse(location);
 	}
 
-	if (NULL != (tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr),
-			"_stream_context", sizeof("_stream_context")-1))) {
+	tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
+	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 		context = php_stream_context_from_zval(tmp, 0);
 	}
 
@@ -501,7 +508,7 @@ try_again:
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
 			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			stream = NULL;
 			use_proxy = 0;
 		}
@@ -512,7 +519,7 @@ try_again:
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
 		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 		use_proxy = 0;
 	}
@@ -523,7 +530,7 @@ try_again:
 			php_stream_auto_cleanup(stream);
 			ZVAL_RES(Z_CLIENT_HTTPSOCKET_P(this_ptr), stream->res);
 			GC_ADDREF(stream->res);
-			add_property_long(this_ptr, "_use_proxy", use_proxy);
+			ZVAL_LONG(Z_CLIENT_USE_PROXY_P(this_ptr), use_proxy);
 		} else {
 			php_url_free(phpurl);
 			if (request != buf) {
@@ -584,17 +591,18 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		if (!http_1_1 ||
-			((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive")-1)) != NULL &&
-			 (Z_TYPE_P(tmp) == IS_FALSE || (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 0)))) {
+		tmp = Z_CLIENT_KEEP_ALIVE_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (!http_1_1 || Z_TYPE_P(tmp) == IS_FALSE) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
 		} else {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: Keep-Alive\r\n");
 		}
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
+		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (Z_TYPE_P(tmp) == IS_STRING) {
 			if (Z_STRLEN_P(tmp) > 0) {
 				smart_str_append_const(&soap_headers, "User-Agent: ");
 				smart_str_appendl(&soap_headers, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
@@ -658,12 +666,14 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
-		if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login")-1)) != NULL &&
-		    Z_TYPE_P(login) == IS_STRING) {
-			zval *digest;
+		login = Z_CLIENT_LOGIN_P(this_ptr);
+		ZVAL_DEREF(login);
+		if (Z_TYPE_P(login) == IS_STRING) {
+			zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
+			ZVAL_DEREF(digest);
 
 			has_authorization = 1;
-			if ((digest = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) != NULL && Z_TYPE_P(digest) == IS_ARRAY) {
+			if (Z_TYPE_P(digest) == IS_ARRAY) {
 				char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
 				zend_long     nonce;
 				PHP_MD5_CTX   md5ctx;
@@ -695,8 +705,9 @@ try_again:
 					PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 				}
 				PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
-				if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL &&
-					Z_TYPE_P(password) == IS_STRING) {
+				password = Z_CLIENT_PASSWORD_P(this_ptr);
+				ZVAL_DEREF(password);
+				if (Z_TYPE_P(password) == IS_STRING) {
 					PHP_MD5Update(&md5ctx, (unsigned char*)Z_STRVAL_P(password), Z_STRLEN_P(password));
 				}
 				PHP_MD5Final(hash, &md5ctx);
@@ -807,16 +818,17 @@ try_again:
 				zend_string *buf;
 
 				smart_str auth = {0};
-				smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
+				smart_str_append(&auth, Z_STR_P(login));
 				smart_str_appendc(&auth, ':');
-				if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL &&
-				    Z_TYPE_P(password) == IS_STRING) {
-					smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
+				password = Z_CLIENT_PASSWORD_P(this_ptr);
+				ZVAL_DEREF(password);
+				if (Z_TYPE_P(password) == IS_STRING) {
+					smart_str_append(&auth, Z_STR_P(password));
 				}
 				smart_str_0(&auth);
 				buf = php_base64_encode((unsigned char*)ZSTR_VAL(auth.s), ZSTR_LEN(auth.s));
 				smart_str_append_const(&soap_headers, "Authorization: Basic ");
-				smart_str_appendl(&soap_headers, (char*)ZSTR_VAL(buf), ZSTR_LEN(buf));
+				smart_str_append(&soap_headers, buf);
 				smart_str_append_const(&soap_headers, "\r\n");
 				zend_string_release_ex(buf, 0);
 				smart_str_free(&auth);
@@ -829,8 +841,9 @@ try_again:
 		}
 
 		/* Send cookies along with request */
-		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) != NULL &&
-		    Z_TYPE_P(cookies) == IS_ARRAY) {
+		cookies = Z_CLIENT_COOKIES_P(this_ptr);
+		ZVAL_DEREF(cookies);
+		if (Z_TYPE_P(cookies) == IS_ARRAY) {
 			zval *data;
 			zend_string *key;
 			uint32_t n = zend_hash_num_elements(Z_ARRVAL_P(cookies));
@@ -870,7 +883,8 @@ try_again:
 		trace = Z_CLIENT_TRACE_P(this_ptr);
 		ZVAL_DEREF(trace);
 		if (Z_TYPE_P(trace) == IS_TRUE) {
-			add_property_stringl(this_ptr, "__last_request_headers", ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
+			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr));
+			ZVAL_STR_COPY(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr), soap_headers.s);
 		}
 		smart_str_appendl(&soap_headers, request->val, request->len);
 		smart_str_0(&soap_headers);
@@ -883,7 +897,7 @@ try_again:
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPURL_P(this_ptr));
 			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Failed Sending HTTP SOAP request", NULL, NULL);
 			smart_str_free(&soap_headers_z);
 			return FALSE;
@@ -898,7 +912,7 @@ try_again:
 	if (!return_value) {
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		smart_str_free(&soap_headers_z);
 		return TRUE;
 	}
@@ -911,7 +925,7 @@ try_again:
 			}
 			php_stream_close(stream);
 			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
 			smart_str_free(&soap_headers_z);
 			return FALSE;
@@ -920,7 +934,8 @@ try_again:
 		trace = Z_CLIENT_TRACE_P(this_ptr);
 		ZVAL_DEREF(trace);
 		if (Z_TYPE_P(trace) == IS_TRUE) {
-			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
+			zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr));
+			ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr), http_headers);
 		}
 
 		/* Check to see what HTTP status was sent */
@@ -967,13 +982,10 @@ try_again:
 	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie: ", &cookie_len))) {
 		char *cookie;
 		char *eqpos, *sempos;
-		zval *cookies;
-
-		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) == NULL ||
-		    Z_TYPE_P(cookies) != IS_ARRAY) {
-			zval tmp_cookies;
-			array_init(&tmp_cookies);
-			cookies = zend_hash_str_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
+		zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
+		ZVAL_DEREF(cookies);
+		if (Z_TYPE_P(cookies) != IS_ARRAY) {
+			array_init(cookies);
 		}
 
 		cookie = estrndup(cookie_itt, cookie_len);
@@ -1090,7 +1102,7 @@ try_again:
 		php_stream_close(stream);
 		zend_string_release_ex(http_headers, 0);
 		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL);
 		if (http_msg) {
 			efree(http_msg);
@@ -1106,7 +1118,7 @@ try_again:
 	if (http_close) {
 		php_stream_close(stream);
 		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy")-1);
+		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
 		stream = NULL;
 	}
 
@@ -1160,17 +1172,15 @@ try_again:
 		}
 	} else if (http_status == 401) {
 		/* Digest authentication */
-		zval *digest, *login, *password;
+		zval *digest = Z_CLIENT_DIGEST_P(this_ptr);
+		zval *login = Z_CLIENT_LOGIN_P(this_ptr);
+		zval *password = Z_CLIENT_PASSWORD_P(this_ptr);
 		char *auth = get_http_header_value(ZSTR_VAL(http_headers), "WWW-Authenticate: ");
-
-		if (auth &&
-				strstr(auth, "Digest") == auth &&
-		    ((digest = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) == NULL ||
-		     Z_TYPE_P(digest) != IS_ARRAY) &&
-		    (login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login")-1)) != NULL &&
-		    Z_TYPE_P(login) == IS_STRING &&
-		    (password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL &&
-		    Z_TYPE_P(password) == IS_STRING) {
+		ZVAL_DEREF(digest);
+		ZVAL_DEREF(login);
+		ZVAL_DEREF(password);
+		if (auth && strstr(auth, "Digest") == auth && Z_TYPE_P(digest) != IS_ARRAY
+				&& Z_TYPE_P(login) == IS_STRING && Z_TYPE_P(password) == IS_STRING) {
 			char *s;
 			zval digest;
 
@@ -1211,10 +1221,10 @@ try_again:
 			}
 
 			if (Z_TYPE(digest) != IS_UNDEF) {
-				php_url *new_url  = emalloc(sizeof(php_url));
+				php_url *new_url = emalloc(sizeof(php_url));
 
-				Z_DELREF(digest);
-				add_property_zval_ex(this_ptr, "_digest", sizeof("_digest")-1, &digest);
+				zval_ptr_dtor(Z_CLIENT_DIGEST_P(this_ptr));
+				ZVAL_COPY_VALUE(Z_CLIENT_DIGEST_P(this_ptr), &digest);
 
 				*new_url = *phpurl;
 				if (phpurl->scheme) phpurl->scheme = zend_string_copy(phpurl->scheme);

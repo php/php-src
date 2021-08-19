@@ -17,7 +17,7 @@ $dummy = unserialize('O:12:"MySoapClient":5:{s:3:"uri";s:1:"a";s:8:"location";s:
 $dummy->whatever();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign string to property SoapClient::$trace of type bool in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign int to property SoapClient::$__default_headers of type ?array in %s:%d
 Stack trace:
 #0 %s(%d): unserialize('O:12:"MySoapCli...')
 #1 {main}

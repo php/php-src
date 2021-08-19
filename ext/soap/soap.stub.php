@@ -57,6 +57,8 @@ class SoapServer
     /** @var resource */
     public $service;
 
+    public ?SoapFault $__soap_fault = null;
+
     public function __construct(?string $wsdl, array $options = []) {}
 
     /** @tentative-return-type */
@@ -103,6 +105,34 @@ class SoapClient
     public $httpsocket = null;
     /** @var resource|null */
     public $httpurl = null;
+
+    public ?string $_login = null;
+    public ?string $_password = null;
+    public bool $_use_digest = false;
+    public ?string $_digest = null;
+    public ?string $_proxy_host = null;
+    public ?int $_proxy_port = null;
+    public ?string $_proxy_login = null;
+    public ?string $_proxy_password = null;
+    public bool $_exceptions = true;
+    public ?string $_encoding = null;
+    public ?array $_classmap = null;
+    public ?int $_features = null;
+    public int $_connection_timeout = 0;
+    /** @var resource|null */
+    public $_stream_context = null;
+    public ?string $_user_agent = null;
+    public bool $_keep_alive = true;
+    public ?int $_ssl_method = null;
+    public int $_soap_version;
+    public ?int $_use_proxy = null;
+    public ?array $_cookies = null;
+    public ?array $__default_headers = null;
+    public ?SoapFault $__soap_fault = null;
+    public ?string $__last_request = null;
+    public ?string $__last_response = null;
+    public ?string $__last_request_headers = null;
+    public ?string $__last_response_headers = null;
 
     public function __construct(?string $wsdl, array $options = []) {}
 

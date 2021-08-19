@@ -3163,7 +3163,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	size_t uri_len = 0;
 	php_stream_context *context=NULL;
-	zval *tmp, *proxy_host, *proxy_port, orig_context, new_context;
+	zval *tmp, orig_context, new_context;
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
@@ -3237,49 +3237,55 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		}
 	}
 
-	if (NULL != (tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr),
-			"_stream_context", sizeof("_stream_context")-1))) {
-		context = php_stream_context_from_zval(tmp, 0);
-	} else {
+	if (instanceof_function(Z_OBJCE_P(this_ptr), soap_class_entry)) {
+		tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
+		if (Z_TYPE_P(tmp) == IS_RESOURCE) {
+			context = php_stream_context_from_zval(tmp, 0);
+		}
+
+		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
+		ZVAL_DEREF(tmp);
+		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
+			smart_str_appends(&headers, "User-Agent: ");
+			smart_str_appends(&headers, Z_STRVAL_P(tmp));
+			smart_str_appends(&headers, "\r\n");
+		}
+
+		zval *proxy_host = Z_CLIENT_PROXY_HOST_P(this_ptr);
+		zval *proxy_port = Z_CLIENT_PROXY_PORT_P(this_ptr);
+		ZVAL_DEREF(proxy_host);
+		ZVAL_DEREF(proxy_port);
+		if (Z_TYPE_P(proxy_host) == IS_STRING && Z_TYPE_P(proxy_port) == IS_LONG) {
+			zval str_proxy;
+			smart_str proxy = {0};
+			smart_str_appends(&proxy,"tcp://");
+			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
+			smart_str_appends(&proxy,":");
+			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
+			smart_str_0(&proxy);
+			ZVAL_NEW_STR(&str_proxy, proxy.s);
+
+			if (!context) {
+				context = php_stream_context_alloc();
+			}
+			php_stream_context_set_option(context, "http", "proxy", &str_proxy);
+			zval_ptr_dtor(&str_proxy);
+
+			if (uri_len < sizeof("https://")-1 ||
+				strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
+				ZVAL_TRUE(&str_proxy);
+				php_stream_context_set_option(context, "http", "request_fulluri", &str_proxy);
+			}
+
+			has_proxy_authorization = proxy_authentication(this_ptr, &headers);
+		}
+
+		has_authorization = basic_authentication(this_ptr, &headers);
+	}
+
+	if (!context) {
 		context = php_stream_context_alloc();
 	}
-
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
-		smart_str_appends(&headers, "User-Agent: ");
-		smart_str_appends(&headers, Z_STRVAL_P(tmp));
-		smart_str_appends(&headers, "\r\n");
-	}
-
-	if ((proxy_host = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1)) != NULL &&
-	    Z_TYPE_P(proxy_host) == IS_STRING &&
-	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
-	    Z_TYPE_P(proxy_port) == IS_LONG) {
-	        zval str_proxy;
-	    	smart_str proxy = {0};
-		smart_str_appends(&proxy,"tcp://");
-		smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
-		smart_str_appends(&proxy,":");
-		smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
-		smart_str_0(&proxy);
-		ZVAL_NEW_STR(&str_proxy, proxy.s);
-
-		if (!context) {
-			context = php_stream_context_alloc();
-		}
-		php_stream_context_set_option(context, "http", "proxy", &str_proxy);
-		zval_ptr_dtor(&str_proxy);
-
-		if (uri_len < sizeof("https://")-1 ||
-		    strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
-			ZVAL_TRUE(&str_proxy);
-			php_stream_context_set_option(context, "http", "request_fulluri", &str_proxy);
-		}
-
-		has_proxy_authorization = proxy_authentication(this_ptr, &headers);
-	}
-
-	has_authorization = basic_authentication(this_ptr, &headers);
 
 	/* Use HTTP/1.1 with "Connection: close" by default */
 	if ((tmp = php_stream_context_get_option(context, "http", "protocol_version")) == NULL) {
