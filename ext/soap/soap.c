@@ -1188,7 +1188,7 @@ PHP_METHOD(SoapServer, handle)
 	soapServicePtr service;
 	xmlDocPtr doc_request = NULL, doc_return = NULL;
 	zval function_name, *params, *soap_obj, retval;
-	char *fn_name, cont_len[30];
+	char cont_len[30];
 	int num_params = 0, size, i, call_status = 0;
 	xmlChar *buf;
 	HashTable *function_table;
@@ -1450,8 +1450,8 @@ PHP_METHOD(SoapServer, handle)
 				}
 			}
 #endif
-			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
-			if (zend_hash_str_exists(function_table, php_strtolower(fn_name, Z_STRLEN(h->function_name)), Z_STRLEN(h->function_name)) ||
+			zend_string *fn_name = zend_string_tolower(Z_STR(h->function_name));
+			if (zend_hash_exists(function_table, fn_name) ||
 			    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 			     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 				if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
@@ -1472,25 +1472,25 @@ PHP_METHOD(SoapServer, handle)
 					}
 					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h);
-					efree(fn_name);
+					zend_string_release(fn_name);
 					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
 					goto fail;
 				} else if (EG(exception)) {
 					php_output_discard();
 					_soap_server_exception(service, function, ZEND_THIS);
-					efree(fn_name);
+					zend_string_release(fn_name);
 					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
 					goto fail;
 				}
 			} else if (h->mustUnderstand) {
 				soap_server_fault("MustUnderstand","Header not understood", NULL, NULL, NULL);
 			}
-			efree(fn_name);
+			zend_string_release(fn_name);
 		}
 	}
 
-	fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
-	if (zend_hash_str_exists(function_table, php_strtolower(fn_name, Z_STRLEN(function_name)), Z_STRLEN(function_name)) ||
+	zend_string *fn_name = zend_string_tolower(Z_STR(function_name));
+	if (zend_hash_exists(function_table, fn_name) ||
 	    ((service->type == SOAP_CLASS || service->type == SOAP_OBJECT) &&
 	     zend_hash_str_exists(function_table, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)-1))) {
 		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
@@ -1512,7 +1512,7 @@ PHP_METHOD(SoapServer, handle)
 	} else {
 		php_error(E_ERROR, "Function '%s' doesn't exist", Z_STRVAL(function_name));
 	}
-	efree(fn_name);
+	zend_string_release(fn_name);
 
 	if (EG(exception)) {
 		if (!zend_is_unwind_exit(EG(exception))) {
