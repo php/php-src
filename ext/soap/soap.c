@@ -145,6 +145,13 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 
 #define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 #define Z_PARAM_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+
+#define Z_HEADER_NAMESPACE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_HEADER_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_HEADER_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
+#define Z_HEADER_MUST_UNDERSTAND_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
+#define Z_HEADER_ACTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+
 #define Z_SERVER_SERVICE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 
 #define FETCH_THIS_SERVICE(ss) \
@@ -525,50 +532,48 @@ PHP_METHOD(SoapParam, __construct)
 PHP_METHOD(SoapHeader, __construct)
 {
 	zval *data = NULL;
-	zend_string *actor_str = NULL;
+	zend_string *ns, *name, *actor_str = NULL;
 	zend_long actor_long;
 	bool actor_is_null = 1;
-	char *name, *ns;
-	size_t name_len, ns_len;
 	bool must_understand = 0;
 	zval *this_ptr;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
-		Z_PARAM_STRING(ns, ns_len)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STR(ns)
+		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(data)
 		Z_PARAM_BOOL(must_understand)
 		Z_PARAM_STR_OR_LONG_OR_NULL(actor_str, actor_long, actor_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ns_len == 0) {
+	if (ZSTR_LEN(ns) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
-	if (name_len == 0) {
+	if (ZSTR_LEN(name) == 0) {
 		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	this_ptr = ZEND_THIS;
-	add_property_stringl(this_ptr, "namespace", ns, ns_len);
-	add_property_stringl(this_ptr, "name", name, name_len);
+	ZVAL_STR_COPY(Z_HEADER_NAMESPACE_P(this_ptr), ns);
+	ZVAL_STR_COPY(Z_HEADER_NAME_P(this_ptr), name);
 	if (data) {
-		add_property_zval(this_ptr, "data", data);
+		ZVAL_COPY(Z_HEADER_DATA_P(this_ptr), data);
 	}
-	add_property_bool(this_ptr, "mustUnderstand", must_understand);
+	ZVAL_BOOL(Z_HEADER_MUST_UNDERSTAND_P(this_ptr), must_understand);
 
 	if (actor_str) {
 		if (ZSTR_LEN(actor_str) > 2) {
-			add_property_stringl(this_ptr, "actor", ZSTR_VAL(actor_str), ZSTR_LEN(actor_str));
+			ZVAL_STR_COPY(Z_HEADER_ACTOR_P(this_ptr), actor_str);
 		} else {
 			zend_argument_value_error(2, "must be longer than 2 characters");
 			RETURN_THROWS();
 		}
 	} else if (!actor_is_null) {
 		if ((actor_long == SOAP_ACTOR_NEXT || actor_long == SOAP_ACTOR_NONE || actor_long == SOAP_ACTOR_UNLIMATERECEIVER)) {
-			add_property_long(this_ptr, "actor", actor_long);
+			ZVAL_LONG(Z_HEADER_ACTOR_P(this_ptr), actor_long);
 		} else {
 			zend_argument_value_error(5, "must be one of SOAP_ACTOR_NEXT, SOAP_ACTOR_NONE, or SOAP_ACTOR_UNLIMATERECEIVER");
 			RETURN_THROWS();
@@ -3346,38 +3351,40 @@ ignore_header:
 }
 /* }}} */
 
-static void set_soap_header_attributes(xmlNodePtr h, HashTable *ht, int version) /* {{{ */
+static void set_soap_header_attributes(xmlNodePtr h, zval *header, int version) /* {{{ */
 {
 	zval *tmp;
 
-	if ((tmp = zend_hash_str_find(ht, "mustUnderstand", sizeof("mustUnderstand")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_TRUE) {
+	tmp = Z_HEADER_MUST_UNDERSTAND_P(header);
+	ZVAL_DEREF(tmp);
+	if (Z_TYPE_P(tmp) == IS_TRUE) {
 		if (version == SOAP_1_1) {
 			xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("1"));
 		} else {
 			xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("true"));
 		}
 	}
-	if ((tmp = zend_hash_str_find(ht, "actor", sizeof("actor")-1)) != NULL) {
-		if (Z_TYPE_P(tmp) == IS_STRING) {
-			if (version == SOAP_1_1) {
-				xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(Z_STRVAL_P(tmp)));
-			} else {
-				xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(Z_STRVAL_P(tmp)));
+
+	tmp = Z_HEADER_ACTOR_P(header);
+	ZVAL_DEREF(tmp);
+	if (Z_TYPE_P(tmp) == IS_STRING) {
+		if (version == SOAP_1_1) {
+			xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(Z_STRVAL_P(tmp)));
+		} else {
+			xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(Z_STRVAL_P(tmp)));
+		}
+	} else if (Z_TYPE_P(tmp) == IS_LONG) {
+		if (version == SOAP_1_1) {
+			if (Z_LVAL_P(tmp) == SOAP_ACTOR_NEXT) {
+				xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(SOAP_1_1_ACTOR_NEXT));
 			}
-		} else if (Z_TYPE_P(tmp) == IS_LONG) {
-			if (version == SOAP_1_1) {
-				if (Z_LVAL_P(tmp) == SOAP_ACTOR_NEXT) {
-					xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(SOAP_1_1_ACTOR_NEXT));
-				}
-			} else {
-				if (Z_LVAL_P(tmp) == SOAP_ACTOR_NEXT) {
-					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NEXT));
-				} else if (Z_LVAL_P(tmp) == SOAP_ACTOR_NONE) {
-					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NONE));
-				} else if (Z_LVAL_P(tmp) == SOAP_ACTOR_UNLIMATERECEIVER) {
-					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_UNLIMATERECEIVER));
-				}
+		} else {
+			if (Z_LVAL_P(tmp) == SOAP_ACTOR_NEXT) {
+				xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NEXT));
+			} else if (Z_LVAL_P(tmp) == SOAP_ACTOR_NONE) {
+				xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NONE));
+			} else if (Z_LVAL_P(tmp) == SOAP_ACTOR_UNLIMATERECEIVER) {
+				xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_UNLIMATERECEIVER));
 			}
 		}
 	}
@@ -3536,18 +3543,20 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			head = xmlNewChild(envelope, ns, BAD_CAST("Header"), NULL);
 			if (Z_TYPE_P(hdr_ret) == IS_OBJECT &&
 			    instanceof_function(Z_OBJCE_P(hdr_ret), soap_header_class_entry)) {
-				HashTable* ht = Z_OBJPROP_P(hdr_ret);
 				sdlSoapBindingFunctionHeaderPtr hdr;
 				smart_str key = {0};
 
-				if ((tmp = zend_hash_str_find(ht, "namespace", sizeof("namespace")-1)) != NULL &&
-			      Z_TYPE_P(tmp) == IS_STRING) {
+				tmp = Z_HEADER_NAMESPACE_P(hdr_ret);
+				ZVAL_DEREF(tmp);
+				if (Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 					smart_str_appendc(&key, ':');
 					hdr_ns = Z_STRVAL_P(tmp);
 				}
-				if ((tmp = zend_hash_str_find(ht, "name", sizeof("name")-1)) != NULL &&
-				    Z_TYPE_P(tmp) == IS_STRING) {
+
+				tmp = Z_HEADER_NAME_P(hdr_ret);
+				ZVAL_DEREF(tmp);
+				if (Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 					hdr_name = Z_STRVAL_P(tmp);
 				}
@@ -3558,7 +3567,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					hdr_use = hdr->use;
 				}
 				smart_str_free(&key);
-				if ((tmp = zend_hash_str_find(ht, "data", sizeof("data")-1)) != NULL) {
+				tmp = Z_HEADER_DATA_P(hdr_ret);
+				if (Z_TYPE_P(tmp) > IS_NULL) {
 					hdr_ret = tmp;
 				} else {
 					hdr_ret = NULL;
@@ -3750,23 +3760,24 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
 					char *hdr_name = Z_TYPE(h->function_name) == IS_STRING
 						? Z_STRVAL(h->function_name) : NULL;
-					HashTable *ht = NULL;
+					bool is_header_object = Z_TYPE(h->retval) == IS_OBJECT &&
+					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry);
 
-					if (Z_TYPE(h->retval) == IS_OBJECT &&
-					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry)) {
+					if (is_header_object) {
 						zval *tmp;
 						sdlSoapBindingFunctionHeaderPtr hdr;
 						smart_str key = {0};
 
-						ht = Z_OBJPROP(h->retval);
-						if ((tmp = zend_hash_str_find(ht, "namespace", sizeof("namespace")-1)) != NULL &&
-					      Z_TYPE_P(tmp) == IS_STRING) {
+						tmp = Z_HEADER_NAMESPACE_P(&h->retval);
+						ZVAL_DEREF(tmp);
+						if (Z_TYPE_P(tmp) == IS_STRING) {
 							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 							smart_str_appendc(&key, ':');
 							hdr_ns = Z_STRVAL_P(tmp);
 						}
-						if ((tmp = zend_hash_str_find(ht, "name", sizeof("name")-1)) != NULL &&
-						    Z_TYPE_P(tmp) == IS_STRING) {
+						tmp = Z_HEADER_NAME_P(&h->retval);
+						ZVAL_DEREF(tmp);
+						if (Z_TYPE_P(tmp) == IS_STRING) {
 							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 							hdr_name = Z_STRVAL_P(tmp);
 						}
@@ -3781,7 +3792,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 							}
 						}
 						smart_str_free(&key);
-						if ((tmp = zend_hash_str_find(ht, "data", sizeof("data")-1)) != NULL) {
+						tmp = Z_HEADER_DATA_P(&h->retval);
+						if (Z_TYPE_P(tmp) > IS_NULL) {
 							hdr_ret = tmp;
 						} else {
 							hdr_ret = NULL;
@@ -3794,8 +3806,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 						if (serialize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, hdr_ret, version, 0, &xmlHdr) == SOAP_ENCODED) {
 							use = SOAP_ENCODED;
 						}
-						if (ht) {
-							set_soap_header_attributes(xmlHdr, ht, version);
+						if (is_header_object) {
+							set_soap_header_attributes(xmlHdr, &h->retval, version);
 						}
 					} else {
 						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head);
@@ -3806,8 +3818,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 							xmlNsPtr nsptr = encode_add_ns(xmlHdr,hdr_ns);
 							xmlSetNs(xmlHdr, nsptr);
 						}
-						if (ht) {
-							set_soap_header_attributes(xmlHdr, ht, version);
+						if (is_header_object) {
+							set_soap_header_attributes(xmlHdr, &h->retval, version);
 						}
 					}
 				}
@@ -3984,18 +3996,16 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		zval* header;
 
 		ZEND_HASH_FOREACH_VAL(soap_headers, header) {
-			HashTable *ht;
-			zval *name, *ns, *tmp;
-
-			if (Z_TYPE_P(header) != IS_OBJECT) {
+			if (Z_TYPE_P(header) != IS_OBJECT
+					|| !instanceof_function(Z_OBJCE_P(header), soap_header_class_entry)) {
 				continue;
 			}
 
-			ht = Z_OBJPROP_P(header);
-			if ((name = zend_hash_str_find(ht, "name", sizeof("name")-1)) != NULL &&
-				Z_TYPE_P(name) == IS_STRING &&
-				(ns = zend_hash_str_find(ht, "namespace", sizeof("namespace")-1)) != NULL &&
-				Z_TYPE_P(ns) == IS_STRING) {
+			zval *name = Z_HEADER_NAME_P(header);
+			zval *ns = Z_HEADER_NAMESPACE_P(header);
+			ZVAL_DEREF(name);
+			ZVAL_DEREF(ns);
+			if (Z_TYPE_P(name) == IS_STRING && Z_TYPE_P(ns) == IS_STRING) {
 				xmlNodePtr h;
 				xmlNsPtr nsptr;
 				int hdr_use = SOAP_LITERAL;
@@ -4019,8 +4029,9 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 					smart_str_free(&key);
 				}
 
-				if ((tmp = zend_hash_str_find(ht, "data", sizeof("data")-1)) != NULL) {
-					h = master_to_xml(enc, tmp, hdr_use, head);
+				zval *data = Z_HEADER_DATA_P(header);
+				if (Z_TYPE_P(data) > IS_NULL) {
+					h = master_to_xml(enc, data, hdr_use, head);
 					xmlNodeSetName(h, BAD_CAST(Z_STRVAL_P(name)));
 				} else {
 					h = xmlNewNode(NULL, BAD_CAST(Z_STRVAL_P(name)));
@@ -4028,7 +4039,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 				}
 				nsptr = encode_add_ns(h, Z_STRVAL_P(ns));
 				xmlSetNs(h, nsptr);
-				set_soap_header_attributes(h, ht, version);
+				set_soap_header_attributes(h, header, version);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

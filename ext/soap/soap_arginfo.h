@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f1f7c9c948e33f0b48ff66ea3515dc995ee8f870 */
+ * Stub hash: 7717522131d47f9d133ac2a9649f1974f70b6a05 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -261,6 +261,36 @@ static zend_class_entry *register_class_SoapHeader(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapHeader", class_SoapHeader_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_namespace_default_value;
+	ZVAL_UNDEF(&property_namespace_default_value);
+	zend_string *property_namespace_name = zend_string_init("namespace", sizeof("namespace") - 1, 1);
+	zend_declare_typed_property(class_entry, property_namespace_name, &property_namespace_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_namespace_name);
+
+	zval property_name_default_value;
+	ZVAL_UNDEF(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_name_name);
+
+	zval property_data_default_value;
+	ZVAL_NULL(&property_data_default_value);
+	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
+	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_data_name);
+
+	zval property_mustUnderstand_default_value;
+	ZVAL_UNDEF(&property_mustUnderstand_default_value);
+	zend_string *property_mustUnderstand_name = zend_string_init("mustUnderstand", sizeof("mustUnderstand") - 1, 1);
+	zend_declare_typed_property(class_entry, property_mustUnderstand_name, &property_mustUnderstand_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_mustUnderstand_name);
+
+	zval property_actor_default_value;
+	ZVAL_UNDEF(&property_actor_default_value);
+	zend_string *property_actor_name = zend_string_init("actor", sizeof("actor") - 1, 1);
+	zend_declare_typed_property(class_entry, property_actor_name, &property_actor_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_actor_name);
 
 	return class_entry;
 }

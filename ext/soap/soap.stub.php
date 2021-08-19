@@ -16,6 +16,12 @@ class SoapParam
 
 class SoapHeader
 {
+    public string $namespace;
+    public string $name;
+    public mixed $data = null;
+    public bool $mustUnderstand;
+    public string|int|null $actor;
+
     public function __construct(string $namespace, string $name, mixed $data = UNKNOWN, bool $mustUnderstand = false, string|int|null $actor = null) {}
 }
 
