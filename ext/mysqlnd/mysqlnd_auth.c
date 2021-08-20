@@ -99,10 +99,7 @@ mysqlnd_run_authentication(
 			switch_to_auth_protocol = NULL;
 			switch_to_auth_protocol_len = 0;
 
-			if (conn->authentication_plugin_data.s) {
-				mnd_pefree(conn->authentication_plugin_data.s, conn->persistent);
-				conn->authentication_plugin_data.s = NULL;
-			}
+			mysqlnd_set_persistent_string(&conn->authentication_plugin_data, NULL, 0, conn->persistent);
 			conn->authentication_plugin_data.l = plugin_data_len;
 			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
 			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
@@ -490,24 +487,11 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 	}
 	if (ret == PASS) {
-		char * tmp = NULL;
-		/* if we get conn->username as parameter and then we first free it, then estrndup it, we will crash */
-		tmp = mnd_pestrndup(user, user_len, conn->persistent);
-		if (conn->username.s) {
-			mnd_pefree(conn->username.s, conn->persistent);
-		}
-		conn->username.s = tmp;
+		ZEND_ASSERT(conn->username.s != user && conn->password.s != passwd);
+		mysqlnd_set_persistent_string(&conn->username, user, user_len, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->password, passwd, passwd_len, conn->persistent);
 
-		tmp = mnd_pestrdup(passwd, conn->persistent);
-		if (conn->password.s) {
-			mnd_pefree(conn->password.s, conn->persistent);
-		}
-		conn->password.s = tmp;
-
-		if (conn->last_message.s) {
-			mnd_efree(conn->last_message.s);
-			conn->last_message.s = NULL;
-		}
+		mysqlnd_set_string(&conn->last_message, NULL, 0);
 		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */
 		if (conn->m->get_server_version(conn) < 50123) {

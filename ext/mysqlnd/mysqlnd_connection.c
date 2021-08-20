@@ -282,31 +282,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	if (conn->hostname.s) {
-		mnd_pefree(conn->hostname.s, pers);
-		conn->hostname.s = NULL;
-	}
-	if (conn->username.s) {
-		mnd_pefree(conn->username.s, pers);
-		conn->username.s = NULL;
-	}
-	if (conn->password.s) {
-		mnd_pefree(conn->password.s, pers);
-		conn->password.s = NULL;
-	}
-	if (conn->connect_or_select_db.s) {
-		mnd_pefree(conn->connect_or_select_db.s, pers);
-		conn->connect_or_select_db.s = NULL;
-	}
-	if (conn->unix_socket.s) {
-		mnd_pefree(conn->unix_socket.s, pers);
-		conn->unix_socket.s = NULL;
-	}
+	mysqlnd_set_persistent_string(&conn->hostname, NULL, 0, pers);
+	mysqlnd_set_persistent_string(&conn->username, NULL, 0, pers);
+	mysqlnd_set_persistent_string(&conn->password, NULL, 0, pers);
+	mysqlnd_set_persistent_string(&conn->connect_or_select_db, NULL, 0, pers);
+	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
-	if (conn->scheme.s) {
-		mnd_pefree(conn->scheme.s, pers);
-		conn->scheme.s = NULL;
-	}
+	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
+	
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
@@ -315,14 +298,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		mnd_pefree(conn->host_info, pers);
 		conn->host_info = NULL;
 	}
-	if (conn->authentication_plugin_data.s) {
-		mnd_pefree(conn->authentication_plugin_data.s, pers);
-		conn->authentication_plugin_data.s = NULL;
-	}
-	if (conn->last_message.s) {
-		mnd_efree(conn->last_message.s);
-		conn->last_message.s = NULL;
-	}
+	mysqlnd_set_persistent_string(&conn->authentication_plugin_data, NULL, 0, pers);
+	mysqlnd_set_string(&conn->last_message, NULL, 0);
 
 	conn->charset = NULL;
 	conn->greet_charset = NULL;
@@ -406,10 +383,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn)
 		conn->current_result->m.free_result(conn->current_result, TRUE);
 		conn->current_result = NULL;
 	}
-	if (conn->last_message.s) {
-		mnd_efree(conn->last_message.s);
-		conn->last_message.s = NULL;
-	}
+	mysqlnd_set_string(&conn->last_message, NULL, 0);
 	conn->error_info = &conn->error_info_impl;
 	DBG_RETURN(PASS);
 }
@@ -681,8 +655,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		pfc->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 
-		conn->scheme.s = mnd_pestrndup(transport.s, transport.l, conn->persistent);
-		conn->scheme.l = transport.l;
+		mysqlnd_set_persistent_string(&conn->scheme, transport.s, transport.l, conn->persistent);
 		if (transport.s) {
 			mnd_sprintf_free(transport.s);
 			transport.s = NULL;
@@ -692,17 +665,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			goto err; /* OOM */
 		}
 
-		conn->username.l		= username.l;
-		conn->username.s		= mnd_pestrndup(username.s, conn->username.l, conn->persistent);
-		conn->password.l		= password.l;
-		conn->password.s		= mnd_pestrndup(password.s, conn->password.l, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->username, username.s, username.l, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->password, username.s, password.l, conn->persistent);
 		conn->port				= port;
-		conn->connect_or_select_db.l = database.l;
-		conn->connect_or_select_db.s = mnd_pestrndup(database.s, conn->connect_or_select_db.l, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
-			conn->hostname.s = mnd_pestrndup(hostname.s, hostname.l, conn->persistent);
-			conn->hostname.l = hostname.l;
+			mysqlnd_set_persistent_string(&conn->hostname, hostname.s, hostname.l, conn->persistent);
 			{
 				char *p;
 				mnd_sprintf(&p, 0, "%s via TCP/IP", conn->hostname.s);
