@@ -33,7 +33,6 @@ struct php_user_filter_data {
 };
 
 /* to provide context for calling into the next filter from user-space */
-static int le_userfilters;
 static int le_bucket_brigade;
 static int le_bucket;
 
@@ -77,14 +76,6 @@ PHP_MINIT_FUNCTION(user_filters)
 {
 	/* init the filter class ancestor */
 	user_filter_class_entry = register_class_php_user_filter();
-
-	/* init the filter resource; it has no dtor, as streams will always clean it up
-	 * at the correct time */
-	le_userfilters = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_FILTER_RES_NAME, 0);
-
-	if (le_userfilters == FAILURE) {
-		return FAILURE;
-	}
 
 	/* Filters will dispose of their brigades */
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
@@ -255,7 +246,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
-	zval obj, zfilter;
+	zval obj;
 	zval func_name;
 	zval retval;
 	size_t len;
@@ -360,12 +351,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		zval_ptr_dtor(&retval);
 	}
 
-	/* set the filter property, this will be used during cleanup */
-	ZVAL_RES(&zfilter, zend_register_resource(filter, le_userfilters));
 	ZVAL_OBJ(&filter->abstract, Z_OBJ(obj));
-	add_property_zval(&obj, "filter", &zfilter);
-	/* add_property_zval increments the refcount which is unwanted here */
-	zval_ptr_dtor(&zfilter);
 
 	return filter;
 }
