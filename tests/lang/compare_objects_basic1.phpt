@@ -33,37 +33,13 @@ $obj5 = new class5();
 echo "\n-- The following is_equal should return TRUE --\n";
 var_dump($obj1 == $obj1);
 
-echo "\n-- All the following is_equals should throw InvalidOperator --\n";
-try {
-    $obj1 == $obj2;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-try {
-    $obj1 == $obj3;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-try {
-    $obj1 == $obj4;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-try {
-    $obj1 == $obj5;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-try {
-    $obj4 == $obj3;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-try {
-    $obj5 == $obj3;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
+echo "\n-- All the following is_equals should return FALSE --\n";
+var_dump($obj1 == $obj2);
+var_dump($obj1 == $obj3);
+var_dump($obj1 == $obj4);
+var_dump($obj1 == $obj5);
+var_dump($obj4 == $obj3);
+var_dump($obj5 == $obj3);
 
 ?>
 --EXPECT--
@@ -72,10 +48,10 @@ Simple test for standard is_equal object handler
 -- The following is_equal should return TRUE --
 bool(true)
 
--- All the following is_equals should throw InvalidOperator --
-InvalidOperator thrown
-InvalidOperator thrown
-InvalidOperator thrown
-InvalidOperator thrown
-InvalidOperator thrown
-InvalidOperator thrown
+-- All the following is_equals should return FALSE --
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)

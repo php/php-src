@@ -2111,7 +2111,6 @@ ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar e
 		} else {
 			retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
 		}
-		retVal = (Z_TYPE_INFO(ret) == IS_TRUE ? 0 : 1);
 		return retVal;
 	}
 }

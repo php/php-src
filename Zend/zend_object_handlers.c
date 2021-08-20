@@ -228,7 +228,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	if(Z_TYPE_P(op1) == IS_OBJECT) {
 		zobj = Z_OBJ_P(op1);
 		ce = Z_OBJCE_P(op1);
-	} else if(Z_TYPE_P(op2) == IS_OBJECT) {
+	} else {
 		zobj = Z_OBJ_P(op2);
 		ce = Z_OBJCE_P(op2);
 		is_retry = 1;
@@ -294,13 +294,8 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				break;
 
 			case ZEND_IS_EQUAL:
-				fcic.function_handler = ce->__equals;
-				operator = "==";
-				break;
-
 			case ZEND_IS_NOT_EQUAL:
 				fcic.function_handler = ce->__equals;
-				operator = "!=";
 				break;
 
 			default:
@@ -316,15 +311,9 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				continue;
 			}
 
-			if ((Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op2) == IS_NULL ||
-				Z_TYPE_INFO_P(op1) == IS_FALSE || Z_TYPE_INFO_P(op2) == IS_FALSE) &&
-				(opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL)) {
-				Z_TYPE_INFO_P(result) = IS_FALSE;
-				return SUCCESS;
-			}
-
-			if ((Z_TYPE_P(op1) == IS_OBJECT && Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_ENUM) ||
-				(Z_TYPE_P(op2) == IS_OBJECT && Z_OBJCE_P(op2)->ce_flags & ZEND_ACC_ENUM)) {
+			if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
+				/* For equality comparisons, return failure for all objects to    */
+				/* allow the normal override of the compare handler in extensions */
 				return FAILURE;
 			}
 
@@ -1709,7 +1698,7 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 		zobj = Z_OBJ_P(o1);
 		ce = Z_OBJCE_P(o1);
 		is_retry = 0;
-	} else if(Z_TYPE_P(o2) == IS_OBJECT) {
+	} else {
 		zobj = Z_OBJ_P(o2);
 		ce = Z_OBJCE_P(o2);
 		is_retry = 1;

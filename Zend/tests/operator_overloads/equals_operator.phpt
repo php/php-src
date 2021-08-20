@@ -1,5 +1,5 @@
 --TEST--
-operator overload: div operator with scalars
+operator overload: equals operator
 --FILE--
 <?php
 

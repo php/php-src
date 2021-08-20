@@ -10,13 +10,7 @@ class_alias('foo', 'bar');
 $a = new foo;
 $b = new bar;
 
-try {
-    $a == $b;
-} catch (InvalidOperator) {
-    echo "InvalidOperator thrown".PHP_EOL;
-}
-
-var_dump($a === $b);
+var_dump($a == $b, $a === $b);
 var_dump($a instanceof $b);
 
 var_dump($a instanceof foo);
@@ -27,7 +21,7 @@ var_dump($b instanceof bar);
 
 ?>
 --EXPECT--
-InvalidOperator thrown
+bool(true)
 bool(false)
 bool(true)
 bool(true)
