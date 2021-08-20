@@ -55,9 +55,9 @@ class SoapVar
 class SoapServer
 {
     /** @var resource */
-    public $service;
+    private $service;
 
-    public ?SoapFault $__soap_fault = null;
+    private ?SoapFault $__soap_fault = null;
 
     public function __construct(?string $wsdl, array $options = []) {}
 
@@ -91,48 +91,48 @@ class SoapServer
 
 class SoapClient
 {
-    public ?string $uri = null;
-    public ?int $style = null;
-    public ?int $use = null;
-    public ?string $location = null;
-    public bool $trace = false;
-    public ?int $compression = null;
+    private ?string $uri = null;
+    private ?int $style = null;
+    private ?int $use = null;
+    private ?string $location = null;
+    private bool $trace = false;
+    private ?int $compression = null;
     /** @var resource|null */
-    public $sdl = null;
+    private $sdl = null;
     /** @var resource|null */
-    public $typemap = null;
+    private $typemap = null;
     /** @var resource|null */
-    public $httpsocket = null;
+    private $httpsocket = null;
     /** @var resource|null */
-    public $httpurl = null;
+    private $httpurl = null;
 
-    public ?string $_login = null;
-    public ?string $_password = null;
-    public bool $_use_digest = false;
-    public ?string $_digest = null;
-    public ?string $_proxy_host = null;
-    public ?int $_proxy_port = null;
-    public ?string $_proxy_login = null;
-    public ?string $_proxy_password = null;
-    public bool $_exceptions = true;
-    public ?string $_encoding = null;
-    public ?array $_classmap = null;
-    public ?int $_features = null;
-    public int $_connection_timeout = 0;
+    private ?string $_login = null;
+    private ?string $_password = null;
+    private bool $_use_digest = false;
+    private ?string $_digest = null;
+    private ?string $_proxy_host = null;
+    private ?int $_proxy_port = null;
+    private ?string $_proxy_login = null;
+    private ?string $_proxy_password = null;
+    private bool $_exceptions = true;
+    private ?string $_encoding = null;
+    private ?array $_classmap = null;
+    private ?int $_features = null;
+    private int $_connection_timeout = 0;
     /** @var resource|null */
-    public $_stream_context = null;
-    public ?string $_user_agent = null;
-    public bool $_keep_alive = true;
-    public ?int $_ssl_method = null;
-    public int $_soap_version;
-    public ?int $_use_proxy = null;
-    public ?array $_cookies = null;
-    public ?array $__default_headers = null;
-    public ?SoapFault $__soap_fault = null;
-    public ?string $__last_request = null;
-    public ?string $__last_response = null;
-    public ?string $__last_request_headers = null;
-    public ?string $__last_response_headers = null;
+    private $_stream_context = null;
+    private ?string $_user_agent = null;
+    private bool $_keep_alive = true;
+    private ?int $_ssl_method = null;
+    private int $_soap_version;
+    private ?int $_use_proxy = null;
+    private ?array $_cookies = null;
+    private ?array $__default_headers = null;
+    private ?SoapFault $__soap_fault = null;
+    private ?string $__last_request = null;
+    private ?string $__last_response = null;
+    private ?string $__last_request_headers = null;
+    private ?string $__last_response_headers = null;
 
     public function __construct(?string $wsdl, array $options = []) {}
 
