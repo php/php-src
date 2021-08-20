@@ -2173,16 +2173,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 			ret = FALSE;
 		} else if (Z_TYPE_P(response) != IS_STRING) {
 			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
-				zval rv;
-				zend_string *msg;
-				zval exception_object;
-
-				ZVAL_OBJ(&exception_object, EG(exception));
-				msg = zval_get_string(zend_read_property(zend_ce_error, Z_OBJ(exception_object), "message", sizeof("message")-1, 0, &rv));
-				/* change class */
-				EG(exception)->ce = soap_fault_class_entry;
-				set_soap_fault(&exception_object, NULL, "Client", ZSTR_VAL(msg), NULL, NULL, NULL);
-				zend_string_release_ex(msg, 0);
+				/* Programmer error in __doRequest() implementation, let it bubble up. */
 			} else if ((fault = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault")-1)) == NULL) {
 				add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL);
 			}
