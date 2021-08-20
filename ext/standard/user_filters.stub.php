@@ -6,6 +6,8 @@ class php_user_filter
 {
     public string $filtername = "";
     public mixed $params = "";
+    /** @var resource|null */
+    public $stream = null;
 
     /**
      * @param resource $in

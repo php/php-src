@@ -148,7 +148,6 @@ php_stream_filter_status_t userfilter_filter(
 	zval func_name;
 	zval retval;
 	zval args[4];
-	zend_string *propname;
 	int call_result;
 
 	/* the userfilter object probably doesn't exist anymore */
@@ -156,15 +155,12 @@ php_stream_filter_status_t userfilter_filter(
 		return ret;
 	}
 
-	if (!zend_hash_str_exists_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
-		zval tmp;
-
+	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	if (stream_prop) {
 		/* Give the userfilter class a hook back to the stream */
-		php_stream_to_zval(stream, &tmp);
-		Z_ADDREF(tmp);
-		add_property_zval(obj, "stream", &tmp);
-		/* add_property_zval increments the refcount which is unwanted here */
-		zval_ptr_dtor(&tmp);
+		zval_ptr_dtor(stream_prop);
+		php_stream_to_zval(stream, stream_prop);
+		Z_ADDREF_P(stream_prop);
 	}
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
@@ -223,9 +219,9 @@ php_stream_filter_status_t userfilter_filter(
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
-	propname = zend_string_init("stream", sizeof("stream")-1, 0);
-	Z_OBJ_HANDLER_P(obj, unset_property)(Z_OBJ_P(obj), propname, NULL);
-	zend_string_release_ex(propname, 0);
+	if (stream_prop) {
+		convert_to_null(stream_prop);
+	}
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
