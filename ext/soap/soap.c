@@ -1473,11 +1473,6 @@ PHP_METHOD(SoapServer, handle)
 				}
 				if (Z_TYPE(h->retval) == IS_OBJECT &&
 				    instanceof_function(Z_OBJCE(h->retval), soap_fault_class_entry)) {
-					zval *tmp;
-
-					if ((tmp = zend_hash_str_find(Z_OBJPROP(h->retval), "headerfault", sizeof("headerfault")-1)) != NULL &&
-					    Z_TYPE_P(tmp) != IS_NULL) {
-					}
 					php_output_discard();
 					soap_server_fault_ex(function, &h->retval, h);
 					zend_string_release(fn_name);
