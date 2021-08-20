@@ -11,7 +11,7 @@ echo unserialize($data);
 ?>
 ==DONE==
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign int to property SoapFault::$faultcode of type ?string in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign %s to property SoapFault::$faultcode of type ?string in %s:%d
 Stack trace:
 #0 %sbug73452.php(4): unserialize('O:9:"SoapFault"...')
 #1 {main}

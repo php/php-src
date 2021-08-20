@@ -861,7 +861,9 @@ try_again:
 		smart_str_0(&soap_headers);
 		if (Z_TYPE_P(Z_CLIENT_TRACE_P(this_ptr)) == IS_TRUE) {
 			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr));
-			ZVAL_STR_COPY(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr), soap_headers.s);
+			/* Need to copy the string here, as we continue appending to soap_headers below. */
+			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr),
+				ZSTR_VAL(soap_headers.s), ZSTR_LEN(soap_headers.s));
 		}
 		smart_str_appendl(&soap_headers, request->val, request->len);
 		smart_str_0(&soap_headers);
