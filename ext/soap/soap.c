@@ -2692,22 +2692,16 @@ PHP_METHOD(SoapClient, __doRequest)
 PHP_METHOD(SoapClient, __setCookie)
 {
 	zend_string *name, *val = NULL;
-	zval *this_ptr = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &name, &val) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
+	zval *cookies = Z_CLIENT_COOKIES_P(ZEND_THIS);
+	SEPARATE_ARRAY(cookies);
 	if (val == NULL) {
-		if (Z_TYPE_P(cookies) == IS_ARRAY) {
-			zend_hash_del(Z_ARRVAL_P(cookies), name);
-		}
+		zend_hash_del(Z_ARRVAL_P(cookies), name);
 	} else {
-		if (Z_TYPE_P(cookies) != IS_ARRAY) {
-			array_init(cookies);
-		}
-
 		zval zcookie;
 		array_init(&zcookie);
 		add_index_str(&zcookie, 0, zend_string_copy(val));
@@ -2723,12 +2717,7 @@ PHP_METHOD(SoapClient, __getCookies)
 		RETURN_THROWS();
 	}
 
-	zval *cookies = Z_CLIENT_COOKIES_P(ZEND_THIS);
-	if (Z_TYPE_P(cookies) == IS_ARRAY) {
-		RETURN_ARR(zend_array_dup(Z_ARRVAL_P(cookies)));
-	} else {
-		array_init(return_value);
-	}
+	RETURN_COPY(Z_CLIENT_COOKIES_P(ZEND_THIS));
 }
 /* }}} */
 

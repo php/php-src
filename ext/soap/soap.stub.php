@@ -126,7 +126,7 @@ class SoapClient
     private ?int $_ssl_method = null;
     private int $_soap_version;
     private ?int $_use_proxy = null;
-    private ?array $_cookies = null;
+    private array $_cookies = [];
     private ?array $__default_headers = null;
     private ?SoapFault $__soap_fault = null;
     private ?string $__last_request = null;

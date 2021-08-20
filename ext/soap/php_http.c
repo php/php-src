@@ -822,37 +822,35 @@ try_again:
 
 		/* Send cookies along with request */
 		cookies = Z_CLIENT_COOKIES_P(this_ptr);
-		if (Z_TYPE_P(cookies) == IS_ARRAY) {
+		ZEND_ASSERT(Z_TYPE_P(cookies) == IS_ARRAY);
+		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0) {
 			zval *data;
 			zend_string *key;
-			uint32_t n = zend_hash_num_elements(Z_ARRVAL_P(cookies));
 			has_cookies = 1;
-			if (n > 0) {
-				smart_str_append_const(&soap_headers, "Cookie: ");
-				ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
-					if (key && Z_TYPE_P(data) == IS_ARRAY) {
-						zval *value;
+			smart_str_append_const(&soap_headers, "Cookie: ");
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
+				if (key && Z_TYPE_P(data) == IS_ARRAY) {
+					zval *value;
 
-						if ((value = zend_hash_index_find(Z_ARRVAL_P(data), 0)) != NULL &&
-						    Z_TYPE_P(value) == IS_STRING) {
-						  zval *tmp;
-						  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
-							   Z_TYPE_P(tmp) != IS_STRING ||
-						       strncmp(phpurl->path?ZSTR_VAL(phpurl->path):"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
-						      ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
-							   Z_TYPE_P(tmp) != IS_STRING ||
-						       in_domain(ZSTR_VAL(phpurl->host),Z_STRVAL_P(tmp))) &&
-						      (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
-								smart_str_append(&soap_headers, key);
-								smart_str_appendc(&soap_headers, '=');
-								smart_str_append(&soap_headers, Z_STR_P(value));
-								smart_str_appendc(&soap_headers, ';');
-							}
+					if ((value = zend_hash_index_find(Z_ARRVAL_P(data), 0)) != NULL &&
+						Z_TYPE_P(value) == IS_STRING) {
+					  zval *tmp;
+					  if (((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 1)) == NULL ||
+						   Z_TYPE_P(tmp) != IS_STRING ||
+						   strncmp(phpurl->path?ZSTR_VAL(phpurl->path):"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
+						  ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
+						   Z_TYPE_P(tmp) != IS_STRING ||
+						   in_domain(ZSTR_VAL(phpurl->host),Z_STRVAL_P(tmp))) &&
+						  (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
+							smart_str_append(&soap_headers, key);
+							smart_str_appendc(&soap_headers, '=');
+							smart_str_append(&soap_headers, Z_STR_P(value));
+							smart_str_appendc(&soap_headers, ';');
 						}
 					}
-				} ZEND_HASH_FOREACH_END();
-				smart_str_append_const(&soap_headers, "\r\n");
-			}
+				}
+			} ZEND_HASH_FOREACH_END();
+			smart_str_append_const(&soap_headers, "\r\n");
 		}
 
 		http_context_headers(context, has_authorization, has_proxy_authorization, has_cookies, &soap_headers);
@@ -957,17 +955,12 @@ try_again:
 	cookie_itt = ZSTR_VAL(http_headers);
 
 	while ((cookie_itt = get_http_header_value_nodup(cookie_itt, "Set-Cookie: ", &cookie_len))) {
-		char *cookie;
-		char *eqpos, *sempos;
 		zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
-		if (Z_TYPE_P(cookies) != IS_ARRAY) {
-			array_init(cookies);
-		}
+		SEPARATE_ARRAY(cookies);
 
-		cookie = estrndup(cookie_itt, cookie_len);
-
-		eqpos = strstr(cookie, "=");
-		sempos = strstr(cookie, ";");
+		char *cookie = estrndup(cookie_itt, cookie_len);
+		char *eqpos = strstr(cookie, "=");
+		char *sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			smart_str name = {0};
 			int cookie_len;

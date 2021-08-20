@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a77aedba4916cdd6981f70dee9185c1ed7b0ab6e */
+ * Stub hash: ab057422ee42f574e7d00462f3bf173caf14ecc1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -598,9 +598,9 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string_release(property__use_proxy_name);
 
 	zval property__cookies_default_value;
-	ZVAL_NULL(&property__cookies_default_value);
+	ZVAL_EMPTY_ARRAY(&property__cookies_default_value);
 	zend_string *property__cookies_name = zend_string_init("_cookies", sizeof("_cookies") - 1, 1);
-	zend_declare_typed_property(class_entry, property__cookies_name, &property__cookies_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property__cookies_name, &property__cookies_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property__cookies_name);
 
 	zval property___default_headers_default_value;
