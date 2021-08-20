@@ -383,16 +383,13 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		encodePtr enc = NULL;
 
 		zval *ztype = Z_VAR_ENC_TYPE_P(data);
-		ZVAL_DEREF(ztype);
 		if (Z_TYPE_P(ztype) != IS_LONG) {
 			soap_error0(E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
 		}
 
 		zval *zstype = Z_VAR_ENC_STYPE_P(data);
-		ZVAL_DEREF(zstype);
 		if (Z_TYPE_P(zstype) == IS_STRING) {
 			zval *zns = Z_VAR_ENC_NS_P(data);
-			ZVAL_DEREF(zns);
 			if (Z_TYPE_P(zns) == IS_STRING) {
 				enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 			} else {
@@ -419,16 +416,12 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			enc = encode;
 		}
 
-		zval *zdata = Z_VAR_ENC_VALUE_P(data);
-		ZVAL_DEREF(zdata);
-		node = master_to_xml(enc, zdata, style, parent);
+		node = master_to_xml(enc, Z_VAR_ENC_VALUE_P(data), style, parent);
 
 		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
 			zval *zstype = Z_VAR_ENC_STYPE_P(data);
-			ZVAL_DEREF(zstype);
 			if (Z_TYPE_P(zstype) == IS_STRING) {
 				zval *zns = Z_VAR_ENC_NS_P(data);
-				ZVAL_DEREF(zns);
 				if (Z_TYPE_P(zns) == IS_STRING) {
 					set_ns_and_type_ex(node, Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 				} else {
@@ -438,13 +431,11 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		}
 
 		zval *zname = Z_VAR_ENC_NAME_P(data);
-		ZVAL_DEREF(zname);
 		if (Z_TYPE_P(zname) == IS_STRING) {
 			xmlNodeSetName(node, BAD_CAST(Z_STRVAL_P(zname)));
 		}
 
 		zval *znamens = Z_VAR_ENC_NAMENS_P(data);
-		ZVAL_DEREF(znamens);
 		if (Z_TYPE_P(znamens) == IS_STRING) {
 			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_P(znamens));
 			xmlSetNs(node, nsp);
@@ -3499,14 +3490,12 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 		if (Z_TYPE_P(tmp) == IS_OBJECT &&
 		    Z_OBJCE_P(tmp) == soap_var_class_entry) {
 			zval *ztype = Z_VAR_ENC_TYPE_P(tmp);
-			ZVAL_DEREF(ztype);
 			if (Z_TYPE_P(ztype) != IS_LONG) {
 				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
 			cur_type = Z_LVAL_P(ztype);
 
 			zval *zstype = Z_VAR_ENC_STYPE_P(tmp);
-			ZVAL_DEREF(zstype);
 			if (Z_TYPE_P(zstype) == IS_STRING) {
 				cur_stype = Z_STRVAL_P(zstype);
 			} else {
@@ -3514,7 +3503,6 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 			}
 
 			zval *zns = Z_VAR_ENC_NS_P(tmp);
-			ZVAL_DEREF(zns);
 			if (Z_TYPE_P(zns) == IS_STRING) {
 				cur_ns = Z_STRVAL_P(zns);
 			} else {

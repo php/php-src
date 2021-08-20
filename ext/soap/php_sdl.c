@@ -3244,7 +3244,6 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		}
 
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
-		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
 			smart_str_appends(&headers, "User-Agent: ");
 			smart_str_appends(&headers, Z_STRVAL_P(tmp));
@@ -3253,8 +3252,6 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 		zval *proxy_host = Z_CLIENT_PROXY_HOST_P(this_ptr);
 		zval *proxy_port = Z_CLIENT_PROXY_PORT_P(this_ptr);
-		ZVAL_DEREF(proxy_host);
-		ZVAL_DEREF(proxy_port);
 		if (Z_TYPE_P(proxy_host) == IS_STRING && Z_TYPE_P(proxy_port) == IS_LONG) {
 			zval str_proxy;
 			smart_str proxy = {0};

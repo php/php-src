@@ -141,27 +141,27 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 
 #define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
-#define Z_PARAM_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
-#define Z_PARAM_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_PARAM_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_PARAM_DATA_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
 
-#define Z_HEADER_NAMESPACE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
-#define Z_HEADER_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
-#define Z_HEADER_DATA_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 2)
-#define Z_HEADER_MUST_UNDERSTAND_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 3)
-#define Z_HEADER_ACTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 4)
+#define Z_HEADER_NAMESPACE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_HEADER_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_HEADER_DATA_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_HEADER_MUST_UNDERSTAND_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_HEADER_ACTOR_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
 
-#define Z_SERVER_SERVICE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
-#define Z_SERVER_SOAP_FAULT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+#define Z_SERVER_SERVICE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_SERVER_SOAP_FAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
 
 /* SoapFault extends Exception, so take those properties into account. */
 #define FAULT_PROP_START_OFFSET zend_ce_exception->default_properties_count
-#define Z_FAULT_STRING_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 0)
-#define Z_FAULT_CODE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 1)
-#define Z_FAULT_CODENS_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 2)
-#define Z_FAULT_ACTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 3)
-#define Z_FAULT_DETAIL_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 4)
-#define Z_FAULT_NAME_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 5)
-#define Z_FAULT_HEADERFAULT_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 6)
+#define Z_FAULT_STRING_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 0))
+#define Z_FAULT_CODE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 1))
+#define Z_FAULT_CODENS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 2))
+#define Z_FAULT_ACTOR_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 3))
+#define Z_FAULT_DETAIL_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 4))
+#define Z_FAULT_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 5))
+#define Z_FAULT_HEADERFAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 6))
 
 #define FETCH_THIS_SERVICE(ss) \
 	{ \
@@ -1785,9 +1785,8 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 
 	if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
 	    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_class_entry)) {
-		zval *tmp = Z_CLIENT_EXCEPTIONS_P(&SOAP_GLOBAL(error_object));
-		ZVAL_DEREF(tmp);
-		bool use_exceptions = Z_TYPE_P(tmp) != IS_FALSE;
+		bool use_exceptions =
+			Z_TYPE_P(Z_CLIENT_EXCEPTIONS_P(&SOAP_GLOBAL(error_object))) != IS_FALSE;
 		if ((error_num & E_FATAL_ERRORS) && use_exceptions) {
 			zval fault;
 			char *code = SOAP_GLOBAL(error_code);
@@ -2149,7 +2148,6 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 	zend_try {
 		zval *trace = Z_CLIENT_TRACE_P(this_ptr);
-		ZVAL_DEREF(trace);
 		if (Z_TYPE_P(trace) == IS_TRUE) {
 			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_P(this_ptr));
 			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_P(this_ptr), buf, buf_size);
@@ -2212,8 +2210,6 @@ static void do_soap_call(zend_execute_data *execute_data,
                          zval* output_headers
                         ) /* {{{ */
 {
-	zval *tmp;
-	zval *trace;
 	sdlPtr sdl = NULL;
 	sdlPtr old_sdl = NULL;
 	sdlFunctionPtr fn;
@@ -2230,14 +2226,12 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	SOAP_CLIENT_BEGIN_CODE();
 
-	trace = Z_CLIENT_TRACE_P(this_ptr);
-	ZVAL_DEREF(trace);
-	if (Z_TYPE_P(trace) == IS_TRUE) {
+	if (Z_TYPE_P(Z_CLIENT_TRACE_P(this_ptr)) == IS_TRUE) {
 		convert_to_null(Z_CLIENT_LAST_REQUEST_P(this_ptr));
 		convert_to_null(Z_CLIENT_LAST_RESPONSE_P(this_ptr));
 	}
-	tmp = Z_CLIENT_SOAP_VERSION_P(this_ptr);
-	ZVAL_DEREF(tmp);
+
+	zval *tmp = Z_CLIENT_SOAP_VERSION_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == SOAP_1_2) {
 		soap_version = SOAP_1_2;
 	} else {
@@ -2246,7 +2240,6 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	if (location == NULL) {
 		tmp = Z_CLIENT_LOCATION_P(this_ptr);
-		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			location = Z_STRVAL_P(tmp);
 		}
@@ -2269,7 +2262,6 @@ static void do_soap_call(zend_execute_data *execute_data,
 	SOAP_GLOBAL(sdl) = sdl;
 	old_encoding = SOAP_GLOBAL(encoding);
 	tmp = Z_CLIENT_ENCODING_P(this_ptr);
-	ZVAL_DEREF(tmp);
 	if (Z_TYPE_P(tmp) == IS_STRING) {
 		SOAP_GLOBAL(encoding) = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
 	} else {
@@ -2277,7 +2269,6 @@ static void do_soap_call(zend_execute_data *execute_data,
 	}
 	old_class_map = SOAP_GLOBAL(class_map);
 	tmp = Z_CLIENT_CLASSMAP_P(this_ptr);
-	ZVAL_DEREF(tmp);
 	if (Z_TYPE_P(tmp) == IS_ARRAY) {
 		SOAP_GLOBAL(class_map) = Z_ARRVAL_P(tmp);
 	} else {
@@ -2287,7 +2278,6 @@ static void do_soap_call(zend_execute_data *execute_data,
 	SOAP_GLOBAL(typemap) = typemap;
 	old_features = SOAP_GLOBAL(features);
 	tmp = Z_CLIENT_FEATURES_P(this_ptr);
-	ZVAL_DEREF(tmp);
 	if (Z_TYPE_P(tmp) == IS_LONG) {
 		SOAP_GLOBAL(features) = Z_LVAL_P(tmp);
 	} else {
@@ -2342,7 +2332,6 @@ static void do_soap_call(zend_execute_data *execute_data,
 			}
 		} else {
 			zval *uri = Z_CLIENT_URI_P(this_ptr);
-			ZVAL_DEREF(uri);
 			if (Z_TYPE_P(uri) != IS_STRING) {
 				add_soap_fault(this_ptr, "Client", "Error finding \"uri\" property", NULL, NULL);
 			} else if (location == NULL) {
@@ -2503,7 +2492,6 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 	/* Add default headers */
 	this_ptr = ZEND_THIS;
 	tmp = Z_CLIENT_DEFAULT_HEADERS_P(this_ptr);
-	ZVAL_DEREF(tmp);
 	if (Z_TYPE_P(tmp) == IS_ARRAY) {
 		HashTable *default_headers = Z_ARRVAL_P(tmp);
 		if (soap_headers) {
@@ -2625,7 +2613,7 @@ PHP_METHOD(SoapClient, __getLastRequest)
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_DEREF(Z_CLIENT_LAST_REQUEST_P(ZEND_THIS));
+	RETURN_COPY(Z_CLIENT_LAST_REQUEST_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -2637,7 +2625,7 @@ PHP_METHOD(SoapClient, __getLastResponse)
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_DEREF(Z_CLIENT_LAST_RESPONSE_P(ZEND_THIS));
+	RETURN_COPY(Z_CLIENT_LAST_RESPONSE_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -2649,7 +2637,7 @@ PHP_METHOD(SoapClient, __getLastRequestHeaders)
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_DEREF(Z_CLIENT_LAST_REQUEST_HEADERS_P(ZEND_THIS));
+	RETURN_COPY(Z_CLIENT_LAST_REQUEST_HEADERS_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -2661,7 +2649,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_DEREF(Z_CLIENT_LAST_RESPONSE_HEADERS_P(ZEND_THIS));
+	RETURN_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(ZEND_THIS));
 }
 /* }}} */
 
@@ -2711,8 +2699,6 @@ PHP_METHOD(SoapClient, __setCookie)
 	}
 
 	zval *cookies = Z_CLIENT_COOKIES_P(this_ptr);
-	ZVAL_DEREF(cookies);
-
 	if (val == NULL) {
 		if (Z_TYPE_P(cookies) == IS_ARRAY) {
 			zend_hash_del(Z_ARRVAL_P(cookies), name);
@@ -2738,7 +2724,6 @@ PHP_METHOD(SoapClient, __getCookies)
 	}
 
 	zval *cookies = Z_CLIENT_COOKIES_P(ZEND_THIS);
-	ZVAL_DEREF(cookies);
 	if (Z_TYPE_P(cookies) == IS_ARRAY) {
 		RETURN_ARR(zend_array_dup(Z_ARRVAL_P(cookies)));
 	} else {
@@ -3279,11 +3264,7 @@ ignore_header:
 
 static void set_soap_header_attributes(xmlNodePtr h, zval *header, int version) /* {{{ */
 {
-	zval *tmp;
-
-	tmp = Z_HEADER_MUST_UNDERSTAND_P(header);
-	ZVAL_DEREF(tmp);
-	if (Z_TYPE_P(tmp) == IS_TRUE) {
+	if (Z_TYPE_P(Z_HEADER_MUST_UNDERSTAND_P(header)) == IS_TRUE) {
 		if (version == SOAP_1_1) {
 			xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("1"));
 		} else {
@@ -3291,8 +3272,7 @@ static void set_soap_header_attributes(xmlNodePtr h, zval *header, int version) 
 		}
 	}
 
-	tmp = Z_HEADER_ACTOR_P(header);
-	ZVAL_DEREF(tmp);
+	zval *tmp = Z_HEADER_ACTOR_P(header);
 	if (Z_TYPE_P(tmp) == IS_STRING) {
 		if (version == SOAP_1_1) {
 			xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(Z_STRVAL_P(tmp)));
@@ -3450,13 +3430,10 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
 	    instanceof_function(Z_OBJCE_P(ret), soap_fault_class_entry)) {
-	  char *detail_name;
-		zval *tmp;
+		char *detail_name;
 		sdlFaultPtr fault = NULL;
 		char *fault_ns = NULL;
-
-		tmp = Z_FAULT_HEADERFAULT_P(ret);
-		ZVAL_DEREF(tmp);
+		zval *tmp = Z_FAULT_HEADERFAULT_P(ret);
 		if (headers && Z_TYPE_P(tmp) > IS_NULL) {
 			encodePtr hdr_enc = NULL;
 			int hdr_use = SOAP_LITERAL;
@@ -3471,7 +3448,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				smart_str key = {0};
 
 				tmp = Z_HEADER_NAMESPACE_P(hdr_ret);
-				ZVAL_DEREF(tmp);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 					smart_str_appendc(&key, ':');
@@ -3479,7 +3455,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				}
 
 				tmp = Z_HEADER_NAME_P(hdr_ret);
-				ZVAL_DEREF(tmp);
 				if (Z_TYPE_P(tmp) == IS_STRING) {
 					smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 					hdr_name = Z_STRVAL_P(tmp);
@@ -3519,14 +3494,12 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 		param = xmlNewChild(body, ns, BAD_CAST("Fault"), NULL);
 
 		tmp = Z_FAULT_CODENS_P(ret);
-		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			fault_ns = Z_STRVAL_P(tmp);
 		}
 		use = SOAP_LITERAL;
 
 		tmp = Z_FAULT_NAME_P(ret);
-		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_STRING) {
 			sdlFaultPtr tmp_fault;
 			if (function && function->faults &&
@@ -3573,7 +3546,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 		if (version == SOAP_1_1) {
 			tmp = Z_FAULT_CODE_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
 				zend_string *str = php_escape_html_entities((unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0, 0, NULL);
@@ -3589,13 +3561,11 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				zend_string_release_ex(str, 0);
 			}
 			tmp = Z_FAULT_STRING_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), tmp, SOAP_LITERAL, param);
 				xmlNodeSetName(node, BAD_CAST("faultstring"));
 			}
 			tmp = Z_FAULT_ACTOR_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), tmp, SOAP_LITERAL, param);
 				xmlNodeSetName(node, BAD_CAST("faultactor"));
@@ -3603,7 +3573,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			detail_name = "detail";
 		} else {
 			tmp = Z_FAULT_CODE_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
 				zend_string *str = php_escape_html_entities((unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0, 0, NULL);
@@ -3619,7 +3588,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				zend_string_release_ex(str, 0);
 			}
 			tmp = Z_FAULT_STRING_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), NULL);
 				node = master_to_xml(get_conversion(IS_STRING), tmp, SOAP_LITERAL, node);
@@ -3635,7 +3603,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			xmlNodePtr x;
 
 			tmp = Z_FAULT_DETAIL_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) > IS_NULL) {
 				detail = tmp;
 			}
@@ -3681,7 +3648,6 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			}
 		} else {
 			tmp = Z_FAULT_DETAIL_P(ret);
-			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) > IS_NULL) {
 				serialize_zval(tmp, NULL, detail_name, use, param);
 			}
@@ -3710,14 +3676,12 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 						smart_str key = {0};
 
 						tmp = Z_HEADER_NAMESPACE_P(&h->retval);
-						ZVAL_DEREF(tmp);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
 							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 							smart_str_appendc(&key, ':');
 							hdr_ns = Z_STRVAL_P(tmp);
 						}
 						tmp = Z_HEADER_NAME_P(&h->retval);
-						ZVAL_DEREF(tmp);
 						if (Z_TYPE_P(tmp) == IS_STRING) {
 							smart_str_appendl(&key, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 							hdr_name = Z_STRVAL_P(tmp);
@@ -3861,7 +3825,6 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		}
 	} else {
 		zstyle = Z_CLIENT_STYLE_P(this_ptr);
-		ZVAL_DEREF(zstyle);
 		if (Z_TYPE_P(zstyle) == IS_LONG) {
 			style = Z_LVAL_P(zstyle);
 		} else {
@@ -3885,7 +3848,6 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		}
 
 		zuse = Z_CLIENT_USE_P(this_ptr);
-		ZVAL_DEREF(zuse);
 		if (Z_TYPE_P(zuse) == IS_LONG && Z_LVAL_P(zuse) == SOAP_LITERAL) {
 			use = SOAP_LITERAL;
 		} else {
@@ -3946,8 +3908,6 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 
 			zval *name = Z_HEADER_NAME_P(header);
 			zval *ns = Z_HEADER_NAMESPACE_P(header);
-			ZVAL_DEREF(name);
-			ZVAL_DEREF(ns);
 			if (Z_TYPE_P(name) == IS_STRING && Z_TYPE_P(ns) == IS_STRING) {
 				xmlNodePtr h;
 				xmlNsPtr nsptr;
@@ -4022,7 +3982,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int in
 			&& Z_OBJCE_P(param_val) == soap_param_class_entry) {
 		zval *param_name = Z_PARAM_NAME_P(param_val);
 		zval *param_data = Z_PARAM_DATA_P(param_val);
-		ZVAL_DEREF(param_name);
 		if (Z_TYPE_P(param_name) == IS_STRING && Z_TYPE_P(param_data) != IS_UNDEF) {
 			param_val = param_data;
 			name = Z_STRVAL_P(param_name);
