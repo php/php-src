@@ -213,13 +213,17 @@ void zend_init_rsrc_plist(void)
 
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_resource *res;
-
-	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
-		if (res->type >= 0) {
-			zend_resource_dtor(res);
+	/* Reload ht->arData on each iteration, as it may be reallocated. */
+	uint32_t i = ht->nNumUsed;
+	while (i-- > 0) {
+		Bucket *p = &ht->arData[i];
+		if (Z_TYPE(p->val) != IS_UNDEF) {
+			zend_resource *res = Z_PTR(p->val);
+			if (res->type >= 0) {
+				zend_resource_dtor(res);
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
 }
 
 
