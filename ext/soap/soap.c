@@ -1991,7 +1991,7 @@ PHP_METHOD(SoapClient, __construct)
 			if ((tmp = zend_hash_str_find(ht, "authentication", sizeof("authentication")-1)) != NULL &&
 			    Z_TYPE_P(tmp) == IS_LONG &&
 			    Z_LVAL_P(tmp) == SOAP_AUTHENTICATION_DIGEST) {
-				add_property_null(this_ptr, "_digest");
+				add_property_bool(this_ptr, "_use_digest", true);
 			}
 		}
 		if ((tmp = zend_hash_str_find(ht, "proxy_host", sizeof("proxy_host")-1)) != NULL &&
