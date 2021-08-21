@@ -338,7 +338,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 	EXCEPINFO e = {0};
 
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
-		&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
+		&IID_NULL, LANG_NEUTRAL, flags, disp_params, v, &e, &arg_err);
 
 	if (silent == 0 && FAILED(hr)) {
 		char *source = NULL, *desc = NULL, *msg = NULL;
@@ -430,7 +430,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 		hr = ITypeInfo_GetIDsOfNames(obj->typeinfo, &olename, 1, dispid);
 		if (FAILED(hr)) {
 			HRESULT hr1 = hr;
-			hr = IDispatch_GetIDsOfNames(V_DISPATCH(&obj->v), &IID_NULL, &olename, 1, LOCALE_SYSTEM_DEFAULT, dispid);
+			hr = IDispatch_GetIDsOfNames(V_DISPATCH(&obj->v), &IID_NULL, &olename, 1, LANG_NEUTRAL, dispid);
 			if (SUCCEEDED(hr) && hr1 != E_NOTIMPL) {
 				/* fall back on IDispatch direct */
 				ITypeInfo_Release(obj->typeinfo);
@@ -438,7 +438,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 			}
 		}
 	} else {
-		hr = IDispatch_GetIDsOfNames(V_DISPATCH(&obj->v), &IID_NULL, &olename, 1, LOCALE_SYSTEM_DEFAULT, dispid);
+		hr = IDispatch_GetIDsOfNames(V_DISPATCH(&obj->v), &IID_NULL, &olename, 1, LANG_NEUTRAL, dispid);
 	}
 	efree(olename);
 
