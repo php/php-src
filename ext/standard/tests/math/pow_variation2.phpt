@@ -155,7 +155,7 @@ Unsupported operand types: float ** string
 Unsupported operand types: float ** string
 
 -- Iteration 23 --
-Unsupported operand types: float ** classA
+Operator '**' unsupported by class classA
 
 -- Iteration 24 --
 float(1)

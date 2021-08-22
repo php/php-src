@@ -159,7 +159,7 @@ Unsupported operand types: string ** int
 Unsupported operand types: string ** int
 
 -- Iteration 23 --
-Unsupported operand types: classA ** int
+Operator '**' unsupported by class classA
 
 -- Iteration 24 --
 int(0)

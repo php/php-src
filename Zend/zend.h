@@ -184,6 +184,12 @@ struct _zend_class_entry {
 	zend_function *__div;
 	zend_function *__mod;
 	zend_function *__pow;
+	zend_function *__bitwiseand;
+	zend_function *__bitwiseor;
+	zend_function *__bitwisexor;
+	zend_function *__bitwisenot;
+	zend_function *__bitwiseshiftleft;
+	zend_function *__bitwiseshiftright;
 	zend_function *__equals;
 	zend_function *__compareto;
 

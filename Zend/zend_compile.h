@@ -1105,12 +1105,21 @@ END_EXTERN_C()
 
 /* operator overload functions */
 
+/* binary operators */
 #define ZEND_ADD_FUNC_NAME			"__add"
 #define ZEND_SUB_FUNC_NAME			"__sub"
 #define ZEND_MUL_FUNC_NAME			"__mul"
 #define ZEND_DIV_FUNC_NAME			"__div"
 #define ZEND_MOD_FUNC_NAME			"__mod"
 #define ZEND_POW_FUNC_NAME			"__pow"
+#define ZEND_BWAND_FUNC_NAME		"__bitwiseand"
+#define ZEND_BWOR_FUNC_NAME			"__bitwiseor"
+#define ZEND_BWXOR_FUNC_NAME		"__bitwisexor"
+#define ZEND_BWSL_FUNC_NAME			"__bitwiseshiftleft"
+#define ZEND_BWSR_FUNC_NAME			"__bitwiseshiftright"
+/* unary operators */
+#define ZEND_BWNOT_FUNC_NAME		"__bitwisenot"
+/* comparison operators */
 #define ZEND_EQ_FUNC_NAME			"__equals"
 #define ZEND_COMPARE_FUNC_NAME		"__compareto"
 

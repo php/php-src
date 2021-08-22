@@ -243,7 +243,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	zval params[2];
 	zval left;
 
-	fci.param_count = 2;
 	fci.size = sizeof(fci);
 	fci.retval = result;
 
@@ -252,15 +251,19 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		Z_TYPE_INFO(left) = is_retry ? IS_FALSE : IS_TRUE;
 
-		if (zobj == Z_OBJ_P(op1)) {
-			ZVAL_COPY_VALUE(&params[0], op2);
-			ZVAL_COPY_VALUE(&params[1], &left);
+		if (op2 == NULL) {
+			fci.param_count = 0;
 		} else {
-			ZVAL_COPY_VALUE(&params[0], op1);
-			ZVAL_COPY_VALUE(&params[1], &left);
+			fci.param_count = 2;
+			if (zobj == Z_OBJ_P(op1)) {
+				ZVAL_COPY_VALUE(&params[0], op2);
+				ZVAL_COPY_VALUE(&params[1], &left);
+			} else {
+				ZVAL_COPY_VALUE(&params[0], op1);
+				ZVAL_COPY_VALUE(&params[1], &left);
+			}
+			fci.params = params;
 		}
-
-		fci.params = params;
 
 		switch (opcode) {
 			case ZEND_ADD:
@@ -291,6 +294,36 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			case ZEND_POW:
 				fcic.function_handler = ce->__pow;
 				operator = "**";
+				break;
+
+			case ZEND_BW_AND:
+				fcic.function_handler = ce->__bitwiseand;
+				operator = "&";
+				break;
+
+			case ZEND_BW_OR:
+				fcic.function_handler = ce->__bitwiseor;
+				operator = "|";
+				break;
+
+			case ZEND_BW_XOR:
+				fcic.function_handler = ce->__bitwisexor;
+				operator = "^";
+				break;
+
+			case ZEND_BW_NOT:
+				fcic.function_handler = ce->__bitwisenot;
+				operator = "~";
+				break;
+
+			case ZEND_SL:
+				fcic.function_handler = ce->__bitwiseshiftleft;
+				operator = "<<";
+				break;
+
+			case ZEND_SR:
+				fcic.function_handler = ce->__bitwiseshiftright;
+				operator = ">>";
 				break;
 
 			case ZEND_IS_EQUAL:

@@ -2504,6 +2504,15 @@ static void zend_check_magic_method_binary_operator_overload(
     zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_BOOL);
 }
 
+static void zend_check_magic_method_unary_operator_overload(
+		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+{
+	zend_check_magic_method_args(0, ce, fptr, error_type);
+	zend_check_magic_method_non_static(ce, fptr, error_type);
+	zend_check_magic_method_public(ce, fptr, error_type);
+	zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_OBJECT);
+}
+
 static void zend_check_magic_method_comparison_operator_overload(
         const zend_class_entry *ce, const zend_function *fptr, int error_type)
 {
@@ -2619,6 +2628,18 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	    zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_POW_FUNC_NAME)) {
 	    zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWAND_FUNC_NAME)) {
+		zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWOR_FUNC_NAME)) {
+		zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWXOR_FUNC_NAME)) {
+		zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWSL_FUNC_NAME)) {
+		zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWSR_FUNC_NAME)) {
+		zend_check_magic_method_binary_operator_overload(ce, fptr, error_type);
+	} else if (zend_string_equals_literal(lcname, ZEND_BWNOT_FUNC_NAME)) {
+		zend_check_magic_method_unary_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_EQ_FUNC_NAME)) {
 	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_COMPARE_FUNC_NAME)) {
@@ -2679,6 +2700,18 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 	    ce->__mod = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_POW_FUNC_NAME)) {
 	    ce->__pow = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWAND_FUNC_NAME)) {
+		ce->__bitwiseand = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWOR_FUNC_NAME)) {
+		ce->__bitwiseor = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWXOR_FUNC_NAME)) {
+		ce->__bitwisexor = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWNOT_FUNC_NAME)) {
+		ce->__bitwisenot = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWSL_FUNC_NAME)) {
+		ce->__bitwiseshiftleft = fptr;
+	} else if (zend_string_equals_literal(lcname, ZEND_BWSR_FUNC_NAME)) {
+		ce->__bitwiseshiftright = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_EQ_FUNC_NAME)) {
 	    ce->__equals = fptr;
 	} else if (zend_string_equals_literal(lcname, ZEND_COMPARE_FUNC_NAME)) {

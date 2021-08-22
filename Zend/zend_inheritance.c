@@ -182,6 +182,24 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->__pow)) {
 		ce->__pow = parent->__pow;
 	}
+	if (EXPECTED(!ce->__bitwiseand)) {
+		ce->__bitwiseand = parent->__bitwiseand;
+	}
+	if (EXPECTED(!ce->__bitwiseor)) {
+		ce->__bitwiseor = parent->__bitwiseor;
+	}
+	if (EXPECTED(!ce->__bitwisexor)) {
+		ce->__bitwisexor = parent->__bitwisexor;
+	}
+	if (EXPECTED(!ce->__bitwisenot)) {
+		ce->__bitwisenot = parent->__bitwisenot;
+	}
+	if (EXPECTED(!ce->__bitwiseshiftleft)) {
+		ce->__bitwiseshiftleft = parent->__bitwiseshiftleft;
+	}
+	if (EXPECTED(!ce->__bitwiseshiftright)) {
+		ce->__bitwiseshiftright = parent->__bitwiseshiftright;
+	}
 	if (EXPECTED(!ce->__equals)) {
 		ce->__equals = parent->__equals;
 	}

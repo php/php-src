@@ -1880,6 +1880,12 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->__div = NULL;
 		ce->__mod = NULL;
 		ce->__pow = NULL;
+		ce->__bitwiseand = NULL;
+		ce->__bitwiseor = NULL;
+		ce->__bitwisexor = NULL;
+		ce->__bitwisenot = NULL;
+		ce->__bitwiseshiftleft = NULL;
+		ce->__bitwiseshiftright = NULL;
 		ce->__equals = NULL;
 		ce->__compareto = NULL;
 		ce->create_object = NULL;
