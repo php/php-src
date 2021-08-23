@@ -317,8 +317,8 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 		do {
 			ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
 		} while (ret <= 2);
-		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 		GC_SET_REFCOUNT(type_name, ret);
+		GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 		return ret;
 	}
 
