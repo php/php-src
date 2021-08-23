@@ -892,10 +892,6 @@ struct st_mysqlnd_connection_data
 	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory;
 
 /* Information related */
-	MYSQLND_STRING	hostname;
-	MYSQLND_STRING	unix_socket;
-	MYSQLND_STRING	username;
-	MYSQLND_STRING	password;
 	MYSQLND_STRING	scheme;
 	uint64_t		thread_id;
 	char			*server_version;
