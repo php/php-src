@@ -61,6 +61,11 @@ findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'SJIS-2004', '%');
 echo "Unicode -> SJIS-2004 conversion works on all invalid characters\n";
 
+// Some pairs of Unicode codepoints are represented by a single character in SJIS-2004
+// Test the case where the first codepoint looks like it might be one of these pairs...
+// but the second one doesn't match
+convertValidString("\x30\x4B\x00A", "\x82\xA9A", 'UTF-16BE', 'SJIS-2004', false);
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x80", "BAD+80", "SJIS-2004", "UTF-8");
