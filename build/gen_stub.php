@@ -1106,6 +1106,10 @@ class FuncInfo {
             return null;
         }
 
+        if ($this->alias !== null) {
+            return null;
+        }
+
         if ($this->return->refcount === null) {
             return null;
         }
