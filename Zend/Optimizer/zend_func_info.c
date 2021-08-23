@@ -542,9 +542,6 @@ static const func_info_t func_infos[] = {
 	F1("utf8_decode",                           MAY_BE_STRING),
 
 	/* ext/zlib */
-	F1("gzgetc",                                MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gzgets",                                MAY_BE_FALSE | MAY_BE_STRING),
-	F1("gzread",                                MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzopen",                                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("gzfile",                                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("gzcompress",                            MAY_BE_FALSE | MAY_BE_STRING),
