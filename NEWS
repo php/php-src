@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC1
 
-
+- COM:
+  . Dispatch using LANG_NEUTRAL instead of LOCALE_SYSTEM_DEFAULT. (Dmitry
+    Maksimov)
 
 19 Aug 2021, PHP 8.1.0beta3
 
