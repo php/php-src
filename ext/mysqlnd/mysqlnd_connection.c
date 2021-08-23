@@ -297,7 +297,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 	mysqlnd_set_string(&conn->last_message, NULL, 0);
 
 	conn->charset = NULL;
-	conn->greet_charset = NULL;
 
 	DBG_VOID_RETURN;
 }

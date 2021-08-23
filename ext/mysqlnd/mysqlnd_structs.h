@@ -898,7 +898,6 @@ struct st_mysqlnd_connection_data
 	char			*host_info;
 	MYSQLND_STRING	authentication_plugin_data;
 	const MYSQLND_CHARSET *charset;
-	const MYSQLND_CHARSET *greet_charset;
 	MYSQLND_INFILE	infile;
 	unsigned int	protocol_version;
 	zend_ulong		server_capabilities;
