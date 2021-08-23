@@ -282,7 +282,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 
 	DBG_INF("Freeing memory of members");
 
-	mysqlnd_set_persistent_string(&conn->connect_or_select_db, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
 	
@@ -660,8 +659,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		if (!conn->scheme.s) {
 			goto err; /* OOM */
 		}
-
-		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
 			char *p;
