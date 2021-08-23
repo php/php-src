@@ -871,11 +871,11 @@ ZEND_API uint32_t zend_get_func_info(
 	return ret;
 }
 
-void zend_func_info_add(const func_info_t *func_infos)
+void zend_func_info_add(const func_info_t *func_infos, size_t n)
 {
 	size_t i;
 
-	for (i = 0; i < sizeof(*func_infos)/sizeof(func_info_t); i++) {
+	for (i = 0; i < n; i++) {
 		zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
 
 		if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
@@ -896,8 +896,8 @@ int zend_func_info_startup(void)
 
 		zend_hash_init(&func_info, sizeof(old_func_infos)/sizeof(func_info_t) + sizeof(func_infos)/sizeof(func_info_t), NULL, NULL, 1);
 
-		zend_func_info_add(old_func_infos);
-		zend_func_info_add(func_infos);
+		zend_func_info_add(old_func_infos, sizeof(old_func_infos)/sizeof(func_info_t));
+		zend_func_info_add(func_infos, sizeof(func_infos)/sizeof(func_info_t));
 	}
 
 	return SUCCESS;

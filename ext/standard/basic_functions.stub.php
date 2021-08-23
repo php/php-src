@@ -266,10 +266,7 @@ function base64_decode(string $string, bool $strict = false): string|false {}
 
 /* basic_functions.c */
 
-/**
- * @param string $name
- * @refcount N
- */
+/** @refcount N */
 function constant(string $name): mixed {}
 
 function ip2long(string $ip): int|false {}

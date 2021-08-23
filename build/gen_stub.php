@@ -298,7 +298,7 @@ class SimpleType {
             case "callable":
                 return "MAY_BE_CALLABLE";
             case "mixed":
-                return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
+                return "MAY_BE_ANY";
             case "static":
                 return "MAY_BE_STATIC";
             case "never":
@@ -359,6 +359,10 @@ class SimpleType {
 
         if ($this->isBuiltin && strtolower($this->name) === "true") {
             return "MAY_BE_TRUE";
+        }
+
+        if ($this->isBuiltin && strtolower($this->name) === "mixed") {
+            return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
         }
 
         return $this->toTypeMask();
@@ -620,8 +624,7 @@ class ArgInfo {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
+        $this->setTypes($type, $phpDocType);
         $this->defaultValue = $defaultValue;
     }
 
@@ -684,6 +687,16 @@ class ArgInfo {
         }
 
         return $this->defaultValue;
+    }
+
+    private function setTypes(?Type $type, ?Type $phpDocType): void
+    {
+        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
+            throw new Exception('PHPDoc param type "' . $phpDocType->__toString() . '" is unnecessary');
+        }
+
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
     }
 }
 
@@ -856,7 +869,7 @@ class ReturnInfo {
     private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
     {
         if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
-            throw new Exception('PHPDoc return type "' . $phpDocType->__toString() . '" cannot be the same as the native return type');
+            throw new Exception('PHPDoc return type "' . $phpDocType->__toString() . '" is unnecessary');
         }
 
         $this->type = $type;
