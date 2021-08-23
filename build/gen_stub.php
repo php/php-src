@@ -114,6 +114,11 @@ class ArrayType extends SimpleType {
     /** @var Type */
     public $valueType;
 
+    public static function createGenericArray(): self
+    {
+        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
+    }
+
     public function __construct(Type $keyType, Type $valueType)
     {
         parent::__construct("array", true);
@@ -131,6 +136,17 @@ class ArrayType extends SimpleType {
 
         return implode("|", $typeMasks);
     }
+
+    public function equals(SimpleType $other): bool {
+        if (!parent::equals($other)) {
+            return false;
+        }
+
+        assert(get_class($other) === self::class);
+
+        return Type::equals($this->keyType, $other->keyType) &&
+            Type::equals($this->valueType, $other->valueType);
+    }
 }
 
 class SimpleType {
@@ -138,11 +154,6 @@ class SimpleType {
     public $name;
     /** @var bool */
     public $isBuiltin;
-
-    public function __construct(string $name, bool $isBuiltin) {
-        $this->name = $name;
-        $this->isBuiltin = $isBuiltin;
-    }
 
     public static function fromNode(Node $node): SimpleType {
         if ($node instanceof Node\Name) {
@@ -158,9 +169,15 @@ class SimpleType {
             assert($node->isFullyQualified());
             return new SimpleType($node->toString(), false);
         }
+
         if ($node instanceof Node\Identifier) {
+            if ($node->toLowerString() === 'array') {
+                return ArrayType::createGenericArray();
+            }
+
             return new SimpleType($node->toString(), true);
         }
+
         throw new Exception("Unexpected node type");
     }
 
@@ -183,7 +200,7 @@ class SimpleType {
             case "never":
                 return new SimpleType(strtolower($typeString), true);
             case "array":
-                return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
+                return ArrayType::createGenericArray();
             case "self":
                 throw new Exception('The exact class name must be used instead of "self"');
         }
@@ -211,6 +228,11 @@ class SimpleType {
     public static function void(): SimpleType
     {
         return new SimpleType("void", true);
+    }
+
+    protected function __construct(string $name, bool $isBuiltin) {
+        $this->name = $name;
+        $this->isBuiltin = $isBuiltin;
     }
 
     public function isScalar(): bool {
@@ -347,8 +369,7 @@ class SimpleType {
     }
 
     public function equals(SimpleType $other): bool {
-        return $this->name === $other->name
-            && $this->isBuiltin === $other->isBuiltin;
+        return $this->name === $other->name && $this->isBuiltin === $other->isBuiltin;
     }
 }
 
@@ -417,7 +438,8 @@ class Type {
                 return false;
             }
         }
-        return false;
+
+        return true;
     }
 
     public function isNullable(): bool {
@@ -426,6 +448,7 @@ class Type {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -816,11 +839,8 @@ class ReturnInfo {
 
     public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
         $this->byRef = $byRef;
-        $this->type = $type;
-        $this->phpDocType = $phpDocType;
-        $this->tentativeReturnType = $tentativeReturnType;
-        $this->refcount = $refcount;
-        $this->validateRefcount();
+        $this->setTypes($type, $phpDocType, $tentativeReturnType);
+        $this->setRefcount($refcount);
     }
 
     public function equalsApartFromPhpDocAndRefcount(ReturnInfo $other): bool {
@@ -833,24 +853,37 @@ class ReturnInfo {
         return $this->type ?? $this->phpDocType;
     }
 
-    private function validateRefcount(): void
+    private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
     {
-        if ($this->refcount === null) {
-            return;
+        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
+            throw new Exception('PHPDoc return type "' . $phpDocType->__toString() . '" cannot be the same as the native return type');
         }
 
-        if (!in_array($this->refcount, ReturnInfo::REFCOUNTS, true)) {
-            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $this->refcount given");
-        }
+        $this->type = $type;
+        $this->phpDocType = $phpDocType;
+        $this->tentativeReturnType = $tentativeReturnType;
+    }
 
+    private function setRefcount(?string $refcount): void
+    {
         $type = $this->phpDocType ?? $this->type;
-        if ($type === null) {
-            return;
+        $isScalarType = $type !== null && $type->isScalar();
+
+        if ($refcount === null) {
+            if ($isScalarType) {
+                $refcount = self::REFCOUNT_0;
+            }
+        } else {
+            if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
+                throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+            }
+
+            if ($isScalarType && $refcount !== self::REFCOUNT_0) {
+                throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
+            }
         }
 
-        if ($type->isScalar() && $this->refcount !== self::REFCOUNT_0) {
-            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-        }
+        $this->refcount = $refcount;
     }
 }
 
@@ -1077,7 +1110,7 @@ class FuncInfo {
             return null;
         }
 
-        if ($this->return->refcount === ReturnInfo::REFCOUNT_0 && Type::equals($this->return->type, $this->return->phpDocType)) {
+        if ($this->return->refcount === ReturnInfo::REFCOUNT_0 && $this->return->phpDocType === null) {
             return null;
         }
 
