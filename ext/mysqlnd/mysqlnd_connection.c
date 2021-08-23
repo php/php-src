@@ -661,7 +661,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			goto err; /* OOM */
 		}
 
-		conn->port				= port;
 		mysqlnd_set_persistent_string(&conn->connect_or_select_db, database.s, database.l, conn->persistent);
 
 		if (!unix_socket && !named_pipe) {
