@@ -1881,7 +1881,7 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	/* We use the refcount to keep map_ptr of corresponding type */
 	uint32_t ret;
 	do {
-		ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		ret = ZEND_MAP_PTR_NEW_OFFSET();
 	} while (ret <= 2);
 	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);
