@@ -13,10 +13,7 @@ function func_num_args(): int {}
 
 function func_get_arg(int $position): mixed {}
 
-/**
- * @return array<int, mixed>
- * @refcount N
- */
+/** @return array<int, mixed> */
 function func_get_args(): array {}
 
 function strlen(string $string): int {}
@@ -95,19 +92,13 @@ function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool 
 /** @alias trigger_error */
 function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 
-/**
- * @return string|array<int, string|object>|object|null
- * @refcount N
- */
+/** @return string|array<int, string|object>|object|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 /** @return true */
 function restore_error_handler(): bool {}
 
-/**
- * @return string|array<int, string|object>|object|null
- * @refcount N
- */
+/** @return string|array<int, string|object>|object|null */
 function set_exception_handler(?callable $callback) {}
 
 /** @return true */

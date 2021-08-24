@@ -24,7 +24,10 @@ function zlib_get_coding_type(): string|false {}
 
 function gzfile(string $filename, int $use_include_path = 0): array|false {}
 
-/** @return resource|false */
+/**
+ * @return resource|false
+ * @refcount 1
+ */
 function gzopen(string $filename, string $mode, int $use_include_path = 0) {}
 
 function readgzfile(string $filename, int $use_include_path = 0): int|false {}

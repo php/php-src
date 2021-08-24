@@ -401,7 +401,10 @@ namespace {
 
     function pg_get_pid(PgSql\Connection $connection): int {}
 
-    /** @return resource|false */
+    /**
+     * @return resource|false
+     * @refcount 1
+     */
     function pg_socket(PgSql\Connection $connection) {}
 
     function pg_consume_input(PgSql\Connection $connection): bool {}
