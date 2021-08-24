@@ -3899,6 +3899,17 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_ROPE_INIT:
+					case ZEND_ROPE_ADD:
+					case ZEND_ROPE_END:
+						op2_info = OP2_INFO();
+						if ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
+							break;
+						}
+						if (!zend_jit_rope(&dasm_state, opline, op2_info)) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}

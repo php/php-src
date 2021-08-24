@@ -693,6 +693,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_post_inc_obj_helper);
 	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
+	REGISTER_HELPER(zend_jit_rope_end);
 #if (PHP_VERSION_ID <= 80100) && (SIZEOF_SIZE_T == 4)
 	REGISTER_HELPER(zval_jit_update_constant_ex);
 #endif

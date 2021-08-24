@@ -1937,6 +1937,11 @@ propagate_arg:
 						ADD_OP1_TRACE_GUARD();
 					}
 					break;
+				case ZEND_ROPE_INIT:
+				case ZEND_ROPE_ADD:
+				case ZEND_ROPE_END:
+					ADD_OP2_TRACE_GUARD();
+					break;
 				default:
 					break;
 			}
@@ -5794,6 +5799,18 @@ generic_dynamic_call:
 							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
 						}
 						break;
+					case ZEND_ROPE_INIT:
+					case ZEND_ROPE_ADD:
+					case ZEND_ROPE_END:
+						op2_info = OP2_INFO();
+						CHECK_OP2_TRACE_TYPE();
+						if ((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
+							break;
+						}
+						if (!zend_jit_rope(&dasm_state, opline, op2_info)) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}

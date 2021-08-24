@@ -14798,6 +14798,47 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 	return 1;
 }
 
+static int zend_jit_rope(dasm_State **Dst, const zend_op *opline, uint32_t op2_info)
+{
+	uint32_t offset;
+
+	offset = (opline->opcode == ZEND_ROPE_INIT) ?
+		opline->result.var :
+		opline->op1.var + opline->extended_value * sizeof(zend_string*);
+
+	if (opline->op2_type == IS_CONST) {
+		zval *zv = RT_CONSTANT(opline, opline->op2);
+		zend_string *str;
+
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+		str = Z_STR_P(zv);
+		|	ADDR_STORE aword [FP + offset], str, r0
+	} else {
+		zend_jit_addr op2_addr = OP2_ADDR();
+
+		ZEND_ASSERT((op2_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
+
+		|	GET_ZVAL_PTR r1, op2_addr
+		|	mov aword [FP + offset], r1
+		if (opline->op2_type == IS_CV) {
+			|	GET_ZVAL_TYPE_INFO eax, op2_addr
+			|	TRY_ADDREF op2_info, ah, r1
+		}
+	}
+
+	if (opline->opcode == ZEND_ROPE_END) {
+		zend_jit_addr res_addr = RES_ADDR();
+
+		|	lea FCARG1a, [FP + opline->op1.var]
+		|	mov FCARG2d, opline->extended_value
+		|	EXT_CALL zend_jit_rope_end, r0
+		|	SET_ZVAL_PTR res_addr, r0
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING_EX
+	}
+
+	return 1;
+}
+
 static bool zend_jit_noref_guard(dasm_State **Dst, const zend_op *opline, zend_jit_addr var_addr)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);

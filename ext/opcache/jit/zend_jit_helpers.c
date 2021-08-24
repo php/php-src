@@ -2597,3 +2597,24 @@ static void ZEND_FASTCALL zend_jit_free_trampoline_helper(zend_function *func)
 	zend_string_release_ex(func->common.function_name, 0);
 	zend_free_trampoline(func);
 }
+
+static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t count)
+{
+	zend_string *ret;
+	uint32_t i;
+	size_t len = 0;
+	char *target;
+
+	for (i = 0; i <= count; i++) {
+		len += ZSTR_LEN(rope[i]);
+	}
+	ret = zend_string_alloc(len, 0);
+	target = ZSTR_VAL(ret);
+	for (i = 0; i <= count; i++) {
+		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
+		target += ZSTR_LEN(rope[i]);
+		zend_string_release_ex(rope[i], 0);
+	}
+	*target = '\0';
+	return ret;
+}
