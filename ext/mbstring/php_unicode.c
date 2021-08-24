@@ -38,7 +38,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
-static int prop_lookup(unsigned long code, unsigned long n)
+static bool prop_lookup(unsigned long code, unsigned long n)
 {
 	long l = _ucprop_offsets[n];
 	long r = _ucprop_offsets[n + 1] - 1;
@@ -53,21 +53,21 @@ static int prop_lookup(unsigned long code, unsigned long n)
 			l = m + 2;
 		else if (code < _ucprop_ranges[m])
 			r = m - 2;
-		else if (code >= _ucprop_ranges[m] && code <= _ucprop_ranges[m + 1])
-			return 1;
+		else
+			return true;
 	}
-	return 0;
+	return false;
 
 }
 
-MBSTRING_API int php_unicode_is_prop1(unsigned long code, int prop)
+MBSTRING_API bool php_unicode_is_prop1(unsigned long code, int prop)
 {
 	return prop_lookup(code, prop);
 }
 
-MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
+MBSTRING_API bool php_unicode_is_prop(unsigned long code, ...)
 {
-	int result = 0;
+	bool result = false;
 	va_list va;
 	va_start(va, code);
 
@@ -78,7 +78,7 @@ MBSTRING_API int php_unicode_is_prop(unsigned long code, ...)
 		}
 
 		if (prop_lookup(code, prop)) {
-			result = 1;
+			result = true;
 			break;
 		}
 	}
