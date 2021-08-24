@@ -66,8 +66,8 @@
 #define UC_AL 32 /* Arabic Letter              */
 
 /* Merged property categories */
-#define UC_C 33
-#define UC_P 34
+#define UC_C 33 /* Control */
+#define UC_P 34 /* Punctuation */
 
 /* Derived properties from DerivedCoreProperties.txt */
 #define UC_CASED          35
