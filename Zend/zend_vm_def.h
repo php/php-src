@@ -1730,7 +1730,7 @@ ZEND_VM_C_LABEL(fetch_this):
 		}
 		if (type == BP_VAR_W) {
 			retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
-		} else if (type == BP_VAR_IS) {
+		} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
 			retval = &EG(uninitialized_zval);
 		} else {
 			zend_error(E_WARNING, "Undefined %svariable $%s",
@@ -1750,7 +1750,7 @@ ZEND_VM_C_LABEL(fetch_this):
 			}
 			if (type == BP_VAR_W) {
 				ZVAL_NULL(retval);
-			} else if (type == BP_VAR_IS) {
+			} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
 				retval = &EG(uninitialized_zval);
 			} else {
 				zend_error(E_WARNING, "Undefined %svariable $%s",

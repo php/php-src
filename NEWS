@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC1
 
+- Core:
+  . Fixed bug #81377 (unset() of $GLOBALS sub-key yields warning). (Nikita)
+
 - COM:
   . Dispatch using LANG_NEUTRAL instead of LOCALE_SYSTEM_DEFAULT. (Dmitry
     Maksimov)
