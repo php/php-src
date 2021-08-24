@@ -25,6 +25,9 @@ static const func_info_t func_infos[] = {
     F1("spl_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
     F1("spl_object_hash", MAY_BE_STRING),
     FN("socket_export_stream", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("dba_popen", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("dba_open", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("bzopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("gzopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 #if HAVE_NANOSLEEP
     F1("time_nanosleep", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_BOOL),
@@ -60,6 +63,31 @@ static const func_info_t func_infos[] = {
     FN("oci_get_implicit_resultset", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_password_change", MAY_BE_RESOURCE|MAY_BE_BOOL),
     FN("oci_new_cursor", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_prepare", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_exec", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_tables", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_columns", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_gettypeinfo", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_primarykeys", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
+    FN("odbc_procedurecolumns", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#endif
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
+    FN("odbc_procedures", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#endif
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
+    FN("odbc_foreignkeys", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#endif
+    FN("odbc_specialcolumns", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    FN("odbc_statistics", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
+    FN("odbc_tableprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#endif
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
+    FN("odbc_columnprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
+#endif
     F1("pg_socket", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("pcntl_signal_get_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_LONG),
 };
