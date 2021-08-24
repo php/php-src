@@ -26,7 +26,7 @@ function processDirectory(string $dir, Context $context): array {
     );
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (preg_match('/\.stub\.php$/', $pathName)) {
+        if (str_ends_with($pathName, '.stub.php')) {
             $fileInfo = processStubFile($pathName, $context);
             if ($fileInfo) {
                 $fileInfos[] = $fileInfo;
@@ -549,7 +549,7 @@ class Type {
             return false;
         }
 
-        for ($i = 0; $i < count($a->types); $i++) {
+        for ($i = 0, $l = count($a->types); $i < $l; $i++) {
             if (!$a->types[$i]->equals($b->types[$i])) {
                 return false;
             }
@@ -1021,7 +1021,7 @@ class FuncInfo {
             return false;
         }
 
-        for ($i = 0; $i < count($this->args); $i++) {
+        for ($i = 0, $l = count($this->args); $i < $l; $i++) {
             if (!$this->args[$i]->equals($other->args[$i])) {
                 return false;
             }
@@ -2451,7 +2451,7 @@ function parseStubFile(string $code): FileInfo {
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new class extends Standard {
-        protected function pName_FullyQualified(Name\FullyQualified $node) {
+        protected function pName_FullyQualified(Name\FullyQualified $node): string {
             return implode('\\', $node->parts);
         }
     };
@@ -2753,7 +2753,7 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (!preg_match('/\.xml$/i', $pathName)) {
+        if (!str_ends_with($pathName, '.xml')) {
             continue;
         }
 
@@ -2886,7 +2886,7 @@ function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $a
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (!preg_match('/\.xml$/i', $pathName)) {
+        if (!str_ends_with($pathName, '.xml')) {
             continue;
         }
 
