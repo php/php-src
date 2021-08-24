@@ -283,8 +283,8 @@ static const func_info_t func_infos[] = {
 	F1("stream_context_create",        MAY_BE_RESOURCE),
 	F1("stream_context_get_params",    MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	FN("stream_context_get_options",   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-	FN("stream_context_get_default",   MAY_BE_FALSE | MAY_BE_RESOURCE),
-	FN("stream_context_set_default",   MAY_BE_FALSE | MAY_BE_RESOURCE),
+	FN("stream_context_get_default",   MAY_BE_RESOURCE),
+	FN("stream_context_set_default",   MAY_BE_RESOURCE),
 	FN("stream_filter_prepend",        MAY_BE_FALSE | MAY_BE_RESOURCE),
 	FN("stream_filter_append",         MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("stream_socket_client",         MAY_BE_FALSE | MAY_BE_RESOURCE),
@@ -542,7 +542,7 @@ static const func_info_t func_infos[] = {
 	F1("utf8_decode",                           MAY_BE_STRING),
 
 	/* ext/zlib */
-	F1("gzopen",                                MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("gzopen",                                MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("gzfile",                                MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("gzcompress",                            MAY_BE_FALSE | MAY_BE_STRING),
 	F1("gzuncompress",                          MAY_BE_FALSE | MAY_BE_STRING),
