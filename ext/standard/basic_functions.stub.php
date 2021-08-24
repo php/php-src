@@ -1423,8 +1423,7 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 
 /* url.c */
 
-/** @return mixed */
-function parse_url(string $url, int $component = -1) {}
+function parse_url(string $url, int $component = -1): int|string|array|null|false {}
 
 function urlencode(string $string): string {}
 
