@@ -185,11 +185,10 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 			} else {
 				filter->status = 0x100;		/* little-endian */
 			}
-			CK((*filter->output_function)(0xfeff, filter->data));
-		} else {
-			filter->status &= ~0xff;
+		} else if (n != 0xfeff) {
 			CK((*filter->output_function)(n, filter->data));
 		}
+		filter->status &= ~0xff;
 		break;
 	}
 
