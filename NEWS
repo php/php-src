@@ -2,8 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.11
 
-- Phar:
-  . Fixed bug #81211: Symlinks are followed when creating PHAR archive (cmb)
 
 12 Aug 2021, PHP 8.0.10RC1
 
