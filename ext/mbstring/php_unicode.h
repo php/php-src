@@ -40,39 +40,38 @@
 #define UC_ZS  6 /* Separator, Space           */
 #define UC_ZL  7 /* Separator, Line            */
 #define UC_ZP  8 /* Separator, Paragraph       */
-#define UC_CC  9 /* Other, Control             */
-#define UC_CF 10 /* Other, Format              */
-#define UC_OS 11 /* Other, Surrogate           */
-#define UC_CO 12 /* Other, Private Use         */
-#define UC_CN 13 /* Other, Not Assigned        */
-#define UC_LU 14 /* Letter, Uppercase          */
-#define UC_LL 15 /* Letter, Lowercase          */
-#define UC_LT 16 /* Letter, Titlecase          */
-#define UC_LM 17 /* Letter, Modifier           */
-#define UC_LO 18 /* Letter, Other              */
-#define UC_SM 19 /* Symbol, Math               */
-#define UC_SC 20 /* Symbol, Currency           */
-#define UC_SK 21 /* Symbol, Modifier           */
-#define UC_SO 22 /* Symbol, Other              */
-#define UC_L  23 /* Left-To-Right              */
-#define UC_R  24 /* Right-To-Left              */
-#define UC_EN 25 /* European Number            */
-#define UC_ES 26 /* European Number Separator  */
-#define UC_ET 27 /* European Number Terminator */
-#define UC_AN 28 /* Arabic Number              */
-#define UC_CS 29 /* Common Number Separator    */
-#define UC_B  30 /* Block Separator            */
-#define UC_S  31 /* Segment Separator          */
-#define UC_WS 32 /* Whitespace                 */
-#define UC_ON 33 /* Other Neutrals             */
-#define UC_AL 34 /* Arabic Letter              */
+#define UC_OS  9 /* Other, Surrogate           */
+#define UC_CO 10 /* Other, Private Use         */
+#define UC_CN 11 /* Other, Not Assigned        */
+#define UC_LU 12 /* Letter, Uppercase          */
+#define UC_LL 13 /* Letter, Lowercase          */
+#define UC_LT 14 /* Letter, Titlecase          */
+#define UC_LM 15 /* Letter, Modifier           */
+#define UC_LO 16 /* Letter, Other              */
+#define UC_SM 17 /* Symbol, Math               */
+#define UC_SC 18 /* Symbol, Currency           */
+#define UC_SK 19 /* Symbol, Modifier           */
+#define UC_SO 20 /* Symbol, Other              */
+#define UC_L  21 /* Left-To-Right              */
+#define UC_R  22 /* Right-To-Left              */
+#define UC_EN 23 /* European Number            */
+#define UC_ES 24 /* European Number Separator  */
+#define UC_ET 25 /* European Number Terminator */
+#define UC_AN 26 /* Arabic Number              */
+#define UC_CS 27 /* Common Number Separator    */
+#define UC_B  28 /* Block Separator            */
+#define UC_S  29 /* Segment Separator          */
+#define UC_WS 30 /* Whitespace                 */
+#define UC_ON 31 /* Other Neutrals             */
+#define UC_AL 32 /* Arabic Letter              */
 
 /* Merged property categories */
-#define UC_P 35
+#define UC_C 33
+#define UC_P 34
 
 /* Derived properties from DerivedCoreProperties.txt */
-#define UC_CASED          36
-#define UC_CASE_IGNORABLE 37
+#define UC_CASED          35
+#define UC_CASE_IGNORABLE 36
 
 
 MBSTRING_API bool php_unicode_is_prop(unsigned long code, ...);
@@ -113,7 +112,7 @@ static inline int php_unicode_is_upper(unsigned long code) {
 #define php_unicode_is_alpha(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, -1)
 #define php_unicode_is_digit(cc) php_unicode_is_prop1(cc, UC_ND)
 #define php_unicode_is_alnum(cc) php_unicode_is_prop(cc, UC_LU, UC_LL, UC_LM, UC_LO, UC_LT, UC_ND, -1)
-#define php_unicode_is_cntrl(cc) php_unicode_is_prop(cc, UC_CC, UC_CF, -1)
+#define php_unicode_is_cntrl(cc) php_unicode_is_prop1(cc, UC_C)
 #define php_unicode_is_blank(cc) php_unicode_is_prop1(cc, UC_ZS)
 #define php_unicode_is_punct(cc) php_unicode_is_prop1(cc, UC_P)
 #define php_unicode_is_graph(cc) php_unicode_is_prop(cc, \
@@ -125,9 +124,6 @@ static inline int php_unicode_is_upper(unsigned long code) {
 		UC_LU, UC_LL, UC_LT, UC_LM, UC_LO, UC_P, \
 		UC_SM, UC_SM, UC_SC, UC_SK, UC_SO, UC_ZS, -1)
 #define php_unicode_is_title(cc) php_unicode_is_prop1(cc, UC_LT)
-
-#define php_unicode_is_isocntrl(cc) php_unicode_is_prop1(cc, UC_CC)
-#define php_unicode_is_fmtcntrl(cc) php_unicode_is_prop1(cc, UC_CF)
 
 #define php_unicode_is_symbol(cc) php_unicode_is_prop(cc, UC_SM, UC_SC, UC_SO, UC_SK, -1)
 #define php_unicode_is_number(cc) php_unicode_is_prop(cc, UC_ND, UC_NO, UC_NL, -1)

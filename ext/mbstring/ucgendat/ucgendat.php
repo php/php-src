@@ -101,12 +101,12 @@ class UnicodeData {
          */
         $this->propIndexes = array_flip([
             "Mn", "Mc", "Me", "Nd", "Nl", "No",
-            "Zs", "Zl", "Zp", "Cc", "Cf", "Cs",
-            "Co", "Cn", "Lu", "Ll", "Lt", "Lm",
-            "Lo", "Sm", "Sc", "Sk", "So", "L",
-            "R", "EN", "ES", "ET", "AN", "CS",
-            "B", "S", "WS", "ON", "AL",
-            "P", "Cased", "Case_Ignorable"
+            "Zs", "Zl", "Zp", "Cs", "Co", "Cn",
+            "Lu", "Ll", "Lt", "Lm", "Lo", "Sm",
+            "Sc", "Sk", "So", "L", "R", "EN",
+            "ES", "ET", "AN", "CS", "B", "S",
+            "WS", "ON", "AL",
+            "C", "P", "Cased", "Case_Ignorable"
         ]);
         $this->numProps = count($this->propIndexes);
 
@@ -134,6 +134,10 @@ class UnicodeData {
          * We're currently not interested in distinguishing different kinds of punctuation. */
         if (in_array($prop, ["Pc", "Pd", "Ps", "Pe", "Po", "Pi", "Pf"])) {
             $prop = "P";
+        }
+        /* Same for control. */
+        if (in_array($prop, ["Cc", "Cf"])) {
+            $prop = "C";
         }
 
         if (!isset($this->propIndexes[$prop])) {
