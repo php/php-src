@@ -103,11 +103,10 @@ class UnicodeData {
             "Mn", "Mc", "Me", "Nd", "Nl", "No",
             "Zs", "Zl", "Zp", "Cc", "Cf", "Cs",
             "Co", "Cn", "Lu", "Ll", "Lt", "Lm",
-            "Lo", "Pc", "Pd", "Ps", "Pe", "Po",
-            "Sm", "Sc", "Sk", "So", "L", "R",
-            "EN", "ES", "ET", "AN", "CS", "B",
-            "S", "WS", "ON", "Pi", "Pf", "AL",
-            "Cased", "Case_Ignorable"
+            "Lo", "Sm", "Sc", "Sk", "So", "L",
+            "R", "EN", "ES", "ET", "AN", "CS",
+            "B", "S", "WS", "ON", "AL",
+            "P", "Cased", "Case_Ignorable"
         ]);
         $this->numProps = count($this->propIndexes);
 
@@ -129,6 +128,12 @@ class UnicodeData {
              * older versions.
              */
             $prop = "ON";
+        }
+
+        /* Merge all punctuation into a single category for efficiency of access.
+         * We're currently not interested in distinguishing different kinds of punctuation. */
+        if (in_array($prop, ["Pc", "Pd", "Ps", "Pe", "Po", "Pi", "Pf"])) {
+            $prop = "P";
         }
 
         if (!isset($this->propIndexes[$prop])) {
