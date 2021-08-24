@@ -3188,17 +3188,20 @@ $funcMap = [];
 $aliasMap = [];
 
 foreach ($fileInfos as $fileInfo) {
+    foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+        /** @var FuncInfo $funcInfo */
+        $funcMap[$funcInfo->name->__toString()] = $funcInfo;
+
+        // TODO: Don't use aliasMap for methodsynopsis?
+        if ($funcInfo->aliasType === "alias") {
+            $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
+        }
+    }
+}
+
+foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
-
-        foreach ($classInfo->funcInfos as $funcInfo) {
-            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
-
-            // TODO: Don't use aliasMap for methodsynopsis?
-            if ($funcInfo->aliasType === "alias") {
-                $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
-            }
-        }
     }
 }
 
