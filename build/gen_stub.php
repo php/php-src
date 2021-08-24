@@ -192,6 +192,7 @@ class SimpleType {
             case "int":
             case "float":
             case "string":
+            case "callable":
             case "iterable":
             case "object":
             case "resource":
@@ -297,8 +298,12 @@ class SimpleType {
                 return "MAY_BE_OBJECT";
             case "callable":
                 return "MAY_BE_CALLABLE";
+            case "iterable":
+                return "MAY_BE_ITERABLE";
             case "mixed":
                 return "MAY_BE_ANY";
+            case "void":
+                return "MAY_BE_VOID";
             case "static":
                 return "MAY_BE_STATIC";
             case "never":
