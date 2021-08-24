@@ -103,12 +103,28 @@ function set_exception_handler(?callable $callback) {}
 /** @return true */
 function restore_exception_handler(): bool {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function get_declared_classes(): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+*/
 function get_declared_traits(): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function get_declared_interfaces(): array {}
 
+/**
+ * @return array<string, array>
+ * @refcount 1
+ */
 function get_defined_functions(bool $exclude_disabled = true): array {}
 
 function get_defined_vars(): array {}
@@ -124,6 +140,10 @@ function get_resource_id($resource): int {}
 
 function get_resources(?string $type = null): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function get_loaded_extensions(bool $zend_extensions = false): array {}
 
 /**
@@ -132,12 +152,20 @@ function get_loaded_extensions(bool $zend_extensions = false): array {}
  */
 function get_defined_constants(bool $categorize = false): array {}
 
+/**
+ * @return array<int, array>
+ * @refcount 1
+ */
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): array {}
 
 function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 
 function extension_loaded(string $extension): bool {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function get_extension_funcs(string $extension): array|false {}
 
 #if ZEND_DEBUG && defined(ZTS)
@@ -154,4 +182,8 @@ function gc_enable(): void {}
 
 function gc_disable(): void {}
 
+/**
+ * @return array<string, int>
+ * @refcount 1
+ */
 function gc_status(): array {}
