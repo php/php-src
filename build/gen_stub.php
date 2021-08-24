@@ -883,17 +883,20 @@ class ReturnInfo {
         $isScalarType = $type !== null && $type->isScalar();
 
         if ($refcount === null) {
-            if ($isScalarType) {
-                $refcount = self::REFCOUNT_0;
-            }
-        } else {
-            if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
-                throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
-            }
+            $this->refcount = $isScalarType ? self::REFCOUNT_0 : self::REFCOUNT_N;
+            return;
+        }
 
-            if ($isScalarType && $refcount !== self::REFCOUNT_0) {
-                throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
-            }
+        if (!in_array($refcount, ReturnInfo::REFCOUNTS, true)) {
+            throw new Exception("@refcount must have one of the following values: \"0\", \"1\", \"N\", $refcount given");
+        }
+
+        if ($isScalarType && $refcount !== self::REFCOUNT_0) {
+            throw new Exception('A scalar return type of "' . $type->__toString() . '" must have a refcount of "' . self::REFCOUNT_0 . '"');
+        }
+
+        if (!$isScalarType && $refcount === self::REFCOUNT_0) {
+            throw new Exception('A non-scalar return type of "' . $type->__toString() . '" cannot have a refcount of "' . self::REFCOUNT_0 . '"');
         }
 
         $this->refcount = $refcount;
@@ -1127,7 +1130,7 @@ class FuncInfo {
             return null;
         }
 
-        if ($this->return->refcount === ReturnInfo::REFCOUNT_0 && $this->return->phpDocType === null) {
+        if (in_array($this->return->refcount, [ReturnInfo::REFCOUNT_0, ReturnInfo::REFCOUNT_N], true) && $this->return->phpDocType === null) {
             return null;
         }
 
