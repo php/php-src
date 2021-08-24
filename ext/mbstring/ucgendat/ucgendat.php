@@ -447,7 +447,7 @@ function generatePropData(UnicodeData $data) {
     $idx = 0;
     foreach ($data->propRanges as $ranges) {
         $num = count($ranges);
-        $propOffsets[] = $num ? $idx : 0xffff;
+        $propOffsets[] = $idx;
         $idx += 2*$num;
     }
 
