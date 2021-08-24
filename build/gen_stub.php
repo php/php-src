@@ -3197,9 +3197,7 @@ foreach ($fileInfos as $fileInfo) {
             $aliasMap[$funcInfo->alias->__toString()] = $funcInfo;
         }
     }
-}
 
-foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
     }
