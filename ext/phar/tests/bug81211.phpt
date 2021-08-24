@@ -41,5 +41,5 @@ try {
 @rmdir(__DIR__ . '/bug81211');
 ?>
 --EXPECTF--
-Iterator RecursiveIteratorIterator returned a path "%s%ebug81211\foobar\file" that is not in the base directory "%s%ebug81211\foo"
-Iterator RecursiveDirectoryIterator returned a path "%s%ebug81211\foobar\file" that is not in the base directory "%s%ebug81211\foo"
+Iterator RecursiveIteratorIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"
+Iterator RecursiveDirectoryIterator returned a path "%s%ebug81211%efoobar%efile" that is not in the base directory "%s%ebug81211%efoo"
