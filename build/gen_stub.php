@@ -236,16 +236,16 @@ class SimpleType {
     }
 
     public function isScalar(): bool {
-        return $this->isBuiltin && in_array(strtolower($this->name), ["null", "false", "true", "bool", "int", "float"], true);
+        return $this->isBuiltin && in_array($this->name, ["null", "false", "true", "bool", "int", "float"], true);
     }
 
     public function isNull(): bool {
-        return $this->isBuiltin && strtolower($this->name) === 'null';
+        return $this->isBuiltin && $this->name === 'null';
     }
 
     public function toTypeCode(): string {
         assert($this->isBuiltin);
-        switch (strtolower($this->name)) {
+        switch ($this->name) {
             case "bool":
                 return "_IS_BOOL";
             case "int":
@@ -278,7 +278,7 @@ class SimpleType {
     public function toTypeMask(): string {
         assert($this->isBuiltin);
 
-        switch (strtolower($this->name)) {
+        switch ($this->name) {
             case "null":
                 return "MAY_BE_NULL";
             case "false":
@@ -311,7 +311,7 @@ class SimpleType {
     public function toOptimizerTypeMaskForArrayKey(): string {
         assert($this->isBuiltin);
 
-        switch (strtolower($this->name)) {
+        switch ($this->name) {
             case "int":
                 return "MAY_BE_ARRAY_KEY_LONG";
             case "string":
@@ -326,7 +326,7 @@ class SimpleType {
             return "MAY_BE_ARRAY_OF_OBJECT";
         }
 
-        switch (strtolower($this->name)) {
+        switch ($this->name) {
             case "null":
                 return "MAY_BE_ARRAY_OF_NULL";
             case "false":
@@ -353,20 +353,20 @@ class SimpleType {
     }
 
     public function toOptimizerTypeMask(): string {
-        if ($this->isBuiltin && strtolower($this->name) === "resource") {
+        if (!$this->isBuiltin) {
+            return "MAY_BE_OBJECT";
+        }
+
+        if ($this->name === "resource") {
             return "MAY_BE_RESOURCE";
         }
 
-        if ($this->isBuiltin && strtolower($this->name) === "true") {
+        if ($this->name === "true") {
             return "MAY_BE_TRUE";
         }
 
-        if ($this->isBuiltin && strtolower($this->name) === "mixed") {
+        if ($this->name === "mixed") {
             return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
-        }
-
-        if (!$this->isBuiltin) {
-            return "MAY_BE_OBJECT";
         }
 
         return $this->toTypeMask();
@@ -491,11 +491,7 @@ class Type {
         $optimizerTypes = [];
 
         foreach ($this->types as $type) {
-            if ($type->isBuiltin) {
-                $optimizerTypes[] = $type->toOptimizerTypeMask();
-            } else {
-                $optimizerTypes[] = "MAY_BE_OBJECT";
-            }
+            $optimizerTypes[] = $type->toOptimizerTypeMask();
         }
 
         return implode("|", $optimizerTypes);
