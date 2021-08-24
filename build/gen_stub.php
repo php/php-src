@@ -577,6 +577,10 @@ class ArginfoType {
     /** @var SimpleType[] $builtinTypes */
     private $builtinTypes;
 
+    /**
+     * @param ClassType[] $classTypes
+     * @param SimpleType[] $builtinTypes
+     */
     public function __construct(array $classTypes, array $builtinTypes) {
         $this->classTypes = $classTypes;
         $this->builtinTypes = $builtinTypes;
@@ -927,6 +931,9 @@ class FuncInfo {
     /** @var string|null */
     public $cond;
 
+    /**
+     * @param ArgInfo[] $args
+     */
     public function __construct(
         FunctionOrMethodName $name,
         int $classFlags,
@@ -1175,8 +1182,8 @@ class FuncInfo {
     }
 
     /**
-     * @param FuncInfo[] $funcMap
-     * @param FuncInfo[] $aliasMap
+     * @param array<string, FuncInfo> $funcMap
+     * @param array<string, FuncInfo> $aliasMap
      * @throws Exception
      */
     public function getMethodSynopsisDocument(array $funcMap, array $aliasMap): ?string {
@@ -1194,8 +1201,8 @@ class FuncInfo {
     }
 
     /**
-     * @param FuncInfo[] $funcMap
-     * @param FuncInfo[] $aliasMap
+     * @param array<string, FuncInfo> $funcMap
+     * @param array<string, FuncInfo> $aliasMap
      * @throws Exception
      */
     public function getMethodSynopsisElement(array $funcMap, array $aliasMap, DOMDocument $doc): ?DOMElement {
@@ -1670,7 +1677,7 @@ class ClassInfo {
     }
 
     /**
-     * @param ClassInfo[] $classMap
+     * @param array<string, ClassInfo> $classMap
      */
     public function getClassSynopsisDocument(array $classMap): ?string {
 
@@ -1880,7 +1887,7 @@ class ClassInfo {
     /**
      * @param Name[] $parentsWithInheritedProperties
      * @param Name[] $parentsWithInheritedMethods
-     * @param ClassInfo[] $classMap
+     * @param array<string, ClassInfo> $classMap
      */
     private function collectInheritedMembers(array &$parentsWithInheritedProperties, array &$parentsWithInheritedMethods, array $classMap): void
     {
@@ -2698,7 +2705,7 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
     return $code;
 }
 
-/** @param FuncInfo[] $funcInfos */
+/** @param FuncInfo<string, FuncInfo> $funcInfos */
 function generateOptimizerInfo(array $funcInfos): string {
 
     $code = "/* This is a generated file, edit the .stub.php files instead. */\n\n";
@@ -2847,8 +2854,8 @@ function getReplacedSynopsisXml(string $xml): string
 }
 
 /**
- * @param FuncInfo[] $funcMap
- * @param FuncInfo[] $aliasMap
+ * @param array<string, FuncInfo> $funcMap
+ * @param array<string, FuncInfo> $aliasMap
  * @return array<string, string>
  */
 function generateMethodSynopses(array $funcMap, array $aliasMap): array {
@@ -2865,8 +2872,8 @@ function generateMethodSynopses(array $funcMap, array $aliasMap): array {
 }
 
 /**
- * @param FuncInfo[] $funcMap
- * @param FuncInfo[] $aliasMap
+ * @param array<string, FuncInfo> $funcMap
+ * @param array<string, FuncInfo> $aliasMap
  * @return array<string, string>
  */
 function replaceMethodSynopses(string $targetDirectory, array $funcMap, array $aliasMap): array {
@@ -3173,20 +3180,16 @@ if ($printParameterStats) {
     echo json_encode($parameterStats, JSON_PRETTY_PRINT), "\n";
 }
 
-/** @var ClassInfo[] $classMap */
+/** @var array<string, ClassInfo> $classMap */
 $classMap = [];
-/** @var FuncInfo[] $funcMap */
+/** @var array<string, FuncInfo> $funcMap */
 $funcMap = [];
-/** @var FuncInfo[] $aliasMap */
+/** @var array<string, FuncInfo> $aliasMap */
 $aliasMap = [];
 
 foreach ($fileInfos as $fileInfo) {
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
-
-        foreach ($fileInfo->funcInfos as $funcInfo) {
-            $funcMap[$funcInfo->name->__toString()] = $funcInfo;
-        }
 
         foreach ($classInfo->funcInfos as $funcInfo) {
             $funcMap[$funcInfo->name->__toString()] = $funcInfo;
