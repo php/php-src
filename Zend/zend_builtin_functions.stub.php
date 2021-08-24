@@ -82,7 +82,6 @@ function get_included_files(): array {}
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @alias get_included_files
  */
 function get_required_files(): array {}

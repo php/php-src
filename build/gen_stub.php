@@ -159,7 +159,7 @@ class SimpleType {
         if ($node instanceof Node\Name) {
             if ($node->toLowerString() === 'static') {
                 // PHP internally considers "static" a builtin type.
-                return new SimpleType($node->toString(), true);
+                return new SimpleType($node->toLowerString(), true);
             }
 
             if ($node->toLowerString() === 'self') {
@@ -175,7 +175,7 @@ class SimpleType {
                 return ArrayType::createGenericArray();
             }
 
-            return new SimpleType($node->toString(), true);
+            return new SimpleType($node->toLowerString(), true);
         }
 
         throw new Exception("Unexpected node type");
@@ -363,6 +363,10 @@ class SimpleType {
 
         if ($this->isBuiltin && strtolower($this->name) === "mixed") {
             return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
+        }
+
+        if (!$this->isBuiltin) {
+            return "MAY_BE_OBJECT";
         }
 
         return $this->toTypeMask();
@@ -847,7 +851,7 @@ class ReturnInfo {
     public $phpDocType;
     /** @var bool */
     public $tentativeReturnType;
-    /** @var string|null */
+    /** @var string */
     public $refcount;
 
     public function __construct(bool $byRef, ?Type $type, ?Type $phpDocType, bool $tentativeReturnType, ?string $refcount) {
@@ -1126,11 +1130,7 @@ class FuncInfo {
             return null;
         }
 
-        if ($this->return->refcount === null) {
-            return null;
-        }
-
-        if (in_array($this->return->refcount, [ReturnInfo::REFCOUNT_0, ReturnInfo::REFCOUNT_N], true) && $this->return->phpDocType === null) {
+        if ($this->return->refcount !== ReturnInfo::REFCOUNT_1 && $this->return->phpDocType === null) {
             return null;
         }
 
@@ -3278,10 +3278,6 @@ if ($verify) {
         $aliasPhpDocReturnType = $aliasReturn->phpDocType;
         if ($aliasedPhpDocReturnType != $aliasPhpDocReturnType && $aliasedPhpDocReturnType != $aliasReturn->type && $aliasPhpDocReturnType != $aliasedReturn->type) {
             $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same PHPDoc return type";
-        }
-
-        if ($aliasedReturn->refcount !== $aliasReturn->refcount) {
-            $errors[] = "{$aliasFunc->name}() and {$aliasedFunc->name}() must have the same refcount";
         }
     }
 
