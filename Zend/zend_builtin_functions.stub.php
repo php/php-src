@@ -6,12 +6,14 @@ class stdClass
 {
 }
 
+/** @refcount 1 */
 function zend_version(): string {}
 
 function func_num_args(): int {}
 
 function func_get_arg(int $position): mixed {}
 
+/** @return array<int, mixed> */
 function func_get_args(): array {}
 
 function strlen(string $string): int {}
@@ -48,6 +50,10 @@ function get_object_vars(object $object): array {}
 
 function get_mangled_object_vars(object $object): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function get_class_methods(object|string $object_or_class): array {}
 
 /** @param object|string $object_or_class */
@@ -68,9 +74,16 @@ function function_exists(string $function): bool {}
 
 function class_alias(string $class, string $alias, bool $autoload = true): bool {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function get_included_files(): array {}
 
-/** @alias get_included_files */
+/**
+ * @return array<int, string>
+ * @alias get_included_files
+ */
 function get_required_files(): array {}
 
 function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool {}
@@ -78,14 +91,16 @@ function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool 
 /** @alias trigger_error */
 function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 
-/** @return string|array|object|null */
+/** @return string|array<int, string|object>|object|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
+/** @return true */
 function restore_error_handler(): bool {}
 
-/** @return string|array|object|null */
+/** @return string|array<int, string|object>|object|null */
 function set_exception_handler(?callable $callback) {}
 
+/** @return true */
 function restore_exception_handler(): bool {}
 
 function get_declared_classes(): array {}
@@ -98,7 +113,10 @@ function get_defined_functions(bool $exclude_disabled = true): array {}
 
 function get_defined_vars(): array {}
 
-/** @param resource $resource */
+/**
+ * @param resource $resource
+ * @refcount 1
+ */
 function get_resource_type($resource): string {}
 
 /** @param resource $resource */
@@ -108,6 +126,10 @@ function get_resources(?string $type = null): array {}
 
 function get_loaded_extensions(bool $zend_extensions = false): array {}
 
+/**
+ * @return array<string, mixed>
+ * @refcount 1
+ */
 function get_defined_constants(bool $categorize = false): array {}
 
 function debug_backtrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): array {}

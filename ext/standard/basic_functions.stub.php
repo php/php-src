@@ -288,6 +288,10 @@ function sleep(int $seconds): int {}
 function usleep(int $microseconds): void {}
 
 #if HAVE_NANOSLEEP
+/**
+ * @return array<string, int>|bool
+ * @refcount 1
+ */
 function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 
 function time_sleep_until(float $timestamp): bool {}
@@ -421,6 +425,8 @@ function checkdnsrr(string $hostname, string $type = "MX"): bool {}
 /**
  * @param array $authoritative_name_servers
  * @param array $additional_records
+ * @return array<int, array>|false
+ * @refcount 1
  */
 function dns_get_record(string $hostname, int $type = DNS_ANY, &$authoritative_name_servers = null, &$additional_records = null, bool $raw = false): array|false {}
 
@@ -772,7 +778,10 @@ function get_meta_tags(string $filename, bool $use_include_path = false): array|
 /** @param resource $handle */
 function pclose($handle): int {}
 
-/** @return resource|false */
+/**
+ * @return resource|false
+ * @refcount 1
+ */
 function popen(string $command, string $mode) {}
 
 /** @param resource|null $context */
@@ -804,6 +813,7 @@ function fread($stream, int $length): string|false {}
 /**
  * @param resource|null $context
  * @return resource|false
+ * @refcount 1
  */
 function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
 
@@ -854,7 +864,10 @@ function copy(string $from, string $to, $context = null): bool {}
 
 function tempnam(string $directory, string $prefix): string|false {}
 
-/** @return resource|false */
+/**
+ * @return resource|false
+ * @refcount 1
+ */
 function tmpfile() {}
 
 /** @param resource|null $context */
@@ -975,6 +988,7 @@ function vfprintf($stream, string $format, array $values): int {}
  * @param int $error_code
  * @param string $error_message
  * @return resource|false
+ * @refcount 1
  */
 function fsockopen(string $hostname, int $port = -1, &$error_code = null, &$error_message = null, ?float $timeout = null) {}
 
@@ -1165,6 +1179,7 @@ function password_algos(): array {}
 /**
  * @param array $pipes
  * @return resource|false
+ * @refcount 1
  */
 function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env_vars = null, ?array $options = null) {}
 
@@ -1214,7 +1229,10 @@ function soundex(string $string): string {}
 
 function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, ?int $microseconds = null): int|false {}
 
-/** @return resource */
+/**
+ * @return resource
+ * @refcount 1
+ */
 function stream_context_create(?array $options = null, ?array $params = null) {}
 
 /** @param resource $context */
@@ -1255,6 +1273,7 @@ function stream_filter_remove($stream_filter): bool {}
  * @param string $error_message
  * @param resource|null $context
  * @return resource|false
+ * @refcount 1
  */
 function stream_socket_client(string $address, &$error_code = null, &$error_message = null, ?float $timeout = null, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
 
@@ -1263,14 +1282,15 @@ function stream_socket_client(string $address, &$error_code = null, &$error_mess
  * @param string $error_message
  * @param resource|null $context
  * @return resource|false
+ * @refcount 1
  */
 function stream_socket_server(string $address, &$error_code = null, &$error_message = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
 
 /**
  * @param resource $socket
- * @param float $timeout
  * @param string $peer_name
  * @return resource|false
+ * @refcount 1
  */
 function stream_socket_accept($socket, ?float $timeout = null, &$peer_name = null) {}
 
