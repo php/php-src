@@ -11,7 +11,6 @@ PHP                                                                        NEWS
     call_user_func()). (Nikita)
   . Fixed bug #81305 (Built-in Webserver Drops Requests With "Upgrade" Header).
     (cmb)
-  . Fixed bug #81122 (SSRF bypass in FILTER_VALIDATE_URL). (CVE-2021-21705) (cmb)
 
 - BCMath:
   . Fixed bug #78238 (BCMath returns "-0"). (cmb)
@@ -52,6 +51,9 @@ PHP                                                                        NEWS
 
 - PDO_ODBC:
   . Fixed bug #81252 (PDO_ODBC doesn't account for SQL_NO_TOTAL). (cmb)
+
+- Phar:
+  . Fixed bug #81211: Symlinks are followed when creating PHAR archive (cmb)
 
 - Shmop:
   . Fixed bug #81283 (shmop can't read beyond 2147483647 bytes). (cmb, Nikita)
