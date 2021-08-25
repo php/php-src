@@ -238,7 +238,6 @@ class DOMNodeList implements IteratorAggregate, Countable
 
 class DOMCharacterData extends DOMNode implements DOMChildNode
 {
-    /** @readonly */
     public string $data;
 
     /** @readonly */
@@ -285,7 +284,6 @@ class DOMAttr extends DOMNode
     /** @readonly */
     public bool $specified = true;
 
-    /** @readonly */
     public string $value;
 
     /** @readonly */
