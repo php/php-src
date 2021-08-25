@@ -728,12 +728,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 					 */
 					a = gdTrueColorGetAlpha(thisPixel);
 					/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */
-					if (a == 127) {
-						*pOutputRow++ = 0;
-					} else {
-						*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
-					}
-
+					*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
 				}
 			}
 		}
