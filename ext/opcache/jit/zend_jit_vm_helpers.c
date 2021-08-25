@@ -114,8 +114,10 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t ca
 #endif
 }
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(uint32_t call_info EXECUTE_DATA_DC)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D)
 {
+	uint32_t call_info = EX_CALL_INFO();
+
 	if (call_info & ZEND_CALL_TOP) {
 		ZEND_OPCODE_TAIL_CALL_EX(zend_jit_leave_top_func_helper, call_info);
 	} else {

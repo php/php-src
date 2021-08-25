@@ -1777,6 +1777,7 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 static int zend_jit_leave_function_stub(dasm_State **Dst)
 {
 	|->leave_function_handler:
+	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	test FCARG1d, ZEND_CALL_TOP
 		|	jnz >1
@@ -10989,7 +10990,7 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 		 !JIT_G(current_frame) ||
 		 !TRACE_FRAME_NO_NEED_RELEASE_THIS(JIT_G(current_frame)));
 
-	if (may_need_call_helper || may_need_release_this) {
+	if (may_need_release_this) {
 		|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
 	}
 	if (may_need_call_helper) {
@@ -11000,13 +11001,17 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 		    }
 		}
 		/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
-		|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
+		if (may_need_release_this) {
+			|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
+		} else {
+			|	test dword [FP + offsetof(zend_execute_data, This.u1.type_info)], (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
+		}
 		if (trace && trace->op != ZEND_JIT_TRACE_END) {
 			|	jnz >1
 			|.cold_code
 			|1:
 			if (!GCC_GLOBAL_REGS) {
-				|	mov FCARG2a, FP
+				|	mov FCARG1a, FP
 			}
 			|	EXT_CALL zend_jit_leave_func_helper, r0
 

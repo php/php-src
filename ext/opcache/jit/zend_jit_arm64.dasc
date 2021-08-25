@@ -10399,7 +10399,7 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 			|.cold_code
 			|1:
 			if (!GCC_GLOBAL_REGS) {
-				|	mov FCARG2x, FP
+				|	mov FCARG1x, FP
 			}
 			|	EXT_CALL zend_jit_leave_func_helper, REG0
 
