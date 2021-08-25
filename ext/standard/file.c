@@ -2387,7 +2387,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
 				if (ch == '<' || ch == '>') {
-					/* Was just an apostrohpe */
+					/* Was just an apostrophe */
 					md->ulc = 1;
 					md->lc = ch;
 				}
