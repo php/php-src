@@ -90,5 +90,5 @@ static const func_info_t func_infos[] = {
     FN("odbc_columnprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
 #endif
     F1("pg_socket", MAY_BE_RESOURCE|MAY_BE_FALSE),
-    FN("pcntl_signal_get_handler", MAY_BE_CALLABLE|MAY_BE_LONG),
+    FN("pcntl_signal_get_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_LONG),
 };

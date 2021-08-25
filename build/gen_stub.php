@@ -296,6 +296,10 @@ class SimpleType {
                 return "MAY_BE_ARRAY";
             case "object":
                 return "MAY_BE_OBJECT";
+            case "callable":
+                return "MAY_BE_CALLABLE";
+            case "iterable":
+                return "MAY_BE_ITERABLE";
             case "mixed":
                 return "MAY_BE_ANY";
             case "void":
@@ -364,9 +368,9 @@ class SimpleType {
             case "resource":
                 return "MAY_BE_RESOURCE";
             case "callable":
-                return "MAY_BE_CALLABLE";
+                return "MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT";
             case "iterable":
-                return "MAY_BE_ITERABLE";
+                return "MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_OBJECT";
             case "mixed":
                 return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
         }

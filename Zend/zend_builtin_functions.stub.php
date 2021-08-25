@@ -91,13 +91,13 @@ function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool 
 /** @alias trigger_error */
 function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
 
-/** @return string|array<int, string|object>|object|null */
+/** @return callable|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
 /** @return true */
 function restore_error_handler(): bool {}
 
-/** @return string|array<int, string|object>|object|null */
+/** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
 /** @return true */
