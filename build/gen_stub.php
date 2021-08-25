@@ -1785,7 +1785,7 @@ class ClassInfo {
                 $parentClassName = self::getClassSynopsisFilename($parent);
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='Properties']]))"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1955,7 +1955,9 @@ class ClassInfo {
     private function createIncludeElement(DOMDocument $doc, string $query): DOMElement
     {
         $includeElement = $doc->createElement("xi:include");
-        $includeElement->setAttribute("xpointer", $query);
+        $attr = $doc->createAttribute("xpointer");
+        $attr->value = $query;
+        $includeElement->appendChild($attr);
         $fallbackElement = $doc->createElement("xi:fallback");
         $includeElement->appendChild(new DOMText("\n     "));
         $includeElement->appendChild($fallbackElement);
