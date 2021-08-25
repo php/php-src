@@ -12,8 +12,6 @@ $array2 = [];
 foreach ($array1 as &returnAppend($array2)['x']) {}
 var_dump($array1, $array2);
 
-// The reference unwrap will perform an additional call to returnAppend().
-
 ?>
 --EXPECT--
 array(3) {
@@ -24,7 +22,7 @@ array(3) {
   [2]=>
   &int(3)
 }
-array(4) {
+array(3) {
   [0]=>
   array(1) {
     ["x"]=>
@@ -40,6 +38,4 @@ array(4) {
     ["x"]=>
     &int(3)
   }
-  [3]=>
-  NULL
 }

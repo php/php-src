@@ -5195,17 +5195,6 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static bool contains_append(zend_ast *var_ast)
-{
-	while (zend_is_variable(var_ast)) {
-		if (var_ast->kind == ZEND_AST_DIM && var_ast->child[1] == NULL) {
-			return true;
-		}
-		var_ast = var_ast->child[0];
-	}
-	return false;
-}
-
 static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -5296,10 +5285,9 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 
 	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
 
-	if (by_ref && value_ast->kind != ZEND_AST_ARRAY && !contains_append(value_ast)) {
-		znode var_node;
-		zend_compile_var(&var_node, value_ast, BP_VAR_UNSET, /* by_ref */ false);
-		zend_emit_op(NULL, ZEND_UNWRAP_REF, &var_node, NULL);
+	if (by_ref && value_ast->kind == ZEND_AST_VAR
+			&& zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
+		zend_emit_op(NULL, ZEND_UNWRAP_REF, &value_node, NULL);
 	}
 }
 /* }}} */

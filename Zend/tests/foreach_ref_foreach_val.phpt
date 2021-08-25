@@ -14,6 +14,7 @@ function test1(array $array) {
 }
 
 function test2(array $array) {
+    // No unwrapping with complex target variable.
     $foo = [];
     foreach ($array as &$foo['val']) {
         var_dump($foo['val']);
@@ -50,12 +51,12 @@ int(2)
 int(3)
 int(1)
 int(2)
-int(3)
+int(2)
 array(3) {
   [0]=>
   int(1)
   [1]=>
   int(2)
   [2]=>
-  int(3)
+  &int(2)
 }
