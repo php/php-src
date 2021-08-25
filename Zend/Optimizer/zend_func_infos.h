@@ -56,6 +56,10 @@ static const func_info_t func_infos[] = {
     FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("json_encode", MAY_BE_STRING|MAY_BE_FALSE),
     F1("json_last_error_msg", MAY_BE_STRING),
+    F1("finfo_open", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("finfo_file", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("finfo_buffer", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mime_content_type", MAY_BE_STRING|MAY_BE_FALSE),
     FN("oci_new_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
@@ -88,6 +92,43 @@ static const func_info_t func_infos[] = {
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
     FN("odbc_columnprivileges", MAY_BE_RESOURCE|MAY_BE_FALSE),
 #endif
+    F1("textdomain", MAY_BE_STRING),
+    F1("gettext", MAY_BE_STRING),
+    F1("dgettext", MAY_BE_STRING),
+    F1("dcgettext", MAY_BE_STRING),
+    F1("bindtextdomain", MAY_BE_STRING|MAY_BE_FALSE),
+#if defined(HAVE_NGETTEXT)
+    F1("ngettext", MAY_BE_STRING),
+#endif
+#if defined(HAVE_DNGETTEXT)
+    F1("dngettext", MAY_BE_STRING),
+#endif
+#if defined(HAVE_DCNGETTEXT)
+    F1("dcngettext", MAY_BE_STRING),
+#endif
+#if defined(HAVE_BIND_TEXTDOMAIN_CODESET)
+    F1("bind_textdomain_codeset", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+    F1("exif_tagname", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("exif_read_data", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
+    F1("exif_thumbnail", MAY_BE_STRING|MAY_BE_FALSE),
     F1("pg_socket", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("filter_input_array", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE|MAY_BE_NULL),
+    F1("filter_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     FN("pcntl_signal_get_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_LONG),
+    F1("bcadd", MAY_BE_STRING),
+    F1("bcsub", MAY_BE_STRING),
+    F1("bcmul", MAY_BE_STRING),
+    F1("bcdiv", MAY_BE_STRING),
+    F1("bcmod", MAY_BE_STRING),
+    F1("bcpowmod", MAY_BE_STRING),
+    F1("bcpow", MAY_BE_STRING),
+    F1("bcsqrt", MAY_BE_STRING),
+    F1("session_name", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("session_module_name", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("session_save_path", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("session_create_id", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("session_encode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("session_get_cookie_params", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
+    F1("session_cache_limiter", MAY_BE_STRING|MAY_BE_FALSE),
 };

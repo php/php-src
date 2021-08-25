@@ -595,15 +595,6 @@ static const func_info_t old_func_infos[] = {
 	F1("sodium_crypto_aead_chacha20poly1305_ietf_keygen",			MAY_BE_STRING),
 	F1("sodium_crypto_aead_xchacha20poly1305_ietf_keygen",			MAY_BE_STRING),
 
-	/* ext/session */
-	F1("session_get_cookie_params",				MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-	F1("session_name",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("session_module_name",					MAY_BE_FALSE | MAY_BE_STRING),
-	F1("session_save_path",						MAY_BE_FALSE | MAY_BE_STRING),
-	F1("session_create_id",						MAY_BE_FALSE | MAY_BE_STRING),
-	F1("session_cache_limiter",					MAY_BE_FALSE | MAY_BE_STRING),
-	F1("session_encode",						MAY_BE_FALSE | MAY_BE_STRING),
-
 	/* ext/pgsql */
 	F1("pg_dbname",								MAY_BE_STRING),
 	F1("pg_options",							MAY_BE_STRING),
@@ -649,48 +640,8 @@ static const func_info_t old_func_infos[] = {
 	F1("pg_delete",								MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("pg_select",								MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
 
-	/* ext/bcmath */
-	F1("bcadd",									MAY_BE_STRING),
-	F1("bcsub",									MAY_BE_STRING),
-	F1("bcmul",									MAY_BE_STRING),
-	F1("bcdiv",									MAY_BE_STRING),
-	F1("bcmod",									MAY_BE_STRING),
-	F1("bcpowmod",								MAY_BE_STRING),
-	F1("bcpow",									MAY_BE_STRING),
-	F1("bcsqrt",								MAY_BE_STRING),
-
-	/* ext/exif */
-	F1("exif_tagname",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("exif_read_data",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-	F1("exif_thumbnail",						MAY_BE_FALSE | MAY_BE_STRING),
-
 	/* ext/filter */
-	F1("filter_input_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF),
-	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-
-	/* ext/gettext */
-	F1("textdomain",							MAY_BE_STRING),
-	F1("gettext",								MAY_BE_STRING),
-	F1("_",										MAY_BE_STRING),
-	F1("dgettext",								MAY_BE_STRING),
-	F1("dcgettext",								MAY_BE_STRING),
-	F1("bindtextdomain",						MAY_BE_FALSE | MAY_BE_STRING),
-#if HAVE_NGETTEXT
-	F1("ngettext",								MAY_BE_STRING),
-#endif
-#if HAVE_DNGETTEXT
-	F1("dcngettext",							MAY_BE_STRING),
-#endif
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-	F1("bind_textdomain_codeset",				MAY_BE_FALSE | MAY_BE_STRING),
-#endif
-
-	/* ext/fileinfo */
-	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_OBJECT),
-	F1("finfo_file",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("finfo_buffer",							MAY_BE_FALSE | MAY_BE_STRING),
-	F1("mime_content_type",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/gd */
 	F1("gd_info",								MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE),
