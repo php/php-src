@@ -879,6 +879,9 @@ $invalid = array(
 
   // First half of surrogate pair at end of string
   "\x01\xD8" => "\x00\x00\x00%",
+
+  // Two successive codepoints which are both the 1st part of a surrogate pair
+  "\x01\xD8\x02\xD8" => "\x00\x00\x00%\x00\x00\x00%"
 );
 
 testInvalidCodepoints($invalid, 'UTF-16LE');
