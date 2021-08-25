@@ -296,10 +296,6 @@ class SimpleType {
                 return "MAY_BE_ARRAY";
             case "object":
                 return "MAY_BE_OBJECT";
-            case "callable":
-                return "MAY_BE_CALLABLE";
-            case "iterable":
-                return "MAY_BE_ITERABLE";
             case "mixed":
                 return "MAY_BE_ANY";
             case "void":
@@ -362,16 +358,17 @@ class SimpleType {
             return "MAY_BE_OBJECT";
         }
 
-        if ($this->name === "resource") {
-            return "MAY_BE_RESOURCE";
-        }
-
-        if ($this->name === "true") {
-            return "MAY_BE_TRUE";
-        }
-
-        if ($this->name === "mixed") {
-            return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
+        switch ($this->name) {
+            case "true":
+                return "MAY_BE_TRUE";
+            case "resource":
+                return "MAY_BE_RESOURCE";
+            case "callable":
+                return "MAY_BE_CALLABLE";
+            case "iterable":
+                return "MAY_BE_ITERABLE";
+            case "mixed":
+                return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
         }
 
         return $this->toTypeMask();
