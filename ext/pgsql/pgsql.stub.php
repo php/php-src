@@ -187,7 +187,7 @@ namespace {
     function pg_result(PgSql\Result $result, $row, string|int $field = UNKNOWN): string|false|null {}
 
     /**
-     * @return array<int, string|null>|false
+     * @return array<int|string, string|null>|false
      * @refcount 1
      */
     function pg_fetch_row(PgSql\Result $result, ?int $row = null, int $mode = PGSQL_NUM): array|false {}
@@ -199,7 +199,7 @@ namespace {
     function pg_fetch_assoc(PgSql\Result $result, ?int $row = null): array|false {}
 
     /**
-     * @return array<int, string|null>|false
+     * @return array<int|string, string|null>|false
      * @refcount 1
      */
     function pg_fetch_array(PgSql\Result $result, ?int $row = null, int $mode = PGSQL_BOTH): array|false {}
