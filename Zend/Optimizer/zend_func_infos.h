@@ -212,7 +212,100 @@ static const func_info_t func_infos[] = {
     F1("exif_tagname", MAY_BE_STRING|MAY_BE_FALSE),
     F1("exif_read_data", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
     F1("exif_thumbnail", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_dbname", MAY_BE_STRING),
+    F1("pg_options", MAY_BE_STRING),
+    F1("pg_port", MAY_BE_STRING),
+    F1("pg_tty", MAY_BE_STRING),
+    F1("pg_host", MAY_BE_STRING),
+    F1("pg_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
+    F1("pg_parameter_status", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_query", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_query_params", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_prepare", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_execute", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_field_name", MAY_BE_STRING),
+    F1("pg_field_type_oid", MAY_BE_STRING|MAY_BE_LONG),
+    F1("pg_fetch_result", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+    F1("pg_fetch_row", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
+    F1("pg_fetch_assoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
+    F1("pg_fetch_array", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
+    F1("pg_fetch_object", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_fetch_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
+    F1("pg_fetch_all_columns", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
+    F1("pg_last_oid", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE),
+    F1("pg_lo_create", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE),
+    F1("pg_lo_open", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_lo_read", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_lo_import", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE),
+    F1("pg_copy_to", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+    F1("pg_escape_string", MAY_BE_STRING),
+    F1("pg_escape_bytea", MAY_BE_STRING),
+    F1("pg_unescape_bytea", MAY_BE_STRING),
+    F1("pg_escape_literal", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_escape_identifier", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_result_error", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("pg_result_error_field", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+    F1("pg_get_result", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("pg_result_status", MAY_BE_STRING|MAY_BE_LONG),
+    F1("pg_get_notify", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
     F1("pg_socket", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("pg_meta_data", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("pg_convert", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
+    F1("pg_insert", MAY_BE_OBJECT|MAY_BE_STRING|MAY_BE_BOOL),
+    F1("pg_update", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("pg_delete", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("pg_select", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gd_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE),
+    F1("imagecreatetruecolor", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(PHP_WIN32)
+    F1("imagegrabwindow", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+#if defined(PHP_WIN32)
+    F1("imagegrabscreen", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+    F1("imagerotate", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecreate", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecreatefromstring", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(HAVE_GD_AVIF)
+    F1("imagecreatefromavif", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+    F1("imagecreatefromgif", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(HAVE_GD_JPG)
+    F1("imagecreatefromjpeg", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_GD_PNG)
+    F1("imagecreatefrompng", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_GD_WEBP)
+    F1("imagecreatefromwebp", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+    F1("imagecreatefromxbm", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(HAVE_GD_XPM)
+    F1("imagecreatefromxpm", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+    F1("imagecreatefromwbmp", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecreatefromgd", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecreatefromgd2", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecreatefromgd2part", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(HAVE_GD_BMP)
+    F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+    F0("imagecolorset", MAY_BE_FALSE|MAY_BE_NULL),
+    F1("imagecolorsforindex", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
+    F1("imagegetclip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
+#if defined(HAVE_GD_FREETYPE)
+    F1("imageftbbox", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_GD_FREETYPE)
+    F1("imagefttext", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
+#endif
+    F1("imagecrop", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagecropauto", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imagescale", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imageaffine", MAY_BE_OBJECT|MAY_BE_FALSE),
+    F1("imageaffinematrixget", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_FALSE),
+    F1("imageaffinematrixconcat", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_FALSE),
+    F1("imageresolution", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_TRUE),
     FN("preg_replace", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
     FN("preg_filter", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
     FN("preg_replace_callback", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
