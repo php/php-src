@@ -110,7 +110,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ actualEncoding	string
-readonly=no
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-actualEncoding
 Since: DOM Level 3
 */
@@ -123,7 +123,7 @@ int dom_entity_actual_encoding_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ encoding	string
-readonly=no
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-encoding
 Since: DOM Level 3
 */
@@ -136,7 +136,7 @@ int dom_entity_encoding_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ version	string
-readonly=no
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-version
 Since: DOM Level 3
 */
