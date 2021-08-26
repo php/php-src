@@ -78,11 +78,8 @@ int dom_entity_public_id_read(dom_object *obj, zval *retval);
 int dom_entity_system_id_read(dom_object *obj, zval *retval);
 int dom_entity_notation_name_read(dom_object *obj, zval *retval);
 int dom_entity_actual_encoding_read(dom_object *obj, zval *retval);
-int dom_entity_actual_encoding_write(dom_object *obj, zval *newval);
 int dom_entity_encoding_read(dom_object *obj, zval *retval);
-int dom_entity_encoding_write(dom_object *obj, zval *newval);
 int dom_entity_version_read(dom_object *obj, zval *retval);
-int dom_entity_version_write(dom_object *obj, zval *newval);
 
 /* namednodemap properties */
 int dom_namednodemap_length_read(dom_object *obj, zval *retval);

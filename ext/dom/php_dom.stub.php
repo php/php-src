@@ -619,13 +619,22 @@ class DOMEntity extends DOMNode
     /** @readonly */
     public ?string $notationName;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @deprecated
+     */
     public mixed $actualEncoding = null;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @deprecated
+     */
     public mixed $encoding = null;
 
-    /** @readonly */
+    /**
+     * @readonly
+     * @deprecated
+     */
     public mixed $version = null;
 }
 
