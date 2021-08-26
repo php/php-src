@@ -517,7 +517,9 @@ static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num,
 					if (!Z_REFCOUNTED_P(zv)) {
 						uint32_t type = Z_TYPE_P(zv);
 
-						if (ZEND_TYPE_FULL_MASK(arg_info->type) & (1u << type)) {
+						// TODO: few functions (e.g. pcntl_exec) modify arrays in-place ???
+						if (type != IS_ARRAY
+						 && (ZEND_TYPE_FULL_MASK(arg_info->type) & (1u << type))) {
 							return 0;
 						}
 					}
