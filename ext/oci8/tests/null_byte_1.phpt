@@ -23,7 +23,7 @@ echo "Test 1: Import\n";
 
 $lob = oci_new_descriptor($c, OCI_D_LOB);
 try {
-    $lob->savefile("/tmp/abc\0def");
+    $lob->saveFile("/tmp/abc\0def");
 } catch (ValueError $e) {
        echo $e->getMessage(), "\n";
 }
