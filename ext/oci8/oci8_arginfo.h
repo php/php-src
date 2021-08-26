@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dfdfd80652d83f82d9bbe3743cd9137c2ab1668e */
+ * Stub hash: 64f26d6d80e5d5abf5017fb9546c1ee3378731eb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -528,7 +528,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_assign, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, from, OCICollection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_assignelem, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_OCICollection_assignElem, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -783,7 +783,7 @@ static const zend_function_entry class_OCICollection_methods[] = {
 	ZEND_ME_MAPPING(append, oci_collection_append, arginfo_class_OCICollection_append, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getElem, oci_collection_element_get, arginfo_class_OCICollection_getElem, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(assign, oci_collection_assign, arginfo_class_OCICollection_assign, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(assignelem, oci_collection_element_assign, arginfo_class_OCICollection_assignelem, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(assignElem, oci_collection_element_assign, arginfo_class_OCICollection_assignElem, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(size, oci_collection_size, arginfo_class_OCICollection_size, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(max, oci_collection_max, arginfo_class_OCICollection_max, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(trim, oci_collection_trim, arginfo_class_OCICollection_trim, ZEND_ACC_PUBLIC)

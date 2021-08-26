@@ -699,7 +699,7 @@ class OCICollection {
      * @alias oci_collection_element_assign
      * @return bool
      */
-    public function assignelem(int $index, string $value) {}
+    public function assignElem(int $index, string $value) {}
 
     /**
      * @alias oci_collection_size
