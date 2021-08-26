@@ -126,10 +126,6 @@ typedef union _zend_parser_stack_elem {
 } zend_parser_stack_elem;
 
 void zend_compile_top_stmt(zend_ast *ast);
-void zend_compile_stmt(zend_ast *ast);
-void zend_compile_expr(znode *node, zend_ast *ast);
-zend_op *zend_compile_var(znode *node, zend_ast *ast, uint32_t type, bool by_ref);
-void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast **ast_ptr, bool allow_dynamic);
 
 typedef int (*user_opcode_handler_t) (zend_execute_data *execute_data);
@@ -791,21 +787,12 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
-/* parser-driven code generators */
-void zend_do_free(znode *op1);
-
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);
 ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
 ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline);
-
-void zend_do_extended_info(void);
-void zend_do_extended_fcall_begin(void);
-void zend_do_extended_fcall_end(void);
-
-void zend_verify_namespace(void);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
