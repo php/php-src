@@ -48,6 +48,7 @@ function xml_parse_into_struct(XMLParser $parser, string $data, &$values, &$inde
 
 function xml_get_error_code(XMLParser $parser): int {}
 
+/** @refcount 1 */
 function xml_error_string(int $error_code): ?string {}
 
 function xml_get_current_line_number(XMLParser $parser): int {}
@@ -61,6 +62,7 @@ function xml_parser_free(XMLParser $parser): bool {}
 /** @param string|int $value */
 function xml_parser_set_option(XMLParser $parser, int $option, $value): bool {}
 
+/** @refcount 1 */
 function xml_parser_get_option(XMLParser $parser, int $option): string|int {}
 
 /**

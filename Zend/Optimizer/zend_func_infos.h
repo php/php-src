@@ -25,6 +25,32 @@ static const func_info_t func_infos[] = {
     F1("spl_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
     F1("spl_object_hash", MAY_BE_STRING),
     FN("socket_export_stream", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("iconv_substr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("iconv_mime_encode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("iconv_mime_decode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("iconv_mime_decode_headers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("iconv", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("iconv_get_encoding", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_STRING|MAY_BE_FALSE),
+    F1("hash", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("hash_file", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("hash_hmac", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("hash_hmac_file", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("hash_init", MAY_BE_OBJECT),
+    F1("hash_final", MAY_BE_STRING),
+    F1("hash_copy", MAY_BE_OBJECT),
+    F1("hash_algos", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("hash_hmac_algos", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("hash_pbkdf2", MAY_BE_STRING),
+    F1("hash_hkdf", MAY_BE_STRING),
+#if defined(PHP_MHASH_BC)
+    F1("mhash_get_hash_name", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+#if defined(PHP_MHASH_BC)
+    F1("mhash_keygen_s2k", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+#if defined(PHP_MHASH_BC)
+    F1("mhash", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
     FN("dba_popen", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("dba_open", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("date", MAY_BE_STRING),
@@ -58,7 +84,20 @@ static const func_info_t func_infos[] = {
     F1("date_sunset", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE),
     F1("date_sun_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE|MAY_BE_ARRAY_OF_LONG),
     FN("bzopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("ob_gzhandler", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("zlib_get_coding_type", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzfile", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("gzopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("zlib_encode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("zlib_decode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzdeflate", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzencode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzcompress", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzinflate", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzdecode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gzuncompress", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
+    F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG),
 #if HAVE_NANOSLEEP
     F1("time_nanosleep", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_BOOL),
 #endif
@@ -324,6 +363,62 @@ static const func_info_t func_infos[] = {
     F1("bcpowmod", MAY_BE_STRING),
     F1("bcpow", MAY_BE_STRING),
     F1("bcsqrt", MAY_BE_STRING),
+    F1("mb_language", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("mb_internal_encoding", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("mb_http_input", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_http_output", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("mb_detect_order", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_TRUE),
+    F1("mb_substitute_character", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
+    F1("mb_preferred_mime_name", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_output_handler", MAY_BE_STRING),
+    F1("mb_strstr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_strrchr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_stristr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_strrichr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_substr", MAY_BE_STRING),
+    F1("mb_strcut", MAY_BE_STRING),
+    F1("mb_strimwidth", MAY_BE_STRING),
+    F1("mb_convert_encoding", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_convert_case", MAY_BE_STRING),
+    F1("mb_strtoupper", MAY_BE_STRING),
+    F1("mb_strtolower", MAY_BE_STRING),
+    F1("mb_detect_encoding", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("mb_encoding_aliases", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("mb_encode_mimeheader", MAY_BE_STRING),
+    F1("mb_decode_mimeheader", MAY_BE_STRING),
+    F1("mb_convert_kana", MAY_BE_STRING),
+    F1("mb_convert_variables", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("mb_encode_numericentity", MAY_BE_STRING),
+    F1("mb_decode_numericentity", MAY_BE_STRING),
+    F1("mb_get_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE),
+#if defined(HAVE_MBREGEX)
+    F1("mb_regex_encoding", MAY_BE_STRING|MAY_BE_BOOL),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_ereg_replace", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_eregi_replace", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_ereg_replace_callback", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_split", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_ereg_search_pos", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_ereg_search_regs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_ereg_search_getregs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_MBREGEX)
+    F1("mb_regex_set_options", MAY_BE_STRING),
+#endif
     F1("session_name", MAY_BE_STRING|MAY_BE_FALSE),
     F1("session_module_name", MAY_BE_STRING|MAY_BE_FALSE),
     F1("session_save_path", MAY_BE_STRING|MAY_BE_FALSE),
