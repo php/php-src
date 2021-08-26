@@ -683,6 +683,8 @@ static inline void zend_begin_loop(
 }
 /* }}} */
 
+static void pop_and_emit_unwrap_refs_from_loop_var_stack(void);
+
 static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 {
 	uint32_t end = get_next_op_number();
@@ -691,12 +693,7 @@ static inline void zend_end_loop(int cont_addr, const znode *var_node) /* {{{ */
 	brk_cont_element->cont = cont_addr;
 	brk_cont_element->brk = end;
 	CG(context).current_brk_cont = brk_cont_element->parent;
-
-	const zend_loop_var *top = zend_stack_top(&CG(loop_var_stack));
-	if (top->opcode == ZEND_UNWRAP_REF) {
-		zend_stack_del_top(&CG(loop_var_stack));
-	}
-
+	pop_and_emit_unwrap_refs_from_loop_var_stack();
 	zend_stack_del_top(&CG(loop_var_stack));
 }
 /* }}} */
@@ -5201,6 +5198,47 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void push_unwrap_refs_to_loop_var_stack(zend_ast *ast)
+{
+	znode unwrap_node;
+	if (ast->kind == ZEND_AST_ARRAY) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			zend_ast *elem = list->child[i];
+			if (!elem || elem->kind != ZEND_AST_ARRAY_ELEM) {
+				continue;
+			}
+			if (elem->attr || elem->child[0]->kind == ZEND_AST_ARRAY) {
+				push_unwrap_refs_to_loop_var_stack(elem->child[0]);
+			}
+		}
+	} else if (ast->kind == ZEND_AST_VAR
+			&& zend_try_compile_cv(&unwrap_node, ast) == SUCCESS) {
+		zend_loop_var unwrap_info = {0};
+		unwrap_info.opcode = ZEND_UNWRAP_REF;
+		unwrap_info.var_type = unwrap_node.op_type;
+		unwrap_info.var_num = unwrap_node.u.op.var;
+		zend_stack_push(&CG(loop_var_stack), &unwrap_info);
+		CG(context).brk_cont_array[CG(context).current_brk_cont].num_cleanups++;
+	}
+}
+
+static void pop_and_emit_unwrap_refs_from_loop_var_stack(void)
+{
+	while (true) {
+		const zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
+		if (loop_var->opcode != ZEND_UNWRAP_REF) {
+			break;
+		}
+
+		zend_op *opline = get_next_op();
+		opline->opcode = loop_var->opcode;
+		opline->op1_type = loop_var->var_type;
+		opline->op1.var = loop_var->var_num;
+		zend_stack_del_top(&CG(loop_var_stack));
+	}
+}
+
 static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -5210,7 +5248,7 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	bool by_ref = value_ast->kind == ZEND_AST_REF;
 	bool is_variable = zend_is_variable(expr_ast) && zend_can_write_to_variable(expr_ast);
 
-	znode expr_node, reset_node, value_node, key_node, unwrap_node;
+	znode expr_node, reset_node, value_node, key_node;
 	zend_op *opline;
 	uint32_t opnum_reset, opnum_fetch;
 
@@ -5245,16 +5283,8 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
 	zend_begin_loop(ZEND_FE_FREE, &reset_node, 0);
-
-	unwrap_node.op_type = IS_UNUSED;
-	if (by_ref && value_ast->kind == ZEND_AST_VAR
-			&& zend_try_compile_cv(&unwrap_node, value_ast) == SUCCESS) {
-		zend_loop_var unwrap_info = {0};
-		unwrap_info.opcode = ZEND_UNWRAP_REF;
-		unwrap_info.var_type = unwrap_node.op_type;
-		unwrap_info.var_num = unwrap_node.u.op.var;
-		zend_stack_push(&CG(loop_var_stack), &unwrap_info);
-		CG(context).brk_cont_array[CG(context).current_brk_cont].num_cleanups++;
+	if (by_ref) {
+		push_unwrap_refs_to_loop_var_stack(value_ast);
 	}
 
 	opnum_fetch = get_next_op_number();
@@ -5301,10 +5331,6 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_end_loop(opnum_fetch, &reset_node);
 
 	zend_emit_op(NULL, ZEND_FE_FREE, &reset_node, NULL);
-
-	if (unwrap_node.op_type != IS_UNUSED) {
-		zend_emit_op(NULL, ZEND_UNWRAP_REF, &value_node, NULL);
-	}
 }
 /* }}} */
 
