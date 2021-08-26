@@ -94,8 +94,10 @@ function sodium_crypto_kx_secretkey(string $key_pair): string {}
 
 function sodium_crypto_kx_seed_keypair(string $seed): string {}
 
+/** @return array<int, string> */
 function sodium_crypto_kx_client_session_keys(string $client_key_pair, string $server_key): array {}
 
+/** @return array<int, string> */
 function sodium_crypto_kx_server_session_keys(string $server_key_pair, string $client_key): array {}
 
 function sodium_crypto_generichash(string $message, string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
@@ -104,6 +106,7 @@ function sodium_crypto_generichash_keygen(): string {}
 
 function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
+/** @return true */
 function sodium_crypto_generichash_update(string &$state, string $message): bool {}
 
 function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
