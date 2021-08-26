@@ -8,6 +8,10 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #73122 (Integer Overflow when concatenating strings). (cmb)
 
+-GD:
+  . Fixed bug #53580 (During resize gdImageCopyResampled cause colors change).
+    (cmb)
+
 - Opcache:
   . Fixed bug #81353 (segfault with preloading and statically bound closure).
     (Nikita)
