@@ -128,7 +128,7 @@ function timezone_transitions_get(
     DateTimeZone $object, int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
 
 /**
- * @return array<string, float|string>
+ * @return array<string, float|string>|false
  * @refcount 1
  */
 function timezone_location_get(DateTimeZone $object): array|false {}
@@ -226,6 +226,7 @@ class DateTime implements DateTimeInterface
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false {}
 
     /**
+     * @return array<string, int|array>|false
      * @tentative-return-type
      * @alias date_get_last_errors
      */
@@ -327,6 +328,7 @@ class DateTimeImmutable implements DateTimeInterface
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
     /**
+     * @return array<string, int|array>|false
      * @tentative-return-type
      * @alias date_get_last_errors
      */
@@ -415,18 +417,21 @@ class DateTimeZone
     public function getTransitions(int $timestampBegin = PHP_INT_MIN, int $timestampEnd = PHP_INT_MAX): array|false {}
 
     /**
+     * @return array<string, float|string>|false
      * @tentative-return-type
      * @alias timezone_location_get
      */
     public function getLocation(): array|false {}
 
     /**
+     * @return array<string, array>
      * @tentative-return-type
      * @alias timezone_abbreviations_list
      */
     public static function listAbbreviations(): array {}
 
     /**
+     * @return array<int, string>
      * @tentative-return-type
      * @alias timezone_identifiers_list
      */
