@@ -120,11 +120,6 @@ int dom_entity_actual_encoding_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_entity_actual_encoding_write(dom_object *obj, zval *newval)
-{
-	return SUCCESS;
-}
-
 /* }}} */
 
 /* {{{ encoding	string
@@ -138,11 +133,6 @@ int dom_entity_encoding_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_entity_encoding_write(dom_object *obj, zval *newval)
-{
-	return SUCCESS;
-}
-
 /* }}} */
 
 /* {{{ version	string
@@ -153,11 +143,6 @@ Since: DOM Level 3
 int dom_entity_version_read(dom_object *obj, zval *retval)
 {
 	ZVAL_NULL(retval);
-	return SUCCESS;
-}
-
-int dom_entity_version_write(dom_object *obj, zval *newval)
-{
 	return SUCCESS;
 }
 
