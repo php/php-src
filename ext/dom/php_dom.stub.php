@@ -623,19 +623,19 @@ class DOMEntity extends DOMNode
      * @readonly
      * @deprecated
      */
-    public mixed $actualEncoding = null;
+    public ?string $actualEncoding = null;
 
     /**
      * @readonly
      * @deprecated
      */
-    public mixed $encoding = null;
+    public ?string $encoding = null;
 
     /**
      * @readonly
      * @deprecated
      */
-    public mixed $version = null;
+    public ?string $version = null;
 }
 
 class DOMEntityReference extends DOMNode
