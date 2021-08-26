@@ -2036,7 +2036,8 @@ simple_list:
 					zend_ast_export_attributes(str, decl->child[3], indent, 0);
 				}
 				smart_str_appends(str, "class");
-				if (zend_ast_get_list(ast->child[1])->children) {
+				if (!zend_ast_is_list(ast->child[1])
+						|| zend_ast_get_list(ast->child[1])->children) {
 					smart_str_appendc(str, '(');
 					zend_ast_export_ex(str, ast->child[1], 0, indent);
 					smart_str_appendc(str, ')');
