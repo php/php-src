@@ -3304,7 +3304,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
-						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level, NULL, 1)) {
+						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level, NULL, 0)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3895,7 +3895,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_init_method_call(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level,
 								op1_info, op1_addr, ce, ce_is_instanceof, 0, NULL,
-								NULL, 1, 0)) {
+								NULL, 0, 0)) {
 							goto jit_failure;
 						}
 						goto done;
