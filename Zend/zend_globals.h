@@ -125,6 +125,7 @@ struct _zend_compiler_globals {
 	HashTable *memoized_exprs;
 	int memoize_mode;
 
+	void   *map_ptr_real_base;
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;

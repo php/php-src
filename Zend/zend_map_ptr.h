@@ -57,11 +57,8 @@
 	} while (0)
 # define ZEND_MAP_PTR_SET_IMM(ptr, val) \
 	ZEND_MAP_PTR_SET(ptr, val)
-# define ZEND_MAP_PTR_REAL_BASE(base) \
-	(base)
-# define ZEND_MAP_PTR_SET_REAL_BASE(base, ptr) do { \
-		base = (ptr); \
-	} while (0)
+# define ZEND_MAP_PTR_BIASED_BASE(real_base) \
+	(real_base)
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 # define ZEND_MAP_PTR_NEW_OFFSET() \
 	((uint32_t)(uintptr_t)zend_map_ptr_new())
@@ -84,11 +81,8 @@
 		void **__p = ZEND_MAP_PTR_OFFSET2PTR((uintptr_t)ZEND_MAP_PTR(ptr)); \
 		*__p = (val); \
 	} while (0)
-# define ZEND_MAP_PTR_REAL_BASE(base) \
-	((void*)(((uintptr_t)(base)) + 1))
-# define ZEND_MAP_PTR_SET_REAL_BASE(base, ptr) do { \
-		base = (void*)(((uintptr_t)(ptr)) - 1); \
-	} while (0)
+# define ZEND_MAP_PTR_BIASED_BASE(real_base) \
+	((void*)(((uintptr_t)(real_base)) - 1))
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
