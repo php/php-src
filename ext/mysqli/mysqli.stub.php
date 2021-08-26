@@ -89,6 +89,7 @@ class mysqli
     /**
      * @return true
      * @alias mysqli_close
+     * @no-verify
      */
     public function close() {} // TODO make return type void
 
@@ -301,6 +302,7 @@ class mysqli
     /**
      * @return true
      * @alias mysqli_ssl_set
+     * @no-verify
      */
     public function ssl_set(
         ?string $key,
@@ -386,6 +388,7 @@ class mysqli_result implements IteratorAggregate
     public function fetch_field(): object|false {}
 
     /**
+     * @return array<int, object>
      * @tentative-return-type
      * @alias mysqli_fetch_fields
      */
@@ -422,6 +425,7 @@ class mysqli_result implements IteratorAggregate
     public function fetch_object(string $class = "stdClass", array $constructor_args = []): object|null|false {}
 
     /**
+     * @return array<int, mixed>|null|false
      * @tentative-return-type
      * @alias mysqli_fetch_row
      */
@@ -496,6 +500,7 @@ class mysqli_stmt
     /**
      * @return true
      * @alias mysqli_stmt_close
+     * @no-verify
      */
     public function close() {} // TODO make return type void
 
