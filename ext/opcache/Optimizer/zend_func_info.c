@@ -805,7 +805,7 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatefrombmp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 	F0("imagecolorset",							MAY_BE_NULL | MAY_BE_FALSE),
-	F1("imagecolorsforindex",					MAY_BE_FALSE | MAY_BE_ARRAY |  MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F1("imagecolorsforindex",					MAY_BE_ARRAY |  MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 	F1("imagegetclip",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imageftbbox",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagefttext",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),

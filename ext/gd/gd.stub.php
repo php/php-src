@@ -153,7 +153,7 @@ function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int {
 
 function imagecolorset(GdImage $image, int $color, int $red, int $green, int $blue, int $alpha = 0): ?bool {}
 
-function imagecolorsforindex(GdImage $image, int $color): array|false {}
+function imagecolorsforindex(GdImage $image, int $color): array {}
 
 function imagegammacorrect(GdImage $image, float $input_gamma, float $output_gamma): bool {}
 
