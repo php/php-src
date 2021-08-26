@@ -65,6 +65,17 @@ static void (*orig_execute_internal)(zend_execute_data *execute_data, zval *retu
 
 static void fuzzer_execute_internal(zend_execute_data *execute_data, zval *return_value) {
 	fuzzer_step();
+
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(execute_data);
+	for (uint32_t i = 0; i < num_args; i++) {
+		/* Some internal functions like preg_replace() may be slow on large inputs.
+		 * Limit the maximum size of string inputs. */
+		zval *arg = ZEND_CALL_VAR_NUM(execute_data, i);
+		if (Z_TYPE_P(arg) == IS_STRING && Z_STRLEN_P(arg) > MAX_SIZE) {
+			zend_bailout();
+		}
+	}
+
 	orig_execute_internal(execute_data, return_value);
 }
 
