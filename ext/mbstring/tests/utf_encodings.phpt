@@ -1021,6 +1021,9 @@ $encoded = encode("\x12\x34", 'UTF-16BE'); // 3 Base64 bytes, 2 bits of padding.
 $corrupted = substr($encoded, 0, 2) . chr(ord($encoded[2]) + 1);
 testInvalidString('+' . $corrupted . '-', "\x00\x00\x12\x34\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
+// Characters which are not Base64 (and not even ASCII) appearing in Base64 section
+testInvalidString("+\x80", "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+
 echo "Done!\n";
 
 ?>
