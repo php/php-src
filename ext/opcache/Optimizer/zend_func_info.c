@@ -163,7 +163,6 @@ static const func_info_t func_infos[] = {
 	FN("substr_replace",               MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("quotemeta",                    MAY_BE_STRING),
 	F1("ucwords",                      MAY_BE_STRING),
-	F1("addcslashes",                  MAY_BE_STRING),
 	FN("str_replace",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	FN("str_ireplace",                 MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	F1("str_repeat",                   MAY_BE_STRING),
