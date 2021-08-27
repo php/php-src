@@ -341,6 +341,10 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, NULL);
 	}
 
+	if (&mptr->internal_function == &call) {
+		zend_string_release(mptr->common.function_name);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -482,7 +486,7 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 			zend_destroy_static_vars(&closure->func.op_array);
 		}
 		destroy_op_array(&closure->func.op_array);
-	} else if (closure->orig_internal_handler == zend_closure_call_magic) {
+	} else if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
 		zend_string_release(closure->func.common.function_name);
 	}
 
@@ -739,6 +743,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			closure->orig_internal_handler = closure->func.internal_function.handler;
 		}
 		closure->func.internal_function.handler = zend_closure_internal_handler;
+		zend_string_addref(closure->func.op_array.function_name);
 		if (!func->common.scope) {
 			/* if it's a free function, we won't set scope & this since they're meaningless */
 			this_ptr = NULL;
@@ -810,6 +815,10 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE(instance), &instance);
 	} else {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_CE(call->This), NULL);
+	}
+
+	if (&mptr->internal_function == &trampoline) {
+		zend_string_release(mptr->common.function_name);
 	}
 } /* }}} */
 
