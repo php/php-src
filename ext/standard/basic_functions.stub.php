@@ -1302,7 +1302,6 @@ function intdiv(int $num1, int $num2): int {}
 
 function is_infinite(float $num): bool {}
 
-/** @refcount 1 */
 function pow(mixed $num, mixed $exponent): int|float|object {}
 
 function exp(float $num): float {}
@@ -1524,10 +1523,7 @@ function stream_socket_server(string $address, &$error_code = null, &$error_mess
  */
 function stream_socket_accept($socket, ?float $timeout = null, &$peer_name = null) {}
 
-/**
- * @param resource $socket
- * @refcount 1
- */
+/** @param resource $socket */
 function stream_socket_get_name($socket, bool $remote): string|false {}
 
 /**

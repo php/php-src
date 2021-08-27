@@ -231,7 +231,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
     F1("readlink", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
-    F1("pow", MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_OBJECT),
     F1("decbin", MAY_BE_STRING),
     F1("decoct", MAY_BE_STRING),
     F1("dechex", MAY_BE_STRING),
@@ -268,7 +267,6 @@ static const func_info_t func_infos[] = {
     F1("stream_socket_client", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_server", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_accept", MAY_BE_RESOURCE|MAY_BE_FALSE),
-    F1("stream_socket_get_name", MAY_BE_STRING|MAY_BE_FALSE),
     F1("stream_socket_recvfrom", MAY_BE_STRING|MAY_BE_FALSE),
 #if HAVE_SOCKETPAIR
     F1("stream_socket_pair", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_FALSE),
