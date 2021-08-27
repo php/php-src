@@ -98,18 +98,46 @@ static const func_info_t func_infos[] = {
     F1("gzuncompress", MAY_BE_STRING|MAY_BE_FALSE),
     F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
     F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG),
+    F1("base64_encode", MAY_BE_STRING),
+    F1("base64_decode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("long2ip", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("getenv", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+    F1("getopt", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
 #if HAVE_NANOSLEEP
     F1("time_nanosleep", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_BOOL),
 #endif
+    F1("get_current_user", MAY_BE_STRING),
+    FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
+    F0("register_shutdown_function", MAY_BE_FALSE|MAY_BE_NULL),
+    F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("php_strip_whitespace", MAY_BE_STRING),
+    F1("highlight_string", MAY_BE_STRING|MAY_BE_BOOL),
+    F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
+    F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("print_r", MAY_BE_STRING|MAY_BE_BOOL),
 #if HAVE_GETSERVBYPORT
     F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
 #if HAVE_GETPROTOBYNUMBER
     F1("getprotobynumber", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
+#if ZEND_DEBUG
+    F1("config_get_hash", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY),
+#endif
+#if defined(HAVE_GETLOADAVG)
+    F1("sys_getloadavg", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_FALSE),
+#endif
 #if HAVE_STRPTIME
     F1("strptime", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
+#if defined(HAVE_GETHOSTNAME)
+    F1("gethostname", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+    F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("gethostbyname", MAY_BE_STRING),
+    F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
     F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif
@@ -117,6 +145,13 @@ static const func_info_t func_infos[] = {
     F1("md5_file", MAY_BE_STRING|MAY_BE_FALSE),
     F1("sha1", MAY_BE_STRING),
     F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
+#if defined(HAVE_INET_NTOP)
+    F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_INET_PTON)
+    F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+    F1("headers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     F1("htmlspecialchars", MAY_BE_STRING),
     F1("htmlentities", MAY_BE_STRING),
     F1("get_html_translation_table", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
@@ -162,10 +197,19 @@ static const func_info_t func_infos[] = {
     F1("escapeshellcmd", MAY_BE_STRING),
     F1("escapeshellarg", MAY_BE_STRING),
     F1("shell_exec", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
+    F1("get_meta_tags", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("popen", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("fgets", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("fread", MAY_BE_STRING|MAY_BE_FALSE),
     F1("fopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("fscanf", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY|MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL),
+    F1("fstat", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
+    F1("tempnam", MAY_BE_STRING|MAY_BE_FALSE),
     F1("tmpfile", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("file", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+    F1("file_get_contents", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("fgetcsv", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
+    F1("realpath", MAY_BE_STRING|MAY_BE_FALSE),
     F1("sprintf", MAY_BE_STRING),
     F1("vsprintf", MAY_BE_STRING),
     F1("fsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
@@ -187,15 +231,35 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
     F1("readlink", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
+    F1("decbin", MAY_BE_STRING),
+    F1("decoct", MAY_BE_STRING),
+    F1("dechex", MAY_BE_STRING),
+    F1("base_convert", MAY_BE_STRING),
+    F1("number_format", MAY_BE_STRING),
+#if defined(HAVE_GETTIMEOFDAY)
+    F1("microtime", MAY_BE_STRING|MAY_BE_DOUBLE),
+#endif
+#if defined(HAVE_GETTIMEOFDAY)
+    F1("gettimeofday", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_DOUBLE),
+#endif
+#if defined(HAVE_GETRUSAGE)
+    F1("getrusage", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_FALSE),
+#endif
+    F1("password_get_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL),
+    F1("password_hash", MAY_BE_STRING),
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
     F1("proc_open", MAY_BE_RESOURCE|MAY_BE_FALSE),
 #endif
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
     F1("proc_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
+    F1("quoted_printable_decode", MAY_BE_STRING),
+    F1("quoted_printable_encode", MAY_BE_STRING),
     F1("random_bytes", MAY_BE_STRING),
     F1("soundex", MAY_BE_STRING),
     F1("stream_context_create", MAY_BE_RESOURCE),
+    F1("stream_context_get_params", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
+    FN("stream_context_get_options", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
     FN("stream_context_get_default", MAY_BE_RESOURCE),
     FN("stream_context_set_default", MAY_BE_RESOURCE),
     FN("stream_filter_prepend", MAY_BE_RESOURCE|MAY_BE_FALSE),
@@ -203,11 +267,29 @@ static const func_info_t func_infos[] = {
     F1("stream_socket_client", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_server", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_accept", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("stream_socket_recvfrom", MAY_BE_STRING|MAY_BE_FALSE),
+#if HAVE_SOCKETPAIR
+    F1("stream_socket_pair", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_FALSE),
+#endif
+    F1("stream_get_contents", MAY_BE_STRING|MAY_BE_FALSE),
+    FN("stream_get_meta_data", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
+    F1("stream_get_line", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("stream_resolve_include_path", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("stream_get_wrappers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("stream_get_transports", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+#if defined(HAVE_GETTIMEOFDAY)
+    F1("uniqid", MAY_BE_STRING),
+#endif
     F1("parse_url", MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL|MAY_BE_FALSE),
     F1("urlencode", MAY_BE_STRING),
     F1("urldecode", MAY_BE_STRING),
     F1("rawurlencode", MAY_BE_STRING),
     F1("rawurldecode", MAY_BE_STRING),
+    F1("get_headers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("convert_uuencode", MAY_BE_STRING),
+    F1("convert_uudecode", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("var_export", MAY_BE_STRING|MAY_BE_NULL),
+    F1("serialize", MAY_BE_STRING),
     FN("zip_open", MAY_BE_RESOURCE|MAY_BE_LONG|MAY_BE_FALSE),
     FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("curl_copy_handle", MAY_BE_OBJECT|MAY_BE_FALSE),

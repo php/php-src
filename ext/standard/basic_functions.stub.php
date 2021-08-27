@@ -260,8 +260,10 @@ function array_is_list(array $array): bool {}
 
 /* base64.c */
 
+/** @refcount 1 */
 function base64_encode(string $string): string {}
 
+/** @refcount 1 */
 function base64_decode(string $string, bool $strict = false): string|false {}
 
 /* basic_functions.c */
@@ -270,15 +272,24 @@ function constant(string $name): mixed {}
 
 function ip2long(string $ip): int|false {}
 
+/** @refcount 1 */
 function long2ip(int $ip): string|false {}
 
+/**
+ * @return string|array<string, string>|false
+ * @refcount 1
+ */
 function getenv(?string $name = null, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
 function putenv(string $assignment): bool {}
 #endif
 
-/** @param int $rest_index */
+/**
+ * @param int $rest_index
+ * @return array<int|string, string|array|false>|false
+ * @refcount 1
+ */
 function getopt(string $short_options, array $long_options = [], &$rest_index = null): array|false {}
 
 function flush(): void {}
@@ -297,12 +308,18 @@ function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 function time_sleep_until(float $timestamp): bool {}
 #endif
 
+/** @refcount 1 */
 function get_current_user(): string {}
 
+/** @return string|array<int|string, string|array>|false */
 function get_cfg_var(string $option): string|array|false {}
 
 function error_log(string $message, int $message_type = 0, ?string $destination = null, ?string $additional_headers = null): bool {}
 
+/**
+ * @return array<string, int|string>|null
+ * @refcount 1
+ */
 function error_get_last(): ?array {}
 
 function error_clear_last(): void {}
@@ -315,19 +332,27 @@ function forward_static_call(callable $callback, mixed ...$args): mixed {}
 
 function forward_static_call_array(callable $callback, array $args): mixed {}
 
+/** @return false|null */
 function register_shutdown_function(callable $callback, mixed ...$args): ?bool {}
 
+/** @refcount 1 */
 function highlight_file(string $filename, bool $return = false): string|bool {}
 
 /** @alias highlight_file */
 function show_source(string $filename, bool $return = false): string|bool {}
 
+/** @refcount 1 */
 function php_strip_whitespace(string $filename): string {}
 
+/** @refcount 1 */
 function highlight_string(string $string, bool $return = false): string|bool {}
 
 function ini_get(string $option): string|false {}
 
+/**
+ * @return array<string, string|array|null>|false
+ * @refcount 1
+ */
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
 function ini_set(string $option, string|int|float|bool|null $value): string|false {}
@@ -337,10 +362,13 @@ function ini_alter(string $option, string|int|float|bool|null $value): string|fa
 
 function ini_restore(string $option): void {}
 
+/** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
 
+/** @refcount 1 */
 function get_include_path(): string|false {}
 
+/** @refcount 1 */
 function print_r(mixed $value, bool $return = false): string|bool {}
 
 function connection_aborted(): int {}
@@ -380,10 +408,18 @@ function parse_ini_file(string $filename, bool $process_sections = false, int $s
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
 #if ZEND_DEBUG
+/**
+ * @return array<string, string|array>
+ * @refcount 1
+ */
 function config_get_hash(): array {}
 #endif
 
 #ifdef HAVE_GETLOADAVG
+/**
+ * @return array<int, float>|false
+ * @refcount 1
+ */
 function sys_getloadavg(): array|false {}
 #endif
 
@@ -413,13 +449,20 @@ function strptime(string $timestamp, string $format): array|false {}
 /* dns.c */
 
 #ifdef HAVE_GETHOSTNAME
+/** @refcount 1 */
 function gethostname(): string|false {}
 #endif
 
+/** @refcount 1 */
 function gethostbyaddr(string $ip): string|false {}
 
+/** @refcount 1 */
 function gethostbyname(string $hostname): string {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function gethostbynamel(string $hostname): array|false {}
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
@@ -509,10 +552,12 @@ function syslog(int $priority, string $message): bool {}
 #endif
 
 #ifdef HAVE_INET_NTOP
+/** @refcount 1 */
 function inet_ntop(string $ip): string|false {}
 #endif
 
 #ifdef HAVE_INET_PTON
+/** @refcount 1 */
 function inet_pton(string $ip): string|false {}
 #endif
 
@@ -537,6 +582,10 @@ function http_response_code(int $response_code = 0): int|bool {}
  */
 function headers_sent(&$filename = null, &$line = null): bool {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function headers_list(): array {}
 
 /* {{{ html.c */
@@ -862,6 +911,10 @@ function proc_nice(int $priority): bool {}
  */
 function flock($stream, int $operation, &$would_block = null): bool {}
 
+/**
+ * @return array<string, string>|false
+ * @refcount 1
+ */
 function get_meta_tags(string $filename, bool $use_include_path = false): array|false {}
 
 /** @param resource $handle */
@@ -893,10 +946,16 @@ function feof($stream): bool {}
 /** @param resource $stream */
 function fgetc($stream): string|false {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
 function fgets($stream, ?int $length = null): string|false {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
 function fread($stream, int $length): string|false {}
 
 /**
@@ -919,7 +978,11 @@ function fpassthru($stream): int {}
 /** @param resource $stream */
 function ftruncate($stream, int $size): bool {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @return array<int|string, int>|false
+ * @refcount 1
+ */
 function fstat($stream): array|false {}
 
 /** @param resource $stream */
@@ -955,6 +1018,7 @@ function rename(string $from, string $to, $context = null): bool {}
 /** @param resource|null $context */
 function copy(string $from, string $to, $context = null): bool {}
 
+/** @refcount 1 */
 function tempnam(string $directory, string $prefix): string|false {}
 
 /**
@@ -963,10 +1027,17 @@ function tempnam(string $directory, string $prefix): string|false {}
  */
 function tmpfile() {}
 
-/** @param resource|null $context */
+/**
+ * @param resource|null $context
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function file(string $filename, int $flags = 0, $context = null): array|false {}
 
-/** @param resource|null $context */
+/**
+ * @param resource|null $context
+ * @refcount 1
+ */
 function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null): string|false {}
 
 /** @param resource|null $context */
@@ -978,9 +1049,14 @@ function file_put_contents(string $filename, mixed $data, int $flags = 0, $conte
 /** @param resource $stream */
 function fputcsv($stream, array $fields, string $separator = ",", string $enclosure = "\"", string $escape = "\\", string $eol = "\n"): int|false {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @return array<int, string|null>|false
+ * @refcount 1
+ */
 function fgetcsv($stream, ?int $length = null, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array|false {}
 
+/** @refcount 1 */
 function realpath(string $path): string|false {}
 
 #ifdef HAVE_FNMATCH
@@ -1248,14 +1324,19 @@ function hexdec(string $hex_string): int|float {}
 
 function octdec(string $octal_string): int|float {}
 
+/** @refcount 1 */
 function decbin(int $num): string {}
 
+/** @refcount 1 */
 function decoct(int $num): string {}
 
+/** @refcount 1 */
 function dechex(int $num): string {}
 
+/** @refcount 1 */
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
+/** @refcount 1 */
 function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
 function fmod(float $num1, float $num2): float {}
@@ -1265,12 +1346,21 @@ function fdiv(float $num1, float $num2): float {}
 /* microtime.c */
 
 #ifdef HAVE_GETTIMEOFDAY
+/** @refcount 1 */
 function microtime(bool $as_float = false): string|float {}
 
+/**
+ * @return array<string, int>|float
+ * @refcount 1
+ */
 function gettimeofday(bool $as_float = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
+/**
+ * @return array<string, int>|false
+ * @refcount 1
+ */
 function getrusage(int $mode = 0): array|false {}
 #endif
 
@@ -1282,8 +1372,13 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /* password.c */
 
+/**
+ * @return array<string, string|array|null>
+ * @refcount 1
+ */
 function password_get_info(string $hash): array {}
 
+/** @refcount 1 */
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
 function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
@@ -1318,8 +1413,10 @@ function proc_get_status($process): array {}
 
 /* quot_print.c */
 
+/** @refcount 1 */
 function quoted_printable_decode(string $string): string {}
 
+/** @refcount 1 */
 function quoted_printable_encode(string $string): string {}
 
 /* mt_rand.c */
@@ -1363,13 +1460,20 @@ function stream_context_create(?array $options = null, ?array $params = null) {}
 /** @param resource $context */
 function stream_context_set_params($context, array $params): bool {}
 
-/** @param resource $context */
+/**
+ * @param resource $context
+ * @return array<string, mixed>
+ * @refcount 1
+ */
 function stream_context_get_params($context): array {}
 
 /** @param resource $context */
 function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
 
-/** @param resource $stream_or_context */
+/**
+ * @param resource $stream_or_context
+ * @return array<string, mixed>
+ */
 function stream_context_get_options($stream_or_context): array {}
 
 /** @return resource */
@@ -1425,6 +1529,7 @@ function stream_socket_get_name($socket, bool $remote): string|false {}
 /**
  * @param resource $socket
  * @param string|null $address
+ * @refcount 1
  */
 function stream_socket_recvfrom($socket, int $length, int $flags = 0, &$address = null): string|false {}
 
@@ -1443,6 +1548,10 @@ function stream_socket_shutdown($stream, int $mode): bool {}
 #endif
 
 #if HAVE_SOCKETPAIR
+/**
+ * @return array<int, resource>|false
+ * @refcount 1
+ */
 function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
 #endif
 
@@ -1452,7 +1561,10 @@ function stream_socket_pair(int $domain, int $type, int $protocol): array|false 
  */
 function stream_copy_to_stream($from, $to, ?int $length = null, int $offset = 0): int|false {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
 function stream_get_contents($stream, ?int $length = null, int $offset = -1): string|false {}
 
 /** @param resource $stream */
@@ -1479,22 +1591,38 @@ function stream_set_blocking($stream, bool $enable): bool {}
  */
 function socket_set_blocking($stream, bool $enable): bool {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @return array<string, mixed>
+ */
 function stream_get_meta_data($stream): array {}
 
 /**
  * @param resource $stream
+ * @return array<string, mixed>
  * @alias stream_get_meta_data
  */
 function socket_get_status($stream): array {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
 function stream_get_line($stream, int $length, string $ending = ""): string|false {}
 
+/** @refcount 1 */
 function stream_resolve_include_path(string $filename): string|false {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function stream_get_wrappers(): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function stream_get_transports(): array {}
 
 /** @param resource|string $stream */
@@ -1580,6 +1708,7 @@ function is_countable(mixed $value): bool {}
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY
+/** @refcount 1 */
 function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 #endif
 
@@ -1603,7 +1732,11 @@ function rawurlencode(string $string): string {}
 /** @refcount 1 */
 function rawurldecode(string $string): string {}
 
-/** @param resource $context */
+/**
+ * @param resource $context
+ * @return array<int|string, string|array>|false
+ * @refcount 1
+ */
 function get_headers(string $url, bool $associative = false, $context = null): array|false {}
 
 /* user_filters.c */
@@ -1626,18 +1759,22 @@ function stream_filter_register(string $filter_name, string $class): bool {}
 
 /* uuencode.c */
 
+/** @refcount 1 */
 function convert_uuencode(string $string): string {}
 
+/** @refcount 1 */
 function convert_uudecode(string $string): string|false {}
 
 /* var.c */
 
 function var_dump(mixed $value, mixed ...$values): void {}
 
+/** @refcount 1 */
 function var_export(mixed $value, bool $return = false): ?string {}
 
 function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
+/** @refcount 1 */
 function serialize(mixed $value): string {}
 
 function unserialize(string $data, array $options = []): mixed {}
