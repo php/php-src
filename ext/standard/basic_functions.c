@@ -1340,25 +1340,32 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
+#define ZVAL_SET_INI_STR(zv, val) do { \
+	if (ZSTR_IS_INTERNED(val)) { \
+		ZVAL_INTERNED_STR(zv, val); \
+	} else if (ZSTR_LEN(val) == 0) { \
+		ZVAL_EMPTY_STRING(zv); \
+	} else if (ZSTR_LEN(val) == 1) { \
+		ZVAL_CHAR(zv, ZSTR_VAL(val)[0]); \
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
+		ZVAL_NEW_STR(zv, zend_string_copy(val)); \
+	} else { \
+		ZVAL_NEW_STR(zv, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
+	} \
+} while (0)
+
 static void add_config_entries(HashTable *hash, zval *return_value);
 
 /* {{{ add_config_entry */
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
 	if (Z_TYPE_P(entry) == IS_STRING) {
-		zend_string *str = Z_STR_P(entry);
-		if (!ZSTR_IS_INTERNED(str)) {
-			if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
-				zend_string_addref(str);
-			} else {
-				str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-			}
-		}
-
+		zval str_zv;
+		ZVAL_SET_INI_STR(&str_zv, Z_STR_P(entry));
 		if (key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), str);
+			add_assoc_zval_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), &str_zv);
 		} else {
-			add_index_str(retval, h, str);
+			add_index_zval(retval, h, &str_zv);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		zval tmp;
@@ -1385,15 +1392,13 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 /* {{{ Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
-	char *varname;
-	size_t varname_len;
-	zval *retval;
+	zend_string *varname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(varname, varname_len)
+		Z_PARAM_STR(varname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	retval = cfg_get_entry(varname, (uint32_t)varname_len);
+	zval *retval = cfg_get_entry_ex(varname);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
@@ -1401,7 +1406,7 @@ PHP_FUNCTION(get_cfg_var)
 			add_config_entries(Z_ARRVAL_P(retval), return_value);
 			return;
 		} else {
-			RETURN_STRING(Z_STRVAL_P(retval));
+			ZVAL_SET_INI_STR(return_value, Z_STR_P(retval));
 		}
 	} else {
 		RETURN_FALSE;
@@ -1947,21 +1952,6 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-#define INI_RETVAL_STR(val) do { \
-	/* copy to return value here, because alter might free it! */ \
-	if (ZSTR_IS_INTERNED(val)) { \
-		RETVAL_INTERNED_STR(val); \
-	} else if (ZSTR_LEN(val) == 0) { \
-		RETVAL_EMPTY_STRING(); \
-	} else if (ZSTR_LEN(val) == 1) { \
-		RETVAL_CHAR(ZSTR_VAL(val)[0]); \
-	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
-		ZVAL_NEW_STR(return_value, zend_string_copy(val)); \
-	} else { \
-		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
-	} \
-} while (0)
-
 /* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -1977,7 +1967,7 @@ PHP_FUNCTION(ini_get)
 		RETURN_FALSE;
 	}
 
-	INI_RETVAL_STR(val);
+	ZVAL_SET_INI_STR(return_value, val);
 }
 /* }}} */
 
@@ -2082,7 +2072,7 @@ PHP_FUNCTION(ini_set)
 	val = zend_ini_get_value(varname);
 
 	if (val) {
-		INI_RETVAL_STR(val);
+		ZVAL_SET_INI_STR(return_value, val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2115,8 +2105,6 @@ PHP_FUNCTION(ini_set)
 	zend_tmp_string_release(new_value_tmp_str);
 }
 /* }}} */
-
-#undef INI_RETVAL_STR
 
 /* {{{ Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
