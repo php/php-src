@@ -362,11 +362,9 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 		p++;
 	}
 
-	if (identd->strict) {
-		for (int i = 0; i < num; i++) {
-			mbfl_convert_filter *filter = identd->filter_list[i];
-			(filter->filter_flush)(filter);
-		}
+	for (int i = 0; i < num; i++) {
+		mbfl_convert_filter *filter = identd->filter_list[i];
+		(filter->filter_flush)(filter);
 	}
 
 	return 0;
