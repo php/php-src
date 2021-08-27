@@ -31,6 +31,7 @@ $badUTF8 = array(
   // Multi-byte characters which end too soon and go to ASCII
   "\xDFA" => "\x00\x00\x00%\x00\x00\x00A",
   "\xEF\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
+  "\xF0\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
   "\xF0\xBF\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
 
   // Multi-byte characters which end too soon and go to another MB char
