@@ -778,12 +778,18 @@ $invalid = array(
   // Multi-byte characters which end too soon and go to ASCII
   "\xDFA" => "\x00\x00\x00%\x00\x00\x00A",
   "\xEF\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
+  "\xF0\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
   "\xF0\xBF\xBFA" => "\x00\x00\x00%\x00\x00\x00A",
 
   // Multi-byte characters which end too soon and go to another MB char
   "\xDF\xDF\xBF" => "\x00\x00\x00%\x00\x00\x07\xFF",
   "\xEF\xBF\xDF\xBF" => "\x00\x00\x00%\x00\x00\x07\xFF",
   "\xF0\xBF\xBF\xDF\xBF" => "\x00\x00\x00%\x00\x00\x07\xFF",
+
+  // Multi-byte characters which end too soon and go to a junk byte
+  // (Which isn't even valid to start a new character)
+  "\xF0\xBF\xBF\xFF" => "\x00\x00\x00%",
+  "\xF0\xBF\xFF" => "\x00\x00\x00%",
 
   // Continuation bytes which appear outside of a MB char
   "\x80" => "\x00\x00\x00%",
