@@ -354,6 +354,7 @@ function getservbyname(string $service, string $protocol): int|false {}
 #endif
 
 #if HAVE_GETSERVBYPORT
+/** @refcount 1 */
 function getservbyport(int $port, string $protocol): string|false {}
 #endif
 
@@ -362,6 +363,7 @@ function getprotobyname(string $protocol): int|false {}
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
+/** @refcount 1 */
 function getprotobynumber(int $protocol): string|false {}
 #endif
 
@@ -400,7 +402,11 @@ function crypt(string $string, string $salt): string {}
 /* datetime.c */
 
 #if HAVE_STRPTIME
-/** @deprecated */
+/**
+ * @return array<string, int|string>|false
+ * @deprecated
+ * @refcount 1
+ */
 function strptime(string $timestamp, string $format): array|false {}
 #endif
 
@@ -466,8 +472,10 @@ function lcg_value(): float {}
 
 /* md5.c */
 
+/** @refcount 1 */
 function md5(string $string, bool $binary = false): string {}
 
+/** @refcount 1 */
 function md5_file(string $filename, bool $binary = false): string|false {}
 
 /* pageinfo.c */
@@ -484,8 +492,10 @@ function getlastmod(): int|false {}
 
 /* sha1.c */
 
+/** @refcount 1 */
 function sha1(string $string, bool $binary = false): string {}
 
+/** @refcount 1 */
 function sha1_file(string $filename, bool $binary = false): string|false {}
 
 /* syslog.c */
@@ -531,14 +541,20 @@ function headers_list(): array {}
 
 /* {{{ html.c */
 
+/** @refcount 1 */
 function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
 function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE): string {}
 
 function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null): string {}
 
+/** @refcount 1 */
 function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
 
+/**
+ * @return array<string, string>
+ * @refcount 1
+ */
 function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, string $encoding = "UTF-8"): array {}
 
 /* }}} */
@@ -551,8 +567,10 @@ function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
 
+/** @refcount 1 */
 function bin2hex(string $string): string {}
 
+/** @refcount 1 */
 function hex2bin(string $string): string|false {}
 
 function strspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
@@ -560,6 +578,7 @@ function strspn(string $string, string $characters, int $offset = 0, ?int $lengt
 function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
 #if HAVE_NL_LANGINFO
+/** @refcount 1 */
 function nl_langinfo(int $item): string|false {}
 #endif
 
@@ -574,8 +593,13 @@ function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
 
 function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
+/** @refcount 1 */
 function wordwrap(string $string, int $width = 75, string $break = "\n", bool $cut_long_words = false): string {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
 function implode(string|array $separator, ?array $array = null): string {}
@@ -583,20 +607,29 @@ function implode(string|array $separator, ?array $array = null): string {}
 /** @alias implode */
 function join(string|array $separator, ?array $array = null): string {}
 
+/** @refcount 1 */
 function strtok(string $string, ?string $token = null): string|false {}
 
 function strtoupper(string $string): string {}
 
 function strtolower(string $string): string {}
 
+/** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
 
+/** @refcount 1 */
 function dirname(string $path, int $levels = 1): string {}
 
+/**
+ * @return array<string, string>|string
+ * @refcount 1
+ */
 function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 
+/** @refcount 1 */
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
+/** @refcount 1 */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @alias strstr */
@@ -610,6 +643,7 @@ function strrpos(string $haystack, string $needle, int $offset = 0): int|false {
 
 function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
+/** @refcount 1 */
 function strrchr(string $haystack, string $needle): string|false {}
 
 function str_contains(string $haystack, string $needle): bool {}
@@ -618,26 +652,32 @@ function str_starts_with(string $haystack, string $needle): bool {}
 
 function str_ends_with(string $haystack, string $needle): bool {}
 
+/** @refcount 1 */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
 function substr(string $string, int $offset, ?int $length = null): string {}
 
+/** @return string|array<int|string, string> */
 function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
 
+/** @refcount 1 */
 function quotemeta(string $string): string {}
 
 function ord(string $character): int {}
 
+/** @refcount 1 */
 function chr(int $codepoint): string {}
 
 function ucfirst(string $string): string {}
 
 function lcfirst(string $string): string {}
 
+/** @refcount 1 */
 function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
+/** @refcount 1 */
 function strrev(string $string): string {}
 
 /** @param float $percent */
@@ -647,20 +687,32 @@ function addcslashes(string $string, string $characters): string {}
 
 function addslashes(string $string): string {}
 
+/** @refcount 1 */
 function stripcslashes(string $string): string {}
 
+/** @refcount 1 */
 function stripslashes(string $string): string {}
 
-/** @param int $count */
+/**
+ * @param int $count
+ * @return string|array<int|string, string>
+ * @refcount 1
+ */
 function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
-/** @param int $count */
+/**
+ * @param int $count
+ * @return string|array<int|string, string>
+ * @refcount 1
+ */
 function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
+/** @refcount 1 */
 function hebrev(string $string, int $max_chars_per_line = 0): string {}
 
 function nl2br(string $string, bool $use_xhtml = true): string {}
 
+/** @refcount 1 */
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
@@ -672,14 +724,27 @@ function setlocale(int $category, $locales, ...$rest): string|false {}
 /** @param array $result */
 function parse_str(string $string, &$result): void {}
 
+/**
+ * @return array<int, string|null>
+ * @refcount 1
+ */
 function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = '\\'): array {}
 
+/** @refcount 1 */
 function str_repeat(string $string, int $times): string {}
 
+/**
+ * @return array<int, int>|string
+ * @refcount 1
+ */
 function count_chars(string $string, int $mode = 0): array|string {}
 
 function strnatcmp(string $string1, string $string2): int {}
 
+/**
+ * @return array<string, int|string|array>
+ * @refcount 1
+ */
 function localeconv(): array {}
 
 function strnatcasecmp(string $string1, string $string2): int {}
@@ -688,16 +753,30 @@ function substr_count(string $haystack, string $needle, int $offset = 0, ?int $l
 
 function str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
+/**
+ * @return array<int, mixed>|int|null
+ * @refcount 1
+ */
 function sscanf(string $string, string $format, mixed &...$vars): array|int|null {}
 
 function str_rot13(string $string): string {}
 
+/** @refcount 1 */
 function str_shuffle(string $string): string {}
 
+/**
+ * @return array<int, string>|int
+ * @refcount 1
+ */
 function str_word_count(string $string, int $format = 0, ?string $characters = null): array|int {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function str_split(string $string, int $length = 1): array {}
 
+/** @refcount 1 */
 function strpbrk(string $string, string $characters): string|false {}
 
 function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
@@ -746,19 +825,29 @@ function glob(string $pattern, int $flags = 0): array|false {}
 /**
  * @param array $output
  * @param int $result_code
+ * @refcount 1
  */
 function exec(string $command, &$output = null, &$result_code = null): string|false {}
 
-/** @param int $result_code */
+/**
+ * @param int $result_code
+ * @refcount 1
+ */
 function system(string $command, &$result_code = null): string|false {}
 
-/** @param int $result_code */
+/**
+ * @param int $result_code
+ * @return false|null
+ */
 function passthru(string $command, &$result_code = null): ?bool {}
 
+/** @refcount 1 */
 function escapeshellcmd(string $command): string {}
 
+/** @refcount 1 */
 function escapeshellarg(string $arg): string {}
 
+/** @refcount 1 */
 function shell_exec(string $command): string|false|null {}
 
 #ifdef HAVE_NICE
@@ -817,7 +906,11 @@ function fread($stream, int $length): string|false {}
  */
 function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @return array<int, mixed>|int|false|null
+ * @refcount 1
+ */
 function fscanf($stream, string $format, mixed &...$vars): array|int|false|null {}
 
 /** @param resource $stream */
@@ -968,12 +1061,14 @@ function realpath_cache_size(): int {}
 
 /* formatted_print.c */
 
+/** @refcount 1 */
 function sprintf(string $format, mixed ...$values): string {}
 
 function printf(string $format, mixed ...$values): int {}
 
 function vprintf(string $format, array $values): int {}
 
+/** @refcount 1 */
 function vsprintf(string $format, array $values): string {}
 
 /** @param resource $stream */
@@ -1001,40 +1096,63 @@ function pfsockopen(string $hostname, int $port = -1, &$error_code = null, &$err
 
 /* http.c */
 
+/** @refcount 1 */
 function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738): string {}
 
 /* image.c */
 
+/** @refcount 1 */
 function image_type_to_mime_type(int $image_type): string {}
 
+/** @refcount 1 */
 function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
 
-/** @param array $image_info */
+/**
+ * @param array $image_info
+ * @return array<int|string, int|string>|false
+ * @refcount 1
+ */
 function getimagesize(string $filename, &$image_info = null): array|false {}
 
-/** @param array $image_info */
+/**
+ * @param array $image_info
+ * @return array<int|string, int|string>|false
+ * @refcount 1
+ */
 function getimagesizefromstring(string $string, &$image_info = null): array|false {}
 
 /* info.c */
 
-function phpinfo(int $flags = INFO_ALL): bool {}
+/** @return true */
+function phpinfo(int $flags = INFO_ALL): bool {} // make return type void
 
+/** @refcount 1 */
 function phpversion(?string $extension = null): string|false {}
 
-function phpcredits(int $flags = CREDITS_ALL): bool {}
+/** @return true */
+function phpcredits(int $flags = CREDITS_ALL): bool {} // make return type void
 
+/** @refcount 1 */
 function php_sapi_name(): string|false {}
 
+/** @refcount 1 */
 function php_uname(string $mode = "a"): string {}
 
+/** @refcount 1 */
 function php_ini_scanned_files(): string|false {}
 
+/** @refcount 1 */
 function php_ini_loaded_file(): string|false {}
 
 /* iptc.c */
 
+/** @refcount 1 */
 function iptcembed(string $iptc_data, string $filename, int $spool = 0): string|bool {}
 
+/**
+ * @return array<string, array>|false
+ * @refcount 1
+ */
 function iptcparse(string $iptc_block): array|false {}
 
 /* levenshtein.c */
@@ -1044,6 +1162,7 @@ function levenshtein(string $string1, string $string2, int $insertion_cost = 1, 
 /* link.c */
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+/** @refcount 1 */
 function readlink(string $path): string|false {}
 
 function linkinfo(string $path): int|false {}
@@ -1189,7 +1308,11 @@ function proc_close($process): int {}
 /** @param resource $process */
 function proc_terminate($process, int $signal = 15): bool {}
 
-/** @param resource $process */
+/**
+ * @param resource $process
+ * @return array<string, bool|int|string>
+ * @refcount 1
+ */
 function proc_get_status($process): array {}
 #endif
 
@@ -1217,12 +1340,14 @@ function getrandmax(): int {}
 
 /* random.c */
 
+/** @refcount 1 */
 function random_bytes(int $length): string {}
 
 function random_int(int $min, int $max): int {}
 
 /* soundex.c */
 
+/** @refcount 1 */
 function soundex(string $string): string {}
 
 /* streamsfuncs.c */
@@ -1460,14 +1585,22 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 
 /* url.c */
 
+/**
+ * @return int|string|array<string, int|string>|null|false
+ * @refcount 1
+ */
 function parse_url(string $url, int $component = -1): int|string|array|null|false {}
 
+/** @refcount 1 */
 function urlencode(string $string): string {}
 
+/** @refcount 1 */
 function urldecode(string $string): string {}
 
+/** @refcount 1 */
 function rawurlencode(string $string): string {}
 
+/** @refcount 1 */
 function rawurldecode(string $string): string {}
 
 /** @param resource $context */
