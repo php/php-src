@@ -683,10 +683,8 @@ function strrev(string $string): string {}
 /** @param float $percent */
 function similar_text(string $string1, string $string2, &$percent = null): int {}
 
-/** @refcount 1 */
 function addcslashes(string $string, string $characters): string {}
 
-/** @refcount 1 */
 function addslashes(string $string): string {}
 
 /** @refcount 1 */
@@ -697,14 +695,14 @@ function stripslashes(string $string): string {}
 
 /**
  * @param int $count
- * @return string|array<int|string, string|array|object>
+ * @return string|array<int|string, string>
  * @refcount 1
  */
 function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
 /**
  * @param int $count
- * @return string|array<int|string, string|array|object>
+ * @return string|array<int|string, string>
  * @refcount 1
  */
 function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
