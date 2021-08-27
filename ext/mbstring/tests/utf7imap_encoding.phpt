@@ -193,7 +193,16 @@ testValid("&" . mBase64(utf16BE("西红柿") . $longChar1) . "-", "西红柿" . 
 /* Multiple sections of valid ASCII _and_ Base64-encoded text */
 testValid("123&" . mBase64(utf16BE("１２３")) . "-abc&" . mBase64(utf16BE("☺")) . "-.", "123１２３abc☺.");
 
+/* If a & character appears right after a non-ASCII character, we must first close the Base64
+ * section and then emit &- */
+testValidString("☺&", "&Jjo-&-", "UTF-8", "UTF7-IMAP", false);
+testValidString("西瓜&", "&iX903A-&-", "UTF-8", "UTF7-IMAP", false);
+testValidString("西红柿&", "&iX9+omf,-&-", "UTF-8", "UTF7-IMAP", false);
+
 echo "Identification and conversion of valid text is working... perfect!\n";
+
+// Try illegal Unicode codepoint (> 0x10FFFF)
+convertInvalidString("\x00\x20\x00\x00", "%", "UCS-4BE", "UTF7-IMAP");
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
