@@ -114,7 +114,6 @@ static const func_info_t func_infos[] = {
     F1("php_strip_whitespace", MAY_BE_STRING),
     F1("highlight_string", MAY_BE_STRING|MAY_BE_BOOL),
     F1("ini_get_all", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
-    F1("ini_set", MAY_BE_STRING|MAY_BE_FALSE),
     F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
     F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
     F1("print_r", MAY_BE_STRING|MAY_BE_BOOL),

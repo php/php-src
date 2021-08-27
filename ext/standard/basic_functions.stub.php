@@ -355,7 +355,6 @@ function ini_get(string $option): string|false {}
  */
 function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-/** @refcount 1 */
 function ini_set(string $option, string|int|float|bool|null $value): string|false {}
 
 /** @alias ini_set */
