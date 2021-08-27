@@ -65,8 +65,10 @@ Loop::test3:
      ; (after optimizer)
      ; %sdce_009.php:15-18
 0000 V1 = FE_RESET_RW array(...) 0001
-0001 FE_FREE V1
-0002 UNWRAP_REF CV0($v)
+0001 UNWRAP_REF CV0($v)
+0002 FE_FREE V1
 0003 RETURN null
+LIVE RANGES:
+     1: 0001 - 0002 (loop)
 Start
 Done
