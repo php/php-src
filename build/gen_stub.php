@@ -120,17 +120,21 @@ class ArrayType extends SimpleType {
     /** @var Type */
     public $valueType;
 
+    /** @var bool */
+    public $supportsReferences;
+
     public static function createGenericArray(): self
     {
-        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
+        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"), false);
     }
 
-    public function __construct(Type $keyType, Type $valueType)
+    public function __construct(Type $keyType, Type $valueType, bool $supportsReferences)
     {
         parent::__construct("array", true);
 
         $this->keyType = $keyType;
         $this->valueType = $valueType;
+        $this->supportsReferences = $supportsReferences;
     }
 
     public function toOptimizerTypeMask(): string {
@@ -139,6 +143,10 @@ class ArrayType extends SimpleType {
             $this->keyType->toOptimizerTypeMaskForArrayKey(),
             $this->valueType->toOptimizerTypeMaskForArrayValue(),
         ];
+
+        if ($this->supportsReferences) {
+            $typeMasks[] = "MAY_BE_ARRAY_OF_REF";
+        }
 
         return implode("|", $typeMasks);
     }
@@ -151,7 +159,8 @@ class ArrayType extends SimpleType {
         assert(get_class($other) === self::class);
 
         return Type::equals($this->keyType, $other->keyType) &&
-            Type::equals($this->valueType, $other->valueType);
+            Type::equals($this->valueType, $other->valueType) &&
+            $this->supportsReferences === $other->supportsReferences;
     }
 }
 
@@ -215,13 +224,13 @@ class SimpleType {
         $matches = [];
         $isArray = preg_match("/(.*)\s*\[\s*\]/", $typeString, $matches);
         if ($isArray) {
-            return new ArrayType(Type::fromString("int"), Type::fromString($matches[1]));
+            return new ArrayType(Type::fromString("int"), Type::fromString($matches[1]), false);
         }
 
         $matches = [];
-        $isArray = preg_match("/array\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
+        $isArray = preg_match("/array(-ref)?\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
         if ($isArray) {
-            return new ArrayType(Type::fromString($matches[1]), Type::fromString($matches[2]));
+            return new ArrayType(Type::fromString($matches[2]), Type::fromString($matches[3]), !empty($matches[1]));
         }
 
         return new SimpleType($typeString, false);
@@ -2032,9 +2041,9 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>,\- ]+)\s*\$\w+.*$/', $value, $matches);
         } elseif ($this->name === "return") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)(\s+|$)/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>,\- ]+)(\s+|$)/', $value, $matches);
         }
 
         if (!isset($matches[1])) {

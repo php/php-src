@@ -50,4 +50,8 @@ function iterator_apply(Traversable $iterator, callable $callback, ?array $args 
 
 function iterator_count(Traversable $iterator): int {}
 
+/**
+ * @return array-ref<int|string, mixed>
+ * @refcount 1
+ */
 function iterator_to_array(Traversable $iterator, bool $preserve_keys = true): array {}
