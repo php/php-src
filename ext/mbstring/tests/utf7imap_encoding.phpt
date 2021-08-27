@@ -109,6 +109,9 @@ if (strlen($testString) != 4)
 	die("Ouch!");
 $testString = substr($testString, 2, 2) . substr($testString, 0, 2);
 identifyInvalidString("&" . mBase64($testString) . "-", 'UTF7-IMAP');
+/* (Or could appear by itself) */
+$testString = substr($testString, 0, 2);
+identifyInvalidString("&" . mBase64($testString) . "-", 'UTF7-IMAP');
 
 /* ...and we should detect this wherever it occurs */
 $singleChar = mb_convert_encoding("１", 'UTF-16BE', 'ASCII');

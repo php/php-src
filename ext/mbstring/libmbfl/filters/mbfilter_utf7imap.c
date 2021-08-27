@@ -177,13 +177,15 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		n = (n & 0x3) << 14;
 		filter->status = 5;
 		if (s >= 0xd800 && s < 0xdc00) {
+			/* 1st part of surrogate pair */
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
-			s &= 0x3ff;
-			s |= (filter->cache & 0xfff0000) >> 6;
-			filter->cache = n;
-			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
+			/* 2nd part of surrogate pair */
+			if (filter->cache & 0xfff0000) {
+				s &= 0x3ff;
+				s |= (filter->cache & 0xfff0000) >> 6;
+				filter->cache = n;
 				CK((*filter->output_function)(s, filter->data));
 			} else { /* illegal character */
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
@@ -216,10 +218,10 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			s = (((s & 0x3ff) << 16) + 0x400000) | n;
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
-			s &= 0x3ff;
-			s |= (filter->cache & 0xfff0000) >> 6;
-			filter->cache = n;
-			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
+			if (filter->cache & 0xfff0000) {
+				s &= 0x3ff;
+				s |= (filter->cache & 0xfff0000) >> 6;
+				filter->cache = n;
 				CK((*filter->output_function)(s, filter->data));
 			} else { /* illegal character */
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
@@ -247,10 +249,10 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 			s = (((s & 0x3ff) << 16) + 0x400000);
 			filter->cache = s;
 		} else if (s >= 0xdc00 && s < 0xe000) {
-			s &= 0x3ff;
-			s |= (filter->cache & 0xfff0000) >> 6;
-			filter->cache = 0;
-			if (s >= MBFL_WCSPLANE_SUPMIN && s < MBFL_WCSPLANE_SUPMAX) {
+			if (filter->cache & 0xfff0000) {
+				s &= 0x3ff;
+				s |= (filter->cache & 0xfff0000) >> 6;
+				filter->cache = 0;
 				CK((*filter->output_function)(s, filter->data));
 			} else { /* illegal character */
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
