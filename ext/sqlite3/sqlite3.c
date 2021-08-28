@@ -1946,8 +1946,10 @@ PHP_METHOD(SQLite3Result, fetchArray)
 			}
 
 			array_init(return_value);
+			
+			int column_count = sqlite3_data_count(result_obj->stmt_obj->stmt);
 
-			for (i = 0; i < sqlite3_data_count(result_obj->stmt_obj->stmt); i++) {
+			for (i = 0; i < column_count; i++) {
 				zval data;
 
 				sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
