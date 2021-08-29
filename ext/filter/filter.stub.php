@@ -12,7 +12,7 @@ function filter_var(mixed $value, int $filter = FILTER_DEFAULT, array|int $optio
 function filter_input_array(int $type, array|int $options = FILTER_DEFAULT, bool $add_empty = true): array|false|null {}
 
 /**
- * @return array-ref<int|string, mixed>|false|null
+ * @return array<int|string, mixed|ref>|false|null
  * @refcount 1
  */
 function filter_var_array(array $array, array|int $options = FILTER_DEFAULT, bool $add_empty = true): array|false|null {}

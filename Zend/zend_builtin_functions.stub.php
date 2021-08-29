@@ -45,7 +45,7 @@ function is_subclass_of(mixed $object_or_class, string $class, bool $allow_strin
 function is_a(mixed $object_or_class, string $class, bool $allow_string = false): bool {}
 
 /**
- * @return array-ref<string, mixed>
+ * @return array<string, mixed|ref>
  * @refcount 1
  */
 function get_class_vars(string $class): array {}
@@ -132,7 +132,7 @@ function get_declared_interfaces(): array {}
 function get_defined_functions(bool $exclude_disabled = true): array {}
 
 /**
- * @return array-ref<string, mixed>
+ * @return array<string, mixed|ref>
  * @refcount 1
  */
 function get_defined_vars(): array {}

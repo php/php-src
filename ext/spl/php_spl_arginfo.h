@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a200c26a76a814b4ac8ab238e884f2d823097b2b */
+ * Stub hash: a3102a82fa37455c2a5941b6e4f56204baa43950 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)

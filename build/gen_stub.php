@@ -120,21 +120,17 @@ class ArrayType extends SimpleType {
     /** @var Type */
     public $valueType;
 
-    /** @var bool */
-    public $supportsReferences;
-
     public static function createGenericArray(): self
     {
-        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"), false);
+        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
     }
 
-    public function __construct(Type $keyType, Type $valueType, bool $supportsReferences)
+    public function __construct(Type $keyType, Type $valueType)
     {
         parent::__construct("array", true);
 
         $this->keyType = $keyType;
         $this->valueType = $valueType;
-        $this->supportsReferences = $supportsReferences;
     }
 
     public function toOptimizerTypeMask(): string {
@@ -143,10 +139,6 @@ class ArrayType extends SimpleType {
             $this->keyType->toOptimizerTypeMaskForArrayKey(),
             $this->valueType->toOptimizerTypeMaskForArrayValue(),
         ];
-
-        if ($this->supportsReferences) {
-            $typeMasks[] = "MAY_BE_ARRAY_OF_REF";
-        }
 
         return implode("|", $typeMasks);
     }
@@ -159,8 +151,7 @@ class ArrayType extends SimpleType {
         assert(get_class($other) === self::class);
 
         return Type::equals($this->keyType, $other->keyType) &&
-            Type::equals($this->valueType, $other->valueType) &&
-            $this->supportsReferences === $other->supportsReferences;
+            Type::equals($this->valueType, $other->valueType);
     }
 }
 
@@ -224,13 +215,13 @@ class SimpleType {
         $matches = [];
         $isArray = preg_match("/(.*)\s*\[\s*\]/", $typeString, $matches);
         if ($isArray) {
-            return new ArrayType(Type::fromString("int"), Type::fromString($matches[1]), false);
+            return new ArrayType(Type::fromString("int"), Type::fromString($matches[1]));
         }
 
         $matches = [];
-        $isArray = preg_match("/array(-ref)?\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
+        $isArray = preg_match("/array\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
         if ($isArray) {
-            return new ArrayType(Type::fromString($matches[2]), Type::fromString($matches[3]), !empty($matches[1]));
+            return new ArrayType(Type::fromString($matches[1]), Type::fromString($matches[2]));
         }
 
         return new SimpleType($typeString, false);
@@ -406,24 +397,25 @@ class Type {
     /** @var SimpleType[] */
     public $types;
 
-    /**
-     * @param SimpleType[] $types
-     */
-    public function __construct(array $types) {
-        $this->types = $types;
-    }
+    /** @var bool */
+    public $isReferenceSupported;
 
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType) {
-            return new Type(array_map(['SimpleType', 'fromNode'], $node->types));
+            return new Type(array_map(['SimpleType', 'fromNode'], $node->types), false);
         }
+
         if ($node instanceof Node\NullableType) {
-            return new Type([
-                SimpleType::fromNode($node->type),
-                SimpleType::null(),
-            ]);
+            return new Type(
+                [
+                    SimpleType::fromNode($node->type),
+                    SimpleType::null(),
+                ],
+                false
+            );
         }
-        return new Type([SimpleType::fromNode($node)]);
+
+        return new Type([SimpleType::fromNode($node)], false);
     }
 
     public static function fromString(string $typeString): self {
@@ -431,6 +423,7 @@ class Type {
         $simpleTypes = [];
         $simpleTypeOffset = 0;
         $inArray = false;
+        $referenceSupported = false;
 
         $typeStringLength = strlen($typeString);
         for ($i = 0; $i < $typeStringLength; $i++) {
@@ -452,13 +445,26 @@ class Type {
 
             if ($char === "|") {
                 $simpleTypeName = trim(substr($typeString, $simpleTypeOffset, $i - $simpleTypeOffset));
-                $simpleTypes[] = SimpleType::fromString($simpleTypeName);
+
+                if (strtolower($simpleTypeName) === "ref") {
+                    $referenceSupported = true;
+                } else {
+                    $simpleTypes[] = SimpleType::fromString($simpleTypeName);
+                }
 
                 $simpleTypeOffset = $i + 1;
             }
         }
 
-        return new Type($simpleTypes);
+        return new Type($simpleTypes, $referenceSupported);
+    }
+
+    /**
+     * @param SimpleType[] $types
+     */
+    private function __construct(array $types, bool $isReferenceSupported) {
+        $this->types = $types;
+        $this->isReferenceSupported = $isReferenceSupported;
     }
 
     public function isScalar(): bool {
@@ -482,9 +488,15 @@ class Type {
     }
 
     public function getWithoutNull(): Type {
-        return new Type(array_filter($this->types, function(SimpleType $type) {
-            return !$type->isNull();
-        }));
+        return new Type(
+            array_filter(
+                $this->types,
+                function(SimpleType $type) {
+                    return !$type->isNull();
+                }
+            ),
+            false
+        );
     }
 
     public function tryToSimpleType(): ?SimpleType {
@@ -535,6 +547,10 @@ class Type {
             $typeMasks[] = $type->toOptimizerTypeMaskForArrayValue();
         }
 
+        if ($this->isReferenceSupported) {
+            $typeMasks[] = "MAY_BE_ARRAY_OF_REF";
+        }
+
         return implode("|", $typeMasks);
     }
 
@@ -574,6 +590,10 @@ class Type {
             if (!$a->types[$i]->equals($b->types[$i])) {
                 return false;
             }
+        }
+
+        if ($a->isReferenceSupported !== $b->isReferenceSupported) {
+            return false;
         }
 
         return true;
