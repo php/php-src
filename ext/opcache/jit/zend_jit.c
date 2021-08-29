@@ -130,6 +130,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags);
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
+static bool zend_jit_needs_arg_dtor(const zend_function *func, uint32_t arg_num, zend_call_info *call_info);
 
 #if ZEND_JIT_TARGET_ARM64
 static zend_jit_trace_info *zend_jit_get_current_trace_info(void);
