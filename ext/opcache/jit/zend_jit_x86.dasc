@@ -12186,6 +12186,17 @@ static int zend_jit_verify_arg_type(dasm_State **Dst, const zend_op *opline, zen
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type) & MAY_BE_ANY;
 	zend_reg tmp_reg = (type_mask == 0 || is_power_of_two(type_mask)) ? ZREG_FCARG1a : ZREG_R0;
 
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && JIT_G(current_frame)
+	 && JIT_G(current_frame)->prev) {
+		zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+		uint8_t type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
+
+		if (type != IS_UNKNOWN && (type_mask & (1u << type))) {
+			return 1;
+		}
+	}
+
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
 		if (opline->opcode == ZEND_RECV_INIT) {
 			|	LOAD_ZVAL_ADDR Ra(tmp_reg), res_addr
