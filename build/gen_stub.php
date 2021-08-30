@@ -18,8 +18,7 @@ error_reporting(E_ALL);
  * @return FileInfo[]
  */
 function processDirectory(string $dir, Context $context): array {
-    $fileInfos = [];
-
+    $pathNames = [];
     $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
@@ -27,13 +26,20 @@ function processDirectory(string $dir, Context $context): array {
     foreach ($it as $file) {
         $pathName = $file->getPathName();
         if (preg_match('/\.stub\.php$/', $pathName)) {
-            $fileInfo = processStubFile($pathName, $context);
-            if ($fileInfo) {
-                $fileInfos[] = $fileInfo;
-            }
+            $pathNames[] = $pathName;
         }
     }
 
+    // Make sure stub files are processed in a predicatable, system-independent order.
+    sort($pathNames);
+
+    $fileInfos = [];
+    foreach ($pathNames as $pathName) {
+        $fileInfo = processStubFile($pathName, $context);
+        if ($fileInfo) {
+            $fileInfos[] = $fileInfo;
+        }
+    }
     return $fileInfos;
 }
 
