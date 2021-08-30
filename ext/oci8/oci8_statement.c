@@ -43,6 +43,16 @@ typedef ub8 oci_phpsized_int;
 typedef ub4 oci_phpsized_int;
 #endif
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+  #define ZendLongPtr2UInt32Ptr(zendlongptr) ((uint32_t *)(zendlongptr))
+  #define ZendLongPtr2OciPhpsizedIntPtr(zendlongptr) ((oci_phpsized_int *)(zendlongptr))
+#else
+  #define ZendLongPtr2UInt32Ptr(zendlongptr) \
+    ((uint32_t *)((char *)(zendlongptr)+(sizeof(zend_long)-sizeof(uint32_t))))
+  #define ZendLongPtr2OciPhpsizedIntPtr(zendlongptr) \
+    ((oci_phpsized_int *)((char *)(zendlongptr)+(sizeof(zend_long)-sizeof(oci_phpsized_int))))
+#endif
+
 /* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len)
@@ -1088,7 +1098,7 @@ int php_oci_bind_post_exec(zval *data)
 		/* This convetrsion is done on purpose (ext/oci8 uses LVAL as a temporary value) */
 		if (Z_LVAL_P(zv) == 0)
 			ZVAL_BOOL(zv, FALSE);
-		else if (Z_LVAL_P(zv) == 1)
+		else
 			ZVAL_BOOL(zv, TRUE);
 	}
 
@@ -1167,7 +1177,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 			convert_to_long(param);
-			bind_data = (oci_phpsized_int *)&Z_LVAL_P(param);
+			bind_data = ZendLongPtr2OciPhpsizedIntPtr(&Z_LVAL_P(param));
 			value_sz = sizeof(oci_phpsized_int);
 			mode = OCI_DEFAULT;
 			break;
@@ -1232,7 +1242,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 				return 1;
 			}
 
-			value_sz = sizeof(zend_long);
+			bind_data = ZendLongPtr2UInt32Ptr (bind_data);	/* relevant on bigendian 64-bit platforms */
+			value_sz = sizeof(int32_t);
 
 			mode = OCI_DEFAULT;
 			break;
@@ -1490,8 +1501,8 @@ sb4 php_oci_bind_out_callback(
 		ZVAL_STRINGL(val, NULL, Z_STRLEN(val) + 1);
 #endif
 
-		/* XXX we assume that zend-zval len has 4 bytes */
-		*alenpp = (ub4*) &Z_STRLEN_P(val);
+		/* in 64-bit, length is 8 bytes long, Oracle expects 4 bytes */
+		*alenpp = ZendLongPtr2UInt32Ptr(&Z_STRLEN_P(val));
 		*bufpp = Z_STRVAL_P(val);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
