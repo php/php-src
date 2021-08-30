@@ -31,8 +31,10 @@ function ob_end_flush(): bool {}
 
 function ob_end_clean(): bool {}
 
+/** @refcount 1 */
 function ob_get_flush(): string|false {}
 
+/** @refcount 1 */
 function ob_get_clean(): string|false {}
 
 function ob_get_contents(): string|false {}
@@ -41,8 +43,16 @@ function ob_get_level(): int {}
 
 function ob_get_length(): int|false {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function ob_list_handlers(): array {}
 
+/**
+ * @return array<int|string, int|string|array>
+ * @refcount 1
+ */
 function ob_get_status(bool $full_status = false): array {}
 
 function ob_implicit_flush(bool $enable = true): void {}
@@ -66,8 +76,10 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 function array_push(array &$array, mixed ...$values): int {}
 
+/** @return true */
 function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
+/** @return true */
 function ksort(array &$array, int $flags = SORT_REGULAR): bool {}
 
 function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
@@ -79,18 +91,24 @@ function natsort(array &$array): bool {}
 
 function natcasesort(array &$array): bool {}
 
+/** @return true */
 function asort(array &$array, int $flags = SORT_REGULAR): bool {}
 
+/** @return true */
 function arsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
+/** @return true */
 function sort(array &$array, int $flags = SORT_REGULAR): bool {}
 
 function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
+/** @return true */
 function usort(array &$array, callable $callback): bool {}
 
+/** @return true */
 function uasort(array &$array, callable $callback): bool {}
 
+/** @return true */
 function uksort(array &$array, callable $callback): bool {}
 
 function end(array|object &$array): mixed {}
@@ -112,8 +130,10 @@ function min(mixed $value, mixed ...$values): mixed {}
 
 function max(mixed $value, mixed ...$values): mixed {}
 
+/** @return true */
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
 
+/** @return true */
 function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
 
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
@@ -126,11 +146,15 @@ function extract(array &$array, int $flags = EXTR_OVERWRITE, string $prefix = ""
 /**
  * @param array|string $var_name
  * @param array|string $var_names
+ * @return array<string, mixed|ref>
+ * @refcount 1
  */
 function compact($var_name, ...$var_names): array {}
 
+/** @return array<int, mixed> */
 function array_fill(int $start_index, int $count, mixed $value): array {}
 
+/** @refcount 1 */
 function array_fill_keys(array $keys, mixed $value): array {}
 
 /**
@@ -139,6 +163,7 @@ function array_fill_keys(array $keys, mixed $value): array {}
  */
 function range($start, $end, int|float $step = 1): array {}
 
+/** @return true */
 function shuffle(array &$array): bool {}
 
 function array_pop(array &$array): mixed {}
@@ -155,72 +180,122 @@ function array_merge(array ...$arrays): array {}
 
 function array_merge_recursive(array ...$arrays): array {}
 
+/** @refcount 1 */
 function array_replace(array $array, array ...$replacements): array {}
 
+/** @refcount 1 */
 function array_replace_recursive(array $array, array ...$replacements): array {}
 
+/** @return array<int, int|string> */
 function array_keys(array $array, mixed $filter_value = UNKNOWN, bool $strict = false): array {}
 
 function array_key_first(array $array): int|string|null {}
 
 function array_key_last(array $array): int|string|null {}
 
+/** @return array<int, mixed|ref> */
 function array_values(array $array): array {}
 
+/**
+ * @return array<int|string, int>
+ * @refcount 1
+ */
 function array_count_values(array $array): array {}
 
+/** @refcount 1 */
 function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
+/** @refcount 1 */
 function array_reverse(array $array, bool $preserve_keys = false): array {}
 
 function array_pad(array $array, int $length, mixed $value): array {}
 
+/**
+ * @return array<int|string, int|string>
+ * @refcount 1
+ */
 function array_flip(array $array): array {}
 
+/** @refcount 1 */
 function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
+/** @refcount 1 */
 function array_intersect_key(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
+/** @refcount 1 */
 function array_intersect(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_uintersect(array $array, ...$rest): array {}
 
+/** @refcount 1 */
 function array_intersect_assoc(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_uintersect_assoc(array $array, ...$rest): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_intersect_uassoc(array $array, ...$rest): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
+/** @refcount 1 */
 function array_diff_key(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_diff_ukey(array $array, ...$rest): array {}
 
 function array_diff(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_udiff(array $array, ...$rest): array {}
 
+/** @refcount 1 */
 function array_diff_assoc(array $array, array ...$arrays): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_diff_uassoc(array $array, ...$rest): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_udiff_assoc(array $array, ...$rest): array {}
 
-/** @param array|callable $rest */
+/**
+ * @param array|callable $rest
+ * @refcount 1
+ */
 function array_udiff_uassoc(array $array, ...$rest): array {}
 
 /**
@@ -231,6 +306,7 @@ function array_udiff_uassoc(array $array, ...$rest): array {}
  */
 function array_multisort(&$array, &...$rest): bool {}
 
+/** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
 
 function array_sum(array $array): int|float {}
@@ -403,8 +479,16 @@ function is_uploaded_file(string $filename): bool {}
 
 function move_uploaded_file(string $from, string $to): bool {}
 
+/**
+ * @return array<int|string, bool|int|float|string|array|null>|false
+ * @refcount 1
+ */
 function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
+/**
+ * @return array<int|string, bool|int|float|string|array|null>|false
+ * @refcount 1
+ */
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
 #if ZEND_DEBUG
@@ -425,6 +509,10 @@ function sys_getloadavg(): array|false {}
 
 /* browscap.c */
 
+/**
+ * @return object|array<string, mixed>|false
+ * @refcount 1
+ */
 function get_browser(?string $user_agent = null, bool $return_array = false): object|array|false {}
 
 /* crc32.c */
@@ -433,6 +521,7 @@ function crc32(string $string): int {}
 
 /* crypt.c */
 
+/** @refcount 1 */
 function crypt(string $string, string $salt): string {}
 
 /* datetime.c */
@@ -546,9 +635,11 @@ function sha1_file(string $filename, bool $binary = false): string|false {}
 #ifdef HAVE_SYSLOG_H
 function openlog(string $prefix, int $flags, int $facility): bool {}
 
+/** @return true */
 function closelog(): bool {}
 
-function syslog(int $priority, string $message): bool {}
+/** @return true */
+function syslog(int $priority, string $message): bool {} // TODO make return type void
 #endif
 
 #ifdef HAVE_INET_NTOP
@@ -563,6 +654,7 @@ function inet_pton(string $ip): string|false {}
 
 /* metaphone.c */
 
+/** @refcount 1 */
 function metaphone(string $string, int $max_phonemes = 0): string {}
 
 /* {{{ head.c */
@@ -806,6 +898,7 @@ function str_pad(string $string, int $length, string $pad_string = " ", int $pad
  */
 function sscanf(string $string, string $format, mixed &...$vars): array|int|null {}
 
+/** @refcount 1 */
 function str_rot13(string $string): string {}
 
 /** @refcount 1 */
@@ -828,8 +921,10 @@ function strpbrk(string $string, string $characters): string|false {}
 
 function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
 
+/** @refcount 1 */
 function utf8_encode(string $string): string {}
 
+/** @refcount 1 */
 function utf8_decode(string $string): string {}
 
 /* dir.c */
@@ -840,7 +935,10 @@ function utf8_decode(string $string): string {}
  */
 function opendir(string $directory, $context = null) {}
 
-/** @param resource|null $context */
+/**
+ * @param resource|null $context
+ * @refcount 1
+ */
 function dir(string $directory, $context = null): Directory|false {}
 
 /** @param resource|null $dir_handle */
@@ -852,18 +950,30 @@ function chdir(string $directory): bool {}
 function chroot(string $directory): bool {}
 #endif
 
+/** @refcount 1 */
 function getcwd(): string|false {}
 
 /** @param resource|null $dir_handle */
 function rewinddir($dir_handle = null): void {}
 
-/** @param resource|null $dir_handle */
+/**
+ * @param resource|null $dir_handle
+ * @refcount 1
+ */
 function readdir($dir_handle = null): string|false {}
 
-/** @param resource|null $context */
+/**
+ * @param resource|null $context
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function scandir(string $directory, int $sorting_order = SCANDIR_SORT_ASCENDING, $context = null): array|false {}
 
 #ifdef HAVE_GLOB
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function glob(string $pattern, int $flags = 0): array|false {}
 #endif
 
@@ -1061,6 +1171,7 @@ function realpath(string $path): string|false {}
 function fnmatch(string $pattern, string $filename, int $flags = 0): bool {}
 #endif
 
+/** @refcount 1 */
 function sys_get_temp_dir(): string {}
 
 /* filestat.c */
@@ -1081,6 +1192,7 @@ function fileperms(string $filename): int|false {}
 
 function filesize(string $filename): int|false {}
 
+/** @refcount 1 */
 function filetype(string $filename): string|false {}
 
 function file_exists(string $filename): bool {}
@@ -1100,8 +1212,16 @@ function is_dir(string $filename): bool {}
 
 function is_link(string $filename): bool {}
 
+/**
+ * @return array<int|string, bool|int|string>|false
+ * @refcount 1
+ */
 function stat(string $filename): array|false {}
 
+/**
+ * @return array<int|string, bool|int|string>|false
+ * @refcount 1
+ */
 function lstat(string $filename): array|false {}
 
 function chown(string $filename, string|int $user): bool {}
@@ -1129,6 +1249,10 @@ function disk_free_space(string $directory): float|false {}
 /** @alias disk_free_space */
 function diskfreespace(string $directory): float|false {}
 
+/**
+ * @return array<string, array>
+ * @refcount 1
+ */
 function realpath_cache_get(): array {}
 
 function realpath_cache_size(): int {}
@@ -1364,8 +1488,13 @@ function getrusage(int $mode = 0): array|false {}
 
 /* pack.c */
 
+/** @refcount 1 */
 function pack(string $format, mixed ...$values): string {}
 
+/**
+ * @return array<int|string, mixed>|false
+ * @refcount 1
+ */
 function unpack(string $format, string $string, int $offset = 0): array|false {}
 
 /* password.c */
@@ -1739,7 +1868,10 @@ function get_headers(string $url, bool $associative = false, $context = null): a
 
 /* user_filters.c */
 
-/** @param resource $brigade */
+/**
+ * @param resource $brigade
+ * @refcount 1
+ */
 function stream_bucket_make_writeable($brigade): ?object {}
 
 /** @param resource $brigade */
@@ -1748,9 +1880,16 @@ function stream_bucket_prepend($brigade, object $bucket): void {}
 /** @param resource $brigade */
 function stream_bucket_append($brigade, object $bucket): void {}
 
-/** @param resource $stream */
+/**
+ * @param resource $stream
+ * @refcount 1
+ */
 function stream_bucket_new($stream, string $buffer): object {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function stream_get_filters(): array {}
 
 function stream_filter_register(string $filter_name, string $class): bool {}

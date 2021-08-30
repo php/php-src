@@ -220,9 +220,13 @@ class SimpleType {
         }
 
         $matches = [];
-        $isArray = preg_match("/array\s*<\s*([A-Za-z0-9_-|]+)\s*,\s*([A-Za-z0-9_-|]+)\s*>/i", $typeString, $matches);
+        $isArray = preg_match("/array\s*<\s*([A-Za-z0-9_-|]+)?(\s*,\s*)?([A-Za-z0-9_-|]+)?\s*>/i", $typeString, $matches);
         if ($isArray) {
-            return new ArrayType(Type::fromString($matches[1]), Type::fromString($matches[2]));
+            if (empty($matches[1]) || empty($matches[3])) {
+                throw new Exception("array<> type hint must have both a key and a value");
+            }
+
+            return new ArrayType(Type::fromString($matches[1]), Type::fromString($matches[3]));
         }
 
         return new SimpleType($typeString, false);
