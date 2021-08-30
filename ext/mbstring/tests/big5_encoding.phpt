@@ -36,9 +36,9 @@ echo "Tested UTF-16BE -> BIG5\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "BIG5", "UTF-8");
-convertInvalidString("\xB0\x9F", "BAD+B09F", "BIG5", "UTF-8");
-convertInvalidString("\xA3\xED", "?+A3ED", "BIG5", "UTF-8");
+convertInvalidString("\x80", "%", "BIG5", "UTF-8");
+convertInvalidString("\xB0\x9F", "%", "BIG5", "UTF-8");
+convertInvalidString("\xA3\xED", "%", "BIG5", "UTF-8");
 convertInvalidString("\x76\x54", "U+7654", "UTF-16BE", "BIG5");
 
 echo "Done!\n";

@@ -135,9 +135,7 @@ retry:
 		} else if (c > 0xa0 && c < 0xe0) {	/* GR kana */
 			CK((*filter->output_function)(0xfec0 + c, filter->data));
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -154,8 +152,9 @@ retry:
 				} else {
 					w = 0;
 				}
+
 				if (w <= 0) {
-					w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0208;
+					w = MBFL_BAD_INPUT;
 				}
 			} else {
 				if (s >= 0 && s < jisx0212_ucs_table_size) {
@@ -163,14 +162,14 @@ retry:
 				} else {
 					w = 0;
 				}
+
 				if (w <= 0) {
-					w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0212;
+					w = MBFL_BAD_INPUT;
 				}
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -187,7 +186,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			goto retry;
 		}
 		break;
@@ -205,7 +204,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			goto retry;
 		}
@@ -224,7 +223,7 @@ retry:
 			filter->status = 0x90;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
@@ -246,7 +245,7 @@ retry:
 			filter->status = 0x20;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
 		}
@@ -257,14 +256,14 @@ retry:
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
 {
 	if ((filter->status & 0xF) == 1) {
 		/* 2-byte (JIS X 0208 or 0212) character was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 	return 0;
 }
@@ -359,7 +358,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 
@@ -438,7 +437,7 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int

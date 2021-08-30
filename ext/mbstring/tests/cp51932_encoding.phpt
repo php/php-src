@@ -111,8 +111,8 @@ echo "Unicode -> CP51932 conversion works on all invalid codepoints\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "CP51932", "UTF-8");
-convertInvalidString("\xFE\xFF", "BAD+FEFF", "CP51932", "UTF-8");
+convertInvalidString("\x80", "%", "CP51932", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "CP51932", "UTF-8");
 
 echo "Done!\n";
 ?>

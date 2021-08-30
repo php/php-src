@@ -30,8 +30,8 @@ echo "Tested UTF-16BE -> ARMSCII-8\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\xA1", "BAD+A1", "ARMSCII-8", "UTF-8");
-convertInvalidString("\xFF", "BAD+FF", "ARMSCII-8", "UTF-8");
+convertInvalidString("\xA1", "%", "ARMSCII-8", "UTF-8");
+convertInvalidString("\xFF", "%", "ARMSCII-8", "UTF-8");
 
 echo "Done!\n";
 ?>

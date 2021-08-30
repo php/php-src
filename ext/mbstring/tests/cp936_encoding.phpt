@@ -326,9 +326,9 @@ echo "Tested UTF-16BE -> CP936\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x81\x20", "BAD+8120", "CP936", "UTF-8");
-convertInvalidString("\x81\x7F", "BAD+817F", "CP936", "UTF-8");
-convertInvalidString("\xFE\xFF", "BAD+FEFF", "CP936", "UTF-8");
+convertInvalidString("\x81\x20", "%", "CP936", "UTF-8");
+convertInvalidString("\x81\x7F", "%", "CP936", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "CP936", "UTF-8");
 
 echo "Done!\n";
 ?>

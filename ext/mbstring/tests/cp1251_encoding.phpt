@@ -13,7 +13,7 @@ testEncodingFromUTF16ConversionTable(__DIR__ . '/data/CP1251.txt', 'CP1251');
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x98", "BAD+98", "CP1251", "UTF-8");
+convertInvalidString("\x98", "%", "CP1251", "UTF-8");
 convertInvalidString("\x12\x34", "U+1234", "UTF-16BE", "CP1251");
 
 echo "Done!\n";

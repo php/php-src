@@ -85,7 +85,7 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		} else if (filter->status == 0 && c >= 0 && c < 0x80) { /* latin, CTLs */
 			CK((*filter->output_function)(c, filter->data));
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -110,13 +110,14 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 			} else {
 				w = 0;
 			}
+
 			if (w <= 0) {
-				w = (c1 << 8) | c | MBFL_WCSPLANE_GB2312;
+				w = MBFL_BAD_INPUT;
 			}
+
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -134,7 +135,7 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		} else {
 			/* Invalid character after ~ */
 			filter->status -= 2;
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -143,14 +144,14 @@ int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_hz_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 0x11) {
 		/* 2-byte character was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {
@@ -239,7 +240,7 @@ int mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter)

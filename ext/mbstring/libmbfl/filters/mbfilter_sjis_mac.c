@@ -150,9 +150,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x2026, filter->data));
 			CK((*filter->output_function)(0xf87f, filter->data));
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -218,8 +216,8 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 					if (s >= code_ofst_tbl[i][0] && s <= code_ofst_tbl[i][1]) {
 						w = code_map[i][s - code_ofst_tbl[i][0]];
 						if (w == 0) {
-							CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
-							return c;
+							CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+							return 0;
 						}
 						s2 = 0;
 						if (s >= 0x043e && s <= 0x0441) {
@@ -247,16 +245,11 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = (s1 << 8) | s2;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_WINCP932;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -265,14 +258,13 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 1) {
-		int w = (filter->cache & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
-		CK((*filter->output_function)(w, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 	return 0;
 }
@@ -404,7 +396,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				if (c == s_form_tbl[i]) {
 					filter->status = 1;
 					filter->cache = c;
-					return c;
+					return 0;
 				}
 			}
 
@@ -412,7 +404,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				/* Apple 'transcoding hint' codepoints (from private use area) */
 				filter->status = 2;
 				filter->cache = c;
-				return c;
+				return 0;
 			}
 		}
 
@@ -665,7 +657,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-	return c;
+	return 0;
 }
 
 static int

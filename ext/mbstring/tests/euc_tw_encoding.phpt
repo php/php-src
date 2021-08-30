@@ -27,14 +27,14 @@ echo "Tested UTF-16BE -> EUC-TW\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "EUC-TW", "UTF-8");
-convertInvalidString("\x8E\x20", "BAD+8E20", "EUC-TW", "UTF-8");
-convertInvalidString("\x8E\xA1\x20", "BAD+8EA120", "EUC-TW", "UTF-8");
-convertInvalidString("\x8E\xA1\xA1\x20", "BAD+A1A120", "EUC-TW", "UTF-8");
-convertInvalidString("\x8E\xA2\xA3\x20", "BAD+A2A320", "EUC-TW", "UTF-8");
-convertInvalidString("\x8F", "BAD+8F", "EUC-TW", "UTF-8");
-convertInvalidString("\xA1\x50", "BAD+A150", "EUC-TW", "UTF-8");
-convertInvalidString("\xFD\xCC", "?+FDCC", "EUC-TW", "UTF-8");
+convertInvalidString("\x80", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA1\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA1\xA1\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA2\xA3\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8F", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\xA1\x50", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\xFD\xCC", "%", "EUC-TW", "UTF-8");
 
 echo "Done!\n";
 ?>

@@ -292,7 +292,7 @@ static int mbfl_estimate_encoding_likelihood(int c, void *void_data)
 	/* Receive wchars decoded from test string using candidate encoding
 	 * If the test string was invalid in the candidate encoding, we assume
 	 * it's the wrong one. */
-	if (c & MBFL_WCSGROUP_THROUGH) {
+	if (c == MBFL_BAD_INPUT) {
 		data->num_illegalchars++;
 	} else if (php_unicode_is_cntrl(c) || php_unicode_is_private(c)) {
 		/* Otherwise, count how many control characters and 'private use'
@@ -303,7 +303,7 @@ static int mbfl_estimate_encoding_likelihood(int c, void *void_data)
 		/* Punctuation is also less common than letters/digits */
 		data->score++;
 	}
-	return c;
+	return 0;
 }
 
 mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
@@ -475,7 +475,7 @@ static int
 filter_count_output(int c, void *data)
 {
 	(*(size_t *)data)++;
-	return c;
+	return 0;
 }
 
 size_t
@@ -591,7 +591,7 @@ retry:
 	}
 
 	pc->output++;
-	return c;
+	return 0;
 }
 
 static const unsigned char *mbfl_find_offset_utf8(
@@ -823,7 +823,7 @@ collector_substr(int c, void* data)
 
 	pc->output++;
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -1286,7 +1286,7 @@ static int
 filter_count_width(int c, void* data)
 {
 	(*(size_t *)data) += (is_fullwidth(c) ? 2: 1);
-	return c;
+	return 0;
 }
 
 size_t
@@ -1359,7 +1359,8 @@ collector_strimwidth(int c, void* data)
 				}
 				pc->status++;
 				(*pc->decoder->filter_function)(c, pc->decoder);
-				c = -1;
+				pc->outchar++;
+				return -1;
 			} else {
 				(*pc->decoder->filter_function)(c, pc->decoder);
 			}
@@ -1368,7 +1369,7 @@ collector_strimwidth(int c, void* data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -1618,7 +1619,7 @@ mime_header_encoder_block_collector(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -1688,7 +1689,7 @@ mime_header_encoder_collector(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -2037,7 +2038,7 @@ mime_header_decoder_collector(int c, void* data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -2194,7 +2195,7 @@ collector_encode_htmlnumericentity(int c, void *data)
 		(*pc->decoder->filter_function)(c, pc->decoder);
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -2370,7 +2371,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -2417,7 +2418,7 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 		(*pc->decoder->filter_function)(c, pc->decoder);
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)

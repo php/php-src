@@ -294,12 +294,12 @@ echo "Invalid Unicode is flagged when converting to CP5022x\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "CP50220", "UTF-8");
-convertInvalidString("\x80", "BAD+80", "CP50221", "UTF-8");
-convertInvalidString("\x80", "BAD+80", "CP50222", "UTF-8");
-convertInvalidString("\x1B\$B1", "BAD+31", "CP50220", "UTF-8");
-convertInvalidString("\x1B\$B1", "BAD+31", "CP50221", "UTF-8");
-convertInvalidString("\x1B\$B1", "BAD+31", "CP50222", "UTF-8");
+convertInvalidString("\x80", "%", "CP50220", "UTF-8");
+convertInvalidString("\x80", "%", "CP50221", "UTF-8");
+convertInvalidString("\x80", "%", "CP50222", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50220", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50221", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50222", "UTF-8");
 
 echo "Long error markers OK\n";
 ?>

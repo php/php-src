@@ -207,14 +207,14 @@ echo "Other mappings from Unicode -> ISO-2022-JP-KDDI OK\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\xE0", "%", "ISO-2022-JP-KDDI", "UTF-8");
 // Invalid escapes:
-convertInvalidString("\x1B", "BAD+1B", "ISO-2022-JP-KDDI", "UTF-8");
-convertInvalidString("\x1B.", "BAD+1B2E", "ISO-2022-JP-KDDI", "UTF-8");
-convertInvalidString("\x1B\$", "BAD+1B24", "ISO-2022-JP-KDDI", "UTF-8");
-convertInvalidString("\x1B\$.", "BAD+1B242E", "ISO-2022-JP-KDDI", "UTF-8");
-convertInvalidString("\x1B\$(X", "BAD+242858", "ISO-2022-JP-KDDI", "UTF-8");
-convertInvalidString("\x1B\$B\x9F", "BAD+9F", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
+convertInvalidString("\x1B", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$B\x9F", "%", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
 convertInvalidString("\xE0\x00", "U+E000", "UTF-16BE", "ISO-2022-JP-KDDI");
 
 echo "Done!\n";

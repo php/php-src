@@ -18,8 +18,8 @@ for ($n = 1; $n <= 16; $n++) {
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\xAE", "BAD+AE", "ISO8859-7", "UTF-8");
-convertInvalidString("\xFF", "BAD+FF", "ISO8859-8", "UTF-8");
+convertInvalidString("\xAE", "%", "ISO8859-7", "UTF-8");
+convertInvalidString("\xFF", "%", "ISO8859-8", "UTF-8");
 
 echo "Done!\n";
 ?>

@@ -65,9 +65,9 @@ echo "Other mappings from Unicode -> SJIS are OK\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "Shift-JIS", "UTF-8");
-convertInvalidString("\x81\x20", "BAD+8120", "Shift-JIS", "UTF-8");
-convertInvalidString("\xEA\xA9", "JIS+742B", "Shift-JIS", "UTF-8");
+convertInvalidString("\x80", "%", "Shift-JIS", "UTF-8");
+convertInvalidString("\x81\x20", "%", "Shift-JIS", "UTF-8");
+convertInvalidString("\xEA\xA9", "%", "Shift-JIS", "UTF-8");
 
 echo "Done!\n";
 ?>

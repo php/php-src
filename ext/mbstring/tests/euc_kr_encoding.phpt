@@ -13,8 +13,8 @@ testEncodingFromUTF16ConversionTable(__DIR__ . '/data/EUC-KR.txt', 'EUC-KR');
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "EUC-KR", "UTF-8");
-convertInvalidString("\xA7\xF0", "?+A7F0", "EUC-KR", "UTF-8");
+convertInvalidString("\x80", "%", "EUC-KR", "UTF-8");
+convertInvalidString("\xA7\xF0", "%", "EUC-KR", "UTF-8");
 
 echo "Done!\n";
 ?>
