@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #71542 (disk_total_space does not work with relative paths). (cmb)
+  . Fixed bug #81400 (Unterminated string in dns_get_record() results). (cmb)
 
 - SysVMsg:
   . Fixed bug #78819 (Heap Overflow in msg_send). (cmb)
