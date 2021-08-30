@@ -29,7 +29,7 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__sun)
+#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 # if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || defined(__sun)
 #  include <sys/random.h>
