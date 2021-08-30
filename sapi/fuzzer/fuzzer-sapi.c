@@ -220,7 +220,7 @@ void fuzzer_set_ini_file(const char *file)
 }
 
 
-int fuzzer_shutdown_php()
+int fuzzer_shutdown_php(void)
 {
 	php_module_shutdown();
 	sapi_shutdown();
