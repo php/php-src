@@ -15,7 +15,7 @@ var_dump(parse_ini_file($ini_file, 1));
 echo "Done.\n";
 ?>
 --EXPECT--
-array(26) {
+array(27) {
   ["basic"]=>
   array(15) {
     ["basicval"]=>
@@ -278,6 +278,22 @@ array(26) {
     string(69) "c:\some windows\path\test\new\r\quote " here\single ' quote\some more"
     ["winpath2"]=>
     string(13) "special case\"
+  }
+  ["characters escaping"]=>
+  array(6) {
+    ["single_quoted"]=>
+    string(28) "She said \Exactly my point\."
+    ["double_quoted"]=>
+    string(28) "She said "Exactly my point"."
+    ["double_quoted_2"]=>
+    string(29) "Use \" to escape double quote"
+    ["double_quoted_multiline"]=>
+    string(20) "Lorem "ipsum"
+ dolor"
+    ["dollar_test"]=>
+    string(7) "${test}"
+    ["unescaped"]=>
+    string(6) "\n\r\t"
   }
 }
 Done.
