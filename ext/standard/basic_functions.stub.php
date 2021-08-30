@@ -1250,7 +1250,7 @@ function disk_free_space(string $directory): float|false {}
 function diskfreespace(string $directory): float|false {}
 
 /**
- * @return array<string|array>
+ * @return array<string, array>
  * @refcount 1
  */
 function realpath_cache_get(): array {}
