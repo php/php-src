@@ -124,7 +124,7 @@ function timezone_name_from_abbr(string $abbr, int $utcOffset = -1, int $isDST =
 function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
 /**
- * @return array<int|string, mixed>|false
+ * @return array<int, array>|false
  * @refcount 1
  */
 function timezone_transitions_get(
@@ -414,7 +414,7 @@ class DateTimeZone
     public function getOffset(DateTimeInterface $datetime): int {}
 
     /**
-     * @return array<int|string, mixed>|false
+     * @return array<int, array>|false
      * @tentative-return-type
      * @alias timezone_transitions_get
      */
