@@ -122,7 +122,7 @@ class ArrayType extends SimpleType {
 
     public static function createGenericArray(): self
     {
-        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
+        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed|ref"));
     }
 
     public function __construct(Type $keyType, Type $valueType)
@@ -402,7 +402,7 @@ class Type {
 
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType) {
-            return new Type(array_map(['SimpleType', 'fromNode'], $node->types), false);
+            return new Type(array_map(['SimpleType', 'fromNode'], $node->types));
         }
 
         if ($node instanceof Node\NullableType) {
@@ -410,12 +410,11 @@ class Type {
                 [
                     SimpleType::fromNode($node->type),
                     SimpleType::null(),
-                ],
-                false
+                ]
             );
         }
 
-        return new Type([SimpleType::fromNode($node)], false);
+        return new Type([SimpleType::fromNode($node)]);
     }
 
     public static function fromString(string $typeString): self {
@@ -488,8 +487,7 @@ class Type {
                 function(SimpleType $type) {
                     return !$type->isNull();
                 }
-            ),
-            false
+            )
         );
     }
 
@@ -2047,9 +2045,9 @@ class DocCommentTag {
         $matches = [];
 
         if ($this->name === "param") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>,\- ]+)\s*\$\w+.*$/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
         } elseif ($this->name === "return") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>,\- ]+)(\s+|$)/', $value, $matches);
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)(\s+|$)/', $value, $matches);
         }
 
         if (!isset($matches[1])) {

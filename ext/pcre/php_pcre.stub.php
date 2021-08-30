@@ -37,10 +37,7 @@ function preg_split(string $pattern, string $subject, int $limit = -1, int $flag
 
 function preg_quote(string $str, ?string $delimiter = null): string {}
 
-/**
- * @return array<int|string, mixed|ref>|false
- * @refcount 1
- */
+/** @refcount 1 */
 function preg_grep(string $pattern, array $array, int $flags = 0): array|false {}
 
 function preg_last_error(): int {}
