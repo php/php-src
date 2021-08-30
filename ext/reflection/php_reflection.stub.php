@@ -8,7 +8,10 @@ class ReflectionException extends Exception
 
 class Reflection
 {
-    /** @tentative-return-type */
+    /**
+     * @return array<int, string>
+     * @tentative-return-type
+     */
     public static function getModifierNames(int $modifiers): array {}
 }
 
@@ -54,7 +57,8 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @tentative-return-type */
     public function getClosureScopeClass(): ?ReflectionClass {}
 
-    public function getClosureUsedVariables() : array {}
+    /** @return array<string, mixed|ref> */
+    public function getClosureUsedVariables(): array {}
 
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
@@ -83,7 +87,10 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @tentative-return-type */
     public function getNumberOfRequiredParameters(): int {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, ReflectionParameter>
+     * @tentative-return-type
+     */
     public function getParameters(): array {}
 
     /** @tentative-return-type */
@@ -92,7 +99,10 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @tentative-return-type */
     public function getStartLine(): int|false {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, mixed|ref>
+     * @tentative-return-type
+     */
     public function getStaticVariables(): array {}
 
     /** @tentative-return-type */
@@ -108,6 +118,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
     public function getTentativeReturnType(): ?ReflectionType {}
 
+    /** @return array<int, ReflectionAttribute> */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -144,7 +155,10 @@ final class ReflectionGenerator
     /** @tentative-return-type */
     public function getExecutingFile(): string {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, array>
+     * @tentative-return-type
+     */
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 
     /** @tentative-return-type */
@@ -258,7 +272,10 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getMethod(string $name): ReflectionMethod {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, ReflectionMethod>
+     * @tentative-return-type
+     */
     public function getMethods(?int $filter = null): array {}
 
     /** @tentative-return-type */
@@ -267,16 +284,25 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getProperty(string $name): ReflectionProperty {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, ReflectionProperty>
+     * @tentative-return-type
+     */
     public function getProperties(?int $filter = null): array {}
 
     /** @tentative-return-type */
     public function hasConstant(string $name): bool {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, mixed|ref>
+     * @tentative-return-type
+     */
     public function getConstants(?int $filter = null): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, ReflectionClassConstant>
+     * @tentative-return-type
+     */
     public function getReflectionConstants(?int $filter = null): array {}
 
     /** @tentative-return-type */
@@ -285,22 +311,37 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getReflectionConstant(string $name): ReflectionClassConstant|false {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, ReflectionClass>
+     * @tentative-return-type
+     */
     public function getInterfaces(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, string>
+     * @tentative-return-type
+     */
     public function getInterfaceNames(): array {}
 
     /** @tentative-return-type */
     public function isInterface(): bool {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, ReflectionClass>
+     * @tentative-return-type
+     */
     public function getTraits(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, string>
+     * @tentative-return-type
+     */
     public function getTraitNames(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, string>
+     * @tentative-return-type
+     */
     public function getTraitAliases(): array {}
 
     /** @tentative-return-type */
@@ -344,7 +385,10 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function setStaticPropertyValue(string $name, mixed $value): void {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, mixed|ref>
+     * @tentative-return-type
+     */
     public function getDefaultProperties(): array {}
 
     /** @tentative-return-type */
@@ -374,7 +418,7 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getShortName(): string {}
 
-    /** @tentative-return-type */
+    /** @return array<int, ReflectionAttribute> */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -450,7 +494,7 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getDefaultValue(): mixed {}
 
-    /** @tentative-return-type */
+    /** @return array<int, ReflectionAttribute> */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -493,7 +537,7 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
 
-    /** @tentative-return-type */
+    /** @return array<int, ReflectionAttribute> */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
@@ -577,7 +621,7 @@ class ReflectionParameter implements Reflector
 
     public function isPromoted(): bool {}
 
-    /** @tentative-return-type */
+    /** @return array<int, ReflectionAttribute> */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -604,11 +648,13 @@ class ReflectionNamedType extends ReflectionType
 
 class ReflectionUnionType extends ReflectionType
 {
+    /** @return array<int, ReflectionType> */
     public function getTypes(): array {}
 }
 
 class ReflectionIntersectionType extends ReflectionType
 {
+    /** @return array<int, ReflectionType> */
     public function getTypes(): array {}
 }
 
@@ -630,22 +676,40 @@ class ReflectionExtension implements Reflector
     /** @tentative-return-type */
     public function getVersion(): ?string {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, ReflectionFunction>
+     * @tentative-return-type
+     */
     public function getFunctions(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, mixed|ref>
+     * @tentative-return-type
+     */
     public function getConstants(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, string|null>
+     * @tentative-return-type
+     */
     public function getINIEntries(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, ReflectionClass>
+     * @tentative-return-type
+     */
     public function getClasses(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<int, string>
+     * @tentative-return-type
+     */
     public function getClassNames(): array {}
 
-    /** @tentative-return-type */
+    /**
+     * @return array<string, string>
+     * @tentative-return-type
+     */
     public function getDependencies(): array {}
 
     /** @tentative-return-type */
@@ -703,9 +767,13 @@ final class ReflectionReference
 final class ReflectionAttribute implements Reflector
 {
     public function getName(): string {}
+
     public function getTarget(): int {}
+
     public function isRepeated(): bool {}
+
     public function getArguments(): array {}
+
     public function newInstance(): object {}
 
     public function __toString(): string {}
@@ -723,6 +791,7 @@ final class ReflectionEnum extends ReflectionClass
 
     public function getCase(string $name): ReflectionEnumUnitCase {}
 
+    /** @return array<int|string, ReflectionClassConstant> */
     public function getCases(): array {}
 
     public function isBacked(): bool {}
@@ -763,5 +832,6 @@ final class ReflectionFiber
 
     public function getCallable(): callable {}
 
+    /** @return array<int, array> */
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 }

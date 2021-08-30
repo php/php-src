@@ -432,7 +432,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
         Parameter #0 [ <optional> ?string $name = null ]
         Parameter #1 [ <optional> int $flags = 0 ]
       }
-      - Tentative return [ array ]
+      - Return [ array ]
     }
   }
 }
