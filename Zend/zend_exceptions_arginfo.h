@@ -259,6 +259,12 @@ static zend_class_entry *register_class_ErrorException(zend_class_entry *class_e
 	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 
+	zval property_severity_default_value;
+	ZVAL_LONG(&property_severity_default_value, E_ERROR);
+	zend_string *property_severity_name = zend_string_init("severity", sizeof("severity") - 1, 1);
+	zend_declare_typed_property(class_entry, property_severity_name, &property_severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_severity_name);
+
 	return class_entry;
 }
 

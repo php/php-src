@@ -1268,7 +1268,7 @@ static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DO
 	zend_string_release(property_name_name);
 
 	zval property_specified_default_value;
-	ZVAL_BOOL(&property_specified_default_value, 1);
+	ZVAL_BOOL(&property_specified_default_value, true);
 	zend_string *property_specified_name = zend_string_init("specified", sizeof("specified") - 1, 1);
 	zend_declare_typed_property(class_entry, property_specified_name, &property_specified_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_specified_name);

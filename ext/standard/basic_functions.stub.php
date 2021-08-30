@@ -2,6 +2,12 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var float
+ * @cname M_E
+ */
+const M_E = 2.7182818284590452354;
+
 final class __PHP_Incomplete_Class
 {
 }
