@@ -4208,9 +4208,37 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_MUL:
 //					case ZEND_DIV: // TODO: check for division by zero ???
 						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
+						op1_addr = OP1_REG_ADDR();
+						if (opline->op1_type != IS_CONST
+						 && orig_op1_type != IS_UNKNOWN
+						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
+									!ssa->var_info[ssa_op->op1_use].guarded_reference, 1)) {
+								goto jit_failure;
+							}
+							if (opline->op1_type == IS_CV
+							 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+							}
+						} else {
+							CHECK_OP1_TRACE_TYPE();
+						}
 						op2_info = OP2_INFO();
-						CHECK_OP2_TRACE_TYPE();
+						op2_addr = OP2_REG_ADDR();
+						if (opline->op2_type != IS_CONST
+						 && orig_op2_type != IS_UNKNOWN
+						 && (orig_op2_type & IS_TRACE_REFERENCE)) {
+							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op2_type, &op2_info, &op2_addr,
+									!ssa->var_info[ssa_op->op2_use].guarded_reference, 1)) {
+								goto jit_failure;
+							}
+							if (opline->op2_type == IS_CV
+							 && ssa->vars[ssa_op->op2_use].alias == NO_ALIAS) {
+								ssa->var_info[ssa_op->op2_use].guarded_reference = 1;
+							}
+						} else {
+							CHECK_OP2_TRACE_TYPE();
+						}
 						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 							break;
 						}
@@ -4245,8 +4273,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						} else {
 							if (!zend_jit_math(&dasm_state, opline,
-									op1_info, OP1_REG_ADDR(),
-									op2_info, OP2_REG_ADDR(),
+									op1_info, op1_addr,
+									op2_info, op2_addr,
 									res_use_info, res_info, res_addr,
 									(op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow(opline, ssa_op, op_array, ssa),
 									zend_may_throw(opline, ssa_op, op_array, ssa))) {
