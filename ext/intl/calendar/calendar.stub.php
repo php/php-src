@@ -74,6 +74,7 @@ class IntlCalendar
     public function getActualMinimum(int $field): int|false {}
 
     /**
+     * @return array<int, string>
      * @tentative-return-type
      * @alias intlcal_get_available_locales
      */
