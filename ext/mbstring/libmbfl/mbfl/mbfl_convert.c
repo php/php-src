@@ -216,12 +216,13 @@ int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char 
 
 static int mbfl_filt_conv_output_hex(unsigned int w, mbfl_convert_filter *filter)
 {
-	int nonzero = 0, shift = 28, ret = 0;
+	bool nonzero = false;
+	int shift = 28, ret = 0;
 
 	while (shift >= 0) {
 		int n = (w >> shift) & 0xF;
 		if (n || nonzero) {
-			nonzero = 1;
+			nonzero = true;
 			ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
 			if (ret < 0) {
 				return ret;
@@ -230,8 +231,8 @@ static int mbfl_filt_conv_output_hex(unsigned int w, mbfl_convert_filter *filter
 		shift -= 4;
 	}
 
-	if (nonzero == 0) {
-		/* illegal character was zero; no hex digits were output by above loop */
+	if (!nonzero) {
+		/* No hex digits were output by above loop */
 		ret = (*filter->filter_function)('0', filter);
 	}
 
