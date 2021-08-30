@@ -13884,10 +13884,10 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
                                    const zend_op        *opline,
                                    const zend_op_array  *op_array,
                                    zend_ssa             *ssa,
-                                   const zend_ssa_op    *ssa_op)
+                                   const zend_ssa_op    *ssa_op,
+                                   zend_jit_addr         res_addr)
 {
 	zval *zv = RT_CONSTANT(opline, opline->op2) + 1;
-	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	zend_jit_addr const_addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
 	uint32_t res_info = RES_INFO();
 
@@ -13929,7 +13929,11 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 		}
 		|	ZVAL_COPY_VALUE_V res_addr, -1, const_addr, res_info, ZREG_REG0, ZREG_REG1, ZREG_TMP1, ZREG_FPR0
 		if (type < IS_STRING) {
-			|	SET_ZVAL_TYPE_INFO res_addr, type, TMP1w, TMP2
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				|	SET_ZVAL_TYPE_INFO res_addr, type, TMP1w, TMP2
+			} else if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
+				return 0;
+			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG2w, TMP1
 			|	TRY_ADDREF res_info, REG2w, REG1, TMP1w
@@ -14265,6 +14269,8 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
+			return 1;
+		case ZEND_FETCH_CONSTANT:
 			return 1;
 		case ZEND_FETCH_DIM_R:
 			op1_info = OP1_INFO();
