@@ -39,8 +39,6 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
-static zend_class_entry *zend_test_ns3_ns_foo_class;
-static zend_class_entry *zend_test_ns3_foo_class;
 static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_object_handlers zend_test_class_handlers;
@@ -357,41 +355,6 @@ static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static ZEND_METHOD(ZendTestNS3_Foo, __construct)
-{
-	zend_object *foo;
-	zval zfoo;
-	zend_string *pname;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(foo, zend_test_ns3_ns_foo_class);
-	ZEND_PARSE_PARAMETERS_END();
-
-	ZVAL_OBJ(&zfoo, foo);
-
-	pname = zend_string_init("foo", sizeof("foo") - 1, 0);
-	zend_std_write_property(Z_OBJ_P(ZEND_THIS), pname, &zfoo, NULL);
-	zend_string_release(pname);
-}
-
-static ZEND_METHOD(ZendTestNS3_Foo, method1)
-{
-	zend_object *foo;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(foo, zend_test_ns3_ns_foo_class);
-	ZEND_PARSE_PARAMETERS_END();
-}
-
-static ZEND_METHOD(ZendTestNS3_Foo, method2)
-{
-	zend_object *foo;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(foo, zend_test_ns3_ns_foo_class);
-	ZEND_PARSE_PARAMETERS_END();
-}
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -429,8 +392,6 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
-	zend_test_ns3_ns_foo_class = register_class_ZendTestNS3_ZendSubNS_Foo();
-	zend_test_ns3_foo_class = register_class_ZendTestNS3_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
 	zend_test_unit_enum = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, NULL);

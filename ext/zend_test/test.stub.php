@@ -88,6 +88,8 @@ namespace ZendTestNS {
 namespace ZendTestNS2 {
 
     class Foo {
+        public ZendSubNS\Foo $foo;
+
         public function method(): void {}
     }
 
@@ -100,25 +102,5 @@ namespace ZendTestNS2\ZendSubNS {
     }
 
     function namespaced_func(): bool {}
-
-}
-
-namespace ZendTestNS3\ZendSubNS {
-
-    class Foo {
-    }
-
-}
-
-namespace ZendTestNS3 {
-
-    class Foo {
-        public ZendSubNS\Foo $foo;
-
-        public function __construct(ZendSubNS\Foo $foo) {}
-
-        public function method1(ZendSubNS\Foo $foo): void {}
-        public function method2(\ZendTestNS3\ZendSubNS\Foo $foo): void {}
-    }
 
 }
