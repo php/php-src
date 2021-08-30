@@ -559,7 +559,7 @@ class OCILob {
      * @alias oci_lob_import
      * @return bool
      */
-    public function savefile(string $filename) {}
+    public function saveFile(string $filename) {}
 
     /**
      * @alias oci_lob_load
@@ -637,19 +637,19 @@ class OCILob {
      * @alias ocisetbufferinglob
      * @return bool
      */
-    public function setbuffering(bool $mode) {}
+    public function setBuffering(bool $mode) {}
 
     /**
      * @alias ocigetbufferinglob
      * @return bool
      */
-    public function getbuffering() {}
+    public function getBuffering() {}
 
     /**
      * @alias oci_lob_export
      * @return bool
      */
-    public function writetofile(string $filename, ?int $offset = null, ?int $length = null) {}
+    public function writeToFile(string $filename, ?int $offset = null, ?int $length = null) {}
 
     /**
      * @alias oci_lob_export
@@ -658,7 +658,7 @@ class OCILob {
     public function export(string $filename, ?int $offset = null, ?int $length = null) {}
 
     /** @return bool */
-    public function writetemporary(string $data, int $type = OCI_TEMP_CLOB) {}
+    public function writeTemporary(string $data, int $type = OCI_TEMP_CLOB) {}
 
     /** @return bool */
     public function close() {}
@@ -699,7 +699,7 @@ class OCICollection {
      * @alias oci_collection_element_assign
      * @return bool
      */
-    public function assignelem(int $index, string $value) {}
+    public function assignElem(int $index, string $value) {}
 
     /**
      * @alias oci_collection_size
