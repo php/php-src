@@ -122,7 +122,7 @@ class ArrayType extends SimpleType {
 
     public static function createGenericArray(): self
     {
-        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed"));
+        return new ArrayType(Type::fromString("int|string"), Type::fromString("mixed|ref"));
     }
 
     public function __construct(Type $keyType, Type $valueType)
@@ -205,6 +205,7 @@ class SimpleType {
             case "mixed":
             case "static":
             case "never":
+            case "ref":
                 return new SimpleType(strtolower($typeString), true);
             case "array":
                 return ArrayType::createGenericArray();
@@ -358,6 +359,8 @@ class SimpleType {
                 return "MAY_BE_ARRAY_OF_RESOURCE";
             case "mixed":
                 return "MAY_BE_ARRAY_OF_ANY";
+            case "ref":
+                return "MAY_BE_ARRAY_OF_REF";
             default:
                 throw new Exception("Type $this->name cannot be an array value");
         }
@@ -397,23 +400,20 @@ class Type {
     /** @var SimpleType[] */
     public $types;
 
-    /**
-     * @param SimpleType[] $types
-     */
-    public function __construct(array $types) {
-        $this->types = $types;
-    }
-
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType) {
             return new Type(array_map(['SimpleType', 'fromNode'], $node->types));
         }
+
         if ($node instanceof Node\NullableType) {
-            return new Type([
-                SimpleType::fromNode($node->type),
-                SimpleType::null(),
-            ]);
+            return new Type(
+                [
+                    SimpleType::fromNode($node->type),
+                    SimpleType::null(),
+                ]
+            );
         }
+
         return new Type([SimpleType::fromNode($node)]);
     }
 
@@ -443,6 +443,7 @@ class Type {
 
             if ($char === "|") {
                 $simpleTypeName = trim(substr($typeString, $simpleTypeOffset, $i - $simpleTypeOffset));
+
                 $simpleTypes[] = SimpleType::fromString($simpleTypeName);
 
                 $simpleTypeOffset = $i + 1;
@@ -450,6 +451,13 @@ class Type {
         }
 
         return new Type($simpleTypes);
+    }
+
+    /**
+     * @param SimpleType[] $types
+     */
+    private function __construct(array $types) {
+        $this->types = $types;
     }
 
     public function isScalar(): bool {
@@ -473,9 +481,14 @@ class Type {
     }
 
     public function getWithoutNull(): Type {
-        return new Type(array_filter($this->types, function(SimpleType $type) {
-            return !$type->isNull();
-        }));
+        return new Type(
+            array_filter(
+                $this->types,
+                function(SimpleType $type) {
+                    return !$type->isNull();
+                }
+            )
+        );
     }
 
     public function tryToSimpleType(): ?SimpleType {
