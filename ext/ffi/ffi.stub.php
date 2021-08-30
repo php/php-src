@@ -89,6 +89,7 @@ namespace FFI {
 
         public function getPointerType(): CType {}
 
+        /** @return array<int, string> */
         public function getStructFieldNames(): array {}
         public function getStructFieldOffset(string $name): int {}
         public function getStructFieldType(string $name): CType {}

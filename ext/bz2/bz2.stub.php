@@ -38,7 +38,10 @@ function bzerrno($bz): int {}
 /** @param resource $bz */
 function bzerrstr($bz): string {}
 
-/** @param resource $bz */
+/**
+ * @param resource $bz
+ * @return array<string, int|string>
+ */
 function bzerror($bz): array {}
 
 function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}

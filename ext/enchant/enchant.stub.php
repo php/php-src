@@ -31,6 +31,7 @@ function enchant_broker_set_dict_path(EnchantBroker $broker, int $type, string $
 /** @deprecated */
 function enchant_broker_get_dict_path(EnchantBroker $broker, int $type): string|false {}
 
+/** @return array<int, array> */
 function enchant_broker_list_dicts(EnchantBroker $broker): array {}
 
 function enchant_broker_request_dict(EnchantBroker $broker, string $tag): EnchantDictionary|false {}
@@ -44,6 +45,7 @@ function enchant_broker_dict_exists(EnchantBroker $broker, string $tag): bool {}
 
 function enchant_broker_set_ordering(EnchantBroker $broker, string $tag, string $ordering): bool {}
 
+/** @return array<int, array> */
 function enchant_broker_describe(EnchantBroker $broker): array {}
 
 /** @param array $suggestions */
@@ -51,6 +53,7 @@ function enchant_dict_quick_check(EnchantDictionary $dictionary, string $word, &
 
 function enchant_dict_check(EnchantDictionary $dictionary, string $word): bool {}
 
+/** @return array<int, string> */
 function enchant_dict_suggest(EnchantDictionary $dictionary, string $word): array {}
 
 function enchant_dict_add(EnchantDictionary $dictionary, string $word): void {}
@@ -75,4 +78,5 @@ function enchant_dict_store_replacement(EnchantDictionary $dictionary, string $m
 
 function enchant_dict_get_error(EnchantDictionary $dictionary): string|false {}
 
+/** @return array<string, string> */
 function enchant_dict_describe(EnchantDictionary $dictionary): array {}
