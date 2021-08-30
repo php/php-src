@@ -36,6 +36,7 @@ function dba_exists($key, $dba): bool {}
  */
 function dba_fetch($key, $skip, $dba = UNKNOWN): string|false {}
 
+/** @return array<int, string>|false */
 function dba_key_split(string|false|null $key): array|false {}
 
 /** @param resource $dba */
@@ -68,6 +69,11 @@ function dba_optimize($dba): bool {}
 /** @param resource $dba */
 function dba_sync($dba): bool {}
 
+/**
+ * @return array<int|string, string>
+ * @refcount 1
+ */
 function dba_handlers(bool $full_info = false): array {}
 
+/** @return array<int, string> */
 function dba_list(): array {}
