@@ -12273,16 +12273,21 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 	}
 
 	if (arg_info || (opline+1)->opcode != ZEND_RECV) {
-		|	cmp dword EX->This.u2.num_args, arg_num
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+			if (!JIT_G(current_frame) ||
+			    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) < 0 ||
+			    arg_num > TRACE_FRAME_NUM_ARGS(JIT_G(current_frame))) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
-			if (!exit_addr) {
-				return 0;
+				if (!exit_addr) {
+					return 0;
+				}
+				|	cmp dword EX->This.u2.num_args, arg_num
+				|	jb &exit_addr
 			}
-			|	jb &exit_addr
 		} else {
+			|	cmp dword EX->This.u2.num_args, arg_num
 			|	jb >1
 			|.cold_code
 			|1:
@@ -12320,14 +12325,25 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	zval *zv = RT_CONSTANT(opline, opline->op2);
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
-	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
-	    (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
-		|	cmp dword EX->This.u2.num_args, arg_num
-		|	jae >5
-	}
-	|	ZVAL_COPY_CONST res_addr, -1, -1, zv, ZREG_R0
-	if (Z_REFCOUNTED_P(zv)) {
-		|	ADDREF_CONST zv, r0
+	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+	 && JIT_G(current_frame)
+	 && TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)) >= 0) {
+		if (arg_num > TRACE_FRAME_NUM_ARGS(JIT_G(current_frame))) {
+			|	ZVAL_COPY_CONST res_addr, -1, -1, zv, ZREG_R0
+			if (Z_REFCOUNTED_P(zv)) {
+				|	ADDREF_CONST zv, r0
+			}
+		}
+	} else {
+		if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+		    (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			|	cmp dword EX->This.u2.num_args, arg_num
+			|	jae >5
+		}
+		|	ZVAL_COPY_CONST res_addr, -1, -1, zv, ZREG_R0
+		if (Z_REFCOUNTED_P(zv)) {
+			|	ADDREF_CONST zv, r0
+		}
 	}
 
 	if (Z_CONSTANT_P(zv)) {
