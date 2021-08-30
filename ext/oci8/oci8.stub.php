@@ -559,7 +559,7 @@ class OCILob {
      * @alias oci_lob_import
      * @tentative-return-type
      */
-    public function savefile(string $filename): bool {}
+    public function saveFile(string $filename): bool {}
 
     /**
      * @alias oci_lob_load
@@ -637,19 +637,19 @@ class OCILob {
      * @alias ocisetbufferinglob
      * @tentative-return-type
      */
-    public function setbuffering(bool $mode): bool {}
+    public function setBuffering(bool $mode): bool {}
 
     /**
      * @alias ocigetbufferinglob
      * @tentative-return-type
      */
-    public function getbuffering(): bool {}
+    public function getBuffering(): bool {}
 
     /**
      * @alias oci_lob_export
      * @tentative-return-type
      */
-    public function writetofile(string $filename, ?int $offset = null, ?int $length = null): bool {}
+    public function writeToFile(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
     /**
      * @alias oci_lob_export
@@ -658,7 +658,7 @@ class OCILob {
     public function export(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
     /** @tentative-return-type */
-    public function writetemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
+    public function writeTemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
 
     /** @tentative-return-type */
     public function close(): bool {}
@@ -699,7 +699,7 @@ class OCICollection {
      * @alias oci_collection_element_assign
      * @tentative-return-type
      */
-    public function assignelem(int $index, string $value): bool {}
+    public function assignElem(int $index, string $value): bool {}
 
     /**
      * @alias oci_collection_size

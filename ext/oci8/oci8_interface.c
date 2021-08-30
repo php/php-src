@@ -916,7 +916,7 @@ PHP_FUNCTION(oci_lob_export)
 /* }}} */
 
 /* {{{ Writes temporary blob */
-PHP_METHOD(OCILob, writetemporary)
+PHP_METHOD(OCILob, writeTemporary)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
