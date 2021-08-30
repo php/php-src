@@ -99,6 +99,9 @@ const char* zend_reg_name[] = {
 #define ZREG_FCARG1x ZREG_X0
 #define ZREG_FCARG2x ZREG_X1
 
+#define ZREG_FCARG1 ZREG_FCARG1x
+#define ZREG_FCARG2 ZREG_FCARG2x
+
 |.type EX, zend_execute_data, FP
 |.type OP, zend_op
 |.type ZVAL, zval

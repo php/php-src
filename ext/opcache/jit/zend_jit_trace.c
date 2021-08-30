@@ -4209,9 +4209,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 //					case ZEND_DIV: // TODO: check for division by zero ???
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
-						if (opline->op1_type != IS_CONST
-						 && orig_op1_type != IS_UNKNOWN
-						 && (orig_op1_type & IS_TRACE_REFERENCE)) {
+						op2_info = OP2_INFO();
+						op2_addr = OP2_REG_ADDR();
+						if (orig_op1_type != IS_UNKNOWN
+						 && (orig_op1_type & IS_TRACE_REFERENCE)
+						 && (Z_MODE(op2_addr) != IS_REG || Z_REG(op2_addr) != ZREG_FCARG1)
+						 && (orig_op2_type == IS_UNKNOWN || !(orig_op2_type & IS_TRACE_REFERENCE))) {
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
 									!ssa->var_info[ssa_op->op1_use].guarded_reference, 1)) {
 								goto jit_failure;
@@ -4223,11 +4226,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else {
 							CHECK_OP1_TRACE_TYPE();
 						}
-						op2_info = OP2_INFO();
-						op2_addr = OP2_REG_ADDR();
-						if (opline->op2_type != IS_CONST
-						 && orig_op2_type != IS_UNKNOWN
-						 && (orig_op2_type & IS_TRACE_REFERENCE)) {
+						if (orig_op2_type != IS_UNKNOWN
+						 && (orig_op2_type & IS_TRACE_REFERENCE)
+						 && (Z_MODE(op1_addr) != IS_REG || Z_REG(op1_addr) != ZREG_FCARG1)
+						 && (orig_op1_type == IS_UNKNOWN || !(orig_op1_type & IS_TRACE_REFERENCE))) {
 							if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op2_type, &op2_info, &op2_addr,
 									!ssa->var_info[ssa_op->op2_use].guarded_reference, 1)) {
 								goto jit_failure;
