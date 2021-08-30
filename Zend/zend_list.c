@@ -37,6 +37,8 @@ ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 	index = zend_hash_next_free_element(&EG(regular_list));
 	if (index == 0) {
 		index = 1;
+	} else if (index == INT_MAX) {
+		zend_error_noreturn(E_ERROR, "Resource ID space overflow");
 	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
