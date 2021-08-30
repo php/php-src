@@ -9652,10 +9652,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov EX:RX->run_time_cache, r2
 				}
 			} else {
+#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				if (func) {
 					|	mov r0, EX:RX->func
 				}
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
 				|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
@@ -9665,11 +9665,17 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	mov r2, aword [r2 + (uintptr_t)ZEND_MAP_PTR(func->op_array.run_time_cache)]
 					} else if ((func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
 					        && (!func->op_array.scope || (func->op_array.scope->ce_flags & ZEND_ACC_LINKED))) {
+						if (func) {
+							|	mov r0, EX:RX->func
+						}
 						|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
 						|	MEM_LOAD_OP_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 						|	mov r2, aword [r2]
 					} else {
 						/* the called op_array may be not persisted yet */
+						if (func) {
+							|	mov r0, EX:RX->func
+						}
 						|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
 						|	test r2, 1
 						|	jz >1
@@ -9678,6 +9684,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	mov r2, aword [r2]
 					}
 				} else {
+					if (func) {
+						|	mov r0, EX:RX->func
+					}
 					|	mov r2, aword [r0 + offsetof(zend_op_array, run_time_cache__ptr)]
 					|	test r2, 1
 					|	jz >1
