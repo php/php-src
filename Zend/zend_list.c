@@ -31,7 +31,7 @@ static HashTable list_destructors;
 
 ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
-	int index;
+	zend_long index;
 	zval zv;
 
 	index = zend_hash_next_free_element(&EG(regular_list));
