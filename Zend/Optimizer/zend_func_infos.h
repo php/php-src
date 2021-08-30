@@ -62,7 +62,7 @@ static const func_info_t func_infos[] = {
     F1("timezone_open", MAY_BE_OBJECT|MAY_BE_FALSE),
     F1("timezone_name_get", MAY_BE_STRING),
     F1("timezone_name_from_abbr", MAY_BE_STRING|MAY_BE_FALSE),
-    F1("timezone_transitions_get", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
+    F1("timezone_transitions_get", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
     F1("timezone_location_get", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("timezone_identifiers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     F1("timezone_abbreviations_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY),
@@ -255,7 +255,7 @@ static const func_info_t func_infos[] = {
     F1("mysqli_fetch_object", MAY_BE_OBJECT|MAY_BE_NULL|MAY_BE_FALSE),
     F1("mysqli_fetch_row", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY|MAY_BE_NULL|MAY_BE_FALSE),
 #if defined(MYSQLI_USE_MYSQLND)
-    F1("mysqli_get_connection_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
+    F1("mysqli_get_connection_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
 #endif
 #if defined(MYSQLI_USE_MYSQLND)
     F1("mysqli_get_client_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
@@ -367,7 +367,7 @@ static const func_info_t func_infos[] = {
     F1("pg_result_error_field", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
     F1("pg_get_result", MAY_BE_OBJECT|MAY_BE_FALSE),
     F1("pg_result_status", MAY_BE_STRING|MAY_BE_LONG),
-    F1("pg_get_notify", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
+    F1("pg_get_notify", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
     F1("pg_socket", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("pg_meta_data", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
     F1("pg_convert", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
