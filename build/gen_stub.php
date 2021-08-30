@@ -205,6 +205,7 @@ class SimpleType {
             case "mixed":
             case "static":
             case "never":
+            case "ref":
                 return new SimpleType(strtolower($typeString), true);
             case "array":
                 return ArrayType::createGenericArray();
@@ -358,6 +359,8 @@ class SimpleType {
                 return "MAY_BE_ARRAY_OF_RESOURCE";
             case "mixed":
                 return "MAY_BE_ARRAY_OF_ANY";
+            case "ref":
+                return "MAY_BE_ARRAY_OF_REF";
             default:
                 throw new Exception("Type $this->name cannot be an array value");
         }
@@ -397,9 +400,6 @@ class Type {
     /** @var SimpleType[] */
     public $types;
 
-    /** @var bool */
-    public $isReferenceSupported;
-
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType) {
             return new Type(array_map(['SimpleType', 'fromNode'], $node->types), false);
@@ -423,7 +423,6 @@ class Type {
         $simpleTypes = [];
         $simpleTypeOffset = 0;
         $inArray = false;
-        $referenceSupported = false;
 
         $typeStringLength = strlen($typeString);
         for ($i = 0; $i < $typeStringLength; $i++) {
@@ -446,25 +445,20 @@ class Type {
             if ($char === "|") {
                 $simpleTypeName = trim(substr($typeString, $simpleTypeOffset, $i - $simpleTypeOffset));
 
-                if (strtolower($simpleTypeName) === "ref") {
-                    $referenceSupported = true;
-                } else {
-                    $simpleTypes[] = SimpleType::fromString($simpleTypeName);
-                }
+                $simpleTypes[] = SimpleType::fromString($simpleTypeName);
 
                 $simpleTypeOffset = $i + 1;
             }
         }
 
-        return new Type($simpleTypes, $referenceSupported);
+        return new Type($simpleTypes);
     }
 
     /**
      * @param SimpleType[] $types
      */
-    private function __construct(array $types, bool $isReferenceSupported) {
+    private function __construct(array $types) {
         $this->types = $types;
-        $this->isReferenceSupported = $isReferenceSupported;
     }
 
     public function isScalar(): bool {
@@ -547,10 +541,6 @@ class Type {
             $typeMasks[] = $type->toOptimizerTypeMaskForArrayValue();
         }
 
-        if ($this->isReferenceSupported) {
-            $typeMasks[] = "MAY_BE_ARRAY_OF_REF";
-        }
-
         return implode("|", $typeMasks);
     }
 
@@ -590,10 +580,6 @@ class Type {
             if (!$a->types[$i]->equals($b->types[$i])) {
                 return false;
             }
-        }
-
-        if ($a->isReferenceSupported !== $b->isReferenceSupported) {
-            return false;
         }
 
         return true;
