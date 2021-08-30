@@ -9014,8 +9014,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		}
 	} else {
 		|	// if (CACHED_PTR(opline->result.num))
-		|	mov r0, EX->run_time_cache
-		|	mov r0, aword [r0 + opline->result.num]
+		|	mov r2, EX->run_time_cache
+		|	mov r0, aword [r2 + opline->result.num]
 		|	test r0, r0
 		|	jz >1
 		|.cold_code
@@ -9025,9 +9025,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		 && func->type == ZEND_USER_FUNCTION
 		 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
 			|	LOAD_ADDR FCARG1a, func
+			|	mov aword [r2 + opline->result.num], FCARG1a
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, r0
-			|	mov r1, EX->run_time_cache
-			|	mov aword [r1 + opline->result.num], r0
 			|	jmp >3
 		} else {
 			zval *zv = RT_CONSTANT(opline, opline->op2);
