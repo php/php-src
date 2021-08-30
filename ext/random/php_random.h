@@ -12,22 +12,22 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
+   |          Sascha Schumann <sascha@schumann.cx>                        |
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
+   |          Sammy Kaye Powers <me@sammyk.me>                            |
+   |          Go Kudo <zeriyoshi@gmail.com>                               |
    |                                                                      |
-   | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
+   | Rand based on code from: Shawn Cokus <Cokus@math.washington.edu>     |
    +----------------------------------------------------------------------+
- */
+*/
 
-#ifndef PHP_RAND_H
-#define	PHP_RAND_H
-
-#include "php_lcg.h"
-#include "php_mt_rand.h"
+#ifndef PHP_RANDOM_H
+#define PHP_RANDOM_H
 
 /* System Rand functions */
 #ifndef RAND_MAX
-#define RAND_MAX PHP_MT_RAND_MAX
+# define RAND_MAX PHP_MT_RAND_MAX
 #endif
 
 #define PHP_RAND_MAX PHP_MT_RAND_MAX
@@ -60,13 +60,58 @@
 #define RAND_RANGE_BADSCALING(__n, __min, __max, __tmax) \
 	(__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
+#define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
+
+#define MT_RAND_MT19937 0
+#define MT_RAND_PHP 1
+
+#define MT_N (624)
+
+extern zend_module_entry random_module_entry;
+#define phpext_random_ptr &random_module_entry
+
+PHP_MINIT_FUNCTION(random);
+PHP_MSHUTDOWN_FUNCTION(random);
+
+ZEND_BEGIN_MODULE_GLOBALS(random)
+	int32_t lcg_s1;
+	int32_t lcg_s2;
+	int lcg_seeded;
+   uint32_t mt_rand_state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
+   uint32_t *mt_rand_next;          /* next random value is computed from here */
+   int mt_rand_left;                /* can *next++ this many times before reloading */
+   bool mt_rand_is_seeded;          /* Whether mt_rand() has been seeded */
+   zend_long mt_rand_mode;
+	int random_fd;
+ZEND_END_MODULE_GLOBALS(random)
+
 #ifdef PHP_WIN32
-#define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+# define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #else
-#define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+# define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #endif
+
+#define php_random_bytes_throw(b, s) php_random_bytes((b), (s), 1)
+#define php_random_bytes_silent(b, s) php_random_bytes((b), (s), 0)
+
+#define php_random_int_throw(min, max, result) \
+	php_random_int((min), (max), (result), 1)
+#define php_random_int_silent(min, max, result) \
+	php_random_int((min), (max), (result), 0)
+
+PHPAPI double php_combined_lcg(void);
+
+PHPAPI void php_mt_srand(uint32_t seed);
+PHPAPI uint32_t php_mt_rand(void);
+PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
+PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
 PHPAPI void php_srand(zend_long seed);
 PHPAPI zend_long php_rand(void);
 
-#endif	/* PHP_RAND_H */
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+
+#define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
+
+#endif

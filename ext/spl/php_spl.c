@@ -36,7 +36,7 @@
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "ext/standard/php_mt_rand.h"
+#include "ext/random/php_random.h"
 #include "main/snprintf.h"
 
 #ifdef COMPILE_DL_SPL

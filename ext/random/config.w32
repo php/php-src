@@ -1,0 +1,2 @@
+EXTENSION('random', 'random.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+PHP_INSTALL_HEADERS("", "ext/random");

@@ -43,7 +43,7 @@
 #endif
 
 #include "php_crypt.h"
-#include "php_random.h"
+#include "ext/random/php_random.h"
 
 /* sha512 crypt has the maximal salt length of 123 characters */
 #define PHP_MAX_SALT_LEN 123

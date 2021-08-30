@@ -12,20 +12,62 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@php.net>                                 |
+   |          Sascha Schumann <sascha@schumann.cx>                        |
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
+   |          Sammy Kaye Powers <me@sammyk.me>                            |
    |                                                                      |
    | Based on code from: Richard J. Wagner <rjwagner@writeme.com>         |
    |                     Makoto Matsumoto <matumoto@math.keio.ac.jp>      |
    |                     Takuji Nishimura                                 |
    |                     Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
- */
+*/
+
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <math.h>
 
 #include "php.h"
-#include "php_rand.h"
+#include "zend_exceptions.h"
+
 #include "php_random.h"
-#include "php_mt_rand.h"
+#include "random_arginfo.h"
+
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#ifdef PHP_WIN32
+# include "win32/winutil.h"
+# include "win32/time.h"
+# include <process.h>
+#else
+# include <sys/time.h>
+#endif
+#ifdef __linux__
+# include <sys/syscall.h>
+#endif
+#if HAVE_SYS_PARAM_H
+# include <sys/param.h>
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700)
+#  include <sys/random.h>
+# endif
+#endif
+
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
+/*
+ * combinedLCG() returns a pseudo random number in the range of (0, 1).
+ * The function combines two CGs with periods of
+ * 2^31 - 85 and 2^31 - 249. The period of this function
+ * is equal to the product of both primes.
+ */
+
+#define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
 /* MT RAND FUNCTIONS */
 
@@ -92,6 +134,69 @@
 #define twist(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
 #define twist_php(m,u,v)  (m ^ (mixBits(u,v)>>1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
+ZEND_DECLARE_MODULE_GLOBALS(random);
+
+/* {{{ lcg_seed */
+static void lcg_seed(void)
+{
+	struct timeval tv;
+
+	if (gettimeofday(&tv, NULL) == 0) {
+		RANDOM_G(lcg_s1) = tv.tv_sec ^ (tv.tv_usec<<11);
+	} else {
+		RANDOM_G(lcg_s1) = 1;
+	}
+#ifdef ZTS
+	RANDOM_G(lcg_s2) = (zend_long) tsrm_thread_id();
+#else
+	RANDOM_G(lcg_s2) = (zend_long) getpid();
+#endif
+
+	/* Add entropy to s2 by calling gettimeofday() again */
+	if (gettimeofday(&tv, NULL) == 0) {
+		RANDOM_G(lcg_s2) ^= (tv.tv_usec<<11);
+	}
+
+	RANDOM_G(lcg_seeded) = 1;
+}
+/* }}} */
+
+/* {{{ php_combined_lcg */
+PHPAPI double php_combined_lcg(void) 
+{
+	int32_t q;
+	int32_t z;
+
+	if (!RANDOM_G(lcg_seeded)) {
+		lcg_seed();
+	}
+
+	MODMULT(53668, 40014, 12211, 2147483563L, RANDOM_G(lcg_s1));
+	MODMULT(52774, 40692, 3791, 2147483399L, RANDOM_G(lcg_s2));
+
+	z = RANDOM_G(lcg_s1) - RANDOM_G(lcg_s2);
+	if (z < 1) {
+		z += 2147483562;
+	}
+
+	return z * 4.656613e-10;
+}
+/* }}} */
+
+/* {{{ php_srand */
+PHPAPI void php_srand(zend_long seed)
+{
+	php_mt_srand(seed);
+}
+/* }}} */
+
+/* {{{ php_rand */
+PHPAPI zend_long php_rand(void)
+{
+	return php_mt_rand();
+}
+/* }}} */
+
 /* {{{ php_mt_initialize */
 static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 {
@@ -118,11 +223,11 @@ static inline void php_mt_reload(void)
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	uint32_t *state = BG(state);
+	uint32_t *state = RANDOM_G(mt_rand_state);
 	uint32_t *p = state;
 	int i;
 
-	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
+	if (RANDOM_G(mt_rand_mode) == MT_RAND_MT19937) {
 		for (i = N - M; i--; ++p)
 			*p = twist(p[M], p[0], p[1]);
 		for (i = M; --i; ++p)
@@ -136,8 +241,8 @@ static inline void php_mt_reload(void)
 			*p = twist_php(p[M-N], p[0], p[1]);
 		*p = twist_php(p[M-N], p[0], state[0]);
 	}
-	BG(left) = N;
-	BG(next) = state;
+	RANDOM_G(mt_rand_left) = N;
+	RANDOM_G(mt_rand_next) = state;
 }
 /* }}} */
 
@@ -145,11 +250,11 @@ static inline void php_mt_reload(void)
 PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
-	php_mt_initialize(seed, BG(state));
+	php_mt_initialize(seed, RANDOM_G(mt_rand_state));
 	php_mt_reload();
 
 	/* Seed only once */
-	BG(mt_rand_is_seeded) = 1;
+	RANDOM_G(mt_rand_is_seeded) = 1;
 }
 /* }}} */
 
@@ -161,7 +266,7 @@ PHPAPI uint32_t php_mt_rand(void)
 
 	uint32_t s1;
 
-	if (UNEXPECTED(!BG(mt_rand_is_seeded))) {
+	if (UNEXPECTED(!RANDOM_G(mt_rand_is_seeded))) {
 		zend_long bytes;
 		if (php_random_bytes_silent(&bytes, sizeof(zend_long)) == FAILURE) {
 			bytes = GENERATE_SEED();
@@ -169,16 +274,203 @@ PHPAPI uint32_t php_mt_rand(void)
 		php_mt_srand(bytes);
 	}
 
-	if (BG(left) == 0) {
+	if (RANDOM_G(mt_rand_left) == 0) {
 		php_mt_reload();
 	}
-	--BG(left);
+	--RANDOM_G(mt_rand_left);
 
-	s1 = *BG(next)++;
+	s1 = *RANDOM_G(mt_rand_next)++;
 	s1 ^= (s1 >> 11);
 	s1 ^= (s1 <<  7) & 0x9d2c5680U;
 	s1 ^= (s1 << 15) & 0xefc60000U;
 	return ( s1 ^ (s1 >> 18) );
+}
+/* }}} */
+
+/* {{{ php_random_bytes */
+PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
+{
+#ifdef PHP_WIN32
+	/* Defer to CryptGenRandom on Windows */
+	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
+		if (should_throw) {
+			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		}
+		return FAILURE;
+	}
+#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001) || defined(__APPLE__))
+	arc4random_buf(bytes, size);
+#else
+	size_t read_bytes = 0;
+	ssize_t n;
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700)
+	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
+	/* Keep reading until we get enough entropy */
+	while (read_bytes < size) {
+		/* Below, (bytes + read_bytes)  is pointer arithmetic.
+
+		   bytes   read_bytes  size
+		     |      |           |
+		    [#######=============] (we're going to write over the = region)
+		             \\\\\\\\\\\\\
+		              amount_to_read
+
+		*/
+		size_t amount_to_read = size - read_bytes;
+#if defined(__linux__)
+		n = syscall(SYS_getrandom, bytes + read_bytes, amount_to_read, 0);
+#else
+		n = getrandom(bytes + read_bytes, amount_to_read, 0);
+#endif
+
+		if (n == -1) {
+			if (errno == ENOSYS) {
+				/* This can happen if PHP was compiled against a newer kernel where getrandom()
+				 * is available, but then runs on an older kernel without getrandom(). If this
+				 * happens we simply fall back to reading from /dev/urandom. */
+				ZEND_ASSERT(read_bytes == 0);
+				break;
+			} else if (errno == EINTR || errno == EAGAIN) {
+				/* Try again */
+				continue;
+			} else {
+			    /* If the syscall fails, fall back to reading from /dev/urandom */
+				break;
+			}
+		}
+
+#if __has_feature(memory_sanitizer)
+		/* MSan does not instrument manual syscall invocations. */
+		__msan_unpoison(bytes + read_bytes, n);
+#endif
+		read_bytes += (size_t) n;
+	}
+#endif
+	if (read_bytes < size) {
+		int    fd = RANDOM_G(random_fd);
+		struct stat st;
+
+		if (fd < 0) {
+#if HAVE_DEV_URANDOM
+			fd = open("/dev/urandom", O_RDONLY);
+#endif
+			if (fd < 0) {
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Cannot open source device", 0);
+				}
+				return FAILURE;
+			}
+			/* Does the file exist and is it a character device? */
+			if (fstat(fd, &st) != 0 ||
+# ifdef S_ISNAM
+					!(S_ISNAM(st.st_mode) || S_ISCHR(st.st_mode))
+# else
+					!S_ISCHR(st.st_mode)
+# endif
+			) {
+				close(fd);
+				if (should_throw) {
+					zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
+				}
+				return FAILURE;
+			}
+			RANDOM_G(random_fd) = fd;
+		}
+
+		for (read_bytes = 0; read_bytes < size; read_bytes += (size_t) n) {
+			n = read(fd, bytes + read_bytes, size - read_bytes);
+			if (n <= 0) {
+				break;
+			}
+		}
+
+		if (read_bytes < size) {
+			if (should_throw) {
+				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+			}
+			return FAILURE;
+		}
+	}
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_random_int */
+PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
+{
+	zend_ulong umax;
+	zend_ulong trial;
+
+	if (min == max) {
+		*result = min;
+		return SUCCESS;
+	}
+
+	umax = (zend_ulong) max - (zend_ulong) min;
+
+	if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* Special case where no modulus is required */
+	if (umax == ZEND_ULONG_MAX) {
+		*result = (zend_long)trial;
+		return SUCCESS;
+	}
+
+	/* Increment the max so the range is inclusive of max */
+	umax++;
+
+	/* Powers of two are not biased */
+	if ((umax & (umax - 1)) != 0) {
+		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
+		zend_ulong limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
+
+		/* Discard numbers over the limit to avoid modulo bias */
+		while (trial > limit) {
+			if (php_random_bytes(&trial, sizeof(trial), should_throw) == FAILURE) {
+				return FAILURE;
+			}
+		}
+	}
+
+	*result = (zend_long)((trial % umax) + min);
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ Returns a value from the combined linear congruential generator */
+PHP_FUNCTION(lcg_value)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_DOUBLE(php_combined_lcg());
+}
+/* }}} */
+
+/* {{{ Returns a random number from Mersenne Twister */
+PHP_FUNCTION(rand)
+{
+	zend_long min;
+	zend_long max;
+	int argc = ZEND_NUM_ARGS();
+
+	if (argc == 0) {
+		RETURN_LONG(php_mt_rand() >> 1);
+	}
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (max < min) {
+		RETURN_LONG(php_mt_rand_common(max, min));
+	}
+
+	RETURN_LONG(php_mt_rand_common(min, max));
 }
 /* }}} */
 
@@ -202,10 +494,10 @@ PHP_FUNCTION(mt_srand)
 
 	switch (mode) {
 		case MT_RAND_PHP:
-			BG(mt_rand_mode) = MT_RAND_PHP;
+			RANDOM_G(mt_rand_mode) = MT_RAND_PHP;
 			break;
 		default:
-			BG(mt_rand_mode) = MT_RAND_MT19937;
+			RANDOM_G(mt_rand_mode) = MT_RAND_MT19937;
 	}
 
 	php_mt_srand(seed);
@@ -295,7 +587,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
 	int64_t n;
 
-	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
+	if (RANDOM_G(mt_rand_mode) == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
 	}
 
@@ -347,10 +639,104 @@ PHP_FUNCTION(mt_getrandmax)
 }
 /* }}} */
 
-PHP_MINIT_FUNCTION(mt_rand)
+/* {{{ Return an arbitrary length of pseudo-random bytes as binary string */
+PHP_FUNCTION(random_bytes)
 {
+	zend_long size;
+	zend_string *bytes;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (size < 1) {
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	bytes = zend_string_alloc(size, 0);
+
+	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
+		zend_string_release_ex(bytes, 0);
+		RETURN_THROWS();
+	}
+
+	ZSTR_VAL(bytes)[size] = '\0';
+
+	RETURN_STR(bytes);
+}
+/* }}} */
+
+/* {{{ Return an arbitrary pseudo-random integer */
+PHP_FUNCTION(random_int)
+{
+	zend_long min;
+	zend_long max;
+	zend_long result;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (min > max) {
+		zend_argument_value_error(1, "must be less than or equal to argument #2 ($max)");
+		RETURN_THROWS();
+	}
+
+	if (php_random_int_throw(min, max, &result) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ PHP_MINIT_FUNCTION */
+PHP_MINIT_FUNCTION(random)
+{
+#if defined(ZTS) && defined(COMPILE_DL_COLOPL_BC)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP",     MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
+/* }}} */
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
+PHP_MSHUTDOWN_FUNCTION(random)
+{
+#if defined(ZTS) && defined(COMPILE_DL_COLOPL_BC)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(random)
+{
+	RANDOM_G(mt_rand_is_seeded) = 0;
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ random_module_entry */
+zend_module_entry random_module_entry = {
+	STANDARD_MODULE_HEADER,
+	"random",				/* Extension name */
+	ext_functions,			/* zend_function_entry */
+	PHP_MINIT(random),		/* PHP_MINIT - Module initialization */
+	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
+	NULL,					/* PHP_RINIT - Request initialization */
+	PHP_RSHUTDOWN(random),	/* PHP_RSHUTDOWN - Request shutdown */
+	NULL,					/* PHP_MINFO - Module info */
+	PHP_VERSION,			/* Version */
+	STANDARD_MODULE_PROPERTIES
+};
+/* }}} */

@@ -36,7 +36,6 @@
 #include "ext/standard/php_mail.h"
 #include "ext/standard/php_ext_syslog.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
 #include "ext/reflection/php_reflection.h"

@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php_rand.h"
+#include "ext/random/php_random.h"
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
