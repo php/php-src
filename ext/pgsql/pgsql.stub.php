@@ -469,7 +469,10 @@ namespace {
     /** @refcount 1 */
     function pg_result_status(PgSql\Result $result, int $mode = PGSQL_STATUS_LONG): string|int {}
 
-    /** @refcount 1 */
+    /**
+     * @return array<int|string, mixed>
+     * @refcount 1
+     */
     function pg_get_notify(PgSql\Connection $connection, int $mode = PGSQL_ASSOC): array|false {}
 
     function pg_get_pid(PgSql\Connection $connection): int {}

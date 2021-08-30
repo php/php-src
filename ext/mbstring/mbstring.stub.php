@@ -72,7 +72,10 @@ function mb_strwidth(string $string, ?string $encoding = null): int {}
 /** @refcount 1 */
 function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
-/** @refcount 1 */
+/**
+ * @return array<int|string, mixed>|string|false
+ * @refcount 1
+ */
 function mb_convert_encoding(array|string $string, string $to_encoding, array|string|null $from_encoding = null): array|string|false {}
 
 /** @refcount 1 */

@@ -141,6 +141,7 @@ class mysqli
 
 #if defined(MYSQLI_USE_MYSQLND)
     /**
+     * @return array<int|string, mixed>
      * @tentative-return-type
      * @alias mysqli_get_connection_stats
      */
@@ -401,18 +402,21 @@ class mysqli_result implements IteratorAggregate
     public function fetch_field_direct(int $index): object|false {}
 
     /**
+     * @return array<int|string, mixed>
      * @tentative-return-type
      * @alias mysqli_fetch_all
      */
     public function fetch_all(int $mode = MYSQLI_NUM): array {}
 
     /**
+     * @return array<int|string, mixed>|null|false
      * @tentative-return-type
      * @alias mysqli_fetch_array
      */
     public function fetch_array(int $mode = MYSQLI_BOTH): array|null|false {}
 
     /**
+     * @return array<int|string, mixed>|null|false
      * @tentative-return-type
      * @alias mysqli_fetch_assoc
      */
@@ -684,13 +688,22 @@ function mysqli_fetch_field_direct(mysqli_result $result, int $index): object|fa
  */
 function mysqli_fetch_lengths(mysqli_result $result): array|false {}
 
-/** @refcount 1 */
+/**
+ * @return array<int|string, mixed>
+ * @refcount 1
+ */
 function mysqli_fetch_all(mysqli_result $result, int $mode = MYSQLI_NUM): array {}
 
-/** @refcount 1 */
+/**
+ * @return array<int|string, mixed>|null|false
+ * @refcount 1
+ */
 function mysqli_fetch_array(mysqli_result $result, int $mode = MYSQLI_BOTH): array|null|false {}
 
-/** @refcount 1 */
+/**
+ * @return array<int|string, mixed>|null|false
+ * @refcount 1
+ */
 function mysqli_fetch_assoc(mysqli_result $result): array|null|false {}
 
 /** @refcount 1 */
@@ -713,7 +726,10 @@ function mysqli_field_tell(mysqli_result $result): int {}
 function mysqli_free_result(mysqli_result $result): void {}
 
 #if defined(MYSQLI_USE_MYSQLND)
-/** @refcount 1 */
+/**
+ * @return array<int|string, mixed>
+ * @refcount 1
+ */
 function mysqli_get_connection_stats(mysqli $mysql): array {}
 
 /**
