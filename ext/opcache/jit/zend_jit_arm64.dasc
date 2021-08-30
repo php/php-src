@@ -11443,8 +11443,8 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	zend_string *varname = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 
 	|	// idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
-	|	ldr REG0, EX->run_time_cache
-	|	MEM_ACCESS_64_WITH_UOFFSET ldr, REG0, REG0, opline->extended_value, TMP1
+	|	ldr FCARG2x, EX->run_time_cache
+	|	MEM_ACCESS_64_WITH_UOFFSET ldr, REG0, FCARG2x, opline->extended_value, TMP1
 	|	sub REG0, REG0, #1
 	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|	MEM_LOAD_32_ZTS ldr, REG1w, executor_globals, symbol_table.nNumUsed, REG1
@@ -11506,7 +11506,6 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|.cold_code
 	|9:
 	|	LOAD_ADDR FCARG1x, (ptrdiff_t)varname
-	|	ldr FCARG2x, EX->run_time_cache
 	if (opline->extended_value) {
 		|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, FCARG2x, opline->extended_value, TMP1
 	}
