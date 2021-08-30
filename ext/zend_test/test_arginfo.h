@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 93bb8b9120e510e8c3afc29dc0a5d47cb6b5f10e */
+ * Stub hash: 77e4782af9c6994f233ba6535b53179da318b223 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -80,6 +80,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestNS3_Foo___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, foo, ZendTestNS3\\ZendSubNS\\Foo, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS3_Foo_method1, 0, 1, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, foo, ZendTestNS3\\ZendSubNS\\Foo, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ZendTestNS3_Foo_method2 arginfo_class_ZendTestNS3_Foo_method1
+
 
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
@@ -105,6 +115,9 @@ static ZEND_METHOD(_ZendTestTrait, testMethod);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
+static ZEND_METHOD(ZendTestNS3_Foo, __construct);
+static ZEND_METHOD(ZendTestNS3_Foo, method1);
+static ZEND_METHOD(ZendTestNS3_Foo, method2);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -172,6 +185,19 @@ static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
 
 static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_ZendSubNS_Foo, method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestNS3_ZendSubNS_Foo_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestNS3_Foo_methods[] = {
+	ZEND_ME(ZendTestNS3_Foo, __construct, arginfo_class_ZendTestNS3_Foo___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestNS3_Foo, method1, arginfo_class_ZendTestNS3_Foo_method1, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestNS3_Foo, method2, arginfo_class_ZendTestNS3_Foo_method2, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -305,6 +331,33 @@ static zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS2\\ZendSubNS", "Foo", class_ZendTestNS2_ZendSubNS_Foo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestNS3_ZendSubNS_Foo(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS3\\ZendSubNS", "Foo", class_ZendTestNS3_ZendSubNS_Foo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestNS3_Foo(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS3", "Foo", class_ZendTestNS3_Foo_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zend_string *property_foo_class_ZendTestNS3_ZendSubNS_Foo = zend_string_init("ZendTestNS3\\ZendSubNS\\Foo", sizeof("ZendTestNS3\\ZendSubNS\\Foo")-1, 1);
+	zval property_foo_default_value;
+	ZVAL_UNDEF(&property_foo_default_value);
+	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, 1);
+	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS3_ZendSubNS_Foo, 0, 0));
+	zend_string_release(property_foo_name);
 
 	return class_entry;
 }
