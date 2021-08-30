@@ -745,14 +745,12 @@ function stripslashes(string $string): string {}
 /**
  * @param int $count
  * @return string|array<int|string, string>
- * @refcount 1
  */
 function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
 /**
  * @param int $count
  * @return string|array<int|string, string>
- * @refcount 1
  */
 function str_ireplace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
