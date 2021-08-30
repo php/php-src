@@ -30,7 +30,7 @@ function processDirectory(string $dir, Context $context): array {
         }
     }
 
-    // Make sure stub files are processed in a predicatable, system-independent order.
+    // Make sure stub files are processed in a predictable, system-independent order.
     sort($pathNames);
 
     $fileInfos = [];
