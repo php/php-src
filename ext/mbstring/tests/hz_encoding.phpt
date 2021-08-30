@@ -120,9 +120,9 @@ echo "Tested UTF-16BE -> HZ (for all GB2312 characters)\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("~A", "BAD+41", "HZ", "UTF-8");
-convertInvalidString("\x80", "BAD+80", "HZ", "UTF-8");
-convertInvalidString("~{\x22\x21", "?+2221", "HZ", "UTF-8");
+convertInvalidString("~A", "%", "HZ", "UTF-8");
+convertInvalidString("\x80", "%", "HZ", "UTF-8");
+convertInvalidString("~{\x22\x21", "%", "HZ", "UTF-8");
 
 echo "Done!\n";
 ?>

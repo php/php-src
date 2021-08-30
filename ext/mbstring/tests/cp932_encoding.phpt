@@ -108,10 +108,10 @@ echo "Unicode -> CP932 conversion works on all invalid codepoints\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "CP932", "UTF-8");
-convertInvalidString("\xEA", "BAD+EA", "CP932", "UTF-8");
-convertInvalidString("\x81\x20", "BAD+8120", "CP932", "UTF-8");
-convertInvalidString("\xEA\xA9", "W932+742B", "CP932", "UTF-8");
+convertInvalidString("\x80", "%", "CP932", "UTF-8");
+convertInvalidString("\xEA", "%", "CP932", "UTF-8");
+convertInvalidString("\x81\x20", "%", "CP932", "UTF-8");
+convertInvalidString("\xEA\xA9", "%", "CP932", "UTF-8");
 
 echo "Done!\n";
 ?>

@@ -13,9 +13,9 @@ testEncodingFromUTF16ConversionTable(__DIR__ . '/data/EUC-CN.txt', 'EUC-CN');
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "EUC-CN", "UTF-8");
-convertInvalidString("\xA1\x50", "BAD+A150", "EUC-CN", "UTF-8");
-convertInvalidString("\xF7\xFF", "BAD+F7FF", "EUC-CN", "UTF-8");
+convertInvalidString("\x80", "%", "EUC-CN", "UTF-8");
+convertInvalidString("\xA1\x50", "%", "EUC-CN", "UTF-8");
+convertInvalidString("\xF7\xFF", "%", "EUC-CN", "UTF-8");
 
 echo "Done!\n";
 ?>

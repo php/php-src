@@ -85,5 +85,5 @@ static int mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

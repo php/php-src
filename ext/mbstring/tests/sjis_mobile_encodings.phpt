@@ -280,9 +280,9 @@ function testSJISVariant($validChars, $nonInvertible, $encoding) {
 
   // Test "long" illegal character markers
   mb_substitute_character("long");
-  convertInvalidString("\x80", "BAD+80", $encoding, "UTF-8");
-  convertInvalidString("\x81\x20", "BAD+8120", $encoding, "UTF-8");
-  convertInvalidString("\xEA\xA9", "W932+742B", $encoding, "UTF-8");
+  convertInvalidString("\x80", "%", $encoding, "UTF-8");
+  convertInvalidString("\x81\x20", "%", $encoding, "UTF-8");
+  convertInvalidString("\xEA\xA9", "%", $encoding, "UTF-8");
   mb_substitute_character(0x25); // '%'
 
   // Test Regional Indicator codepoint at end of string

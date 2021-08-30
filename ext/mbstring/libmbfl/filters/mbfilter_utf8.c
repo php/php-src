@@ -84,10 +84,10 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
+int mbfl_filt_put_invalid_char(mbfl_convert_filter *filter)
 {
 	filter->status = filter->cache = 0;
-	CK((*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
+	CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	return 0;
 }
 
@@ -110,7 +110,7 @@ retry:
 			filter->status = 0x30;
 			filter->cache = c & 0x7;
 		} else {
-			CK(mbfl_filt_put_invalid_char(c, filter));
+			CK(mbfl_filt_put_invalid_char(filter));
 		}
 		break;
 	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
@@ -121,25 +121,9 @@ retry:
 			filter->status = filter->cache = 0;
 			CK((*filter->output_function)(s, filter->data));
 		} else {
-			int status = filter->status;
-			filter->status = 0;
+			CK(mbfl_filt_put_invalid_char(filter));
 			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				if (status == 0x10) {
-					CK(mbfl_filt_put_invalid_char(0xC0 | filter->cache, filter));
-				} else if (status == 0x21) {
-					CK(mbfl_filt_put_invalid_char(0xE080 | ((filter->cache & ~0x3F) << 2) | (filter->cache & 0x3F), filter));
-				} else {
-					CK(mbfl_filt_put_invalid_char(0xF08080 | ((filter->cache & ~0xFFF) << 4) | ((filter->cache & 0xFC0) << 2) | (filter->cache & 0x3F), filter));
-				}
 				goto retry;
-			} else {
-				if (status == 0x10) {
-					CK(mbfl_filt_put_invalid_char(0xC000 | (filter->cache << 8) | c, filter));
-				} else if (status == 0x21) {
-					CK(mbfl_filt_put_invalid_char(0xE08000 | ((filter->cache & ~0x3F) << 10) | ((filter->cache & 0x3F) << 8) | c, filter));
-				} else {
-				CK(mbfl_filt_put_invalid_char(0x808000 | ((filter->cache & 0xFC0) << 10) | ((filter->cache & 0x3F) << 8) | c, filter));
-				}
 			}
 		}
 		break;
@@ -154,12 +138,9 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
+			CK(mbfl_filt_put_invalid_char(filter));
 			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				CK(mbfl_filt_put_invalid_char(0xE0 | filter->cache, filter));
 				goto retry;
-			} else {
-				CK(mbfl_filt_put_invalid_char(0xE000 | (filter->cache << 8) | c, filter));
-				filter->status = 0;
 			}
 		}
 		break;
@@ -174,12 +155,9 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
+			CK(mbfl_filt_put_invalid_char(filter));
 			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				CK(mbfl_filt_put_invalid_char(0xF0 | filter->cache, filter));
 				goto retry;
-			} else {
-				CK(mbfl_filt_put_invalid_char(0xF000 | (filter->cache << 8) | c, filter));
-				filter->status = 0;
 			}
 		}
 		break;
@@ -188,12 +166,9 @@ retry:
 			filter->cache = (filter->cache<<6) | (c & 0x3f);
 			filter->status++;
 		} else {
+			CK(mbfl_filt_put_invalid_char(filter));
 			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				CK(mbfl_filt_put_invalid_char(0xF080 | ((filter->cache & ~0x3F) << 2) | (filter->cache & 0x3F), filter));
 				goto retry;
-			} else {
-				CK(mbfl_filt_put_invalid_char(0xF000 | (filter->cache << 8) | c, filter));
-				filter->status = 0;
 			}
 		}
 		break;
@@ -202,29 +177,13 @@ retry:
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
-	int status = filter->status, cache = filter->cache;
-
-	filter->status = filter->cache = 0;
-
-	if (status) {
-		if (status == 0x10) {
-			CK(mbfl_filt_put_invalid_char(0xC0 | cache, filter));
-		} else if (status == 0x20) {
-			CK(mbfl_filt_put_invalid_char(0xE0 | cache, filter));
-		} else if (status == 0x21) {
-			CK(mbfl_filt_put_invalid_char(0xE080 | ((cache & ~0x3F) << 2) | (cache & 0x3F), filter));
-		} else if (status == 0x30) {
-			CK(mbfl_filt_put_invalid_char(0xF0 | cache, filter));
-		} else if (status == 0x31) {
-			CK(mbfl_filt_put_invalid_char(0xF080 | ((cache & ~0x3F) << 2) | (cache & 0x3F), filter));
-		} else if (status == 0x32) {
-			CK(mbfl_filt_put_invalid_char(0xF08080 | ((cache & ~0xFFF) << 4) | ((cache & 0xFC0) << 2) | (cache & 0x3F), filter));
-		}
+	if (filter->status) {
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -256,5 +215,5 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

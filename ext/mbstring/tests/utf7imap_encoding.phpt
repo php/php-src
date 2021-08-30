@@ -194,10 +194,10 @@ echo "Identification and conversion of valid text is working... perfect!\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x10", "BAD+10", "UTF7-IMAP", "UTF-8");
-convertInvalidString("\x80", "BAD+80", "UTF7-IMAP", "UTF-8");
-convertInvalidString("abc&", "abcBAD+0", "UTF7-IMAP", "UTF-8"); // The & starts a Base-64 coded section, which is OK... but there's no data in it, so the 'bad character' is 'zero'
-convertInvalidString("&**-", "BAD+2A*-", "UTF7-IMAP", "UTF-8"); // When we hit the first bad byte in a Base-64 coded section, it drops us back into the default mode, so the following characters are literal
+convertInvalidString("\x10", "%", "UTF7-IMAP", "UTF-8");
+convertInvalidString("\x80", "%", "UTF7-IMAP", "UTF-8");
+convertInvalidString("abc&", "abc%", "UTF7-IMAP", "UTF-8"); // The & starts a Base-64 coded section, which is OK... but there's no data in it
+convertInvalidString("&**-", "%*-", "UTF7-IMAP", "UTF-8"); // When we hit the first bad byte in a Base-64 coded section, it drops us back into the default mode, so the following characters are literal
 
 echo "Done!\n";
 ?>

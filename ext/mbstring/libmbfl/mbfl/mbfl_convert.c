@@ -262,43 +262,18 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 		break;
 
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
-		if (w < MBFL_WCSGROUP_UCS4MAX) { /* Unicode */
+		if (w != MBFL_BAD_INPUT) {
 			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
-		} else if (w < MBFL_WCSGROUP_WCHARMAX) {
-			int m = w & ~MBFL_WCSPLANE_MASK;
-			switch (m) {
-			case MBFL_WCSPLANE_JIS0208:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS+");
+			if (ret < 0)
 				break;
-			case MBFL_WCSPLANE_JIS0212:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+");
-				break;
-			case MBFL_WCSPLANE_JIS0213:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS3+");
-				break;
-			case MBFL_WCSPLANE_WINCP932:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+");
-				break;
-			case MBFL_WCSPLANE_GB18030:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
-				break;
-			default:
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+");
-				break;
-			}
-			w &= MBFL_WCSPLANE_MASK;
-		} else {
-			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"BAD+");
-			w &= MBFL_WCSGROUP_MASK;
-		}
-
-		if (ret >= 0) {
 			ret = mbfl_filt_conv_output_hex(w, filter);
+		} else {
+			ret = (*filter->filter_function)(substchar_backup, filter);
 		}
 		break;
 
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
-		if (w < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
+		if (w != MBFL_BAD_INPUT) {
 			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#x");
 			if (ret < 0)
 				break;

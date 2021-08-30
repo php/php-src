@@ -89,9 +89,9 @@ echo "Unicode -> SJIS-mac conversion works on all invalid characters\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x81", "BAD+81", "SJIS-mac", "UTF-8");
-convertInvalidString("\x81\x20", "BAD+8120", "SJIS-mac", "UTF-8");
-convertInvalidString("\xED\x9F", "W932+7A21", "SJIS-mac", "UTF-8");
+convertInvalidString("\x81", "%", "SJIS-mac", "UTF-8");
+convertInvalidString("\x81\x20", "%", "SJIS-mac", "UTF-8");
+convertInvalidString("\xED\x9F", "%", "SJIS-mac", "UTF-8");
 
 echo "Done!\n";
 ?>

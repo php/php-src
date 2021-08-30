@@ -110,7 +110,7 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(mbfl_base64_table[n & 0x3f], filter->data));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
@@ -151,7 +151,7 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 	int n;
 
 	if (c == 0x0d || c == 0x0a || c == 0x20 || c == 0x09 || c == 0x3d) {	/* CR or LF or SPACE or HTAB or '=' */
-		return c;
+		return 0;
 	}
 
 	n = 0;
@@ -190,7 +190,7 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)

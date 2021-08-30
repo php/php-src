@@ -68,9 +68,9 @@ convertValidString("\x30\x4B\x00A", "\x82\xA9A", 'UTF-16BE', 'SJIS-2004', false)
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "SJIS-2004", "UTF-8");
-convertInvalidString("\x81\x20", "BAD+8120", "SJIS-2004", "UTF-8");
-convertInvalidString("\xFC\xF5", "BAD+FCF5", "SJIS-2004", "UTF-8");
+convertInvalidString("\x80", "%", "SJIS-2004", "UTF-8");
+convertInvalidString("\x81\x20", "%", "SJIS-2004", "UTF-8");
+convertInvalidString("\xFC\xF5", "%", "SJIS-2004", "UTF-8");
 
 echo "Done!\n";
 ?>

@@ -79,8 +79,8 @@ echo "Unicode -> EUC-JP conversion works on all invalid characters\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "EUC-JP", "UTF-8");
-convertInvalidString("\xFE\xFF", "BAD+FEFF", "EUC-JP", "UTF-8");
+convertInvalidString("\x80", "%", "EUC-JP", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "EUC-JP", "UTF-8");
 
 echo "Done!\n";
 ?>

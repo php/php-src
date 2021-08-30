@@ -98,10 +98,10 @@ echo "Escapes behave as expected\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x1B", "BAD+1B", "ISO-2022-KR", "UTF-8");
-convertInvalidString("\x1B$", "BAD+1B24", "ISO-2022-KR", "UTF-8");
-convertInvalidString("\x1B$)", "BAD+1B2429", "ISO-2022-KR", "UTF-8");
-convertInvalidString("\x1B$)C\x0E\x7C\x84", "BAD+7C84", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$)", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$)C\x0E\x7C\x84", "%", "ISO-2022-KR", "UTF-8");
 
 echo "Done!\n";
 ?>

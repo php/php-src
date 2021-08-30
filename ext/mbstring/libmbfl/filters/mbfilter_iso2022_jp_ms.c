@@ -100,7 +100,7 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
 			CK((*filter->output_function)(0xFEC0 + c, filter->data));
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -141,18 +141,18 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 				}
 
 				if (w <= 0) {
-					w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0208;
+					w = MBFL_BAD_INPUT;
 				}
 			} else {
 				if (c1 > 0x20 && c1 < 0x35) {
 					w = 0xE000 + ((c1 - 0x21) * 94) + c - 0x21;
 				} else {
-					w = (((c1 - 0x21) + 0x7f) << 8) | c | MBFL_WCSPLANE_JIS0208;
+					w = MBFL_BAD_INPUT;
 				}
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -164,7 +164,7 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B00 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -176,7 +176,7 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 			filter->status++;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B2400 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -188,7 +188,7 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = UDC;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B242800 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -200,28 +200,18 @@ int mbfl_filt_conv_2022jpms_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = JISX0201_KANA;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B2800 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 
 static int mbfl_filt_conv_2022jpms_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status & 0xF) {
-		if ((filter->status & 0xF) == 2) {
-			(*filter->output_function)(0x1B | MBFL_WCSGROUP_THROUGH, filter->data);
-		} else if ((filter->status & 0xF) == 3) {
-			(*filter->output_function)(0x1B24 | MBFL_WCSGROUP_THROUGH, filter->data);
-		} else if ((filter->status & 0xF) == 4) {
-			(*filter->output_function)(0x1B2428 | MBFL_WCSGROUP_THROUGH, filter->data);
-		} else if ((filter->status & 0xF) == 5) {
-			(*filter->output_function)(0x1B28 | MBFL_WCSGROUP_THROUGH, filter->data);
-		} else {
-			(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
-		}
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -351,7 +341,7 @@ int mbfl_filt_conv_wchar_2022jpms(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_any_2022jpms_flush(mbfl_convert_filter *filter)

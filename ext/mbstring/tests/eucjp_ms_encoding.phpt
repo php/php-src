@@ -56,8 +56,8 @@ echo "Tested UTF-16BE -> eucJP-win\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\x80", "BAD+80", "eucJP-win", "UTF-8");
-convertInvalidString("\xFE\xFF", "BAD+FEFF", "eucJP-win", "UTF-8");
+convertInvalidString("\x80", "%", "eucJP-win", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "eucJP-win", "UTF-8");
 
 ?>
 --EXPECT--

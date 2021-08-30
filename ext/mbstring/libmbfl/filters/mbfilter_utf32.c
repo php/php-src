@@ -134,8 +134,7 @@ static int emit_char_if_valid(int n, mbfl_convert_filter *filter)
 	if (n >= 0 && n < MBFL_WCSPLANE_UTF32MAX && (n < 0xD800 || n > 0xDFFF)) {
 		CK((*filter->output_function)(n, filter->data));
 	} else {
-		n = (n & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH;
-		CK((*filter->output_function)(n, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 	return 0;
 }
@@ -160,7 +159,7 @@ int mbfl_filt_conv_utf32_wchar(int c, mbfl_convert_filter *filter)
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
@@ -173,7 +172,7 @@ int mbfl_filt_conv_utf32be_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache = filter->status = 0;
 		CK(emit_char_if_valid(n, filter));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_utf32be(int c, mbfl_convert_filter *filter)
@@ -187,7 +186,7 @@ int mbfl_filt_conv_wchar_utf32be(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
@@ -200,7 +199,7 @@ int mbfl_filt_conv_utf32le_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache = filter->status = 0;
 		CK(emit_char_if_valid(n, filter));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
@@ -214,14 +213,14 @@ int mbfl_filt_conv_wchar_utf32le(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {

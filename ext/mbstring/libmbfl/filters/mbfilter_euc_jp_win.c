@@ -106,7 +106,7 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 		} else if (c == 0x8f) { /* X 0212 first char */
 			filter->status = 3;
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -145,12 +145,11 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f) | MBFL_WCSPLANE_WINCP932;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -160,8 +159,7 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 			w = 0xfec0 + c;
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = 0x8e00 | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -205,12 +203,11 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = ((c1 & 0x7f) << 8) | (c & 0x7f) | MBFL_WCSPLANE_JIS0212;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | 0x8f0000 | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -219,13 +216,13 @@ int mbfl_filt_conv_eucjpwin_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_eucjpwin_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
-		(*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data);
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -339,5 +336,5 @@ int mbfl_filt_conv_wchar_eucjpwin(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

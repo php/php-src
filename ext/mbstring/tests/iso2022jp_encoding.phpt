@@ -201,12 +201,12 @@ echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
-convertInvalidString("\xE0", "BAD+E0", "JIS", "UTF-8");
-convertInvalidString("\xE0", "BAD+E0", "ISO-2022-JP", "UTF-8");
-convertInvalidString("\x1B\$(X", "BAD+1B\$(X", "JIS", "UTF-8"); // Invalid escape
-convertInvalidString("\x1B\$(X", "BAD+1B\$(X", "ISO-2022-JP", "UTF-8"); // Invalid escape
-convertInvalidString("\x1B\$B!", "BAD+21", "JIS", "UTF-8"); // Truncated character
-convertInvalidString("\x1B\$B!", "BAD+21", "ISO-2022-JP", "UTF-8"); // Truncated character
+convertInvalidString("\xE0", "%", "JIS", "UTF-8");
+convertInvalidString("\xE0", "%", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B\$(X", "%\$(X", "JIS", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$(X", "%\$(X", "ISO-2022-JP", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$B!", "%", "JIS", "UTF-8"); // Truncated character
+convertInvalidString("\x1B\$B!", "%", "ISO-2022-JP", "UTF-8"); // Truncated character
 
 echo "Done!\n";
 ?>
