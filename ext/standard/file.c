@@ -908,7 +908,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 

@@ -9,6 +9,7 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   f. Non-serializable classes should use ZEND_ACC_NOT_SERIALIZABLE
   g. _zend_hash_find_known_hash renamed to zend_hash_find_known_hash
   h. Renaming of ZEND_TYPE_HAS_CLASS() into ZEND_TYPE_IS_COMPLEX()
+  i. zend_resource handle is now zend_long
 
 2. Build system changes
   a. New compiler flags
@@ -58,6 +59,9 @@ PHP 8.1 INTERNALS UPGRADE NOTES
   h. ZEND_TYPE_HAS_CLASS() has been renamed to ZEND_TYPE_IS_COMPLEX() for clarity.
      A zend_type element can contain a zend_type_list which might be either a union or an intersection,
      or a single class stored as either a zend_string* or a zend_class_entry*.
+  i. The handle member of zend_resource (the resource ID) now has type zend_long
+     rather than int. This should be transparent to most code, but uses in
+     printf may need to switch from "%d" to ZEND_LONG_FMT.
 
 ========================
 2. Build system changes
