@@ -397,7 +397,7 @@ class SimpleType {
         return str_replace('\\', '\\\\', $this->name);
     }
 
-    public function toCVarEscapedName(): string {
+    public function toVarEscapedName(): string {
         $name = str_replace('_', '__', $this->name);
         return str_replace('\\', '_', $this->name);
     }
@@ -1425,7 +1425,7 @@ class PropertyInfo
                     foreach ($arginfoType->classTypes as $classType) {
                         $className = $classType->name;
                         $escapedClassName = $classType->toEscapedName();
-                        $varEscapedClassName = $classType->toCVarEscapedName();
+                        $varEscapedClassName = $classType->toVarEscapedName();
                         $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\") - 1, 1);\n";
                     }
 
@@ -1446,7 +1446,7 @@ class PropertyInfo
                 } else {
                     $className = $arginfoType->classTypes[0]->name;
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
-                    $varEscapedClassName = $arginfoType->classTypes[0]->toCVarEscapedName();
+                    $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
                     $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"${escapedClassName}\")-1, 1);\n";
 
                     $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
