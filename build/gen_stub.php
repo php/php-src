@@ -600,14 +600,14 @@ class Type {
 }
 
 class ArginfoType {
-    /** @var ClassType[] $classTypes */
+    /** @var SimpleType[] $classTypes */
     public $classTypes;
 
     /** @var SimpleType[] $builtinTypes */
     private $builtinTypes;
 
     /**
-     * @param ClassType[] $classTypes
+     * @param SimpleType[] $classTypes
      * @param SimpleType[] $builtinTypes
      */
     public function __construct(array $classTypes, array $builtinTypes) {
