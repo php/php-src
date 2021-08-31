@@ -352,6 +352,19 @@ convertInvalidString("\x1B\$B1", "%", "CP50221", "UTF-8");
 convertInvalidString("\x1B\$B1", "%", "CP50222", "UTF-8");
 
 echo "Long error markers OK\n";
+
+foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
+  testInvalidString("\x1B", "%", $encoding, "UTF-8");
+  testInvalidString("\x1BX", "%X", $encoding, "UTF-8");
+  testInvalidString("\x1B(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B(X", "%(X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$X", "%\$X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(X", "%\$(X", $encoding, "UTF-8");
+}
+
+echo "Invalid escape sequences OK\n";
 ?>
 --EXPECT--
 ASCII support OK
@@ -361,3 +374,4 @@ JIS X 0212 support OK
 Folding of fullwidth katakana for CP50220 OK
 Invalid Unicode is flagged when converting to CP5022x
 Long error markers OK
+Invalid escape sequences OK

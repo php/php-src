@@ -307,8 +307,9 @@ retry:
 
 static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 {
-	if ((filter->status & 0xF) == 1) {
-		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+	if (filter->status & 0xF) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated, or else
+		 * escape sequence was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
