@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC1
+02 Sep 2021, PHP 8.1.0RC1
 
 - Core:
   . Fixed bug #81377 (unset() of $GLOBALS sub-key yields warning). (Nikita)
