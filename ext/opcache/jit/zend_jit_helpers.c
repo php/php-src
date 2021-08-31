@@ -384,7 +384,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_r_helper(zend_array *ht, zval *dim,
 			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_use_resource_as_offset(dim);
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:
@@ -449,7 +449,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_use_resource_as_offset(dim);
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:
@@ -512,7 +512,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_use_resource_as_offset(dim);
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:
@@ -579,7 +579,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_use_resource_as_offset(dim);
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:
@@ -642,7 +642,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			hval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_use_resource_as_offset(dim);
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:

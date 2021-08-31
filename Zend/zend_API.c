@@ -1987,7 +1987,7 @@ ZEND_API zend_result array_set_zval_key(HashTable *ht, zval *key, zval *value) /
 			result = zend_hash_update(ht, ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
+			zend_use_resource_as_offset(key);
 			result = zend_hash_index_update(ht, Z_RES_HANDLE_P(key), value);
 			break;
 		case IS_FALSE:

@@ -2164,7 +2164,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(vo
 	zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim)
 {
 	zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 }

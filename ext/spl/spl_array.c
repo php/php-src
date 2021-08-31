@@ -303,8 +303,7 @@ try_again:
 		}
 		return SUCCESS;
 	case IS_RESOURCE:
-		zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)",
-			Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
+		zend_use_resource_as_offset(offset);
 		key->key = NULL;
 		key->h = Z_RES_P(offset)->handle;
 		break;

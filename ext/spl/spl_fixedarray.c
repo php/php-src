@@ -333,8 +333,7 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			offset = Z_REFVAL_P(offset);
 			goto try_again;
 		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)",
-				Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			zend_use_resource_as_offset(offset);
 			return Z_RES_HANDLE_P(offset);
 	}
 
