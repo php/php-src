@@ -617,6 +617,17 @@ PHP 8.1 UPGRADE NOTES
 - The log_errors_max_len ini setting has been removed. It no longer had an
   effect since PHP 8.0.
 
+- A leading dollar in a quoted string can now be escaped: "\${" will now be
+  interpreted as a string with contents `${`.
+
+- Backslashes in double quoted strings are now more consistently treated as
+  escape characters. Previously, "foo\\" followed by something other than a
+  newline was not considered as a teminated string. It is now interpreted as a
+  string with contents `foo\`. However, as an exception, the string "foo\"
+  followed by a newline will continue to be treated as a valid string with
+  contents `foo\` rather than an unterminated string. This exception exists to
+  support naive uses of Windows file pahts as "C:\foo\".
+
 ========================================
 12. Windows Support
 ========================================
