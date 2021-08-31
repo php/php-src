@@ -1423,7 +1423,6 @@ class PropertyInfo
             if ($arginfoType->hasClassType()) {
                 if (count($arginfoType->classTypes) >= 2) {
                     foreach ($arginfoType->classTypes as $classType) {
-                        $className = $classType->name;
                         $escapedClassName = $classType->toEscapedName();
                         $varEscapedClassName = $classType->toVarEscapedName();
                         $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\") - 1, 1);\n";
@@ -1434,7 +1433,6 @@ class PropertyInfo
                     $code .= "\tproperty_{$propertyName}_type_list->num_types = $classTypeCount;\n";
 
                     foreach ($arginfoType->classTypes as $k => $classType) {
-                        $className = $classType->name;
                         $escapedClassName = $classType->toEscapedName();
                         $code .= "\tproperty_{$propertyName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$escapedClassName}, 0, 0);\n";
                     }
@@ -1444,7 +1442,6 @@ class PropertyInfo
                     $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_PTR(property_{$propertyName}_type_list, _ZEND_TYPE_LIST_BIT, 0, $typeMaskCode);\n";
                     $typeCode = "property_{$propertyName}_type";
                 } else {
-                    $className = $arginfoType->classTypes[0]->name;
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
                     $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
                     $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"${escapedClassName}\")-1, 1);\n";
