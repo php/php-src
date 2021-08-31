@@ -33,5 +33,5 @@ bool(false)
 Warning: openssl_pkcs12_export_to_file(): private key does not correspond to cert in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): error opening file . in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): error opening file %s in %s on line %d
 bool(false)

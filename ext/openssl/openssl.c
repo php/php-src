@@ -1152,7 +1152,7 @@ static int php_openssl_spki_cleanup(const char *src, char *dest)
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args) /* {{{ */
 {
-	char * str;
+	char * str, path[MAXPATHLEN];
 	zval * item;
 
 	SET_OPTIONAL_STRING_ARG("config", req->config_filename, default_ssl_conf_filename);
@@ -1169,8 +1169,8 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* read in the oids */
 	str = php_openssl_conf_get_string(req->req_config, NULL, "oid_file");
-	if (str != NULL && !php_openssl_open_base_dir_chk(str)) {
-		BIO *oid_bio = BIO_new_file(str, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+	if (str != NULL && expand_filepath(str, path) && !php_openssl_open_base_dir_chk(path)) {
+		BIO *oid_bio = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
 			BIO_free(oid_bio);
@@ -1705,6 +1705,7 @@ PHP_FUNCTION(openssl_get_cert_locations)
 static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_resource **resourceval)
 {
 	X509 *cert = NULL;
+	char path[MAXPATHLEN];
 	BIO *in;
 
 	if (resourceval) {
@@ -1739,11 +1740,11 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 
 	if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 
-		if (php_openssl_open_base_dir_chk(Z_STRVAL_P(val) + (sizeof("file://") - 1))) {
+		if (!expand_filepath(Z_STRVAL_P(val) + (sizeof("file://") - 1), path) || php_openssl_open_base_dir_chk(path)) {
 			return NULL;
 		}
 
-		in = BIO_new_file(Z_STRVAL_P(val) + (sizeof("file://") - 1), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+		in = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (in == NULL) {
 			php_openssl_store_errors();
 			return NULL;
@@ -1789,7 +1790,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	zval * zcert;
 	zend_bool notext = 1;
 	BIO * bio_out;
-	char * filename;
+	char * filename, filepath[MAXPATHLEN];
 	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zp|b", &zcert, &filename, &filename_len, &notext) == FAILURE) {
@@ -1803,11 +1804,11 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		return;
 	}
 
-	if (php_openssl_open_base_dir_chk(filename)) {
+	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		return;
 	}
 
-	bio_out = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+	bio_out = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out) {
 		if (!notext && !X509_print(bio_out, cert)) {
 			php_openssl_store_errors();
@@ -1819,7 +1820,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		RETVAL_TRUE;
 	} else {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
+		php_error_docref(NULL, E_WARNING, "error opening file %s", filepath);
 	}
 	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
@@ -2529,6 +2530,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(char *certfile)
 	STACK_OF(X509) *stack=NULL, *ret=NULL;
 	BIO *in=NULL;
 	X509_INFO *xi;
+	char certpath[MAXPATHLEN];
 
 	if(!(stack = sk_X509_new_null())) {
 		php_openssl_store_errors();
@@ -2536,14 +2538,14 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(char *certfile)
 		goto end;
 	}
 
-	if (php_openssl_open_base_dir_chk(certfile)) {
+	if (!expand_filepath(certfile, certpath) || php_openssl_open_base_dir_chk(certpath)) {
 		sk_X509_free(stack);
 		goto end;
 	}
 
-	if (!(in=BIO_new_file(certfile, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY)))) {
+	if (!(in=BIO_new_file(certpath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY)))) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error opening the file, %s", certfile);
+		php_error_docref(NULL, E_WARNING, "error opening the file, %s", certpath);
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -2551,7 +2553,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(char *certfile)
 	/* This loads from a file, a stack of x509/crl/pkey sets */
 	if (!(sk=PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error reading the file, %s", certfile);
+		php_error_docref(NULL, E_WARNING, "error reading the file, %s", certpath);
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -2566,7 +2568,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(char *certfile)
 		X509_INFO_free(xi);
 	}
 	if (!sk_X509_num(stack)) {
-		php_error_docref(NULL, E_WARNING, "no certificates in file, %s", certfile);
+		php_error_docref(NULL, E_WARNING, "no certificates in file, %s", certpath);
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -2843,7 +2845,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	X509 * cert = NULL;
 	BIO * bio_out = NULL;
 	PKCS12 * p12 = NULL;
-	char * filename;
+	char * filename, filepath[MAXPATHLEN];
 	char * friendly_name = NULL;
 	size_t filename_len;
 	char * pass;
@@ -2874,7 +2876,8 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 		php_error_docref(NULL, E_WARNING, "private key does not correspond to cert");
 		goto cleanup;
 	}
-	if (php_openssl_open_base_dir_chk(filename)) {
+
+	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		goto cleanup;
 	}
 
@@ -2900,7 +2903,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 
 	p12 = PKCS12_create(pass, friendly_name, priv_key, cert, ca, 0, 0, 0, 0, 0);
 	if (p12 != NULL) {
-		bio_out = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+		bio_out = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (bio_out != NULL) {
 
 			i2d_PKCS12_bio(bio_out, p12);
@@ -2909,7 +2912,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 			RETVAL_TRUE;
 		} else {
 			php_openssl_store_errors();
-			php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
+			php_error_docref(NULL, E_WARNING, "error opening file %s", filepath);
 		}
 
 		PKCS12_free(p12);
@@ -3296,7 +3299,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_resource **resourceval)
 {
 	X509_REQ * csr = NULL;
-	char * filename = NULL;
+	char * filename = NULL, filepath[MAXPATHLEN];
 	BIO * in;
 
 	if (resourceval) {
@@ -3325,10 +3328,10 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
 	}
 	if (filename) {
-		if (php_openssl_open_base_dir_chk(filename)) {
+		if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 			return NULL;
 		}
-		in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+		in = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 	} else {
 		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 	}
@@ -3356,7 +3359,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 	X509_REQ * csr;
 	zval * zcsr = NULL;
 	zend_bool notext = 1;
-	char * filename = NULL;
+	char * filename = NULL, filepath[MAXPATHLEN];
 	size_t filename_len;
 	BIO * bio_out;
 	zend_resource *csr_resource;
@@ -3372,17 +3375,17 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		return;
 	}
 
-	if (php_openssl_open_base_dir_chk(filename)) {
+	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		return;
 	}
 
-	bio_out = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+	bio_out = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (bio_out != NULL) {
 		if (!notext && !X509_REQ_print(bio_out, csr)) {
 			php_openssl_store_errors();
 		}
 		if (!PEM_write_bio_X509_REQ(bio_out, csr)) {
-			php_error_docref(NULL, E_WARNING, "error writing PEM to file %s", filename);
+			php_error_docref(NULL, E_WARNING, "error writing PEM to file %s", filepath);
 			php_openssl_store_errors();
 		} else {
 			RETVAL_TRUE;
@@ -3390,7 +3393,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		BIO_free(bio_out);
 	} else {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
+		php_error_docref(NULL, E_WARNING, "error opening file %s", filepath);
 	}
 
 	if (csr_resource == NULL && csr != NULL) {
@@ -3812,7 +3815,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 	X509 * cert = NULL;
 	int free_cert = 0;
 	zend_resource *cert_res = NULL;
-	char * filename = NULL;
+	char * filename = NULL, filepath[MAXPATHLEN];
 	zval tmp;
 
 	ZVAL_NULL(&tmp);
@@ -3911,7 +3914,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 			filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
-			if (php_openssl_open_base_dir_chk(filename)) {
+			if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 				TMP_CLEAN;
 			}
 		}
@@ -3924,7 +3927,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 				/* not a X509 certificate, try to retrieve public key */
 				BIO* in;
 				if (filename) {
-					in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+					in = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 				} else {
 					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 				}
@@ -3940,7 +3943,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 			BIO *in;
 
 			if (filename) {
-				in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+				in = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 			} else {
 				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 			}
@@ -4593,7 +4596,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	zval * zpkey, * args = NULL;
 	char * passphrase = NULL;
 	size_t passphrase_len = 0;
-	char * filename = NULL;
+	char * filename = NULL, filepath[MAXPATHLEN];
 	size_t filename_len = 0;
 	zend_resource *key_resource = NULL;
 	int pem_write = 0;
@@ -4614,14 +4617,14 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		RETURN_FALSE;
 	}
 
-	if (php_openssl_open_base_dir_chk(filename)) {
+	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		RETURN_FALSE;
 	}
 
 	PHP_SSL_REQ_INIT(&req);
 
 	if (PHP_SSL_REQ_PARSE(&req, args) == SUCCESS) {
-		bio_out = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+		bio_out = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (bio_out == NULL) {
 			php_openssl_store_errors();
 			goto clean_exit;
@@ -5153,15 +5156,15 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	PKCS7 * p7 = NULL;
 	BIO * in = NULL, * datain = NULL, * dataout = NULL, * p7bout  = NULL;
 	zend_long flags = 0;
-	char * filename;
+	char * filename, filepath[MAXPATHLEN];
 	size_t filename_len;
 	char * extracerts = NULL;
 	size_t extracerts_len = 0;
-	char * signersfilename = NULL;
+	char * signersfilename = NULL, signersfilepath[MAXPATHLEN];
 	size_t signersfilename_len = 0;
-	char * datafilename = NULL;
+	char * datafilename = NULL, datafilepath[MAXPATHLEN];
 	size_t datafilename_len = 0;
-	char * p7bfilename = NULL;
+	char * p7bfilename = NULL, p7bfilepath[MAXPATHLEN];
 	size_t p7bfilename_len = 0;
 
 	RETVAL_LONG(-1);
@@ -5186,11 +5189,11 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (!store) {
 		goto clean_exit;
 	}
-	if (php_openssl_open_base_dir_chk(filename)) {
+	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		goto clean_exit;
 	}
 
-	in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(flags));
+	in = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_R(flags));
 	if (in == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
@@ -5205,12 +5208,11 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	}
 
 	if (datafilename) {
-
-		if (php_openssl_open_base_dir_chk(datafilename)) {
+		if (!expand_filepath(datafilename, datafilepath) || php_openssl_open_base_dir_chk(datafilepath)) {
 			goto clean_exit;
 		}
 
-		dataout = BIO_new_file(datafilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+		dataout = BIO_new_file(datafilepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (dataout == NULL) {
 			php_openssl_store_errors();
 			goto clean_exit;
@@ -5218,12 +5220,11 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	}
 
 	if (p7bfilename) {
-
-		if (php_openssl_open_base_dir_chk(p7bfilename)) {
+		if (!expand_filepath(p7bfilename, p7bfilepath) || php_openssl_open_base_dir_chk(p7bfilepath)) {
 			goto clean_exit;
 		}
 
-		p7bout = BIO_new_file(p7bfilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+		p7bout = BIO_new_file(p7bfilepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (p7bout == NULL) {
 			php_openssl_store_errors();
 			goto clean_exit;
@@ -5240,11 +5241,11 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		if (signersfilename) {
 			BIO *certout;
 
-			if (php_openssl_open_base_dir_chk(signersfilename)) {
+			if (!expand_filepath(signersfilename, signersfilepath) || php_openssl_open_base_dir_chk(signersfilepath)) {
 				goto clean_exit;
 			}
 
-			certout = BIO_new_file(signersfilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+			certout = BIO_new_file(signersfilepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 			if (certout) {
 				int i;
 				signers = PKCS7_get0_signers(p7, NULL, (int)flags);
@@ -5267,7 +5268,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				BIO_free(certout);
 			} else {
 				php_openssl_store_errors();
-				php_error_docref(NULL, E_WARNING, "signature OK, but cannot open %s for writing", signersfilename);
+				php_error_docref(NULL, E_WARNING, "signature OK, but cannot open %s for writing", signersfilepath);
 				RETVAL_LONG(-1);
 			}
 
@@ -5306,9 +5307,9 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	const EVP_CIPHER *cipher = NULL;
 	zend_long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
 	zend_string * strindex;
-	char * infilename = NULL;
+	char * infilename = NULL, infilepath[MAXPATHLEN];
 	size_t infilename_len;
-	char * outfilename = NULL;
+	char * outfilename = NULL, outfilepath[MAXPATHLEN];
 	size_t outfilename_len;
 
 	RETVAL_FALSE;
@@ -5317,18 +5318,21 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
 		return;
 
-
-	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
 		return;
 	}
 
-	infile = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(flags));
+	if (php_openssl_open_base_dir_chk(infilepath) || php_openssl_open_base_dir_chk(outfilepath)) {
+		return;
+	}
+
+	infile = BIO_new_file(infilepath, PHP_OPENSSL_BIO_MODE_R(flags));
 	if (infile == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
 
-	outfile = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(flags));
+	outfile = BIO_new_file(outfilepath, PHP_OPENSSL_BIO_MODE_W(flags));
 	if (outfile == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
@@ -5547,9 +5551,9 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	STACK_OF(X509) *others = NULL;
 	zend_resource *certresource = NULL, *keyresource = NULL;
 	zend_string * strindex;
-	char * infilename;
+	char * infilename, infilepath[MAXPATHLEN];
 	size_t infilename_len;
-	char * outfilename;
+	char * outfilename, outfilepath[MAXPATHLEN];
 	size_t outfilename_len;
 	char * extracertsfilename = NULL;
 	size_t extracertsfilename_len;
@@ -5582,21 +5586,25 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
 		goto clean_exit;
 	}
 
-	infile = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(flags));
+	if (php_openssl_open_base_dir_chk(infilepath) || php_openssl_open_base_dir_chk(outfilepath)) {
+		goto clean_exit;
+	}
+
+	infile = BIO_new_file(infilepath, PHP_OPENSSL_BIO_MODE_R(flags));
 	if (infile == NULL) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error opening input file %s!", infilename);
+		php_error_docref(NULL, E_WARNING, "error opening input file %s!", infilepath);
 		goto clean_exit;
 	}
 
-	outfile = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+	outfile = BIO_new_file(outfilepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (outfile == NULL) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "error opening output file %s!", outfilename);
+		php_error_docref(NULL, E_WARNING, "error opening output file %s!", outfilepath);
 		goto clean_exit;
 	}
 
@@ -5664,9 +5672,9 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 	zend_resource *certresval, *keyresval;
 	BIO * in = NULL, * out = NULL, * datain = NULL;
 	PKCS7 * p7 = NULL;
-	char * infilename;
+	char * infilename, infilepath[MAXPATHLEN];
 	size_t infilename_len;
-	char * outfilename;
+	char * outfilename, outfilepath[MAXPATHLEN];
 	size_t outfilename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppz|z", &infilename, &infilename_len,
@@ -5688,16 +5696,20 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 		goto clean_exit;
 	}
 
-	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
 		goto clean_exit;
 	}
 
-	in = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
+	if (php_openssl_open_base_dir_chk(infilepath) || php_openssl_open_base_dir_chk(outfilepath)) {
+		goto clean_exit;
+	}
+
+	in = BIO_new_file(infilepath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 	if (in == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
-	out = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
+	out = BIO_new_file(outfilepath, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 	if (out == NULL) {
 		php_openssl_store_errors();
 		goto clean_exit;
