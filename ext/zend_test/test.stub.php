@@ -45,6 +45,16 @@ namespace {
 
     }
 
+    enum ZendTestUnitEnum {
+        case Foo;
+        case Bar;
+    }
+
+    enum ZendTestStringEnum: string {
+        case Foo = "Test1";
+        case Bar = "Test2";
+    }
+
     function zend_test_array_return(): array {}
 
     function zend_test_nullable_array_return(): ?array {}

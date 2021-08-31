@@ -22,12 +22,12 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_test.h"
-#include "test_arginfo.h"
 #include "observer.h"
 #include "fiber.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "test_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -394,16 +394,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
-	zend_test_unit_enum = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, NULL);
-	zend_enum_add_case_cstr(zend_test_unit_enum, "Foo", NULL);
-	zend_enum_add_case_cstr(zend_test_unit_enum, "Bar", NULL);
-
-	zval val;
-	zend_test_string_enum = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, NULL);
-	ZVAL_PSTRINGL(&val, "Test1", sizeof("Test1")-1);
-	zend_enum_add_case_cstr(zend_test_string_enum, "Foo", &val);
-	ZVAL_PSTRINGL(&val, "Test2", sizeof("Test2")-1);
-	zend_enum_add_case_cstr(zend_test_string_enum, "Bar", &val);
+	zend_test_unit_enum = register_class_ZendTestUnitEnum();
+	zend_test_string_enum = register_class_ZendTestStringEnum();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

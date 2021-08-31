@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 04d48fa64594bacba57210dcb94381f83951116c */
+ * Stub hash: f8a7cb96dcefc802b69426e83cdfcaf1afd56611 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -158,6 +158,16 @@ static const zend_function_entry class_ZendTestAttribute_methods[] = {
 };
 
 
+static const zend_function_entry class_ZendTestUnitEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestStringEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS_Foo, method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -275,6 +285,34 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	INIT_CLASS_ENTRY(ce, "ZendTestAttribute", class_ZendTestAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestUnitEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, class_ZendTestUnitEnum_methods);
+
+	zend_enum_add_case_cstr(class_entry, "Foo", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Bar", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestStringEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, class_ZendTestStringEnum_methods);
+
+	zval enum_case_Foo_value;
+	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", sizeof("Test1") - 1, 1);
+	ZVAL_STR(&enum_case_Foo_value, enum_case_Foo_value_str);
+	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
+
+	zval enum_case_Bar_value;
+	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", sizeof("Test2") - 1, 1);
+	ZVAL_STR(&enum_case_Bar_value, enum_case_Bar_value_str);
+	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
 
 	return class_entry;
 }

@@ -8,7 +8,9 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Enum_;
 use PhpParser\Node\Stmt\Interface_;
+use PhpParser\Node\Stmt\Trait_;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -1324,6 +1326,51 @@ class FuncInfo {
     }
 }
 
+function initializeZval(string $zvalName, $value): string
+{
+    $code = "\tzval $zvalName;\n";
+
+    switch (gettype($value)) {
+        case "NULL":
+            $code .= "\tZVAL_NULL(&$zvalName);\n";
+            break;
+
+        case "boolean":
+            $code .= "\tZVAL_BOOL(&$zvalName, " . ((int) $value) . ");\n";
+            break;
+
+        case "integer":
+            $code .= "\tZVAL_LONG(&$zvalName, $value);\n";
+            break;
+
+        case "double":
+            $code .= "\tZVAL_DOUBLE(&$zvalName, $value);\n";
+            break;
+
+        case "string":
+            if ($value === "") {
+                $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
+            } else {
+                $code .= "\tzend_string *{$zvalName}_str = zend_string_init(\"$value\", sizeof(\"$value\") - 1, 1);\n";
+                $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
+            }
+            break;
+
+        case "array":
+            if (empty($value)) {
+                $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
+            } else {
+                throw new Exception("Unimplemented default value");
+            }
+            break;
+
+        default:
+            throw new Exception("Invalid default value");
+    }
+
+    return $code;
+}
+
 class PropertyInfo
 {
     /** @var PropertyName */
@@ -1361,10 +1408,8 @@ class PropertyInfo
         $defaultValueConstant = false;
         if ($this->defaultValue === null) {
             $defaultValue = null;
-            $defaultValueType = "undefined";
         } else {
             $defaultValue = $this->evaluateDefaultValue($defaultValueConstant);
-            $defaultValueType = gettype($defaultValue);
         }
 
         if ($defaultValueConstant) {
@@ -1411,76 +1456,22 @@ class PropertyInfo
             }
         }
 
-        $code .= $this->initializeValue($defaultValueType, $defaultValue, $this->type !== null);
+        $zvalName = "property_{$this->name->property}_default_value";
+        if ($this->defaultValue === null && $this->type !== null) {
+            $code .= "\tzval $zvalName;\n\tZVAL_UNDEF(&$zvalName);\n";
+        } else {
+            $code .= initializeZval($zvalName, $defaultValue);
+        }
 
         $code .= "\tzend_string *property_{$propertyName}_name = zend_string_init(\"$propertyName\", sizeof(\"$propertyName\") - 1, 1);\n";
         $nameCode = "property_{$propertyName}_name";
 
         if ($this->type !== null) {
-            $code .= "\tzend_declare_typed_property(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL, $typeCode);\n";
+            $code .= "\tzend_declare_typed_property(class_entry, $nameCode, &$zvalName, " . $this->getFlagsAsString() . ", NULL, $typeCode);\n";
         } else {
-            $code .= "\tzend_declare_property_ex(class_entry, $nameCode, &property_{$propertyName}_default_value, " . $this->getFlagsAsString() . ", NULL);\n";
+            $code .= "\tzend_declare_property_ex(class_entry, $nameCode, &$zvalName, " . $this->getFlagsAsString() . ", NULL);\n";
         }
         $code .= "\tzend_string_release(property_{$propertyName}_name);\n";
-
-        return $code;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function initializeValue(string $type, $value, bool $isTyped): string
-    {
-        $name = $this->name->property;
-        $zvalName = "property_{$name}_default_value";
-
-        $code = "\tzval $zvalName;\n";
-
-        switch ($type) {
-            case "undefined":
-                if ($isTyped) {
-                    $code .= "\tZVAL_UNDEF(&$zvalName);\n";
-                } else {
-                    $code .= "\tZVAL_NULL(&$zvalName);\n";
-                }
-                break;
-
-            case "NULL":
-                $code .= "\tZVAL_NULL(&$zvalName);\n";
-                break;
-
-            case "boolean":
-                $code .= "\tZVAL_BOOL(&$zvalName, " . ((int) $value) . ");\n";
-                break;
-
-            case "integer":
-                $code .= "\tZVAL_LONG(&$zvalName, $value);\n";
-                break;
-
-            case "double":
-                $code .= "\tZVAL_DOUBLE(&$zvalName, $value);\n";
-                break;
-
-            case "string":
-                if ($value === "") {
-                    $code .= "\tZVAL_EMPTY_STRING(&$zvalName);\n";
-                } else {
-                    $code .= "\tzend_string *{$zvalName}_str = zend_string_init(\"$value\", sizeof(\"$value\") - 1, 1);\n";
-                    $code .= "\tZVAL_STR(&$zvalName, {$zvalName}_str);\n";
-                }
-                break;
-
-            case "array":
-                if (empty($value)) {
-                    $code .= "\tZVAL_EMPTY_ARRAY(&$zvalName);\n";
-                } else {
-                    throw new Exception("Unimplemented property default value");
-                }
-                break;
-
-            default:
-                throw new Exception("Invalid property default value");
-        }
 
         return $code;
     }
@@ -1568,6 +1559,33 @@ class PropertyInfo
     }
 }
 
+class EnumCaseInfo {
+    /** @var string */
+    public $name;
+    /** @var Expr|null */
+    public $value;
+
+    public function __construct(string $name, ?Expr $value) {
+        $this->name = $name;
+        $this->value = $value;
+    }
+
+    public function getDeclaration(): string {
+        $escapedName = addslashes($this->name);
+        if ($this->value === null) {
+            $code = "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
+        } else {
+            $evaluator = new ConstExprEvaluator(function (Expr $expr) {
+                throw new Exception("Enum case $this->name has an unsupported value");
+            });
+            $zvalName = "enum_case_{$escapedName}_value";
+            $code = "\n" . initializeZval($zvalName, $evaluator->evaluateDirectly($this->value));
+            $code .= "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", &$zvalName);\n";
+        }
+        return $code;
+    }
+}
+
 class ClassInfo {
     /** @var Name */
     public $name;
@@ -1577,6 +1595,8 @@ class ClassInfo {
     public $type;
     /** @var string|null */
     public $alias;
+    /** @var SimpleType|null */
+    public $enumBackingType;
     /** @var bool */
     public $isDeprecated;
     /** @var bool */
@@ -1591,30 +1611,36 @@ class ClassInfo {
     public $propertyInfos;
     /** @var FuncInfo[] */
     public $funcInfos;
+    /** @var EnumCaseInfo[] */
+    public $enumCaseInfos;
 
     /**
      * @param Name[] $extends
      * @param Name[] $implements
      * @param PropertyInfo[] $propertyInfos
      * @param FuncInfo[] $funcInfos
+     * @param EnumCaseInfo[] $enumCaseInfos
      */
     public function __construct(
         Name $name,
         int $flags,
         string $type,
         ?string $alias,
+        ?SimpleType $enumBackingType,
         bool $isDeprecated,
         bool $isStrictProperties,
         bool $isNotSerializable,
         array $extends,
         array $implements,
         array $propertyInfos,
-        array $funcInfos
+        array $funcInfos,
+        array $enumCaseInfos
     ) {
         $this->name = $name;
         $this->flags = $flags;
         $this->type = $type;
         $this->alias = $alias;
+        $this->enumBackingType = $enumBackingType;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
         $this->isNotSerializable = $isNotSerializable;
@@ -1622,6 +1648,7 @@ class ClassInfo {
         $this->implements = $implements;
         $this->propertyInfos = $propertyInfos;
         $this->funcInfos = $funcInfos;
+        $this->enumCaseInfos = $enumCaseInfos;
     }
 
     public function getRegistration(): string
@@ -1639,21 +1666,29 @@ class ClassInfo {
         $code = "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
 
         $code .= "{\n";
-        $code .= "\tzend_class_entry ce, *class_entry;\n\n";
-        if (count($this->name->parts) > 1) {
-            $className = $this->name->getLast();
-            $namespace = addslashes((string) $this->name->slice(0, -1));
-
-            $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+        if ($this->type == "enum") {
+            $name = addslashes((string) $this->name);
+            $backingType = $this->enumBackingType
+                ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
+            $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, class_{$escapedName}_methods);\n";
         } else {
-            $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+            $code .= "\tzend_class_entry ce, *class_entry;\n\n";
+            if (count($this->name->parts) > 1) {
+                $className = $this->name->getLast();
+                $namespace = addslashes((string) $this->name->slice(0, -1));
+
+                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+            } else {
+                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+            }
+
+            if ($this->type === "class" || $this->type === "trait") {
+                $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
+            } else {
+                $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
+            }
         }
 
-        if ($this->type === "class" || $this->type === "trait") {
-            $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
-        } else {
-            $code .= "\tclass_entry = zend_register_internal_interface(&ce);\n";
-        }
         if ($this->getFlagsAsString()) {
             $code .= "\tclass_entry->ce_flags |= " . $this->getFlagsAsString() . ";\n";
         }
@@ -1671,6 +1706,10 @@ class ClassInfo {
 
         if ($this->alias) {
             $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "_", $this->alias) . "\", class_entry);\n";
+        }
+
+        foreach ($this->enumCaseInfos as $enumCase) {
+            $code .= $enumCase->getDeclaration();
         }
 
         foreach ($this->propertyInfos as $property) {
@@ -2306,8 +2345,11 @@ function parseProperty(
 /**
  * @param PropertyInfo[] $properties
  * @param FuncInfo[] $methods
+ * @param EnumCaseInfo[] $enumCases
  */
-function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array $methods): ClassInfo {
+function parseClass(
+    Name $name, Stmt\ClassLike $class, array $properties, array $methods, array $enumCases
+): ClassInfo {
     $flags = $class instanceof Class_ ? $class->flags : 0;
     $comment = $class->getDocComment();
     $alias = null;
@@ -2334,26 +2376,38 @@ function parseClass(Name $name, Stmt\ClassLike $class, array $properties, array 
     $implements = [];
 
     if ($class instanceof Class_) {
+        $classKind = "class";
         if ($class->extends) {
             $extends[] = $class->extends;
         }
         $implements = $class->implements;
     } elseif ($class instanceof Interface_) {
+        $classKind = "interface";
         $extends = $class->extends;
+    } else if ($class instanceof Trait_) {
+        $classKind = "trait";
+    } else if ($class instanceof Enum_) {
+        $classKind = "enum";
+        $implements = $class->implements;
+    } else {
+        throw new Exception("Unknown class kind " . get_class($class));
     }
 
     return new ClassInfo(
         $name,
         $flags,
-        $class instanceof Class_ ? "class" : ($class instanceof Interface_ ? "interface" : "trait"),
+        $classKind,
         $alias,
+        $class instanceof Enum_ && $class->scalarType !== null
+            ? SimpleType::fromNode($class->scalarType) : null,
         $isDeprecated,
         $isStrictProperties,
         $isNotSerializable,
         $extends,
         $implements,
         $properties,
-        $methods
+        $methods,
+        $enumCases
     );
 }
 
@@ -2431,6 +2485,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             $className = $stmt->namespacedName;
             $propertyInfos = [];
             $methodInfos = [];
+            $enumCaseInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
@@ -2466,12 +2521,16 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         $classStmt,
                         $cond
                     );
+                } else if ($classStmt instanceof Stmt\EnumCase) {
+                    $enumCaseInfos[] = new EnumCaseInfo(
+                        $classStmt->name->toString(), $classStmt->expr);
                 } else {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
             }
 
-            $fileInfo->classInfos[] = parseClass($className, $stmt, $propertyInfos, $methodInfos);
+            $fileInfo->classInfos[] = parseClass(
+                $className, $stmt, $propertyInfos, $methodInfos, $enumCaseInfos);
             continue;
         }
 
