@@ -354,7 +354,7 @@ static const zend_function_entry backed_enum_methods[] = {
 };
 
 ZEND_API zend_class_entry *zend_register_internal_enum(
-	const char *name, zend_uchar type, zend_function_entry *functions)
+	const char *name, zend_uchar type, const zend_function_entry *functions)
 {
 	ZEND_ASSERT(type == IS_UNDEF || type == IS_LONG || type == IS_STRING);
 
