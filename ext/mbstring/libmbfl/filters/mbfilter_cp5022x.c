@@ -33,6 +33,7 @@
 
 static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_cp50220_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter);
 
 /* Previously, a dubious 'encoding' called 'cp50220raw' was supported
@@ -601,8 +602,7 @@ int mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 	return 0;
 }
 
-int
-mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter)
+static int mbfl_filt_conv_wchar_cp50222_flush(mbfl_convert_filter *filter)
 {
 	/* back to latin */
 	if ((filter->status & 0xff00) == 0x500) {
