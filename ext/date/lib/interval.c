@@ -232,6 +232,8 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 		memcpy(&t->relative, interval, sizeof(timelib_rel_time));
 
 		timelib_update_ts(t, NULL);
+
+		timelib_update_from_sse(t);
 	} else {
 		if (interval->invert) {
 			bias = -1;
@@ -247,11 +249,14 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 
 		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse += bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+		timelib_update_from_sse(t);
 		t->us += interval->us * bias;
+		if (bias == -1 && interval->us > 0) {
+			t->sse--;
+		}
 		timelib_do_normalize(t);
 	}
 
-	timelib_update_from_sse(t);
 	if (t->zone_type == TIMELIB_ZONETYPE_ID) {
 		timelib_set_timezone(t, t->tz_info);
 	}
@@ -287,7 +292,11 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 
 		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+		timelib_update_from_sse(t);
 		t->us -= interval->us * bias;
+		if (bias == -1 && interval->us > 0) {
+			t->sse++;
+		}
 		timelib_do_normalize(t);
 	}
 

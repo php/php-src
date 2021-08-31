@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Dispatch using LANG_NEUTRAL instead of LOCALE_SYSTEM_DEFAULT. (Dmitry
     Maksimov)
 
+- Date:
+  . Fixed bug #80998 (Missing second with inverted interval). (Derick)
+  . Speed up finding timezone offset information. (Derick)
+
 19 Aug 2021, PHP 8.1.0beta3
 
 - Core:
