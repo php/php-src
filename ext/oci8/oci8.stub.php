@@ -239,7 +239,7 @@ function ocifetchinto($statement, &$result, int $mode = OCI_NUM): int|false {}
  * @param resource $statement
  * @param array $output
  */
-function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, int $flags = 0): int {}
+function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, int $flags = OCI_FETCHSTATEMENT_BY_COLUMN | OCI_ASSOC): int {}
 
 /**
  * @param resource $statement
@@ -247,7 +247,7 @@ function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, i
  * @alias oci_fetch_all
  * @deprecated
  */
-function ocifetchstatement($statement, &$output, int $offset = 0, int $limit = -1, int $flags = 0): int {}
+function ocifetchstatement($statement, &$output, int $offset = 0, int $limit = -1, int $flags = OCI_FETCHSTATEMENT_BY_COLUMN | OCI_ASSOC): int {}
 
 /** @param resource $statement */
 function oci_fetch_object($statement, int $mode = OCI_ASSOC | OCI_RETURN_NULLS): stdClass|false {}
