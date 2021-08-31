@@ -2427,29 +2427,17 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     continue;
                 }
 
-                if (!$classStmt instanceof Stmt\ClassMethod && !$classStmt instanceof Stmt\Property) {
-                    throw new Exception("Not implemented {$classStmt->getType()}");
-                }
-
-                $classFlags = 0;
-                if ($stmt instanceof Class_) {
-                    $classFlags = $stmt->flags;
-                }
-
-                $flags = $classStmt->flags;
-                if ($stmt instanceof Stmt\Interface_) {
-                    $flags |= Class_::MODIFIER_ABSTRACT;
-                }
-
-                if (!($flags & Class_::VISIBILITY_MODIFIER_MASK)) {
-                    throw new Exception("Visibility modifier is required");
-                }
+                $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
+                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Class_::MODIFIER_ABSTRACT : 0;
 
                 if ($classStmt instanceof Stmt\Property) {
+                    if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                        throw new Exception("Visibility modifier is required");
+                    }
                     foreach ($classStmt->props as $property) {
                         $propertyInfos[] = parseProperty(
                             $className,
-                            $flags,
+                            $classStmt->flags,
                             $property,
                             $classStmt->type,
                             $classStmt->getDocComment(),
@@ -2457,14 +2445,19 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         );
                     }
                 } else if ($classStmt instanceof Stmt\ClassMethod) {
+                    if (!($classStmt->flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                        throw new Exception("Visibility modifier is required");
+                    }
                     $methodInfos[] = parseFunctionLike(
                         $prettyPrinter,
                         new MethodName($className, $classStmt->name->toString()),
                         $classFlags,
-                        $flags,
+                        $classStmt->flags | $abstractFlag,
                         $classStmt,
                         $cond
                     );
+                } else {
+                    throw new Exception("Not implemented {$classStmt->getType()}");
                 }
             }
 
