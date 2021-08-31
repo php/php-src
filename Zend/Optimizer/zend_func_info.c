@@ -184,11 +184,9 @@ ZEND_API uint32_t zend_get_func_info(
 	return ret;
 }
 
-void zend_func_info_add(const func_info_t *func_infos, size_t n)
+static void zend_func_info_add(const func_info_t *func_infos, size_t n)
 {
-	size_t i;
-
-	for (i = 0; i < n; i++) {
+	for (size_t i = 0; i < n; i++) {
 		zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
 
 		if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
