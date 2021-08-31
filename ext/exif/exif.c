@@ -2763,9 +2763,9 @@ PHP_FUNCTION(exif_tagname)
 	zend_long tag;
 	char *szTemp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &tag) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(tag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	szTemp = exif_get_tagname(tag, tag_table_IFD);
 	if (tag < 0 || !szTemp) {
@@ -4781,9 +4781,9 @@ PHP_FUNCTION(exif_imagetype)
 	php_stream * stream;
 	int itype = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &imagefile, &imagefile_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(imagefile, imagefile_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	stream = php_stream_open_wrapper(imagefile, "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
 
