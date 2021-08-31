@@ -1625,6 +1625,7 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 	if (type == CURLINFO_HEADER_OUT) {
 		if (ch->header.str) {
 			zend_string_release_ex(ch->header.str, 0);
+			ch->header.str = NULL;
 		}
 		ch->header.str = zend_string_init(buf, buf_len, 0);
 	}
@@ -3467,6 +3468,7 @@ static void curl_free_obj(zend_object *object)
 	zval_ptr_dtor(&ch->handlers.std_err);
 	if (ch->header.str) {
 		zend_string_release_ex(ch->header.str, 0);
+		ch->header.str = NULL;
 	}
 
 	zval_ptr_dtor(&ch->handlers.write_header->stream);
