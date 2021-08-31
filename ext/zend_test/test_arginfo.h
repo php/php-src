@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 93bb8b9120e510e8c3afc29dc0a5d47cb6b5f10e */
+ * Stub hash: 04d48fa64594bacba57210dcb94381f83951116c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -295,6 +295,13 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS2", "Foo", class_ZendTestNS2_Foo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo")-1, 1);
+	zval property_foo_default_value;
+	ZVAL_UNDEF(&property_foo_default_value);
+	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, 1);
+	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS2_ZendSubNS_Foo, 0, 0));
+	zend_string_release(property_foo_name);
 
 	return class_entry;
 }

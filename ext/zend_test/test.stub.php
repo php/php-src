@@ -88,6 +88,8 @@ namespace ZendTestNS {
 namespace ZendTestNS2 {
 
     class Foo {
+        public ZendSubNS\Foo $foo;
+
         public function method(): void {}
     }
 
