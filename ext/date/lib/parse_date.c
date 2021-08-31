@@ -168,6 +168,8 @@ static const timelib_tz_lookup_table timelib_timezone_utc[] = {
 	{ "utc", 0, 0, "UTC" },
 };
 
+#define MAX_ABBR_LEN 5 /* the longest name in "timezonemap.h" and "fallbackmap.h" */
+
 static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "ms",           TIMELIB_MICROSEC, 1000 },
 	{ "msec",         TIMELIB_MICROSEC, 1000 },
@@ -749,7 +751,7 @@ static timelib_long timelib_lookup_abbr(const char **ptr, int *dst, char **tz_ab
 	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
-	if ((tp = abbr_search(word, -1, 0))) {
+	if (end - begin < MAX_ABBR_LEN && (tp = abbr_search(word, -1, 0))) {
 		value = tp->gmtoffset;
 		*dst = tp->type;
 		value -= tp->type * 3600;
