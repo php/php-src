@@ -10347,6 +10347,7 @@ static int zend_jit_free_cvs(dasm_State **Dst)
 	|	ldr FCARG1x, EX->prev_execute_data
 	|	MEM_STORE_64_ZTS str, FCARG1x, executor_globals, current_execute_data, REG0
 	|	// zend_free_compiled_variables(execute_data);
+	|	mov FCARG1x, FP
 	|	EXT_CALL zend_free_compiled_variables, REG0
 	return 1;
 }
