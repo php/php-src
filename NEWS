@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC2
 
-
+- Zip:
+  . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)
 
 02 Sep 2021, PHP 8.1.0RC1
 
