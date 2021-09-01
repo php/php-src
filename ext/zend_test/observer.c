@@ -189,15 +189,15 @@ static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execu
 	return (zend_observer_fcall_handlers){NULL, NULL};
 }
 
-static void fiber_init_observer(zend_fiber_context *initializing) {
-	if (ZT_G(observer_fiber_init)) {
-		php_printf("<!-- alloc: %p -->\n", initializing);
+static void fiber_init_observer(zend_fiber_context *from, zend_fiber_context *to) {
+	if (ZT_G(observer_fiber_init) && to->status == ZEND_FIBER_STATUS_INIT) {
+		php_printf("<!-- alloc: %p -->\n", to);
 	}
 }
 
-static void fiber_destroy_observer(zend_fiber_context *destroying) {
-	if (ZT_G(observer_fiber_destroy)) {
-		php_printf("<!-- destroy: %p -->\n", destroying);
+static void fiber_destroy_observer(zend_fiber_context *from, zend_fiber_context *to) {
+	if (ZT_G(observer_fiber_destroy) && from->status == ZEND_FIBER_STATUS_DEAD) {
+		php_printf("<!-- destroy: %p -->\n", from);
 	}
 }
 
@@ -283,11 +283,11 @@ void zend_test_observer_init(INIT_FUNC_ARGS)
 	}
 
 	if (ZT_G(observer_enabled)) {
-		zend_observer_fiber_init_register(fiber_init_observer);
+		zend_observer_fiber_switch_register(fiber_init_observer);
 		zend_observer_fiber_switch_register(fiber_address_observer);
 		zend_observer_fiber_switch_register(fiber_enter_observer);
 		zend_observer_fiber_switch_register(fiber_suspend_observer);
-		zend_observer_fiber_destroy_register(fiber_destroy_observer);
+		zend_observer_fiber_switch_register(fiber_destroy_observer);
 	}
 }
 
