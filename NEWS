@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug #81351 (xml_parse may fail, but has no error code). (cmb, Nikita)
 
+- Zip:
+  . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)
+
 26 Aug 2021, PHP 8.0.10
 
 - Core:
