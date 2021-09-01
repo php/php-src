@@ -132,6 +132,10 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 	testInvalid("\x1B\$B" . chr($i), "\x00%", 'ISO-2022-JP');
 }
 
+/* Switch from Kanji to ASCII */
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "JIS", false);
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "ISO-2022-JP", false);
+
 echo "JIS X 0208 support OK\n";
 
 /* JIS7 supports escape to switch to JIS X 0212 charset, but ISO-2022-JP does not */
@@ -155,6 +159,10 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 for ($i = 0x21; $i <= 0x7E; $i++) {
 	testInvalid("\x1B\$(D" . chr($i), "\x00%", 'JIS');
 }
+
+testValidString("\x00\xA1", "\x1B\$(D\x22\x42\x1B(B", "UTF-16BE", "JIS", false);
+// Check that ISO-2022-JP treats JISX 0212 chars as error
+convertInvalidString("\x00\xA1", "%", "UTF-16BE", "ISO-2022-JP", false);
 
 echo "JIS X 0212 support OK\n";
 
@@ -198,6 +206,9 @@ foreach (['JIS', 'ISO-2022-JP'] as $encoding) {
 }
 
 echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
+
+convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "JIS", false);
+convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "ISO-2022-JP", false);
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
