@@ -3492,7 +3492,7 @@ static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval
 		fcc->calling_scope = ce_org;
 	} else {
 		/* We already checked for plain function before. */
-		if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
+		if (error) {
 			zend_spprintf(error, 0, "function \"%s\" not found or invalid function name", Z_STRVAL_P(callable));
 		}
 		return 0;
@@ -3610,7 +3610,7 @@ get_function_via_handler:
 				}
 			}
 		}
-	} else if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
+	} else if (error) {
 		if (fcc->calling_scope) {
 			if (error) zend_spprintf(error, 0, "class %s does not have a method \"%s\"", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(mname));
 		} else {
