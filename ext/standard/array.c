@@ -2407,7 +2407,7 @@ PHP_FUNCTION(extract)
 		}
 	}
 
-	if (zend_forbid_dynamic_call("extract()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		return;
 	}
 
@@ -2523,7 +2523,7 @@ PHP_FUNCTION(compact)
 		Z_PARAM_VARIADIC('+', args, num_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_forbid_dynamic_call("compact()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		return;
 	}
 

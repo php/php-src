@@ -689,13 +689,13 @@ ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API zend_result zend_set_local_var(zend_string *name, zval *value, bool force);
 ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *value, bool force);
 
-static zend_always_inline zend_result zend_forbid_dynamic_call(const char *func_name)
+static zend_always_inline zend_result zend_forbid_dynamic_call(void)
 {
 	zend_execute_data *ex = EG(current_execute_data);
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
-		zend_throw_error(NULL, "Cannot call %s dynamically", func_name);
+		zend_throw_error(NULL, "Cannot call %s() dynamically", get_active_function_name());
 		return FAILURE;
 	}
 
