@@ -114,7 +114,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 	zval func_name;
 	zval retval;
 
-	if (obj == NULL) {
+	if (Z_ISUNDEF_P(obj)) {
 		/* If there's no object associated then there's nothing to dispose of */
 		return;
 	}
