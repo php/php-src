@@ -95,10 +95,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 1;
+	var PHP_MINOR_VERSION = 2;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.1.0";
+	var PHP_VERSION_STRING = "8.2.0";
 }
 
 /* Get version numbers and DEFINE as a string */
