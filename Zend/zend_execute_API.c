@@ -686,7 +686,12 @@ zend_result _call_user_function_impl(zval *object, zval *function_name, zval *re
 	zend_fcall_info fci;
 
 	fci.size = sizeof(fci);
-	fci.object = object ? Z_OBJ_P(object) : NULL;
+	if (object) {
+		ZEND_ASSERT(Z_TYPE_P(object) == IS_OBJECT);
+		fci.object = Z_OBJ_P(object);
+	} else {
+		fci.object = NULL;
+	}
 	ZVAL_COPY_VALUE(&fci.function_name, function_name);
 	fci.retval = retval_ptr;
 	fci.param_count = param_count;
