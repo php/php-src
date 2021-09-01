@@ -1244,7 +1244,6 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 
 		zval_ptr_dtor(&user_func);
-		zval_ptr_dtor(&args[0]);
 	} while (0);
 
 	*p = YYCURSOR;
