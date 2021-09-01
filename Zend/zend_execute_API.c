@@ -719,7 +719,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	}
 
 	if (EG(exception)) {
-		return FAILURE; /* we would result in an instable executor otherwise */
+		return SUCCESS; /* we would result in an instable executor otherwise */
 	}
 
 	ZEND_ASSERT(fci->size == sizeof(zend_fcall_info));
@@ -731,15 +731,14 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, NULL, fci_cache, &error)) {
-			if (error) {
-				zend_string *callable_name
-					= zend_get_callable_name_ex(&fci->function_name, fci->object);
-				zend_error(E_WARNING, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
-				efree(error);
-				zend_string_release_ex(callable_name, 0);
-			}
-			return FAILURE;
+		if (!zend_is_callable_ex(&fci->function_name, fci->object, 0, NULL, fci_cache, &error)) {
+			ZEND_ASSERT(error && "Should have error if not callable");
+			zend_string *callable_name
+				= zend_get_callable_name_ex(&fci->function_name, fci->object);
+			zend_throw_error(NULL, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
+			efree(error);
+			zend_string_release_ex(callable_name, 0);
+			return SUCCESS;
 		}
 
 		ZEND_ASSERT(!error);
@@ -762,7 +761,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 
 		if (UNEXPECTED(EG(exception))) {
 			zend_vm_stack_free_call_frame(call);
-			return FAILURE;
+			return SUCCESS;
 		}
 	}
 
@@ -789,7 +788,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 cleanup_args:
 						zend_vm_stack_free_args(call);
 						zend_vm_stack_free_call_frame(call);
-						return FAILURE;
+						return SUCCESS;
 					}
 				}
 			}
@@ -1008,6 +1007,28 @@ ZEND_API void zend_call_known_instance_method_with_2_params(
 	ZVAL_COPY_VALUE(&params[0], param1);
 	ZVAL_COPY_VALUE(&params[1], param2);
 	zend_call_known_instance_method(fn, object, retval_ptr, 2, params);
+}
+
+ZEND_API zend_result zend_call_method_if_exists(
+		zend_object *object, zend_string *method_name, zval *retval,
+		uint32_t param_count, zval *params)
+{
+	zend_fcall_info fci;
+	fci.size = sizeof(zend_fcall_info);
+	fci.object = object;
+	ZVAL_STR(&fci.function_name, method_name);
+	fci.retval = retval;
+	fci.param_count = param_count;
+	fci.params = params;
+	fci.named_params = NULL;
+
+	zend_fcall_info_cache fcc;
+	if (!zend_is_callable_ex(&fci.function_name, fci.object, 0, NULL, &fcc, NULL)) {
+		ZVAL_UNDEF(retval);
+		return FAILURE;
+	}
+
+	return zend_call_function(&fci, &fcc);
 }
 
 /* 0-9 a-z A-Z _ \ 0x80-0xff */

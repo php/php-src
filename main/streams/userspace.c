@@ -275,6 +275,13 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 	}}} **/
 
+static zend_result call_method_if_exists(
+		zval *object, zval *method_name, zval *retval, uint32_t param_count, zval *params)
+{
+	return zend_call_method_if_exists(
+		Z_OBJ_P(object), Z_STR_P(method_name), retval, param_count, params);
+}
+
 static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object)
 {
 	if (uwrap->ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
@@ -350,7 +357,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	ZVAL_STRING(&zfuncname, USERSTREAM_OPEN);
 
 	zend_try {
-		call_result = call_user_function(NULL, &us->object, &zfuncname, &zretval, 4, args);
+		call_result = call_method_if_exists(&us->object, &zfuncname, &zretval, 4, args);
 	} zend_catch {
 		FG(user_stream_current_filename) = NULL;
 		zend_bailout();
@@ -424,7 +431,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_DIR_OPEN);
 
-	call_result = call_user_function(NULL, &us->object, &zfuncname, &zretval, 2, args);
+	call_result = call_method_if_exists(&us->object, &zfuncname, &zretval, 2, args);
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
@@ -563,7 +570,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 
 	ZVAL_STRINGL(&args[0], (char*)buf, count);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 1, args);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 1, args);
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&func_name);
 
@@ -612,7 +619,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 
 	ZVAL_LONG(&args[0], count);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 1, args);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 1, args);
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&func_name);
@@ -651,7 +658,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 	zval_ptr_dtor(&func_name);
 
 	if (EG(exception)) {
@@ -684,7 +691,7 @@ static int php_userstreamop_close(php_stream *stream, int close_handle)
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1);
 
-	call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&func_name);
@@ -708,7 +715,7 @@ static int php_userstreamop_flush(php_stream *stream)
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_FLUSH, sizeof(USERSTREAM_FLUSH)-1);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval))
 		call_result = 0;
@@ -736,7 +743,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 2, args);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 2, args);
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
@@ -766,7 +773,7 @@ static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int when
 	/* now determine where we are */
 	ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_LONG) {
 		*newoffs = Z_LVAL(retval);
@@ -832,7 +839,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb)
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_STAT, sizeof(USERSTREAM_STAT)-1);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) == IS_ARRAY) {
 		if (SUCCESS == statbuf_from_array(&retval, ssb))
@@ -862,7 +869,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 	switch (option) {
 	case PHP_STREAM_OPTION_CHECK_LIVENESS:
 		ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
-		call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+		call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 		if (call_result == SUCCESS && (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 			ret = zval_is_true(&retval) ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 		} else {
@@ -896,7 +903,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		/* TODO wouldblock */
 		ZVAL_STRINGL(&func_name, USERSTREAM_LOCK, sizeof(USERSTREAM_LOCK)-1);
 
-		call_result = call_user_function(NULL, &us->object, &func_name, &retval, 1, args);
+		call_result = call_method_if_exists(&us->object, &func_name, &retval, 1, args);
 
 		if (call_result == SUCCESS && (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE)) {
 			ret = (Z_TYPE(retval) == IS_FALSE);
@@ -931,7 +938,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			ptrdiff_t new_size = *(ptrdiff_t*) ptrparam;
 			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
 				ZVAL_LONG(&args[0], (zend_long)new_size);
-				call_result = call_user_function(NULL, &us->object, &func_name, &retval, 1, args);
+				call_result = call_method_if_exists(&us->object, &func_name, &retval, 1, args);
 				if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE || Z_TYPE(retval) == IS_TRUE) {
 						ret = (Z_TYPE(retval) == IS_TRUE) ? PHP_STREAM_OPTION_RETURN_OK :
@@ -991,7 +998,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			break;
 		}
 
-		call_result = call_user_function(NULL, &us->object, &func_name, &retval, 3, args);
+		call_result = call_method_if_exists(&us->object, &func_name, &retval, 3, args);
 
 		if (call_result == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_SET_OPTION " is not implemented!",
@@ -1037,11 +1044,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_UNLINK);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			1, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 1, args);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1081,11 +1084,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_RENAME);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			2, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 2, args);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1127,11 +1126,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_MKDIR);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			3, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 3, args);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1173,11 +1168,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_RMDIR);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			2, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 2, args);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1243,11 +1234,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_METADATA);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			3, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 3, args);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
@@ -1290,11 +1277,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_STATURL);
 
-	call_result = call_user_function(NULL,
-			&object,
-			&zfuncname,
-			&zretval,
-			2, args);
+	call_result = call_method_if_exists(&object, &zfuncname, &zretval, 2, args);
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) == IS_ARRAY) {
 		/* We got the info we needed */
@@ -1334,7 +1317,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_READ, sizeof(USERSTREAM_DIR_READ)-1);
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
 		convert_to_string(&retval);
@@ -1362,7 +1345,7 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle)
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_CLOSE, sizeof(USERSTREAM_DIR_CLOSE)-1);
 
-	call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&func_name);
@@ -1382,7 +1365,7 @@ static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_REWIND, sizeof(USERSTREAM_DIR_REWIND)-1);
 
-	call_user_function(NULL, &us->object, &func_name, &retval, 0, NULL);
+	call_method_if_exists(&us->object, &func_name, &retval, 0, NULL);
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&func_name);
@@ -1412,7 +1395,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		break;
 	}
 
-	call_result = call_user_function(NULL, &us->object, &func_name, &retval, 1, args);
+	call_result = call_method_if_exists(&us->object, &func_name, &retval, 1, args);
 
 	do {
 		if (call_result == FAILURE) {

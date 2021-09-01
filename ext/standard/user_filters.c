@@ -111,7 +111,6 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 static void userfilter_dtor(php_stream_filter *thisfilter)
 {
 	zval *obj = &thisfilter->abstract;
-	zval func_name;
 	zval retval;
 
 	if (Z_ISUNDEF_P(obj)) {
@@ -119,16 +118,11 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 		return;
 	}
 
-	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1);
-
-	call_user_function(NULL,
-			obj,
-			&func_name,
-			&retval,
-			0, NULL);
+	zend_string *func_name = zend_string_init("onclose", sizeof("onclose")-1, 0);
+	zend_call_method_if_exists(Z_OBJ_P(obj), func_name, &retval, 0, NULL);
+	zend_string_release(func_name);
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func_name);
 
 	/* kill the object */
 	zval_ptr_dtor(obj);
@@ -243,7 +237,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
 	zval obj;
-	zval func_name;
 	zval retval;
 	size_t len;
 
@@ -319,15 +312,9 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1);
-
-	call_user_function(NULL,
-			&obj,
-			&func_name,
-			&retval,
-			0, NULL);
-
-	zval_ptr_dtor(&func_name);
+	zend_string *func_name = zend_string_init("oncreate", sizeof("oncreate")-1, 0);
+	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
+	zend_string_release(func_name);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {

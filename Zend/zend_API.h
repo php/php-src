@@ -646,6 +646,9 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
  */
 ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
+/* Can only return FAILURE if EG(active) is false during late engine shutdown.
+ * If the call or call setup throws, EG(exception) will be set and the retval
+ * will be UNDEF. Otherwise, the retval will be a non-UNDEF value. */
 ZEND_API zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache);
 
 /* Call the provided zend_function with the given params.
@@ -678,6 +681,13 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2);
+
+/* Call method if it exists. Return FAILURE if method does not exist or call failed.
+ * If FAILURE is returned, retval will be UNDEF. As such, destroying retval unconditionally
+ * is legal. */
+ZEND_API zend_result zend_call_method_if_exists(
+		zend_object *object, zend_string *method_name, zval *retval,
+		uint32_t param_count, zval *params);
 
 ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...);
 
