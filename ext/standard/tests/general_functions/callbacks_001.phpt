@@ -83,14 +83,22 @@ $o = new P;
 $o->test();
 
 ?>
---EXPECT--
+--EXPECTF--
 parent|who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 B
 C|parent::who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 B
 B|parent::who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 A
 E|parent::who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 D
 A|who
 A
@@ -100,8 +108,12 @@ B|who2
 A
 ===FOREIGN===
 parent|who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 O
 P|parent::who
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 O
 $this|O::who
 O

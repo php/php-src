@@ -73,10 +73,16 @@ new Derived_5('5');
 new Derived_6('6');
 
 ?>
---EXPECT--
+--EXPECTF--
 Base::__construct(1)
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 Base::__construct(2)
 Base::__construct(3)
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 Base::__construct(4)
 Base::__construct(5)
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 Base::__construct(6)

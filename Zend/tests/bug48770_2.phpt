@@ -53,8 +53,15 @@ $c = new C;
 $c->func('This should work!');
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 string(27) "B::func2: This should work!"
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 string(27) "B::func3: This should work!"
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 call_user_func_array(): Argument #1 ($callback) must be a valid callback, cannot access private method B::func22()
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 call_user_func_array(): Argument #1 ($callback) must be a valid callback, class B does not have a method "inexistent"

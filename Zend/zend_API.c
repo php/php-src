@@ -3307,6 +3307,9 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"self\" when no class scope is active");
 		} else {
+			if (error) {
+				zend_error(E_DEPRECATED, "Use of \"self\" in callables is deprecated");
+			}
 			fcc->called_scope = zend_get_called_scope(frame);
 			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope)) {
 				fcc->called_scope = scope;
@@ -3323,6 +3326,9 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		} else if (!scope->parent) {
 			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
 		} else {
+			if (error) {
+				zend_error(E_DEPRECATED, "Use of \"parent\" in callables is deprecated");
+			}
 			fcc->called_scope = zend_get_called_scope(frame);
 			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope->parent)) {
 				fcc->called_scope = scope->parent;
@@ -3340,6 +3346,9 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 		if (!called_scope) {
 			if (error) *error = estrdup("cannot access \"static\" when no class scope is active");
 		} else {
+			if (error) {
+				zend_error(E_DEPRECATED, "Use of \"static\" in callables is deprecated");
+			}
 			fcc->called_scope = called_scope;
 			fcc->calling_scope = called_scope;
 			if (!fcc->object) {
