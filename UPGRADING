@@ -35,6 +35,26 @@ PHP 8.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Callables that are not accepted by the $callable() syntax (but are accepted
+    by call_user_func) are deprecated. In particular:
+
+        "self::method"
+        "parent::method"
+        "static::method"
+        ["self", "method"]
+        ["parent", "method"]
+        ["static", "method"]
+        ["Foo", "Bar::method"]
+        [new Foo, "Bar::method"]
+
+    This does not affect normal method callables like "A::method" or
+    ["A", "method"]. A deprecation notice is only emitted on call. Both
+    is_callable() and the callable type will silently accept these callables
+    until support for them is removed entirely.
+
+    RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+
 ========================================
 5. Changed Functions
 ========================================
