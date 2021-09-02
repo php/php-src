@@ -38,10 +38,10 @@ C::test();
 string(1) "B"
 string(1) "A"
 
-Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 string(1) "A"
 string(1) "B"
 string(1) "A"
 
-Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 string(1) "A"

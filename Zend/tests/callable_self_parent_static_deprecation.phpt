@@ -19,6 +19,7 @@ class B extends A {
         call_user_func(["B", "self::foo"]);
         call_user_func(["B", "parent::foo"]);
         call_user_func(["B", "static::foo"]);
+        call_user_func(["B", "A::foo"]);
 
         // Also applies to other things performing calls
         echo "Test array_map()\n";
@@ -53,11 +54,13 @@ Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 
 Deprecated: Use of "static" in callables is deprecated in %s on line %d
 
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 
-Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 
-Deprecated: Use of "static" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 Test array_map()
 
 Deprecated: Use of "self" in callables is deprecated in %s on line %d

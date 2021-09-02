@@ -45,11 +45,11 @@ $c->func('This should work!');
 
 ?>
 --EXPECTF--
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 string(27) "B::func2: This should work!"
 
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 string(27) "B::func3: This should work!"
 
-Deprecated: Use of "self" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 call_user_func_array(): Argument #1 ($callback) must be a valid callback, class C does not have a method "inexistent"
