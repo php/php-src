@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f8a7cb96dcefc802b69426e83cdfcaf1afd56611 */
+ * Stub hash: 53832c784e59195e8ef41710c1e4e778f396c99b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -313,6 +313,11 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", sizeof("Test2") - 1, 1);
 	ZVAL_STR(&enum_case_Bar_value, enum_case_Bar_value_str);
 	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
+
+	zval enum_case_Baz_value;
+	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", sizeof("Test2\\a") - 1, 1);
+	ZVAL_STR(&enum_case_Baz_value, enum_case_Baz_value_str);
+	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
 
 	return class_entry;
 }
