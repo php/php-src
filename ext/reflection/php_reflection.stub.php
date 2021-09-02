@@ -374,7 +374,6 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getShortName(): string {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -450,7 +449,6 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getDefaultValue(): mixed {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -493,7 +491,6 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
@@ -577,7 +574,6 @@ class ReflectionParameter implements Reflector
 
     public function isPromoted(): bool {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
