@@ -73,7 +73,7 @@ checkAndClean();
 --EXPECTF--
 ---> Test arrays:
 
-Warning: ob_start(): array must have exactly two members in %s on line %d
+Warning: ob_start(): array callback must have exactly two members in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
@@ -89,7 +89,7 @@ Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line %d
+Warning: ob_start(): array callback must have exactly two members in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
@@ -97,7 +97,7 @@ Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line %d
+Warning: ob_start(): array callback must have exactly two members in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
@@ -105,7 +105,7 @@ Array
 (
 )
 
-Warning: ob_start(): array must have exactly two members in %s on line %d
+Warning: ob_start(): array callback must have exactly two members in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)
@@ -125,7 +125,7 @@ Array
 )
 
 
-Warning: ob_start(): array must have exactly two members in %s on line %d
+Warning: ob_start(): array callback must have exactly two members in %s on line %d
 
 Notice: ob_start(): Failed to create buffer in %s on line %d
 bool(false)

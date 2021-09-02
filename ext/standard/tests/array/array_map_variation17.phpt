@@ -121,7 +121,7 @@ array_map(): Argument #1 ($callback) must be a valid callback or null, function 
 array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
 
 -- Iteration 16 --
-array_map(): Argument #1 ($callback) must be a valid callback or null, array must have exactly two members
+array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 
 -- Iteration 17 --
 array_map(): Argument #1 ($callback) must be a valid callback or null, first array member is not a valid class name or object

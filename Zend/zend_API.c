@@ -3727,63 +3727,51 @@ check_func:
 
 		case IS_ARRAY:
 			{
-				zval *method = NULL;
-				zval *obj = NULL;
-
-				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
-					obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
-					method = zend_hash_index_find(Z_ARRVAL_P(callable), 1);
+				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) != 2) {
+					if (error) *error = estrdup("array callback must have exactly two members");
+					return 0;
 				}
 
-				do {
-					if (obj == NULL || method == NULL) {
-						break;
+				zval *obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
+				zval *method = zend_hash_index_find(Z_ARRVAL_P(callable), 1);
+				if (!obj || !method) {
+					if (error) *error = estrdup("array callback has to contain indices 0 and 1");
+					return 0;
+				}
+
+				ZVAL_DEREF(obj);
+				if (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) {
+					if (error) *error = estrdup("first array member is not a valid class name or object");
+					return 0;
+				}
+
+				ZVAL_DEREF(method);
+				if (Z_TYPE_P(method) != IS_STRING) {
+					if (error) *error = estrdup("second array member is not a valid method");
+					return 0;
+				}
+
+				if (Z_TYPE_P(obj) == IS_STRING) {
+					if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
+						return 1;
 					}
 
-					ZVAL_DEREF(method);
-					if (Z_TYPE_P(method) != IS_STRING) {
-						break;
-					}
-
-					ZVAL_DEREF(obj);
-					if (Z_TYPE_P(obj) == IS_STRING) {
-						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
-							return 1;
-						}
-
-						if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error)) {
-							return 0;
-						}
-
-					} else if (Z_TYPE_P(obj) == IS_OBJECT) {
-
-						fcc->calling_scope = Z_OBJCE_P(obj); /* TBFixed: what if it's overloaded? */
-
-						fcc->object = Z_OBJ_P(obj);
-
-						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
-							fcc->called_scope = fcc->calling_scope;
-							return 1;
-						}
-					} else {
-						break;
-					}
-
-					callable = method;
-					goto check_func;
-
-				} while (0);
-				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
-					if (!obj || (!Z_ISREF_P(obj)?
-								(Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) :
-								(Z_TYPE_P(Z_REFVAL_P(obj)) != IS_STRING && Z_TYPE_P(Z_REFVAL_P(obj)) != IS_OBJECT))) {
-						if (error) *error = estrdup("first array member is not a valid class name or object");
-					} else {
-						if (error) *error = estrdup("second array member is not a valid method");
+					if (!zend_is_callable_check_class(Z_STR_P(obj), get_scope(frame), frame, fcc, &strict_class, error)) {
+						return 0;
 					}
 				} else {
-					if (error) *error = estrdup("array must have exactly two members");
+					ZEND_ASSERT(Z_TYPE_P(obj) == IS_OBJECT);
+					fcc->calling_scope = Z_OBJCE_P(obj); /* TBFixed: what if it's overloaded? */
+					fcc->object = Z_OBJ_P(obj);
+
+					if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
+						fcc->called_scope = fcc->calling_scope;
+						return 1;
+					}
 				}
+
+				callable = method;
+				goto check_func;
 			}
 			return 0;
 		case IS_OBJECT:
