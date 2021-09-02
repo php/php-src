@@ -7,6 +7,11 @@ mbstring
 include('encoding_tests.inc');
 mb_substitute_character(0x25);
 
+testValidString("\xFF\xFE\x00\x30", "\x30\x00", "UCS-2", "UTF-16BE", false);
+testValidString("\xFE\xFF\x30\x00", "\x30\x00", "UCS-2", "UTF-16BE", false);
+testValidString("\x30\x00", "\x30\x00", "UCS-2", "UTF-16BE");
+testValidString("\x00\x30", "\x30\x00", "UCS-2LE", "UTF-16BE");
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 
