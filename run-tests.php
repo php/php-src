@@ -2502,7 +2502,21 @@ COMMAND $cmd
         if (!$no_clean) {
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-            system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+            $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+
+            if ($output) {
+                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
+                    $PHP_FAILED_TESTS['BORKED'][] = [
+                    'name' => $file,
+                    'test_name' => '',
+                    'output' => '',
+                    'diff' => '',
+                    'info' => "$output [$file]",
+                ];
+
+                $junit->markTestAs('BORK', $shortname, $tested, null, $output);
+                return 'BORKED';
+            }
         }
 
         if (!$cfg['keep']['clean']) {
