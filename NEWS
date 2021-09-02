@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC2
 
+- Shmop:
+  . Fixed bug #81407 (shmop_open won't attach and causes php to crash). (cmb)
+
 - Opcache:
   . Fixed bug #81409 (Incorrect JIT code for ADD with a reference to array).
     (Dmitry)
