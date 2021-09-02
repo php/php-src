@@ -8,6 +8,6 @@ class Test extends SplObjectStorage {
 }
 ?>
 --EXPECTF--
-Deprecated: Return type of Test::valid() should either be compatible with SplObjectStorage::valid(): bool, or the #[ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s on line %d
+Deprecated: Return type of Test::valid() should either be compatible with SplObjectStorage::valid(): bool, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s on line %d
 
 Fatal error: Could not check compatibility between Test::current(): Unknown and SplObjectStorage::current(): object, because class Unknown is not available in %s on line %d
