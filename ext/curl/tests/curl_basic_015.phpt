@@ -6,9 +6,9 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 curl
 --FILE--
 <?php
-  $url = 'http://www.example.com/';
-  $ch  = curl_init($url);
-  var_dump($url == curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
+$url = 'http://www.example.com/';
+$ch  = curl_init($url);
+var_dump($url == curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
 ?>
 --EXPECT--
 bool(true)

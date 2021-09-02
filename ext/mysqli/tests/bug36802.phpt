@@ -4,39 +4,39 @@ Bug #36802 (crashes with with mysqli_set_charset())
 mysqli
 --FILE--
 <?php
-    class really_my_mysqli extends mysqli {
-        function __construct()
-        {
-        }
+class really_my_mysqli extends mysqli {
+    function __construct()
+    {
     }
+}
 
-    require_once("connect.inc");
-    $mysql = mysqli_init();
+require_once("connect.inc");
+$mysql = mysqli_init();
 
-    /* following operations should not work */
-    if (method_exists($mysql, 'set_charset')) {
-        try {
-            $mysql->set_charset('utf8');
-        } catch (Error $exception) {
-            echo $exception->getMessage() . "\n";
-        }
-    } else {
-        $x[0] = false;
-    }
-
+/* following operations should not work */
+if (method_exists($mysql, 'set_charset')) {
     try {
-        $mysql->query("SELECT 'foo' FROM DUAL");
+        $mysql->set_charset('utf8');
     } catch (Error $exception) {
         echo $exception->getMessage() . "\n";
     }
+} else {
+    $x[0] = false;
+}
 
-    /* following operations should work */
-    $x[1] = ($mysql->error);
-    $x[2] = $mysql->errno;
+try {
+    $mysql->query("SELECT 'foo' FROM DUAL");
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-    $mysql->close();
+/* following operations should work */
+$x[1] = ($mysql->error);
+$x[2] = $mysql->errno;
 
-    var_dump($x);
+$mysql->close();
+
+var_dump($x);
 ?>
 --EXPECT--
 mysqli object is not fully initialized

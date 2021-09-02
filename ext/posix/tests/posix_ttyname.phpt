@@ -10,9 +10,9 @@ PHP Testfest Berlin 2009-05-10
 posix
 --FILE--
 <?php
-    var_dump(posix_ttyname(STDIN));
-    var_dump(posix_ttyname(STDERR));
-    var_dump(posix_ttyname(STDOUT));
+var_dump(posix_ttyname(STDIN));
+var_dump(posix_ttyname(STDERR));
+var_dump(posix_ttyname(STDOUT));
 ?>
 --EXPECT--
 bool(false)

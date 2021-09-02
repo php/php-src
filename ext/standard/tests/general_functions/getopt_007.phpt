@@ -7,9 +7,9 @@ register_argc_argv=On
 variables_order=GPS
 --FILE--
 <?php
-    $optind = null;
-    getopt('a:b:', [], $optind);
-    var_dump($optind);
+$optind = null;
+getopt('a:b:', [], $optind);
+var_dump($optind);
 ?>
 --EXPECT--
 int(6)

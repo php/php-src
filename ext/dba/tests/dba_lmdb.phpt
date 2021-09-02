@@ -4,19 +4,19 @@ DBA LMDB handler test
 dba
 --SKIPIF--
 <?php
-    $handler = 'lmdb';
-    require_once __DIR__ .'/skipif.inc';
+$handler = 'lmdb';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-    $handler = 'lmdb';
-    require_once __DIR__ .'/test.inc';
-    $lock_flag = ''; // lock in library
-    require_once __DIR__ .'/dba_handler.inc';
+$handler = 'lmdb';
+require_once __DIR__ .'/test.inc';
+$lock_flag = ''; // lock in library
+require_once __DIR__ .'/dba_handler.inc';
 ?>
 --CLEAN--
 <?php
-    require_once __DIR__ .'/clean.inc';
+require_once __DIR__ .'/clean.inc';
 ?>
 --EXPECTF--
 database handler: lmdb

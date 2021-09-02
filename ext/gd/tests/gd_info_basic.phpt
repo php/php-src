@@ -5,11 +5,11 @@ gd
 --FILE--
 <?php
 
-    echo "basic test of gd_info() function\n";
+echo "basic test of gd_info() function\n";
 
-    var_dump(gd_info());
+var_dump(gd_info());
 
-    echo "\nDone\n";
+echo "\nDone\n";
 ?>
 --EXPECTF--
 basic test of gd_info() function

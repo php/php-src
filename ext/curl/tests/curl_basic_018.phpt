@@ -6,55 +6,55 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 curl
 --FILE--
 <?php
-  include 'server.inc';
-  $host = curl_cli_server_start();
+include 'server.inc';
+$host = curl_cli_server_start();
 
-  // start testing
-  echo "*** Testing curl_exec() : basic functionality ***\n";
+// start testing
+echo "*** Testing curl_exec() : basic functionality ***\n";
 
-  $url = "{$host}/get.inc?test=get";
-  $chs = array(
-    0 => curl_init(),
-    1 => curl_init(),
-    2 => curl_init(),
-  );
+$url = "{$host}/get.inc?test=get";
+$chs = array(
+  0 => curl_init(),
+  1 => curl_init(),
+  2 => curl_init(),
+);
 
-  ob_start(); // start output buffering
+ob_start(); // start output buffering
 
-  $options = array(
-    CURLOPT_RETURNTRANSFER => 1,
-    CURLOPT_URL => $url,
-  );
+$options = array(
+  CURLOPT_RETURNTRANSFER => 1,
+  CURLOPT_URL => $url,
+);
 
-  curl_setopt_array($chs[0], $options); //set the options
-  curl_setopt_array($chs[1], $options); //set the options
-  curl_setopt_array($chs[2], $options); //set the options
+curl_setopt_array($chs[0], $options); //set the options
+curl_setopt_array($chs[1], $options); //set the options
+curl_setopt_array($chs[2], $options); //set the options
 
-  $mh = curl_multi_init();
+$mh = curl_multi_init();
 
-  // add handlers
-  curl_multi_add_handle($mh, $chs[0]);
-  curl_multi_add_handle($mh, $chs[1]);
-  curl_multi_add_handle($mh, $chs[2]);
+// add handlers
+curl_multi_add_handle($mh, $chs[0]);
+curl_multi_add_handle($mh, $chs[1]);
+curl_multi_add_handle($mh, $chs[2]);
 
-  $running=null;
-  //execute the handles
-  do {
-    curl_multi_exec($mh, $running);
-  } while ($running > 0);
+$running=null;
+//execute the handles
+do {
+  curl_multi_exec($mh, $running);
+} while ($running > 0);
 
-  $curl_content = '';
-  $curl_content .= curl_multi_getcontent($chs[0]);
-  $curl_content .= curl_multi_getcontent($chs[1]);
-  $curl_content .= curl_multi_getcontent($chs[2]);
+$curl_content = '';
+$curl_content .= curl_multi_getcontent($chs[0]);
+$curl_content .= curl_multi_getcontent($chs[1]);
+$curl_content .= curl_multi_getcontent($chs[2]);
 
-  //close the handles
-  curl_multi_remove_handle($mh, $chs[0]);
-  curl_multi_remove_handle($mh, $chs[1]);
-  curl_multi_remove_handle($mh, $chs[2]);
-  curl_multi_close($mh);
+//close the handles
+curl_multi_remove_handle($mh, $chs[0]);
+curl_multi_remove_handle($mh, $chs[1]);
+curl_multi_remove_handle($mh, $chs[2]);
+curl_multi_close($mh);
 
-  var_dump( $curl_content );
+var_dump( $curl_content );
 
 ?>
 --EXPECT--

@@ -2,22 +2,22 @@
 Ensure class constants are not evaluated when a class is looked up to resolve inheritance during runtime.
 --FILE--
 <?php
-  class C
-  {
-      const X = E::A;
-      public static $a = array(K => D::V, E::A => K);
-  }
+class C
+{
+    const X = E::A;
+    public static $a = array(K => D::V, E::A => K);
+}
 
-  eval('class D extends C { const V = \'test\'; }');
+eval('class D extends C { const V = \'test\'; }');
 
-  class E extends D
-  {
-      const A = "hello";
-  }
+class E extends D
+{
+    const A = "hello";
+}
 
-  define('K', "nasty");
+define('K', "nasty");
 
-  var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
+var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
 ?>
 --EXPECT--
 string(5) "hello"

@@ -7,11 +7,11 @@ Nic Rosental nicrosental@gmail.com
 dom
 --FILE--
 <?php
-    try {
-        $section = new DOMCDataSection();
-    } catch (TypeError $e) {
-        echo $e->getMessage();
-    }
+try {
+    $section = new DOMCDataSection();
+} catch (TypeError $e) {
+    echo $e->getMessage();
+}
 ?>
 --EXPECT--
 DOMCdataSection::__construct() expects exactly 1 argument, 0 given

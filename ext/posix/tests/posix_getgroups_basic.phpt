@@ -4,15 +4,15 @@ Test posix_getgroups() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getgroups\n";
+echo "Basic test of POSIX getgroups\n";
 
-  $groups = posix_getgroups();
+$groups = posix_getgroups();
 
-  if (!is_array($groups)) {
-    echo "TEST FAILED: ", posix_strerror(posix_get_last_error()), "\n";
-  } else {
-    echo "TEST PASSED\n";
-  }
+if (!is_array($groups)) {
+  echo "TEST FAILED: ", posix_strerror(posix_get_last_error()), "\n";
+} else {
+  echo "TEST PASSED\n";
+}
 
 ?>
 --EXPECT--

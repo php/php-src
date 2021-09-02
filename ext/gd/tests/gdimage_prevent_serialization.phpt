@@ -5,8 +5,8 @@ gd
 --FILE--
 <?php
 
-    $img_src = imagecreatetruecolor(32, 32);
-    var_dump(serialize($img_src));
+$img_src = imagecreatetruecolor(32, 32);
+var_dump(serialize($img_src));
 
 ?>
 --EXPECTF--

@@ -4,14 +4,14 @@ DBA NDBM handler test
 dba
 --SKIPIF--
 <?php
-    $handler = 'ndbm';
-    require_once __DIR__ .'/skipif.inc';
+$handler = 'ndbm';
+require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
-    $handler = 'ndbm';
-    require_once __DIR__ .'/test.inc';
-    require_once __DIR__ .'/dba_handler.inc';
+$handler = 'ndbm';
+require_once __DIR__ .'/test.inc';
+require_once __DIR__ .'/dba_handler.inc';
 ?>
 --EXPECT--
 database handler: ndbm

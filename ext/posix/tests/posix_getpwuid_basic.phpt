@@ -4,12 +4,12 @@ Test posix_getpwuid() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getpwuid\n";
+echo "Basic test of POSIX getpwuid\n";
 
 
-  $pwuid = posix_getpwuid(posix_getuid());
+$pwuid = posix_getpwuid(posix_getuid());
 
-  print_r($pwuid);
+print_r($pwuid);
 
 ?>
 ===DONE====

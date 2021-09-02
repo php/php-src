@@ -4,11 +4,11 @@ Test posix_getpid() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getpid function\n";
+echo "Basic test of POSIX getpid function\n";
 
-  $pid = posix_getpid();
+$pid = posix_getpid();
 
-  var_dump($pid);
+var_dump($pid);
 
 ?>
 ===DONE====

@@ -2,41 +2,41 @@
 various fgetcsv() functionality tests
 --FILE--
 <?php
-    $list = array(
-        'aaa,bbb',
-        'aaa,"bbb"',
-        '"aaa","bbb"',
-        'aaa,bbb',
-        '"aaa",bbb',
-        '"aaa",   "bbb"',
-        ',',
-        'aaa,',
-        ',"aaa"',
-        '"",""',
-        '"\\"","aaa"',
-        '"""""",',
-        '""""",aaa' . "\n",
-        '"\\""",aaa' . "\n",
-        'aaa,"\\"bbb,ccc' . "\n",
-        'aaa,bbb   ',
-        'aaa,"bbb   "',
-        'aaa"aaa","bbb"bbb',
-        'aaa"aaa""",bbb',
-        'aaa"\\"a","bbb"',
-        'aaa,"bbb' . "\n",
-        'aaa,"bbb',
-    );
+$list = array(
+    'aaa,bbb',
+    'aaa,"bbb"',
+    '"aaa","bbb"',
+    'aaa,bbb',
+    '"aaa",bbb',
+    '"aaa",   "bbb"',
+    ',',
+    'aaa,',
+    ',"aaa"',
+    '"",""',
+    '"\\"","aaa"',
+    '"""""",',
+    '""""",aaa' . "\n",
+    '"\\""",aaa' . "\n",
+    'aaa,"\\"bbb,ccc' . "\n",
+    'aaa,bbb   ',
+    'aaa,"bbb   "',
+    'aaa"aaa","bbb"bbb',
+    'aaa"aaa""",bbb',
+    'aaa"\\"a","bbb"',
+    'aaa,"bbb' . "\n",
+    'aaa,"bbb',
+);
 
-    $file = __DIR__ . '/fgetcsv.csv';
-    @unlink($file);
-    foreach ($list as $v) {
-        $fp = fopen($file, "w");
-        fwrite($fp, $v);
-        fclose($fp);
+$file = __DIR__ . '/fgetcsv.csv';
+@unlink($file);
+foreach ($list as $v) {
+    $fp = fopen($file, "w");
+    fwrite($fp, $v);
+    fclose($fp);
 
-        var_dump(fgetcsv(fopen($file, "r"), 1024));
-    }
-    @unlink($file);
+    var_dump(fgetcsv(fopen($file, "r"), 1024));
+}
+@unlink($file);
 ?>
 --EXPECT--
 array(2) {

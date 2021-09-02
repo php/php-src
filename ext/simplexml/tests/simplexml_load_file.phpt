@@ -4,10 +4,10 @@ simplexml_load_file()
 simplexml
 --FILE--
 <?php
-    $simple = simplexml_load_file(__DIR__."/book.xml");
+$simple = simplexml_load_file(__DIR__."/book.xml");
 
-    var_dump($simple);
-    echo "Done";
+var_dump($simple);
+echo "Done";
 ?>
 --EXPECT--
 object(SimpleXMLElement)#1 (1) {

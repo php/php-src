@@ -5,8 +5,8 @@ gd
 --FILE--
 <?php
 
-    $img_src = imagecreatetruecolor(32, 32);
-    $img_dst = clone $img_src;
+$img_src = imagecreatetruecolor(32, 32);
+$img_dst = clone $img_src;
 
 ?>
 --EXPECTF--

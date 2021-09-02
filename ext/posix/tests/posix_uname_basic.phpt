@@ -4,11 +4,11 @@ Test posix_uname() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX uname function\n";
+echo "Basic test of POSIX uname function\n";
 
-  $uname = posix_uname();
-  unset($uname['domainname']);
-  print_r($uname);
+$uname = posix_uname();
+unset($uname['domainname']);
+print_r($uname);
 
 ?>
 ===DONE====

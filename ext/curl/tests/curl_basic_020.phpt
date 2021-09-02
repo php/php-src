@@ -6,15 +6,15 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 curl
 --FILE--
 <?php
-  include 'server.inc';
-  $host = curl_cli_server_start();
+include 'server.inc';
+$host = curl_cli_server_start();
 
-  $url = "{$host}/get.inc?test=";
-  $ch  = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_exec($ch);
-  var_dump(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-  curl_close($ch);
+$url = "{$host}/get.inc?test=";
+$ch  = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_exec($ch);
+var_dump(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+curl_close($ch);
 ?>
 --EXPECT--
 Hello World!

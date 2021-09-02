@@ -4,10 +4,10 @@ Bug #68735 fileinfo out-of-bounds memory access
 fileinfo
 --FILE--
 <?php
-    $test_file = __DIR__ . DIRECTORY_SEPARATOR . "bug68735.jpg";
-    $f = new finfo;
+$test_file = __DIR__ . DIRECTORY_SEPARATOR . "bug68735.jpg";
+$f = new finfo;
 
-    var_dump($f->file($test_file));
+var_dump($f->file($test_file));
 
 ?>
 --EXPECTF--

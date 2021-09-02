@@ -3,33 +3,33 @@ Bug #55424 (Method got missing from class when a trait defined an abstract metho
 --FILE--
 <?php
 
-    trait ATrait
+trait ATrait
+{
+    function setRequired()
     {
-        function setRequired()
-        {
-            $this->setAttribute();
-        }
-
-        abstract function setAttribute();
+        $this->setAttribute();
     }
 
-    class Base
-    {
-        function setAttribute() { }
-    }
+    abstract function setAttribute();
+}
 
-    class MyClass extends Base
-    {
-        use ATrait;
-    }
+class Base
+{
+    function setAttribute() { }
+}
 
-    $i = new Base();
-    $i->setAttribute();
+class MyClass extends Base
+{
+    use ATrait;
+}
 
-    $t = new MyClass();
-    /* setAttribute used to disappear for no good reason. */
-    $t->setRequired();
-    echo 'DONE';
+$i = new Base();
+$i->setAttribute();
+
+$t = new MyClass();
+/* setAttribute used to disappear for no good reason. */
+$t->setRequired();
+echo 'DONE';
 ?>
 --EXPECT--
 DONE

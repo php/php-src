@@ -4,8 +4,8 @@ tidy_parse_string()
 tidy
 --FILE--
 <?php
-        $a = tidy_parse_string("<HTML></HTML>");
-        echo tidy_get_output($a);
+$a = tidy_parse_string("<HTML></HTML>");
+echo tidy_get_output($a);
 
 ?>
 --EXPECT--

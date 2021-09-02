@@ -7,12 +7,12 @@ User Group: PHPSP #phptestfestbrasil
 posix
 --FILE--
 <?php
-  $uid = posix_geteuid();
-  $user = posix_getpwuid($uid);
-  $username = $user['name'];
-  $info = posix_getpwnam($username);
-  print_r($info);
-  var_dump($username == $info['name']);
+$uid = posix_geteuid();
+$user = posix_getpwuid($uid);
+$username = $user['name'];
+$info = posix_getpwnam($username);
+print_r($info);
+var_dump($username == $info['name']);
 ?>
 ===DONE====
 --EXPECTF--

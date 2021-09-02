@@ -12,7 +12,7 @@ $config = array(
 	'ENV' => ['LSAN_OPTIONS' => 'detect_leaks=0'],
 	'TESTS' => 'ext/pdo/tests'
 );
-	
+
 
 if (false !== getenv('PDO_FIREBIRD_TEST_DSN')) {
 	# user set them from their shell

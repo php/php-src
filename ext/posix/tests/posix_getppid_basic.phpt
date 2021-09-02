@@ -4,11 +4,11 @@ Test posix_getppid() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getppid function\n";
+echo "Basic test of POSIX getppid function\n";
 
-  $ppid = posix_getppid();
+$ppid = posix_getppid();
 
-  var_dump($ppid);
+var_dump($ppid);
 
 ?>
 ===DONE====

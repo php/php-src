@@ -10,15 +10,15 @@ PHP Testfest Berlin 2009-05-10
 posix
 --SKIPIF--
 <?php
-    
-    // needed because of #ifdef HAVE_CTERMID in posix.c
-    if (!function_exists('posix_ctermid')) {
-        die('SKIP - Function posix_ctermid() not available');
-    }
+
+// needed because of #ifdef HAVE_CTERMID in posix.c
+if (!function_exists('posix_ctermid')) {
+    die('SKIP - Function posix_ctermid() not available');
+}
 ?>
 --FILE--
 <?php
-    var_dump(posix_ctermid());
+var_dump(posix_ctermid());
 ?>
 --EXPECTF--
 string(%d) "%s"

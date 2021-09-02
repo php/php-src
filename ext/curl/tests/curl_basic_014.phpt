@@ -6,8 +6,8 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
 curl
 --FILE--
 <?php
-  $ch = curl_init();
-  var_dump($ch);
+$ch = curl_init();
+var_dump($ch);
 ?>
 --EXPECT--
 object(CurlHandle)#1 (0) {

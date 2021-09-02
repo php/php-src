@@ -4,12 +4,12 @@ Test posix_getgrgid() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getgid and getgrid functions\n";
+echo "Basic test of POSIX getgid and getgrid functions\n";
 
-  $gid = posix_getgid();
-  $groupinfo = posix_getgrgid($gid);
+$gid = posix_getgid();
+$groupinfo = posix_getgrgid($gid);
 
-  print_r($groupinfo);
+print_r($groupinfo);
 
 ?>
 --EXPECTF--

@@ -4,11 +4,11 @@ Test posix_getpgrp() function : basic functionality
 posix
 --FILE--
 <?php
-  echo "Basic test of POSIX getpgrp function\n";
+echo "Basic test of POSIX getpgrp function\n";
 
-  $pgrp = posix_getpgrp();
+$pgrp = posix_getpgrp();
 
-  var_dump($pgrp);
+var_dump($pgrp);
 
 ?>
 ===DONE====

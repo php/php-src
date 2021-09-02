@@ -4,17 +4,17 @@ Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
 curl
 --SKIPIF--
 <?php if(substr(PHP_OS, 0, 3) == 'WIN' )
-  die("skip Not Valid for Windows");
+die("skip Not Valid for Windows");
 ?>
 --INI--
 open_basedir="/tmp"
 --FILE--
 <?php
-  $ch = curl_init();
-  var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, ""));
-  var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "/tmp/foo"));
-  var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "/xxx/bar"));
-  curl_close($ch);
+$ch = curl_init();
+var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, ""));
+var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "/tmp/foo"));
+var_dump(curl_setopt($ch, CURLOPT_COOKIEFILE, "/xxx/bar"));
+curl_close($ch);
 ?>
 --EXPECTF--
 bool(true)
