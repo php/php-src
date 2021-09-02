@@ -25,6 +25,8 @@
 #ifndef PHP_RANDOM_H
 #define PHP_RANDOM_H
 
+#include "php.h"
+
 /* System Rand functions */
 #ifndef RAND_MAX
 # define RAND_MAX PHP_MT_RAND_MAX
@@ -85,6 +87,8 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	int random_fd;
 ZEND_END_MODULE_GLOBALS(random)
 
+#define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
+
 #ifdef PHP_WIN32
 # define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #else
@@ -112,6 +116,46 @@ PHPAPI zend_long php_rand(void);
 PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
 PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
-#define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
+extern PHPAPI zend_class_entry *random_ce_Random;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_XorShift128Plus;
+extern PHPAPI zend_class_entry *random_ce_random_NumberGenerator_MT19937;
+extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
+
+typedef struct _php_random_algo {
+   const size_t generate_size;
+   const size_t state_size;
+   uint64_t (*generate)(void *state);
+   void (*seed)(void *state, const zend_long seed);
+   int (*serialize)(void *state, HashTable *data);
+   int (*unserialize)(void *state, HashTable *data);
+} php_random_algo;
+
+typedef struct _php_random_ng {
+   const php_random_algo *algo;
+   void *state;
+   zend_object std;
+} php_random_ng;
+
+typedef struct _php_random {
+   php_random_ng *rng;
+   zend_object std;
+} php_random;
+
+static inline php_random_ng *php_random_ng_from_obj(zend_object *obj) {
+	return (php_random_ng *)((char *)(obj) - XtOffsetOf(php_random_ng, std));
+}
+
+static inline php_random *php_random_from_obj(zend_object *obj) {
+	return (php_random *)((char *)(obj) - XtOffsetOf(php_random, std));
+}
+
+#define Z_RANDOM_NG_P(zval)	php_random_ng_from_obj(Z_OBJ_P(zval))
+#define Z_RANDOM_P(zval)	php_random_from_obj(Z_OBJ_P(zval))
+
+PHPAPI uint64_t php_random_ng_next(php_random_ng *rng);
+PHPAPI zend_long php_random_ng_range(php_random_ng *rng, zend_long min, zend_long max);
+PHPAPI void php_random_ng_array_data_shuffle(php_random_ng *rng, HashTable *ht);
+PHPAPI void php_random_ng_string_shuffle(php_random_ng *rng, zend_string *string);
 
 #endif
