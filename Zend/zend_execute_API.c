@@ -582,13 +582,20 @@ ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
+ZEND_API zend_string *get_function_or_method_name_or_null(const zend_function *func)
 {
 	if (func->common.scope && func->common.function_name) {
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
-	return func->common.function_name ? zend_string_copy(func->common.function_name) : ZSTR_INIT_LITERAL("main", 0);
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : NULL;
+}
+
+ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
+{
+	zend_string *name = get_function_or_method_name_or_null(func);
+
+	return name ? name : ZSTR_INIT_LITERAL("main", 0);
 }
 /* }}} */
 

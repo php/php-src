@@ -72,6 +72,21 @@ namespace {
         public function returnsThrowable(): Exception {}
     }
 
+    class _ZendTestTypeInference
+    {
+        /**
+         * @return array<int, int>
+         * @refcount 1
+         */
+        final public function getIntArray(): array {}
+
+        /**
+         * @return array<int, int>
+         * @refcount 1
+         */
+        final public static function createIntArray(): array {}
+    }
+
     class ZendAttributeTest {
         /** @var int */
         #[ZendTestRepeatableAttribute]

@@ -49,7 +49,10 @@ class Exception implements Throwable
 
     final public function getMessage(): string {}
 
-    /** @return int */
+    /**
+     * @return mixed
+     * @no-verify
+     */
     final public function getCode() {} // TODO add proper type (i.e. int|string)
 
     final public function getFile(): string {}

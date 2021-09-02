@@ -385,6 +385,7 @@ static zend_always_inline zend_function *zend_active_function(void)
 }
 
 ZEND_API zend_string *get_active_function_or_method_name(void);
+ZEND_API zend_string *get_function_or_method_name_or_null(const zend_function *func);
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);

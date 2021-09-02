@@ -914,6 +914,28 @@ zend_function *zend_optimizer_get_called_func(
 					}
 					return fbc;
 				}
+			} else if (opline->op1_type == IS_CONST
+					   && Z_TYPE_P(CRT_CONSTANT(opline->op1)) == IS_OBJECT
+					   && opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING
+					   && op_array->scope
+					   && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
+					   && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
+				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
+				zend_function *fbc = zend_hash_find_ptr(
+						&op_array->scope->function_table, method_name);
+				if (fbc) {
+					if (fbc->type == ZEND_INTERNAL_FUNCTION
+						|| (fbc->type == ZEND_USER_FUNCTION && fbc->common.fn_flags & ZEND_ACC_PUBLIC)) {
+						/* Prototype methods are potentially overridden. fbc still contains useful type information.
+						 * Some optimizations may not be applied, like inlining or inferring the send-mode of superfluous args.
+						 * A method cannot be overridden if the class or method is final. */
+						if ((fbc->common.fn_flags & ZEND_ACC_FINAL) == 0 &&
+							(fbc->common.scope->ce_flags & ZEND_ACC_FINAL) == 0) {
+							*is_prototype = true;
+						}
+						return fbc;
+					}
+				}
 			}
 			break;
 		case ZEND_NEW:

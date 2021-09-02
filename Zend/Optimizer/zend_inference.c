@@ -3885,6 +3885,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_INIT_METHOD_CALL:
 			if (ssa_op->result_def >= 0) {
 				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 				zend_call_info *call_info;
