@@ -2989,7 +2989,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (opline->opcode == ZEND_ADD &&
 						    (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY &&
 						    (op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) {
-							if (!zend_jit_add_arrays(&dasm_state, opline, op1_info, op2_info, res_addr)) {
+							if (!zend_jit_add_arrays(&dasm_state, opline, op1_info, OP1_REG_ADDR(), op2_info, OP2_REG_ADDR(), res_addr)) {
 								goto jit_failure;
 							}
 						} else {
