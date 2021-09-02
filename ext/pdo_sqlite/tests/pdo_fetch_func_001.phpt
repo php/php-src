@@ -127,7 +127,7 @@ PDOStatement::fetchAll(): Argument #2 must be a callable, null given
 no array or string given
 cannot access "self" when no class scope is active
 
-Deprecated: Use of "parent" in callables is deprecated in %s on line %d
+Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
 array(2) {
   [0]=>
   string(9) "--- 1 ---"
