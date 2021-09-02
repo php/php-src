@@ -898,7 +898,7 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 		const char *private_key = NULL;
 
 		if (!VCWD_REALPATH(certfile, resolved_path_buff)) {
-			php_error_docref(NULL, E_WARNING, "Unable to get real path of certfile file `%s'", certfile);
+			php_error_docref(NULL, E_WARNING, "Unable to get real path of certificate file `%s'", certfile);
 			return FAILURE;
 		}
 		/* a certificate to use for authentication */
