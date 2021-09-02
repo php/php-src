@@ -908,11 +908,13 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 			}
 			GET_VER_OPT_STRING("local_pk", private_key);
 
-			if (!private_key || VCWD_REALPATH(private_key, resolved_path_buff)) {
-				if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-					php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
-					return FAILURE;
-				}
+			if (private_key && !VCWD_REALPATH(private_key, resolved_path_buff)) {
+				php_error_docref(NULL, E_WARNING, "Unable to get real path of private key file `%s'", private_key);
+				return FAILURE;
+			}
+			if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
+				return FAILURE;
 			}
 
 			if (!SSL_CTX_check_private_key(ctx)) {
