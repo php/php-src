@@ -613,11 +613,12 @@ TSRM_API int pclose(FILE *stream)
 
 #define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
 #define DESCRIPTOR_PREFIX "TSRM_SHM_DESCRIPTOR:"
+#define INT_MIN_AS_STRING "-2147483648"
 
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
-	char shm_segment[sizeof(SEGMENT_PREFIX "4294967295")], shm_info[sizeof(DESCRIPTOR_PREFIX "4294967295")];
+	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)], shm_info[sizeof(DESCRIPTOR_PREFIX INT_MIN_AS_STRING)];
 	HANDLE shm_handle = NULL, info_handle = NULL;
 	BOOL created = FALSE;
 
