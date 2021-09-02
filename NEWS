@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #81353 (segfault with preloading and statically bound closure).
     (Nikita)
 
+- Shmop:
+  . Fixed bug #81407 (shmop_open won't attach and causes php to crash). (cmb)
+
 - Standard:
   . Fixed bug #71542 (disk_total_space does not work with relative paths). (cmb)
   . Fixed bug #81400 (Unterminated string in dns_get_record() results). (cmb)
