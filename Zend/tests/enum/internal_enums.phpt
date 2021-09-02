@@ -47,11 +47,13 @@ string(5) "Test1"
 enum(ZendTestStringEnum::Bar)
 bool(true)
 NULL
-array(2) {
+array(3) {
   [0]=>
   enum(ZendTestStringEnum::Foo)
   [1]=>
   enum(ZendTestStringEnum::Bar)
+  [2]=>
+  enum(ZendTestStringEnum::Baz)
 }
 string(30) "E:22:"ZendTestStringEnum:Foo";"
 enum(ZendTestStringEnum::Foo)
