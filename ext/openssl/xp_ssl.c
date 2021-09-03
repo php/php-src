@@ -897,35 +897,30 @@ static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ *
 		char resolved_path_buff[MAXPATHLEN];
 		const char *private_key = NULL;
 
-		if (VCWD_REALPATH(certfile, resolved_path_buff)) {
-			/* a certificate to use for authentication */
-			if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
-				php_error_docref(NULL, E_WARNING,
-					"Unable to set local cert chain file `%s'; Check that your cafile/capath "
-					"settings include details of your certificate and its issuer",
-					certfile);
-				return FAILURE;
-			}
-			GET_VER_OPT_STRING("local_pk", private_key);
+		if (!VCWD_REALPATH(certfile, resolved_path_buff)) {
+			php_error_docref(NULL, E_WARNING, "Unable to get real path of certificate file `%s'", certfile);
+			return FAILURE;
+		}
+		/* a certificate to use for authentication */
+		if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+			php_error_docref(NULL, E_WARNING,
+				"Unable to set local cert chain file `%s'; Check that your cafile/capath "
+				"settings include details of your certificate and its issuer",
+				certfile);
+			return FAILURE;
+		}
 
-			if (private_key) {
-				char resolved_path_buff_pk[MAXPATHLEN];
-				if (VCWD_REALPATH(private_key, resolved_path_buff_pk)) {
-					if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff_pk, SSL_FILETYPE_PEM) != 1) {
-						php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff_pk);
-						return FAILURE;
-					}
-				}
-			} else {
-				if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
-					php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
-					return FAILURE;
-				}
-			}
-
-			if (!SSL_CTX_check_private_key(ctx)) {
-				php_error_docref(NULL, E_WARNING, "Private key does not match certificate!");
-			}
+		GET_VER_OPT_STRING("local_pk", private_key);
+		if (private_key && !VCWD_REALPATH(private_key, resolved_path_buff)) {
+			php_error_docref(NULL, E_WARNING, "Unable to get real path of private key file `%s'", private_key);
+			return FAILURE;
+		}
+		if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+			php_error_docref(NULL, E_WARNING, "Unable to set private key file `%s'", resolved_path_buff);
+			return FAILURE;
+		}
+		if (!SSL_CTX_check_private_key(ctx)) {
+			php_error_docref(NULL, E_WARNING, "Private key does not match certificate!");
 		}
 	}
 
@@ -1614,10 +1609,15 @@ int php_openssl_setup_crypto(php_stream *stream,
 	/* We need to do slightly different things based on client/server method
 	 * so lets remember which method was selected */
 	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
-	method_flags = ((cparam->inputs.method >> 1) << 1);
+	method_flags = cparam->inputs.method & ~STREAM_CRYPTO_IS_CLIENT;
 
 	method = sslsock->is_client ? SSLv23_client_method() : SSLv23_server_method();
 	sslsock->ctx = SSL_CTX_new(method);
+
+	if (sslsock->ctx == NULL) {
+		php_error_docref(NULL, E_WARNING, "SSL context creation failure");
+		return FAILURE;
+	}
 
 	GET_VER_OPT_LONG("min_proto_version", min_version);
 	GET_VER_OPT_LONG("max_proto_version", max_version);
@@ -1627,11 +1627,6 @@ int php_openssl_setup_crypto(php_stream *stream,
 #else
 	ssl_ctx_options = SSL_OP_ALL;
 #endif
-
-	if (sslsock->ctx == NULL) {
-		php_error_docref(NULL, E_WARNING, "SSL context creation failure");
-		return FAILURE;
-	}
 
 	if (GET_VER_OPT("no_ticket") && zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_TICKET;
@@ -2293,9 +2288,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 
 		if (xparam->outputs.client && sock->enable_on_connect) {
 			/* remove the client bit */
-			if (sock->method & STREAM_CRYPTO_IS_CLIENT) {
-				sock->method = ((sock->method >> 1) << 1);
-			}
+			sock->method &= ~STREAM_CRYPTO_IS_CLIENT;
 
 			clisockdata->method = sock->method;
 
