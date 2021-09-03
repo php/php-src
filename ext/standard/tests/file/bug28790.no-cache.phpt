@@ -7,7 +7,7 @@ enable_stat_cache = False
 
 $php = '"'.getenv('TEST_PHP_EXECUTABLE').'"';
 $phpfile = getenv('TEST_PHP_EXECUTABLE');
-$impossiblefile = __DIR__.DIRECTORY_SEPARATOR.'bug28790.no-cache.phpt'.DIRECTORY_SEPARATOR.'impossible';
+$impossiblefile = __FILE__.DIRECTORY_SEPARATOR.'bug28790.impossible';
 $testfile = __DIR__.DIRECTORY_SEPARATOR.'bug28790.file';
 
 function all_the_stats($filename, $message) {
