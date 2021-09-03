@@ -153,7 +153,6 @@ static inline php_random *php_random_from_obj(zend_object *obj) {
 #define Z_RANDOM_NG_P(zval)	php_random_ng_from_obj(Z_OBJ_P(zval))
 #define Z_RANDOM_P(zval)	php_random_from_obj(Z_OBJ_P(zval))
 
-PHPAPI uint64_t php_random_ng_next(php_random_ng *rng);
 PHPAPI zend_long php_random_ng_range(php_random_ng *rng, zend_long min, zend_long max);
 PHPAPI void php_random_ng_array_data_shuffle(php_random_ng *rng, HashTable *ht);
 PHPAPI void php_random_ng_string_shuffle(php_random_ng *rng, zend_string *string);

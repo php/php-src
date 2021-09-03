@@ -932,14 +932,7 @@ static uint64_t rng_rand_range64(php_random_ng *rng, uint64_t umax) {
 }
 #endif
 
-/* {{{ php_random_ng_next */
-PHPAPI uint64_t php_random_ng_next(php_random_ng *rng)
-{
-	return rng->algo->generate(rng->state);
-}
-/* }}} */
-
-/* {{{ php_random_ng_next */
+/* {{{ php_random_ng_range */
 PHPAPI zend_long php_random_ng_range(php_random_ng *rng, zend_long min, zend_long max)
 {
 	zend_ulong umax = max - min;
@@ -1244,7 +1237,7 @@ PHP_METHOD(Random_NumberGenerator_XorShift128Plus, generate)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_LONG((zend_long) php_random_ng_next(rng));
+	RETURN_LONG((zend_long) rng->algo->generate(rng->state));
 }
 /* }}} */
 
@@ -1404,9 +1397,9 @@ PHP_METHOD(Random, getBytes)
 	ret = zend_string_alloc(size, 0);
 
 	while (generated_bytes <= size) {
-		buf = php_random_ng_next(random->rng);
+		buf = random->rng->algo->generate(random->rng->state);
 		if (random->rng && random->rng->algo->generate_size == sizeof(uint32_t)) {
-			buf = (buf << 32) | php_random_ng_next(random->rng);
+			buf = (buf << 32) | random->rng->algo->generate(random->rng->state);
 		}
 		bytes = (uint8_t *) &buf;
 		for (i = 0; i < (sizeof(uint64_t) / sizeof(uint8_t)); i ++) {
