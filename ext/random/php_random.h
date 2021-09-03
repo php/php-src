@@ -79,11 +79,11 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	int32_t lcg_s1;
 	int32_t lcg_s2;
 	int lcg_seeded;
-   uint32_t mt_rand_state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
-   uint32_t *mt_rand_next;          /* next random value is computed from here */
-   int mt_rand_left;                /* can *next++ this many times before reloading */
-   bool mt_rand_is_seeded;          /* Whether mt_rand() has been seeded */
-   zend_long mt_rand_mode;
+	uint32_t mt_rand_state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
+	uint32_t *mt_rand_next;          /* next random value is computed from here */
+	int mt_rand_left;                /* can *next++ this many times before reloading */
+	bool mt_rand_is_seeded;          /* Whether mt_rand() has been seeded */
+	zend_long mt_rand_mode;
 	int random_fd;
 ZEND_END_MODULE_GLOBALS(random)
 
@@ -123,23 +123,23 @@ extern PHPAPI zend_class_entry *random_ce_random_NumberGenerator_MT19937;
 extern PHPAPI zend_class_entry *random_ce_Random_NumberGenerator_Secure;
 
 typedef struct _php_random_algo {
-   const size_t generate_size;
-   const size_t state_size;
-   uint64_t (*generate)(void *state);
-   void (*seed)(void *state, const zend_long seed);
-   int (*serialize)(void *state, HashTable *data);
-   int (*unserialize)(void *state, HashTable *data);
+	const size_t generate_size;
+	const size_t state_size;
+	uint64_t (*generate)(void *state);
+	void (*seed)(void *state, const zend_long seed);
+	int (*serialize)(void *state, HashTable *data);
+	int (*unserialize)(void *state, HashTable *data);
 } php_random_algo;
 
 typedef struct _php_random_ng {
-   const php_random_algo *algo;
-   void *state;
-   zend_object std;
+	const php_random_algo *algo;
+	void *state;
+	zend_object std;
 } php_random_ng;
 
 typedef struct _php_random {
-   php_random_ng *rng;
-   zend_object std;
+	php_random_ng *rng;
+	zend_object std;
 } php_random;
 
 static inline php_random_ng *php_random_ng_from_obj(zend_object *obj) {
