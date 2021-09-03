@@ -962,6 +962,7 @@ for ($i = 0; $i < 256; $i++) {
 testValidString('+' . encode("\x12\x34", 'UTF-16BE') . '-', "\x00\x00\x12\x34", 'UTF-7', 'UTF-32BE');
 testValidString('+' . encode("\x12\x34\x56\x78", 'UTF-16BE') . '-', "\x00\x00\x12\x34\x00\x00\x56\x78", 'UTF-7', 'UTF-32BE');
 testValidString('+' . encode("\x12\x34\x56\x78\x00\x40", 'UTF-16BE') . '-', "\x00\x00\x12\x34\x00\x00\x56\x78\x00\x00\x00\x40", 'UTF-7', 'UTF-32BE');
+testValidString('+' . encode("\xFF\xEE\xEE\xFF", 'UTF-16BE') . '-', "\x00\x00\xFF\xEE\x00\x00\xEE\xFF", 'UTF-7', 'UTF-32BE');
 
 // Surrogate pair
 testValidString('+' . encode("\x00\x01\x04\x00", 'UTF-32BE') . '-', "\x00\x01\x04\x00", 'UTF-7', 'UTF-32BE');
@@ -981,7 +982,7 @@ testValidString('+' . encode('AB', 'ASCII') . '-+' . encode('CD', 'ASCII') . '-'
 testValidString('+' . encode('AB', 'ASCII') . '-!+' . encode('CD', 'ASCII') . '-', "\x00A\x00B\x00!\x00C\x00D", 'UTF-7', 'UTF-16BE', false);
 
 // + section terminated by a non-Base64 ASCII character which is NOT -
-for ($i = 0; $i < 128; $i++)  {
+for ($i = 0; $i < 128; $i++) {
   if ($i >= ord('A') && $i <= ord('Z'))
     continue;
   if ($i >= ord('a') && $i <= ord('z'))
@@ -994,22 +995,39 @@ for ($i = 0; $i < 128; $i++)  {
   testValidString('+' . encode("\x12\x34", 'UTF-16BE') . $char, "\x00\x00\x12\x34\x00\x00\x00" . $char, 'UTF-7', 'UTF-32BE', false);
 }
 
+// Non-direct character followed by direct character
+testValidString('%A', '+ACU-A', 'ASCII', 'UTF-7');
+testValidString('%%A', '+ACUAJQ-A', 'ASCII', 'UTF-7');
+testValidString('%%%A', '+ACUAJQAl-A', 'ASCII', 'UTF-7');
+
 // Now let's see how UTF-7 can go BAD...
 
 function rawEncode($str) {
   return str_replace('=', '', base64_encode($str));
 }
 
+// Totally bogus byte
+testInvalidString("\xFF", "%", 'UTF-7', 'UTF-8');
+// Totally bogus codepoint... '+ACU-' is '%' in UTF-7'
+testInvalidString("\x12\x34\x56\x78", "+ACU-", 'UTF-32BE', 'UTF-7');
+
 // First, messed up UTF16 in + section
 // Second half of surrogate pair coming first
 testInvalidString('+' . rawEncode("\xDC\x01\xD8\x02") . '-', "\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\xDC\x01\xD8\x02") . '-', "\x00\x00\x00.\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\x00.\xDC\x01\xD8\x02") . '-', "\x00\x00\x00.\x00\x00\x00.\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
 // First half of surrogate pair not followed by second half
 testInvalidString('+' . rawEncode("\xD8\x01\x00A") . '-', "\x00\x00\x00%\x00\x00\x00A", 'UTF-7', 'UTF-32BE');
 testInvalidString('+' . rawEncode("\xD8\x01\xD9\x02") . '-', "\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\xD8\x01\x00A") . '-', "\x00\x00\x00.\x00\x00\x00%\x00\x00\x00A", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\xD8\x01\xD9\x02") . '-', "\x00\x00\x00.\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\x00.\xD8\x01\x00A") . '-', "\x00\x00\x00.\x00\x00\x00.\x00\x00\x00%\x00\x00\x00A", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\x00.\x00.\xD8\x01\xD9\x02") . '-', "\x00\x00\x00.\x00\x00\x00.\x00\x00\x00%\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
 // First half of surrogate pair appearing at end of string
 testInvalidString('+' . rawEncode("\xD8\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
 // Truncated string
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
