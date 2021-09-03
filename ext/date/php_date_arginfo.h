@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e4585948a8767182f38b553b603e06555e92c372 */
+ * Stub hash: 309c82089d655b81b8ed186ee080b32170a46892 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -718,6 +718,48 @@ static zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_D
 	INIT_CLASS_ENTRY(ce, "DateTime", class_DateTime_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 1, class_entry_DateTimeInterface);
+
+	zval property_year_default_value;
+	ZVAL_UNDEF(&property_year_default_value);
+	zend_string *property_year_name = zend_string_init("year", sizeof("year") - 1, 1);
+	zend_declare_typed_property(class_entry, property_year_name, &property_year_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_year_name);
+
+	zval property_month_default_value;
+	ZVAL_UNDEF(&property_month_default_value);
+	zend_string *property_month_name = zend_string_init("month", sizeof("month") - 1, 1);
+	zend_declare_typed_property(class_entry, property_month_name, &property_month_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_month_name);
+
+	zval property_day_default_value;
+	ZVAL_UNDEF(&property_day_default_value);
+	zend_string *property_day_name = zend_string_init("day", sizeof("day") - 1, 1);
+	zend_declare_typed_property(class_entry, property_day_name, &property_day_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_day_name);
+
+	zval property_hour_default_value;
+	ZVAL_UNDEF(&property_hour_default_value);
+	zend_string *property_hour_name = zend_string_init("hour", sizeof("hour") - 1, 1);
+	zend_declare_typed_property(class_entry, property_hour_name, &property_hour_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_hour_name);
+
+	zval property_minute_default_value;
+	ZVAL_UNDEF(&property_minute_default_value);
+	zend_string *property_minute_name = zend_string_init("minute", sizeof("minute") - 1, 1);
+	zend_declare_typed_property(class_entry, property_minute_name, &property_minute_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_minute_name);
+
+	zval property_second_default_value;
+	ZVAL_UNDEF(&property_second_default_value);
+	zend_string *property_second_name = zend_string_init("second", sizeof("second") - 1, 1);
+	zend_declare_typed_property(class_entry, property_second_name, &property_second_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_second_name);
+
+	zval property_timezone_default_value;
+	ZVAL_UNDEF(&property_timezone_default_value);
+	zend_string *property_timezone_name = zend_string_init("timezone", sizeof("timezone") - 1, 1);
+	zend_declare_typed_property(class_entry, property_timezone_name, &property_timezone_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_timezone_name);
 
 	return class_entry;
 }

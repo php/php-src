@@ -209,6 +209,14 @@ interface DateTimeInterface
 
 class DateTime implements DateTimeInterface
 {
+    public int $year;
+    public int $month;
+    public int $day;
+    public int $hour;
+    public int $minute;
+    public int $second;
+    public string $timezone;
+
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
     /** @tentative-return-type */

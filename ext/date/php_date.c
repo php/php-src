@@ -170,6 +170,7 @@ static int date_object_compare_date(zval *d1, zval *d2);
 static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n);
+static HashTable *date_object_get_properties(zend_object *object);
 static HashTable *date_object_get_properties_interval(zend_object *object);
 static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_period(zend_object *object);
@@ -179,6 +180,7 @@ static HashTable *date_object_get_debug_info_timezone(zend_object *object, int *
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
 static int date_interval_compare_objects(zval *o1, zval *o2);
+static zval *date_object_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
@@ -1575,6 +1577,30 @@ static int implement_date_interface_handler(zend_class_entry *interface, zend_cl
 	return SUCCESS;
 } /* }}} */
 
+static int date_object_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
+{
+	zval rv;
+	zval *prop;
+	int retval = 0;
+
+	prop = date_object_read_property(object, name, BP_VAR_IS, cache_slot, &rv);
+
+	if (prop != &EG(uninitialized_zval)) {
+		if (type == 2) {
+			retval = 1;
+		} else if (type == 1) {
+			retval = zend_is_true(prop);
+		} else if (type == 0) {
+			retval = (Z_TYPE_P(prop) != IS_NULL);
+		}
+	} else {
+		retval = zend_std_has_property(object, name, type, cache_slot);
+	}
+
+	return retval;
+
+}
+
 static int date_interval_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	php_interval_obj *obj;
@@ -1636,6 +1662,9 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
+	date_object_handlers_date.has_property = date_object_has_property;
+	date_object_handlers_date.read_property = date_object_read_property;
+	date_object_handlers_date.get_properties = date_object_get_properties;
 	date_object_handlers_date.compare = date_object_compare_date;
 	date_object_handlers_date.get_properties_for = date_object_get_properties_for;
 	date_object_handlers_date.get_gc = date_object_get_gc;
@@ -2063,6 +2092,32 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+
+	return props;
+}
+
+static HashTable *date_object_get_properties(zend_object *object) /* {{{ */
+{
+	HashTable *props;
+	zval zv;
+	php_date_obj *obj;
+
+	obj = php_date_obj_from_obj(object);
+	props = zend_std_get_properties(object);
+
+#define PHP_DATE_OBJECT_ADD_PROPERTY(n,f) \
+	ZVAL_LONG(&zv, (zend_long)obj->time->f); \
+	zend_hash_str_update(props, n, sizeof(n)-1, &zv);
+
+	PHP_DATE_OBJECT_ADD_PROPERTY("year", y);
+	PHP_DATE_OBJECT_ADD_PROPERTY("month", m);
+	PHP_DATE_OBJECT_ADD_PROPERTY("day", d);
+	PHP_DATE_OBJECT_ADD_PROPERTY("hour", h);
+	PHP_DATE_OBJECT_ADD_PROPERTY("minute", i);
+	PHP_DATE_OBJECT_ADD_PROPERTY("second", s);
+	
+	ZVAL_STR(&zv, date_format("P", sizeof("P")-1, obj->time, 1));
+	zend_hash_str_update(props, "timezone", sizeof("timezone") - 1, &zv);
 
 	return props;
 } /* }}} */
@@ -3761,6 +3816,42 @@ static int date_interval_compare_objects(zval *o1, zval *o2) {
 	 * such, we treat DateInterval objects are non-comparable and emit a warning. */
 	zend_error(E_WARNING, "Cannot compare DateInterval objects");
 	return ZEND_UNCOMPARABLE;
+}
+
+
+static zval *date_object_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
+{
+	php_date_obj *obj;
+	zval *retval;
+	// timelib_sll value = -1;
+
+	// ZVAL_NULL(retval);
+
+	obj = php_date_obj_from_obj(object);
+
+	retval = rv;
+
+	if (zend_string_equals_literal(name, "year")) {
+		ZVAL_LONG(retval, obj->time->y);
+	} else if (zend_string_equals_literal(name, "month")) {
+		ZVAL_LONG(retval, obj->time->m);
+	} else if (zend_string_equals_literal(name, "day")) {
+		ZVAL_LONG(retval, obj->time->d);
+	} else if (zend_string_equals_literal(name, "hour")) {
+		ZVAL_LONG(retval, obj->time->h);
+	} else if (zend_string_equals_literal(name, "minute")) {
+		ZVAL_LONG(retval, obj->time->i);
+	} else if (zend_string_equals_literal(name, "second")) {
+		ZVAL_LONG(retval, obj->time->s);
+	} else if (zend_string_equals_literal(name, "timezone")) {
+		zend_string *buf = date_format("P", sizeof("P")-1, obj->time, 1);
+		ZVAL_STR(retval, buf);
+	} else {
+		retval = zend_std_read_property(object, name, type, cache_slot, rv);
+		return retval;
+	}
+
+	return retval;
 }
 
 /* {{{ date_interval_read_property */
