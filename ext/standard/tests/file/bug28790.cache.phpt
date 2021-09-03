@@ -1,8 +1,5 @@
 --TEST--
 Bug #28790: Add php.ini option to disable stat cache (with cache)
---CREDITS--
-jnoll <jnoll [at] prim [dot] hu>
-Kevin Lyda <kevin [at] lyda [dot] ie>
 --FILE--
 <?php
 
