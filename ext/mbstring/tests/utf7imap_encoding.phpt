@@ -110,24 +110,30 @@ if (strlen($testString) != 4)
 $testString = substr($testString, 2, 2) . substr($testString, 0, 2);
 identifyInvalidString("&" . mBase64($testString) . "-", 'UTF7-IMAP');
 /* (Or could appear by itself) */
-$testString = substr($testString, 0, 2);
-identifyInvalidString("&" . mBase64($testString) . "-", 'UTF7-IMAP');
+$testString2 = substr($testString, 0, 2);
+identifyInvalidString("&" . mBase64($testString2) . "-", 'UTF7-IMAP');
 
 /* ...and we should detect this wherever it occurs */
-$singleChar = mb_convert_encoding("１", 'UTF-16BE', 'ASCII');
+$singleChar = "\x00\x01";
 $doubleChar = mb_convert_encoding("\x00\x01\x04\x01", 'UTF-16BE', 'UTF-32BE');
 if (strlen($doubleChar) != 4)
 	die("That was supposed to be a surrogate pair");
 identifyInvalidString("&" . mBase64($singleChar . $testString) . "-", 'UTF7-IMAP');
 identifyInvalidString("&" . mBase64($singleChar . $singleChar . $testString) . "-", 'UTF7-IMAP');
 identifyInvalidString("&" . mBase64($singleChar . $singleChar . $singleChar . $testString) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($singleChar . $testString2) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($singleChar . $singleChar . $testString2) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($singleChar . $singleChar . $singleChar . $testString2) . "-", 'UTF7-IMAP');
 identifyInvalidString("&" . mBase64($doubleChar . $testString) . "-", 'UTF7-IMAP');
 identifyInvalidString("&" . mBase64($singleChar . $doubleChar . $testString) . "-", 'UTF7-IMAP');
 identifyInvalidString("&" . mBase64($singleChar . $singleChar . $doubleChar . $testString) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($doubleChar . $testString2) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($singleChar . $doubleChar . $testString2) . "-", 'UTF7-IMAP');
+identifyInvalidString("&" . mBase64($singleChar . $singleChar . $doubleChar . $testString2) . "-", 'UTF7-IMAP');
 
 /* 2. The first half of a surrogate pair might be followed by an invalid 2nd part, */
 $testString = mb_convert_encoding("\x00\x01\x04\x00", 'UTF-16BE', 'UTF-32BE');
-$testString = substr($testString, 0, 2) . mb_convert_encoding("a", 'UTF-16BE', 'ASCII');
+$testString = substr($testString, 0, 2) . "\x00a";
 identifyInvalidString("&" . mBase64($testString) . "-", 'UTF7-IMAP');
 
 /* ...and we should also detect that wherever it occurs... */
