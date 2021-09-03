@@ -3,13 +3,17 @@ Test Random: MT19937 compatibility
 --FILE--
 <?php
 
+function right_shift_logical($operand): int {
+    return ($operand >> 1) & PHP_INT_MAX;
+}
+
 $seed = random_int(PHP_INT_MIN, PHP_INT_MAX);
 mt_srand($seed);
 $random = new Random(new Random\NumberGenerator\MT19937($seed));
 
 for ($i = 0; $i < 20000; $i++) {
     $mt_rand_ret = mt_rand();
-    $random_ret = $random->getNumberGenerator()->generate() >> 1;
+    $random_ret = right_shift_logical($random->getNumberGenerator()->generate());
 
     if ($mt_rand_ret !== $random_ret) {
         die("failure: mt_rand_ret: ${mt_rand_ret} random_ret: ${random_ret} i: ${i}");
