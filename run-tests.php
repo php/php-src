@@ -2495,6 +2495,8 @@ COMMAND $cmd
         ];
     }
 
+    // Remember CLEAN output to report borked test if it otherwise passes.
+    $clean_output = null;
     if ($test->sectionNotEmpty('CLEAN') && (!$no_clean || $cfg['keep']['clean'])) {
         show_file_block('clean', $test->getSection('CLEAN'));
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
@@ -2502,21 +2504,7 @@ COMMAND $cmd
         if (!$no_clean) {
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-            $output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
-
-            if ($output) {
-                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
-                    $PHP_FAILED_TESTS['BORKED'][] = [
-                    'name' => $file,
-                    'test_name' => '',
-                    'output' => '',
-                    'diff' => '',
-                    'info' => "$output [$file]",
-                ];
-
-                $junit->markTestAs('BORK', $shortname, $tested, null, $output);
-                return 'BORKED';
-            }
+            $clean_output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
         }
 
         if (!$cfg['keep']['clean']) {
@@ -2668,25 +2656,6 @@ COMMAND $cmd
 
         if (preg_match("/^$wanted_re\$/s", $output)) {
             $passed = true;
-            if (!$cfg['keep']['php'] && !$leaked) {
-                @unlink($test_file);
-                @unlink($preload_filename);
-            }
-            @unlink($tmp_post);
-
-            if (!$leaked && !$failed_headers) {
-                if ($test->hasSection('XFAIL')) {
-                    $warn = true;
-                    $info = " (warn: XFAIL section but test passes)";
-                } elseif ($test->hasSection('XLEAK')) {
-                    $warn = true;
-                    $info = " (warn: XLEAK section but test passes)";
-                } else {
-                    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    $junit->markTestAs('PASS', $shortname, $tested);
-                    return 'PASSED';
-                }
-            }
         }
     } else {
         $wanted = trim($test->getSection('EXPECT'));
@@ -2696,29 +2665,46 @@ COMMAND $cmd
         // compare and leave on success
         if (!strcmp($output, $wanted)) {
             $passed = true;
-
-            if (!$cfg['keep']['php'] && !$leaked) {
-                @unlink($test_file);
-                @unlink($preload_filename);
-            }
-            @unlink($tmp_post);
-
-            if (!$leaked && !$failed_headers) {
-                if ($test->hasSection('XFAIL')) {
-                    $warn = true;
-                    $info = " (warn: XFAIL section but test passes)";
-                } elseif ($test->hasSection('XLEAK')) {
-                    $warn = true;
-                    $info = " (warn: XLEAK section but test passes)";
-                } else {
-                    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    $junit->markTestAs('PASS', $shortname, $tested);
-                    return 'PASSED';
-                }
-            }
         }
 
         $wanted_re = null;
+    }
+
+    if ($passed) {
+        if (!$cfg['keep']['php'] && !$leaked) {
+            @unlink($test_file);
+            @unlink($preload_filename);
+        }
+        @unlink($tmp_post);
+
+        if (!$leaked && !$failed_headers) {
+            // If the test passed and CLEAN produced output, report test as borked.
+            if ($clean_output) {
+                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
+                    $PHP_FAILED_TESTS['BORKED'][] = [
+                    'name' => $file,
+                    'test_name' => '',
+                    'output' => '',
+                    'diff' => '',
+                    'info' => "$clean_output [$file]",
+                ];
+
+                $junit->markTestAs('BORK', $shortname, $tested, null, $clean_output);
+                return 'BORKED';
+            }
+
+            if ($test->hasSection('XFAIL')) {
+                $warn = true;
+                $info = " (warn: XFAIL section but test passes)";
+            } elseif ($test->hasSection('XLEAK')) {
+                $warn = true;
+                $info = " (warn: XLEAK section but test passes)";
+            } else {
+                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+                $junit->markTestAs('PASS', $shortname, $tested);
+                return 'PASSED';
+            }
+        }
     }
 
     // Test failed so we need to report details.
