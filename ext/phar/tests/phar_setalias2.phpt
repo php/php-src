@@ -38,9 +38,6 @@ try {
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
-unlink(__DIR__ . '/notphar.phar');
-__HALT_COMPILER();
 ?>
 --EXPECTF--
 hio

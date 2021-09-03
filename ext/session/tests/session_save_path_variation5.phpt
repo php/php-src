@@ -38,7 +38,7 @@ ob_end_flush();
 <?php
 $directory = __DIR__;
 $sessions = ($directory."/session_save_path_variation5");
-var_dump(rmdir($sessions));
+rmdir($sessions);
 ?>
 --EXPECTF--
 *** Testing session_save_path() : variation ***
