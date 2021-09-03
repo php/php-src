@@ -67,6 +67,11 @@ static void observer_show_opcode(zend_execute_data *execute_data)
 	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
 }
 
+static void observer_opline_begin(zend_execute_data *execute_data)
+{
+	php_printf("lineno: %d\n", execute_data->opline->lineno);
+}
+
 static void observer_begin(zend_execute_data *execute_data)
 {
 	if (!ZT_G(observer_show_output)) {
@@ -254,6 +259,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.enabled", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_enabled, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_output", "1", PHP_INI_SYSTEM, OnUpdateBool, observer_show_output, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_all", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_all, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_oplines", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_oplines, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_includes", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_includes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
@@ -273,6 +279,9 @@ void zend_test_observer_init(INIT_FUNC_ARGS)
 		REGISTER_INI_ENTRIES();
 		if (ZT_G(observer_enabled)) {
 			zend_observer_fcall_register(observer_fcall_init);
+			if (ZT_G(observer_observe_oplines)) {
+				zend_observer_opline_register(observer_opline_begin);
+			}
 		}
 	} else {
 		(void)ini_entries;

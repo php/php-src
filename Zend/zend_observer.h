@@ -26,8 +26,10 @@
 
 BEGIN_EXTERN_C()
 
+extern ZEND_API int zend_observer_opline;
 extern ZEND_API int zend_observer_fcall_op_array_extension;
 
+#define ZEND_OBSERVER_OPLINE_ENABLED (zend_observer_opline != -1)
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
 #define ZEND_OBSERVER_FCALL_BEGIN(execute_data) do { \
@@ -41,6 +43,8 @@ extern ZEND_API int zend_observer_fcall_op_array_extension;
 			zend_observer_fcall_end(execute_data, return_value); \
 		} \
 	} while (0)
+
+typedef void (*zend_observer_opline_handler)(zend_execute_data *execute_data);
 
 typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
 typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
@@ -60,6 +64,9 @@ ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
 ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_deactivate(void);
 ZEND_API void zend_observer_shutdown(void);
+
+ZEND_API void zend_observer_opline_register(zend_observer_opline_handler handler);
+ZEND_API void ZEND_FASTCALL zend_observer_opline_begin(zend_execute_data *execute_data);
 
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(
 	zend_execute_data *execute_data);

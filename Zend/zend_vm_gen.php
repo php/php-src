@@ -1081,6 +1081,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                 rewind($out);
                 $code =
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
+                    . "\t\t\t\tzend_observer_opline_begin(execute_data);\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
                     . stream_get_contents($out);
                 fclose($out);
@@ -1091,6 +1092,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                     "_INLINE" : "";
                 $code =
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
+                    . "\t\t\t\tzend_observer_opline_begin(execute_data);\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
                     . "\t\t\t\t{$spec_name}{$inline}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
                     . "\t\t\t\tHYBRID_BREAK();\n";
@@ -2154,9 +2156,11 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#else\n");
                         case ZEND_VM_KIND_CALL:
                             out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
+                            out($f, $m[1]."zend_observer_opline_begin(execute_data);\n");
                             out($f, $m[1]."((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
                             out($f, $m[1]."if (UNEXPECTED(!OPLINE))".$m[3]."\n");
                             out($f,"#else\n");
+                            out($f, $m[1]."zend_observer_opline_begin(execute_data);\n");
                             out($f, $m[1]."if (UNEXPECTED((ret = ((opcode_handler_t)OPLINE->handler)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)) != 0))".$m[3]."\n");
                             out($f,"#endif\n");
                             if ($kind == ZEND_VM_KIND_HYBRID) {

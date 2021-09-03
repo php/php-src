@@ -36,6 +36,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
 	int observer_show_output;
 	int observer_observe_all;
+	int observer_observe_oplines;
 	int observer_observe_includes;
 	int observer_observe_functions;
 	int observer_show_return_type;

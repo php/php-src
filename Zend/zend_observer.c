@@ -38,12 +38,14 @@ typedef struct _zend_observer_fcall_data {
 	zend_observer_fcall_handlers handlers[1];
 } zend_observer_fcall_data;
 
+zend_llist zend_observers_opline_list;
 zend_llist zend_observers_fcall_list;
 zend_llist zend_observer_error_callbacks;
 zend_llist zend_observer_fiber_init;
 zend_llist zend_observer_fiber_switch;
 zend_llist zend_observer_fiber_destroy;
 
+int zend_observer_opline = -1;
 int zend_observer_fcall_op_array_extension = -1;
 
 ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
@@ -73,6 +75,7 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 
 // Called by engine before MINITs
 ZEND_API void zend_observer_startup(void) {
+	zend_llist_init(&zend_observers_opline_list, sizeof(zend_observer_opline_handler), NULL, 1);
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
 	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
 	zend_llist_init(&zend_observer_fiber_init, sizeof(zend_observer_fiber_init_handler), NULL, 1);
@@ -93,9 +96,33 @@ ZEND_API void zend_observer_deactivate(void) {
 }
 
 ZEND_API void zend_observer_shutdown(void) {
+	zend_llist_destroy(&zend_observers_opline_list);
 	zend_llist_destroy(&zend_observers_fcall_list);
 	zend_llist_destroy(&zend_observer_error_callbacks);
 	zend_llist_destroy(&zend_observer_fiber_switch);
+}
+
+ZEND_API void zend_observer_opline_register(zend_observer_opline_handler handler)
+{
+	if (!ZEND_OBSERVER_OPLINE_ENABLED) {
+		zend_observer_opline = 1;
+	}
+	zend_llist_add_element(&zend_observers_opline_list, &handler);
+}
+
+ZEND_API zend_always_inline void ZEND_FASTCALL zend_observer_opline_begin(zend_execute_data *execute_data)
+{
+	if (EXPECTED(!ZEND_OBSERVER_OPLINE_ENABLED)) {
+		return;
+	}
+
+	zend_llist_element *element;
+	zend_observer_opline_handler handler;
+
+	for (element = zend_observers_opline_list.head; element; element = element->next) {
+		handler = *(zend_observer_opline_handler *) (element->data);
+		handler(execute_data);
+	}
 }
 
 static void zend_observer_fcall_install(zend_execute_data *execute_data) {
