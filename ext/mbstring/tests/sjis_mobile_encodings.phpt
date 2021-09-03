@@ -290,7 +290,10 @@ function testSJISVariant($validChars, $nonInvertible, $encoding) {
   // flags, but in Unicode these are represented by a sequence of _two_ codepoints
   // So if only one of those two codepoints appears at the end of a string, it can't
   // be converted to SJIS and should be treated as an error
-  convertInvalidString("\x00\x01\xF1\xE6", "%", "UTF-32BE", $encoding); // Regional Indicator A
+  convertInvalidString("\x00\x01\xF1\xE9", "%", "UTF-32BE", $encoding); // Regional Indicator C
+
+  // Test Regional Indicator codepoint followed by some other codepoint
+  convertInvalidString("\x00\x01\xF1\xE9\x00\x00\x00A", "%A", "UTF-32BE", $encoding);
 }
 
 testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');
