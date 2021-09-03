@@ -1396,28 +1396,26 @@ static bool can_ct_eval_const(zend_constant *c) {
 
 static bool zend_try_ct_eval_const(zval *zv, zend_string *name, bool is_fully_qualified) /* {{{ */
 {
-	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
+	/* Substitute true, false and null (including unqualified usage in namespaces)
+	 * before looking up the possibly namespaced name. */
+	const char *lookup_name = ZSTR_VAL(name);
+	size_t lookup_len = ZSTR_LEN(name);
+
+	if (!is_fully_qualified) {
+		zend_get_unqualified_name(name, &lookup_name, &lookup_len);
+	}
+
+	zend_constant *c;
+	if ((c = zend_get_special_const(lookup_name, lookup_len))) {
+		ZVAL_COPY_VALUE(zv, &c->value);
+		return 1;
+	}
+	c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c && can_ct_eval_const(c)) {
 		ZVAL_COPY_OR_DUP(zv, &c->value);
 		return 1;
 	}
-
-	{
-		/* Substitute true, false and null (including unqualified usage in namespaces) */
-		const char *lookup_name = ZSTR_VAL(name);
-		size_t lookup_len = ZSTR_LEN(name);
-
-		if (!is_fully_qualified) {
-			zend_get_unqualified_name(name, &lookup_name, &lookup_len);
-		}
-
-		if ((c = zend_get_special_const(lookup_name, lookup_len))) {
-			ZVAL_COPY_VALUE(zv, &c->value);
-			return 1;
-		}
-
-		return 0;
-	}
+	return 0;
 }
 /* }}} */
 
