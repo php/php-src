@@ -1335,7 +1335,7 @@ PHP_METHOD(Random, __construct)
 
 	ZVAL_OBJ(&zobj, obj);
 
-	pname = zend_string_init("rng", sizeof("rng") - 1, 0);
+	pname = zend_string_init("randomNumberGenerator", sizeof("randomNumberGenerator") - 1, 0);
 	zend_std_write_property(&random->std, pname, &zobj, NULL);
 	zend_string_release(pname);
 
@@ -1485,7 +1485,7 @@ PHP_METHOD(Random, __unserialize)
 	}
 	object_properties_load(&random->std, Z_ARRVAL_P(members_zv));
 
-	zobj = zend_read_property(random->std.ce, &random->std, "rng", sizeof("rng") - 1, 0, NULL);
+	zobj = zend_read_property(random->std.ce, &random->std, "randomNumberGenerator", sizeof("randomNumberGenerator") - 1, 0, NULL);
 	if (Z_TYPE_P(zobj) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(zobj), random_ce_Random_NumberGenerator)) {
 		zend_throw_exception(NULL, "Incomplete or ill-formed serialization data", 0);
 		RETURN_THROWS();
