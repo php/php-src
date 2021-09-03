@@ -172,7 +172,7 @@ PHP 8.1 UPGRADE NOTES
   . debug_zval_dump() will now print reference wrappers with their refcount,
     instead of only prepending a "&" to the value. This more accurately models
     reference representation since PHP 7.0.
-  . debug_zval_dump() will not print "interned" instead of a dummy refcount of
+  . debug_zval_dump() will now print "interned" instead of a dummy refcount of
     one for interned strings and immutable arrays.
 
 - SPL:
