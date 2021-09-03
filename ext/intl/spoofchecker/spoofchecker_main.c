@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -125,6 +125,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 /* }}} */
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
+/* TODO Document this method on PHP.net */
 /* {{{ Set the loosest restriction level allowed for strings. */
 PHP_METHOD(Spoofchecker, setRestrictionLevel)
 {
@@ -143,8 +144,10 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 			USPOOF_MODERATELY_RESTRICTIVE != level &&
 			USPOOF_MINIMALLY_RESTRICTIVE != level &&
 			USPOOF_UNRESTRICTIVE != level) {
-		php_error_docref(NULL, E_WARNING, "Invalid restriction level value");
-		return;
+		zend_argument_value_error(1, "must be one of Spoofchecker::ASCII, Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE, "
+			"Spoofchecker::SINGLE_HIGHLY_RESTRICTIVE, Spoofchecker::SINGLE_MODERATELY_RESTRICTIVE, "
+			"Spoofchecker::SINGLE_MINIMALLY_RESTRICTIVE, or Spoofchecker::UNRESTRICTIVE");
+		RETURN_THROWS();
 	}
 
 	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);

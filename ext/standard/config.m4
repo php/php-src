@@ -59,6 +59,8 @@ fi
 
 AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -73,9 +75,9 @@ AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
-	exit(!encrypted || strcmp(encrypted,"rl.3StKT.4T8M"));
+	return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_des=yes
@@ -87,6 +89,8 @@ int main() {
 
 AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -101,9 +105,9 @@ AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
 int main() {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
-	exit(!encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc"));
+	return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_ext_des=yes
@@ -115,6 +119,8 @@ int main() {
 
 AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -139,9 +145,9 @@ int main() {
 	strcpy(answer,salt);
 	strcat(answer,"rISCgZzpwk3UhDidwXvin0");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_md5=yes
@@ -153,6 +159,8 @@ int main() {
 
 AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -174,9 +182,9 @@ int main() {
 	strcpy(answer,salt);
 	strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_blowfish=yes
@@ -188,6 +196,8 @@ int main() {
 
 AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -208,9 +218,9 @@ int main() {
 	strcpy(answer, salt);
 	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_sha512=yes
@@ -222,6 +232,8 @@ int main() {
 
 AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -242,9 +254,9 @@ int main() {
 	strcpy(answer, salt);
 	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
 	encrypted = crypt("rasmuslerdorf",salt);
-	exit(!encrypted || strcmp(encrypted,answer));
+	return !encrypted || strcmp(encrypted,answer);
 #else
-	exit(1);
+	return 1;
 #endif
 }]])],[
   ac_cv_crypt_sha256=yes
@@ -283,7 +295,17 @@ if test "$ac_cv_attribute_aligned" = "yes"; then
   AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
-AC_FUNC_FNMATCH
+if test "$cross_compiling" = yes ; then
+  case $host_alias in
+    *linux*)
+      AC_DEFINE([HAVE_FNMATCH], 1,
+		     [Define to 1 if your system has a working POSIX `fnmatch'
+		      function.])
+      ;;
+  esac
+else
+  AC_FUNC_FNMATCH
+fi
 
 dnl
 dnl Check if there is a support means of creating a new process and defining
@@ -378,34 +400,13 @@ dnl Check for argon2
 dnl
 PHP_ARG_WITH([password-argon2],
   [for Argon2 support],
-  [AS_HELP_STRING([[--with-password-argon2[=DIR]]],
-    [Include Argon2 support in password_*. DIR is the Argon2 shared library
-    path])])
+  [AS_HELP_STRING([[--with-password-argon2]],
+    [Include Argon2 support in password_*])])
 
 if test "$PHP_PASSWORD_ARGON2" != "no"; then
-  AC_MSG_CHECKING([for Argon2 library])
-  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
-    if test -r $i/include/argon2.h; then
-      ARGON2_DIR=$i;
-      AC_MSG_RESULT(found in $i)
-      break
-    fi
-  done
-
-  if test -z "$ARGON2_DIR"; then
-    AC_MSG_RESULT([not found])
-    AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
-  fi
-
-  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
-  PHP_ADD_INCLUDE($ARGON2_DIR/include)
-
-  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
-    LIBS="$LIBS -largon2"
-    AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
-  ], [
-    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libraries >= 20161029 are installed])
-  ])
+  PKG_CHECK_MODULES([ARGON2], [libargon2])
+  PHP_EVAL_INCLINE($ARGON2_CFLAGS)
+  PHP_EVAL_LIBLINE($ARGON2_LIBS)
 fi
 
 dnl
@@ -449,7 +450,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c net.c hrtime.c,,,
+                            random.c net.c hrtime.c crc32_x86.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT

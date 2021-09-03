@@ -1,7 +1,7 @@
 --TEST--
 Bug #60150 (Integer overflow during the parsing of invalid exif header)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0

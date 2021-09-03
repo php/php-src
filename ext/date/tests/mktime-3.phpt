@@ -14,7 +14,7 @@ foreach ($tzs as $tz) {
     date_default_timezone_set($tz);
     foreach ($years as $year) {
         printf("Y: %4d - ", $year);
-        $ret = mktime(1, 1, 1, 1, 1, $year);
+        $ret = @mktime(1, 1, 1, 1, 1, $year);
         if ($ret == FALSE) {
             echo "out of range\n";
         } else {

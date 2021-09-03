@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -69,6 +69,16 @@ typedef struct _intl_data {
     {																				\
         intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );	\
         RETURN_FALSE;										\
+    }
+
+/* Check status in object, if error goto a label */
+#define INTL_METHOD_CHECK_STATUS_OR_GOTO(obj, msg, label)							\
+    intl_error_set_code( NULL, INTL_DATA_ERROR_CODE((obj)) );						\
+    if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
+    {																				\
+        intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 );				\
+        RETVAL_FALSE;																\
+        goto label;																	\
     }
 
 /* Check status in object, if error return null */

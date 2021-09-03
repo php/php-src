@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strrchr() function : with empty needle
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

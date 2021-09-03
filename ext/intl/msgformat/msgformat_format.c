@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -80,6 +80,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	size_t      slocale_len = 0;
 	MessageFormatter_object mf;
 	MessageFormatter_object *mfo = &mf;
+	UParseError parse_error;
 
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "ssa",
@@ -119,10 +120,25 @@ PHP_FUNCTION( msgfmt_format_message )
 #endif
 
 	/* Create an ICU message formatter. */
-	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));
+	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, &parse_error, &INTL_DATA_ERROR_CODE(mfo));
 	if(spattern && spattern_len) {
 		efree(spattern);
 	}
+
+	if (INTL_DATA_ERROR_CODE( mfo ) == U_PATTERN_SYNTAX_ERROR) {
+		char *msg = NULL;
+		smart_str parse_error_str;
+		parse_error_str = intl_parse_error_to_string( &parse_error );
+		spprintf( &msg, 0, "pattern syntax error (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "unknown parser error" );
+		smart_str_free( &parse_error_str );
+
+		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( mfo ) );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P( mfo ), msg, 1 );
+
+		efree( msg );
+		RETURN_FALSE;
+	}
+
 	INTL_METHOD_CHECK_STATUS(mfo, "Creating message formatter failed");
 
 	msgfmt_do_format(mfo, args, return_value);

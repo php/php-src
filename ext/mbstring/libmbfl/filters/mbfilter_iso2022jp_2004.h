@@ -33,7 +33,6 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_2022jp_2004;
-extern const struct mbfl_identify_vtbl vtbl_identify_2022jp_2004;
 extern const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004;
 

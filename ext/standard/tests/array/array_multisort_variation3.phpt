@@ -103,76 +103,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_multisort() : usage variation ***
 
 --int 0--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag that has not already been specified
+array_multisort(): Argument #3 must be an array or a sort flag that has not already been specified
 
 --int 1--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag that has not already been specified
+array_multisort(): Argument #3 must be an array or a sort flag that has not already been specified
 
 --int 12345--
-array_multisort(): Argument #3 ($sort_flags) must be a valid sort flag
+array_multisort(): Argument #3 must be a valid sort flag
 
 --int -12345--
-array_multisort(): Argument #3 ($sort_flags) must be a valid sort flag
+array_multisort(): Argument #3 must be a valid sort flag
 
 --float 10.5--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --float -10.5--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --float 12.3456789000e10--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --float -12.3456789000e10--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --float .5--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --uppercase NULL--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --lowercase null--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --lowercase true--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --lowercase false--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --uppercase TRUE--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --uppercase FALSE--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --empty string DQ--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --empty string SQ--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --string DQ--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --string SQ--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --mixed case string--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --heredoc--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --instance of classWithToString--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --instance of classWithoutToString--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --undefined var--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag
 
 --unset var--
-array_multisort(): Argument #3 ($sort_flags) must be an array or a sort flag
+array_multisort(): Argument #3 must be an array or a sort flag

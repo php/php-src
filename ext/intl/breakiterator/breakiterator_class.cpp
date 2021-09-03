@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -69,7 +69,7 @@ U_CFUNC void breakiterator_object_construct(zval *object,
 	BreakIterator_object *bio;
 
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; //populate to from object
-	assert(bio->biter == NULL);
+	ZEND_ASSERT(bio->biter == NULL);
 	bio->biter = biter;
 }
 
@@ -203,10 +203,10 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 {
 	BreakIterator_object*	intern;
 
-	intern = (BreakIterator_object*)ecalloc(1, sizeof(BreakIterator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = (BreakIterator_object*) zend_object_alloc(sizeof(BreakIterator_object), ce);
 
 	zend_object_std_init(&intern->zo, ce);
-    object_properties_init((zend_object*) intern, ce);
+	object_properties_init(&intern->zo, ce);
 	breakiterator_object_init(intern);
 
 	intern->zo.handlers = &BreakIterator_handlers;
@@ -220,13 +220,11 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
  */
 U_CFUNC void breakiterator_register_BreakIterator_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", class_IntlBreakIterator_methods);
-	ce.create_object = BreakIterator_object_create;
-	ce.get_iterator = _breakiterator_get_iterator;
-	BreakIterator_ce_ptr = zend_register_internal_class(&ce);
+
+	BreakIterator_ce_ptr = register_class_IntlBreakIterator(zend_ce_aggregate);
+	BreakIterator_ce_ptr->create_object = BreakIterator_object_create;
+	BreakIterator_ce_ptr->get_iterator = _breakiterator_get_iterator;
 
 	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
@@ -235,8 +233,6 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
-
-	zend_class_implements(BreakIterator_ce_ptr, 1, zend_ce_aggregate);
 
 	zend_declare_class_constant_long(BreakIterator_ce_ptr,
 		"DONE", sizeof("DONE") - 1, BreakIterator::DONE );
@@ -271,15 +267,9 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 
 
 	/* Create and register 'RuleBasedBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
-			class_IntlRuleBasedBreakIterator_methods);
-	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	RuleBasedBreakIterator_ce_ptr = register_class_IntlRuleBasedBreakIterator(BreakIterator_ce_ptr);
 
 	/* Create and register 'CodePointBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator",
-			class_IntlCodePointBreakIterator_methods);
-	CodePointBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr);
+	CodePointBreakIterator_ce_ptr = register_class_IntlCodePointBreakIterator(BreakIterator_ce_ptr);
 }
 /* }}} */

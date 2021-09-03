@@ -1,9 +1,9 @@
 --TEST--
 mysqli_stmt_send_long_data()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -64,9 +64,11 @@ require_once('skipifconnectfailure.inc');
     */
     assert(strlen($blob) <= $max_allowed_packet);
 
-    if (false !== ($tmp = mysqli_stmt_send_long_data($stmt, -1, $blob)))
-        printf("[012] Expecting boolean/false, got %s/%s. [%d] %s\n",
-            gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+    try {
+        $tmp = mysqli_stmt_send_long_data($stmt, -1, $blob);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (false !== ($tmp = mysqli_stmt_send_long_data($stmt, 999, $blob)))
         printf("[014] Expecting boolean/false, got %s/%s. [%d] %s\n",
@@ -104,8 +106,8 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_send_long_data(): Invalid parameter number in %s on line %d
+--EXPECT--
+mysqli_stmt_send_long_data(): Argument #2 ($param_num) must be greater than or equal to 0
 done!

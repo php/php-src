@@ -1,8 +1,9 @@
 --TEST--
 PDO MySQL Bug #61207 (PDO::nextRowset() after a multi-statement query doesn't always work)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
@@ -10,6 +11,7 @@ MySQLPDOTest::skip();
 --FILE--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+/** @var PDO $db */
 $db = MySQLPDOTest::factory();
 
 $db->query('DROP TABLE IF EXISTS test');
@@ -19,8 +21,8 @@ $handle1 = $db->prepare('insert into test(id) values(1);
                           select * from test where id = ?;
                           update test set id = 2 where id = ?;');
 
-$handle1->bindValue('1', '1');
-$handle1->bindValue('2', '1');
+$handle1->bindValue(1, '1');
+$handle1->bindValue(2, '1');
 
 $handle1->execute();
 $i = 1;
@@ -34,8 +36,8 @@ do {
 $handle2 = $db->prepare('select * from test where id = ?;
                            update test set id = 1 where id = ?;');
 
-$handle2->bindValue('1', '2');
-$handle2->bindValue('2', '2');
+$handle2->bindValue(1, '2');
+$handle2->bindValue(2, '2');
 
 $handle2->execute();
 
@@ -50,8 +52,8 @@ do {
 $handle3 = $db->prepare('update test set id = 2 where id = ?;
                            select * from test where id = ?;');
 
-$handle3->bindValue('1', '1');
-$handle3->bindValue('2', '2');
+$handle3->bindValue(1, '1');
+$handle3->bindValue(2, '2');
 
 $handle3->execute();
 
@@ -67,8 +69,8 @@ $handle4 = $db->prepare('insert into test(id) values(3);
                            update test set id = 2 where id = ?;
                            select * from test where id = ?;');
 
-$handle4->bindValue('1', '3');
-$handle4->bindValue('2', '2');
+$handle4->bindValue(1, '3');
+$handle4->bindValue(2, '2');
 
 $handle4->execute();
 

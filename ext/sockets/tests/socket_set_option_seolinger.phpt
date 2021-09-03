@@ -4,12 +4,8 @@ Test if socket_set_option() works, option:SO_SEOLINGER
 -wrong params
 -set/get params comparison
 -l_linger not given
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -45,11 +41,8 @@ var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 socket_close($socket);
 ?>
 --EXPECT--
-socket_set_option(): Argument #4 ($optval) must have key "l_onoff"
-socket_set_option(): Argument #4 ($optval) must have key "l_linger"
+socket_set_option(): Argument #4 ($value) must have key "l_onoff"
+socket_set_option(): Argument #4 ($value) must have key "l_linger"
 bool(true)
 bool(true)
 bool(true)
---CREDITS--
-Moritz Neuhaeuser, info@xcompile.net
-PHP Testfest Berlin 2009-05-10

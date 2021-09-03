@@ -14,6 +14,7 @@ register_shutdown_function(function(){
 
 //$undefined = null; // defined variable does not cause problems
 $undefined->foo();
+?>
 --EXPECTF--
 Error handler called (Undefined variable $undefined)
 

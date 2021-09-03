@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -172,16 +172,14 @@ PHP_FUNCTION(socket_sendmsg)
 	ssize_t			res;
 
 	/* zmsg should be passed by ref */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa|l", &zsocket, socket_ce, &zmsg, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags, 3);
 
-	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
-					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		RETURN_THROWS();
-	}
+	php_sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
 			sizeof(*msghdr), "msghdr", &allocations, &err);
@@ -194,14 +192,13 @@ PHP_FUNCTION(socket_sendmsg)
 	res = sendmsg(php_sock->bsd_socket, msghdr, (int)flags);
 
 	if (res != -1) {
-		zend_llist_destroy(allocations);
-		efree(allocations);
-
-		RETURN_LONG((zend_long)res);
+		RETVAL_LONG((zend_long)res);
 	} else {
-		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
-		RETURN_FALSE;
+		PHP_SOCKET_ERROR(php_sock, "Error in sendmsg", errno);
+		RETVAL_FALSE;
 	}
+
+	allocations_dispose(&allocations);
 }
 
 PHP_FUNCTION(socket_recvmsg)
@@ -216,17 +213,14 @@ PHP_FUNCTION(socket_recvmsg)
 	struct err_s	err = {0};
 
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l",
-			&zsocket, &zmsg, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa|l", &zsocket, socket_ce, &zmsg, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags, 3);
 
-	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
-					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		RETURN_THROWS();
-	}
+	php_sock = Z_SOCKET_P(zsocket);
+	ENSURE_SOCKET_VALID(php_sock);
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,
 			sizeof(*msghdr), "msghdr", &allocations, &err);
@@ -251,7 +245,6 @@ PHP_FUNCTION(socket_recvmsg)
 
 		/* we don;t need msghdr anymore; free it */
 		msghdr = NULL;
-		allocations_dispose(&allocations);
 
 		zval_ptr_dtor(zmsg);
 		if (!err.has_error) {
@@ -262,14 +255,15 @@ PHP_FUNCTION(socket_recvmsg)
 			/* no need to destroy/free zres -- it's NULL in this circumstance */
 			assert(zres == NULL);
 		}
+		RETVAL_LONG((zend_long)res);
 	} else {
 		SOCKETS_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",
 				errno, sockets_strerror(errno));
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 
-	RETURN_LONG((zend_long)res);
+	allocations_dispose(&allocations);
 }
 
 PHP_FUNCTION(socket_cmsg_space)
@@ -301,8 +295,9 @@ PHP_FUNCTION(socket_cmsg_space)
 	}
 
 	if (entry->var_el_size > 0) {
-		size_t rem_size = ZEND_LONG_MAX - entry->size;
-		size_t n_max = rem_size / entry->var_el_size;
+		/* Leading underscore to avoid symbol collision on AIX. */
+		size_t _rem_size = ZEND_LONG_MAX - entry->size;
+		size_t n_max = _rem_size / entry->var_el_size;
 		size_t size = entry->size + n * entry->var_el_size;
 		size_t total_size = CMSG_SPACE(size);
 		if (n > n_max /* zend_long overflow */
@@ -361,7 +356,7 @@ int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 dosockopt:
 	retval = setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen);
 	if (retval != 0) {
-		PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
+		PHP_SOCKET_ERROR(php_sock, "Unable to set socket option", errno);
 	}
 	allocations_dispose(&allocations);
 

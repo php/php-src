@@ -548,19 +548,19 @@ float(-512000)
 string(6) "double"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
@@ -943,19 +943,19 @@ float(-512000)
 string(6) "double"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"

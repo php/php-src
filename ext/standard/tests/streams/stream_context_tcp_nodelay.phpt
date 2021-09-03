@@ -1,10 +1,11 @@
 --TEST--
 stream context tcp_nodelay
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
-if (!extension_loaded("sockets")) die("skip: need sockets");
- ?>
+?>
 --FILE--
 <?php
 $ctxt = stream_context_create([

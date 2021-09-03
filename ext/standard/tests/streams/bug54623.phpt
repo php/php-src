@@ -14,6 +14,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECTF--
 int(%d)
 int(%d)

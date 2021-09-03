@@ -20,8 +20,12 @@ $longVals = array(
 
 
 foreach ($longVals as $longVal) {
-   echo "--- testing: $longVal ---\n";
-   var_dump(decbin($longVal));
+    echo "--- testing: $longVal ---\n";
+    try {
+        var_dump(decbin($longVal));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 ?>
@@ -51,7 +55,7 @@ string(32) "11111111111111111111111111111101"
 --- testing: 9223372036854775806 ---
 string(63) "111111111111111111111111111111111111111111111111111111111111110"
 --- testing: 9.2233720368548E+18 ---
-string(64) "1000000000000000000000000000000000000000000000000000000000000000"
+decbin(): Argument #1 ($num) must be of type int, float given
 --- testing: -9223372036854775807 ---
 string(64) "1000000000000000000000000000000000000000000000000000000000000001"
 --- testing: -9.2233720368548E+18 ---

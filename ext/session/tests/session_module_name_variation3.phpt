@@ -4,6 +4,8 @@ Test session_module_name() function : variation
 session.save_path=
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -35,8 +37,6 @@ ob_end_flush();
 *** Testing session_module_name() : variation ***
 string(5) "files"
 string(4) "user"
-
-Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 
 Fatal error: Uncaught Exception: Stop...! in %s:%d
 Stack trace:

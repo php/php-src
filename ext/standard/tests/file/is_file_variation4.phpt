@@ -35,7 +35,7 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( is_file( $file_path."/".$file ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   clearstatcache();
@@ -66,8 +66,8 @@ bool(false)
 - Iteration 6 -
 bool(false)
 - Iteration 7 -
-is_file(): Argument #1 ($filename) must be a valid path, string given
+bool(false)
 - Iteration 8 -
-is_file(): Argument #1 ($filename) must be a valid path, string given
+bool(false)
 
 *** Done ***

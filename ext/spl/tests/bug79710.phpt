@@ -32,7 +32,7 @@ Run::main();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught RuntimeException: Object not initialized in %s:%d
+Fatal error: Uncaught Error: Object not initialized in %s:%d
 Stack trace:
 #0 %s(%d): SplFileObject->flock(2)
 #1 [internal function]: Target->__destruct()

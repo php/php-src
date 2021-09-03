@@ -6,10 +6,10 @@ Bug #30346 (arrayAccess and using $this)
 class Test implements ArrayAccess
 {
         public function __construct() { }
-        public function offsetExists( $offset ) { return false; }
-        public function offsetGet( $offset ) { return $offset; }
-        public function offsetSet( $offset, $data ) { }
-        public function offsetUnset( $offset ) { }
+        public function offsetExists( $offset ): bool { return false; }
+        public function offsetGet( $offset ): mixed { return $offset; }
+        public function offsetSet( $offset, $data ): void { }
+        public function offsetUnset( $offset ): void { }
 }
 
 $post = new Test;

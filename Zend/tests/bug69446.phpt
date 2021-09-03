@@ -21,6 +21,7 @@ $foo->bad->x = new stdClass;
 unset($foo);
 gc_collect_cycles();
 var_dump($bar);
+?>
 --EXPECT--
 object(bad)#2 (2) {
   ["x"]=>

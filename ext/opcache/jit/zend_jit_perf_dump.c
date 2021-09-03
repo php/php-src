@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,6 +22,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #if defined(__linux__)
 #include <sys/syscall.h>
@@ -32,11 +35,14 @@
 # include <sys/sysctl.h>
 #elif defined(__NetBSD__)
 # include <lwp.h>
+#elif defined(__DragonFly__)
+# include <sys/lwp.h>
+# include <sys/sysctl.h>
 #elif defined(__sun)
 // avoiding thread.h inclusion as it conflicts with vtunes types.
 extern unsigned int thr_self(void);
 #elif defined(__HAIKU__)
-#include <kernel/image.h>
+#include <FindDirectory.h>
 #endif
 
 #include "zend_elf.h"
@@ -124,7 +130,7 @@ static void zend_jit_perf_jitdump_open(void)
 	fd = open("/proc/self/exe", O_RDONLY);
 #elif defined(__NetBSD__)
 	fd = open("/proc/curproc/exe", O_RDONLY);
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 	char path[PATH_MAX];
 	size_t pathlen = sizeof(path);
 	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
@@ -133,23 +139,15 @@ static void zend_jit_perf_jitdump_open(void)
 	}
 	fd = open(path, O_RDONLY);
 #elif defined(__sun)
-	const char *path = getexecname();
-	fd = open(path, O_RDONLY);
+	fd = open("/proc/self/path/a.out", O_RDONLY);
 #elif defined(__HAIKU__)
-	image_info ii;
-	int32_t ic = 0;
-
-	while (get_next_image_info(0, &ic, &ii) == B_OK) {
-		if (ii.type == B_APP_IMAGE) {
-			break;
-		}
-	}
-
-	if (ii.type != B_APP_IMAGE) {
+	char path[PATH_MAX];
+	if (find_path(B_APP_IMAGE_SYMBOL, B_FIND_PATH_IMAGE_PATH,
+		NULL, path, sizeof(path)) != B_OK) {
 		return;
 	}
 
-	fd = open(ii.name, O_RDONLY);
+	fd = open(path, O_RDONLY);
 #else
 	fd = -1;
 #endif
@@ -233,6 +231,8 @@ static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t
 		thread_id = getthrid();
 #elif defined(__NetBSD__)
 		thread_id = _lwp_self();
+#elif defined(__DragonFly__)
+		thread_id = lwp_gettid();
 #elif defined(__sun)
 		thread_id = thr_self();
 #endif

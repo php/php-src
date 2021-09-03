@@ -1,7 +1,8 @@
 --TEST--
 gmp_random_seed() basic tests
+--EXTENSIONS--
+gmp
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
@@ -106,12 +107,16 @@ var_dump(gmp_strval(gmp_random_range(-10000, 0)));
 
 
 // standard non conversion error
-var_dump(gmp_random_seed('not a number'));
+try {
+    var_dump(gmp_random_seed('not a number'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 string(3) "107"
 string(30) "576055025228722307492589900056"
@@ -168,7 +173,5 @@ string(301) "7240560133683902061389868703829443708354917824328579773726122219756
 string(4) "9636"
 string(5) "-9848"
 string(5) "-9648"
-
-Warning: gmp_random_seed(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
+gmp_random_seed(): Argument #1 ($seed) is not an integer string
 Done

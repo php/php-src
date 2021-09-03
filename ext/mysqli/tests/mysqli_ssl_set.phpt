@@ -1,12 +1,12 @@
 --TEST--
 mysqli_ssl_set() - test is a stub!
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_ssl_set'))
-	die("skip function not available");
+    die("skip function not available");
 ?>
 --FILE--
 <?php

@@ -27,16 +27,24 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.121 2021/02/05 22:29:07 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
+#include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>	/* for pipe2() */
+#endif
+#if defined(HAVE_WCHAR_H)
 #include <wchar.h>
+#endif
+#if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
+#endif
 #include <limits.h>
 
 #ifndef SIZE_MAX
@@ -50,27 +58,127 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
+protected char *
+file_copystr(char *buf, size_t blen, size_t width, const char *str)
+{
+	if (++width > blen)
+		width = blen;
+	strlcpy(buf, str, width);
+	return buf;
+}
+
+private void
+file_clearbuf(struct magic_set *ms)
+{
+	efree(ms->o.buf);
+	ms->o.buf = NULL;
+	ms->o.blen = 0;
+}
+
+private int
+file_checkfield(char *msg, size_t mlen, const char *what, const char **pp)
+{
+	const char *p = *pp;
+	int fw = 0;
+
+	while (*p && isdigit((unsigned char)*p))
+		fw = fw * 10 + (*p++ - '0');
+
+	*pp = p;
+
+	if (fw < 1024)
+		return 1;
+	if (msg)
+		snprintf(msg, mlen, "field %s too large: %d", what, fw);
+
+	return 0;
+}
+
+protected int
+file_checkfmt(char *msg, size_t mlen, const char *fmt)
+{
+	for (const char *p = fmt; *p; p++) {
+		if (*p != '%')
+			continue;
+		if (*++p == '%')
+			continue;
+		// Skip uninteresting.
+		while (strchr("#0.'+- ", *p) != NULL)
+			p++;
+		if (*p == '*') {
+			if (msg)
+				snprintf(msg, mlen, "* not allowed in format");
+			return -1;
+		}
+
+		if (!file_checkfield(msg, mlen, "width", &p))
+			return -1;
+
+		if (*p == '.') {
+			p++;
+			if (!file_checkfield(msg, mlen, "precision", &p))
+				return -1;
+		}
+
+		if (!isalpha((unsigned char)*p)) {
+			if (msg)
+				snprintf(msg, mlen, "bad format char: %c", *p);
+			return -1;
+		}
+	}
+	return 0;
+}
+
+/*
+ * Like printf, only we append to a buffer.
+ */
+protected int
+file_vprintf(struct magic_set *ms, const char *fmt, va_list ap)
+{
+	size_t len;
+	char *buf, *newstr;
+	char tbuf[1024];
+
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return 0;
+
+	if (file_checkfmt(tbuf, sizeof(tbuf), fmt)) {
+		file_clearbuf(ms);
+		file_error(ms, 0, "Bad magic format `%s' (%s)", fmt, tbuf);
+		return -1;
+	}
+
+	len = vspprintf(&buf, 0, fmt, ap);
+	if (len > 1024 || len + ms->o.blen > 1024 * 1024) {
+		size_t blen = ms->o.blen;
+		if (buf) efree(buf);
+		file_clearbuf(ms);
+		file_error(ms, 0, "Output buffer space exceeded %d+%zu", len,
+		    blen);
+		return -1;
+	}
+
+	if (ms->o.buf != NULL) {
+		len = spprintf(&newstr, 0, "%s%s", ms->o.buf, buf);
+		efree(buf);
+		efree(ms->o.buf);
+		buf = newstr;
+	}
+	ms->o.buf = buf;
+	ms->o.blen = len;
+	return 0;
+}
+
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
+	int rv;
 	va_list ap;
-	char *buf = NULL, *newstr;
 
 	va_start(ap, fmt);
-	vspprintf(&buf, 0, fmt, ap);
+	rv = file_vprintf(ms, fmt, ap);
 	va_end(ap);
-
-	if (ms->o.buf != NULL) {
-		spprintf(&newstr, 0, "%s%s", ms->o.buf, (buf ? buf : ""));
-		if (buf) {
-			efree(buf);
-		}
-		efree(ms->o.buf);
-		ms->o.buf = newstr;
-	} else {
-		ms->o.buf = buf;
-	}
-	return 0;
+	return rv;
 }
 
 /*
@@ -81,30 +189,18 @@ private void
 file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
     size_t lineno)
 {
-	char *buf = NULL;
-
 	/* Only the first error is ok */
 	if (ms->event_flags & EVENT_HAD_ERR)
 		return;
 	if (lineno != 0) {
-		efree(ms->o.buf);
-		ms->o.buf = NULL;
-		file_printf(ms, "line %" SIZE_T_FORMAT "u:", lineno);
+		file_clearbuf(ms);
+		(void)file_printf(ms, "line %" SIZE_T_FORMAT "u:", lineno);
 	}
-
-	vspprintf(&buf, 0, f, va);
-	va_end(va);
-
-	if (error > 0) {
-		file_printf(ms, "%s (%s)", (*buf ? buf : ""), strerror(error));
-	} else if (*buf) {
-		file_printf(ms, "%s", buf);
-	}
-
-	if (buf) {
-		efree(buf);
-	}
-
+	if (ms->o.buf && *ms->o.buf)
+		(void)file_printf(ms, " ");
+	(void)file_vprintf(ms, f, va);
+	if (error > 0)
+		(void)file_printf(ms, " (%s)", strerror(error));
 	ms->event_flags |= EVENT_HAD_ERR;
 	ms->error = error;
 }
@@ -151,10 +247,32 @@ file_badread(struct magic_set *ms)
 	file_error(ms, errno, "error reading");
 }
 
+#ifndef COMPILE_ONLY
+#define FILE_SEPARATOR "\n- "
+
 protected int
 file_separator(struct magic_set *ms)
 {
-	return file_printf(ms, "\n- ");
+	return file_printf(ms, FILE_SEPARATOR);
+}
+
+static void
+trim_separator(struct magic_set *ms)
+{
+	size_t l;
+
+	if (ms->o.buf == NULL)
+		return;
+
+	l = strlen(ms->o.buf);
+	if (l < sizeof(FILE_SEPARATOR))
+		return;
+
+	l -= sizeof(FILE_SEPARATOR) - 1;
+	if (strcmp(ms->o.buf + l, FILE_SEPARATOR) != 0)
+		return;
+
+	ms->o.buf[l] = '\0';
 }
 
 static int
@@ -256,6 +374,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 #endif
 
 #if PHP_FILEINFO_UNCOMPRESS
+	/* try compression stuff */
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
 		m = file_zmagic(ms, &b, inname);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
@@ -281,6 +400,17 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 		m = file_is_json(ms, &b);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			(void)fprintf(stderr, "[try json %d]\n", m);
+		if (m) {
+			if (checkdone(ms, &rv))
+				goto done;
+		}
+	}
+
+	/* Check if we have a CSV file */
+	if ((ms->flags & MAGIC_NO_CHECK_CSV) == 0) {
+		m = file_is_csv(ms, &b, looks_text);
+		if ((ms->flags & MAGIC_DEBUG) != 0)
+			(void)fprintf(stderr, "[try csv %d]\n", m);
 		if (m) {
 			if (checkdone(ms, &rv))
 				goto done;
@@ -360,6 +490,7 @@ simple:
 				rv = -1;
 	}
  done:
+	trim_separator(ms);
 	if ((ms->flags & MAGIC_MIME_ENCODING) != 0) {
 		if (ms->flags & MAGIC_MIME_TYPE)
 			if (file_printf(ms, "; charset=") == -1)
@@ -377,6 +508,7 @@ simple:
 
 	return m;
 }
+#endif
 
 protected int
 file_reset(struct magic_set *ms, int checkloaded)
@@ -385,10 +517,7 @@ file_reset(struct magic_set *ms, int checkloaded)
 		file_error(ms, 0, "no magic files loaded");
 		return -1;
 	}
-	if (ms->o.buf) {
-		efree(ms->o.buf);
-		ms->o.buf = NULL;
-	}
+	file_clearbuf(ms);
 	if (ms->o.pbuf) {
 		efree(ms->o.pbuf);
 		ms->o.pbuf = NULL;
@@ -434,7 +563,7 @@ file_getbuffer(struct magic_set *ms)
 	}
 	ms->o.pbuf = pbuf;
 
-#if defined(HAVE_WCWIDTH)
+#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
 	{
 		mbstate_t state;
 		wchar_t nextchar;
@@ -510,13 +639,13 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 protected size_t
 file_printedlen(const struct magic_set *ms)
 {
-	return ms->o.buf == NULL ? 0 : strlen(ms->o.buf);
+	return ms->o.blen;
 }
 
 protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-	zval patt;
+	zend_string *pattern;
 	uint32_t opts = 0;
 	pcre_cache_entry *pce;
 	zend_string *res;
@@ -524,13 +653,13 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	size_t rep_cnt = 0;
 
 	opts |= PCRE2_MULTILINE;
-	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
-	if ((pce = pcre_get_compiled_regex_cache_ex(Z_STR(patt), 0)) == NULL) {
-		zval_ptr_dtor(&patt);
+	pattern = convert_libmagic_pattern((char*)pat, strlen(pat), opts);
+	if ((pce = pcre_get_compiled_regex_cache_ex(pattern, 0)) == NULL) {
+		zend_string_release(pattern);
 		rep_cnt = -1;
 		goto out;
 	}
-	zval_ptr_dtor(&patt);
+	zend_string_release(pattern);
 
 	repl = zend_string_init(rep, strlen(rep), 0);
 	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
@@ -562,9 +691,11 @@ file_push_buffer(struct magic_set *ms)
 		return NULL;
 
 	pb->buf = ms->o.buf;
+	pb->blen = ms->o.blen;
 	pb->offset = ms->offset;
 
 	ms->o.buf = NULL;
+	ms->o.blen = 0;
 	ms->offset = 0;
 
 	return pb;
@@ -584,6 +715,7 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 	rbuf = ms->o.buf;
 
 	ms->o.buf = pb->buf;
+	ms->o.blen = pb->blen;
 	ms->offset = pb->offset;
 
 	efree(pb);
@@ -614,4 +746,73 @@ file_printable(char *buf, size_t bufsiz, const char *str, size_t slen)
 	}
 	*ptr = '\0';
 	return buf;
+}
+
+struct guid {
+	uint32_t data1;
+	uint16_t data2;
+	uint16_t data3;
+	uint8_t data4[8];
+};
+
+protected int
+file_parse_guid(const char *s, uint64_t *guid)
+{
+	struct guid *g = CAST(struct guid *, CAST(void *, guid));
+	return sscanf(s,
+	    "%8x-%4hx-%4hx-%2hhx%2hhx-%2hhx%2hhx%2hhx%2hhx%2hhx%2hhx",
+	    &g->data1, &g->data2, &g->data3, &g->data4[0], &g->data4[1],
+	    &g->data4[2], &g->data4[3], &g->data4[4], &g->data4[5],
+	    &g->data4[6], &g->data4[7]) == 11 ? 0 : -1;
+}
+
+protected int
+file_print_guid(char *str, size_t len, const uint64_t *guid)
+{
+	const struct guid *g = CAST(const struct guid *,
+	    CAST(const void *, guid));
+
+	return snprintf(str, len, "%.8X-%.4hX-%.4hX-%.2hhX%.2hhX-"
+	    "%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX%.2hhX",
+	    g->data1, g->data2, g->data3, g->data4[0], g->data4[1],
+	    g->data4[2], g->data4[3], g->data4[4], g->data4[5],
+	    g->data4[6], g->data4[7]);
+}
+
+#if 0
+protected int
+file_pipe_closexec(int *fds)
+{
+#ifdef HAVE_PIPE2
+	return pipe2(fds, O_CLOEXEC);
+#else
+	if (pipe(fds) == -1)
+		return -1;
+	(void)fcntl(fds[0], F_SETFD, FD_CLOEXEC);
+	(void)fcntl(fds[1], F_SETFD, FD_CLOEXEC);
+	return 0;
+#endif
+}
+
+protected int
+file_clear_closexec(int fd) {
+	return fcntl(fd, F_SETFD, 0);
+}
+#endif
+
+protected char *
+file_strtrim(char *str)
+{
+	char *last;
+
+	while (isspace(CAST(unsigned char, *str)))
+		str++;
+	last = str;
+	while (*last)
+		last++;
+	--last;
+	while (isspace(CAST(unsigned char, *last)))
+		last--;
+	*++last = '\0';
+	return str;
 }

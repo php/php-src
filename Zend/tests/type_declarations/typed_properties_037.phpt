@@ -7,6 +7,7 @@ $foo = new class {
 };
 
 var_dump($foo);
+?>
 --EXPECTF--
 object(class@anonymous)#%d (1) {
   ["bar"]=>

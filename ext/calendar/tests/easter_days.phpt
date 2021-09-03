@@ -1,7 +1,7 @@
 --TEST--
 easter_days()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 echo easter_days(1999), "\n";

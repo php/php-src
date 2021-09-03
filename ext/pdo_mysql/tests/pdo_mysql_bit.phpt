@@ -1,12 +1,13 @@
 --TEST--
 MySQL PDO->exec(), BIT columns - remove after fix!
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
-	die("skip Known bug - mysqlnd handles BIT incorrectly!");
+    die("skip Known bug - mysqlnd handles BIT incorrectly!");
 ?>
 --FILE--
 <?php

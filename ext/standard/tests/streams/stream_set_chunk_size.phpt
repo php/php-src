@@ -59,6 +59,7 @@ try {
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
+?>
 --EXPECT--
 bool(true)
 should return previous chunk size (8192)

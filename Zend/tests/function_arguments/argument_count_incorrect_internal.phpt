@@ -7,5 +7,6 @@ try {
 } catch (ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
+?>
 --EXPECT--
-substr() expects at least 2 parameters, 1 given
+substr() expects at least 2 arguments, 1 given

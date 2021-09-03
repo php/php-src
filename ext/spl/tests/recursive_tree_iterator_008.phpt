@@ -20,14 +20,13 @@ foreach($it as $k => $v) {
 }
 try {
     $it->setPrefixPart(-1, "");
-    $it->setPrefixPart(6, "");
-} catch (OutOfRangeException $e) {
-    echo "OutOfRangeException thrown\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 try {
     $it->setPrefixPart(6, "");
-} catch (OutOfRangeException $e) {
-    echo "OutOfRangeException thrown\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -35,5 +34,5 @@ try {
 [0] => 0145b
 [c] => 045Array
 [0] => 0245d
-OutOfRangeException thrown
-OutOfRangeException thrown
+RecursiveTreeIterator::setPrefixPart(): Argument #1 ($part) must be a RecursiveTreeIterator::PREFIX_* constant
+RecursiveTreeIterator::setPrefixPart(): Argument #1 ($part) must be a RecursiveTreeIterator::PREFIX_* constant

@@ -1,57 +1,58 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95fee5001472494653e6a83467c3c0079ea70728 */
+ * Stub hash: 4baf9586ab91f37facc865cf1b3aa6a87e5d732d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Collator_create arginfo_class_Collator___construct
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_compare, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Collator_create, 0, 1, Collator, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sort, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, sort_flag, "Collator::SORT_REGULAR")
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_compare, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sortWithSortKeys, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_sort, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_asort, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_sortWithSortKeys, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(1, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getAttribute, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
+#define arginfo_class_Collator_asort arginfo_class_Collator_sort
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getAttribute, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, attribute, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_setAttribute, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, val, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_setAttribute, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, attribute, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getStrength, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Collator_getStrength, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_setStrength, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, strength, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getLocale, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getLocale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Collator_getErrorCode arginfo_class_Collator_getStrength
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getErrorCode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Collator_getErrorMessage arginfo_class_Collator_getStrength
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getErrorMessage, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getSortKey, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getSortKey, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -88,3 +89,13 @@ static const zend_function_entry class_Collator_methods[] = {
 	ZEND_ME_MAPPING(getSortKey, collator_get_sort_key, arginfo_class_Collator_getSortKey, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Collator(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Collator", class_Collator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

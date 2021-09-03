@@ -3,15 +3,15 @@ Test sapi_windows_vt100_support on newer Windows versions with redirected STDIN/
 --SKIPIF--
 <?php
 if (getenv("SKIP_IO_CAPTURE_TESTS")) {
-	die("skip I/O capture test");
+    die("skip I/O capture test");
 }
 if(PHP_OS_FAMILY !== "Windows") {
     echo "skip Only for Windows systems";
 } elseif (version_compare(
     PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD,
-	 '10.0.10586'
+     '10.0.10586'
 ) < 0) {
-	echo "skip Only for Windows systems >= 10.0.10586";
+    echo "skip Only for Windows systems >= 10.0.10586";
 }
 ?>
 --CAPTURE_STDIO--

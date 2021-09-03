@@ -38,9 +38,11 @@ try {
 
 
 ?>
---EXPECT--
-ReflectionClass::getStaticPropertyValue() expects at most 2 parameters, 3 given
-ReflectionClass::getStaticPropertyValue() expects at least 1 parameter, 0 given
+--EXPECTF--
+ReflectionClass::getStaticPropertyValue() expects at most 2 arguments, 3 given
+ReflectionClass::getStaticPropertyValue() expects at least 1 argument, 0 given
+
+Deprecated: ReflectionClass::getStaticPropertyValue(): Passing null to parameter #1 ($name) of type string is deprecated in %s on line %d
 Property C::$ does not exist
 string(3) "def"
 ReflectionClass::getStaticPropertyValue(): Argument #1 ($name) must be of type string, array given

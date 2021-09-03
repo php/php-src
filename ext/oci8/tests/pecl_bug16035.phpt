@@ -1,14 +1,15 @@
 --TEST--
 PECL Bug #16035 (Crash with Oracle 10.2 connecting with a character set but ORACLE_HOME is not set)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
 $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov !== 1) {
-	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
+    die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
 ?>
 --ENV--

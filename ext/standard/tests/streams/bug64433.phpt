@@ -3,14 +3,12 @@ Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
 if(!file_exists(__DIR__."/../../../../sapi/cli/tests/php_cli_server.inc"))
-	die("skip could not found cli server script");
+    die("skip could not found cli server script");
 $res = @include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {
-	die("skip could not open cli server script");
+    die("skip could not open cli server script");
 }
 ?>
---CONFLICTS--
-server
 --FILE--
 <?php
 include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";
@@ -42,6 +40,7 @@ $context = stream_context_create($arr);
 foreach($codes as $code) {
     echo "$code: ".file_get_contents("http://".PHP_CLI_SERVER_ADDRESS."/index.php?status=$code&loc=1", false, $context);
 }
+?>
 --EXPECT--
 HELLO!
 default

@@ -3,7 +3,7 @@ Test fscanf() function: usage variations - unsigned int formats with integer val
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) {
-	die("skip this test is for 32bit platform only");
+    die("skip this test is for 32bit platform only");
 }
 ?>
 --FILE--

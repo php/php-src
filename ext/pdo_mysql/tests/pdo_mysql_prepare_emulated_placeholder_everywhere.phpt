@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->prepare(), emulated PS, anonymous placeholder
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // TODO: This test is MySQL version specific - for whatever reason
@@ -72,8 +73,6 @@ array(0) {
 now the same with emulated PS
 
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
-
-Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line 33
 [005] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,

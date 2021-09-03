@@ -4,7 +4,7 @@ Bug #60120 (proc_open hangs when data in stdin/out/err is getting larger or equa
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
-	die("skip No php executable defined\n");
+    die("skip No php executable defined\n");
 }
 ?>
 --FILE--

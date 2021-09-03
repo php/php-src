@@ -1,23 +1,21 @@
 --TEST--
 MySQL PDOStatement->nextRowSet() with PDO::MYSQL_ATTR_MULTI_STATEMENTS either true or false
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-	die(sprintf("skip Cannot determine MySQL Server version\n"));
+    die(sprintf("skip Cannot determine MySQL Server version\n"));
 
 $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 50000)
-	die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
-		$matches[1], $matches[2], $matches[3], $version));
-
-if (!MySQLPDOTest::isPDOMySQLnd())
-	die("skip This will not work with libmysql");
+    die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
+        $matches[1], $matches[2], $matches[3], $version));
 ?>
 --FILE--
 <?php
@@ -132,6 +130,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -173,9 +173,11 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
 string(5) "42000"
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true
@@ -219,6 +221,8 @@ array(3) {
     string(1) "a"
   }
 }
+array(0) {
+}
 bool(false)
 array(3) {
   [0]=>
@@ -259,6 +263,8 @@ array(3) {
     ["label"]=>
     string(1) "a"
   }
+}
+array(0) {
 }
 bool(false)
 string(5) "00000"

@@ -1,9 +1,7 @@
 --TEST--
 imageclosest
---SKIPIF--
-<?php
-        if (!function_exists('imagecolorclosest')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -14,7 +12,11 @@ imagedestroy($im);
 
 $im = imagecreate(5,5);
 $c = imagecolorclosest($im, 255,0,255);
-print_r(imagecolorsforindex($im, $c));
+try {
+  imagecolorsforindex($im, $c);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 imagedestroy($im);
 
 $im = imagecreate(5,5);
@@ -48,7 +50,11 @@ imagedestroy($im);
 
 $im = imagecreate(5,5);
 $c = imagecolorclosestalpha($im, 255,0,255,100);
-print_r(imagecolorsforindex($im, $c));
+try {
+  imagecolorsforindex($im, $c);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 imagedestroy($im);
 
 $im = imagecreate(5,5);
@@ -62,7 +68,6 @@ for ($i=0; $i<255; $i++) imagecolorresolvealpha($im, $i,0,0,1);
 $c = imagecolorclosestalpha($im, 255,0,0,1);
 print_r(imagecolorsforindex($im, $c));
 
-
 $im = imagecreate(5,5);
 for ($i=0; $i<256; $i++) {
     if ($i == 246) {
@@ -74,12 +79,10 @@ for ($i=0; $i<256; $i++) {
 $c = imagecolorclosestalpha($im, 255,10,10,1);
 print_r(imagecolorsforindex($im, $c));
 
-
 ?>
---EXPECTF--
+--EXPECT--
 FF00FF
-
-Warning: imagecolorsforindex(): Color index -1 out of range in %s on line %d
+imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255
@@ -102,8 +105,7 @@ Array
     [alpha] => 0
 )
 64FF00FF
-
-Warning: imagecolorsforindex(): Color index -1 out of range in %s on line %d
+imagecolorsforindex(): Argument #2 ($color) is out of range
 Array
 (
     [red] => 255

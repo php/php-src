@@ -1,7 +1,7 @@
 --TEST--
 Bug #65414 Injection (A1) in .phar files magic .phar directory
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly = 0
 --FILE--
@@ -23,10 +23,6 @@ foreach ($bads as $bad) {
     }
 }
 echo 'done' . PHP_EOL;
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/bug65414.phar');
 ?>
 --EXPECT--
 .phar/injected-1.txt:Cannot create any files in magic ".phar" directory

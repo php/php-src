@@ -19,7 +19,6 @@ $names_arr = array(
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
-  "NULL" => NULL,
   "\"\"" => "",
   "\" \"" => " ",
   "\\0" => "\0",
@@ -35,11 +34,10 @@ foreach($names_arr as $key => $value) {
     echo "\n-- Filename: $key --\n";
     try {
         readfile($value);
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (\TypeError|\ValueError $e) {
+        echo get_class($e) . ': ' . $e->getMessage(), "\n";
     }
-};
-
+}
 ?>
 --EXPECTF--
 *** Testing readfile() : variation ***
@@ -53,26 +51,20 @@ Warning: readfile(-1): Failed to open stream: No such file or directory in %s on
 Warning: readfile(1): Failed to open stream: No such file or directory in %s on line %d
 
 -- Filename: FALSE --
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
-
--- Filename: NULL --
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
+ValueError: Path cannot be empty
 
 -- Filename: "" --
-
-Warning: readfile(): Filename cannot be empty in %s on line %d
+ValueError: Path cannot be empty
 
 -- Filename: " " --
 
 Warning: readfile( ): Failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
-readfile(): Argument #1 ($filename) must be a valid path, string given
+ValueError: readfile(): Argument #1 ($filename) must not contain any null bytes
 
 -- Filename: array() --
-readfile(): Argument #1 ($filename) must be a valid path, array given
+TypeError: readfile(): Argument #1 ($filename) must be of type string, array given
 
 -- Filename: /no/such/file/dir --
 

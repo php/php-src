@@ -1,9 +1,7 @@
 --TEST--
 DOM Comment : Basic Functionality
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -26,6 +24,7 @@ for ($index = 0; $index < $children->length; $index++) {
     echo get_class($current), "\n";
     var_dump($current->textContent);
 }
+?>
 --EXPECT--
 bool(true)
 --- child 0 ---

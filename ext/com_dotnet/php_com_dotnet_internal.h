@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -51,9 +51,9 @@ typedef struct _php_com_dotnet_object {
 static inline int php_com_is_valid_object(zval *zv)
 {
 	zend_class_entry *ce = Z_OBJCE_P(zv);
-	return strcmp("com", ce->name->val) == 0 ||
-		strcmp("dotnet", ce->name->val) == 0 ||
-		strcmp("variant", ce->name->val) == 0;
+	return zend_string_equals_literal(ce->name, "com") ||
+		zend_string_equals_literal(ce->name, "dotnet") ||
+		zend_string_equals_literal(ce->name, "variant");
 }
 
 #define CDNO_FETCH(zv)			(php_com_dotnet_object*)Z_OBJ_P(zv)
@@ -132,8 +132,7 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1);
 
 /* com_typeinfo.c */
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string,
-		int codepage, int *cached);
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage);
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
 PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 		int codepage);

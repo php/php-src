@@ -1,7 +1,7 @@
 --TEST--
 datefmt_format_code() with relative formats
---SKIPIF--
-<?php if (!extension_loaded("intl")) print "skip"; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -53,6 +53,7 @@ function getDayInPast(): DateTimeImmutable {
     return new DateTimeImmutable("2020-01-20 20:20:20", new DateTimeZone("UTC"));
 }
 
+?>
 --EXPECT--
 yesterday
 yesterday

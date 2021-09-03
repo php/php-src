@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium box
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $keypair = sodium_crypto_box_keypair();
@@ -142,7 +142,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-sodium_crypto_box(): Argument #3 ($key) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
+sodium_crypto_box(): Argument #3 ($key_pair) must be SODIUM_CRYPTO_BOX_KEYPAIRBYTES bytes long
 bool(true)
 string(17) "Hi, this is Alice"
 string(21) "Hi Alice! This is Bob"

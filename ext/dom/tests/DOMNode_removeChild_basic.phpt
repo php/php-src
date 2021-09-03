@@ -1,9 +1,7 @@
 --TEST--
 DOM removeChild : Basic Functionality
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --CREDITS--
 Simon Hughes <odbc3@hotmail.com>
 --FILE--
@@ -56,6 +54,7 @@ for ($index = 0; $index < $children->length; $index++) {
     $current = $children->item($index);
     dumpcourse($current);
 }
+?>
 --EXPECT--
 original has 5 nodes
 node 4

@@ -1,25 +1,31 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class Spoofchecker
 {
     public function __construct() {}
 
-    /** @return bool */
-    public function isSuspicious(string $text, &$error = null) {}
+    /**
+     * @param int $errorCode
+     * @tentative-return-type
+     */
+    public function isSuspicious(string $string, &$errorCode = null): bool {}
 
-    /** @return bool */
-    public function areConfusable(string $s1, string $s2, &$error = null) {}
+    /**
+     * @param int $errorCode
+     * @tentative-return-type
+     */
+    public function areConfusable(string $string1, string $string2, &$errorCode = null): bool {}
 
-    /** @return void */
-    public function setAllowedLocales(string $locale_list) {}
+    /** @tentative-return-type */
+    public function setAllowedLocales(string $locales): void {}
 
-    /** @return void */
-    public function setChecks(int $checks) {}
+    /** @tentative-return-type */
+    public function setChecks(int $checks): void {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-    /** @return void */
-    public function setRestrictionLevel(int $level) {}
+    /** @tentative-return-type */
+    public function setRestrictionLevel(int $level): void {}
 #endif
 }

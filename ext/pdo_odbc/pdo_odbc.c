@@ -2,10 +2,10 @@
   +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,12 +26,6 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-/* {{{ pdo_odbc_functions[] */
-static const zend_function_entry pdo_odbc_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -44,7 +38,7 @@ zend_module_entry pdo_odbc_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_odbc_deps,
 	"PDO_ODBC",
-	pdo_odbc_functions,
+	NULL,
 	PHP_MINIT(pdo_odbc),
 	PHP_MSHUTDOWN(pdo_odbc),
 	NULL,
@@ -93,7 +87,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
 		pdo_odbc_pool_on = SQL_CP_OFF;
 	} else {
-		php_error_docref(NULL, E_CORE_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		php_error_docref(NULL, E_CORE_ERROR, "Error in pdo_odbc.connection_pooling configuration. Value must be one of \"strict\", \"relaxed\", or \"off\"");
 		return FAILURE;
 	}
 

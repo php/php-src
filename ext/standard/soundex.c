@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,7 @@ PHP_FUNCTION(soundex)
 	size_t	i, _small, str_len, code, last;
 	char	soundex[4 + 1];
 
-	static char soundex_table[26] =
+	static const char soundex_table[26] =
 	{0,							/* A */
 	 '1',						/* B */
 	 '2',						/* C */
@@ -59,10 +59,6 @@ PHP_FUNCTION(soundex)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(str, str_len)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (str_len == 0) {
-		RETURN_FALSE;
-	}
 
 	/* build soundex string */
 	last = -1;

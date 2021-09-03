@@ -1,9 +1,7 @@
 --TEST--
 Bug #54446 (Arbitrary file creation via libxslt 'output' extension)
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include("prepare.inc");
@@ -69,6 +67,7 @@ if (file_exists($outputfile)) {
 } else {
     print "OK, no file created\n";
 }
+?>
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 

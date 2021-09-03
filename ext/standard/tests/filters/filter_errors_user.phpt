@@ -5,18 +5,18 @@ Filter errors: user filter
 require 'filter_errors.inc';
 
 class test_filter0 extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         return PSFS_ERR_FATAL;
     }
 }
 class test_filter1 extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         $bucket = stream_bucket_make_writeable($in);
         return PSFS_ERR_FATAL;
     }
 }
 class test_filter2 extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         while ($bucket = stream_bucket_make_writeable($in)) {
             $consumed += $bucket->datalen;
             stream_bucket_append($out, $bucket);
@@ -25,7 +25,7 @@ class test_filter2 extends php_user_filter {
     }
 }
 class test_filter3 extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         if (!$closing) {
             $bucket = stream_bucket_new($this->stream, "42");
             stream_bucket_append($out, $bucket);
@@ -34,7 +34,7 @@ class test_filter3 extends php_user_filter {
     }
 }
 class test_filter4 extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing) {
+    function filter($in, $out, &$consumed, $closing): int {
         if (!$closing) {
             $bucket = stream_bucket_new($this->stream, "42");
         }

@@ -1,9 +1,7 @@
 --TEST--
 Bug #79294 ()::columnType() may fail after SQLite3Stmt::reset())
---SKIPIF--
-<?php
-if (!extension_loaded('sqlite3')) die('sqlite3 extension not available');
-?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

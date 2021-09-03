@@ -75,9 +75,9 @@ Stack trace:
 #0 %s ReflectionMethod->__construct('3')
 #1 {main}
 Wrong type of argument (bool, string):
-ReflectionException: ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be of type object|string, bool given in %s:%d
+ReflectionException: Class "1" does not exist in %s:%d
 Stack trace:
-#0 %s ReflectionMethod->__construct(true, 'foo')
+#0 %s ReflectionMethod->__construct('1', 'foo')
 #1 {main}
 Wrong type of argument (string, bool):
 ReflectionException: Method TestClass::1() does not exist in %s:%d

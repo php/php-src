@@ -1,8 +1,10 @@
 --TEST--
 Phar front controller alternate index file zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--INI--
+phar.require_hash=0
+--EXTENSIONS--
+phar
+zlib
 --ENV--
 SCRIPT_NAME=/frontcontroller7.phar.php
 REQUEST_URI=/frontcontroller7.phar.php/

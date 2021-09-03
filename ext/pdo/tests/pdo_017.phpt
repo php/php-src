@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: transactions
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -16,10 +17,10 @@ try {
 }
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	require_once(__DIR__ . DIRECTORY_SEPARATOR . '../../pdo_mysql/tests/mysql_pdo_test.inc');
-	if (false === MySQLPDOTest::detect_transactional_mysql_engine($db)) {
-		die('skip your mysql configuration does not support working transactions');
-	}
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . '../../pdo_mysql/tests/mysql_pdo_test.inc');
+    if (false === MySQLPDOTest::detect_transactional_mysql_engine($db)) {
+        die('skip your mysql configuration does not support working transactions');
+    }
 }
 ?>
 --FILE--

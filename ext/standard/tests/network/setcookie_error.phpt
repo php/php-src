@@ -1,5 +1,5 @@
 --TEST--
-setcookie() array variant error tests
+setcookie() error tests
 --INI--
 date.timezone=UTC
 --FILE--
@@ -7,37 +7,57 @@ date.timezone=UTC
 
 ob_start();
 
-// Unrecognized key and no valid keys
-setcookie('name', 'value', ['unknown_key' => 'only']);
-// Numeric key and no valid keys
-setcookie('name2', 'value2', [0 => 'numeric_key']);
-// Unrecognized key
-setcookie('name3', 'value3', ['path' => '/path/', 'foo' => 'bar']);
-// Arguments after options array (will not be set)
-setcookie('name4', 'value4', [], "path", "domain.tld", true, true);
+try {
+    setcookie('');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    setcookie('invalid=');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    setcookie('name', 'invalid;');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    setcookie('name', 'value', 100, 'invalid;');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    setcookie('name', 'value', 100, 'path', 'invalid;');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+
+if (PHP_INT_SIZE == 8) {
+    try {
+        // To go above year 9999: 60 * 60 * 24 * 365 * 9999
+        setcookie('name', 'value', 315328464000);
+    } catch (\ValueError $e) {
+        var_dump($e->getMessage() == 'setcookie(): "expires" option cannot have a year greater than 9999');
+    }
+} else {
+    var_dump(true);
+}
 
 var_dump(headers_list());
+
+?>
 --EXPECTHEADERS--
 
 --EXPECTF--
-Warning: setcookie(): Unrecognized key 'unknown_key' found in the options array in %s
-
-Warning: setcookie(): No valid options were found in the given array in %s
-
-Warning: setcookie(): Numeric key found in the options array in %s
-
-Warning: setcookie(): No valid options were found in the given array in %s
-
-Warning: setcookie(): Unrecognized key 'foo' found in the options array in %s
-
-Warning: setcookie(): Cannot pass arguments after the options array in %s
-array(4) {
+setcookie(): Argument #1 ($name) cannot be empty
+setcookie(): Argument #1 ($name) cannot contain "=", ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+setcookie(): "path" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+setcookie(): "domain" option cannot contain ",", ";", " ", "\t", "\r", "\n", "\013", or "\014"
+bool(true)
+array(2) {
   [0]=>
   string(%d) "X-Powered-By: PHP/%s"
   [1]=>
-  string(22) "Set-Cookie: name=value"
-  [2]=>
-  string(24) "Set-Cookie: name2=value2"
-  [3]=>
-  string(37) "Set-Cookie: name3=value3; path=/path/"
+  string(27) "Set-Cookie: name=invalid%3B"
 }

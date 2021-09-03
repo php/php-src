@@ -39,6 +39,7 @@ decode("\rtrue\n");
 decode("\rtrue\r");
 
 echo "Done\n";
+?>
 --EXPECT--
 bool(true)
 bool(false)

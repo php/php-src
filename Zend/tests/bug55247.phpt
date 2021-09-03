@@ -24,6 +24,7 @@ $test->{'method'}();
 Test::method();
 Test::$method();
 Test::{'method'}();
+?>
 --EXPECT--
 method
 method

@@ -43,7 +43,7 @@ try {
 
 ?>
 --EXPECT--
-string(128) "ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from Iterator, nonExistentClass given"
-string(120) "ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from Iterator, stdClass given"
-string(124) "ArrayObject::__construct(): Argument #3 ($iterator_class) must be a class name derived from Iterator, nonExistentClass given"
-string(116) "ArrayObject::__construct(): Argument #3 ($iterator_class) must be a class name derived from Iterator, stdClass given"
+string(133) "ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from ArrayIterator, nonExistentClass given"
+string(125) "ArrayObject::setIteratorClass(): Argument #1 ($iteratorClass) must be a class name derived from ArrayIterator, stdClass given"
+string(128) "ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, nonExistentClass given"
+string(120) "ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, stdClass given"

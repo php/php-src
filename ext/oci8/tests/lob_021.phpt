@@ -1,5 +1,7 @@
 --TEST--
 oci_lob_free()/close()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -62,7 +64,7 @@ int(4)
 bool(true)
 int(4)
 bool(true)
-string(%d) "OCI_Lob::write(): %s is not a valid oci8 descriptor resource"
+string(%d) "OCILob::write(): %s is not a valid oci8 descriptor resource"
 string(%d) "oci_free_descriptor(): %s is not a valid oci8 descriptor resource"
 
 Warning: oci_free_descriptor(): Unable to find descriptor property in %s on line %d

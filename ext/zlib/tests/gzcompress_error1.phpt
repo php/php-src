@@ -1,11 +1,7 @@
 --TEST--
 Test gzcompress() function : error conditions
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 /*
@@ -41,4 +37,4 @@ try {
 gzcompress(): Argument #2 ($level) must be between -1 and 9
 
 -- Testing with invalid encoding --
-gzcompress(): Argument #3 ($encoding) must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE
+gzcompress(): Argument #3 ($encoding) must be one of ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP, or ZLIB_ENCODING_DEFLATE

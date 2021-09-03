@@ -1,7 +1,7 @@
 --TEST--
 Phar: fopen/stat/fseek/unlink/rename edge cases
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -69,7 +69,7 @@ include $pname . '/test.php';
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
-<?php unlink(__DIR__ . '/fopen_edgetest.phar');
+<?php unlink(__DIR__ . '/fopen_edgetest.phar'); ?>
 --EXPECTF--
 Warning: fopen(phar://%sfopen_edgecases.phar.php/b/c.php): Failed to open stream: phar error: open mode append not supported in %sfopen_edgecases.php on line %d
 

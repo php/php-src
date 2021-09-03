@@ -1,7 +1,7 @@
 --TEST--
 Phar: create with illegal path
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -53,7 +53,7 @@ foreach($checks as $check)
     {
         $phar[$check] = 'error';
     }
-    catch (TypeError $e)
+    catch (ValueError $e)
     {
         echo 'Exception: ' . $e->getMessage() . "\n";
     }
@@ -78,4 +78,4 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
-Exception: Phar::offsetSet(): Argument #1 ($entry) must be a valid path, string given
+Exception: Phar::offsetSet(): Argument #1 ($localName) must not contain any null bytes

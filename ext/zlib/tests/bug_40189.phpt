@@ -1,7 +1,7 @@
 --TEST--
 Bug #40189 (endless loop in zlib.inflate stream filter)
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --INI--
 allow_url_fopen=1
 --FILE--

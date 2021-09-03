@@ -12,7 +12,7 @@ var_dump( $dt = new DateTime('0000-00-00 00:00:00') );
 echo $dt->format( DateTime::ISO8601 ), "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(12) {
   ["year"]=>
   int(0)
@@ -43,6 +43,8 @@ array(12) {
   ["is_localtime"]=>
   bool(false)
 }
+
+Warning: strtotime(): Epoch doesn't fit in a PHP integer in %s on line %d
 bool(false)
 object(DateTime)#1 (3) {
   ["date"]=>

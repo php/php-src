@@ -42,7 +42,7 @@ array(3) {
   int(243)
 }
 -- with built-in function 'pow' and one parameter --
-pow() expects exactly 2 parameters, 1 given
+pow() expects exactly 2 arguments, 1 given
 -- with language construct --
-array_map(): Argument #1 ($callback) must be a valid callback, function "echo" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
 Done

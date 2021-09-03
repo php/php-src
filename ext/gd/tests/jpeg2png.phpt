@@ -1,17 +1,15 @@
 --TEST--
 jpeg <--> png conversion test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-
-	if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
-		die("skip png support unavailable");
-	}
-	if (!function_exists("imagecreatefromjpeg") || !function_exists("imagejpeg")) {
-		die("skip jpeg support unavailable");
-	}
+    if (!function_exists("imagecreatefrompng") || !function_exists("imagepng")) {
+        die("skip png support unavailable");
+    }
+    if (!function_exists("imagecreatefromjpeg") || !function_exists("imagejpeg")) {
+        die("skip jpeg support unavailable");
+    }
 ?>
 --FILE--
 <?php

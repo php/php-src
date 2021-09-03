@@ -40,6 +40,7 @@ namespace {
 
 }
 
+?>
 --EXPECT--
 ClassInGlobal
 Demo\ClassInNamespace

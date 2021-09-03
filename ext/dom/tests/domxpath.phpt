@@ -1,7 +1,7 @@
 --TEST--
 DOMXPath Tests
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");
@@ -50,9 +50,24 @@ $root->appendChild($dom->createElementNS("urn::default", "testnode", 5));
 
 $avg = $xpath->evaluate('number(php:function("MyAverage", //def:testnode))');
 var_dump($avg);
+
+try {
+    $xpath->registerPHPFunctions('non_existent');
+    $avg = $xpath->evaluate('number(php:function("non_existent", //def:testnode))');
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    $xpath->registerPhpFunctions(['non_existant']);
+    $avg = $xpath->evaluate('number(php:function("non_existent", //def:testnode))');
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECT--
 myval
 float(1)
 bool(true)
 float(4)
+Unable to call handler non_existent()
+Unable to call handler non_existent()

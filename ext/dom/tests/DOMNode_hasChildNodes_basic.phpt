@@ -1,9 +1,7 @@
 --TEST--
 Test whether a node has child nodes: hasChildNodes()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

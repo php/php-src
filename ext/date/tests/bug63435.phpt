@@ -12,5 +12,6 @@ for ($i=1 ; $i<999 ; $i++) {
     }
 }
 echo "Done";
+?>
 --EXPECT--
 Done

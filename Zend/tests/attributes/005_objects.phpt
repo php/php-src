@@ -3,109 +3,109 @@ Attributes can be converted into objects.
 --FILE--
 <?php
 
-<<Attribute(Attribute::TARGET_FUNCTION)>>
+#[Attribute(Attribute::TARGET_FUNCTION)]
 class A1
 {
-	public string $name;
-	public int $ttl;
+    public string $name;
+    public int $ttl;
 
-	public function __construct(string $name, int $ttl = 50)
-	{
-		$this->name = $name;
-		$this->ttl = $ttl;
-	}
+    public function __construct(string $name, int $ttl = 50)
+    {
+        $this->name = $name;
+        $this->ttl = $ttl;
+    }
 }
 
-$ref = new \ReflectionFunction(<<A1('test')>> function () { });
+$ref = new \ReflectionFunction(#[A1('test')] function () { });
 
 foreach ($ref->getAttributes() as $attr) {
-	$obj = $attr->newInstance();
+    $obj = $attr->newInstance();
 
-	var_dump(get_class($obj), $obj->name, $obj->ttl);
+    var_dump(get_class($obj), $obj->name, $obj->ttl);
 }
 
 echo "\n";
 
-$ref = new \ReflectionFunction(<<A1>> function () { });
+$ref = new \ReflectionFunction(#[A1] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\ArgumentCountError $e) {
-	var_dump('ERROR 1', $e->getMessage());
+    var_dump('ERROR 1', $e->getMessage());
 }
 
 echo "\n";
 
-$ref = new \ReflectionFunction(<<A1([])>> function () { });
+$ref = new \ReflectionFunction(#[A1([])] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\TypeError $e) {
-	var_dump('ERROR 2', $e->getMessage());
+    var_dump('ERROR 2', $e->getMessage());
 }
 
 echo "\n";
 
-$ref = new \ReflectionFunction(<<A2>> function () { });
+$ref = new \ReflectionFunction(#[A2] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-	var_dump('ERROR 3', $e->getMessage());
+    var_dump('ERROR 3', $e->getMessage());
 }
 
 echo "\n";
 
-<<Attribute>>
+#[Attribute]
 class A3
 {
-	private function __construct() { }
+    private function __construct() { }
 }
 
-$ref = new \ReflectionFunction(<<A3>> function () { });
+$ref = new \ReflectionFunction(#[A3] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-	var_dump('ERROR 4', $e->getMessage());
+    var_dump('ERROR 4', $e->getMessage());
 }
 
 echo "\n";
 
-<<Attribute>>
+#[Attribute]
 class A4 { }
 
-$ref = new \ReflectionFunction(<<A4(1)>> function () { });
+$ref = new \ReflectionFunction(#[A4(1)] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-	var_dump('ERROR 5', $e->getMessage());
+    var_dump('ERROR 5', $e->getMessage());
 }
 
 echo "\n";
 
 class A5 { }
 
-$ref = new \ReflectionFunction(<<A5>> function () { });
+$ref = new \ReflectionFunction(#[A5] function () { });
 
 try {
-	$ref->getAttributes()[0]->newInstance();
+    $ref->getAttributes()[0]->newInstance();
 } catch (\Error $e) {
-	var_dump('ERROR 6', $e->getMessage());
+    var_dump('ERROR 6', $e->getMessage());
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 string(2) "A1"
 string(4) "test"
 int(50)
 
 string(7) "ERROR 1"
-string(81) "Too few arguments to function A1::__construct(), 0 passed and at least 1 expected"
+string(%d) "Too few arguments to function A1::__construct(), 0 passed in %s005_objects.php on line 26 and at least 1 expected"
 
 string(7) "ERROR 2"
-string(74) "A1::__construct(): Argument #1 ($name) must be of type string, array given"
+string(%d) "A1::__construct(): Argument #1 ($name) must be of type string, array given, called in %s005_objects.php on line 36"
 
 string(7) "ERROR 3"
 string(30) "Attribute class "A2" not found"

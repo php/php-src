@@ -1,7 +1,7 @@
 --TEST--
 openssl_cms_decrypt() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $infile = __DIR__ . "/plain.txt";
@@ -15,8 +15,9 @@ $single_cert = "file://" . __DIR__ . "/cert.crt";
 $headers = array("test@test", "testing openssl_cms_encrypt()");
 $wrong = "wrong";
 $empty = "";
+$cipher = OPENSSL_CIPHER_AES_128_CBC;
 
-openssl_cms_encrypt($infile, $encrypted, $single_cert, $headers);
+openssl_cms_encrypt($infile, $encrypted, $single_cert, $headers, cipher_algo: $cipher);
 
 var_dump(openssl_cms_decrypt($encrypted, $outfile, $single_cert, $privkey));
 print("\nDecrypted text:\n");
@@ -50,16 +51,16 @@ bool(true)
 Warning: openssl_cms_decrypt(): Unable to get private key in %s on line %d
 bool(false)
 
-Warning: openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_cms_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_cms_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 
-Warning: openssl_cms_decrypt(): Unable to coerce parameter 3 to x509 cert in %s on line %d
+Warning: openssl_cms_decrypt(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
 Warning: openssl_cms_decrypt(): Unable to get private key in %s on line %d

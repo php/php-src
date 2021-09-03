@@ -1,7 +1,7 @@
 --TEST--
 Cloning unconstructed IntlDateFormatter
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -15,5 +15,6 @@ try {
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
+?>
 --EXPECTF--
 string(%s) "Cannot clone unconstructed IntlDateFormatter"

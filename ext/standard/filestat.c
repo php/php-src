@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -59,11 +59,7 @@
 #endif
 
 #if HAVE_GRP_H
-# ifdef PHP_WIN32
-#  include "win32/grp.h"
-# else
-#  include <grp.h>
-# endif
+# include <grp.h>
 #endif
 
 #if HAVE_UTIME
@@ -92,11 +88,11 @@ PHP_RINIT_FUNCTION(filestat) /* {{{ */
 PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 {
 	if (BG(CurrentStatFile)) {
-		efree (BG(CurrentStatFile));
+		zend_string_release(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
 	}
 	if (BG(CurrentLStatFile)) {
-		efree (BG(CurrentLStatFile));
+		zend_string_release(BG(CurrentLStatFile));
 		BG(CurrentLStatFile) = NULL;
 	}
 	return SUCCESS;
@@ -180,18 +176,22 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
-	char *path;
+	char *path, fullpath[MAXPATHLEN];
 	size_t path_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(path)) {
+	if (!expand_filepath(path, fullpath)) {
 		RETURN_FALSE;
 	}
 
-	if (php_disk_total_space(path, &bytestotal) == SUCCESS) {
+	if (php_check_open_basedir(fullpath)) {
+		RETURN_FALSE;
+	}
+
+	if (php_disk_total_space(fullpath, &bytestotal) == SUCCESS) {
 		RETURN_DOUBLE(bytestotal);
 	}
 	RETURN_FALSE;
@@ -273,18 +273,22 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
-	char *path;
+	char *path, fullpath[MAXPATHLEN];
 	size_t path_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(path)) {
+	if (!expand_filepath(path, fullpath)) {
 		RETURN_FALSE;
 	}
 
-	if (php_disk_free_space(path, &bytesfree) == SUCCESS) {
+	if (php_check_open_basedir(fullpath)) {
+		RETURN_FALSE;
+	}
+
+	if (php_disk_free_space(fullpath, &bytesfree) == SUCCESS) {
 		RETURN_DOUBLE(bytesfree);
 	}
 	RETURN_FALSE;
@@ -327,7 +331,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
-	zval *group;
+	zend_string *group_str;
+	zend_long group_long;
 #if !defined(WINDOWS)
 	gid_t gid;
 	int ret;
@@ -336,7 +341,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL(group)
+		Z_PARAM_STR_OR_LONG(group_str, group_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -344,16 +349,14 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(group) == IS_LONG) {
-				option = PHP_STREAM_META_GROUP;
-				value = &Z_LVAL_P(group);
-			} else if (Z_TYPE_P(group) == IS_STRING) {
+			if (group_str) {
 				option = PHP_STREAM_META_GROUP_NAME;
-				value = Z_STRVAL_P(group);
+				value = ZSTR_VAL(group_str);
 			} else {
-				zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
-				RETURN_THROWS();
+				option = PHP_STREAM_META_GROUP;
+				value = &group_long;
 			}
+
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
 			} else {
@@ -372,16 +375,13 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
-	} else if (Z_TYPE_P(group) == IS_STRING) {
-		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+	if (group_str) {
+		if (php_get_gid_by_name(ZSTR_VAL(group_str), &gid) != SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Unable to find gid for %s", ZSTR_VAL(group_str));
 			RETURN_FALSE;
 		}
 	} else {
-		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
-		RETURN_THROWS();
+		gid = (gid_t) group_long;
 	}
 
 	/* Check the basedir */
@@ -416,11 +416,7 @@ PHP_FUNCTION(chgrp)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
 {
-# if !defined(WINDOWS)
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-# else
-	RETURN_FALSE;
-# endif
 }
 #endif
 /* }}} */
@@ -461,7 +457,8 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
 	size_t filename_len;
-	zval *user;
+	zend_string *user_str;
+	zend_long user_long;
 #if !defined(WINDOWS)
 	uid_t uid;
 	int ret;
@@ -470,7 +467,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL(user)
+		Z_PARAM_STR_OR_LONG(user_str, user_long)
 	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -478,16 +475,14 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(user) == IS_LONG) {
-				option = PHP_STREAM_META_OWNER;
-				value = &Z_LVAL_P(user);
-			} else if (Z_TYPE_P(user) == IS_STRING) {
+			if (user_str) {
 				option = PHP_STREAM_META_OWNER_NAME;
-				value = Z_STRVAL_P(user);
+				value = ZSTR_VAL(user_str);
 			} else {
-				php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
-				RETURN_FALSE;
+				option = PHP_STREAM_META_OWNER;
+				value = &user_long;
 			}
+
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
 			} else {
@@ -507,16 +502,13 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_FALSE;
 #else
 
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
-	} else if (Z_TYPE_P(user) == IS_STRING) {
-		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid) != SUCCESS) {
-			php_error_docref(NULL, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
+	if (user_str) {
+		if (php_get_uid_by_name(ZSTR_VAL(user_str), &uid) != SUCCESS) {
+			php_error_docref(NULL, E_WARNING, "Unable to find uid for %s", ZSTR_VAL(user_str));
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
-		RETURN_FALSE;
+		uid = (uid_t) user_long;
 	}
 
 	/* Check the basedir */
@@ -552,12 +544,8 @@ PHP_FUNCTION(chown)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
 {
-# if !defined(WINDOWS)
 	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-# else
-	RETURN_FALSE;
-# endif
 }
 #endif
 /* }}} */
@@ -614,7 +602,8 @@ PHP_FUNCTION(touch)
 	char *filename;
 	size_t filename_len;
 	zend_long filetime = 0, fileatime = 0;
-	int ret, argc = ZEND_NUM_ARGS();
+	bool filetime_is_null = 1, fileatime_is_null = 1;
+	int ret;
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
@@ -623,28 +612,24 @@ PHP_FUNCTION(touch)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(filetime)
-		Z_PARAM_LONG(fileatime)
+		Z_PARAM_LONG_OR_NULL(filetime, filetime_is_null)
+		Z_PARAM_LONG_OR_NULL(fileatime, fileatime_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!filename_len) {
 		RETURN_FALSE;
 	}
 
-	switch (argc) {
-		case 1:
-			newtime = NULL;
-			break;
-		case 2:
-			newtime->modtime = newtime->actime = filetime;
-			break;
-		case 3:
-			newtime->modtime = filetime;
-			newtime->actime = fileatime;
-			break;
-		default:
-			/* Never reached */
-			WRONG_PARAM_COUNT;
+	if (filetime_is_null && fileatime_is_null) {
+		newtime = NULL;
+	} else if (!filetime_is_null && fileatime_is_null) {
+		newtime->modtime = newtime->actime = filetime;
+	} else if (filetime_is_null && !fileatime_is_null) {
+		zend_argument_value_error(2, "cannot be null when argument #3 ($atime) is an integer");
+		RETURN_THROWS();
+	} else {
+		newtime->modtime = filetime;
+		newtime->actime = fileatime;
 	}
 
 	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
@@ -657,7 +642,7 @@ PHP_FUNCTION(touch)
 			}
 		} else {
 			php_stream *stream;
-			if(argc > 1) {
+			if(!filetime_is_null || !fileatime_is_null) {
 				php_error_docref(NULL, E_WARNING, "Can not call touch() for a non-standard stream");
 				RETURN_FALSE;
 			}
@@ -697,17 +682,17 @@ PHP_FUNCTION(touch)
 #endif
 
 /* {{{ php_clear_stat_cache() */
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len)
+PHPAPI void php_clear_stat_cache(bool clear_realpath_cache, const char *filename, size_t filename_len)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
 	 * in this directory, as shown by lstat_stat_variation9.phpt) */
 	if (BG(CurrentStatFile)) {
-		efree(BG(CurrentStatFile));
+		zend_string_release(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
 	}
 	if (BG(CurrentLStatFile)) {
-		efree(BG(CurrentLStatFile));
+		zend_string_release(BG(CurrentLStatFile));
 		BG(CurrentLStatFile) = NULL;
 	}
 	if (clear_realpath_cache) {
@@ -723,7 +708,7 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
 /* {{{ Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	zend_bool  clear_realpath_cache = 0;
+	bool  clear_realpath_cache = 0;
 	char      *filename             = NULL;
 	size_t     filename_len         = 0;
 
@@ -737,29 +722,33 @@ PHP_FUNCTION(clearstatcache)
 }
 /* }}} */
 
-#define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT)
-#define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
+#define IS_LINK_OPERATION(__t) ((__t) == FS_TYPE || (__t) == FS_IS_LINK || (__t) == FS_LSTAT || (__t) == FS_LPERMS)
+#define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK || (__t) == FS_LPERMS)
 #define IS_ABLE_CHECK(__t) ((__t) == FS_IS_R || (__t) == FS_IS_W || (__t) == FS_IS_X)
 #define IS_ACCESS_CHECK(__t) (IS_ABLE_CHECK(type) || (__t) == FS_EXISTS)
 
 /* {{{ php_stat */
-PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value)
+PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 {
 	zend_stat_t *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
-	const char *local;
-	php_stream_wrapper *wrapper;
-
-	if (!filename_length) {
-		RETURN_FALSE;
-	}
-
-	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0)) == &php_plain_files_wrapper && php_check_open_basedir(local)) {
-		RETURN_FALSE;
-	}
+	const char *local = NULL;
+	php_stream_wrapper *wrapper = NULL;
 
 	if (IS_ACCESS_CHECK(type)) {
+		if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+			if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
+				php_error_docref(NULL, E_WARNING, "Filename contains null byte");
+			}
+			RETURN_FALSE;
+		}
+
+		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
+		 && php_check_open_basedir(local)) {
+			RETURN_FALSE;
+		}
+
 		if (wrapper == &php_plain_files_wrapper) {
 
 			switch (type) {
@@ -794,13 +783,69 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		flags |= PHP_STREAM_URL_STAT_QUIET;
 	}
 
-	if (php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL)) {
-		/* Error Occurred */
-		if (!IS_EXISTS_CHECK(type)) {
-			php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
+	do {
+		if (CWDG(enable_stat_cache)) {
+			/* Try to hit the cache first */
+			if (flags & PHP_STREAM_URL_STAT_LINK) {
+				if (filename == BG(CurrentLStatFile)
+				 || (BG(CurrentLStatFile)
+				  && zend_string_equal_content(filename, BG(CurrentLStatFile)))) {
+					memcpy(&ssb, &BG(lssb), sizeof(php_stream_statbuf));
+					break;
+				}
+			} else {
+				if (filename == BG(CurrentStatFile)
+				 || (BG(CurrentStatFile)
+				  && zend_string_equal_content(filename, BG(CurrentStatFile)))) {
+					memcpy(&ssb, &BG(ssb), sizeof(php_stream_statbuf));
+					break;
+				}
+			}
 		}
-		RETURN_FALSE;
-	}
+
+		if (!wrapper) {
+			if (!ZSTR_LEN(filename) || CHECK_NULL_PATH(ZSTR_VAL(filename), ZSTR_LEN(filename))) {
+				if (ZSTR_LEN(filename) && !IS_EXISTS_CHECK(type)) {
+					php_error_docref(NULL, E_WARNING, "Filename contains null byte");
+				}
+				RETURN_FALSE;
+			}
+
+			if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
+			 && php_check_open_basedir(local)) {
+				RETURN_FALSE;
+			}
+		}
+
+		if (!wrapper
+		 || !wrapper->wops->url_stat
+		 || wrapper->wops->url_stat(wrapper, local, flags | PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR, &ssb, NULL)) {
+			/* Error Occurred */
+			if (!IS_EXISTS_CHECK(type)) {
+				php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", ZSTR_VAL(filename));
+			}
+			RETURN_FALSE;
+		}
+
+		if (CWDG(enable_stat_cache)) {
+			/* Drop into cache */
+			if (flags & PHP_STREAM_URL_STAT_LINK) {
+				if (BG(CurrentLStatFile)) {
+					zend_string_release(BG(CurrentLStatFile));
+				}
+				BG(CurrentLStatFile) = zend_string_copy(filename);
+				memcpy(&BG(lssb), &ssb, sizeof(php_stream_statbuf));
+			}
+			if (!(flags & PHP_STREAM_URL_STAT_LINK)
+			 || !S_ISLNK(ssb.sb.st_mode)) {
+				if (BG(CurrentStatFile)) {
+					zend_string_release(BG(CurrentStatFile));
+				}
+				BG(CurrentStatFile) = zend_string_copy(filename);
+				memcpy(&BG(ssb), &ssb, sizeof(php_stream_statbuf));
+			}
+		}
+	} while (0);
 
 	stat_sb = &ssb.sb;
 
@@ -847,6 +892,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 
 	switch (type) {
 	case FS_PERMS:
+	case FS_LPERMS:
 		RETURN_LONG((zend_long)ssb.sb.st_mode);
 	case FS_INODE:
 		RETURN_LONG((zend_long)ssb.sb.st_ino);
@@ -956,14 +1002,13 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 /* {{{ FileFunction(name, funcnum) */
 #define FileFunction(name, funcnum) \
 ZEND_NAMED_FUNCTION(name) { \
-	char *filename; \
-	size_t filename_len; \
+	zend_string *filename; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
-		Z_PARAM_PATH(filename, filename_len) \
+		Z_PARAM_STR(filename) \
 	ZEND_PARSE_PARAMETERS_END(); \
 	\
-	php_stat(filename, filename_len, funcnum, return_value); \
+	php_stat(filename, funcnum, return_value); \
 }
 /* }}} */
 

@@ -344,7 +344,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	char *s_bytes;
 	/* Default number of rounds.  */
 	size_t rounds = ROUNDS_DEFAULT;
-	zend_bool rounds_custom = 0;
+	bool rounds_custom = 0;
 
 	/* Find beginning of salt string.  The prefix should normally always
 	be present.  Just in case it is not.  */

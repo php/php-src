@@ -364,6 +364,10 @@ gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
 
+gdImagePtr gdImageCreateFromAvif(FILE *infile);
+gdImagePtr gdImageCreateFromAvifPtr(int size, void *data);
+gdImagePtr gdImageCreateFromAvifCtx(gdIOCtx *infile);
+
 gdImagePtr gdImageCreateFromTga( FILE * fp );
 gdImagePtr gdImageCreateFromTgaCtx(gdIOCtx* ctx);
 gdImagePtr gdImageCreateFromTgaPtr(int size, void *data);
@@ -372,9 +376,9 @@ gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
-const char * gdPngGetVersionString();
+const char * gdPngGetVersionString(void);
 
-const char * gdJpegGetVersionString();
+const char * gdJpegGetVersionString(void);
 
 /* A custom data source. */
 /* The source function must return -1 on error, otherwise the number
@@ -444,8 +448,8 @@ void gdImageStringUp16(gdImagePtr im, gdFontPtr f, int x, int y, unsigned short 
  * use of any sort of threads in a module load / shutdown function
  * respectively.
  */
-void gdFontCacheMutexSetup();
-void gdFontCacheMutexShutdown();
+void gdFontCacheMutexSetup(void);
+void gdFontCacheMutexShutdown(void);
 
 /* 2.0.16: for thread-safe use of gdImageStringFT and friends,
  * call this before allowing any thread to call gdImageStringFT.
@@ -615,7 +619,20 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization);
+/**
+ * Group: WebP
+ *
+ * Constant: gdWebpLossless
+ *
+ * Lossless quality threshold. When image quality is greater than or equal to
+ * <gdWebpLossless>, the image will be written in the lossless WebP format.
+ *
+ * See also:
+ *   - <gdImageWebpCtx>
+ */
+#define gdWebpLossless 101
+
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
@@ -623,6 +640,12 @@ void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
 gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
+
+void gdImageAvif(gdImagePtr im, FILE *outfile);
+void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
+void *gdImageAvifPtr(gdImagePtr im, int *size);
+void *gdImageAvifPtrEx(gdImagePtr im, int *size, int quality, int speed);
+void gdImageAvifCtx(gdImagePtr im, gdIOCtx *outfile, int quality, int speed);
 
 /* A custom data sink. For backwards compatibility. Use
 	gdIOCtx instead. */

@@ -15,16 +15,16 @@ $test->next();
 var_dump($test->current());
 try {
   $output = $test->callGetChildren();
-} catch (InvalidArgumentException $ilae){
+} catch (TypeError $exception) {
   $output = null;
-  print "invalid argument exception\n";
+  echo $exception->getMessage() . "\n";
 }
 var_dump($output);
 
 
 ?>
 --EXPECT--
-  array(3) {
+array(3) {
   [0]=>
   int(7)
   [1]=>
@@ -33,5 +33,5 @@ var_dump($output);
   int(9)
 }
 int(7)
-invalid argument exception
+ArrayIterator::__construct(): Argument #1 ($array) must be of type array, int given
 NULL

@@ -3,10 +3,8 @@ DOM Document : save and saveXML
 --CREDITS--
 Sami Greenbury (sami@patabugen.co.uk)
 # TestFest 2008
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -33,6 +31,7 @@ $result = file_get_contents($filename);
 var_dump($result == $dom->saveXML());
 
 unlink($filename);
+?>
 --EXPECT--
 int(181)
 bool(true)

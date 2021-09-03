@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -79,19 +79,6 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
-
-#define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
-INIT_CLASS_ENTRY(ce, name, funcs); \
-ce.create_object = xsl_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce);
-
-#define XSL_DOMOBJ_NEW(zval, obj, ret) \
-	zval = php_xsl_create_object(obj, ret, zval, return_value); \
-	if (ZVAL_IS_NULL(zval)) { \
-		php_error_docref(NULL, E_WARNING, "Cannot create required DOM object"); \
-		RETURN_FALSE; \
-	}
-
 
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);

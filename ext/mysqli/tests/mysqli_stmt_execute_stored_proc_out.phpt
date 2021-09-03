@@ -1,19 +1,20 @@
 --TEST--
 mysqli_stmt_execute() - OUT
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-	die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) < 50503) {
-	die(sprintf('skip Needs MySQL 5.5.3+, found version %d.', mysqli_get_server_version($link)));
+    die(sprintf('skip Needs MySQL 5.5.3+, found version %d.', mysqli_get_server_version($link)));
 }
 /*
 if ($IS_MYSQLND) {
-	die(sprintf("skip WHY ?!"));
+    die(sprintf("skip WHY ?!"));
 }
 */
 ?>
@@ -44,8 +45,12 @@ if ($IS_MYSQLND) {
         printf("[008] More results: %s\n", (mysqli_more_results($link) ? "yes" : "no"));
         printf("[009] Next results: %s\n", (mysqli_next_result($link) ? "yes" : "no"));
 
-        if (!mysqli_stmt_bind_result($stmt, $ver_out) || !mysqli_stmt_fetch($stmt))
-            printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        try {
+            if (!mysqli_stmt_bind_result($stmt, $ver_out) || !mysqli_stmt_fetch($stmt))
+                printf("[010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+        } catch (\ArgumentCountError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
 
         if ("myversion" !== $ver_out)
             printf("[011] Results seem wrong got '%s'\n", $ver_out);

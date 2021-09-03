@@ -2,12 +2,12 @@
 IntlCalendar::getDayOfWeekType() basic test
 --INI--
 date.timezone=Atlantic/Azores
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
 if (version_compare(INTL_ICU_VERSION, '52.1') < 0)
-	die('skip for ICU >= 52.1');
+    die('skip for ICU >= 52.1');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

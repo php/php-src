@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 int(0)
-json_last_error() expects exactly 0 parameters, 1 given
+json_last_error() expects exactly 0 arguments, 1 given

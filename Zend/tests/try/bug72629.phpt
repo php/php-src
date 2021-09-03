@@ -11,5 +11,6 @@ try {
 } catch (Exception $e) { }
 
 var_dump($var === $e);
+?>
 --EXPECT--
 bool(true)

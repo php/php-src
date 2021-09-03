@@ -1,8 +1,9 @@
 --TEST--
 Bug #55797: Integer overflow in SdnToGregorian leads to segfault (in optimized builds)
+--EXTENSIONS--
+calendar
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (PHP_INT_SIZE == 4) {
         die("skip this test is for 64bit platform only");
 }
@@ -12,6 +13,7 @@ if (PHP_INT_SIZE == 4) {
 $x = 9223372036854743639;
 
 var_dump(cal_from_jd($x, CAL_GREGORIAN));
+?>
 --EXPECTF--
 array(9) {
   ["date"]=>

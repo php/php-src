@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_uuencode.h"
 
@@ -49,7 +45,7 @@ const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
 	mbfl_no_encoding_uuencode,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_uudec,
 	mbfl_filt_conv_common_flush,
 	NULL,
@@ -149,5 +145,5 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			/* skip newline */
 			filter->status = uudec_state_size;
 	}
-	return c;
+	return 0;
 }

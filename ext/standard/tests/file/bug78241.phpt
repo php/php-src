@@ -19,6 +19,10 @@ for ($i = 2037; $i <= 2040; $i++) {
   echo 'File: '.date('D, d M Y H:i:s', $file), PHP_EOL, PHP_EOL;
 }
 ?>
+--CLEAN--
+<?php
+@unlink($filename = __DIR__ . '/bug78241.txt');
+?>
 --EXPECT--
 Date: Thu, 01 Jan 2037 01:01:01
 File: Thu, 01 Jan 2037 01:01:01

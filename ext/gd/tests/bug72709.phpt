@@ -1,9 +1,7 @@
 --TEST--
 Bug #72709 (imagesetstyle() causes OOB read for empty $styles)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip ext/gd not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(1, 1);
@@ -20,5 +18,5 @@ imagedestroy($im);
 ?>
 ====DONE====
 --EXPECT--
-imagesetstyle(): Argument #2 ($styles) cannot be empty
+imagesetstyle(): Argument #2 ($style) cannot be empty
 ====DONE====

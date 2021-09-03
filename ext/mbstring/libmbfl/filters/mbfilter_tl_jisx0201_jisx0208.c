@@ -22,280 +22,252 @@
  *
  */
 
-#include "mbfl_allocators.h"
+#include <stdint.h>
+#include <stdbool.h>
 #include "mbfilter_tl_jisx0201_jisx0208.h"
 #include "translit_kana_jisx0201_jisx0208.h"
 
-void
-mbfl_filt_tl_jisx0201_jisx0208_init(mbfl_convert_filter *filt)
+/* Apply various transforms to input codepoint, such as converting halfwidth katakana
+ * to fullwidth katakana. `mode` is a bitfield which controls which transforms are
+ * actually performed. The bit values are defined in mbfilter_tl_jisx0201_jix0208.h.
+ * `mode` must not call for transforms which are inverses (i.e. which would cancel
+ * each other out).
+ *
+ * In some cases, successive input codepoints may be merged into one output codepoint.
+ * (That is the purpose of the `next` parameter.) If the `next` codepoint is consumed
+ * and should be skipped over, `*consumed` will be set to true. Otherwise, `*consumed`
+ * will not be modified. If there is no following codepoint, `next` should be zero.
+ *
+ * Again, in some cases, one input codepoint may convert to two output codepoints.
+ * If so, the second output codepoint will be stored in `*second`.
+ *
+ * Return the resulting codepoint. If none of the requested transforms apply, return
+ * the input codepoint unchanged.
+ */
+int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 {
-	mbfl_filt_conv_common_ctor(filt);
-}
-
-void
-mbfl_filt_tl_jisx0201_jisx0208_cleanup(mbfl_convert_filter *filt)
-{
-}
-
-int
-mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
-{
-	int s, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
-
-	s = c;
-
-	if ((mode & MBFL_FILT_TL_HAN2ZEN_ALL)
-			&& c >= 0x21 && c <= 0x7d && c != 0x22 && c != 0x27 && c != 0x5c) {
-		/* all except <"> <'> <\> <~> */
-		s = c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_ALPHA) &&
-			((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a))) {
-		/* alpha */
-		s = c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_NUMERIC) &&
-			c >= 0x30 && c <= 0x39) {
-		/* num */
-		s = c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_SPACE) && c == 0x20) {
-		/* space */
-		s = 0x3000;
+	if ((mode & MBFL_FILT_TL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7d && c != '"' && c != '\'' && c != '\\') {
+		return c + 0xfee0;
+	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_ALPHA) && ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a))) { /* alphabetic */
+		return c + 0xfee0;
+	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_NUMERIC) && c >= 0x30 && c <= 0x39) { /* num */
+		return c + 0xfee0;
+	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_SPACE) && c == 0x20) { /* space */
+		return 0x3000;
 	}
 
-	if (mode &
-			(MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_HIRAGANA)) {
-		/* hankaku kana to zenkaku kana */
-		if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) &&
-				(mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
-			/* hankaku kana to zenkaku katakana and glue voiced sound mark */
+	if (mode & (MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_HIRAGANA)) {
+		/* Convert Hankaku kana to Zenkaku kana
+		 * Either all Hankaku kana (including katakana and hiragana) will be converted
+		 * to Zenkaku katakana, or to Zenkaku hiragana */
+		if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) && (mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
 			if (c >= 0xff61 && c <= 0xff9f) {
-				if (filt->status) {
-					n = (filt->cache - 0xff60) & 0x3f;
-					if (c == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						filt->status = 0;
-						s = 0x3001 + hankana2zenkana_table[n];
-					} else if (c == 0xff9e && n == 19) {
-						filt->status = 0;
-						s = 0x30f4;
-					} else if (c == 0xff9f && (n >= 42 && n <= 46)) {
-						filt->status = 0;
-						s = 0x3002 + hankana2zenkana_table[n];
-					} else {
-						filt->status = 1;
-						filt->cache = c;
-						s = 0x3000 + hankana2zenkana_table[n];
+				int n = c - 0xff60;
+				if (next >= 0xff61 && next <= 0xff9f) {
+					if (next == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenkana_table[n];
+					} else if (next == 0xff9e && n == 19) {
+						*consumed = true;
+						return 0x30f4;
+					} else if (next == 0xff9f && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenkana_table[n];
 					}
-				} else {
-					filt->status = 1;
-					filt->cache = c;
-					return c;
 				}
-			} else {
-				if (filt->status) {
-					n = (filt->cache - 0xff60) & 0x3f;
-					filt->status = 0;
-					(*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
-				}
+
+				return 0x3000 + hankana2zenkana_table[n];
 			}
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) &&
-				(mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
-			/* hankaku kana to zenkaku hirangana and glue voiced sound mark */
+		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) && (mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
 			if (c >= 0xff61 && c <= 0xff9f) {
-				if (filt->status) {
-					n = (filt->cache - 0xff60) & 0x3f;
-					if (c == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
-						filt->status = 0;
-						s = 0x3001 + hankana2zenhira_table[n];
-					} else if (c == 0xff9f && (n >= 42 && n <= 46)) {
-						filt->status = 0;
-						s = 0x3002 + hankana2zenhira_table[n];
-					} else {
-						filt->status = 1;
-						filt->cache = c;
-						s = 0x3000 + hankana2zenhira_table[n];
+				int n = c - 0xff60;
+				if (next >= 0xff61 && next <= 0xff9f) {
+					if (next == 0xff9e && ((n >= 22 && n <= 36) || (n >= 42 && n <= 46))) {
+						*consumed = true;
+						return 0x3001 + hankana2zenhira_table[n];
+					} else if (next == 0xff9f && n >= 42 && n <= 46) {
+						*consumed = true;
+						return 0x3002 + hankana2zenhira_table[n];
 					}
-				} else {
-					filt->status = 1;
-					filt->cache = c;
-					return c;
 				}
-			} else {
-				if (filt->status) {
-					n = (filt->cache - 0xff60) & 0x3f;
-					filt->status = 0;
-					(*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
-				}
+
+				return 0x3000 + hankana2zenhira_table[n];
 			}
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) &&
-				c >= 0xff61 && c <= 0xff9f) {
-			/* hankaku kana to zenkaku katakana */
-			s = 0x3000 + hankana2zenkana_table[c - 0xff60];
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA)
-				&& c >= 0xff61 && c <= 0xff9f) {
-			/* hankaku kana to zenkaku hirangana */
-			s = 0x3000 + hankana2zenhira_table[c - 0xff60];
+		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) && c >= 0xff61 && c <= 0xff9f) {
+			return 0x3000 + hankana2zenkana_table[c - 0xff60];
+		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) && c >= 0xff61 && c <= 0xff9f) {
+			return 0x3000 + hankana2zenhira_table[c - 0xff60];
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT1) {
-		/* special ascii to symbol */
+	if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT1) { /* special ascii to symbol */
 		if (c == 0x5c) {
-			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
-		} else if (c == 0xa5) {		/* YEN SIGN */
-			s = 0xffe5;				/* FULLWIDTH YEN SIGN */
+			return 0xffe5; /* FULLWIDTH YEN SIGN */
+		} else if (c == 0xa5) { /* YEN SIGN */
+			return 0xffe5; /* FULLWIDTH YEN SIGN */
 		} else if (c == 0x7e) {
-			s = 0xffe3;				/* FULLWIDTH MACRON */
-		} else if (c == 0x203e) {	/* OVERLINE */
-			s = 0xffe3;				/* FULLWIDTH MACRON */
+			return 0xffe3; /* FULLWIDTH MACRON */
+		} else if (c == 0x203e) { /* OVERLINE */
+			return 0xffe3; /* FULLWIDTH MACRON */
 		} else if (c == 0x27) {
-			s = 0x2019;				/* RIGHT SINGLE QUOTATION MARK */
+			return 0x2019; /* RIGHT SINGLE QUOTATION MARK */
 		} else if (c == 0x22) {
-			s = 0x201d;				/* RIGHT DOUBLE QUOTATION MARK */
+			return 0x201d; /* RIGHT DOUBLE QUOTATION MARK */
 		}
-	} else if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT2) {
-		/* special ascii to symbol */
+	} else if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT2) { /* special ascii to symbol */
 		if (c == 0x5c) {
-			s = 0xff3c;				/* FULLWIDTH REVERSE SOLIDUS */
+			return 0xff3c; /* FULLWIDTH REVERSE SOLIDUS */
 		} else if (c == 0x7e) {
-			s = 0xff5e;				/* FULLWIDTH TILDE */
+			return 0xff5e; /* FULLWIDTH TILDE */
 		} else if (c == 0x27) {
-			s = 0xff07;				/* FULLWIDTH APOSTROPHE */
+			return 0xff07; /* FULLWIDTH APOSTROPHE */
 		} else if (c == 0x22) {
-			s = 0xff02;				/* FULLWIDTH QUOTATION MARK */
+			return 0xff02; /* FULLWIDTH QUOTATION MARK */
 		}
 	}
 
-	if (mode & 0xf0) { /* zenkaku to hankaku */
-		if ((mode & 0x10) && c >= 0xff01 && c <= 0xff5d && c != 0xff02 && c != 0xff07 && c!= 0xff3c) {	/* all except <"> <'> <\> <~> */
-			s = c - 0xfee0;
-		} else if ((mode & 0x20) && ((c >= 0xff21 && c <= 0xff3a) || (c >= 0xff41 && c <= 0xff5a))) {	/* alpha */
-			s = c - 0xfee0;
-		} else if ((mode & 0x40) && (c >= 0xff10 && c <= 0xff19)) {	/* num */
-			s = c - 0xfee0;
-		} else if ((mode & 0x80) && (c == 0x3000)) {	/* spase */
-			s = 0x20;
-		} else if ((mode & 0x10) && (c == 0x2212)) {	/* MINUS SIGN */
-			s = 0x2d;
+	if (mode & (MBFL_FILT_TL_ZEN2HAN_ALL | MBFL_FILT_TL_ZEN2HAN_ALPHA | MBFL_FILT_TL_ZEN2HAN_NUMERIC | MBFL_FILT_TL_ZEN2HAN_SPACE)) {
+		/* Zenkaku to Hankaku */
+		if ((mode & MBFL_FILT_TL_ZEN2HAN_ALL) && c >= 0xff01 && c <= 0xff5d && c != 0xff02 && c != 0xff07 && c!= 0xff3c) {
+			/* all except " ' \ ~ */
+			return c - 0xfee0;
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_ALPHA) && ((c >= 0xff21 && c <= 0xff3a) || (c >= 0xff41 && c <= 0xff5a))) {
+			return c - 0xfee0;
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_NUMERIC) && (c >= 0xff10 && c <= 0xff19)) {
+			return c - 0xfee0;
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_SPACE) && (c == 0x3000)) {
+			return 0x20;
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
+			return 0x2d;
 		}
 	}
 
-	if (mode &
-			(MBFL_FILT_TL_ZEN2HAN_KATAKANA | MBFL_FILT_TL_ZEN2HAN_HIRAGANA)) {
+	if (mode & (MBFL_FILT_TL_ZEN2HAN_KATAKANA | MBFL_FILT_TL_ZEN2HAN_HIRAGANA)) {
 		/* Zenkaku kana to hankaku kana */
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_KATAKANA) &&
-				c >= 0x30a1 && c <= 0x30f4) {
+		if ((mode & MBFL_FILT_TL_ZEN2HAN_KATAKANA) && c >= 0x30a1 && c <= 0x30f4) {
 			/* Zenkaku katakana to hankaku kana */
-			n = c - 0x30a1;
-			if (zenkana2hankana_table[n][1] != 0) {
-				(filt->output_function)(0xff00 + zenkana2hankana_table[n][0], filt->data);
-				s = 0xff00 + zenkana2hankana_table[n][1];
-			} else {
-				s = 0xff00 + zenkana2hankana_table[n][0];
+			int n = c - 0x30a1;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xff00 + zenkana2hankana_table[n][1];
 			}
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRAGANA) &&
-				c >= 0x3041 && c <= 0x3093) {
-			/* Zenkaku hirangana to hankaku kana */
-			n = c - 0x3041;
-			if (zenkana2hankana_table[n][1] != 0) {
-				(filt->output_function)(0xff00 + zenkana2hankana_table[n][0], filt->data);
-				s = 0xff00 + zenkana2hankana_table[n][1];
-			} else {
-				s = 0xff00 + zenkana2hankana_table[n][0];
+			return 0xff00 + zenkana2hankana_table[n][0];
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
+			/* Zenkaku hiragana to hankaku kana */
+			int n = c - 0x3041;
+			if (zenkana2hankana_table[n][1]) {
+				*second = 0xff00 + zenkana2hankana_table[n][1];
 			}
+			return 0xff00 + zenkana2hankana_table[n][0];
 		} else if (c == 0x3001) {
-			s = 0xff64;				/* HALFWIDTH IDEOGRAPHIC COMMA */
+			return 0xff64; /* HALFWIDTH IDEOGRAPHIC COMMA */
 		} else if (c == 0x3002) {
-			s = 0xff61;				/* HALFWIDTH IDEOGRAPHIC FULL STOP */
+			return 0xff61; /* HALFWIDTH IDEOGRAPHIC FULL STOP */
 		} else if (c == 0x300c) {
-			s = 0xff62;				/* HALFWIDTH LEFT CORNER BRACKET */
+			return 0xff62; /* HALFWIDTH LEFT CORNER BRACKET */
 		} else if (c == 0x300d) {
-			s = 0xff63;				/* HALFWIDTH RIGHT CORNER BRACKET */
+			return 0xff63; /* HALFWIDTH RIGHT CORNER BRACKET */
 		} else if (c == 0x309b) {
-			s = 0xff9e;				/* HALFWIDTH KATAKANA VOICED SOUND MARK */
+			return 0xff9e; /* HALFWIDTH KATAKANA VOICED SOUND MARK */
 		} else if (c == 0x309c) {
-			s = 0xff9f;				/* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
+			return 0xff9f; /* HALFWIDTH KATAKANA SEMI-VOICED SOUND MARK */
 		} else if (c == 0x30fc) {
-			s = 0xff70;				/* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
+			return 0xff70; /* HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK */
 		} else if (c == 0x30fb) {
-			s = 0xff65;				/* HALFWIDTH KATAKANA MIDDLE DOT */
+			return 0xff65; /* HALFWIDTH KATAKANA MIDDLE DOT */
 		}
-	} else if (mode & (MBFL_FILT_TL_ZEN2HAN_HIRA2KANA
-			| MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) {
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRA2KANA) &&
-				((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
-			/* Zenkaku hirangana to Zenkaku katakana */
-			s = c + 0x60;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_KANA2HIRA) &&
-				((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
-			/* Zenkaku katakana to Zenkaku hirangana */
-			s = c - 0x60;
+	} else if (mode & (MBFL_FILT_TL_ZEN2HAN_HIRA2KANA | MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) {
+		if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRA2KANA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
+			/* Zenkaku hiragana to Zenkaku katakana */
+			return c + 0x60;
+		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_KANA2HIRA) && ((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
+			/* Zenkaku katakana to Zenkaku hiragana */
+			return c - 0x60;
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT1) {	/* special symbol to ascii */
-		if (c == 0xffe5) {			/* FULLWIDTH YEN SIGN */
-			s = 0x5c;
-		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x5c;
-		} else if (c == 0xffe3) {	/* FULLWIDTH MACRON */
-			s = 0x7e;
-		} else if (c == 0x203e) {	/* OVERLINE */
-			s = 0x7e;
-		} else if (c == 0x2018) {	/* LEFT SINGLE QUOTATION MARK*/
-			s = 0x27;
-		} else if (c == 0x2019) {	/* RIGHT SINGLE QUOTATION MARK */
-			s = 0x27;
-		} else if (c == 0x201c) {	/* LEFT DOUBLE QUOTATION MARK */
-			s = 0x22;
-		} else if (c == 0x201d) {	/* RIGHT DOUBLE QUOTATION MARK */
-			s = 0x22;
+	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT1) { /* special symbol to ascii */
+		if (c == 0xffe5) { /* FULLWIDTH YEN SIGN */
+			return 0x5c;
+		} else if (c == 0xff3c) { /* FULLWIDTH REVERSE SOLIDUS */
+			return 0x5c;
+		} else if (c == 0xffe3) { /* FULLWIDTH MACRON */
+			return 0x7e;
+		} else if (c == 0x203e) { /* OVERLINE */
+			return 0x7e;
+		} else if (c == 0x2018) { /* LEFT SINGLE QUOTATION MARK*/
+			return 0x27;
+		} else if (c == 0x2019) { /* RIGHT SINGLE QUOTATION MARK */
+			return 0x27;
+		} else if (c == 0x201c) { /* LEFT DOUBLE QUOTATION MARK */
+			return 0x22;
+		} else if (c == 0x201d) { /* RIGHT DOUBLE QUOTATION MARK */
+			return 0x22;
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT2) {	/* special symbol to ascii */
-		if (c == 0xff3c) {			/* FULLWIDTH REVERSE SOLIDUS */
-			s = 0x5c;
-		} else if (c == 0xff5e) {	/* FULLWIDTH TILDE */
-			s = 0x7e;
-		} else if (c == 0xff07) {	/* FULLWIDTH APOSTROPHE */
-			s = 0x27;
-		} else if (c == 0xff02) {	/* FULLWIDTH QUOTATION MARK */
-			s = 0x22;
+	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT2) { /* special symbol to ascii */
+		if (c == 0xff3c) { /* FULLWIDTH REVERSE SOLIDUS */
+			return 0x5c;
+		} else if (c == 0xff5e) { /* FULLWIDTH TILDE */
+			return 0x7e;
+		} else if (c == 0xff07) { /* FULLWIDTH APOSTROPHE */
+			return 0x27;
+		} else if (c == 0xff02) { /* FULLWIDTH QUOTATION MARK */
+			return 0x22;
 		}
 	}
 
-	return (*filt->output_function)(s, filt->data);
+	return c;
 }
 
-int
-mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
+int mbfl_filt_tl_jisx0201_jisx0208(int c, mbfl_convert_filter *filt)
 {
-	int ret, n;
-	int mode = ((mbfl_filt_tl_jisx0201_jisx0208_param *)filt->opaque)->mode;
+	int mode = (intptr_t)filt->opaque, second = 0;
+	bool consumed = false;
 
-	ret = 0;
-	if (filt->status) {
-		n = (filt->cache - 0xff60) & 0x3f;
-		if (mode & 0x100) {	/* hankaku kana to zenkaku katakana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenkana_table[n], filt->data);
-		} else if (mode & 0x200) {	/* hankaku kana to zenkaku hirangana */
-			ret = (*filt->output_function)(0x3000 + hankana2zenhira_table[n], filt->data);
+	if (filt->cache) {
+		int s = mbfl_convert_kana(filt->cache, c, &consumed, &second, mode);
+		filt->cache = consumed ? 0 : c;
+		(*filt->output_function)(s, filt->data);
+		if (second) {
+			(*filt->output_function)(second, filt->data);
 		}
-		filt->status = 0;
+	} else if (c == 0) {
+		/* This case has to be handled separately, since `filt->cache == 0` means no
+		 * codepoint is cached */
+		(*filt->output_function)(0, filt->data);
+	} else {
+		filt->cache = c;
 	}
 
-	if (filt->flush_function != NULL) {
+	return 0;
+}
+
+int mbfl_filt_tl_jisx0201_jisx0208_flush(mbfl_convert_filter *filt)
+{
+	int mode = (intptr_t)filt->opaque, second = 0;
+
+	if (filt->cache) {
+		int s = mbfl_convert_kana(filt->cache, 0, NULL, &second, mode);
+		(*filt->output_function)(s, filt->data);
+		if (second) {
+			(*filt->output_function)(second, filt->data);
+		}
+		filt->cache = 0;
+	}
+
+	if (filt->flush_function) {
 		return (*filt->flush_function)(filt->data);
 	}
 
-	return ret;
+	return 0;
 }
 
 const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_wchar,
-	mbfl_filt_tl_jisx0201_jisx0208_init,
-	mbfl_filt_tl_jisx0201_jisx0208_cleanup,
+	mbfl_filt_conv_common_ctor,
+	NULL,
 	mbfl_filt_tl_jisx0201_jisx0208,
 	mbfl_filt_tl_jisx0201_jisx0208_flush,
 	NULL,

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,12 +20,11 @@
 #include "codepage.h"
 #include <bcrypt.h>
 #include <lmcons.h>
-#include <imagehlp.h>
 
 
 PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 {/*{{{*/
-	wchar_t *bufw = NULL;
+	wchar_t *bufw = NULL, *pw;
 	char *buf;
 
 	DWORD ret = FormatMessageW(
@@ -36,6 +35,10 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 	if (!ret || !bufw) {
 		return "";
 	}
+
+	/* strip trailing line breaks and periods */
+	for (pw = bufw + wcslen(bufw) - 1; pw >= bufw && (*pw == L'\r' || *pw == L'\n' || *pw == L'.'); pw--);
+	pw[1] = L'\0';
 
 	buf = php_win32_cp_conv_w_to_any(bufw, ret, PHP_WIN32_CP_IGNORE_LEN_P);
 
@@ -436,26 +439,13 @@ PHP_WINUTIL_API char *php_win32_get_username(void)
 	return uname;
 }/*}}}*/
 
-static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, char *format, char **err)
+static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, char *format, char **err)
 {/*{{{*/
-	/* work around ImageLoad() issue */
-	const char *name_stripped = name;
-	if (name[0] == '.' && IS_SLASH(name[1])) {
-		name_stripped += 2;
-	}
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER) handle;
+	PIMAGE_NT_HEADERS pNTHeader = (PIMAGE_NT_HEADERS)((char *) dosHeader + dosHeader->e_lfanew);
 
-	PLOADED_IMAGE img = ImageLoad(name_stripped, NULL);
-
-	if (!img) {
-		DWORD _err = GetLastError();
-		char *err_txt = php_win32_error_to_msg(_err);
-		spprintf(err, 0, "Failed to load %s, %s", name, err_txt);
-		free(err_txt);
-		return FALSE;
-	}
-
-	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
-	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
+	DWORD major = pNTHeader->OptionalHeader.MajorLinkerVersion;
+	DWORD minor = pNTHeader->OptionalHeader.MinorLinkerVersion;
 
 #if PHP_LINKER_MAJOR == 14
 	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
@@ -474,23 +464,39 @@ static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, 
 	if (PHP_LINKER_MAJOR != major)
 #endif
 	{
-		spprintf(err, 0, format, name, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
-		ImageUnload(img);
+		char buf[MAX_PATH];
+		if (GetModuleFileName(handle, buf, sizeof(buf)) != 0) {
+			spprintf(err, 0, format, buf, major, minor, PHP_LINKER_MAJOR, PHP_LINKER_MINOR);
+		} else {
+			spprintf(err, 0, "Can't retrieve the module name (error %u)", GetLastError());
+		}
 		return FALSE;
 	}
-	ImageUnload(img);
 
 	return TRUE;
 }/*}}}*/
 
-PHP_WINUTIL_API BOOL php_win32_image_compatible(const char *name, char **err)
+PHP_WINUTIL_API BOOL php_win32_image_compatible(HMODULE handle, char **err)
 {/*{{{*/
-	return is_compatible(name, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
+	return is_compatible(handle, TRUE, "Can't load module '%s' as it's linked with %u.%u, but the core is linked with %d.%d", err);
 }/*}}}*/
 
-/* Expect a CRT name DLL. */
-PHP_WINUTIL_API BOOL php_win32_crt_compatible(const char *name, char **err)
+/* Expect a CRT module handle */
+PHP_WINUTIL_API BOOL php_win32_crt_compatible(char **err)
 {/*{{{*/
-	return is_compatible(name, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
+#if PHP_LINKER_MAJOR == 14
+	/* Extend for other CRT if needed. */
+# if PHP_DEBUG
+	const char *crt_name = "vcruntime140d.dll";
+# else
+	const char *crt_name = "vcruntime140.dll";
+# endif
+	HMODULE handle = GetModuleHandle(crt_name);
+	if (handle == NULL) {
+		spprintf(err, 0, "Can't get handle of module %s (error %u)", crt_name, GetLastError());
+		return FALSE;
+	}
+	return is_compatible(handle, FALSE, "'%s' %u.%u is not compatible with this PHP build linked with %d.%d", err);
+#endif
+	return TRUE;
 }/*}}}*/
-

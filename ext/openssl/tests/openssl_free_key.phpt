@@ -2,24 +2,16 @@
 void openssl_free_key ( resource $key_identifier );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!@openssl_pkey_new())
     die("skip cannot create private key");
 ?>
 --FILE--
 <?php
 echo "Creating private key\n";
-
-/* stack up some entropy; performance is not critical,
- * and being slow will most likely even help the test.
- */
-for ($z = "", $i = 0; $i < 1024; $i++) {
-    $z .= $i * $i;
-    usleep($i);
-}
 
 $conf = array('config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf');
 $privkey = openssl_pkey_new($conf);
@@ -68,10 +60,16 @@ echo "OK!\n";
 
 @unlink($key_file_name);
 ?>
---EXPECT--
+--EXPECTF--
 Creating private key
 Export key to file
 Load key from file - array syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 Load key using direct syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 Load key manually and use string syntax
+
+Deprecated: Function openssl_free_key() is deprecated in %s on line %d
 OK!

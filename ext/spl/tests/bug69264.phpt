@@ -3,49 +3,49 @@ Bug #69264 (__debugInfo() ignored while extending SPL classes)
 --FILE--
 <?php
 class MyFileInfo extends SplFileInfo {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyDoublyLinkedList extends SplDoublyLinkedList {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyObjectStorage extends SplObjectStorage {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyMultipleIterator extends MultipleIterator {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyArrayObject extends ArrayObject {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyArrayIterator extends ArrayIterator {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyMaxHeap extends SplMaxHeap {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }
 
 class MyPriorityQueue extends SplPriorityQueue {
-    public function __debugInfo() {
+    public function __debugInfo(): array {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
 }

@@ -20,6 +20,7 @@ foreach ( [ __DIR__, "glob://".__DIR__ ] as $spec) {
     continue;
   }
 }
+?>
 --EXPECTF--
 ** Opening %s
 

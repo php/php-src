@@ -1,7 +1,9 @@
 --TEST--
 readline_write_history(): Test that open_basedir is respected
+--EXTENSIONS--
+readline
 --SKIPIF--
-<?php if (!extension_loaded("readline") || !function_exists('readline_write_history')) die("skip"); ?>
+<?php if (!function_exists('readline_write_history')) die("skip"); ?>
 --INI--
 open_basedir=/tmp/some-sandbox
 --FILE--

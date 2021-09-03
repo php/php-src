@@ -1,7 +1,6 @@
 --TEST--
 Bug #71067 (Local object in class method stays in memory for each call)
 --INI--
-opcache.enable=0
 error_reporting=0
 --FILE--
 <?php

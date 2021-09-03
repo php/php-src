@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -75,6 +75,46 @@ static zend_always_inline int zend_ulong_ntz(zend_ulong num)
 #endif
 }
 
+/* Number of leading zero bits (Undefined for zero) */
+static zend_always_inline int zend_ulong_nlz(zend_ulong num)
+{
+#if (defined(__GNUC__) || __has_builtin(__builtin_clzl)) \
+	&& SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CLZL)
+	return __builtin_clzl(num);
+#elif (defined(__GNUC__) || __has_builtin(__builtin_clzll)) && defined(PHP_HAVE_BUILTIN_CLZLL)
+	return __builtin_clzll(num);
+#elif defined(_WIN32)
+	unsigned long index;
+
+#if defined(_WIN64)
+	if (!BitScanReverse64(&index, num)) {
+#else
+	if (!BitScanReverse(&index, num)) {
+#endif
+		/* undefined behavior */
+		return SIZEOF_ZEND_LONG * 8;
+	}
+
+	return (int) (SIZEOF_ZEND_LONG * 8 - 1)- index;
+#else
+	zend_ulong x;
+	int n;
+
+#if SIZEOF_ZEND_LONG == 8
+	n = 64;
+	x = num >> 32; if (x != 0) {n -= 32; num = x;}
+#else
+	n = 32;
+#endif
+	x = num >> 16; if (x != 0) {n -= 16; num = x;}
+	x = num >> 8;  if (x != 0) {n -=  8; num = x;}
+	x = num >> 4;  if (x != 0) {n -=  4; num = x;}
+	x = num >> 2;  if (x != 0) {n -=  2; num = x;}
+	x = num >> 1;  if (x != 0) return n - 2;
+	return n - num;
+#endif
+}
+
 /* Returns the number of zend_ulong words needed to store a bitset that is N
    bits long.  */
 static inline uint32_t zend_bitset_len(uint32_t n)
@@ -82,7 +122,7 @@ static inline uint32_t zend_bitset_len(uint32_t n)
 	return (n + ((sizeof(zend_long) * 8) - 1)) / (sizeof(zend_long) * 8);
 }
 
-static inline zend_bool zend_bitset_in(zend_bitset set, uint32_t n)
+static inline bool zend_bitset_in(zend_bitset set, uint32_t n)
 {
 	return ZEND_BIT_TEST(set, n);
 }
@@ -102,7 +142,7 @@ static inline void zend_bitset_clear(zend_bitset set, uint32_t len)
 	memset(set, 0, len * ZEND_BITSET_ELM_SIZE);
 }
 
-static inline int zend_bitset_empty(zend_bitset set, uint32_t len)
+static inline bool zend_bitset_empty(zend_bitset set, uint32_t len)
 {
 	uint32_t i;
 	for (i = 0; i < len; i++) {
@@ -118,7 +158,7 @@ static inline void zend_bitset_fill(zend_bitset set, uint32_t len)
 	memset(set, 0xff, len * ZEND_BITSET_ELM_SIZE);
 }
 
-static inline zend_bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
+static inline bool zend_bitset_equal(zend_bitset set1, zend_bitset set2, uint32_t len)
 {
     return memcmp(set1, set2, len * ZEND_BITSET_ELM_SIZE) == 0;
 }
@@ -173,7 +213,7 @@ static inline void zend_bitset_union_with_difference(zend_bitset set1, zend_bits
 	}
 }
 
-static inline zend_bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32_t len)
+static inline bool zend_bitset_subset(zend_bitset set1, zend_bitset set2, uint32_t len)
 {
 	uint32_t i;
 

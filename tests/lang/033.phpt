@@ -37,7 +37,6 @@ switch ($a):
         break;
 endswitch;
 ?>
-
 --EXPECT--
 If: 11
 While: 12346789

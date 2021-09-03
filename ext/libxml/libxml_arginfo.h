@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2d793e5134ea8633c432f03d20c1d8b80a05795b */
+ * Stub hash: 252fdc1cd83d2d3322cc040baf2bf3c7fde29254 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -42,7 +42,58 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
 	ZEND_FE(libxml_get_errors, arginfo_libxml_get_errors)
 	ZEND_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
-	ZEND_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
+	ZEND_DEP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
 	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_LibXMLError_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_LibXMLError(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "LibXMLError", class_LibXMLError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_level_default_value;
+	ZVAL_UNDEF(&property_level_default_value);
+	zend_string *property_level_name = zend_string_init("level", sizeof("level") - 1, 1);
+	zend_declare_typed_property(class_entry, property_level_name, &property_level_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_level_name);
+
+	zval property_code_default_value;
+	ZVAL_UNDEF(&property_code_default_value);
+	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_code_name);
+
+	zval property_column_default_value;
+	ZVAL_UNDEF(&property_column_default_value);
+	zend_string *property_column_name = zend_string_init("column", sizeof("column") - 1, 1);
+	zend_declare_typed_property(class_entry, property_column_name, &property_column_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_column_name);
+
+	zval property_message_default_value;
+	ZVAL_UNDEF(&property_message_default_value);
+	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
+	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_message_name);
+
+	zval property_file_default_value;
+	ZVAL_UNDEF(&property_file_default_value);
+	zend_string *property_file_name = zend_string_init("file", sizeof("file") - 1, 1);
+	zend_declare_typed_property(class_entry, property_file_name, &property_file_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_file_name);
+
+	zval property_line_default_value;
+	ZVAL_UNDEF(&property_line_default_value);
+	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
+	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_line_name);
+
+	return class_entry;
+}

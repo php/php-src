@@ -31,6 +31,6 @@ try {
 ?>
 --EXPECT--
 *** Testing Error Conditions ***
-extract(): Argument #2 ($extract_type) must be a valid extract type
-extract(): Argument #2 ($extract_type) must be a valid extract type
+extract(): Argument #2 ($flags) must be a valid extract type
+extract(): Argument #2 ($flags) must be a valid extract type
 extract(): Argument #3 ($prefix) is required when using this extract type

@@ -4,8 +4,8 @@ Bug #75681: Warning: Narrowing occurred during type inference (specific case)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

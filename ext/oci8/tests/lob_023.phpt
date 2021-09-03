@@ -1,5 +1,7 @@
 --TEST--
 oci_lob_import()/read()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -47,7 +49,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-object(OCI_Lob)#%d (1) {
+object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
@@ -59,12 +61,12 @@ Warning: oci_lob_import(): Unable to find descriptor property in %s on line %d
 bool(false)
 array(2) {
   [0]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }
   ["BLOB"]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

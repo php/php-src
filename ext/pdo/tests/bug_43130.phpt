@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #43130 (Bound parameters cannot have - in their name)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite', strlen('sqlite'))) die('skip not relevant for sqlite driver');
@@ -36,6 +37,4 @@ var_dump($stmt->fetch(PDO::FETCH_COLUMN));
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in %s on line %d
-
-Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d
 bool(false)

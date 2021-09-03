@@ -1,9 +1,7 @@
 --TEST--
 Bug #78114 (segfault when calling sodium_* functions from eval)
---SKIPIF--
-<?php
-if (!extension_loaded('sodium')) die('skip sodium extension not available');
-?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 try {
@@ -13,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-sodium_bin2hex() expects exactly 1 parameter, 0 given
+sodium_bin2hex() expects exactly 1 argument, 0 given

@@ -28,17 +28,33 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Abbreviated weekday name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(3) "Fri"
 
 --Full weekday name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(6) "Friday"
 
 --Week number of the year--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "31"
 
 --Week number of the year in decimal number--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "31"

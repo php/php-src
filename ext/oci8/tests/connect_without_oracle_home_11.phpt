@@ -1,14 +1,15 @@
 --TEST--
 oci_connect() without ORACLE_HOME set (OCIServerAttach() segfaults)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();
 $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov != 1) {
-	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
+    die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
 preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!(isset($matches[0]) &&

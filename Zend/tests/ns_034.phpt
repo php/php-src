@@ -22,6 +22,7 @@ echo \A\Foo::C;
 f1();
 f2();
 f3();
+?>
 --EXPECT--
 ok
 ok

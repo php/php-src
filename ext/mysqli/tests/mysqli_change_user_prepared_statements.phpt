@@ -1,9 +1,9 @@
 --TEST--
 mysqli_change_user() - Prepared Statement
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

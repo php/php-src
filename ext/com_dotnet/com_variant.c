@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -384,14 +384,14 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		} else {
 			V_BOOL(dstvar) = V_BOOL(srcvar);
 		}
-        break;
+		break;
 
 	case VT_BSTR:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_BSTRREF(dstvar) = V_BSTR(srcvar);
 		} else {
 			V_BSTR(dstvar) = V_BSTR(srcvar);
-        }
+		}
 		break;
 
 	case VT_UNKNOWN:
@@ -964,8 +964,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 	}
 
 	if (timestamp < 0) {
-		php_error_docref(NULL, E_WARNING, "Timestamp value must be a positive value.");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	VariantInit(&res);
@@ -975,8 +975,8 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	/* Invalid after 23:59:59, December 31, 3000, UTC */
 	if (!tmv) {
-		php_error_docref(NULL, E_WARNING, "Invalid timestamp " ZEND_LONG_FMT, timestamp);
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not go past 23:59:59, December 31, 3000, UTC");
+		RETURN_THROWS();
 	}
 
 	memset(&systime, 0, sizeof(systime));

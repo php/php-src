@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -154,12 +154,12 @@ typedef struct _fcgi_begin_request_rec {
 } fcgi_begin_request_rec;
 
 typedef struct _fcgi_end_request {
-    unsigned char appStatusB3;
-    unsigned char appStatusB2;
-    unsigned char appStatusB1;
-    unsigned char appStatusB0;
-    unsigned char protocolStatus;
-    unsigned char reserved[3];
+	unsigned char appStatusB3;
+	unsigned char appStatusB2;
+	unsigned char appStatusB1;
+	unsigned char appStatusB0;
+	unsigned char protocolStatus;
+	unsigned char reserved[3];
 } fcgi_end_request;
 
 typedef struct _fcgi_end_request_rec {
@@ -200,9 +200,9 @@ typedef struct _fcgi_hash {
 typedef struct _fcgi_req_hook 	fcgi_req_hook;
 
 struct _fcgi_req_hook {
-	void(*on_accept)();
-	void(*on_read)();
-	void(*on_close)();
+	void(*on_accept)(void);
+	void(*on_read)(void);
+	void(*on_close)(void);
 };
 
 struct _fcgi_request {
@@ -511,11 +511,8 @@ int fcgi_init(void)
 
 			str = getenv("_FCGI_SHUTDOWN_EVENT_");
 			if (str != NULL) {
-				zend_long ev;
-				HANDLE shutdown_event;
-
-				ZEND_ATOL(ev, str);
-				shutdown_event = (HANDLE) ev;
+				zend_long ev = ZEND_ATOL(str);
+				HANDLE shutdown_event = (HANDLE) ev;
 				if (!CreateThread(NULL, 0, fcgi_shutdown_thread,
 				                  shutdown_event, 0, NULL)) {
 					return -1;
@@ -523,9 +520,7 @@ int fcgi_init(void)
 			}
 			str = getenv("_FCGI_MUTEX_");
 			if (str != NULL) {
-				zend_long mt;
-				ZEND_ATOL(mt, str);
-				fcgi_accept_mutex = (HANDLE) mt;
+				fcgi_accept_mutex = (HANDLE) ZEND_ATOL(str);
 			}
 			return is_fastcgi = 1;
 		} else {
@@ -688,8 +683,12 @@ int fcgi_listen(const char *path, int backlog)
 		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
+#ifdef HAVE_INET_PTON
+			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
+#else
 			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
 			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
+#endif
 				struct hostent *hep;
 
 				if(strlen(host) > MAXFQDNLEN) {
@@ -871,11 +870,11 @@ void fcgi_set_allowed_clients(char *ip)
 	}
 }
 
-static void fcgi_hook_dummy() {
+static void fcgi_hook_dummy(void) {
 	return;
 }
 
-fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(), void(*on_read)(), void(*on_close)())
+fcgi_request *fcgi_init_request(int listen_socket, void(*on_accept)(void), void(*on_read)(void), void(*on_close)(void))
 {
 	fcgi_request *req = calloc(1, sizeof(fcgi_request));
 	req->listen_socket = listen_socket;
@@ -1032,7 +1031,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			val_len |= *p++;
 		}
 		if (UNEXPECTED(name_len + val_len > (unsigned int) (end - p))) {
-			/* Malformated request */
+			/* Malformed request */
 			return 0;
 		}
 		fcgi_hash_set(&req->env, FCGI_HASH_FUNC(p, name_len), (char*)p, name_len, (char*)p + name_len, val_len);
@@ -1320,7 +1319,7 @@ int fcgi_is_closed(fcgi_request *req)
 	return (req->fd < 0);
 }
 
-static int fcgi_is_allowed() {
+static int fcgi_is_allowed(void) {
 	int i;
 
 	if (client_sa.sa.sa_family == AF_UNIX) {

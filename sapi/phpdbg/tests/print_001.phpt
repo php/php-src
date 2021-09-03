@@ -11,36 +11,48 @@ q
 --EXPECTF--
 [Successful compilation of %s]
 prompt> [User Function foo (8 ops)]
-L14-16 foo() %s - %s + 8 ops
- L14   #0     RECV                    1                                         $baz                
- L15   #1     INIT_FCALL%s %d %s "var_dump"                               
- L15   #2     INIT_FCALL%s %d %s "strrev"                                 
- L15   #3     SEND_VAR                $baz                 1                                        
- L15   #4     DO_%cCALL                                                          @0                  
- L15   #5     SEND_VAR                @0                   1                                        
- L15   #6     DO_%cCALL                                                                              
- L16   #7     RETURN<-1>              null                                                          
+
+foo:
+     ; (lines=8, args=1, vars=1, tmps=2)
+     ; %s:14-16
+L0014 0000 CV0($baz) = RECV 1
+L0015 0001 INIT_FCALL %d %d string("var_dump")
+L0015 0002 INIT_FCALL %d %d string("strrev")
+L0015 0003 SEND_VAR CV0($baz) 1
+L0015 0004 V1 = DO_ICALL
+L0015 0005 SEND_VAR V1 1
+L0015 0006 DO_ICALL
+L0016 0007 RETURN null
 prompt> [User Class: Foo\Bar (2 methods)]
-L5-7 Foo\Bar::Foo() %s - %s + 5 ops
- L5    #0     RECV                    1                                         $bar                
- L6    #1     INIT_NS_FCALL_BY_NAME<1>                      "Foo\\var_dump"                          
- L6    #2     SEND_VAR_EX             $bar                 1                                        
- L6    #3     DO_FCALL                                                                              
- L7    #4     RETURN<-1>              null                                                          
-L9-9 Foo\Bar::baz() %s - %s + 1 ops
- L9    #0     RETURN<-1>              null                                                          
+
+Foo\Bar::Foo:
+     ; (lines=5, args=1, vars=1, tmps=1)
+     ; %s:5-7
+L0005 0000 CV0($bar) = RECV 1
+L0006 0001 INIT_NS_FCALL_BY_NAME 1 string("Foo\var_dump")
+L0006 0002 SEND_VAR_EX CV0($bar) 1
+L0006 0003 DO_FCALL
+L0007 0004 RETURN null
+
+Foo\Bar::baz:
+     ; (lines=1, args=0, vars=0, tmps=0)
+     ; %s:9-9
+L0009 0000 RETURN null
 prompt> [Not Executing!]
 prompt> [Context %s (9 ops)]
-L1-21 {main}() %s - %s + 9 ops
- L18   #0     NEW                     "Foo\\Bar"                                @0                  
- L18   #1     DO_FCALL                                                                              
- L18   #2     INIT_METHOD_CALL<1>     @0                   "Foo"                                    
- L18   #3     SEND_VAL_EX             "test"               1                                        
- L18   #4     DO_FCALL                                                                              
- L19   #5     INIT_FCALL%s %d %s "foo"                                    
- L19   #6     SEND_VAL                "test"               1                                        
- L19   #7     DO_FCALL                                                                              
- L21   #8     RETURN<-1>              1                                                             
+
+$_main:
+     ; (lines=9, args=0, vars=0, tmps=4)
+     ; %s:1-21
+L0018 0000 V0 = NEW 0 string("Foo\Bar")
+L0018 0001 DO_FCALL
+L0018 0002 INIT_METHOD_CALL 1 V0 string("Foo")
+L0018 0003 SEND_VAL_EX string("test") 1
+L0018 0004 DO_FCALL
+L0019 0005 INIT_FCALL %d %d string("foo")
+L0019 0006 SEND_VAL string("test") 1
+L0019 0007 DO_FCALL
+L0021 0008 RETURN int(1)
 prompt> 
 --FILE--
 <?php

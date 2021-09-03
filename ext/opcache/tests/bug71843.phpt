@@ -4,19 +4,16 @@ Bug #71843 (null ptr deref ZEND_RETURN_SPEC_CONST_HANDLER (zend_vm_execute.h:347
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=0xFFFFBFFF
---SKIPIF--
-<?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 define('E', 'E');
 define('R', 'R');
 define('See', 'See');
-0 & ~E & ~R;
+"0" & ~E & ~R;
 6 && ~See
 ?>
 okey
---EXPECTF--
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
+--EXPECT--
 okey

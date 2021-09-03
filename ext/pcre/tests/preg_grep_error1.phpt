@@ -56,7 +56,7 @@ Warning: preg_grep(): Unknown modifier 'F' in %spreg_grep_error1.php on line %d
 bool(false)
 
 Arg value is Array
-preg_grep(): Argument #1 ($regex) must be of type string, array given
+preg_grep(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 array(2) {
@@ -65,5 +65,5 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-preg_grep(): Argument #1 ($regex) must be of type string, stdClass given
+preg_grep(): Argument #1 ($pattern) must be of type string, stdClass given
 Done

@@ -1,7 +1,7 @@
 --TEST--
 transliterator_transliterate (variant 1, non-transliterator 1st arg)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -20,6 +20,7 @@ echo transliterator_transliterate(new A(), $str), "\n";
 echo intl_get_error_message(), "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 \u0020o
 

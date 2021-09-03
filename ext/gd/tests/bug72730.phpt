@@ -1,9 +1,7 @@
 --TEST--
 Bug #72730: imagegammacorrect allows arbitrary write access
---SKIPIF--
-<?php
-if (!function_exists("imagecreatetruecolor")) die("skip");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -17,4 +15,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imagegammacorrect(): Argument #2 ($inputgamma) must be greater than 0
+!! [ValueError] imagegammacorrect(): Argument #2 ($input_gamma) must be greater than 0

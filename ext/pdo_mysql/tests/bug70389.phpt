@@ -1,8 +1,9 @@
 --TEST--
 Bug #70389 (PDO constructor changes unrelated variables)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -22,12 +23,12 @@ new PDO(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, $flags);
 var_dump($flags);
 
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
-  [1005]=>
+  [%d]=>
   bool(true)
-  [1001]=>
+  [%d]=>
   bool(true)
-  [12]=>
+  [%d]=>
   bool(true)
 }

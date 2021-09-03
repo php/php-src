@@ -1,7 +1,7 @@
 --TEST--
 Phar: corrupted zip (truncated file comment)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {
@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECTF--
-phar error: corrupt zip archive, zip file comment truncated in zip-based phar "%sfilecomment.zip"
+phar error: end of central directory not found in zip-based phar "%sfilecomment.zip"

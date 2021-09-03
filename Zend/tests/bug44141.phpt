@@ -21,6 +21,7 @@ class Y extends X
 
 $y = Y::cheat(5);
 echo $y->x, PHP_EOL;
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Call to private X::__construct() from scope Y in %s:%d
 Stack trace:

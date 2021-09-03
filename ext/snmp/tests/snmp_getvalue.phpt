@@ -2,6 +2,8 @@
 Function snmp_getvalue
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
@@ -72,7 +74,7 @@ string(%d) "%s"
 Get with SNMP_VALUE_OBJECT for BITS OID
 object
 int(4)
-string(25) "BITS: %d %s"
+string(%d) "%s: %d %S"
 Get with SNMP_VALUE_OBJECT | SNMP_VALUE_PLAIN for BITS OID
 object
 int(4)

@@ -1,9 +1,7 @@
 --TEST--
 Bug #66431 Special Character via COM Interface (CP_UTF8), Scripting.FileSystemObject
---SKIPIF--
-<?php
-if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; }
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 
@@ -33,7 +31,7 @@ if (!$result) {
 $fpath = str_replace("/", "\\", __DIR__ . "/bug66431.txt");
 
 if (file_exists($fpath)) {
-	unlink($fpath);
+    unlink($fpath);
 }
 ?>
 --EXPECT--

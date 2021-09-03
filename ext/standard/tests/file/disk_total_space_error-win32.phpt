@@ -29,12 +29,10 @@ unlink($file_path."/disk_total_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_total_space(): The system cannot find the path specified.
- in %s on line %d
+Warning: disk_total_space(): The system cannot find the path specified in %s on line %d
 bool(false)
 
-Warning: disk_total_space(): The directory name is invalid.
- in %s on line %d
+Warning: disk_total_space(): The directory name is invalid in %s on line %d
 bool(false)
 
 --- Done ---

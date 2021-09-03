@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_strlen() function : error conditions - pass an unknown encoding
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 /*
@@ -23,5 +20,5 @@ var_dump(iconv_strlen($string, $encoding));
 --EXPECTF--
 *** Testing iconv_strlen() : error ***
 
-Notice: iconv_strlen(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
+Warning: iconv_strlen(): Wrong encoding, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)

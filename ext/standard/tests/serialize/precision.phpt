@@ -3,7 +3,7 @@ Default precision is sufficient to serialize all the information in floats
 --SKIPIF--
 <?php
 if (pack('s', 1) != "\x01\x00")
-	die("skip test for little-endian architectures");
+    die("skip test for little-endian architectures");
 --FILE--
 <?php
 
@@ -33,6 +33,7 @@ foreach ($numbers as $ns) {
     else
         echo "mismatch\n\twas:    $ns\n\tbecame: $repr\n";
 }
+?>
 --EXPECT--
 number: 0.00000000000000000e+0... OK
 number: 2.00000000000000010e-4... OK

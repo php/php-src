@@ -18,7 +18,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Notice: Undefined array key 2 in %s on line %d
+Warning: Undefined array key 2 in %s on line %d
 
 Fatal error: Uncaught Error: Value of type null is not callable in %s:%d
 Stack trace:

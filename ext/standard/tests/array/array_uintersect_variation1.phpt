@@ -5,7 +5,7 @@ Test array_uintersect() function : usage variation
 echo "*** Testing array_uintersect() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr2 = array(1, 2);
+$array2 = array(1, 2);
 
 include('compare_function.inc');
 $data_compare_function = 'compare_function';
@@ -82,12 +82,12 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for arr1
+// loop through each element of the array for array1
 
 foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
-        var_dump( array_uintersect($value, $arr2, $data_compare_function) );
+        var_dump( array_uintersect($value, $array2, $data_compare_function) );
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
@@ -98,76 +98,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_uintersect() : usage variation ***
 
 --int 0--
-array_uintersect(): Argument #1 ($arr1) must be of type array, int given
+array_uintersect(): Argument #1 ($array) must be of type array, int given
 
 --int 1--
-array_uintersect(): Argument #1 ($arr1) must be of type array, int given
+array_uintersect(): Argument #1 ($array) must be of type array, int given
 
 --int 12345--
-array_uintersect(): Argument #1 ($arr1) must be of type array, int given
+array_uintersect(): Argument #1 ($array) must be of type array, int given
 
 --int -12345--
-array_uintersect(): Argument #1 ($arr1) must be of type array, int given
+array_uintersect(): Argument #1 ($array) must be of type array, int given
 
 --float 10.5--
-array_uintersect(): Argument #1 ($arr1) must be of type array, float given
+array_uintersect(): Argument #1 ($array) must be of type array, float given
 
 --float -10.5--
-array_uintersect(): Argument #1 ($arr1) must be of type array, float given
+array_uintersect(): Argument #1 ($array) must be of type array, float given
 
 --float 12.3456789000e10--
-array_uintersect(): Argument #1 ($arr1) must be of type array, float given
+array_uintersect(): Argument #1 ($array) must be of type array, float given
 
 --float -12.3456789000e10--
-array_uintersect(): Argument #1 ($arr1) must be of type array, float given
+array_uintersect(): Argument #1 ($array) must be of type array, float given
 
 --float .5--
-array_uintersect(): Argument #1 ($arr1) must be of type array, float given
+array_uintersect(): Argument #1 ($array) must be of type array, float given
 
 --uppercase NULL--
-array_uintersect(): Argument #1 ($arr1) must be of type array, null given
+array_uintersect(): Argument #1 ($array) must be of type array, null given
 
 --lowercase null--
-array_uintersect(): Argument #1 ($arr1) must be of type array, null given
+array_uintersect(): Argument #1 ($array) must be of type array, null given
 
 --lowercase true--
-array_uintersect(): Argument #1 ($arr1) must be of type array, bool given
+array_uintersect(): Argument #1 ($array) must be of type array, bool given
 
 --lowercase false--
-array_uintersect(): Argument #1 ($arr1) must be of type array, bool given
+array_uintersect(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase TRUE--
-array_uintersect(): Argument #1 ($arr1) must be of type array, bool given
+array_uintersect(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase FALSE--
-array_uintersect(): Argument #1 ($arr1) must be of type array, bool given
+array_uintersect(): Argument #1 ($array) must be of type array, bool given
 
 --empty string DQ--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --empty string SQ--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --string DQ--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --string SQ--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --mixed case string--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --heredoc--
-array_uintersect(): Argument #1 ($arr1) must be of type array, string given
+array_uintersect(): Argument #1 ($array) must be of type array, string given
 
 --instance of classWithToString--
-array_uintersect(): Argument #1 ($arr1) must be of type array, classWithToString given
+array_uintersect(): Argument #1 ($array) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_uintersect(): Argument #1 ($arr1) must be of type array, classWithoutToString given
+array_uintersect(): Argument #1 ($array) must be of type array, classWithoutToString given
 
 --undefined var--
-array_uintersect(): Argument #1 ($arr1) must be of type array, null given
+array_uintersect(): Argument #1 ($array) must be of type array, null given
 
 --unset var--
-array_uintersect(): Argument #1 ($arr1) must be of type array, null given
+array_uintersect(): Argument #1 ($array) must be of type array, null given

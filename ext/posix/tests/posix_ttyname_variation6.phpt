@@ -4,29 +4,13 @@ Test function posix_ttyname() by substituting argument 1 with object values.
 Marco Fabbri mrfabbri@gmail.com
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded('posix')) {
-    die('SKIP The posix extension is not loaded.');
-}
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
 
 
 echo "*** Test substituting argument 1 with object values ***\n";
-
-
-
-function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-        if (error_reporting() != 0) {
-                // report non-silenced errors
-                echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-        }
-}
-set_error_handler('test_error_handler');
-
-
 
 class classWithToString
 {
@@ -51,7 +35,9 @@ foreach ( $variation_array as $var ) {
 ?>
 --EXPECTF--
 *** Test substituting argument 1 with object values ***
-Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
+
+Warning: Object of class classWithToString could not be converted to int in %s on line %d
 bool(false)
-Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
+
+Warning: Object of class classWithoutToString could not be converted to int in %s on line %d
 bool(false)

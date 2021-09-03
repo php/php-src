@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
+static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 
 /* {{{ Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
@@ -35,14 +35,13 @@ PHP_FUNCTION(metaphone)
 		Z_PARAM_LONG(phones)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1) == 0) {
-		RETVAL_STR(result);
-	} else {
-		if (result) {
-			zend_string_free(result);
-		}
-		RETURN_FALSE;
+	if (phones < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
+
+	metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1);
+	RETVAL_STR(result);
 }
 /* }}} */
 
@@ -145,7 +144,7 @@ static char Lookahead(char *word, int how_far)
 						ZSTR_LEN(*phoned_word) = p_idx; \
 					}
 /* Slap a null character on the end of the phoned word */
-#define End_Phoned_Word	{ \
+#define End_Phoned_Word()	{ \
 							if (p_idx == max_buffer_len) { \
 								*phoned_word = zend_string_extend(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
 								max_buffer_len += 1; \
@@ -160,24 +159,13 @@ static char Lookahead(char *word, int how_far)
 #define Isbreak(c)  (!isalpha(c))
 
 /* {{{ metaphone */
-static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
+static void metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
 	size_t p_idx = 0;				/* end of the phoned phrase */
 	size_t max_buffer_len = 0;		/* maximum length of the destination buffer */
-
-/*-- Parameter checks --*/
-	/* Negative phoneme length is meaningless */
-
-	if (max_phonemes < 0)
-		return -1;
-
-	/* Empty/null string is meaningless */
-	/* Overly paranoid */
-	/* assert(word != NULL && word[0] != '\0'); */
-
-	if (word == NULL)
-		return -1;
+	ZEND_ASSERT(word != NULL);
+	ZEND_ASSERT(max_phonemes >= 0);
 
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
@@ -194,8 +182,8 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	for (; !isalpha(Curr_Letter); w_idx++) {
 		/* On the off chance we were given nothing but crap... */
 		if (Curr_Letter == '\0') {
-			End_Phoned_Word
-				return SUCCESS;	/* For testing */
+			End_Phoned_Word();
+			return;
 		}
 	}
 
@@ -460,8 +448,6 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 		w_idx += skip_letter;
 	}							/* END FOR */
 
-	End_Phoned_Word;
-
-	return 0;
+	End_Phoned_Word();
 }								/* END metaphone */
 /* }}} */

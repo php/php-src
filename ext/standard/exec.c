@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -220,12 +220,12 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!cmd_len) {
-		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (strlen(cmd) != cmd_len) {
-		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
 	}
 
 	if (!ret_array) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 {
-	register size_t x, y;
+	size_t x, y;
 	size_t l = strlen(str);
 	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;
@@ -358,7 +358,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const char *str)
 #else
 				ZSTR_VAL(cmd)[y++] = '\\';
 #endif
-				/* fall-through */
+				ZEND_FALLTHROUGH;
 			default:
 				ZSTR_VAL(cmd)[y++] = str[x];
 
@@ -432,7 +432,7 @@ PHPAPI zend_string *php_escape_shell_arg(const char *str)
 			ZSTR_VAL(cmd)[y++] = '\\';
 			ZSTR_VAL(cmd)[y++] = '\'';
 #endif
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		default:
 			ZSTR_VAL(cmd)[y++] = str[x];
 		}
@@ -480,7 +480,7 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
-			zend_argument_type_error(1, "must not contain any null bytes");
+			zend_argument_value_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
@@ -501,7 +501,7 @@ PHP_FUNCTION(escapeshellarg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument_len != strlen(argument)) {
-		zend_argument_type_error(1, "must not contain any null bytes");
+		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
@@ -523,12 +523,12 @@ PHP_FUNCTION(shell_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
-		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
 	}
 	if (strlen(command) != command_len) {
-		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must not contain any null bytes");
+		RETURN_THROWS();
 	}
 
 #ifdef PHP_WIN32

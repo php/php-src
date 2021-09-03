@@ -7,8 +7,10 @@ steps:
       sudo apt-get update -y | true
       sudo apt-get install -y gcc-multilib
       sudo apt-get install -y g++-multilib
-      sudo apt-get purge -y libxml2 libsqlite3-0
+      sudo apt-get purge -y libxml2
       # TODO: Reenable postgresql + postgresql-contrib packages once they work again.
+      sudo apt-get purge -y libpq5
+      sudo apt-get install -y libc6:i386
       sudo apt-get install -y bison \
                               re2c \
                               locales \

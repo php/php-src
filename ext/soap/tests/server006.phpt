@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 6: setclass with constructor
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class Foo {

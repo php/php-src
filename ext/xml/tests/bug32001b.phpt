@@ -1,11 +1,16 @@
 --TEST--
 Bug #32001 (xml_parse*() goes into infinite loop when autodetection in effect), using EUC-JP, Shift_JIS, GB2312
+--EXTENSIONS--
+iconv
+xml
 --SKIPIF--
 <?php
-require_once("skipif.inc");
-if (!extension_loaded('iconv')) die ("skip iconv extension not available");
 foreach(array('EUC-JP', 'Shift_JISP', 'GB2312') as $encoding) {
-	if (@xml_parser_create($encoding) === false) die("skip libxml2 does not support $encoding encoding");
+    try {
+        xml_parser_create($encoding);
+    } catch (ValueError) {
+        die("skip libxml2 does not support $encoding encoding");
+    }
 }
 ?>
 --FILE--

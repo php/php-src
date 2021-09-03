@@ -1,7 +1,7 @@
 --TEST--
 FFI 015: Incomplete type usage
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--

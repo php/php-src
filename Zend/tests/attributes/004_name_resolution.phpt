@@ -2,12 +2,15 @@
 Resolve attribute names
 --FILE--
 <?php
-function dump_attributes($attributes) {
-    $arr = [];
-    foreach ($attributes as $attribute) {
-        $arr[] = ['name' => $attribute->getName(), 'args' => $attribute->getArguments()];
+
+namespace {
+    function dump_attributes($attributes) {
+        $arr = [];
+        foreach ($attributes as $attribute) {
+            $arr[] = ['name' => $attribute->getName(), 'args' => $attribute->getArguments()];
+        }
+        var_dump($arr);
     }
-    var_dump($arr);
 }
 
 namespace Doctrine\ORM\Mapping {
@@ -25,11 +28,11 @@ namespace Foo {
     use Doctrine\ORM\Mapping as ORM;
     use Doctrine\ORM\Attributes;
 
-    <<Entity("imported class")>>
-    <<ORM\Entity("imported namespace")>>
-    <<\Doctrine\ORM\Mapping\Entity("absolute from namespace")>>
-    <<\Entity("import absolute from global")>>
-    <<Attributes\Table()>>
+    #[Entity("imported class")]
+    #[ORM\Entity("imported namespace")]
+    #[\Doctrine\ORM\Mapping\Entity("absolute from namespace")]
+    #[\Entity("import absolute from global")]
+    #[Attributes\Table()]
     function foo() {
     }
 }

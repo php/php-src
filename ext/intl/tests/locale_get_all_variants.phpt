@@ -1,7 +1,7 @@
 --TEST--
 locale_get_all_variants.phpt()
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

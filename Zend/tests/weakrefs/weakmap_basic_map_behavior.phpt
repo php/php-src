@@ -46,6 +46,9 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+// It's okay to unset an object that's not in the map.
+unset($map[new stdClass]);
+
 echo "\nIndirect modification:\n";
 $map[$obj] = [];
 $map[$obj][] = 42;

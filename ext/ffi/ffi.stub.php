@@ -1,64 +1,108 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-final class FFI
-{
-    public static function cdef(string $code = "", ?string $lib = null): FFI {}
+namespace {
 
-    public static function load(string $filename): ?FFI {}
+	/** @not-serializable */
+    final class FFI
+    {
+        public static function cdef(string $code = "", ?string $lib = null): FFI {}
 
-    public static function scope(string $scope_name): ?FFI {}
+        public static function load(string $filename): ?FFI {}
 
-    /** @param FFI\CType|string $type */
-    public static function new($type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+        public static function scope(string $name): FFI {}
 
-    /** @prefer-ref $ptr */
-    public static function free(FFI\CData $ptr): void {}
+        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
 
-    /**
-     * @param FFI\CType|string $type
-     * @prefer-ref $ptr
-     */
-    public static function cast($type, $ptr): ?FFI\CData {}
+        /** @prefer-ref $ptr */
+        public static function free(FFI\CData $ptr): void {}
 
-    public static function type(string $type): ?FFI\CType {}
+        /**
+         * @param FFI\CData|int|float|bool|null $ptr
+         * @prefer-ref $ptr
+         */
+        public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}
 
-    /** @prefer-ref $ptr */
-    public static function typeof(FFI\CData $ptr): ?FFI\CType {}
+        public static function type(string $type): ?FFI\CType {}
 
-    public static function arrayType(FFI\CType $type, array $dims): ?FFI\CType {}
+        /** @prefer-ref $ptr */
+        public static function typeof(FFI\CData $ptr): FFI\CType {}
 
-    /** @prefer-ref $ptr */
-    public static function addr(FFI\CData $ptr): FFI\CData {}
+        public static function arrayType(FFI\CType $type, array $dimensions): FFI\CType {}
 
-    /** @prefer-ref $ptr */
-    public static function sizeof(object $ptr): ?int {}
+        /** @prefer-ref $ptr */
+        public static function addr(FFI\CData $ptr): FFI\CData {}
 
-    /** @prefer-ref $ptr */
-    public static function alignof(object $ptr): ?int {}
+        /** @prefer-ref $ptr */
+        public static function sizeof(FFI\CData|FFI\CType $ptr): int {}
 
-    /**
-     * @prefer-ref $dst
-     * @prefer-ref $src
-     * @param string|FFI\CData $dst
-     */
-    public static function memcpy(FFI\CData $dst, $src, int $size): void {}
+        /** @prefer-ref $ptr */
+        public static function alignof(FFI\CData|FFI\CType $ptr): int {}
 
-    /**
-     * @prefer-ref $ptr1
-     * @param string|FFI\CData $ptr1
-     * @prefer-ref $ptr2
-     * @param string|FFI\CData $ptr2
-     */
-    public static function memcmp($ptr1, $ptr2, int $size): ?int {}
+        /**
+         * @param FFI\CData|string $from
+         * @prefer-ref $to
+         * @prefer-ref $from
+         */
+        public static function memcpy(FFI\CData $to, $from, int $size): void {}
 
-    /** @prefer-ref $ptr */
-    public static function memset(FFI\CData $ptr, int $ch, int $size): void {}
+        /**
+         * @prefer-ref $ptr1
+         * @param string|FFI\CData $ptr1
+         * @prefer-ref $ptr2
+         * @param string|FFI\CData $ptr2
+         */
+        public static function memcmp($ptr1, $ptr2, int $size): int {}
 
-    /** @prefer-ref $ptr */
-    public static function string(FFI\CData $ptr, ?int $size = null): ?string {}
+        /** @prefer-ref $ptr */
+        public static function memset(FFI\CData $ptr, int $value, int $size): void {}
 
-    /** @prefer-ref $ptr */
-    public static function isNull(FFI\CData $ptr): bool {}
+        /** @prefer-ref $ptr */
+        public static function string(FFI\CData $ptr, ?int $size = null): string {}
+
+        /** @prefer-ref $ptr */
+        public static function isNull(FFI\CData $ptr): bool {}
+    }
+
+}
+
+namespace FFI {
+
+	/** @not-serializable */
+    final class CData {
+    }
+
+	/** @not-serializable */
+    final class CType {
+        public function getName(): string {}
+
+        public function getKind(): int {}
+        public function getSize(): int {}
+        public function getAlignment(): int {}
+        public function getAttributes(): int {}
+
+        public function getEnumKind(): int {}
+
+        public function getArrayElementType(): CType {}
+        public function getArrayLength(): int {}
+
+        public function getPointerType(): CType {}
+
+        public function getStructFieldNames(): array {}
+        public function getStructFieldOffset(string $name): int {}
+        public function getStructFieldType(string $name): CType {}
+
+        public function getFuncABI(): int {}
+        public function getFuncReturnType(): CType {}
+        public function getFuncParameterCount(): int {}
+        public function getFuncParameterType(int $index): CType {}
+    }
+
+    class Exception extends \Error {
+    }
+
+    final class ParserException extends Exception {
+    }
+
 }

@@ -9,6 +9,7 @@ $map = new SplObjectStorage();
 $map[$a] = 'foo';
 var_dump($map[$b] ?? null);
 var_dump($map[$a] ?? null);
+?>
 --EXPECT--
 NULL
 string(3) "foo"

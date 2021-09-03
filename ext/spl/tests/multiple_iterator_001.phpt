@@ -13,7 +13,16 @@ echo "-- Default flags, no iterators --\n";
 foreach($m as $value) {
     var_dump($value);
 }
-var_dump($m->current());
+try {
+    var_dump($m->current());
+} catch (RuntimeException $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($m->key());
+} catch (RuntimeException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $m->attachIterator($iter1);
 $m->attachIterator($iter2);
@@ -79,8 +88,8 @@ echo "-- Associate with invalid value --\n";
 
 try {
     $m->attachIterator($iter3, new stdClass());
-} catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+} catch(TypeError $e) {
+    echo "TypeError thrown: " . $e->getMessage() . "\n";
 }
 
 echo "-- Associate with duplicate value --\n";
@@ -105,7 +114,8 @@ foreach($m as $key => $value) {
 ?>
 --EXPECTF--
 -- Default flags, no iterators --
-bool(false)
+Called current() on an invalid iterator
+Called key() on an invalid iterator
 -- Default flags, MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC --
 bool(true)
 array(3) {
@@ -297,7 +307,7 @@ array(3) {
   int(3)
 }
 -- Associate with invalid value --
-InvalidArgumentException thrown: Info must be NULL, integer or string
+TypeError thrown: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, stdClass given
 -- Associate with duplicate value --
 InvalidArgumentException thrown: Key duplication error
 -- Count, contains, detach, count, contains, iterate --

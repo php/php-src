@@ -1,9 +1,9 @@
 --TEST--
 mysqli_result->data_seek()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -43,16 +43,22 @@ require_once('skipifconnectfailure.inc');
     if (false !== ($tmp = $res->data_seek(4)))
         printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
 
-    if (false !== ($tmp = $res->data_seek(-1)))
-        printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->data_seek(-1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     $res->free_result();
 
     if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id', MYSQLI_USE_RESULT))
         printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (false !== ($tmp = $res->data_seek(3)))
-        printf("[014] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        var_dump($res->data_seek(3));
+    } catch (\Error $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     $res->free_result();
 
@@ -67,11 +73,11 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 mysqli_result object is already closed
-
-Warning: mysqli_result::data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0
+mysqli_result::data_seek() cannot be used in MYSQLI_USE_RESULT mode
 mysqli_result object is already closed
 done!

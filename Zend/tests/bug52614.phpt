@@ -69,6 +69,7 @@ $foo->f1()[0]++;
 var_dump($foo->a1[0]);
 $foo->f6()[0]++;
 var_dump($foo->a1[0]);
+?>
 --EXPECT--
 NULL
 array(0) {

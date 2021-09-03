@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -69,7 +69,7 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 		returnValue = (sb4) Z_LVAL(retval);
 	}
 
-	/* Setting params[0] to null so resource isn't destroyed on zval_dtor */
+	/* Setting params[0] to null so resource isn't destroyed on zval_ptr_dtor */
 	ZVAL_NULL(&params[0]);
 
 	/* Cleanup */

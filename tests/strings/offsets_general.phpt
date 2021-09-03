@@ -9,17 +9,19 @@ var_dump($string[0]);
 var_dump($string[1]);
 var_dump(isset($string[0]));
 var_dump(isset($string[0][0]));
-var_dump($string["foo"]);
+try {
+    var_dump($string["foo"]);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(isset($string["foo"]["bar"]));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "B"
 string(1) "f"
 string(1) "o"
 bool(true)
 bool(true)
-
-Warning: Illegal string offset "foo" in %s on line %d
-string(1) "f"
+Cannot access offset of type string on string
 bool(false)

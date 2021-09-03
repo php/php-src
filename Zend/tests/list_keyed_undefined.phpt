@@ -14,8 +14,8 @@ var_dump($five, $duke);
 
 ?>
 --EXPECTF--
-Notice: Undefined array key 5 in %s on line %d
+Warning: Undefined array key 5 in %s on line %d
 
-Notice: Undefined array key "duke" in %s on line %d
+Warning: Undefined array key "duke" in %s on line %d
 NULL
 NULL

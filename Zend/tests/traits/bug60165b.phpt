@@ -12,5 +12,6 @@ class MyClass {
         A::nonExistent as barA;
     }
 }
+?>
 --EXPECTF--
 Fatal error: An alias was defined for A::nonExistent but this method does not exist in %s on line %d

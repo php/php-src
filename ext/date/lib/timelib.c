@@ -35,7 +35,7 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-const char *timelib_error_messages[8] = {
+const char *timelib_error_messages[10] = {
 	"No error",
 	"Can not allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
@@ -43,6 +43,9 @@ const char *timelib_error_messages[8] = {
 	"Corrupt tzfile: No abbreviation could be found for a transition",
 	"The version used in this timezone identifier is unsupported",
 	"No timezone with this name could be found",
+	"A 'slim' timezone file has been detected",
+	"The embedded POSIX string is not valid",
+	"The embedded POSIX string is empty"
 };
 
 const char *timelib_get_error_message(int error_code)
@@ -115,7 +118,7 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 	return tmp;
 }
 
-void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
+void timelib_time_tz_abbr_update(timelib_time* tm, const char* tz_abbr)
 {
 	unsigned int i;
 	size_t tz_abbr_len = strlen(tz_abbr);
@@ -202,6 +205,11 @@ void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h)
 	} else {
 		*h = ((double)hour - (double)min / 60 - (double)sec / 3600);
 	}
+}
+
+timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s)
+{
+	return (h * SECS_PER_HOUR) + (m * 60) + s;
 }
 
 static const unsigned char timelib_tolower_map[256] = {

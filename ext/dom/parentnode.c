@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -35,7 +35,7 @@ int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -68,7 +68,7 @@ int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -102,7 +102,7 @@ int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -133,6 +133,11 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 	zend_class_entry *ce;
 	dom_object *newNodeObj;
 	int stricterror;
+
+	if (document == NULL) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
+		return NULL;
+	}
 
 	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
 		documentNode = (xmlDoc *) contextNode;
@@ -369,10 +374,6 @@ void dom_child_node_remove(dom_object *context)
 	xmlNodePtr children;
 	int stricterror;
 
-	if (dom_node_children_valid(child) == FAILURE) {
-		return;
-	}
-
 	stricterror = dom_get_strict_error(context->document);
 
 	if (dom_node_is_read_only(child) == SUCCESS ||
@@ -383,6 +384,10 @@ void dom_child_node_remove(dom_object *context)
 
 	if (!child->parent) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		return;
+	}
+
+	if (dom_node_children_valid(child->parent) == FAILURE) {
 		return;
 	}
 

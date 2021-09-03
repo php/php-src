@@ -1,13 +1,13 @@
 --TEST--
 Fetching results from tables of different charsets.
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-require_once('skipifemb.inc');
 
 if (!function_exists('mysqli_set_charset')) {
-	die('skip mysqli_set_charset() not available');
+    die('skip mysqli_set_charset() not available');
 }
 ?>
 --FILE--
@@ -101,7 +101,7 @@ if (!function_exists('mysqli_set_charset')) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

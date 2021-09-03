@@ -1,8 +1,9 @@
 --TEST--
 PDO::ATTR_ERRMODE
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -14,29 +15,26 @@ error_reporting=E_ALL
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
 
-    $valid = array(PDO::ERRMODE_SILENT, PDO::ERRMODE_WARNING, PDO::ERRMODE_EXCEPTION);
-    do {
-        $invalid = mt_rand(-1000, 1000);
-    } while (in_array($invalid, $valid));
-
-
-    $tmp = array();
-    if (false != @$db->setAttribute(PDO::ATTR_ERRMODE, $tmp))
-        printf("[001] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...\n");
-
-    $tmp = new stdClass();
-    $ret = @$db->setAttribute(PDO::ATTR_ERRMODE, $tmp);
-    if (false != $ret)
-        printf("[002] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...%s\n",
-            var_export($ret, true));
-
-    $ret = @$db->setAttribute(PDO::ATTR_ERRMODE, 'pdo');
-    if (false != $ret)
-        printf("[003] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...%s\n",
-            var_export($ret, true));
-
-    if (false != @$db->setAttribute(PDO::ATTR_ERRMODE, $invalid))
-        printf("[004] Invalid ERRMODE should be rejected\n");
+    try {
+        $db->setAttribute(PDO::ATTR_ERRMODE, []);
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_ERRMODE, new stdClass());
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_ERRMODE, 'pdo');
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
+    try {
+        $db->setAttribute(PDO::ATTR_ERRMODE, 1000);
+    } catch (\Error $e) {
+        echo get_class($e), ': ', $e->getMessage(), \PHP_EOL;
+    }
 
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     // no message for any PDO call but...
@@ -158,8 +156,12 @@ error_reporting=E_ALL
     $db->query('THIS IS NOT VALID SQL');
 
     print "done!\n";
+?>
 --EXPECTF--
-[003] Maybe PDO could indicate that this is not a proper way of setting the ERRMODE...true
+TypeError: Attribute value must be of type int for selected attribute, array given
+TypeError: Attribute value must be of type int for selected attribute, stdClass given
+TypeError: Attribute value must be of type int for selected attribute, string given
+ValueError: Error mode must be one of the PDO::ERRMODE_* constants
 
 Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: %d You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '%s' at line %d in %s on line %d
 

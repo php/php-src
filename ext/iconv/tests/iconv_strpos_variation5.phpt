@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_strpos() function : usage variations - Pass different integers as $offset argument
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
@@ -32,25 +29,29 @@ $needle_mb = base64_decode('44CC');
 for ($i = -30; $i <= 60; $i += 10) {
     echo "\n**-- Offset is: $i --**\n";
     echo "-- ASCII String --\n";
-    var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
+    try {
+        var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
     echo "--Multibyte String --\n";
-    var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
+    try {
+        var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
+    } catch (ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_strpos() : usage variations ***
 
 **-- Offset is: -30 --**
 -- ASCII String --
-
-Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-
-Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: -20 --**
 -- ASCII String --
@@ -84,25 +85,25 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-bool(false)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 Done

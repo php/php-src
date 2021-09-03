@@ -13,6 +13,11 @@ class B {
     public int $b;
 }
 
+class E {
+    public $a;
+    public int $b;
+}
+
 class C {
     public int $a;
     public string $b;
@@ -25,6 +30,7 @@ class D {
 
 var_dump(unserialize('O:1:"A":2:{s:1:"a";i:1;s:1:"b";R:2;}'));
 var_dump(unserialize('O:1:"B":2:{s:1:"a";i:1;s:1:"b";R:2;}'));
+var_dump(unserialize('O:1:"E":2:{s:1:"a";i:1;s:1:"b";R:2;}'));
 
 try {
     var_dump(unserialize('O:1:"A":2:{s:1:"a";N;s:1:"b";R:2;}'));
@@ -61,6 +67,12 @@ object(A)#1 (2) {
   &int(1)
 }
 object(B)#1 (2) {
+  ["a"]=>
+  &int(1)
+  ["b"]=>
+  &int(1)
+}
+object(E)#1 (2) {
   ["a"]=>
   &int(1)
   ["b"]=>

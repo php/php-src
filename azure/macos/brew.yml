@@ -2,8 +2,6 @@ parameters:
   packages: ''
 
 steps:
-  - script: brew update
-    displayName: 'Update Homebrew'
   - script: |
       brew install pkg-config \
                    autoconf \
@@ -25,12 +23,11 @@ steps:
                    zlib \
                    t1lib \
                    gd \
+                   libzip \
                    gmp \
                    tidyp \
                    libxml2 \
                    libxslt \
                    postgresql
-      # Make sure we don't get broken libzip 1.7.0
-      brew upgrade libzip
       brew link icu4c gettext --force
     displayName: 'Install Build Dependencies'

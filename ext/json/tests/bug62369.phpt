@@ -27,6 +27,7 @@ switch (json_last_error()) {
         echo 'ERROR' . PHP_EOL;
     break;
 }
+?>
 --EXPECT--
 OK
 ERROR

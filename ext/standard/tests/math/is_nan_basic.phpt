@@ -11,7 +11,6 @@ $values = array(234,
                 "234",
                 "234.5",
                 "23.45e1",
-                null,
                 true,
                 false,
                 pow(0, -2),
@@ -25,7 +24,6 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECT--
-bool(false)
 bool(false)
 bool(false)
 bool(false)

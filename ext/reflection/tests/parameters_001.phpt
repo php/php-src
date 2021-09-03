@@ -39,4 +39,4 @@ int(1)
 bool(false)
 bool(true)
 string(54) "The parameter specified by its name could not be found"
-string(95) "ReflectionParameter::__construct(): Argument #2 ($parameter) must be greater than or equal to 0"
+string(91) "ReflectionParameter::__construct(): Argument #2 ($param) must be greater than or equal to 0"

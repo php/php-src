@@ -1,14 +1,20 @@
 --TEST--
 gmp_invert() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
 var_dump(gmp_strval(gmp_invert(123123,5467624)));
 var_dump(gmp_strval(gmp_invert(123123,"3333334345467624")));
 var_dump(gmp_strval(gmp_invert("12312323213123123",7624)));
-var_dump(gmp_strval(gmp_invert(444,0)));
+
+try {
+    var_dump(gmp_strval(gmp_invert(444,0)));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 var_dump(gmp_strval(gmp_invert(0,28347)));
 var_dump(gmp_strval(gmp_invert(-12,456456)));
 var_dump(gmp_strval(gmp_invert(234234,-435345)));
@@ -19,29 +25,35 @@ $n1 = gmp_init("3498273496234234523451");
 var_dump(gmp_strval(gmp_invert($n, $n1)));
 var_dump(gmp_strval(gmp_invert($n1, $n)));
 
-var_dump(gmp_invert(array(), 1));
-var_dump(gmp_invert(1, array()));
-var_dump(gmp_invert(array(), array()));
+try {
+    var_dump(gmp_invert(array(), 1));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_invert(1, array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_invert(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "2293131"
 string(1) "0"
 string(4) "5827"
-string(1) "0"
+Division by zero
 string(1) "0"
 string(1) "0"
 string(1) "0"
 string(22) "3498273496234234523441"
 string(1) "1"
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_invert(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_invert(): Argument #1 ($num1) must be of type GMP|string|int, array given
+gmp_invert(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_invert(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

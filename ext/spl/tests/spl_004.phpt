@@ -85,5 +85,5 @@ int(6)
 int(4)
 ===ERRORS===
 iterator_apply(): Argument #3 ($args) must be of type ?array, int given
-iterator_apply(): Argument #2 ($function) must be a valid callback, function "non_existing_function" not found or invalid function name
-iterator_apply() expects at most 3 parameters, 4 given
+iterator_apply(): Argument #2 ($callback) must be a valid callback, function "non_existing_function" not found or invalid function name
+iterator_apply() expects at most 3 arguments, 4 given

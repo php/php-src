@@ -17,6 +17,7 @@ $x = new Foo;
 Foo::Bar();
 $x = new \Foo\Bar\Foo;
 \Foo\Bar\Foo::Bar();
+?>
 --EXPECT--
 Foo\Bar\Foo
 Foo\Bar\Foo

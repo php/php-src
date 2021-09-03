@@ -1,9 +1,7 @@
 --TEST--
 Bug #53603 (ZipArchive should quiet stat errors)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
@@ -27,6 +25,7 @@ if ($zip->open($file) !== TRUE) {
 
 $a = $zip->extractTo('teststream://test');
 var_dump($a);
+?>
 --EXPECTF--
 Warning: ZipArchive::extractTo(teststream://test/foo): Failed to open stream: "TestStream::stream_open" call failed in %s on line %d
 bool(false)

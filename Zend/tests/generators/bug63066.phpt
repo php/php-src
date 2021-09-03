@@ -10,6 +10,7 @@ function gen($o)
 
 foreach(gen(new stdClass()) as $value)
     echo $value, "\n";
+?>
 --EXPECTF--
 foo
 

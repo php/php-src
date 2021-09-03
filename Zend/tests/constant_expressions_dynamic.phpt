@@ -5,7 +5,7 @@ Dynamic Constant Expressions
 
 const C_0 = 0;
 const C_1 = 1;
-const C_foo = "foo";
+const C_foo = "0foo";
 const C_arr = [0 => 0, "foo" => "foo"];
 
 const T_1 = C_1 | 2;
@@ -46,6 +46,8 @@ var_dump(
 ?>
 --EXPECTF--
 Warning: A non-numeric value encountered in %s on line %d
+
+Deprecated: Implicit conversion from float 3.14 to int loses precision in %s on line %d
 int(3)
 string(4) "1foo"
 bool(false)

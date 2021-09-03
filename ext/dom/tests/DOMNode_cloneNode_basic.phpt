@@ -1,9 +1,7 @@
 --TEST--
 DOM cloneNode : Basic Functionality
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --CREDITS--
 Simon Hughes <odbc3@hotmail.com>
 --FILE--
@@ -71,6 +69,7 @@ for ($index = 0; $index < $children->length; $index++) {
     echo "node $index\n";
     dumpcourse($children->item($index));
 }
+?>
 --EXPECT--
 Start cloneNode test
 node 0

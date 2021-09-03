@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -85,7 +85,7 @@ static void browscap_entry_dtor_persistent(zval *zvalue)
 	pefree(entry, 1);
 }
 
-static inline zend_bool is_placeholder(char c) {
+static inline bool is_placeholder(char c) {
 	return c == '?' || c == '*';
 }
 
@@ -221,7 +221,7 @@ typedef struct _browscap_parser_ctx {
 } browscap_parser_ctx;
 
 static zend_string *browscap_intern_str(
-		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
+		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
 	zend_string *interned = zend_hash_find_ptr(&ctx->str_interned, str);
 	if (interned) {
 		zend_string_addref(interned);
@@ -237,7 +237,7 @@ static zend_string *browscap_intern_str(
 }
 
 static zend_string *browscap_intern_str_ci(
-		browscap_parser_ctx *ctx, zend_string *str, zend_bool persistent) {
+		browscap_parser_ctx *ctx, zend_string *str, bool persistent) {
 	zend_string *lcname;
 	zend_string *interned;
 	ALLOCA_FLAG(use_heap);
@@ -249,7 +249,7 @@ static zend_string *browscap_intern_str_ci(
 	if (interned) {
 		zend_string_addref(interned);
 	} else {
-		interned = zend_string_dup(lcname, persistent);
+		interned = zend_string_init(ZSTR_VAL(lcname), ZSTR_LEN(lcname), persistent);
 		if (persistent) {
 			interned = zend_new_interned_string(interned);
 		}
@@ -261,7 +261,7 @@ static zend_string *browscap_intern_str_ci(
 }
 
 static void browscap_add_kv(
-		browser_data *bdata, zend_string *key, zend_string *value, zend_bool persistent) {
+		browser_data *bdata, zend_string *key, zend_string *value, bool persistent) {
 	if (bdata->kv_used == bdata->kv_size) {
 		bdata->kv_size *= 2;
 		bdata->kv = safe_perealloc(bdata->kv, sizeof(browscap_kv), bdata->kv_size, 0, persistent);
@@ -313,26 +313,25 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_string *new_key, *new_value;
 
 				/* Set proper value for true/false settings */
-				if ((Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
+				if (zend_string_equals_literal_ci(Z_STR_P(arg2), "on")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "yes")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "true")
 				) {
 					new_value = ZSTR_CHAR('1');
-				} else if (
-					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
-					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
+				} else if (zend_string_equals_literal_ci(Z_STR_P(arg2), "no")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "off")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "none")
+					|| zend_string_equals_literal_ci(Z_STR_P(arg2), "false")
 				) {
 					new_value = ZSTR_EMPTY_ALLOC();
 				} else { /* Other than true/false setting */
 					new_value = browscap_intern_str(ctx, Z_STR_P(arg2), persistent);
 				}
 
-				if (!strcasecmp(Z_STRVAL_P(arg1), "parent")) {
+				if (zend_string_equals_literal_ci(Z_STR_P(arg1), "parent")) {
 					/* parent entry can not be same as current section -> causes infinite loop! */
 					if (ctx->current_section_name != NULL &&
-						!strcasecmp(ZSTR_VAL(ctx->current_section_name), Z_STRVAL_P(arg2))
+						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))
 					) {
 						zend_error(E_CORE_ERROR, "Invalid browscap ini file: "
 							"'Parent' value cannot be same as the section name: %s "
@@ -406,20 +405,22 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 {
 	zend_file_handle fh;
 	browscap_parser_ctx ctx = {0};
+	FILE *fp;
 
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
 	}
 
-	zend_stream_init_fp(&fh, VCWD_FOPEN(filename, "r"), filename);
-	if (!fh.handle.fp) {
-		zend_error(E_CORE_WARNING, "Cannot open '%s' for reading", filename);
+	fp = VCWD_FOPEN(filename, "r");
+	if (!fp) {
+		zend_error(E_CORE_WARNING, "Cannot open \"%s\" for reading", filename);
 		return FAILURE;
 	}
+	zend_stream_init_fp(&fh, fp, filename);
 
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
-	zend_hash_init_ex(browdata->htab, 0, NULL,
-		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent, 0);
+	zend_hash_init(browdata->htab, 0, NULL,
+		persistent ? browscap_entry_dtor_persistent : browscap_entry_dtor, persistent);
 
 	browdata->kv_size = 16 * 1024;
 	browdata->kv_used = 0;
@@ -439,6 +440,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		zend_string_release(ctx.current_section_name);
 	}
 	zend_hash_destroy(&ctx.str_interned);
+	zend_destroy_file_handle(&fh);
 
 	return SUCCESS;
 }
@@ -679,14 +681,14 @@ static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 PHP_FUNCTION(get_browser)
 {
 	zend_string *agent_name = NULL, *lookup_browser_name;
-	zend_bool return_array = 0;
+	bool return_array = 0;
 	browser_data *bdata;
 	browscap_entry *found_entry = NULL;
 	HashTable *agent_ht;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_STR_OR_NULL(agent_name)
 		Z_PARAM_BOOL(return_array)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -708,7 +710,7 @@ PHP_FUNCTION(get_browser)
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY
-				|| zend_is_auto_global_str(ZEND_STRL("_SERVER"))) {
+				|| zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) {
 			http_user_agent = zend_hash_str_find(
 				Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]),
 				"HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1);

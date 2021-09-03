@@ -1,8 +1,10 @@
 --TEST--
 PDO MySQL Bug #38546 (bindParam incorrect processing of bool types)
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
 require dirname(__FILE__) . '/config.inc';
 require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -230,14 +232,14 @@ Array
     [3] => 2
 )
 
-Warning: PDOStatement::execute(): SQLSTATE[HY000]: General error: 1366 Incorrect integer value: 'true' for column 'some_bool_1' at row 1 in %s
+Warning: PDOStatement::execute(): SQLSTATE[%s]: %s: 1366 Incorrect integer value: 'true' for column %s at row 1 in %s
 array(3) {
   [0]=>
-  string(5) "HY000"
+  string(5) "%s"
   [1]=>
   int(1366)
   [2]=>
-  string(65) "Incorrect integer value: 'true' for column 'some_bool_1' at row 1"
+  string(%d) "Incorrect integer value: 'true' for column %s at row 1"
 }
 Array
 (

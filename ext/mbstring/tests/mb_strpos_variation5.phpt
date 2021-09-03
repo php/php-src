@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strpos() function : usage variations - Pass different integers as $offset argument
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

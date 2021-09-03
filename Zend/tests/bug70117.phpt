@@ -16,6 +16,7 @@ function &foo1() :string {
 
 var_dump(foo());
 var_dump(foo1());
+?>
 --EXPECT--
 string(1) "1"
 string(3) "ref"

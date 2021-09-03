@@ -80,17 +80,17 @@ object(B)#%d (1) {
   }
 }
 object(C)#%d (3) {
+  ["a_b"]=>
+  array(1) {
+    ["key"]=>
+    string(5) "value"
+  }
   ["a_c_parent"]=>
   array(1) {
     ["key"]=>
     string(5) "value"
   }
   ["a_c_self"]=>
-  array(1) {
-    ["key"]=>
-    string(5) "value"
-  }
-  ["a_b"]=>
   array(1) {
     ["key"]=>
     string(5) "value"

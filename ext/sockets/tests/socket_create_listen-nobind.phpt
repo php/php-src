@@ -1,10 +1,10 @@
 --TEST--
 Test if socket_create_listen() returns false, when it cannot bind to the port.
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+
 $filename = __FILE__ . '.root_check.tmp';
 $fp = fopen($filename, 'w');
 fclose($fp);
@@ -19,6 +19,7 @@ if (@socket_create_listen(80)) {
 --FILE--
 <?php
 $sock = socket_create_listen(80);
+?>
 --EXPECTF--
 Warning: socket_create_listen(): unable to bind to given address [13]: Permission denied in %s on line %d
 --CREDITS--

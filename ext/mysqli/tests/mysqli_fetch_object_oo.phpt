@@ -1,9 +1,9 @@
 --TEST--
 mysqli_fetch_object()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -74,14 +74,9 @@ require_once('skipifconnectfailure.inc');
     }
 
     try {
-        $obj = $res->fetch_object('mysqli_fetch_object_construct', null);
-
-        if (($obj->ID !== "3") || ($obj->label !== "c") || ($obj->a !== NULL) || ($obj->b !== NULL) || (get_class($obj) != 'mysqli_fetch_object_construct')) {
-            printf("[009] Object seems wrong. [%d] %s\n", $mysqli->errno, $mysqli->error);
-            var_dump($obj);
-        }
-    } catch (Error $e) {
-        handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+        $res->fetch_object('mysqli_fetch_object_construct', null);
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
         mysqli_fetch_object($res);
     }
 
@@ -118,24 +113,27 @@ require_once('skipifconnectfailure.inc');
         echo $exception->getMessage() . "\n";
     }
 
-    // Fatal error, script execution will end
-    var_dump($res->fetch_object('this_class_does_not_exist'));
+    try {
+        var_dump($res->fetch_object('this_class_does_not_exist'));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     $mysqli->close();
     print "done!";
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
-[0] mysqli_result::fetch_object(): Argument #1 ($class_name) must be of type string, mysqli given in %s on line %d
-[0] mysqli_result::fetch_object() expects at most 2 parameters, 3 given in %s on line %d
-[0] mysqli_result::fetch_object(): Argument #2 ($params) must be of type array, null given in %s on line %d
+[0] Object of class mysqli could not be converted to string in %s on line %d
+[0] mysqli_result::fetch_object() expects at most 2 arguments, 3 given in %s on line %d
+mysqli_result::fetch_object(): Argument #2 ($constructor_args) must be of type array, null given
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
 mysqli_result object is already closed
-
-Fatal error: Class "this_class_does_not_exist" not found in %s on line %d
+mysqli_result::fetch_object(): Argument #1 ($class) must be a valid class name, this_class_does_not_exist given
+done!

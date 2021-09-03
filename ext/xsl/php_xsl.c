@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -27,15 +27,6 @@
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
 
-/* {{{ xsl_functions[]
- *
- * Every user visible function must have an entry in xsl_functions[].
- */
-const zend_function_entry xsl_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
@@ -46,7 +37,7 @@ zend_module_entry xsl_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	xsl_deps,
 	"xsl",
-	xsl_functions,
+	NULL,
 	PHP_MINIT(xsl),
 	PHP_MSHUTDOWN(xsl),
 	NULL,
@@ -120,15 +111,14 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xsl)
 {
-
-	zend_class_entry ce;
-
 	memcpy(&xsl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 
-	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, class_XSLTProcessor_methods, xsl_xsltprocessor_class_entry);
+	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
+	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
+
 #ifdef HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif

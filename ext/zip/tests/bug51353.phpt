@@ -1,8 +1,9 @@
 --TEST--
 Bug #51353 ZIP64 problem, archive with 100000 items
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
 die('skip the test might get very long, activate it manually');
 --FILE--
 <?php
@@ -46,9 +47,10 @@ unlink("$base_path/51353.zip");
 
 $a = glob("$base_path/51353_unpack/*.txt");
 foreach($a as $f) {
-	unlink($f);
+    unlink($f);
 }
 rmdir("$base_path/51353_unpack");
+?>
 --EXPECT--
 100000
 OK

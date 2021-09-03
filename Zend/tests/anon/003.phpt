@@ -10,6 +10,7 @@ while (@$i++<10) {
         }
     });
 }
+?>
 --EXPECTF--
 object(class@%s)#1 (1) {
   ["i"]=>

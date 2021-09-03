@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,12 +26,6 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-/* {{{ pdo_pgsql_functions[] */
-static const zend_function_entry pdo_pgsql_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -44,7 +38,7 @@ zend_module_entry pdo_pgsql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_pgsql_deps,
 	"pdo_pgsql",
-	pdo_pgsql_functions,
+	NULL,
 	PHP_MINIT(pdo_pgsql),
 	PHP_MSHUTDOWN(pdo_pgsql),
 	NULL,
@@ -71,8 +65,7 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
-	php_pdo_register_driver(&pdo_pgsql_driver);
-	return SUCCESS;
+	return php_pdo_register_driver(&pdo_pgsql_driver);
 }
 /* }}} */
 

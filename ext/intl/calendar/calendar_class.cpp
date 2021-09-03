@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -57,9 +57,9 @@ U_CFUNC	void calendar_object_create(zval *object,
 	calendar_object_construct(object, calendar);
 }
 
-U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object)
+U_CFUNC Calendar *calendar_fetch_native_calendar(zend_object *object)
 {
-	Calendar_object *co = Z_INTL_CALENDAR_P(object);
+	Calendar_object *co = php_intl_calendar_fetch_object(object);
 
 	return co->ucal;
 }
@@ -268,12 +268,9 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
  */
 void calendar_register_IntlCalendar_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlCalendar", class_IntlCalendar_methods);
-	ce.create_object = Calendar_object_create;
-	Calendar_ce_ptr = zend_register_internal_class(&ce);
+	Calendar_ce_ptr = register_class_IntlCalendar();
+	Calendar_ce_ptr->create_object = Calendar_object_create;
 
 	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
@@ -331,8 +328,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("WALLTIME_NEXT_VALID",			UCAL_WALLTIME_NEXT_VALID);
 
 	/* Create and register 'IntlGregorianCalendar' class. */
-	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", class_IntlGregorianCalendar_methods);
-	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr);
+	GregorianCalendar_ce_ptr = register_class_IntlGregorianCalendar(Calendar_ce_ptr);
 }
 /* }}} */

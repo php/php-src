@@ -17,6 +17,7 @@ foreach ($foo as $k => $v) {
     var_dump($k);
 }
 var_dump(key($foo));
+?>
 --EXPECT--
 int(0)
 int(0)

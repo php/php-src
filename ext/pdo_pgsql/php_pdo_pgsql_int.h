@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -42,16 +42,13 @@ typedef struct {
 	unsigned int	stmt_counter;
 	/* The following two variables have the same purpose. Unfortunately we need
 	   to keep track of two different attributes having the same effect. */
-	zend_bool		emulate_prepares;
-	zend_bool		disable_native_prepares; /* deprecated since 5.6 */
-	zend_bool		disable_prepares;
+	bool		emulate_prepares;
+	bool		disable_native_prepares; /* deprecated since 5.6 */
+	bool		disable_prepares;
 } pdo_pgsql_db_handle;
 
 typedef struct {
-	char         *def;
-	zend_long    intval;
 	Oid          pgsql_type;
-	zend_bool    boolval;
 } pdo_pgsql_column;
 
 typedef struct {
@@ -60,13 +57,13 @@ typedef struct {
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
 	char *stmt_name;
-	char *query;
+	zend_string *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
 	int                     current_row;
-	zend_bool is_prepared;
+	bool is_prepared;
 } pdo_pgsql_stmt;
 
 typedef struct {
@@ -79,7 +76,8 @@ extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const
 #define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)
 #define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__)
 #define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__)
-#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__)
+#define pdo_pgsql_error_stmt_msg(stmt, e, sqlstate, msg) \
+	_pdo_pgsql_error(stmt->dbh, stmt, e, sqlstate, msg, __FILE__, __LINE__)
 
 extern const struct pdo_stmt_methods pgsql_stmt_methods;
 

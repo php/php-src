@@ -1,9 +1,9 @@
 --TEST--
 EXPLAIN - metadata
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND)
@@ -157,7 +157,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

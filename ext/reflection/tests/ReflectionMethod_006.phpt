@@ -8,16 +8,16 @@ Steve Seear <stevseea@php.net>
 
 try {
     new ReflectionMethod();
-} catch (TypeError $re) {
+} catch (ArgumentCountError $re) {
     echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
     new ReflectionMethod('a', 'b', 'c');
-} catch (TypeError $re) {
+} catch (ArgumentCountError $re) {
     echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
-Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 3 given
+Ok - ReflectionMethod::__construct() expects at least 1 argument, 0 given
+Ok - ReflectionMethod::__construct() expects at most 2 arguments, 3 given

@@ -1,9 +1,7 @@
 --TEST--
 Bug #64342 ZipArchive::addFile() has to check file existence (variation 1)
---SKIPIF--
-<?php
-	if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
@@ -35,8 +33,11 @@ DONE
 <?php
 
 @unlink(__DIR__ . '/bug64342.zip');
+?>
 --EXPECTF--
 %s.txt
+
+Warning: ZipArchive::addFile(): No such file or directory in %s on line %d
 add failed
 close ok
 DONE

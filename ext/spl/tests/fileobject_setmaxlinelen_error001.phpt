@@ -8,10 +8,10 @@ $s = new SplFileObject( __FILE__ );
 try {
     $s->setMaxLineLen(-1);
 }
-catch (DomainException $e) {
-    echo 'DomainException thrown';
+catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 
 ?>
 --EXPECT--
-DomainException thrown
+SplFileObject::setMaxLineLen(): Argument #1 ($maxLength) must be greater than or equal to 0

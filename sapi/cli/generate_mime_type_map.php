@@ -3,32 +3,42 @@
 
 // Check if we are being given a mime.types file or if we should use the
 // default URL.
-$source = count($_SERVER['argv']) > 1 ? $_SERVER['argv'][1] : 'https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types';
+$source = count($argv) > 1 ? $argv[1] : 'https://cdn.jsdelivr.net/gh/jshttp/mime-db@v1.45.0/db.json';
 
 // See if we can actually load it.
-$types = @file($source);
-if ($types === false) {
+$data = @file_get_contents($source);
+if ($data === false) {
     fprintf(STDERR, "Error: unable to read $source\n");
     exit(1);
 }
 
-// Remove comments and flip into an extensions array.
+// Source preference from lowest to highest
+$prefs = ['nginx' => 1, 'apache' => 2, 'custom' => 3, 'iana' => 4];
+
 $extensions = [];
-array_walk($types, function ($line) use (&$extensions) {
-    $line = trim($line);
-    if ($line && $line[0] != '#') {
-        $fields = preg_split('/\s+/', $line);
-        if (count($fields) > 1) {
-            $mime = array_shift($fields);
-            foreach ($fields as $extension) {
-                $extensions[$extension] = $mime;
+$types = json_decode($data, true);
+foreach ($types as $mime => $info) {
+    $source = $info['source'] ?? 'custom';
+    $pref = $prefs[$source];
+    foreach ($info['extensions'] ?? [] as $extension) {
+        if (isset($extensions[$extension])) {
+            // Use same preference rules as jshttp/mime-types
+            [$oldMime, $oldPref] = $extensions[$extension];
+            if ($oldMime !== 'application/octet-stream'
+                && ($oldPref > $pref
+                    || ($oldPref === $pref && substr($oldMime, 0, 12) === 'application/'))) {
+                continue;
             }
         }
+
+        $extensions[$extension] = [$mime, $pref];
     }
-});
+}
+
+// Only keep the MIME type.
+$extensions = array_map(function($x) { return $x[0]; }, $extensions);
 
 $additional_mime_maps = [
-    "map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
     "jsm" => "application/javascript",
 ];
 
@@ -52,7 +62,7 @@ echo <<<HEADER
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |

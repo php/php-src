@@ -19,10 +19,11 @@
  *  (end code)
  **/
 
-#include <gd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+#include "gd.h"
 
 static int gdGuessBackgroundColorFromCorners(gdImagePtr im, int *color);
 static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold);

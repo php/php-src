@@ -5,9 +5,9 @@ SplFileObject::seek function - test parameters
 $obj = new SplFileObject(__FILE__);
 try {
     $obj->seek(-1);
-} catch (LogicException $e) {
+} catch (\ValueError $e) {
     echo($e->getMessage());
 }
 ?>
---EXPECTF--
-Can't seek file %s to negative line -1
+--EXPECT--
+SplFileObject::seek(): Argument #1 ($line) must be greater than or equal to 0

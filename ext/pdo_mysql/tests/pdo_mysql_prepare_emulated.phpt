@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->prepare(), emulated PS
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -11,6 +12,7 @@ $db = MySQLPDOTest::factory();
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     function prepex($offset, &$db, $query, $input_params = null, $error_info = null) {
 
@@ -88,9 +90,11 @@ $db = MySQLPDOTest::factory();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch to emulated prepared statements, test will fail\n");
 
-        // TODO - that's PDO - you can prepare empty statements!
-        prepex(3, $db, '',
-            array(), array('execute' => array('sqlstate' => '42000')));
+        try {
+            prepex(3, $db, '', [], ['execute' => ['sqlstate' => '42000']]);
+        } catch (\ValueError $e) {
+            echo $e->getMessage(), \PHP_EOL;
+        }
 
         // lets be fair and do the most simple SELECT first
         $stmt = prepex(4, $db, 'SELECT 1 as "one"');
@@ -324,10 +328,8 @@ require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---XFAIL--
-PDO's PS parser has some problems with invalid SQL and crashes from time to time
-(check with valgrind...)
---EXPECT--
+--EXPECTF--
+PDO::prepare(): Argument #1 ($query) cannot be empty
 array(1) {
   ["one"]=>
   string(1) "1"
@@ -339,12 +341,9 @@ array(1) {
     string(12) ":placeholder"
   }
 }
-array(1) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(12) ":placeholder"
-  }
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
+array(0) {
 }
 array(2) {
   [0]=>
@@ -381,12 +380,9 @@ array(1) {
     string(1) "?"
   }
 }
-array(1) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(1) "?"
-  }
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
+array(0) {
 }
 array(2) {
   [0]=>

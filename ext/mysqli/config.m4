@@ -48,49 +48,17 @@ elif test "$PHP_MYSQLI" != "no"; then
 
   MYSQL_CONFIG=$PHP_MYSQLI
 
-  MYSQL_LIB_NAME='mysqlclient'
-  if test "$enable_zts" = "yes"; then
-    MYSQL_LIB_CFG='--libs_r'
-    MYSQL_LIB_NAME='mysqlclient_r'
-  else
-    MYSQL_LIB_CFG='--libs'
-  fi
-
-  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
+  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG --libs > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
-    MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | $SED -e "s/'//g"`
+    MYSQLI_LIBLINE=`$MYSQL_CONFIG --libs | $SED -e "s/'//g"`
   else
     AC_MSG_RESULT([mysql_config not found])
     AC_MSG_ERROR([Please reinstall the mysql distribution])
   fi
 
-  dnl
-  dnl Check the library
-  dnl
-  PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_set_server_option,
-  [
-    PHP_EVAL_INCLINE($MYSQLI_INCLINE)
-    PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
-    AC_DEFINE(HAVE_MYSQLILIB, 1, [ ])
-    PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_set_character_set,
-    [ ],[
-      AC_MSG_ERROR([MySQLI doesn't support versions < 4.1.13 (for MySQL 4.1.x) and < 5.0.7 for (MySQL 5.0.x) anymore. Please update your libraries.])
-    ],[$MYSQLI_LIBLINE])
-  ],[
-    AC_MSG_ERROR([wrong mysql library version or lib not found. Check config.log for more information.])
-  ],[
-    $MYSQLI_LIBLINE
-  ])
-  dnl
-  dnl Check the library for mysql_stmt_next_result
-  dnl
-  PHP_CHECK_LIBRARY($MYSQL_LIB_NAME, mysql_stmt_next_result,
-  [
-    AC_DEFINE(HAVE_STMT_NEXT_RESULT,             1, [ ])
-  ],[
-  ],[
-    $MYSQLI_LIBLINE
-  ])
+  PHP_EVAL_INCLINE($MYSQLI_INCLINE)
+  PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
+  AC_DEFINE(HAVE_MYSQLILIB, 1, [ ])
 fi
 
 dnl Build extension

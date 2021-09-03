@@ -1,12 +1,12 @@
 --TEST--
 Bug #67647: Bundled libmagic 5.17 does not detect quicktime files correctly
+--EXTENSIONS--
+fileinfo
 --SKIPIF--
 <?php
-	require_once(__DIR__ . '/skipif.inc');
-
-	if (ini_get("default_charset") != "UTF-8") {
-		die("skip require default_charset == UTF-8");
-	}
+    if (ini_get("default_charset") != "UTF-8") {
+        die("skip require default_charset == UTF-8");
+    }
 ?>
 --FILE--
 <?php
@@ -29,9 +29,9 @@ var_dump($fi->file($f));
 +++DONE+++
 --CLEAN--
 <?php
-	$f_base = "67647私はガラスを食べられます.mov";
-	$f = __DIR__ . DIRECTORY_SEPARATOR . $f_base;
-	unlink($f);
+    $f_base = "67647私はガラスを食べられます.mov";
+    $f = __DIR__ . DIRECTORY_SEPARATOR . $f_base;
+    unlink($f);
 ?>
 --EXPECT--
 string(15) "video/quicktime"

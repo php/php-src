@@ -24,6 +24,7 @@
 #include "zend_generators.h"
 #include "zend_closures.h"
 #include "zend_generators_arginfo.h"
+#include "zend_observer.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -114,7 +115,7 @@ static void zend_generator_cleanup_unfinished_execution(
 }
 /* }}} */
 
-ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution) /* {{{ */
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -127,6 +128,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+			zend_free_extra_named_params(execute_data->extra_named_params);
+		}
 
 		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
@@ -157,7 +161,45 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 }
 /* }}} */
 
-static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf);
+static void zend_generator_remove_child(zend_generator_node *node, zend_generator *child)
+{
+	ZEND_ASSERT(node->children >= 1);
+	if (node->children == 1) {
+		node->child.single = NULL;
+	} else {
+		HashTable *ht = node->child.ht;
+		zend_hash_index_del(ht, (zend_ulong) child);
+		if (node->children == 2) {
+			zend_generator *other_child;
+			ZEND_HASH_FOREACH_PTR(ht, other_child) {
+				node->child.single = other_child;
+				break;
+			} ZEND_HASH_FOREACH_END();
+			zend_hash_destroy(ht);
+			efree(ht);
+		}
+	}
+	node->children--;
+}
+
+static zend_always_inline zend_generator *clear_link_to_leaf(zend_generator *generator) {
+	ZEND_ASSERT(!generator->node.parent);
+	zend_generator *leaf = generator->node.ptr.leaf;
+	if (leaf) {
+		leaf->node.ptr.root = NULL;
+		generator->node.ptr.leaf = NULL;
+		return leaf;
+	}
+	return NULL;
+}
+
+static zend_always_inline void clear_link_to_root(zend_generator *generator) {
+	ZEND_ASSERT(generator->node.parent);
+	if (generator->node.ptr.root) {
+		generator->node.ptr.root->node.ptr.leaf = NULL;
+		generator->node.ptr.root = NULL;
+	}
+}
 
 static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 {
@@ -172,19 +214,19 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		ZVAL_UNDEF(&generator->values);
 	}
 
-	if (EXPECTED(generator->node.children == 0)) {
-		zend_generator *root = generator->node.ptr.root, *next;
-		while (UNEXPECTED(root != generator)) {
-			next = zend_generator_get_child(&root->node, generator);
-			generator->node.ptr.root = next;
-			next->node.parent = NULL;
-			OBJ_RELEASE(&root->std);
-			root = next;
-		}
+	zend_generator *parent = generator->node.parent;
+	if (parent) {
+		zend_generator_remove_child(&parent->node, generator);
+		clear_link_to_root(generator);
+		generator->node.parent = NULL;
+		OBJ_RELEASE(&parent->std);
+	} else {
+		clear_link_to_leaf(generator);
 	}
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
 			|| CG(unclean_shutdown)) {
+		zend_generator_close(generator, 0);
 		return;
 	}
 
@@ -224,7 +266,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 			/* TODO: If we hit another yield inside try/finally,
 			 * should we also jump to the next finally block? */
-			return;
+			break;
 		} else if (op_num < try_catch->finally_end) {
 			zval *fast_call =
 				ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[try_catch->finally_end].op1.var);
@@ -243,6 +285,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 		try_catch_offset--;
 	}
+
+	zend_generator_close(generator, 0);
 }
 /* }}} */
 
@@ -283,6 +327,16 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		return NULL;
 	}
 
+	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
+		/* If the generator is currently running, we certainly won't be able to GC any values it
+		 * holds on to. The execute_data state might be inconsistent during execution (e.g. because
+		 * GC has been triggered in the middle of a variable reassignment), so we should not try
+		 * to inspect it here. */
+		*table = NULL;
+		*n = 0;
+		return NULL;
+	}
+
 	op_array = &EX(func)->op_array;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
@@ -312,6 +366,11 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
 		zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(EX(func)));
 	}
+	if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zval extra_named_params;
+		ZVAL_ARR(&extra_named_params, EX(extra_named_params));
+		zend_get_gc_buffer_add_zval(gc_buffer, &extra_named_params);
+	}
 
 	if (execute_data->opline != op_array->opcodes) {
 		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
@@ -330,12 +389,8 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		}
 	}
 
-	if (generator->node.children == 0) {
-		zend_generator *root = generator->node.ptr.root;
-		while (root != generator) {
-			zend_get_gc_buffer_add_obj(gc_buffer, &root->std);
-			root = zend_generator_get_child(&root->node, generator);
-		}
+	if (generator->node.parent) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &generator->node.parent->std);
 	}
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
@@ -363,7 +418,7 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	/* By default we have a tree of only one node */
 	generator->node.parent = NULL;
 	generator->node.children = 0;
-	generator->node.ptr.root = generator;
+	generator->node.ptr.root = NULL;
 
 	zend_object_std_init(&generator->std, class_type);
 	generator->std.handlers = &zend_generator_handlers;
@@ -385,14 +440,12 @@ ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_
 	if (!ptr->func && Z_TYPE(ptr->This) == IS_OBJECT) {
 		if (Z_OBJCE(ptr->This) == zend_ce_generator) {
 			zend_generator *generator = (zend_generator *) Z_OBJ(ptr->This);
-			zend_generator *root = (generator->node.children < 1 ? generator : generator->node.ptr.leaf)->node.ptr.root;
 			zend_execute_data *prev = ptr->prev_execute_data;
-			if (generator->node.parent != root) {
-				do {
-					generator->execute_data->prev_execute_data = prev;
-					prev = generator->execute_data;
-					generator = generator->node.parent;
-				} while (generator->node.parent != root);
+			ZEND_ASSERT(generator->node.parent && "Placeholder only used with delegation");
+			while (generator->node.parent->node.parent) {
+				generator->execute_data->prev_execute_data = prev;
+				prev = generator->execute_data;
+				generator = generator->node.parent;
 			}
 			generator->execute_data->prev_execute_data = prev;
 			ptr = generator->execute_data;
@@ -424,204 +477,131 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	EG(current_execute_data) = original_execute_data;
 }
 
-static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf)
+static void zend_generator_add_child(zend_generator *generator, zend_generator *child)
 {
-	if (node->children == 0) {
-		return NULL;
-	} else if (node->children == 1) {
-		return node->child.single.child;
-	} else {
-		return zend_hash_index_find_ptr(node->child.ht, (zend_ulong) leaf);
-	}
-}
+	zend_generator_node *node = &generator->node;
 
-static zend_generator_node *zend_generator_search_multi_children_node(zend_generator_node *node)
-{
-	while (node->children == 1) {
-		node = &node->child.single.child->node;
-	}
-	return node->children > 1 ? node : NULL;
-}
-
-static void zend_generator_add_single_child(zend_generator_node *node, zend_generator *child, zend_generator *leaf)
-{
 	if (node->children == 0) {
-		node->child.single.leaf = leaf;
-		node->child.single.child = child;
+		node->child.single = child;
 	} else {
 		if (node->children == 1) {
 			HashTable *ht = emalloc(sizeof(HashTable));
 			zend_hash_init(ht, 0, NULL, NULL, 0);
-			zend_hash_index_add_ptr(ht,
-				(zend_ulong) node->child.single.leaf, node->child.single.child);
+			zend_hash_index_add_new_ptr(ht,
+				(zend_ulong) node->child.single, node->child.single);
 			node->child.ht = ht;
 		}
 
-		zend_hash_index_add_ptr(node->child.ht, (zend_ulong) leaf, child);
+		zend_hash_index_add_new_ptr(node->child.ht, (zend_ulong) child, child);
 	}
 
-	node->children++;
-}
-
-static void zend_generator_merge_child_nodes(zend_generator_node *dest, zend_generator_node *src, zend_generator *child)
-{
-	zend_ulong leaf;
-	ZEND_ASSERT(src->children > 1);
-	ZEND_HASH_FOREACH_NUM_KEY(src->child.ht, leaf) {
-		zend_generator_add_single_child(dest, child, (zend_generator *) leaf);
-	} ZEND_HASH_FOREACH_END();
-}
-
-/* Pay attention so that the root of each subtree of the Generators tree is referenced
- * once per leaf */
-static void zend_generator_add_child(zend_generator *generator, zend_generator *child)
-{
-	zend_generator *leaf = child->node.children ? child->node.ptr.leaf : child;
-	zend_generator_node *multi_children_node;
-	zend_bool was_leaf = generator->node.children == 0;
-
-	if (was_leaf) {
-		zend_generator *next = generator->node.parent;
-		leaf->node.ptr.root = generator->node.ptr.root;
-		GC_ADDREF(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
-		generator->node.ptr.leaf = leaf;
-
-		while (next) {
-			if (next->node.children > 1) {
-				zend_generator *child = zend_hash_index_find_ptr(next->node.child.ht, (zend_ulong) generator);
-				zend_hash_index_del(next->node.child.ht, (zend_ulong) generator);
-				zend_hash_index_add_ptr(next->node.child.ht, (zend_ulong) leaf, child);
-			}
-
-			next->node.ptr.leaf = leaf;
-			next = next->node.parent;
-		}
-	} else if (generator->node.children == 1) {
-		multi_children_node = zend_generator_search_multi_children_node(&generator->node);
-		if (multi_children_node) {
-			generator->node.children = 0;
-			zend_generator_merge_child_nodes(&generator->node, multi_children_node, generator->node.child.single.child);
-		}
-	}
-
-	if (!was_leaf) {
-		multi_children_node = zend_generator_search_multi_children_node(&child->node);
-	} else {
-		multi_children_node = (zend_generator_node *) 0x1;
-	}
-
-	{
-		zend_generator *parent = generator->node.parent, *cur = generator;
-
-		if (multi_children_node > (zend_generator_node *) 0x1) {
-			zend_generator_merge_child_nodes(&generator->node, multi_children_node, child);
-		} else {
-			zend_generator_add_single_child(&generator->node, child, leaf);
-		}
-		while (parent) {
-			if (parent->node.children > 1) {
-				if (multi_children_node == (zend_generator_node *) 0x1) {
-					multi_children_node = zend_generator_search_multi_children_node(&child->node);
-				}
-				if (multi_children_node) {
-					zend_generator_merge_child_nodes(&parent->node, multi_children_node, cur);
-				} else {
-					zend_generator_add_single_child(&parent->node, cur, leaf);
-				}
-			}
-			cur = parent;
-			parent = parent->node.parent;
-		}
-	}
+	++node->children;
 }
 
 void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 {
-	zend_generator_add_child(from, generator);
-
+	ZEND_ASSERT(!generator->node.parent && "Already has parent?");
+	zend_generator *leaf = clear_link_to_leaf(generator);
+	if (leaf && !from->node.parent && !from->node.ptr.leaf) {
+		from->node.ptr.leaf = leaf;
+		leaf->node.ptr.root = from;
+	}
 	generator->node.parent = from;
-	zend_generator_get_current(generator);
-	GC_DELREF(&from->std);
+	zend_generator_add_child(from, generator);
 	generator->flags |= ZEND_GENERATOR_DO_INIT;
 }
 
-ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf)
+ZEND_API zend_generator *zend_generator_update_root(zend_generator *generator)
 {
-	zend_generator *old_root, *root = leaf->node.ptr.root;
-
-	/* generator at the root had stopped */
-	if (root != generator) {
-		old_root = root;
-		root = zend_generator_get_child(&root->node, leaf);
-	} else {
-		old_root = NULL;
+	zend_generator *root = generator->node.parent;
+	while (root->node.parent) {
+		root = root->node.parent;
 	}
 
-	while (!root->execute_data && root != generator) {
-		OBJ_RELEASE(&old_root->std);
-		old_root = root;
-
-		root = zend_generator_get_child(&root->node, leaf);
-	}
-
-	if (root->node.parent) {
-		if (root->node.parent->execute_data == NULL) {
-			if (EXPECTED(EG(exception) == NULL)) {
-				zend_op *yield_from = (zend_op *) root->execute_data->opline - 1;
-
-				if (yield_from->opcode == ZEND_YIELD_FROM) {
-					if (Z_ISUNDEF(root->node.parent->retval)) {
-						/* Throw the exception in the context of the generator */
-						zend_execute_data *original_execute_data = EG(current_execute_data);
-						EG(current_execute_data) = root->execute_data;
-
-						if (root == generator) {
-							root->execute_data->prev_execute_data = original_execute_data;
-						} else {
-							root->execute_data->prev_execute_data = &generator->execute_fake;
-							generator->execute_fake.prev_execute_data = original_execute_data;
-						}
-
-						root->execute_data->opline--; /* ZEND_YIELD(_FROM) already advance, so decrement opline to throw from correct place */
-						zend_throw_exception(zend_ce_ClosedGeneratorException, "Generator yielded from aborted, no return value available", 0);
-
-						EG(current_execute_data) = original_execute_data;
-
-						if (!((old_root ? old_root : generator)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
-							leaf->node.ptr.root = root;
-							root->node.parent = NULL;
-							if (old_root) {
-								OBJ_RELEASE(&old_root->std);
-							}
-							zend_generator_resume(leaf);
-							return leaf->node.ptr.root; /* this may be updated during zend_generator_resume! */
-						}
-					} else {
-						zval_ptr_dtor(&root->value);
-						ZVAL_COPY(&root->value, &root->node.parent->value);
-						ZVAL_COPY(ZEND_CALL_VAR(root->execute_data, yield_from->result.var), &root->node.parent->retval);
-					}
-				}
-			}
-
-			root->node.parent = NULL;
-		} else {
-			do {
-				root = root->node.parent;
-				GC_ADDREF(&root->std);
-			} while (root->node.parent);
-		}
-	}
-
-	leaf->node.ptr.root = root;
-	if (old_root) {
-		OBJ_RELEASE(&old_root->std);
-	}
-
+	clear_link_to_leaf(root);
+	root->node.ptr.leaf = generator;
+	generator->node.ptr.root = root;
 	return root;
 }
 
-static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
+static zend_generator *get_new_root(zend_generator *generator, zend_generator *root)
+{
+	while (!root->execute_data && root->node.children == 1) {
+		root = root->node.child.single;
+	}
+
+	if (root->execute_data) {
+		return root;
+	}
+
+	/* We have reached a multi-child node haven't found the root yet. We don't know which
+	 * child to follow, so perform the search from the other direction instead. */
+	while (generator->node.parent->execute_data) {
+		generator = generator->node.parent;
+	}
+
+	return generator;
+}
+
+ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator)
+{
+	zend_generator *old_root = generator->node.ptr.root;
+	ZEND_ASSERT(!old_root->execute_data && "Nothing to update?");
+
+	zend_generator *new_root = get_new_root(generator, old_root);
+
+	ZEND_ASSERT(old_root->node.ptr.leaf == generator);
+	generator->node.ptr.root = new_root;
+	new_root->node.ptr.leaf = generator;
+	old_root->node.ptr.leaf = NULL;
+
+	zend_generator *new_root_parent = new_root->node.parent;
+	ZEND_ASSERT(new_root_parent);
+	zend_generator_remove_child(&new_root_parent->node, new_root);
+
+	if (EXPECTED(EG(exception) == NULL) && EXPECTED((OBJ_FLAGS(&generator->std) & IS_OBJ_DESTRUCTOR_CALLED) == 0)) {
+		zend_op *yield_from = (zend_op *) new_root->execute_data->opline - 1;
+
+		if (yield_from->opcode == ZEND_YIELD_FROM) {
+			if (Z_ISUNDEF(new_root_parent->retval)) {
+				/* Throw the exception in the context of the generator */
+				zend_execute_data *original_execute_data = EG(current_execute_data);
+				EG(current_execute_data) = new_root->execute_data;
+
+				if (new_root == generator) {
+					new_root->execute_data->prev_execute_data = original_execute_data;
+				} else {
+					new_root->execute_data->prev_execute_data = &generator->execute_fake;
+					generator->execute_fake.prev_execute_data = original_execute_data;
+				}
+
+				/* ZEND_YIELD(_FROM) already advance, so decrement opline to throw from correct place */
+				new_root->execute_data->opline--;
+				zend_throw_exception(zend_ce_ClosedGeneratorException, "Generator yielded from aborted, no return value available", 0);
+
+				EG(current_execute_data) = original_execute_data;
+
+				if (!((old_root ? old_root : generator)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+					new_root->node.parent = NULL;
+					OBJ_RELEASE(&new_root_parent->std);
+					zend_generator_resume(generator);
+					return zend_generator_get_current(generator);
+				}
+			} else {
+				zval_ptr_dtor(&new_root->value);
+				ZVAL_COPY(&new_root->value, &new_root_parent->value);
+				ZVAL_COPY(ZEND_CALL_VAR(new_root->execute_data, yield_from->result.var), &new_root_parent->retval);
+			}
+		}
+	}
+
+	new_root->node.parent = NULL;
+	OBJ_RELEASE(&new_root_parent->std);
+
+	return new_root;
+}
+
+static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
@@ -637,9 +617,6 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 
 			p = &ht->arData[pos];
 			value = &p->val;
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
-			}
 			pos++;
 		} while (Z_ISUNDEF_P(value));
 
@@ -665,6 +642,9 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 		}
 
 		if (iter->funcs->valid(iter) == FAILURE) {
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				goto exception;
+			}
 			/* reached end of iteration */
 			goto failure;
 		}
@@ -693,7 +673,7 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 	return SUCCESS;
 
 exception:
-	zend_rethrow_exception(generator->execute_data);
+	zend_generator_throw_exception(generator, NULL);
 
 failure:
 	zval_ptr_dtor(&generator->values);
@@ -723,17 +703,17 @@ try_again:
 		return;
 	}
 
+	/* Drop the AT_FIRST_YIELD flag */
+	orig_generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
+
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
 		if (EXPECTED(zend_generator_get_next_delegated_value(generator) == SUCCESS)) {
 			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 			return;
 		}
-		/* If there are no more deletegated values, resume the generator
+		/* If there are no more delegated values, resume the generator
 		 * after the "yield from" expression. */
 	}
-
-	/* Drop the AT_FIRST_YIELD flag */
-	orig_generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
 
 	{
 		/* Backup executor globals */
@@ -763,7 +743,16 @@ try_again:
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
-		zend_execute_ex(generator->execute_data);
+		if (!ZEND_OBSERVER_ENABLED) {
+			zend_execute_ex(generator->execute_data);
+		} else {
+			zend_observer_generator_resume(generator->execute_data);
+			zend_execute_ex(generator->execute_data);
+			if (generator->execute_data) {
+				/* On the final return, this will be called from ZEND_GENERATOR_RETURN */
+				zend_observer_fcall_end(generator->execute_data, &generator->value);
+			}
+		}
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		generator->frozen_call_stack = NULL;
@@ -871,9 +860,7 @@ ZEND_METHOD(Generator, current)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -891,9 +878,7 @@ ZEND_METHOD(Generator, key)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
-		zval *key = &root->key;
-
-		ZVAL_COPY_DEREF(return_value, key);
+		RETURN_COPY_DEREF(&root->key);
 	}
 }
 /* }}} */
@@ -942,9 +927,7 @@ ZEND_METHOD(Generator, send)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -974,9 +957,7 @@ ZEND_METHOD(Generator, throw)
 
 		root = zend_generator_get_current(generator);
 		if (generator->execute_data) {
-			zval *value = &root->value;
-
-			ZVAL_COPY_DEREF(return_value, value);
+			RETURN_COPY_DEREF(&root->value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
@@ -1098,6 +1079,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_get_gc,
 };
 
+/* by_ref is int due to Iterator API */
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator;
@@ -1125,17 +1107,9 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 void zend_register_generator_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
-	zend_ce_generator = zend_register_internal_class(&ce);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_generator = register_class_Generator(zend_ce_iterator);
 	zend_ce_generator->create_object = zend_generator_create;
-	zend_ce_generator->serialize = zend_class_serialize_deny;
-	zend_ce_generator->unserialize = zend_class_unserialize_deny;
-
 	/* get_iterator has to be assigned *after* implementing the interface */
-	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1145,7 +1119,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.clone_obj = NULL;
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
-	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
-	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	zend_ce_ClosedGeneratorException = register_class_ClosedGeneratorException(zend_ce_exception);
 }
 /* }}} */

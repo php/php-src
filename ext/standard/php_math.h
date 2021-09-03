@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,7 +21,7 @@
 PHPAPI double _php_math_round(double value, int places, int mode);
 PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep);
 PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *dec_point, size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len);
-PHPAPI zend_string * _php_math_longtobase(zval *arg, int base);
+PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base);
 PHPAPI zend_long _php_math_basetolong(zval *arg, int base);
 PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret);
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);

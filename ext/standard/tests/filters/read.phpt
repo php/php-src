@@ -4,7 +4,7 @@ stream filter - reading
 <?php
 echo "-TEST\n";
 class strtoupper_filter extends php_user_filter {
-    function filter($in, $out, &$consumed, $closing)
+    function filter($in, $out, &$consumed, $closing): int
     {
         $output = 0;
         while ($bucket = stream_bucket_make_writeable($in)) {
@@ -38,7 +38,7 @@ echo "Done\n";
 <?PHP
 ECHO "-TEST\N";
 CLASS STRTOUPPER_FILTER EXTENDS PHP_USER_FILTER {
-    FUNCTION FILTER($IN, $OUT, &$CONSUMED, $CLOSING)
+    FUNCTION FILTER($IN, $OUT, &$CONSUMED, $CLOSING): INT
     {
         $OUTPUT = 0;
         WHILE ($BUCKET = STREAM_BUCKET_MAKE_WRITEABLE($IN)) {

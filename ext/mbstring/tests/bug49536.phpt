@@ -1,7 +1,7 @@
 --TEST--
 Bug #49536 (mb_detect_encoding() returns incorrect results when strict_mode is turned on)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 // non-strict mode

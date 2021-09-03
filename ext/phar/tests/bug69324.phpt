@@ -1,9 +1,7 @@
 --TEST--
 Bug #69324: Buffer Over-read in unserialize when parsing Phar
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {
@@ -13,5 +11,6 @@ var_dump($meta);
 } catch(Exception $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECTF--
 internal corruption of phar "%s" (truncated manifest entry)

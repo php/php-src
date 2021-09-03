@@ -3,8 +3,8 @@ Bug #65665 (Exception not properly caught when opcache enabled)
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function foo() {
@@ -112,6 +112,7 @@ dummy:
     return;
 }
 foo();foo1();foo2();
+?>
 --EXPECT--
 correct
 correct

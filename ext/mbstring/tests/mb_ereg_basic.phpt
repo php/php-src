@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : basic functionality
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--
@@ -76,17 +77,17 @@ Regex encoding set to utf-8
 
 **-- ASCII String --**
 -- Without $regs argument--
-int(1)
-int(1)
+bool(true)
+bool(true)
 --With $regs argument --
-int(36)
+bool(true)
 array(2) {
   [0]=>
   string(48) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4gMDEyMzQ1Njc4"
   [1]=>
   string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
 }
-int(17)
+bool(true)
 array(1) {
   [0]=>
   string(24) "VGhpcyBpcyBhbiBFbmdsaXM="
@@ -94,10 +95,10 @@ array(1) {
 
 **-- Multibyte String --**
 -- Without $regs argument --
-int(1)
+bool(true)
 bool(false)
 -- With $regs argument --
-int(35)
+bool(true)
 array(3) {
   [0]=>
   string(48) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzQ="

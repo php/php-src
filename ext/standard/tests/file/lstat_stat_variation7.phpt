@@ -18,6 +18,7 @@ $old_stat = stat($file_name);
 clearstatcache();
 $blksize = PHP_OS_FAMILY === 'Windows' ? 4096 : $old_stat['blksize'];
 fwrite($fh, str_repeat("Hello World", $blksize));
+fclose($fh);
 $new_stat = stat($file_name);
 
 // compare self stats

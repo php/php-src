@@ -1,5 +1,7 @@
 --TEST--
 Tokenization of namespaced names
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 
@@ -12,7 +14,7 @@ namespace\Foo
 Foo \ Bar
 CODE;
 
-foreach (PhpToken::getAll($code) as $token) {
+foreach (PhpToken::tokenize($code) as $token) {
     echo "{$token->getTokenName()}: \"$token->text\"\n";
 }
 

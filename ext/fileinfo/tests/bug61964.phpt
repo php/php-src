@@ -1,7 +1,7 @@
 --TEST--
 Bug #61964 (finfo_open with directory cause invalid free)
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
@@ -45,8 +45,10 @@ rmdir($dir);
 ?>
 --EXPECTF--
 bool(false)%A
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
 bool(false)%A
 Warning: finfo_open(): offset `string' invalid in %sbug61964.php on line %d
 
@@ -58,5 +60,5 @@ Warning: finfo_open(): offset `a' invalid in %sbug61964.php on line %d
 
 Warning: finfo_open(): offset `b' invalid in %sbug61964.php on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%sbug61964'. in %sbug61964.php on line %d
+Warning: finfo_open(): Failed to load magic database at "%sbug61964" in %sbug61964.php on line %d
 DONE: testing dir with files

@@ -3,6 +3,8 @@ Test session_set_save_handler() : default object
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -27,6 +29,7 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
+?>
 --EXPECTF--
 *** Testing session_set_save_handler() : default object ***
 string(%d) "%s"

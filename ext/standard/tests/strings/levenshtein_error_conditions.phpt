@@ -1,7 +1,9 @@
 --TEST--
-levenshtein() error conditions
+levenshtein() former error conditions
 --FILE--
 <?php
+
+// levenshtein no longer has a maximum string length limit.
 
 echo '--- String 1 ---' . \PHP_EOL;
 var_dump(levenshtein('AbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrstuvwxyzAbcdefghijklmnopqrtsuvwxyzAbcdefghijklmnopqrtsuvwxyzAbcdefghijklmnopqrtsuvwxyzAbcdefghijklmnopqrtsuvwxyzAbcdefghijklmnopqrtsuvwxyzAbcdefghijklmnopqrtsu', 'A'));
@@ -25,7 +27,7 @@ try {
 --EXPECT--
 --- String 1 ---
 int(254)
-levenshtein(): Argument #1 ($str1) must be less than 256 characters
+int(255)
 --- String 2 ---
 int(254)
-levenshtein(): Argument #2 ($str2) must be less than 256 characters
+int(255)

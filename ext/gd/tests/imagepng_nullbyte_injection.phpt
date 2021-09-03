@@ -1,11 +1,12 @@
 --TEST--
 Testing null byte injection in imagepng
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
 if (!isset($support['PNG Support']) || $support['PNG Support'] === false) {
-	print 'skip png support not available';
+    print 'skip png support not available';
 }
 ?>
 --FILE--
@@ -18,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-imagepng(): Argument #2 ($to) must not contain null bytes
+imagepng(): Argument #2 ($file) must not contain null bytes

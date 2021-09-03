@@ -49,12 +49,12 @@ compare_eq(-INF, "-1e1000");
 echo "\n";
 
 $float = 1.75;
- 
+
 echo "precision=14:\n";
 ini_set('precision', 14);
 compare_3way($float, "1.75abc");
 compare_3way((string) $float, "1.75abc");
- 
+
 echo "precision=0:\n";
 ini_set('precision', 0);
 compare_3way($float, "1.75abc");
@@ -73,7 +73,7 @@ compare_3way((string) $float, "1.75abc");
 "0" == "0e214987142012": true
 
 42 == "   42": true
-42 == "42   ": false
+42 == "42   ": true
 42 == "42abc": false
 42 == "abc42": false
 0 == "abc42": false

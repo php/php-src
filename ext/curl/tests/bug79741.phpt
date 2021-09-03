@@ -1,10 +1,12 @@
 --TEST--
 Bug #79741: curl_setopt CURLOPT_POSTFIELDS asserts on object with declared properties
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
 class Test {
-	public $prop = "value";
+    public $prop = "value";
 }
 
 $ch = curl_init();

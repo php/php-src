@@ -6,14 +6,14 @@ $stream = fopen('php://memory', 'w');
 stream_filter_append($stream, 'convert.quoted-printable-decode', STREAM_FILTER_WRITE, ['line-break-chars' => "\r\n"]);
 
 $lines = [
-	"\r\n",
-	" -=()\r\n",
-	" -=\r\n",
-	"\r\n"
-	];
+    "\r\n",
+    " -=()\r\n",
+    " -=\r\n",
+    "\r\n"
+    ];
 
 foreach ($lines as $line) {
-	fwrite($stream, $line);
+    fwrite($stream, $line);
 }
 
 fclose($stream);

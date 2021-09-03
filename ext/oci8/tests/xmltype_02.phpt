@@ -1,10 +1,12 @@
 --TEST--
 Basic XMLType test #2
+--EXTENSIONS--
+simplexml
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
-if (!extension_loaded("simplexml")) die ("skip no simplexml extension");
 ?>
 --FILE--
 <?php
@@ -111,7 +113,7 @@ oci8_test_sql_execute($c, $stmtarray);
 Test 1 Insert new XML data using a temporary CLOB
 array(1) {
   [0]=>
-  object(OCI_Lob)#%d (1) {
+  object(OCILob)#%d (1) {
     ["descriptor"]=>
     resource(%d) of type (oci8 descriptor)
   }

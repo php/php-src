@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d1ab4864c1159916b45c8f272a2a1d708b2dca65 */
+ * Stub hash: f87d92c002674c431827895a8d8b3a5da3b95482 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -39,8 +39,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_define, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, case_insensitive, "false")
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, case_insensitive, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_defined, 0, 1, _IS_BOOL, 0)
@@ -69,7 +69,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_a, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, allow_string, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_class_vars, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_vars, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -84,12 +84,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_class_methods, 0, 1, IS_ARRA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_method_exists, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, object_or_class, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, object_or_class)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_property_exists, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, object_or_class, IS_MIXED, 0)
+	ZEND_ARG_INFO(0, object_or_class)
 	ZEND_ARG_TYPE_INFO(0, property, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -105,6 +105,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trait_exists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, trait, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, autoload, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enum_exists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, enum, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, autoload, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
@@ -124,21 +129,21 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trigger_error, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_type, IS_LONG, 0, "E_USER_NOTICE")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_level, IS_LONG, 0, "E_USER_NOTICE")
 ZEND_END_ARG_INFO()
 
 #define arginfo_user_error arginfo_trigger_error
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, error_handler, IS_CALLABLE, 1)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_types, IS_LONG, 0, "E_ALL")
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_levels, IS_LONG, 0, "E_ALL")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_error_handler, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, exception_handler, IS_CALLABLE, 1)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_restore_exception_handler arginfo_restore_error_handler
@@ -238,6 +243,7 @@ ZEND_FUNCTION(property_exists);
 ZEND_FUNCTION(class_exists);
 ZEND_FUNCTION(interface_exists);
 ZEND_FUNCTION(trait_exists);
+ZEND_FUNCTION(enum_exists);
 ZEND_FUNCTION(function_exists);
 ZEND_FUNCTION(class_alias);
 ZEND_FUNCTION(get_included_files);
@@ -298,6 +304,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(class_exists, arginfo_class_exists)
 	ZEND_FE(interface_exists, arginfo_interface_exists)
 	ZEND_FE(trait_exists, arginfo_trait_exists)
+	ZEND_FE(enum_exists, arginfo_enum_exists)
 	ZEND_FE(function_exists, arginfo_function_exists)
 	ZEND_FE(class_alias, arginfo_class_alias)
 	ZEND_FE(get_included_files, arginfo_get_included_files)
@@ -333,3 +340,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_status, arginfo_gc_status)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_stdClass_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_stdClass(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "stdClass", class_stdClass_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

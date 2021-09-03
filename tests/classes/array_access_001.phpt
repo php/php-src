@@ -6,19 +6,19 @@ class ObjectOne implements ArrayAccess {
 
     public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 
-    function offsetExists($index) {
+    function offsetExists($index): bool {
         echo __METHOD__ . "($index)\n";
         return array_key_exists($index, $this->a);
     }
-    function offsetGet($index) {
+    function offsetGet($index): mixed {
         echo __METHOD__ . "($index)\n";
         return $this->a[$index];
     }
-    function offsetSet($index, $newval) {
+    function offsetSet($index, $newval): void {
         echo __METHOD__ . "($index,$newval)\n";
-        return $this->a[$index] = $newval;
+        $this->a[$index] = $newval;
     }
-    function offsetUnset($index) {
+    function offsetUnset($index): void {
         echo __METHOD__ . "($index)\n";
         unset($this->a[$index]);
     }
@@ -134,11 +134,11 @@ ObjectOne::offsetGet(4th)
 int(4)
 ObjectOne::offsetGet(5th)
 
-Notice: Undefined array key "5th" in %s on line %d
+Warning: Undefined array key "5th" in %s on line %d
 NULL
 ObjectOne::offsetGet(6)
 
-Notice: Undefined array key 6 in %s on line %d
+Warning: Undefined array key 6 in %s on line %d
 NULL
 ===offsetSet===
 WRITE 1

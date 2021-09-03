@@ -24,14 +24,16 @@ $a = new A(20);
 $ca = $a->getIncrementor();
 $cas = $a->getStaticIncrementor();
 
-$ca->bindTo($a, array());
+try {
+    $ca->bindTo($a, array());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $cas->bindTo($a, 'A');
 
 ?>
 --EXPECTF--
-Warning: Array to string conversion in %s on line %d
-
-Warning: Class "Array" not found in %s on line %d
+Closure::bindTo(): Argument #2 ($newScope) must be of type object|string|null, array given
 
 Warning: Cannot bind an instance to a static closure in %s on line %d

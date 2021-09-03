@@ -3,7 +3,7 @@ Test tempnam() function: usage variations - obscure prefixes
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
-	die("skip run only on Windows");
+    die("skip run only on Windows");
 ?>
 --CONFLICTS--
 obscure_filename
@@ -26,7 +26,6 @@ $names_arr = array(
     -1,
     TRUE,
     FALSE,
-    NULL,
     "",
     " ",
     "\0",
@@ -47,7 +46,6 @@ $res_arr = array(
     true,
     true,
     true,
-    true,
     false,
 
     /* prefix with path separator of a non existing directory*/
@@ -59,7 +57,7 @@ for( $i=0; $i<count($names_arr); $i++ ) {
     echo "-- Iteration $i --\n";
     try {
         $file_name = tempnam($file_path, $names_arr[$i]);
-    } catch (TypeError $e) {
+    } catch (Error $e) {
         echo $e->getMessage(), "\n";
         continue;
     }
@@ -99,17 +97,15 @@ OK
 -- Iteration 3 --
 OK
 -- Iteration 4 --
-OK
--- Iteration 5 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation3-win32.php on line %d
 Failed, not created in the correct directory %s vs %s
 0
+-- Iteration 5 --
+tempnam(): Argument #2 ($prefix) must not contain any null bytes
 -- Iteration 6 --
-tempnam(): Argument #2 ($prefix) must be a valid path, string given
+tempnam(): Argument #2 ($prefix) must be of type string, array given
 -- Iteration 7 --
-tempnam(): Argument #2 ($prefix) must be a valid path, array given
--- Iteration 8 --
 OK
--- Iteration 9 --
+-- Iteration 8 --
 OK

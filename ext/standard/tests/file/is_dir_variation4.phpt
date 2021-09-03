@@ -35,7 +35,7 @@ foreach($dirs_arr as $dir) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( is_dir($file_path."/".$dir ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $count++;
@@ -76,9 +76,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-is_dir(): Argument #1 ($filename) must be a valid path, string given
+bool(false)
 
 -- Iteration 10 --
-is_dir(): Argument #1 ($filename) must be a valid path, string given
+bool(false)
 
 *** Done ***

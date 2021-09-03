@@ -46,7 +46,7 @@ foreach($dirs_arr as $dir1) {
   echo "\n-- Iteration $count --\n";
   try {
     var_dump( disk_total_space( $dir1 ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   $count++;
@@ -64,47 +64,47 @@ rmdir($file_path."/disk_total_space");
 ?>
 --EXPECTF--
 *** Testing with a directory ***
-float(%d)
+float(%f)
 
 Testing for the return type ***
 bool(true)
 
 *** Testing with different directory combinations ***
 -- Iteration 1 --
-float(%d)
+float(%f)
 
 -- Iteration 2 --
-float(%d)
+float(%f)
 
 -- Iteration 3 --
-float(%d)
+float(%f)
 
 -- Iteration 4 --
-float(%d)
+float(%f)
 
 -- Iteration 5 --
-float(%d)
+float(%f)
 
 -- Iteration 6 --
-float(%d)
+float(%f)
 
 -- Iteration 7 --
-float(%d)
+float(%f)
 
 -- Iteration 8 --
-float(%d)
+float(%f)
 
 -- Iteration 9 --
-disk_total_space(): Argument #1 ($directory) must be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 10 --
-disk_total_space(): Argument #1 ($directory) must be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 11 --
-disk_total_space(): Argument #1 ($directory) must be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 
 -- Iteration 12 --
-disk_total_space(): Argument #1 ($directory) must be a valid path, string given
+disk_total_space(): Argument #1 ($directory) must not contain any null bytes
 *** Testing with Binary Input ***
 float(%s)
 

@@ -22,5 +22,6 @@ class D
 }
 
 (new D)->a();
+?>
 --EXPECT--
 Done

@@ -1,14 +1,14 @@
 --TEST--
 int mysqli_poll() simple
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND)
-	die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
+    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
 ?>
 --FILE--
 <?php
@@ -30,12 +30,24 @@ if (!$IS_MYSQLND)
         printf("[009] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
     $read = $error = $reject = array($link);
-    if (false !== ($tmp = (mysqli_poll($read, $error, $reject, -1, 1))))
-        printf("[010] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
+    try {
+        mysqli_poll($read, $error, $reject, -1, 1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    try {
+        mysqli_poll($read, $error, $reject, 0, -1);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
-    $read = $error = $reject = array($link);
-    if (false !== ($tmp = (mysqli_poll($read, $error, $reject, 0, -1))))
-        printf("[011] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
+    $link->close();
+    $read[0] = get_connection();
+    try {
+        mysqli_poll($read, $error, $reject, 0, 1);
+    } catch (\Error $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
@@ -111,9 +123,9 @@ if (!$IS_MYSQLND)
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
-
-Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
+mysqli_poll(): Argument #4 ($seconds) must be greater than or equal to 0
+mysqli_poll(): Argument #5 ($microseconds) must be greater than or equal to 0
+mysqli object is already closed
 [012 + 6] Rejecting thread %d: 0/
 [013 + 6] Rejecting thread %d: 0/
 [014 + 6] Rejecting thread %d: 0/

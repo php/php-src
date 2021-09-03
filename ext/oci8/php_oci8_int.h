@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -519,16 +519,16 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	zend_long		 persistent_timeout;			/* time period after which idle persistent connection is considered expired */
 	zend_long		 statement_cache_size;			/* statement cache size. used with 9i+ clients only*/
 	zend_long		 default_prefetch;				/* default prefetch setting */
-	zend_bool	 privileged_connect;			/* privileged connect flag (On/Off) */
-	zend_bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
+	bool	 privileged_connect;			/* privileged connect flag (On/Off) */
+	bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
 
 	int			 shutdown;						/* in shutdown flag */
 
 	OCIEnv		*env;							/* global environment handle */
 
-	zend_bool	 in_call;
+	bool	 in_call;
 	char		*connection_class;
-	zend_bool	 events;
+	bool	 events;
 	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
 

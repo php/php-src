@@ -43,5 +43,5 @@ string(10) "%r\0%r*%r\0%rvar_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"
-array_walk(): Argument #1 ($input) must be of type array, string given
+array_walk(): Argument #1 ($array) must be of type array, string given
 Done

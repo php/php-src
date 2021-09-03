@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->prepare(), emulated PS, anonymous placeholder
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -64,17 +65,18 @@ require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECT--
-array(1) {
-  [0]=>
-  array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(1) "?"
-  }
+--EXPECTF--
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
+[003] Execute has failed, 'HY093' array (
+  0 => 'HY093',
+  1 => NULL,
+  2 => NULL,
+)
+array(0) {
 }
 now the same with native PS
+
+Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d
 [005] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,

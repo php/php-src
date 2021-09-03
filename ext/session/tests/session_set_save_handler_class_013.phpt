@@ -3,6 +3,8 @@ Test session_set_save_handler() : incorrect arguments for existing handler close
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -14,17 +16,17 @@ echo "*** Testing session_set_save_handler() : incorrect arguments for existing 
 
 class MySession extends SessionHandler {
     public $i = 0;
-    public function open($path, $name) {
+    public function open($path, $name): bool {
         ++$this->i;
         echo 'Open ', session_id(), "\n";
         return parent::open($path, $name);
     }
-    public function read($key) {
+    public function read($key): string|false {
         ++$this->i;
         echo 'Read ', session_id(), "\n";
         return parent::read($key);
     }
-    public function close() {
+    public function close(): bool {
         return parent::close(false);
     }
 }
@@ -47,7 +49,7 @@ int(2)
 array(0) {
 }
 
-Fatal error: Uncaught ArgumentCountError: SessionHandler::close() expects exactly 0 parameters, 1 given in %s:%d
+Fatal error: Uncaught ArgumentCountError: SessionHandler::close() expects exactly 0 arguments, 1 given in %s:%d
 Stack trace:
 #0 %s(%d): SessionHandler->close(false)
 #1 [internal function]: MySession->close()

@@ -1,7 +1,7 @@
 --TEST--
 Phar: Phar::extractTo()
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --CONFLICTS--
 tempmanifest1.phar.php
 --INI--
@@ -45,8 +45,8 @@ var_dump(file_get_contents(__DIR__ . '/extract1-2/file2.txt'));
 var_dump(is_dir(__DIR__ . '/extract1-2/one/level'));
 
 try {
-    $a->extractTo(__DIR__ . '/whatever', 134);
-} catch (Exception $e) {
+    $a->extractTo(__DIR__ . '/whatever', new stdClass());
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -105,30 +105,27 @@ try {
 ?>
 --CLEAN--
 <?php
-@rmdir(__DIR__ . '/whatever');
-@unlink(__DIR__ . '/oops');
-@rmdir(__DIR__ . '/oops1');
-@unlink(__DIR__ . '/tempmanifest1.phar.php');
+unlink(__DIR__ . '/oops');
+rmdir(__DIR__ . '/oops1');
+unlink(__DIR__ . '/tempmanifest1.phar.php');
 $e = __DIR__ . '/extract/';
-@unlink($e . 'file1.txt');
-@unlink($e . 'file2.txt');
-@unlink($e . 'subdir/ectory/file.txt');
-@rmdir($e . 'subdir/ectory');
-@rmdir($e . 'subdir');
-@rmdir($e . 'one/level');
-@rmdir($e . 'one');
-@rmdir($e);
+unlink($e . 'file1.txt');
+unlink($e . 'file2.txt');
+unlink($e . 'subdir/ectory/file.txt');
+rmdir($e . 'subdir/ectory');
+rmdir($e . 'subdir');
+rmdir($e . 'one');
+rmdir($e);
 $e = __DIR__ . '/extract1/';
-@unlink($e . 'file1.txt');
-@unlink($e . 'subdir/ectory/file.txt');
-@rmdir($e . 'subdir/ectory');
-@rmdir($e . 'subdir');
-@rmdir($e);
+unlink($e . 'file1.txt');
+unlink($e . 'subdir/ectory/file.txt');
+rmdir($e . 'subdir/ectory');
+rmdir($e . 'subdir');
+rmdir($e);
 $e = __DIR__ . '/extract1-2/';
-@unlink($e . 'file2.txt');
-@rmdir($e . 'one/level');
-@rmdir($e . 'one');
-@rmdir($e);
+unlink($e . 'file2.txt');
+rmdir($e . 'one');
+rmdir($e);
 ?>
 --EXPECTF--
 %sextract%cfile1.txt
@@ -141,8 +138,8 @@ string(2) "hi"
 string(3) "hi3"
 string(3) "hi2"
 bool(false)
-Invalid argument, expected a filename (string) or array of filenames
-Phar::extractTo(): Argument #1 ($pathto) must be a valid path, array given
+Phar::extractTo(): Argument #2 ($files) must be of type array|string|null, stdClass given
+Phar::extractTo(): Argument #1 ($directory) must be of type string, array given
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

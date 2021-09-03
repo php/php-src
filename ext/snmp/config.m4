@@ -30,7 +30,7 @@ if test "$PHP_SNMP" != "no"; then
         AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
       fi
     else
-      AC_MSG_ERROR([Net-SNMP version 5.3 or greater reqired (detected $snmp_full_version).])
+      AC_MSG_ERROR([Net-SNMP version 5.3 or greater required (detected $snmp_full_version).])
     fi
   else
     AC_MSG_ERROR([Could not find net-snmp-config binary. Please check your net-snmp installation.])
@@ -50,6 +50,22 @@ if test "$PHP_SNMP" != "no"; then
   PHP_CHECK_LIBRARY($SNMP_LIBNAME, shutdown_snmp_logging,
   [
     AC_DEFINE(HAVE_SHUTDOWN_SNMP_LOGGING, 1, [ ])
+  ], [], [
+    $SNMP_SHARED_LIBADD
+  ])
+
+  dnl Check whether usmHMAC192SHA256AuthProtocol exists.
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, usmHMAC192SHA256AuthProtocol,
+  [
+    AC_DEFINE(HAVE_SNMP_SHA256, 1, [ ])
+  ], [], [
+    $SNMP_SHARED_LIBADD
+  ])
+
+  dnl Check whether usmHMAC384SHA512AuthProtocol exists.
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, usmHMAC384SHA512AuthProtocol,
+  [
+    AC_DEFINE(HAVE_SNMP_SHA512, 1, [ ])
   ], [], [
     $SNMP_SHARED_LIBADD
   ])

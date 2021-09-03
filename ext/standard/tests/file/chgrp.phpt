@@ -8,10 +8,10 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 try {
-    chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", null);
+    chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECT--
-chgrp(): Argument #2 ($group) must be of type string|int, null given
+--EXPECTF--
+Warning: chgrp(): No such file or directory in %s on line %d

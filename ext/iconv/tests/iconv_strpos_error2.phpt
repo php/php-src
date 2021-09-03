@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_strpos() function : error conditions - Pass unknown encoding
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 /*
@@ -24,6 +21,6 @@ echo "Done";
 --EXPECTF--
 *** Testing iconv_strpos() : error conditions ***
 
-Notice: iconv_strpos(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
+Warning: iconv_strpos(): Wrong encoding, conversion from "unknown-encoding" to "UCS-4LE" is not allowed in %s on line %d
 bool(false)
 Done

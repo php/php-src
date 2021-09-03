@@ -1,12 +1,13 @@
 --TEST--
 Bug #77768 (Redeclaration of builtin types and repeated declarations)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 try {
-	$libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
+    $libc = FFI::cdef("int printf(const char *format, ...);", "libc.so.6");
 } catch (Throwable $_) {
-	die('skip libc.so.6 not available');
+    die('skip libc.so.6 not available');
 }
 ?>
 --INI--

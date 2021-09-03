@@ -1,7 +1,7 @@
 --TEST--
 Bug #74439 Wrong reflection on the Locale methods
---SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not available'); ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

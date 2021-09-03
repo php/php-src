@@ -37,7 +37,7 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( fileperms( $file_path."/".$file ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   clearstatcache();
@@ -74,8 +74,12 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileperms(): Argument #1 ($filename) must be a valid path, string given
+
+Warning: fileperms(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-fileperms(): Argument #1 ($filename) must be a valid path, string given
+
+Warning: fileperms(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

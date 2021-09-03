@@ -1,9 +1,10 @@
 --TEST--
 Bug #42499 (Multi-statement execution via PDO::exec() makes connection unusable)
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 MySQLPDOTest::skip();
@@ -13,12 +14,12 @@ $stmt = $db->query('SELECT VERSION() as _version');
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-	die(sprintf("skip Cannot determine MySQL Server version\n"));
+    die(sprintf("skip Cannot determine MySQL Server version\n"));
 
 $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 41000)
-	die(sprintf("skip Need MySQL Server 4.1.0+, found %d.%02d.%02d (%d)\n",
-		$matches[1], $matches[2], $matches[3], $version));
+    die(sprintf("skip Need MySQL Server 4.1.0+, found %d.%02d.%02d (%d)\n",
+        $matches[1], $matches[2], $matches[3], $version));
 --FILE--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

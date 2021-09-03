@@ -1,5 +1,7 @@
 --TEST--
 DBA lock modifier error message test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "flatfile";
@@ -17,7 +19,7 @@ $db_file1 = dba_popen($db_filename, 'n-t', 'flatfile');
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile

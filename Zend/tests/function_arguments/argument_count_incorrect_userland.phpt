@@ -33,6 +33,7 @@ try {
     echo get_class($e) . PHP_EOL;
     echo $e->getMessage() . PHP_EOL;
 }
+?>
 --EXPECTF--
 ArgumentCountError
 Too few arguments to function foo(), 0 passed in %s and exactly 1 expected

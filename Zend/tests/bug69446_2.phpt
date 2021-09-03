@@ -30,6 +30,7 @@ unserialize(serialize($foo));
 
 gc_collect_cycles();
 var_dump($bar);
+?>
 --EXPECT--
 object(bad)#4 (1) {
   ["_private"]=>

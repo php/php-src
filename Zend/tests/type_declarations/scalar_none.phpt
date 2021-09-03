@@ -23,6 +23,7 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+?>
 --EXPECTF--
 Testing int:
 *** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected

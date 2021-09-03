@@ -1,16 +1,15 @@
 --TEST--
 xbm --> png conversion test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-	if (!function_exists("imagepng")) {
-		die("skip png support unavailable");
-	}
-	if (!function_exists("imagecreatefromxbm")) {
-		die("skip xbm read support unavailable");
-	}
+    if (!function_exists("imagepng")) {
+        die("skip png support unavailable");
+    }
+    if (!function_exists("imagecreatefromxbm")) {
+        die("skip xbm read support unavailable");
+    }
 ?>
 --FILE--
 <?php

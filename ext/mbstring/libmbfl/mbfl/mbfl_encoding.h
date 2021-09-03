@@ -37,10 +37,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_invalid = -1,
 	mbfl_no_encoding_pass,
 	mbfl_no_encoding_wchar,
-	mbfl_no_encoding_byte2be,
-	mbfl_no_encoding_byte2le,
-	mbfl_no_encoding_byte4be,
-	mbfl_no_encoding_byte4le,
 	mbfl_no_encoding_base64,
 	mbfl_no_encoding_uuencode,
 	mbfl_no_encoding_html_ent,
@@ -72,7 +68,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_eucjp2004,
 	mbfl_no_encoding_sjis,
 	mbfl_no_encoding_eucjp_win,
-	mbfl_no_encoding_sjis_open,
  	mbfl_no_encoding_sjis_docomo,
  	mbfl_no_encoding_sjis_kddi,
  	mbfl_no_encoding_sjis_sb,
@@ -117,9 +112,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_armscii8,
 	mbfl_no_encoding_cp850,
-	mbfl_no_encoding_jis_ms,
 	mbfl_no_encoding_cp50220,
-	mbfl_no_encoding_cp50220raw,
 	mbfl_no_encoding_cp50221,
 	mbfl_no_encoding_cp50222,
 	mbfl_no_encoding_charset_max
@@ -145,20 +138,19 @@ typedef struct _mbfl_encoding {
 	enum mbfl_no_encoding no_encoding;
 	const char *name;
 	const char *mime_name;
-	const char *(*aliases)[];
+	const char **aliases;
 	const unsigned char *mblen_table;
 	unsigned int flag;
 	const struct mbfl_convert_vtbl *input_filter;
 	const struct mbfl_convert_vtbl *output_filter;
 } mbfl_encoding;
 
-MBFLAPI extern const mbfl_encoding * mbfl_name2encoding(const char *name);
-MBFLAPI extern const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
-MBFLAPI extern const mbfl_encoding ** mbfl_get_supported_encodings();
-MBFLAPI extern const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
-MBFLAPI extern const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
-MBFLAPI extern int mbfl_is_support_encoding(const char *name);
-
+MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings(void);
+MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const char *mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
+MBFLAPI extern const char *mbfl_encoding_preferred_mime_name(const mbfl_encoding *encoding);
 
 #endif /* MBFL_ENCODING_H */

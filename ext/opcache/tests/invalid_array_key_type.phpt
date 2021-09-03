@@ -1,7 +1,7 @@
 --TEST--
 Don't add array value type is key type is illegal
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

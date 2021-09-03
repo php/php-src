@@ -1,275 +1,232 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
 {
-    /** @param array|object $input */
-    public function __construct($input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
+    public function __construct(array|object $array = [], int $flags = 0, string $iteratorClass = ArrayIterator::class) {}
 
-    /**
-     * @param mixed $index
-     * @return bool
-     */
-    public function offsetExists($index) {}
+    /** @tentative-return-type */
+    public function offsetExists(mixed $key): bool {}
 
-    /**
-     * @param mixed $index
-     * @return mixed
-     */
-    public function offsetGet($index) {}
+    /** @tentative-return-type */
+    public function offsetGet(mixed $key): mixed {}
 
-    /**
-     * @param mixed $index
-     * @param mixed $value
-     * @return void
-     */
-    public function offsetSet($index, $value) {}
+    /** @tentative-return-type */
+    public function offsetSet(mixed $key, mixed $value): void {}
 
-    /**
-     * @param mixed $index
-     * @return void
-     */
-    public function offsetUnset($index) {}
+    /** @tentative-return-type */
+    public function offsetUnset(mixed $key): void {}
 
-    /**
-     * @param mixed $value
-     * @return void
-     */
-    public function append($value) {}
+    /** @tentative-return-type */
+    public function append(mixed $value): void {}
 
-    /** @return array */
-    public function getArrayCopy() {}
+    /** @tentative-return-type */
+    public function getArrayCopy(): array {}
 
-    /** @return int */
-    public function count() {}
+    /** @tentative-return-type */
+    public function count(): int {}
 
-    /** @return int */
-    public function getFlags() {}
+    /** @tentative-return-type */
+    public function getFlags(): int {}
 
-    /** @return void */
-    public function setFlags(int $flags) {}
+    /** @tentative-return-type */
+    public function setFlags(int $flags): void {}
 
-    /**
-     * @param int $sort_flags
-     * @return bool
-     */
-    public function asort($sort_flags = SORT_REGULAR) {}
+    /** @tentative-return-type */
+    public function asort(int $flags = SORT_REGULAR): bool {}
 
-    /**
-     * @param int $sort_flags
-     * @return bool
-     */
-    public function ksort($sort_flags = SORT_REGULAR) {}
+    /** @tentative-return-type */
+    public function ksort(int $flags = SORT_REGULAR): bool {}
 
-    /**
-     * @param callback $cmp_function
-     * @return bool
-     */
-    public function uasort($cmp_function) {}
+    /** @tentative-return-type */
+    public function uasort(callable $callback): bool {}
 
-    /**
-     * @param callback $cmp_function
-     * @return bool
-     */
-    public function uksort($cmp_function) {}
+    /** @tentative-return-type */
+    public function uksort(callable $callback): bool {}
 
-    /** @return bool */
-    public function natsort() {}
+    /** @tentative-return-type */
+    public function natsort(): bool {}
 
-    /** @return bool */
-    public function natcasesort() {}
+    /** @tentative-return-type */
+    public function natcasesort(): bool {}
 
-    /** @return void */
-    public function unserialize(string $serialized) {}
+    /** @tentative-return-type */
+    public function unserialize(string $data): void {}
 
-    /** @return string */
-    public function serialize() {}
+    /** @tentative-return-type */
+    public function serialize(): string {}
 
-    /** @return array */
-    public function __serialize() {}
+    /** @tentative-return-type */
+    public function __serialize(): array {}
 
-    /** @return void */
-    public function __unserialize(array $data) {}
+    /** @tentative-return-type */
+    public function __unserialize(array $data): void {}
 
-    /** @return Iterator */
-    public function getIterator() {}
+    /** @tentative-return-type */
+    public function getIterator(): Iterator {}
 
-    /**
-     * @param array|object $input
-     * @return array|null
-     */
-    public function exchangeArray($input) {}
+    /** @tentative-return-type */
+    public function exchangeArray(array|object $array): array {}
 
-    /** @return void */
-    public function setIteratorClass(string $iteratorClass) {}
+    /** @tentative-return-type */
+    public function setIteratorClass(string $iteratorClass): void {}
 
-    /** @return string */
-    public function getIteratorClass() {}
+    /** @tentative-return-type */
+    public function getIteratorClass(): string {}
 
-    /** @return array */
-    public function __debugInfo() {}
+    /** @tentative-return-type */
+    public function __debugInfo(): array {}
 }
 
 class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
 {
-    /** @param array|object $array */
-    public function __construct($array = [], int $flags = 0) {}
+    public function __construct(array|object $array = [], int $flags = 0) {}
 
     /**
-     * @param mixed $index
-     * @return bool
-     * @alias ArrayObject::offsetExists
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::offsetExists
      */
-    public function offsetExists($index) {}
+    public function offsetExists(mixed $key): bool {}
 
     /**
-     * @param mixed $index
-     * @return mixed
-     * @alias ArrayObject::offsetGet
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::offsetGet
      */
-    public function offsetGet($index) {}
+    public function offsetGet(mixed $key): mixed {}
 
     /**
-     * @param mixed $index
-     * @param mixed $value
-     * @return void
-     * @alias ArrayObject::offsetSet
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::offsetSet
      */
-    public function offsetSet($index, $value) {}
+    public function offsetSet(mixed $key, mixed $value): void {}
 
     /**
-     * @param mixed $index
-     * @return void
-     * @alias ArrayObject::offsetUnset
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::offsetUnset
      */
-    public function offsetUnset($index) {}
+    public function offsetUnset(mixed $key): void {}
 
     /**
-     * @param mixed $value
-     * @return void
-     * @alias ArrayObject::append
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::append
      */
-    public function append($value) {}
+    public function append(mixed $value): void {}
 
     /**
-     * @return array
-     * @alias ArrayObject::getArrayCopy
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::getArrayCopy
      */
-    public function getArrayCopy() {}
+    public function getArrayCopy(): array {}
 
     /**
-     * @return int
-     * @alias ArrayObject::count
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::count
      */
-    public function count() {}
+    public function count(): int {}
 
     /**
-     * @return int
-     * @alias ArrayObject::getFlags
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::getFlags
      */
-    public function getFlags() {}
+    public function getFlags(): int {}
 
     /**
-     * @return void
-     * @alias ArrayObject::setFlags
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::setFlags
      */
-    public function setFlags(int $flags) {}
+    public function setFlags(int $flags): void {}
 
     /**
-     * @param int $sort_flags
-     * @return bool
-     * @alias ArrayObject::asort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::asort
      */
-    public function asort($sort_flags = SORT_REGULAR) {}
+    public function asort(int $flags = SORT_REGULAR): bool {}
 
     /**
-     * @param int $sort_flags
-     * @return bool
-     * @alias ArrayObject::ksort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::ksort
      */
-    public function ksort($sort_flags = SORT_REGULAR) {}
+    public function ksort(int $flags = SORT_REGULAR): bool {}
 
     /**
-     * @param callback $cmp_function
-     * @return bool
-     * @alias ArrayObject::uasort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::uasort
      */
-    public function uasort($cmp_function) {}
+    public function uasort(callable $callback): bool {}
 
     /**
-     * @param callback $cmp_function
-     * @return bool
-     * @alias ArrayObject::uksort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::uksort
      */
-    public function uksort($cmp_function) {}
+    public function uksort(callable $callback): bool {}
 
     /**
-     * @return bool
-     * @alias ArrayObject::natsort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::natsort
      */
-    public function natsort() {}
+    public function natsort(): bool {}
 
     /**
-     * @return bool
-     * @alias ArrayObject::natcasesort
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::natcasesort
      */
-    public function natcasesort() {}
+    public function natcasesort(): bool {}
 
     /**
-     * @return void
-     * @alias ArrayObject::unserialize
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::unserialize
      */
-    public function unserialize(string $serialized) {}
+    public function unserialize(string $data): void {}
 
     /**
-     * @return string
-     * @alias ArrayObject::serialize
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::serialize
      */
-    public function serialize() {}
+    public function serialize(): string {}
 
     /**
-     * @return array
-     * @alias ArrayObject::__serialize
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::__serialize
      */
-    public function __serialize() {}
+    public function __serialize(): array {}
 
     /**
-     * @return void
-     * @alias ArrayObject::__unserialize
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::__unserialize
      */
-    public function __unserialize(array $data) {}
+    public function __unserialize(array $data): void {}
 
-    /** @return void */
-    public function rewind() {}
+    /** @tentative-return-type */
+    public function rewind(): void {}
 
-    /** @return mixed */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): mixed {}
 
-    /** @return mixed */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): string|int|null {}
 
-    /** @return void */
-    public function next() {}
+    /** @tentative-return-type */
+    public function next(): void {}
 
-    /** @return bool */
-    public function valid() {}
+    /** @tentative-return-type */
+    public function valid(): bool {}
 
-    /** @return void */
-    public function seek(int $position) {}
+    /** @tentative-return-type */
+    public function seek(int $offset): void {}
 
     /**
-     * @return array
-     * @alias ArrayObject::__debugInfo
+     * @tentative-return-type
+     * @implementation-alias ArrayObject::__debugInfo
      */
-    public function __debugInfo() {}
+    public function __debugInfo(): array {}
 }
 
 class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator
 {
-    /** @return bool */
-    public function hasChildren() {}
+    /** @tentative-return-type */
+    public function hasChildren(): bool {}
 
-    /** @return RecursiveArrayIterator|null */
-    public function getChildren() {}
+    /** @tentative-return-type */
+    public function getChildren(): ?RecursiveArrayIterator {}
 }

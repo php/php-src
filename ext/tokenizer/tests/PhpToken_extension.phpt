@@ -1,7 +1,7 @@
 --TEST--
 Extending the PhpToken class
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ class MyPhpToken extends PhpToken {
     }
 }
 
-foreach (MyPhpToken::getAll($code) as $token) {
+foreach (MyPhpToken::tokenize($code) as $token) {
     echo $token->getLoweredText();
 
     if ($token->extra !== 123) {

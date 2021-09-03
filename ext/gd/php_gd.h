@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -17,6 +17,9 @@
 
 #ifndef PHP_GD_H
 #define PHP_GD_H
+
+#include "zend_string.h"
+#include "php_streams.h"
 
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
@@ -39,6 +42,7 @@
 #define PHP_GDIMG_TYPE_WEBP     11
 #define PHP_GDIMG_TYPE_BMP      12
 #define PHP_GDIMG_TYPE_TGA      13
+#define PHP_GDIMG_TYPE_AVIF     14
 
 #define PHP_IMG_GIF    1
 #define PHP_IMG_JPG    2
@@ -49,6 +53,7 @@
 #define PHP_IMG_WEBP  32
 #define PHP_IMG_BMP   64
 #define PHP_IMG_TGA  128
+#define PHP_IMG_AVIF 256
 
 #ifdef PHP_WIN32
 #	ifdef PHP_GD_EXPORTS
@@ -68,6 +73,7 @@ PHPAPI extern const char php_sig_png[8];
 PHPAPI extern const char php_sig_bmp[2];
 PHPAPI extern const char php_sig_riff[4];
 PHPAPI extern const char php_sig_webp[4];
+PHPAPI extern const char php_sig_avif[4];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

@@ -6,7 +6,7 @@ Bug #62609: Allow implementing Traversable on abstract classes (work)
 abstract class AbstractTraversable implements Traversable {}
 
 class NonAbstractTraversable extends AbstractTraversable implements IteratorAggregate {
-    public function getIterator() {
+    public function getIterator(): Traversable {
         yield "foo";
         yield "bar";
     }

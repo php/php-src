@@ -6,7 +6,7 @@ Also test that the custom exception is not wrapped by ext/json
 
 class JsonSerializableObject implements \JsonSerializable
 {
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         throw new \Exception('This error is expected');
     }
@@ -18,5 +18,6 @@ try {
 } catch (\Exception $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 This error is expected

@@ -20,8 +20,12 @@ $longVals = array(
 
 
 foreach ($longVals as $longVal) {
-   echo "--- testing: $longVal ---\n";
-   var_dump(dechex($longVal));
+    echo "--- testing: $longVal ---\n";
+    try {
+        var_dump(dechex($longVal));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 }
 
 ?>
@@ -51,7 +55,7 @@ string(8) "fffffffd"
 --- testing: 9223372036854775806 ---
 string(16) "7ffffffffffffffe"
 --- testing: 9.2233720368548E+18 ---
-string(16) "8000000000000000"
+dechex(): Argument #1 ($num) must be of type int, float given
 --- testing: -9223372036854775807 ---
 string(16) "8000000000000001"
 --- testing: -9.2233720368548E+18 ---

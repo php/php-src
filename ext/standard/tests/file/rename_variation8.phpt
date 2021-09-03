@@ -41,7 +41,6 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__."/rename_basic_new2.tmp");
 rmdir(__DIR__."/rename_basic_dir1");
 ?>
 --EXPECTF--

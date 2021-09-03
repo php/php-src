@@ -28,10 +28,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_base64.h"
 
@@ -41,7 +37,7 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	"BASE64",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_ENC_STRM | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
 	NULL
 };
@@ -50,7 +46,7 @@ const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
 	mbfl_no_encoding_8bit,
 	mbfl_no_encoding_base64,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_base64enc,
 	mbfl_filt_conv_base64enc_flush,
 	NULL,
@@ -60,7 +56,7 @@ const struct mbfl_convert_vtbl vtbl_b64_8bit = {
 	mbfl_no_encoding_base64,
 	mbfl_no_encoding_8bit,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_base64dec,
 	mbfl_filt_conv_base64dec_flush,
 	NULL,
@@ -114,7 +110,7 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 		CK((*filter->output_function)(mbfl_base64_table[n & 0x3f], filter->data));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
@@ -155,7 +151,7 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 	int n;
 
 	if (c == 0x0d || c == 0x0a || c == 0x20 || c == 0x09 || c == 0x3d) {	/* CR or LF or SPACE or HTAB or '=' */
-		return c;
+		return 0;
 	}
 
 	n = 0;
@@ -194,7 +190,7 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)

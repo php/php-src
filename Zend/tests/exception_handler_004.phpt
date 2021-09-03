@@ -16,5 +16,5 @@ try {
 
 ?>
 --EXPECT--
-set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback or null, function "fo" not found or invalid function name
-set_exception_handler(): Argument #1 ($exception_handler) must be a valid callback or null, class "" not found
+set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, function "fo" not found or invalid function name
+set_exception_handler(): Argument #1 ($callback) must be a valid callback or null, class "" not found

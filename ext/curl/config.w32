@@ -28,7 +28,8 @@ if (PHP_CURL != "no") {
 		) {
 		EXTENSION("curl", "interface.c multi.c share.c curl_file.c");
 		AC_DEFINE('HAVE_CURL', 1, 'Have cURL library');
-		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB");
+		ADD_FLAG("CFLAGS_CURL", "/D CURL_STATICLIB /D PHP_CURL_EXPORTS=1");
+		PHP_INSTALL_HEADERS("ext/curl", "php_curl.h");
 		// TODO: check for curl_version_info
 	} else {
 		WARNING("curl not enabled; libraries and headers not found");

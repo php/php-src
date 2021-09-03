@@ -15,11 +15,15 @@ CDATA
 );
 $s = new SplFileObject('csv_control_data_error003.csv');
 $s->setFlags(SplFileObject::READ_CSV);
-$s->setCsvControl('|', '\'', 'three');
+try {
+    $s->setCsvControl('|', '\'', 'three');
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
 unlink('csv_control_data_error003.csv');
 ?>
---EXPECTF--
-Warning: SplFileObject::setCsvControl(): escape must be empty or a single character in %s on line %d
+--EXPECT--
+SplFileObject::setCsvControl(): Argument #3 ($escape) must be empty or a single character

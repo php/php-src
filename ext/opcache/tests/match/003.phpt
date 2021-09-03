@@ -4,8 +4,8 @@ Match expression long jump table
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
---SKIPIF--
-<?php require_once(__DIR__ . '/../skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -25,6 +25,7 @@ foreach (range(0, 10) as $char) {
     var_dump(test($char));
 }
 
+?>
 --EXPECTF--
 $_main:
      ; (lines=15, args=0, vars=1, tmps=2)

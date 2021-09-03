@@ -1,9 +1,7 @@
 --TEST--
 openssl_csr_get_public_key() tests
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
@@ -40,5 +38,7 @@ var_dump(openssl_csr_get_public_key($csr));
 var_dump(openssl_csr_get_public_key($csr_file));
 ?>
 --EXPECTF--
-resource(%d) of type (OpenSSL key)
-resource(%d) of type (OpenSSL key)
+object(OpenSSLAsymmetricKey)#%d (0) {
+}
+object(OpenSSLAsymmetricKey)#%d (0) {
+}

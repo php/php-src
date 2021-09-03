@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -39,6 +39,8 @@
 #ifndef OCI_STMT_CALL
 #define OCI_STMT_CALL 10
 #endif
+
+#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
 
 /* {{{ Register a callback function for Oracle Transparent Application Failover (TAF) */
 PHP_FUNCTION(oci_register_taf_callback)
@@ -109,8 +111,8 @@ PHP_FUNCTION(oci_define_by_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!name_len) {
-		php_error_docref(NULL, E_WARNING, "Column name cannot be empty");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
 	}
 
 	PHP_OCI_ZVAL_TO_STATEMENT(stmt, statement);
@@ -210,8 +212,8 @@ PHP_FUNCTION(oci_bind_array_by_name)
 	}
 
 	if (max_array_len <= 0) {
-		php_error_docref(NULL, E_WARNING, "Maximum array length must be greater than zero");
-		RETURN_FALSE;
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	if (php_oci_bind_array_by_name(statement, name, (sb4) name_len, bind_var, max_array_len, max_item_len, type)) {
@@ -257,17 +259,17 @@ PHP_FUNCTION(oci_lob_save)
 		RETURN_THROWS();
 	}
 
+	if (offset < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
-
-	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset parameter must be greater than or equal to 0");
-		RETURN_FALSE;
-	}
 
 	if (php_oci_lob_write(descriptor, (ub4) offset, data, (ub4) data_len, &bytes_written)) {
 		RETURN_FALSE;
@@ -349,17 +351,17 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_THROWS();
 	}
 
+	if (length <= 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than 0");
+		RETURN_THROWS();
+	}
+
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
-
-	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
-	}
 
 	if (php_oci_lob_read(descriptor, length, descriptor->lob_current_position, &buffer, &buffer_len)) {
 		RETURN_FALSE;
@@ -525,19 +527,16 @@ PHP_FUNCTION(oci_lob_write)
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
 	size_t data_len;
-	zend_long write_len = 0;
+	zend_long write_len;
+	bool write_len_is_null = 1;
 	ub4 bytes_written;
 	char *data;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &write_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|l!", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &write_len, &write_len_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (getThis() && ZEND_NUM_ARGS() == 2) {
-		data_len = MIN((zend_long) data_len, write_len);
-	}
-
-	if (!getThis() && ZEND_NUM_ARGS() == 3) {
+	if (!write_len_is_null) {
 		data_len = MIN((zend_long) data_len, write_len);
 	}
 
@@ -602,13 +601,13 @@ PHP_FUNCTION(oci_lob_truncate)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
+	if (trim_length < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
-	if (trim_length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
 
@@ -628,30 +627,25 @@ PHP_FUNCTION(oci_lob_erase)
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
 	ub4 bytes_erased;
-	zend_long offset = -1, length = -1;
+	zend_long offset, length;
+	bool offset_is_null = 1, length_is_null = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &z_descriptor, oci_lob_class_entry_ptr, &offset, &length) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &offset, &offset_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (getThis() && ZEND_NUM_ARGS() > 0 && offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset must be greater than or equal to 0");
-		RETURN_FALSE;
+	if (offset_is_null) {
+		offset = -1;
+	} else if (offset < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
-	if (getThis() && ZEND_NUM_ARGS() > 1 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0");
-		RETURN_FALSE;
-	}
-
-	if (!getThis() && ZEND_NUM_ARGS() > 1 && offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset must be greater than or equal to 0");
-		RETURN_FALSE;
-	}
-
-	if (!getThis() && ZEND_NUM_ARGS() > 2 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0");
-		RETURN_FALSE;
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
@@ -703,7 +697,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
-	zend_bool flag;
+	bool flag;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &z_descriptor, oci_lob_class_entry_ptr, &flag) == FAILURE) {
 		RETURN_THROWS();
@@ -752,9 +746,17 @@ PHP_FUNCTION(oci_lob_copy)
 {
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest, *z_descriptor_from;
 	php_oci_descriptor *descriptor_dest, *descriptor_from;
-	zend_long length = 0;
+	zend_long length;
+	bool length_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|l", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|l!", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length, &length_is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
+		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -770,16 +772,6 @@ PHP_FUNCTION(oci_lob_copy)
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_dest, descriptor_dest);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
-
-	if (ZEND_NUM_ARGS() == 3 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
-	}
-
-	if (ZEND_NUM_ARGS() == 2) {
-		/* indicate that we want to copy from the current position to the end of the LOB */
-		length = -1;
-	}
 
 	if (php_oci_lob_copy(descriptor_dest, descriptor_from, length)) {
 		RETURN_FALSE;
@@ -831,32 +823,27 @@ PHP_FUNCTION(oci_lob_export)
 	char *filename;
 	char *buffer;
 	size_t filename_len;
-	zend_long start = -1, length = -1, block_length;
+	zend_long start, length, block_length;
+	bool start_is_null = 1, length_is_null = 1;
 	php_stream *stream;
 	ub4 lob_length;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Op|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &start_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (getThis() && ZEND_NUM_ARGS() > 1 && start < 0) {
-		php_error_docref(NULL, E_WARNING, "Start parameter must be greater than or equal to 0");
-		RETURN_FALSE;
+	if (start_is_null) {
+		start = -1;
+	} else if (start < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
-	if (getThis() && ZEND_NUM_ARGS() > 2 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
-		RETURN_FALSE;
-	}
-
-	if (!getThis() && ZEND_NUM_ARGS() > 2 && start < 0) {
-		php_error_docref(NULL, E_WARNING, "Start parameter must be greater than or equal to 0");
-		RETURN_FALSE;
-	}
-
-	if (!getThis() && ZEND_NUM_ARGS() > 3 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
-		RETURN_FALSE;
+	if (length_is_null) {
+		length = -1;
+	} else if (length < 0) {
+		zend_argument_value_error(ERROR_ARG_POS(4), "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
@@ -929,7 +916,7 @@ PHP_FUNCTION(oci_lob_export)
 /* }}} */
 
 /* {{{ Writes temporary blob */
-PHP_FUNCTION(oci_lob_write_temporary)
+PHP_METHOD(OCILob, writeTemporary)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
@@ -956,7 +943,7 @@ PHP_FUNCTION(oci_lob_write_temporary)
 /* }}} */
 
 /* {{{ Closes lob descriptor */
-PHP_FUNCTION(oci_lob_close)
+PHP_METHOD(OCILob, close)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
@@ -1287,7 +1274,7 @@ PHP_FUNCTION(oci_fetch_all)
 	zval **outarrs;
 	ub4 nrows = 1;
 	int i;
-	zend_long rows = 0, flags = 0, skip = 0, maxrows = -1;
+	zend_long rows = 0, flags = PHP_OCI_FETCHSTATEMENT_BY_COLUMN | PHP_OCI_ASSOC, skip = 0, maxrows = -1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_RESOURCE(z_statement)
@@ -1521,10 +1508,10 @@ PHP_FUNCTION(oci_error)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(arg)
+		Z_PARAM_RESOURCE_OR_NULL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() > 0) {
+	if (arg) {
 		statement = (php_oci_statement *) zend_fetch_resource_ex(arg, NULL, le_statement);
 		if (statement) {
 			errh = statement->err;
@@ -1635,8 +1622,8 @@ PHP_FUNCTION(oci_set_prefetch)
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	if (size < 0) {
-		php_error_docref(NULL, E_WARNING, "Number of rows to be prefetched has to be greater than or equal to 0");
-		return;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	if (php_oci_statement_set_prefetch(statement, (ub4)size)) {
@@ -1904,16 +1891,16 @@ PHP_FUNCTION(oci_password_change)
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
 		if (!user_len) {
-			php_error_docref(NULL, E_WARNING, "Username cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(2, "cannot be empty");
+			RETURN_THROWS();
 		}
 		if (!pass_old_len) {
-			php_error_docref(NULL, E_WARNING, "Old password cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "cannot be empty");
+			RETURN_THROWS();
 		}
 		if (!pass_new_len) {
-			php_error_docref(NULL, E_WARNING, "New password cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(4, "cannot be empty");
+			RETURN_THROWS();
 		}
 
 		if (php_oci_password_change(connection, user, (int) user_len, pass_old, (int) pass_old_len, pass_new, (int) pass_new_len)) {
@@ -1923,16 +1910,16 @@ PHP_FUNCTION(oci_password_change)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ssss", &dbname, &dbname_len, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 
 		if (!user_len) {
-			php_error_docref(NULL, E_WARNING, "Username cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(2, "cannot be empty");
+			RETURN_THROWS();
 		}
 		if (!pass_old_len) {
-			php_error_docref(NULL, E_WARNING, "Old password cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(3, "cannot be empty");
+			RETURN_THROWS();
 		}
 		if (!pass_new_len) {
-			php_error_docref(NULL, E_WARNING, "New password cannot be empty");
-			RETURN_FALSE;
+			zend_argument_value_error(4, "cannot be empty");
+			RETURN_THROWS();
 		}
 
 		connection = php_oci_do_connect_ex(user, (int) user_len, pass_old, (int) pass_old_len, pass_new, (int) pass_new_len, dbname, (int) dbname_len, NULL, OCI_DEFAULT, 0, 0);
@@ -2303,7 +2290,7 @@ PHP_FUNCTION(oci_new_collection)
 	char *tdo, *schema = NULL;
 	size_t tdo_len, schema_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|s", &z_connection, &tdo, &tdo_len, &schema, &schema_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|s!", &z_connection, &tdo, &tdo_len, &schema, &schema_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

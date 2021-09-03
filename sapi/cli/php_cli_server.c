@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -215,7 +215,7 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 
 static int php_cli_server_log_level = 3;
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
@@ -275,7 +275,7 @@ static void char_ptr_dtor_p(zval *zv) /* {{{ */
 	pefree(Z_PTR_P(zv), 1);
 } /* }}} */
 
-static char *get_last_error() /* {{{ */
+static char *get_last_error(void) /* {{{ */
 {
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
@@ -498,58 +498,7 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
-	char *workers;
-
-	if (php_module_startup(sapi_module, &cli_server_module_entry, 1) == FAILURE) {
-		return FAILURE;
-	}
-
-	if ((workers = getenv("PHP_CLI_SERVER_WORKERS"))) {
-#ifndef SO_REUSEPORT
-		fprintf(stderr, "platform does not support SO_REUSEPORT, cannot create workers\n");
-#elif HAVE_FORK
-		ZEND_ATOL(php_cli_server_workers_max, workers);
-
-		if (php_cli_server_workers_max > 1) {
-			zend_long php_cli_server_worker;
-
-			php_cli_server_workers = calloc(
-				php_cli_server_workers_max, sizeof(pid_t));
-			if (!php_cli_server_workers) {
-				php_cli_server_workers_max = 1;
-
-				return SUCCESS;
-			}
-
-			php_cli_server_master = getpid();
-
-			for (php_cli_server_worker = 0;
-				 php_cli_server_worker < php_cli_server_workers_max;
-				 php_cli_server_worker++) {
-				pid_t pid = fork();
-
-				if (pid == FAILURE) {
-					/* no more forks allowed, work with what we have ... */
-					php_cli_server_workers_max =
-						php_cli_server_worker + 1;
-					return SUCCESS;
-				} else if (pid == SUCCESS) {
-					return SUCCESS;
-				} else {
-					php_cli_server_workers[
-						php_cli_server_worker
-					] = pid;
-				}
-			}
-		} else {
-			fprintf(stderr, "number of workers must be larger than 1\n");
-		}
-#else
-		fprintf(stderr, "forking is not supported on this platform\n");
-#endif
-	}
-
-	return SUCCESS;
+	return php_module_startup(sapi_module, &cli_server_module_entry, 1);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
@@ -1153,10 +1102,18 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 } /* }}} */
 
 #if HAVE_UNISTD_H
-static int php_cli_is_output_tty() /* {{{ */
+static int php_cli_is_output_tty(void) /* {{{ */
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
 		php_cli_output_is_tty = isatty(STDOUT_FILENO);
+	}
+	return php_cli_output_is_tty;
+} /* }}} */
+#elif defined(PHP_WIN32)
+static int php_cli_is_output_tty() /* {{{ */
+{
+	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
+		php_cli_output_is_tty = php_win32_console_fileno_is_console(STDOUT_FILENO) && php_win32_console_fileno_has_vt100(STDOUT_FILENO);
 	}
 	return php_cli_output_is_tty;
 } /* }}} */
@@ -1166,26 +1123,20 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 {
 	int color = 0, effective_status = status;
 	char *basic_buf, *message_buf = "", *error_buf = "";
-	zend_bool append_error_message = 0;
+	bool append_error_message = 0;
 
 	if (PG(last_error_message)) {
-		switch (PG(last_error_type)) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-			case E_PARSE:
-				if (status == 200) {
-					/* the status code isn't changed by a fatal error, so fake it */
-					effective_status = 500;
-				}
+		if (PG(last_error_type) & E_FATAL_ERRORS) {
+			if (status == 200) {
+				/* the status code isn't changed by a fatal error, so fake it */
+				effective_status = 500;
+			}
 
-				append_error_message = 1;
-				break;
+			append_error_message = 1;
 		}
 	}
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H || defined(PHP_WIN32)
 	if (CLI_SERVER_G(color) && php_cli_is_output_tty() == OUTPUT_IS_TTY) {
 		if (effective_status >= 500) {
 			/* server error: red */
@@ -1218,7 +1169,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 	/* error */
 	if (append_error_message) {
 		spprintf(&error_buf, 0, " - %s in %s on line %d",
-			ZSTR_VAL(PG(last_error_message)), PG(last_error_file), PG(last_error_lineno));
+			ZSTR_VAL(PG(last_error_message)), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);
 			if (message) {
@@ -1312,13 +1263,6 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 		{
 			int val = 1;
 			setsockopt(retval, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
-		}
-#endif
-
-#if defined(HAVE_FORK) && defined(SO_REUSEPORT)
-		if (php_cli_server_workers_max > 1) {
-			int val = 1;
-			setsockopt(retval, SOL_SOCKET, SO_REUSEPORT, (char*)&val, sizeof(val));
 		}
 #endif
 
@@ -1625,6 +1569,9 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 	{
 		char *vpath;
 		size_t vpath_len;
+		if (UNEXPECTED(client->request.vpath != NULL)) {
+			return 1;
+		}
 		normalize_vpath(&vpath, &vpath_len, at, length, 1);
 		client->request.vpath = vpath;
 		client->request.vpath_len = vpath_len;
@@ -1635,17 +1582,34 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 static int php_cli_server_client_read_request_on_query_string(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.query_string = pestrndup(at, length, 1);
-	client->request.query_string_len = length;
+	if (EXPECTED(client->request.query_string == NULL)) {
+		client->request.query_string = pestrndup(at, length, 1);
+		client->request.query_string_len = length;
+	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.query_string = perealloc(client->request.query_string, client->request.query_string_len + length + 1, 1);
+		memcpy(client->request.query_string + client->request.query_string_len, at, length);
+		client->request.query_string_len += length;
+		client->request.query_string[client->request.query_string_len] = '\0';
+	}
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_url(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.request_method = parser->method;
-	client->request.request_uri = pestrndup(at, length, 1);
-	client->request.request_uri_len = length;
+	if (EXPECTED(client->request.request_uri == NULL)) {
+		client->request.request_method = parser->method;
+		client->request.request_uri = pestrndup(at, length, 1);
+		client->request.request_uri_len = length;
+	} else {
+		ZEND_ASSERT(client->request.request_method == parser->method);
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
+		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
+		client->request.request_uri_len += length;
+		client->request.request_uri[client->request.request_uri_len] = '\0';
+	}
 	return 0;
 }
 
@@ -1683,7 +1647,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 	switch (client->last_header_element) {
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_NONE:
 		client->current_header_name = (char *)at;
 		client->current_header_name_len = length;
@@ -1748,7 +1712,7 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		client->current_header_value = pemalloc(1, 1);
 		*client->current_header_value = '\0';
 		client->current_header_value_len = 0;
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
 		break;
@@ -1877,12 +1841,8 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 				int nfds = php_pollfd_for(client->sock, POLLOUT, &tv);
 				if (nfds > 0) {
 					continue;
-				} else if (nfds < 0) {
-					/* error */
-					php_handle_aborted_connection();
-					return nbytes_left;
 				} else {
-					/* timeout */
+					/* error or timeout */
 					php_handle_aborted_connection();
 					return nbytes_left;
 				}
@@ -2075,9 +2035,11 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	{
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
+		zfd.primary_script = 1;
 		zend_try {
 			php_execute_script(&zfd);
 		} zend_end_try();
+		zend_destroy_file_handle(&zfd);
 	}
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
@@ -2164,8 +2126,6 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup()) {
-		/* should never be happen */
-		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
 	PG(during_request_startup) = 0;
@@ -2196,6 +2156,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 	zend_stream_init_filename(&zfd, server->router);
+	zfd.primary_script = 1;
 
 	zend_try {
 		zval retval;
@@ -2208,6 +2169,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			}
 		}
 	} zend_end_try();
+
+	zend_destroy_file_handle(&zfd);
 
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));
@@ -2233,9 +2196,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 
 	if (server->router || !is_static_file) {
 		if (FAILURE == php_cli_server_request_startup(server, client)) {
-			SG(server_context) = NULL;
-			php_cli_server_close_connection(server, client);
-			destroy_request_info(&SG(request_info));
+			php_cli_server_request_shutdown(server, client);
 			return SUCCESS;
 		}
 	}
@@ -2351,6 +2312,109 @@ static void php_cli_server_client_dtor_wrapper(zval *zv) /* {{{ */
 	pefree(p, 1);
 } /* }}} */
 
+/**
+ * Parse the host and port portions of an address specifier in
+ * one of the following forms:
+ * - hostOrIP:port
+ * - [hostOrIP]:port
+ */
+static char *php_cli_server_parse_addr(const char *addr, int *pport) {
+	const char *p, *end;
+	long port;
+
+	if (addr[0] == '[') {
+		/* Encapsulated [hostOrIP]:port */
+		const char *start = addr + 1;
+		end = strchr(start, ']');
+		if (!end) {
+			/* No ending ] delimiter to match [ */
+			return NULL;
+		}
+
+		p = end + 1;
+		if (*p != ':') {
+			/* Invalid char following address/missing port */
+			return NULL;
+		}
+
+		port = strtol(p + 1, (char**)&p, 10);
+		if (p && *p) {
+			/* Non-numeric in port */
+			return NULL;
+		}
+		if (port < 0 || port > 65535) {
+			/* Invalid port */
+			return NULL;
+		}
+
+		/* Full [hostOrIP]:port provided */
+		*pport = (int)port;
+		return pestrndup(start, end - start, 1);
+	}
+
+	end = strchr(addr, ':');
+	if (!end) {
+		/* Missing port */
+		return NULL;
+	}
+
+	port = strtol(end + 1, (char**)&p, 10);
+	if (p && *p) {
+		/* Non-numeric port */
+		return NULL;
+	}
+	if (port < 0 || port > 65535) {
+		/* Invalid port */
+		return NULL;
+	}
+	*pport = (int)port;
+	return pestrndup(addr, end - addr, 1);
+}
+
+static void php_cli_server_startup_workers() {
+	char *workers = getenv("PHP_CLI_SERVER_WORKERS");
+	if (!workers) {
+		return;
+	}
+
+#if HAVE_FORK
+	php_cli_server_workers_max = ZEND_ATOL(workers);
+	if (php_cli_server_workers_max > 1) {
+		zend_long php_cli_server_worker;
+
+		php_cli_server_workers = calloc(
+			php_cli_server_workers_max, sizeof(pid_t));
+		if (!php_cli_server_workers) {
+			php_cli_server_workers_max = 1;
+			return;
+		}
+
+		php_cli_server_master = getpid();
+
+		for (php_cli_server_worker = 0;
+			 php_cli_server_worker < php_cli_server_workers_max;
+			 php_cli_server_worker++) {
+			pid_t pid = fork();
+
+			if (pid == FAILURE) {
+				/* no more forks allowed, work with what we have ... */
+				php_cli_server_workers_max =
+					php_cli_server_worker + 1;
+				return;
+			} else if (pid == SUCCESS) {
+				return;
+			} else {
+				php_cli_server_workers[php_cli_server_worker] = pid;
+			}
+		}
+	} else {
+		fprintf(stderr, "number of workers must be larger than 1\n");
+	}
+#else
+	fprintf(stderr, "forking is not supported on this platform\n");
+#endif
+}
+
 static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
 {
 	int retval = SUCCESS;
@@ -2361,40 +2425,9 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 	int err = 0;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
-	char *p = NULL;
 
-	if (addr[0] == '[') {
-		host = pestrdup(addr + 1, 1);
-		if (!host) {
-			return FAILURE;
-		}
-		p = strchr(host, ']');
-		if (p) {
-			*p++ = '\0';
-			if (*p == ':') {
-				port = strtol(p + 1, &p, 10);
-				if (port <= 0 || port > 65535) {
-					p = NULL;
-				}
-			} else if (*p != '\0') {
-				p = NULL;
-			}
-		}
-	} else {
-		host = pestrdup(addr, 1);
-		if (!host) {
-			return FAILURE;
-		}
-		p = strchr(host, ':');
-		if (p) {
-			*p++ = '\0';
-			port = strtol(p, &p, 10);
-			if (port <= 0 || port > 65535) {
-				p = NULL;
-			}
-		}
-	}
-	if (!p) {
+	host = php_cli_server_parse_addr(addr, &port);
+	if (!host) {
 		fprintf(stderr, "Invalid address: %s\n", addr);
 		retval = FAILURE;
 		goto out;
@@ -2410,6 +2443,8 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		goto out;
 	}
 	server->server_sock = server_sock;
+
+	php_cli_server_startup_workers();
 
 	err = php_cli_server_poller_ctor(&server->poller);
 	if (SUCCESS != err) {
@@ -2718,10 +2753,12 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
+		bool ipv6 = strchr(server.host, ':');
 		php_cli_server_logf(
 			PHP_CLI_SERVER_LOG_PROCESS,
-			"PHP %s Development Server (http://%s) started",
-			PHP_VERSION, server_bind_address);
+			"PHP %s Development Server (http://%s%s%s:%d) started",
+			PHP_VERSION, ipv6 ? "[" : "", server.host,
+			ipv6 ? "]" : "", server.port);
 	}
 
 #if defined(SIGINT)

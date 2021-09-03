@@ -1,8 +1,9 @@
 --TEST--
 Test External Authentication errors with oci_connect
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (substr(PHP_OS, 0, 3) == 'WIN') die("skip feature not available on Windows platforms");
 require(__DIR__.'/details.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
@@ -11,6 +12,8 @@ if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 oci8.privileged_connect=1
 --FILE--
 <?php
+
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 // Run Test
 

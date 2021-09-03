@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -125,13 +125,13 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql, 0);
+	result = mysql->m->use_result(mysql);
 
 	for (;;) {
 		zval *entry;
-		int errno;
+		int mysqli_errno;
 
-		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQLI);
+		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row);
 		if (Z_TYPE(row) != IS_ARRAY) {
 			zval_ptr_dtor(&row);
 			break;
@@ -142,13 +142,13 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
-		errno = zval_get_long(entry);
+		mysqli_errno = zval_get_long(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
-		w = php_new_warning(entry, errno);
+		w = php_new_warning(entry, mysqli_errno);
 		/*
 		  Don't destroy entry, because the row destroy will decrease
 		  the refcounter. Decreased twice then mysqlnd_free_result()
@@ -195,13 +195,13 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
 		}
 
 		return FAILURE;
@@ -215,13 +215,13 @@ static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool qu
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
 		}
 
 		return FAILURE;
@@ -235,13 +235,13 @@ static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool q
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quiet)
+static int mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
 		if (!quiet) {
-			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+			zend_throw_error(NULL, "%s object is already closed", ZSTR_VAL(obj->zo.ce->name));
 		}
 
 		return FAILURE;
@@ -254,67 +254,12 @@ static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quie
 }
 /* }}} */
 
-/* {{{ mysqli_warning_construct(object obj) */
 PHP_METHOD(mysqli_warning, __construct)
 {
-	zval			*z;
-	mysqli_object	*obj;
-#ifndef MYSQLI_USE_MYSQLND
-	MYSQL			*hdl;
-#endif
-	MYSQLI_WARNING  *w;
-	MYSQLI_RESOURCE *mysqli_resource;
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
-		RETURN_THROWS();
-	}
-	obj = Z_MYSQLI_P(z);
-
-	if (obj->zo.ce == mysqli_link_class_entry) {
-		MY_MYSQL *mysql;
-		MYSQLI_FETCH_RESOURCE_CONN(mysql, z, MYSQLI_STATUS_VALID);
-		if (mysql_warning_count(mysql->mysql)) {
-#ifndef MYSQLI_USE_MYSQLND
-			w = php_get_warnings(mysql->mysql);
-#else
-			w = php_get_warnings(mysql->mysql->data);
-#endif
-		} else {
-			php_error_docref(NULL, E_WARNING, "No warnings found");
-			RETURN_FALSE;
-		}
-	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
-		MY_STMT *stmt;
-		MYSQLI_FETCH_RESOURCE_STMT(stmt, z, MYSQLI_STATUS_VALID);
-#ifndef MYSQLI_USE_MYSQLND
-		hdl = mysqli_stmt_get_connection(stmt->stmt);
-		if (mysql_warning_count(hdl)) {
-			w = php_get_warnings(hdl);
-#else
-		if (mysqlnd_stmt_warning_count(stmt->stmt)) {
-			w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt));
-#endif
-		} else {
-			php_error_docref(NULL, E_WARNING, "No warnings found");
-			RETURN_FALSE;
-		}
-	} else {
-		php_error_docref(NULL, E_WARNING, "Invalid class argument");
-		RETURN_FALSE;
-	}
-
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
-	mysqli_resource->status = MYSQLI_STATUS_VALID;
-
-	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry)) {
-		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
-	} else {
-		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;
-	}
-
+	zend_throw_error(NULL, "Cannot directly construct mysqli_warning");
 }
-/* }}} */
 
 /* {{{ mysqli_warning_property_entries */
 const mysqli_property_entry mysqli_warning_property_entries[] = {

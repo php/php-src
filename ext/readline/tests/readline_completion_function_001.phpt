@@ -1,7 +1,7 @@
 --TEST--
 readline_completion_function(): Basic test
---SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); ?>
+--EXTENSIONS--
+readline
 --FILE--
 <?php
 
@@ -26,5 +26,5 @@ foreach ($data as $callback) {
 --EXPECT--
 bool(true)
 bool(true)
-readline_completion_function(): Argument #1 ($funcname) must be a valid callback, no array or string given
-readline_completion_function(): Argument #1 ($funcname) must be a valid callback, no array or string given
+readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given
+readline_completion_function(): Argument #1 ($callback) must be a valid callback, no array or string given

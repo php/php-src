@@ -1,7 +1,7 @@
 --TEST--
 Bug #27742 (WDSL SOAP Parsing Schema bug)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --GET--
 wsdl
 --INI--

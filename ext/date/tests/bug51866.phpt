@@ -22,6 +22,7 @@ foreach( $tests as $test )
 
     echo "\n\n";
 }
+?>
 --EXPECTF--
 string(5) "Y-m-d"
 string(19) "2001-11-29 13:20:01"

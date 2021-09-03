@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, file data
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $filename = __DIR__ . '/_002.xml';
@@ -10,7 +10,11 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 file_put_contents($filename, $xmlstring);
 
 $reader = new XMLReader();
-if ($reader->open('')) exit();
+try {
+    $reader->open('');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $reader = new XMLReader();
 if (!$reader->open($filename)) {
@@ -31,7 +35,7 @@ $reader->close();
 unlink($filename);
 
 ?>
---EXPECTF--
-Warning: XMLReader::open(): Empty string supplied as input in %s on line %d
+--EXPECT--
+XMLReader::open(): Argument #1 ($uri) cannot be empty
 books
 books

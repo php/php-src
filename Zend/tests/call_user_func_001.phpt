@@ -37,5 +37,5 @@ namespace testing {
 ?>
 --EXPECT--
 string(6) "foobar"
-call_user_func(): Argument #1 ($function) must be a valid callback, cannot access private method testing\foo::priv()
-call_user_func(): Argument #1 ($function) must be a valid callback, cannot access protected method testing\foo::prot()
+call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access private method testing\foo::priv()
+call_user_func(): Argument #1 ($callback) must be a valid callback, cannot access protected method testing\foo::prot()

@@ -11,8 +11,9 @@ if test "$PHP_SODIUM" != "no"; then
 
   AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
 
-  dnl Add -Wno-type-limits as this may arise on 32bits platforms
+  dnl Add -Wno-type-limits and -Wno-logical-op as this may arise on 32bits platforms
   SODIUM_COMPILER_FLAGS="$LIBSODIUM_CFLAGS -Wno-type-limits"
+  AX_CHECK_COMPILE_FLAG([-Wno-logical-op], SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op", , [-Werror])
   PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared, , $SODIUM_COMPILER_FLAGS)
   PHP_SUBST(SODIUM_SHARED_LIBADD)
 fi

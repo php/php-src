@@ -26,12 +26,13 @@ class test3 {
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test1), 40, 0);
 var_dump($out, $my_var);
-$my_var = str_repeat('A', 40);
+$my_var = '0' . str_repeat('A', 39);
 $out = substr_replace(array(&$my_var), array(new test2), 40, 0);
 var_dump($out, $my_var);
 $my_var = str_repeat('A', 40);
 $out = substr_replace(array(&$my_var), array(new test3), 40, 0);
 var_dump($out, $my_var);
+?>
 --EXPECTF--
 array(1) {
   [0]=>
@@ -45,7 +46,7 @@ array(1) {
 Warning: A non-numeric value encountered in %s on line %d
 array(1) {
   [0]=>
-  string(40) "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  string(40) "0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 }
 int(134512640)
 array(1) {

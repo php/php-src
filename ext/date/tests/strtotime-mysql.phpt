@@ -21,7 +21,9 @@ foreach($d as $date) {
     }
 }
 ?>
---EXPECT--
+--EXPECTF--
 string(31) "Fri, 23 May 1997 09:15:28 +0000"
 string(31) "Sun, 31 Dec 2000 18:58:59 +0000"
+
+Warning: strtotime(): Epoch doesn't fit in a PHP integer in %s on line %d
 bool(false)

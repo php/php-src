@@ -34,6 +34,7 @@ var_dump(
     test5(),
     test6(),
 );
+?>
 --EXPECTF--
 object(Generator)#%d (%d) {
 }

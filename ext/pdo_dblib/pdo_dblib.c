@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -31,10 +31,6 @@
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
 
-static const zend_function_entry pdo_dblib_functions[] = {
-	PHP_FE_END
-};
-
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -54,7 +50,7 @@ zend_module_entry pdo_dblib_module_entry = {
 #else
 	"pdo_dblib",
 #endif
-	pdo_dblib_functions,
+	NULL,
 	PHP_MINIT(pdo_dblib),
 	PHP_MSHUTDOWN(pdo_dblib),
 	NULL,
@@ -125,7 +121,7 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 }
 
 int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
-	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
+	int severity, char *msgtext, char *srvname, char *procname, int line)
 {
 	pdo_dblib_err *einfo;
 

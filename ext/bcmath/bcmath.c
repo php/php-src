@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -129,20 +129,23 @@ PHP_MINFO_FUNCTION(bcmath)
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
-static void php_str2num(bc_num *num, char *str)
+static zend_result php_str2num(bc_num *num, char *str)
 {
 	char *p;
 
 	if (!(p = strchr(str, '.'))) {
 		if (!bc_str2num(num, str, 0)) {
-			php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+			return FAILURE;
 		}
-		return;
+
+		return SUCCESS;
 	}
 
 	if (!bc_str2num(num, str, strlen(p+1))) {
-		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -151,7 +154,7 @@ PHP_FUNCTION(bcadd)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -174,15 +177,26 @@ PHP_FUNCTION(bcadd)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
+
 	bc_add (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
-	return;
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -191,7 +205,7 @@ PHP_FUNCTION(bcsub)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -214,15 +228,26 @@ PHP_FUNCTION(bcsub)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
+
 	bc_sub (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
-	return;
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -231,7 +256,7 @@ PHP_FUNCTION(bcmul)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale;
 
@@ -254,15 +279,26 @@ PHP_FUNCTION(bcmul)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
+
 	bc_multiply (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
-	return;
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -271,7 +307,7 @@ PHP_FUNCTION(bcdiv)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -294,8 +330,16 @@ PHP_FUNCTION(bcdiv)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
 
 	switch (bc_divide(first, second, &result, scale)) {
 		case 0: /* OK */
@@ -306,10 +350,11 @@ PHP_FUNCTION(bcdiv)
 			break;
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
-	return;
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -318,7 +363,7 @@ PHP_FUNCTION(bcmod)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -341,8 +386,16 @@ PHP_FUNCTION(bcmod)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
 
 	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
@@ -353,9 +406,11 @@ PHP_FUNCTION(bcmod)
 			break;
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -364,7 +419,7 @@ PHP_FUNCTION(bcpowmod)
 {
 	zend_string *left, *right, *modulus;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, mod, result;
 	int scale = BCG(bc_precision);
 
@@ -389,26 +444,32 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&second);
 	bc_init_num(&mod);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
-	php_str2num(&mod, ZSTR_VAL(modulus));
 
-	switch (bc_raisemod(first, second, mod, &result, scale)) {
-		case 0:
-			RETVAL_STR(bc_num2str_ex(result, scale));
-			break;
-		case -1:
-			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-			break;
-		case -2:
-			zend_argument_value_error(2, "must be greater than 0");
-			break;
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
 	}
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&mod);
-	bc_free_num(&result);
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&mod, ZSTR_VAL(modulus)) == FAILURE) {
+		zend_argument_value_error(3, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (bc_raisemod(first, second, mod, &result, scale) == SUCCESS) {
+		RETVAL_STR(bc_num2str_ex(result, scale));
+	}
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&mod);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -417,7 +478,7 @@ PHP_FUNCTION(bcpow)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second, result;
 	int scale = BCG(bc_precision);
 
@@ -440,14 +501,26 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&first);
 	bc_init_num(&second);
 	bc_init_num(&result);
-	php_str2num(&first, ZSTR_VAL(left));
-	php_str2num(&second, ZSTR_VAL(right));
+
+	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
+	}
+
 	bc_raise (first, second, &result, scale);
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
-	bc_free_num(&first);
-	bc_free_num(&second);
-	bc_free_num(&result);
+
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -456,7 +529,7 @@ PHP_FUNCTION(bcsqrt)
 {
 	zend_string *left;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num result;
 	int scale = BCG(bc_precision);
 
@@ -476,16 +549,21 @@ PHP_FUNCTION(bcsqrt)
 	}
 
 	bc_init_num(&result);
-	php_str2num(&result, ZSTR_VAL(left));
+
+	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
 
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		zend_value_error("Square root of negative number");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 	}
 
-	bc_free_num(&result);
-	return;
+	cleanup: {
+		bc_free_num(&result);
+	};
 }
 /* }}} */
 
@@ -494,7 +572,7 @@ PHP_FUNCTION(bccomp)
 {
 	zend_string *left, *right;
 	zend_long scale_param;
-	zend_bool scale_param_is_null = 1;
+	bool scale_param_is_null = 1;
 	bc_num first, second;
 	int scale = BCG(bc_precision);
 
@@ -518,16 +596,21 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&second);
 
 	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
-		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
 	}
+
 	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
-		php_error_docref(NULL, E_WARNING, "bcmath function argument is not well-formed");
+		zend_argument_value_error(2, "is not well-formed");
+		goto cleanup;
 	}
+
 	RETVAL_LONG(bc_compare(first, second));
 
-	bc_free_num(&first);
-	bc_free_num(&second);
-	return;
+	cleanup: {
+		bc_free_num(&first);
+		bc_free_num(&second);
+	};
 }
 /* }}} */
 
@@ -535,7 +618,7 @@ PHP_FUNCTION(bccomp)
 PHP_FUNCTION(bcscale)
 {
 	zend_long old_scale, new_scale;
-	zend_bool new_scale_is_null = 1;
+	bool new_scale_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
@@ -550,7 +633,11 @@ PHP_FUNCTION(bcscale)
 			RETURN_THROWS();
 		}
 
-		BCG(bc_precision) = (int) new_scale;
+		zend_string *ini_name = zend_string_init("bcmath.scale", sizeof("bcmath.scale") - 1, 0);
+		zend_string *new_scale_str = zend_long_to_str(new_scale);
+		zend_alter_ini_entry(ini_name, new_scale_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release(new_scale_str);
+		zend_string_release(ini_name);
 	}
 
 	RETURN_LONG(old_scale);

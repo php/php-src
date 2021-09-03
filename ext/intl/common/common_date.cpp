@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -173,6 +173,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 		return ZEND_NAN;
 	}
 
+try_again:
 	switch (Z_TYPE_P(z)) {
 	case IS_STRING:
 		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
@@ -225,6 +226,9 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 			efree(message);
 		}
 		break;
+	case IS_REFERENCE:
+		z = Z_REFVAL_P(z);
+		goto try_again;
 	default:
 		spprintf(&message, 0, "%s: invalid PHP type for date", func);
 		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR,

@@ -1,12 +1,12 @@
 --TEST--
 Bug #50675 SoapClient can't handle object references correctly.
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 
 class TestSoapClient extends SoapClient {
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <soapenv:Envelope
@@ -45,6 +45,7 @@ $person->name = 'name';
 $result = $client->echoPerson($person, $person);
 
 print($client->__getLastRequest());
+?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://service" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="urn:service.EchoService" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:echoPerson><p xsi:type="ns2:Person" id="ref1"><name xsi:type="SOAP-ENC:string">name</name></p><p2 href="#ref1"/></ns1:echoPerson></SOAP-ENV:Body></SOAP-ENV:Envelope>

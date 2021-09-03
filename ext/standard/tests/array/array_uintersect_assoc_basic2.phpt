@@ -8,7 +8,7 @@ include('compare_function.inc');
 $data_compare_function = 'compare_function';
 
 // Initialise all required variables
-$arr1 = array("one" => "one", "02" => "two", '3' => "three", "four", "0.5" => 5, 0.6 => 6, "0x7" => "seven");
+$arr1 = array("one" => "one", "02" => "two", '3' => "three", "four", "0.5" => 5, 0 => 6, "0x7" => "seven");
 $arr2 = array("one" => "one", "02" => "two", '3' => "three");
 $arr3 = array("one" => "one", '3' => "three", "0.5" => 5);
 $arr4 = array("one" => "one", '3' => "three", "0.5" => 5);

@@ -3,8 +3,8 @@ bcsqrt — Get the square root of an arbitrary precision number
 --CREDITS--
 Antoni Torrents
 antoni@solucionsinternet.com
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 try {
@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-Square root of negative number
+bcsqrt(): Argument #1 ($num) must be greater than or equal to 0

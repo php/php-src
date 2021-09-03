@@ -21,6 +21,7 @@ a::staticTest();
 
 $b = new b();
 $b->test();
+?>
 --EXPECTF--
 string(%d) "The magic method b::__invoke() must have public visibility"
 b::test()

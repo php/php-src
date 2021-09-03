@@ -1,43 +1,43 @@
 --TEST--
 Persistent connections and mysqli.max_links
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
-	require_once('table.inc');
+    require_once('skipifconnectfailure.inc');
+    require_once('table.inc');
 
-	mysqli_query($link, 'DROP USER pcontest');
-	mysqli_query($link, 'DROP USER pcontest@localhost');
+    mysqli_query($link, 'DROP USER pcontest');
+    mysqli_query($link, 'DROP USER pcontest@localhost');
 
-	if (!mysqli_query($link, 'CREATE USER pcontest@"%" IDENTIFIED BY "pcontest"') ||
-		!mysqli_query($link, 'CREATE USER pcontest@localhost IDENTIFIED BY "pcontest"')) {
-		printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
-		mysqli_close($link);
-		die("skip CREATE USER failed");
-	}
-
-	// we might be able to specify the host using CURRENT_USER(), but...
-	if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db)) ||
-		!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'localhost'", $db))) {
-		printf("skip Cannot GRANT SELECT to second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
-		mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
-		mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
-		mysqli_query($link, 'DROP USER pcontest@localhost');
-		mysqli_query($link, 'DROP USER pcontest');
-		mysqli_close($link);
-		die("skip GRANT failed");
-	}
-
-	if (!($link_pcontest = @my_mysqli_connect($host, 'pcontest', 'pcontest', $db, $port, $socket))) {
-		mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
-		mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
-		mysqli_query($link, 'DROP USER pcontest@localhost');
-		mysqli_query($link, 'DROP USER pcontest');
-		mysqli_close($link);
-		die("skip CONNECT using new user failed");
+    if (!mysqli_query($link, 'CREATE USER pcontest@"%" IDENTIFIED BY "pcontest"') ||
+        !mysqli_query($link, 'CREATE USER pcontest@localhost IDENTIFIED BY "pcontest"')) {
+        printf("skip Cannot create second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
+        mysqli_close($link);
+        die("skip CREATE USER failed");
     }
-	mysqli_close($link);
+
+    // we might be able to specify the host using CURRENT_USER(), but...
+    if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db)) ||
+        !mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'localhost'", $db))) {
+        printf("skip Cannot GRANT SELECT to second DB user [%d] %s", mysqli_errno($link), mysqli_error($link));
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest');
+        mysqli_close($link);
+        die("skip GRANT failed");
+    }
+
+    if (!($link_pcontest = @my_mysqli_connect($host, 'pcontest', 'pcontest', $db, $port, $socket))) {
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
+        mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest@localhost');
+        mysqli_query($link, 'DROP USER pcontest');
+        mysqli_close($link);
+        die("skip CONNECT using new user failed");
+    }
+    mysqli_close($link);
 ?>
 --INI--
 mysqli.allow_persistent=1
@@ -208,7 +208,7 @@ mysqli_query($link, 'DROP USER pcontest');
 mysqli_close($link);
 ?>
 --EXPECT--
-mysqli_get_links_stats() expects exactly 0 parameters, 1 given
+mysqli_get_links_stats() expects exactly 0 arguments, 1 given
 Before pconnect:array(3) {
   ["total"]=>
   int(1)

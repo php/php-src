@@ -34,6 +34,6 @@ string(24) "Class "a" does not exist"
 string(23) "Class "" does not exist"
 string(24) "Class "a" does not exist"
 string(23) "Class "" does not exist"
-string(103) "ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be of type object|string, int given"
+string(24) "Class "1" does not exist"
 string(23) "Class "" does not exist"
 Done

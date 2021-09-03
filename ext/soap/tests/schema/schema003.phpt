@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 3: simpleType/restriction (reference to type, that is not defined yet)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

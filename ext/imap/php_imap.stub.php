@@ -1,258 +1,178 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-/**
- * @return resource|false
- */
-function imap_open(string $mailbox, string $user, string $password, int $options = 0, int $n_retries = 0, array $params = UNKNOWN) {}
+namespace IMAP {
 
-/**
- * @param resource $stream_id
- */
-function imap_reopen($stream_id, string $mailbox, int $options = 0, int $n_retries = 0): bool {}
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection {
+    }
 
-/**
- * @param resource $stream_id
- */
-function imap_close($stream_id, int $options = 0): bool {}
+}
 
-/** @param resource $stream_id */
-function imap_num_msg($stream_id): int|false {}
+namespace {
 
-/** @param resource $stream_id */
-function imap_num_recent($stream_id): int|false {}
+    function imap_open(string $mailbox, string $user, string $password, int $flags = 0, int $retries = 0, array $options = []): IMAP\Connection|false {}
 
-/** @param resource $stream_id */
-function imap_headers($stream_id): array|false {}
+    function imap_reopen(IMAP\Connection $imap, string $mailbox, int $flags = 0, int $retries = 0): bool {}
 
-/** @param resource $stream_id */
-function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
+    function imap_close(IMAP\Connection $imap, int $flags = 0): bool {}
 
-/** @alias imap_headerinfo */
-function imap_header($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
+    function imap_num_msg(IMAP\Connection $imap): int|false {}
 
-function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): \stdClass {}
+    function imap_num_recent(IMAP\Connection $imap): int {}
 
-function imap_rfc822_write_address(string $mailbox, string $host, string $personal): string|false {}
+    function imap_headers(IMAP\Connection $imap): array|false {}
 
-function imap_rfc822_parse_adrlist(string $address_string, string $default_host): array {}
+    function imap_headerinfo(IMAP\Connection $imap, int $message_num, int $from_length = 0, int $subject_length = 0): \stdClass|false {}
 
-/** @param resource $stream_id */
-function imap_body($stream_id, int $msg_no, int $options = 0): string|false {}
+    function imap_rfc822_parse_headers(string $headers, string $default_hostname = "UNKNOWN"): \stdClass {}
 
-/**
- * @param resource $stream_id
- * @alias imap_body
- */
-function imap_fetchtext($stream_id, int $msg_no, int $options = 0): string|false {}
+    function imap_rfc822_write_address(string $mailbox, string $hostname, string $personal): string|false {}
 
-/**
- * @param resource $stream_id
- * @return \stdClass|false
- */
-function imap_bodystruct($stream_id, int $msg_no, string $section) {}
+    function imap_rfc822_parse_adrlist(string $string, string $default_hostname): array {}
 
-/** @param resource $stream_id */
-function imap_fetchbody($stream_id, int $msg_no, string $section, int $options = 0): string|false {}
+    function imap_body(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
-/** @param resource $stream_id */
-function imap_fetchmime($stream_id, int $msg_no, string $section, int $options = 0): string|false {}
+    /** @alias imap_body */
+    function imap_fetchtext(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
-/**
- * @param resource $stream_id
- * @todo: should $file be `resource|string`? it looks like it tries to accept anything?
- */
-function imap_savebody($stream_id, $file, int $msg_no, string $section = '', int $options = 0): bool {}
+    function imap_bodystruct(IMAP\Connection $imap, int $message_num, string $section): \stdClass|false {}
 
-/** @param resource $stream_id */
-function imap_fetchheader($stream_id, int $msg_no, int $options = 0): string|false {}
+    function imap_fetchbody(IMAP\Connection $imap, int $message_num, string $section, int $flags = 0): string|false {}
 
-/** @param resource $stream_id */
-function imap_fetchstructure($stream_id, int $msg_no, int $options = 0): stdClass|false {}
+    function imap_fetchmime(IMAP\Connection $imap, int $message_num, string $section, int $flags = 0): string|false {}
 
-/**
- * @param resource $stream_id
- */
-function imap_gc($stream_id, int $flags): bool {}
+    /** @param resource|string|int $file */
+    function imap_savebody(IMAP\Connection $imap, $file, int $message_num, string $section = "", int $flags = 0): bool {}
 
-/**
- * @param resource $stream_id
- */
-function imap_expunge($stream_id): bool {}
+    function imap_fetchheader(IMAP\Connection $imap, int $message_num, int $flags = 0): string|false {}
 
-/**
- * @param resource $stream_id
- */
-function imap_delete($stream_id, string $msg_no, int $options = 0): bool {}
+    function imap_fetchstructure(IMAP\Connection $imap, int $message_num, int $flags = 0): \stdClass|false {}
 
-/**
- * @param resource $stream_id
- */
-function imap_undelete($stream_id, string $msg_no, int $options = 0): bool {}
+    function imap_gc(IMAP\Connection $imap, int $flags): bool {}
 
-/** @param resource $stream_id */
-function imap_check($stream_id): stdClass|false {}
+    function imap_expunge(IMAP\Connection $imap): bool {}
 
-/** @param resource $stream_id */
-function imap_listscan($stream_id, string $ref, string $pattern, string $content): array|false {}
+    function imap_delete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
 
-/**
- * @param resource $stream_id
- * @alias imap_listscan
- */
-function imap_scan($stream_id, string $ref, string $pattern, string $content): array|false {}
+    function imap_undelete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
 
-/**
- * @param resource $stream_id
- * @alias imap_listscan
- */
-function imap_scanmailbox($stream_id, string $ref, string $pattern, string $content): array|false {}
+    function imap_check(IMAP\Connection $imap): \stdClass|false {}
 
-/** @param resource $stream_id */
-function imap_mail_copy($stream_id, string $msglist, string $mailbox, int $options = 0): bool {}
+    function imap_listscan(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
-/** @param resource $stream_id */
-function imap_mail_move($stream_id, string $sequence, string $mailbox, int $options = 0): bool {}
+    /** @alias imap_listscan */
+    function imap_scan(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
-function imap_mail_compose(array $envelope, array $body): string|false {}
+    /** @alias imap_listscan */
+    function imap_scanmailbox(IMAP\Connection $imap, string $reference, string $pattern, string $content): array|false {}
 
-/** @param resource $stream_id */
-function imap_createmailbox($stream_id, string $mailbox): bool {}
+    function imap_mail_copy(IMAP\Connection $imap, string $message_nums, string $mailbox, int $flags = 0): bool {}
 
-/**
- * @param resource $stream_id
- * @alias imap_createmailbox
- */
-function imap_create($stream_id, string $mailbox): bool {}
+    function imap_mail_move(IMAP\Connection $imap, string $message_nums, string $mailbox, int $flags = 0): bool {}
 
-/** @param resource $stream_id */
-function imap_renamemailbox($stream_id, string $old_name, string $new_name): bool {}
+    function imap_mail_compose(array $envelope, array $bodies): string|false {}
 
-/**
- * @param resource $stream_id
- * @alias imap_renamemailbox
- */
-function imap_rename($stream_id, string $old_name, string $new_name): bool {}
+    function imap_createmailbox(IMAP\Connection $imap, string $mailbox): bool {}
 
-/** @param resource $stream_id */
-function imap_deletemailbox($stream_id, string $mailbox): bool {}
+    /** @alias imap_createmailbox */
+    function imap_create(IMAP\Connection $imap, string $mailbox): bool {}
 
-/** @param resource $stream_id */
-function imap_subscribe($stream_id, string $mailbox): bool {}
+    function imap_renamemailbox(IMAP\Connection $imap, string $from, string $to): bool {}
 
-/** @param resource $stream_id */
-function imap_unsubscribe($stream_id, string $mailbox): bool {}
+    /** @alias imap_renamemailbox */
+    function imap_rename(IMAP\Connection $imap, string $from, string $to): bool {}
 
-/** @param resource $stream_id */
-function imap_append($stream_id, string $folder, string $message, string $options = UNKNOWN, string $internal_date = UNKNOWN): bool {}
+    function imap_deletemailbox(IMAP\Connection $imap, string $mailbox): bool {}
 
-/** @param resource $stream_id */
-function imap_ping($stream_id): bool {}
+    function imap_subscribe(IMAP\Connection $imap, string $mailbox): bool {}
 
-function imap_base64(string $text): string|false {}
+    function imap_unsubscribe(IMAP\Connection $imap, string $mailbox): bool {}
 
-function imap_qprint(string $text): string|false {}
+    function imap_append(IMAP\Connection $imap, string $folder, string $message, ?string $options = null, ?string $internal_date = null): bool {}
 
-function imap_8bit(string $text): string|false {}
+    function imap_ping(IMAP\Connection $imap): bool {}
 
-function imap_binary(string $text): string|false {}
+    function imap_base64(string $string): string|false {}
 
+    function imap_qprint(string $string): string|false {}
 
-function imap_utf8(string $mime_encoded_text): string {}
+    function imap_8bit(string $string): string|false {}
 
-/**
- * @param resource $stream_id
- * @return \stdClass|false
- */
-function imap_status($stream_id, string $mailbox, int $options) {}
+    function imap_binary(string $string): string|false {}
 
-/** @param resource $stream_id */
-function imap_mailboxmsginfo($stream_id): \stdClass {}
+    function imap_utf8(string $mime_encoded_text): string {}
 
-/** @param resource $stream_id */
-function imap_setflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
+    function imap_status(IMAP\Connection $imap, string $mailbox, int $flags): \stdClass|false {}
 
-/** @param resource $stream_id */
-function imap_clearflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
+    function imap_mailboxmsginfo(IMAP\Connection $imap): \stdClass {}
 
-/** @param resource $stream_id */
-function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = UNKNOWN): array|false {}
+    function imap_setflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): bool {}
 
-/** @param resource $stream_id */
-function imap_uid($stream_id, int $msg_no): int|false {}
+    function imap_clearflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): bool {}
 
-/** @param resource $stream_id */
-function imap_msgno($stream_id, int $unique_msg_id): int|false {}
+    function imap_sort(IMAP\Connection $imap, int $criteria, bool $reverse, int $flags = 0, ?string $search_criteria = null, ?string $charset = null): array|false {}
 
-/** @param resource $stream_id */
-function imap_list($stream_id, string $ref, string $pattern): array|false {}
+    function imap_uid(IMAP\Connection $imap, int $message_num): int|false {}
 
-/**
- * @param resource $stream_id
- * @alias imap_list
- */
-function imap_listmailbox($stream_id, string $ref, string $pattern): array|false {}
+    function imap_msgno(IMAP\Connection $imap, int $message_uid): int {}
 
-/** @param resource $stream_id */
-function imap_lsub($stream_id, string $ref, string $pattern): array|false {}
+    function imap_list(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-/**
- * @param resource $stream_id
- * @alias imap_lsub
- */
-function imap_listsubscribed($stream_id, string $ref, string $pattern): array|false {}
+    /** @alias imap_list */
+    function imap_listmailbox(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-/** @param resource $stream_id */
-function imap_getsubscribed($stream_id, string $ref, string $pattern): array|false {}
+    function imap_lsub(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-/** @param resource $stream_id */
-function imap_getmailboxes($stream_id, string $ref, string $pattern): array|false {}
+    /** @alias imap_lsub */
+    function imap_listsubscribed(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-/** @param resource $stream_id */
-function imap_fetch_overview($stream_id, string $sequence, int $options = 0): array|false {}
+    function imap_getsubscribed(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-function imap_alerts(): array|false {}
+    function imap_getmailboxes(IMAP\Connection $imap, string $reference, string $pattern): array|false {}
 
-function imap_errors(): array|false {}
+    function imap_fetch_overview(IMAP\Connection $imap, string $sequence, int $flags = 0): array|false {}
 
-function imap_last_error(): string|false {}
+    function imap_alerts(): array|false {}
 
-/** @param resource $stream_id */
-function imap_search($stream_id, string $criteria, int $options = \SE_FREE, string $charset = ''): array|false {}
+    function imap_errors(): array|false {}
 
-function imap_utf7_decode(string $buf): string|false {}
+    function imap_last_error(): string|false {}
 
-function imap_utf7_encode(string $buf): string {}
+    function imap_search(IMAP\Connection $imap, string $criteria, int $flags = SE_FREE, string $charset = ""): array|false {}
 
-#ifdef HAVE_IMAP_MUTF7
-function imap_utf8_to_mutf7(string $in): string|false {}
+    function imap_utf7_decode(string $string): string|false {}
 
-function imap_mutf7_to_utf8(string $in): string|false {}
-#endif
+    function imap_utf7_encode(string $string): string {}
 
-function imap_mime_header_decode(string $str): array|false {}
+    #ifdef HAVE_IMAP_MUTF7
+    function imap_utf8_to_mutf7(string $string): string|false {}
 
-/** @param resource $stream_id */
-function imap_thread($stream_id, int $options = \SE_FREE): array|false {}
+    function imap_mutf7_to_utf8(string $string): string|false {}
+    #endif
 
-function imap_timeout(int $timeout_type, int $timeout = -1): int|bool {}
+    function imap_mime_header_decode(string $string): array|false {}
 
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-/** @param resource $stream_id */
-function imap_get_quota($stream_id, string $qroot): array|false {}
+    function imap_thread(IMAP\Connection $imap, int $flags = SE_FREE): array|false {}
 
-/** @param resource $stream_id */
-function imap_get_quotaroot($stream_id, string $mbox): array|false {}
+    function imap_timeout(int $timeout_type, int $timeout = -1): int|bool {}
 
-/** @param resource $stream_id */
-function imap_set_quota($stream_id, string $qroot, int $mailbox_size): bool {}
+    #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+    function imap_get_quota(IMAP\Connection $imap, string $quota_root): array|false {}
 
-/** @param resource $stream_id */
-function imap_setacl($stream_id, string $mailbox, string $id, string $rights): bool {}
+    function imap_get_quotaroot(IMAP\Connection $imap, string $mailbox): array|false {}
 
-/** @param resource $stream_id */
-function imap_getacl($stream_id, string $mailbox): array|false {}
-#endif
+    function imap_set_quota(IMAP\Connection $imap, string $quota_root, int $mailbox_size): bool {}
 
-function imap_mail(string $to, string $subject, string $message, string $additional_headers = UNKNOWN, string $cc = UNKNOWN, string $bcc = UNKNOWN, string $rpath = UNKNOWN): bool {}
+    function imap_setacl(IMAP\Connection $imap, string $mailbox, string $user_id, string $rights): bool {}
+
+    function imap_getacl(IMAP\Connection $imap, string $mailbox): array|false {}
+    #endif
+
+    function imap_mail(string $to, string $subject, string $message, ?string $additional_headers = null, ?string $cc = null, ?string $bcc = null, ?string $return_path = null): bool {}
+
+}

@@ -23,6 +23,7 @@ $x = new Foo();
 $x->prop;
 $x->y;
 echo "ok\n";
+?>
 --EXPECTF--
 Warning: Uninitialized string offset 3 in %s on line %d
 ok

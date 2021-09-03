@@ -1,7 +1,7 @@
 --TEST--
 cal_days_in_month()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 $num = cal_days_in_month(CAL_GREGORIAN, 8, 2003);

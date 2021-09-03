@@ -20,6 +20,7 @@ class Test {
     }
 }
 echo new ReflectionClass('Test');
+?>
 --EXPECTF--
 Class [ <user> class Test ] {
   @@ %sbug33389.php 3-18

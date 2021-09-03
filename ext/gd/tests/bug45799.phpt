@@ -1,9 +1,7 @@
 --TEST--
 Bug #45799 (imagepng() crashes on empty image).
---SKIPIF--
-<?php
-	if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $img = imagecreate(500,500);

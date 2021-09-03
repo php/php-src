@@ -1,7 +1,7 @@
 --TEST--
 FFI 028: Incomplete arrays inside structure
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--

@@ -12,6 +12,7 @@ class qux extends foo {
 
 $qux = new qux();
 var_dump($qux->foo());
+?>
 --EXPECTF--
 object(qux)#%d (%d) {
 }

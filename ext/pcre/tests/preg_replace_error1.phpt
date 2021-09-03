@@ -56,4 +56,4 @@ string(1) "a"
 
 Arg value is /[a-zA-Z]/
 string(1) "1"
-preg_replace(): Argument #1 ($regex) must be of type string|array, stdClass given
+preg_replace(): Argument #1 ($pattern) must be of type array|string, stdClass given

@@ -19,10 +19,11 @@ try {
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
+?>
 --EXPECTF--
 NULL
 int(3)
 
 Warning: Undefined property: Crasher::$2 in %s on line %d
 NULL
-string(%s) "DateInterval::__construct(): Unknown or bad format (blah)"
+string(28) "Unknown or bad format (blah)"

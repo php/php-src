@@ -1,7 +1,7 @@
 --TEST--
 PHP crash when zend_multibyte_encoding_converter returns (size_t)-1)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 $infile = __DIR__.'/exif_encoding_crash.jpg';

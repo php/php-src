@@ -1,12 +1,20 @@
 --TEST--
 gmp_random_bits() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
-var_dump(gmp_random_bits(0));
-var_dump(gmp_random_bits(-1));
+try {
+    var_dump(gmp_random_bits(0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_random_bits(-1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 // If these error the test fails.
 gmp_random_bits(1);
@@ -32,10 +40,7 @@ while (1) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_random_bits(): The number of bits must be positive in %s on line %d
-bool(false)
-
-Warning: gmp_random_bits(): The number of bits must be positive in %s on line %d
-bool(false)
+--EXPECT--
+gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
+gmp_random_bits(): Argument #1 ($bits) must be greater than or equal to 1
 Done

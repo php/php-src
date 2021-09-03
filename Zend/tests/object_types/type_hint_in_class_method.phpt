@@ -10,6 +10,7 @@ class One {
 $one = new One();
 $one->a(new One());
 $one->a(123);
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: One::a(): Argument #1 ($obj) must be of type object, int given, called in %s:%d
 Stack trace:

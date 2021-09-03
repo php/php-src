@@ -1,8 +1,9 @@
 --TEST--
 Bug #72697: select_colors write out-of-bounds
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!function_exists("imagecreatetruecolor")) die("skip");
 if (PHP_INT_MAX !== 9223372036854775807) die("skip for 64-bit long systems only");
 ?>
 --FILE--
@@ -19,5 +20,5 @@ trycatch_dump(
 ?>
 DONE
 --EXPECT--
-!! [ValueError] imagetruecolortopalette(): Argument #3 ($colorWanted) must be greater than 0 and less than 2147483647
+!! [ValueError] imagetruecolortopalette(): Argument #3 ($num_colors) must be greater than 0 and less than 2147483647
 DONE

@@ -554,19 +554,19 @@ int(-512000)
 string(7) "integer"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
@@ -949,19 +949,19 @@ int(-512000)
 string(7) "integer"
 -- Iteration 76 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 77 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
 -- Iteration 78 --
 string(6) "object"
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"

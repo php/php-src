@@ -7,20 +7,20 @@ Source code: ext/posix/posix.c
 --CREDITS--
 Falko Menge, mail at falko-menge dot de
 PHP Testfest Berlin 2009-05-10
---SKIPIF--
-<?php
-	if (!extension_loaded('posix')) {
-        die('SKIP - POSIX extension not available');
-    }
-	if (!extension_loaded('sockets')) {
-        die('SKIP - Sockets extension not available');
-    }
-?>
+--EXTENSIONS--
+posix
+standard
 --FILE--
 <?php
+
 var_dump(posix_ttyname(0)); // param not a resource
+
+$descriptors = [["pty"], ["pty"], ["pty"], ["pipe", "w"]];
+$pipes = [];
+$process = proc_open('echo "foo";', $descriptors, $pipes);
+
 try {
-    var_dump(posix_ttyname(socket_create(AF_INET, SOCK_DGRAM, SOL_UDP))); // wrong resource type
+    var_dump(posix_ttyname($process)); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

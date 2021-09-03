@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round4 GroupH Complex Doc Lit 007 (php/wsdl): echoMultipleFaults2(1)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

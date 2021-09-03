@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -203,18 +203,19 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 
 static int com_dimension_exists(zend_object *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
+	/* TODO Add support */
+	zend_throw_error(NULL, "Cannot check dimension on a COM object");
 	return 0;
 }
 
 static void com_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete properties from a COM object");
 }
 
 static void com_dimension_delete(zend_object *object, zval *offset)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
+	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
 static HashTable *com_properties_get(zend_object *object)
@@ -334,8 +335,8 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								zend_bool by_ref = (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) != 0;
-								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0));
+								bool by_ref = (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) != 0;
+								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0, 0));
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;

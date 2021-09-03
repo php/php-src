@@ -14,7 +14,7 @@ $arrays = array (
   range('a', 'z', 2 ),
   array("a" => "A", 2 => "B", "C" => 3, 4 => 4, "one" => 1, "" => NULL ),
   array(1, array(1, 2 => 3 ), "one" => 1, "5" => 5 ),
-  array(-1, -2, -3, -4, "-0.005" => "neg0.005", 2.0 => "float2", "neg.9" => -.9 ),
+  array(-1, -2, -3, -4, "-0.005" => "neg0.005", 2 => "float2", "neg.9" => -.9 ),
   array(1.0005, 2.000000, -3.000000, -4.9999999 ),
   array(true, false),
   array("PHP", "Web2.0", "SOA"),

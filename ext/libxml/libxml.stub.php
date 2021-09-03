@@ -1,6 +1,16 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class LibXMLError
+{
+    public int $level;
+    public int $code;
+    public int $column;
+    public string $message;
+    public string $file;
+    public int $line;
+}
 
 /** @param resource $context */
 function libxml_set_streams_context($context): void {}
@@ -13,6 +23,7 @@ function libxml_get_errors(): array {}
 
 function libxml_clear_errors(): void {}
 
+/** @deprecated */
 function libxml_disable_entity_loader(bool $disable = true): bool {}
 
 function libxml_set_external_entity_loader(?callable $resolver_function): bool {}

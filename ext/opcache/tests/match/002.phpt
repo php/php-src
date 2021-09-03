@@ -4,8 +4,8 @@ Test match jump table optimizer
 opcache.enable=1
 opcache.enable_cli=1
 opcache.opt_debug_level=0x20000
---SKIPIF--
-<?php require_once(__DIR__ . '/../skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -27,6 +27,7 @@ function test2() {
 }
 test2();
 
+?>
 --EXPECTF--
 $_main:
      ; (lines=5, args=0, vars=0, tmps=0)

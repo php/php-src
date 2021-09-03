@@ -7,7 +7,7 @@ escapeshellarg("hello\0world");
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Uncaught TypeError: escapeshellarg(): Argument #1 ($arg) must not contain any null bytes in %s:%d
+Fatal error: Uncaught ValueError: escapeshellarg(): Argument #1 ($arg) must not contain any null bytes in %s:%d
 Stack trace:
 #0 %s(%d): escapeshellarg('hello\x00world')
 #1 {main}

@@ -50,8 +50,11 @@ foreach ($csv_lists as $csv_list) {
     $csv_field = $csv_list[2];
 
     // write to a file in csv format
-    var_dump( fputcsv($file_handle, $csv_field, '++', '%%'
-) );
+    try {
+      var_dump( fputcsv($file_handle, $csv_field, '++', '%%') );
+    } catch (ValueError $e) {
+      echo $e->getMessage(), "\n";
+    }
     // check the file pointer position and eof
     var_dump( ftell($file_handle) );
     var_dump( feof($file_handle) );
@@ -68,1194 +71,654 @@ foreach ($csv_lists as $csv_list) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fputcsv() : with two chars as enclosure & delimiter ***
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "water,fruit
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "water,fruit
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "water,fruit
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(12) "water,fruit
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(12)
-int(12)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "water,fruit
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(15) ""water","fruit
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(15)
-int(15)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) ""water","fruit"
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "%^water^ ^fruit^%
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&water&:&fruit&
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(16) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(16)
-int(16)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "=water===fruit=
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(18) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(18)
-int(18)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water--fruit-air
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(22) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(22)
-int(22)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "-water---fruit---air-
-"
+string(0) ""
 
 -- file opened in r+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in r+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in r+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in a+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in a+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in a+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in w+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in w+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in w+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in x+ --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in x+b --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(24) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 
 -- file opened in x+t --
-
-Notice: fputcsv(): delimiter must be a single character in %s on line %d
-
-Notice: fputcsv(): enclosure must be a single character in %s on line %d
-int(24)
-int(24)
+fputcsv(): Argument #3 ($separator) must be a single character
+int(0)
 bool(false)
-string(%d) "&""""&:&"&:,:":&,&:,,,,
-"
+string(0) ""
 Done

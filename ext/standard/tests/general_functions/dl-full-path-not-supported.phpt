@@ -7,7 +7,7 @@ User Group: PHP-WVL & PHPGent #PHPTestFest
 <?php
 $enabled_sapi = array('cgi-fcgi', 'cli', 'embed', 'fpm');
 if (!in_array(php_sapi_name(), $enabled_sapi)) {
-	die('skip dl() is not enabled for ' . php_sapi_name());
+    die('skip dl() is not enabled for ' . php_sapi_name());
 }
 ?>
 --INI--

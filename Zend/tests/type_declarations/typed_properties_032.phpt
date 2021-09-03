@@ -11,5 +11,6 @@ $foo = new class {
 };
 
 var_dump($foo->method());
+?>
 --EXPECT--
 int(15)

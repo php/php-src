@@ -119,12 +119,12 @@ L=100 M=200 N=300
 O= and P=
 10 20 40 50 60 70 80
 
-Notice: Undefined array key 0 in %s on line %d
+Warning: Undefined array key 0 in %s on line %d
 
-Notice: Undefined array key 1 in %s on line %d
+Warning: Undefined array key 1 in %s on line %d
 Y=,Z=
 
-Notice: Undefined array key 1 in %s on line %d
+Warning: Undefined array key 1 in %s on line %d
 AA=10
 CC=10 DD=30
 Array

@@ -1,16 +1,29 @@
 --TEST--
 gmp_mod tests()
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
-var_dump(gmp_mod("",""));
+try {
+    var_dump(gmp_mod("",""));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gmp_mod(0,1));
 var_dump(gmp_mod(0,-1));
-var_dump(gmp_mod(-1,0));
 
-var_dump(gmp_mod(array(), array()));
+try {
+    var_dump(gmp_mod(-1,0));
+} catch (\DivisionByZeroError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(gmp_mod(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $a = gmp_init("-100000000");
 $b = gmp_init("353467");
@@ -19,24 +32,19 @@ var_dump(gmp_mod($a, $b));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_mod(): Unable to convert variable to GMP - string is not an integer in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+--EXPECT--
+gmp_mod(): Argument #1 ($num1) is not an integer string
+object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"
 }
-object(GMP)#%d (1) {
+object(GMP)#2 (1) {
   ["num"]=>
   string(1) "0"
 }
-
-Warning: gmp_mod(): Zero operand not allowed in %s on line %d
-bool(false)
-
-Warning: gmp_mod(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-object(GMP)#%d (1) {
+Modulo by zero
+gmp_mod(): Argument #1 ($num1) must be of type GMP|string|int, array given
+object(GMP)#4 (1) {
   ["num"]=>
   string(5) "31161"
 }

@@ -35,33 +35,39 @@ Class [ <internal%s> class Directory ] {
   - Static methods [0] {
   }
 
-  - Properties [0] {
+  - Properties [2] {
+    Property [ public readonly string $path ]
+    Property [ public readonly mixed $handle ]
   }
 
   - Methods [3] {
     Method [ <internal:standard> public method close ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = <default> ]
+      - Parameters [0] {
       }
+      - Tentative return [ void ]
     }
 
     Method [ <internal:standard> public method rewind ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = <default> ]
+      - Parameters [0] {
       }
+      - Tentative return [ void ]
     }
 
     Method [ <internal:standard> public method read ] {
 
-      - Parameters [1] {
-        Parameter #0 [ <optional> $dir_handle = <default> ]
+      - Parameters [0] {
       }
+      - Tentative return [ string|false ]
     }
   }
 }
 Cannot instantiate a valid Directory directly:
 object(Directory)#%d (0) {
+  ["path"]=>
+  uninitialized(string)
+  ["handle"]=>
+  uninitialized(mixed)
 }
 Unable to find my handle property

@@ -1,7 +1,7 @@
 --TEST--
 Bug #42369 (Implicit conversion to string leaks memory)
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) echo 'skip simplexml extension is not loaded'; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
     $xml = '<?xml version="1.0" encoding="utf-8"?>';

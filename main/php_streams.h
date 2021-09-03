@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -181,6 +181,10 @@ struct _php_stream_wrapper	{
 
 #define PHP_STREAM_FLAG_NO_FCLOSE					0x80
 
+/* Suppress generation of PHP warnings on stream read/write errors.
+ * Currently for internal use only. */
+#define PHP_STREAM_FLAG_SUPPRESS_ERRORS				0x100
+
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
@@ -201,8 +205,6 @@ struct _php_stream  {
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	uint8_t fclose_stdiocast:2;
-
-	uint8_t fgetss_state;		/* for fgetss to handle multiline tags */
 
 	char mode[16];			/* "rwb" etc. ala stdio */
 
@@ -332,6 +334,9 @@ PHPAPI int _php_stream_putc(php_stream *stream, int c);
 PHPAPI int _php_stream_flush(php_stream *stream, int closing);
 #define php_stream_flush(stream)	_php_stream_flush((stream), 0)
 
+PHPAPI int _php_stream_sync(php_stream *stream, bool data_only);
+#define php_stream_sync(stream, d)	    _php_stream_sync((stream), (d))
+
 PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, size_t *returned_len);
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL)
 
@@ -387,7 +392,7 @@ END_EXTERN_C()
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
 #define PHP_STREAM_URL_STAT_QUIET	2
-#define PHP_STREAM_URL_STAT_NOCACHE	4
+#define PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR	4
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1
@@ -439,6 +444,15 @@ END_EXTERN_C()
 
 /* Enable/disable blocking reads on anonymous pipes on Windows. */
 #define PHP_STREAM_OPTION_PIPE_BLOCKING 13
+
+/* Stream can support fsync operation */
+#define PHP_STREAM_OPTION_SYNC_API		14
+#define PHP_STREAM_SYNC_SUPPORTED	0
+#define PHP_STREAM_SYNC_FSYNC 1
+#define PHP_STREAM_SYNC_FDSYNC 2
+
+#define php_stream_sync_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_SYNC_API, PHP_STREAM_SYNC_SUPPORTED, NULL) == PHP_STREAM_OPTION_RETURN_OK ? 1 : 0)
+
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR		-1 /* problem setting option */
@@ -550,8 +564,8 @@ END_EXTERN_C()
 /* Allow blocking reads on anonymous pipes on Windows. */
 #define STREAM_USE_BLOCKING_PIPE        0x00008000
 
-/* Antique - no longer has meaning */
-#define IGNORE_URL_WIN 0
+/* this flag is only used by include/require functions */
+#define STREAM_OPEN_FOR_ZEND_STREAM     0x00010000
 
 int php_init_stream_wrappers(int module_number);
 int php_shutdown_stream_wrappers(int module_number);

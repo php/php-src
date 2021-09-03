@@ -79,5 +79,6 @@ for ($b1 = 0xF0; $b1 < 0xFF; $b1++) {
     }
 }
 echo "Done.\n";
+?>
 --EXPECT--
 Done.

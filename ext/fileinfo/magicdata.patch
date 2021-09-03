@@ -1,121 +1,22 @@
- magic/Magdir/animation     | 47 +++++++++++++++++++---------------------------
- magic/Magdir/images        | 28 +++++++++++++--------------
- magic/Magdir/rpm           |  1 +
- magic/Magdir/securitycerts |  2 ++
- 4 files changed, 36 insertions(+), 42 deletions(-)
-
-diff --git a/magic/Magdir/animation b/magic/Magdir/animation
-index aaf32dd4..5c9ee1d9 100644
---- a/magic/Magdir/animation
-+++ b/magic/Magdir/animation
-@@ -1,6 +1,6 @@
- 
+diff -ur Magdir.orig/mail.news Magdir/mail.news
+--- Magdir.orig/mail.news	2021-03-31 01:47:28.000000000 +0200
++++ Magdir/mail.news	2021-04-05 19:41:55.168556972 +0200
+@@ -1,5 +1,5 @@
  #------------------------------------------------------------------------------
--# $File: animation,v 1.71 2019/04/19 00:42:27 christos Exp $
-+# $File: animation,v 1.73 2019/07/05 19:20:38 christos Exp $
- # animation:  file(1) magic for animation/movie formats
+-# $File: mail.news,v 1.26 2021/03/21 14:37:03 christos Exp $
++# $File: mail.news,v 1.27 2021/04/05 16:36:14 christos Exp $
+ # mail.news:  file(1) magic for mail and news
  #
- # animation formats
-@@ -445,36 +445,27 @@
- # modified by Joerg Jenderek
- # GRR the original test are too common for many DOS files
- # so don't accept as MP3 until we've tested the rate
-+# But also beat GEMDOS fonts
- 0       beshort&0xFFFE  0xFFFA
- # rates
-->2      byte&0xF0       0x10           MPEG ADTS, layer III, v1,  32 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x20           MPEG ADTS, layer III, v1,  40 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x30           MPEG ADTS, layer III, v1,  48 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x40           MPEG ADTS, layer III, v1,  56 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x50           MPEG ADTS, layer III, v1,  64 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x60           MPEG ADTS, layer III, v1,  80 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x70           MPEG ADTS, layer III, v1,  96 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x80           MPEG ADTS, layer III, v1, 112 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0x90           MPEG ADTS, layer III, v1, 128 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xA0           MPEG ADTS, layer III, v1, 160 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xB0           MPEG ADTS, layer III, v1, 192 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xC0           MPEG ADTS, layer III, v1, 224 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xD0           MPEG ADTS, layer III, v1, 256 kbps
--!:mime	audio/mpeg
-->2      byte&0xF0       0xE0           MPEG ADTS, layer III, v1, 320 kbps
-+>2	byte&0xF0	!0	
-+>>2	byte&0xF0	!0xF0		MPEG ADTS, layer III, v1
-+!:strength +20
- !:mime	audio/mpeg
-+>2	byte&0xF0	0x10		\b, 32 kbps
-+>2	byte&0xF0	0x20		\b, 40 kbps
-+>2	byte&0xF0	0x30		\b, 48 kbps
-+>2	byte&0xF0	0x40		\b, 56 kbps
-+>2	byte&0xF0	0x50		\b, 64 kbps
-+>2	byte&0xF0	0x60		\b, 80 kbps
-+>2	byte&0xF0	0x70		\b, 96 kbps
-+>2	byte&0xF0	0x80		\b, 112 kbps
-+>2	byte&0xF0	0x90		\b, 128 kbps
-+>2	byte&0xF0	0xA0		\b, 160 kbps
-+>2	byte&0xF0	0xB0		\b, 192 kbps
-+>2	byte&0xF0	0xC0		\b, 224 kbps
-+>2	byte&0xF0	0xD0		\b, 256 kbps
-+>2	byte&0xF0	0xE0		\b, 320 kbps
- # timing
- >2      byte&0x0C       0x00           \b, 44.1 kHz
- >2      byte&0x0C       0x04           \b, 48 kHz
-diff --git a/magic/Magdir/images b/magic/Magdir/images
-index 0e314ade..edf647d7 100644
---- a/magic/Magdir/images
-+++ b/magic/Magdir/images
-@@ -30,22 +30,22 @@
- # Prevent conflicts with CRI ADX.
- >(2.S-2) belong	!0x28632943
- # skip more garbage like *.iso by looking for positive image type
-->>2	ubyte			>0
-+>2	ubyte			>0
- # skip some compiled terminfo like xterm+tmux by looking for image type less equal 33
-->>>2	ubyte			<34
-+>>2	ubyte			<34
- # skip arches.3200 , Finder.Root , Slp.1 by looking for low pixel depth 1 8 15 16 24 32
-->>>>16	ubyte			1
-->>>>>0		use		tga-image
-->>>>16	ubyte			8
-->>>>>0		use		tga-image
-->>>>16	ubyte			15
-->>>>>0		use		tga-image
-->>>>16	ubyte			16
-->>>>>0		use		tga-image
-->>>>16	ubyte			24
-->>>>>0		use		tga-image
-->>>>16	ubyte			32
-->>>>>0		use		tga-image
-+>>>16	ubyte			1
-+>>>>0		use		tga-image
-+>>>16	ubyte			8
-+>>>>0		use		tga-image
-+>>>16	ubyte			15
-+>>>>0		use		tga-image
-+>>>16	ubyte			16
-+>>>>0		use		tga-image
-+>>>16	ubyte			24
-+>>>>0		use		tga-image
-+>>>16	ubyte			32
-+>>>>0		use		tga-image
- #	display tga bitmap image information
- 0	name				tga-image
- >2	ubyte		<34		Targa image data
-diff --git a/magic/Magdir/rpm b/magic/Magdir/rpm
-index fa336c07..00bda501 100644
---- a/magic/Magdir/rpm
-+++ b/magic/Magdir/rpm
+ # Unfortunately, saved netnews also has From line added in some news software.
+@@ -81,4 +81,4 @@
+ # File format spec: https://wiki.dovecot.org/Design/Dcrypt/#File_format
+ # From: Stephen Gildea
+ 0	string	CRYPTED\003\007		Dovecot encrypted message
+->9	byte	xu			\b, dcrypt version %d
++>9	byte	x			\b, dcrypt version %d
+diff -ur Magdir.orig/rpm Magdir/rpm
+--- Magdir.orig/rpm	2021-02-23 01:49:24.000000000 +0100
++++ Magdir/rpm	2021-04-05 19:40:55.080911893 +0200
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -124,10 +25,9 @@ index fa336c07..00bda501 100644
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff --git a/magic/Magdir/securitycerts b/magic/Magdir/securitycerts
-index d315a157..301d3c3d 100644
---- a/magic/Magdir/securitycerts
-+++ b/magic/Magdir/securitycerts
+diff -ur Magdir.orig/securitycerts Magdir/securitycerts
+--- Magdir.orig/securitycerts	2021-02-23 01:49:24.000000000 +0100
++++ Magdir/securitycerts	2021-04-05 19:40:55.080911893 +0200
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text

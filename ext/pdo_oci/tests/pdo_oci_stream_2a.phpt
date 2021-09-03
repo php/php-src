@@ -1,8 +1,10 @@
 --TEST--
-PDO OCI: Inserts 10K with 1 number and 2 LOB columns (stress test)
+PDO OCI: Inserts 1K with 1 number and 2 LOB columns (stress test)
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
@@ -51,8 +53,8 @@ $a8 = str_repeat('h', 4093);
 $a9 = str_repeat('i', 4094);
 $a10 = str_repeat('j', 4095);
 
-printf("Inserting 10000 Records ... ");
-for($i=0; $i<1000; $i++) {
+printf("Inserting 1000 Records ... ");
+for($i=0; $i<100; $i++) {
     do_insert($db, $i * 10 + 1, $a1, $a10);
     do_insert($db, $i * 10 + 2, $a2, $a9);
     do_insert($db, $i * 10 + 3, $a3, $a8);
@@ -71,4 +73,4 @@ printf("Done\n");
 
 ?>
 --EXPECT--
-Inserting 10000 Records ... Done
+Inserting 1000 Records ... Done

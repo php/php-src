@@ -9,6 +9,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline){
 });
 
 require 'notfound.php';
+?>
 --EXPECTF--
 error(require(notfound.php): Failed to open stream: %s)
 Fatal error: Uncaught Exception: Foo in %sbug60909_1.php:5

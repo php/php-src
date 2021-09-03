@@ -2,8 +2,9 @@
 ldap_modify_batch() - bug 77958 - values in ldap_modify_batch must be "string"
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -42,7 +43,8 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 bool(true)
-resource(%d) of type (ldap result entry)
+object(LDAP\ResultEntry)#%d (0) {
+}
 array(3) {
   [0]=>
   string(14) "xx-xx-xx-xx-xx"

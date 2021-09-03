@@ -30,7 +30,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--
-'s' is not a valid callback
+preg_replace_callback_array(): Argument #1 ($pattern) must contain only valid callbacks
 string(0) ""
 
 Warning: preg_replace_callback_array(): No ending delimiter '/' found in %spreg_replace_callback_array2.php on line %d

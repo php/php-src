@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs12_export_to_file() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
@@ -40,7 +40,7 @@ try {
 <?php
 $pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
-	unlink($pkcsfile);
+    unlink($pkcsfile);
 }
 ?>
 --EXPECTF--
@@ -53,11 +53,9 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
 
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_pkcs12_export_to_file(): X.509 Certificate cannot be retrieved in %s on line %d
 bool(false)
-
-Warning: openssl_pkcs12_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
-openssl_pkcs12_export_to_file(): supplied resource is not a valid OpenSSL X.509 resource
+openssl_pkcs12_export_to_file(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, OpenSSLAsymmetricKey given

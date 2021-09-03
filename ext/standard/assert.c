@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -24,15 +24,13 @@
 ZEND_BEGIN_MODULE_GLOBALS(assert)
 	zval callback;
 	char *cb;
-	zend_bool active;
-	zend_bool bail;
-	zend_bool warning;
-	zend_bool exception;
+	bool active;
+	bool bail;
+	bool warning;
+	bool exception;
 ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
-
-static zend_class_entry *assertion_error_ce;
 
 #define ASSERTG(v) ZEND_MODULE_GLOBALS_ACCESSOR(assert, v)
 
@@ -45,6 +43,8 @@ enum {
 	ASSERT_WARNING,
 	ASSERT_EXCEPTION
 };
+
+PHPAPI zend_class_entry *assertion_error_ce;
 
 static PHP_INI_MH(OnChangeCallback) /* {{{ */
 {
@@ -77,7 +77,7 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_BOOLEAN("assert.bail",		"0",	PHP_INI_ALL,	OnUpdateBool,		bail,	 			zend_assert_globals,		assert_globals)
 	 STD_PHP_INI_BOOLEAN("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateBool,		warning, 			zend_assert_globals,		assert_globals)
 	 PHP_INI_ENTRY("assert.callback",		NULL,	PHP_INI_ALL,	OnChangeCallback)
-	 STD_PHP_INI_BOOLEAN("assert.exception",	"0",	PHP_INI_ALL,	OnUpdateBool,		exception, 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_BOOLEAN("assert.exception",	"1",	PHP_INI_ALL,	OnUpdateBool,		exception, 			zend_assert_globals,		assert_globals)
 PHP_INI_END()
 
 static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{{ */
@@ -89,8 +89,6 @@ static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{
 
 PHP_MINIT_FUNCTION(assert) /* {{{ */
 {
-	zend_class_entry ce;
-
 	ZEND_INIT_MODULE_GLOBALS(assert, php_assert_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
@@ -100,9 +98,6 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", ASSERT_EXCEPTION, CONST_CS|CONST_PERSISTENT);
-
-	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
-	assertion_error_ce = zend_register_internal_class_ex(&ce, zend_ce_error);
 
 	return SUCCESS;
 }
@@ -139,20 +134,27 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval *assertion;
-	zval *description = NULL;
+	zend_string *description_str = NULL;
+	zend_object *description_obj = NULL;
 
-	if (! ASSERTG(active)) {
+	if (!ASSERTG(active)) {
 		RETURN_TRUE;
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(assertion)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(description)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(description_obj, zend_ce_throwable, description_str)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_is_true(assertion)) {
 		RETURN_TRUE;
+	}
+
+	if (description_obj) {
+		GC_ADDREF(description_obj);
+		zend_throw_exception_internal(description_obj);
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(ASSERTG(callback)) == IS_UNDEF && ASSERTG(cb)) {
@@ -171,49 +173,33 @@ PHP_FUNCTION(assert)
 
 		ZVAL_FALSE(&retval);
 
-		/* XXX do we want to check for error here? */
-		if (!description) {
-			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
-			zval_ptr_dtor(&(args[2]));
-			zval_ptr_dtor(&(args[0]));
-		} else {
-			ZVAL_STR(&args[3], zval_get_string(description));
+		if (description_str) {
+			ZVAL_STR(&args[3], description_str);
 			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 4, args);
-			zval_ptr_dtor(&(args[3]));
-			zval_ptr_dtor(&(args[2]));
-			zval_ptr_dtor(&(args[0]));
+		} else {
+			call_user_function(NULL, NULL, &ASSERTG(callback), &retval, 3, args);
 		}
 
+		zval_ptr_dtor(&args[0]);
 		zval_ptr_dtor(&retval);
 	}
 
 	if (ASSERTG(exception)) {
-		if (!description) {
-			zend_throw_exception(assertion_error_ce, NULL, E_ERROR);
-		} else if (Z_TYPE_P(description) == IS_OBJECT &&
-			instanceof_function(Z_OBJCE_P(description), zend_ce_throwable)) {
-			Z_ADDREF_P(description);
-			zend_throw_exception_object(description);
-		} else {
-			zend_string *str = zval_get_string(description);
-			zend_throw_exception(assertion_error_ce, ZSTR_VAL(str), E_ERROR);
-			zend_string_release_ex(str, 0);
+		zend_throw_exception(assertion_error_ce, description_str ? ZSTR_VAL(description_str) : NULL, E_ERROR);
+		if (ASSERTG(bail)) {
+			/* When bail is turned on, the exception will not be caught. */
+			zend_exception_error(EG(exception), E_ERROR);
 		}
 	} else if (ASSERTG(warning)) {
-		if (!description) {
-			php_error_docref(NULL, E_WARNING, "Assertion failed");
-		} else {
-			zend_string *str = zval_get_string(description);
-			php_error_docref(NULL, E_WARNING, "%s failed", ZSTR_VAL(str));
-			zend_string_release_ex(str, 0);
-		}
+		php_error_docref(NULL, E_WARNING, "%s failed", description_str ? ZSTR_VAL(description_str) : "Assertion failed");
 	}
 
 	if (ASSERTG(bail)) {
-		zend_bailout();
+		zend_throw_unwind_exit();
+		RETURN_THROWS();
+	} else {
+		RETURN_FALSE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -222,7 +208,7 @@ PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
 	zend_long what;
-	zend_bool oldint;
+	bool oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
@@ -289,9 +275,14 @@ PHP_FUNCTION(assert_options)
 		} else {
 			RETVAL_NULL();
 		}
+
 		if (ac == 2) {
 			zval_ptr_dtor(&ASSERTG(callback));
-			ZVAL_COPY(&ASSERTG(callback), value);
+			if (Z_TYPE_P(value) == IS_NULL) {
+				ZVAL_UNDEF(&ASSERTG(callback));
+			} else {
+				ZVAL_COPY(&ASSERTG(callback), value);
+			}
 		}
 		return;
 
@@ -312,7 +303,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		zend_argument_value_error(1, "must have a valid value");
+		zend_argument_value_error(1, "must be an ASSERT_* constant");
 		RETURN_THROWS();
 	}
 }

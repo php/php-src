@@ -25,7 +25,7 @@ try {
 
 
 ?>
---EXPECTF--
-Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
-Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
+--EXPECT--
+Ok - ReflectionExtension::__construct() expects exactly 1 argument, 0 given
+Ok - ReflectionExtension::__construct() expects exactly 1 argument, 2 given
 Ok - ReflectionExtension::__construct(): Argument #1 ($name) must be of type string, array given

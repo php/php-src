@@ -1,8 +1,7 @@
 --TEST--
 Bug #34272 (empty array onto COM object blows up)
---SKIPIF--
-<?php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 error_reporting(E_ALL);

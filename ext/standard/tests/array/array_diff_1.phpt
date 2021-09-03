@@ -15,5 +15,5 @@ try {
 echo "OK!";
 ?>
 --EXPECT--
-array_diff(): Argument #2 ($arr2) must be of type array, int given
+array_diff(): Argument #2 must be of type array, int given
 OK!

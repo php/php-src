@@ -1,8 +1,9 @@
 --TEST--
 Basic test for setting Oracle 11gR2 "edition" attribute
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
@@ -15,7 +16,7 @@ if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
-       	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+        die("skip expected output only valid when using Oracle 11gR2 or greater database server");
 }
 preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!(isset($matches[0]) &&

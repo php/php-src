@@ -1,11 +1,7 @@
 --TEST--
 ext/sockets - socket_sendto - test with incorrect parameters
---SKIPIF--
-<?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
     $s_c = socket_create_listen(0);
@@ -17,4 +13,4 @@ ext/sockets - socket_sendto - test with incorrect parameters
     socket_close($s_c);
 ?>
 --EXPECT--
-socket_sendto(): Argument #3 ($len) must be greater than or equal to 0
+socket_sendto(): Argument #3 ($length) must be greater than or equal to 0

@@ -26,5 +26,5 @@ echo $s->current();
 --EXPECT--
 //line 3
 //line 4
-//line 3
 //line 4
+//line 5

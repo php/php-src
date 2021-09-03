@@ -29,6 +29,7 @@ chown("test://testdir/chown", 42);
 chgrp("test://testdir/chgrp", "test");
 chgrp("test://testdir/chgrp", 42);
 chmod("test://testdir/chmod", 0755);
+?>
 --EXPECT--
 bool(true)
 metadata: test://testdir/touch, 1

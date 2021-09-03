@@ -2,8 +2,8 @@
 Phar front controller alternate index file [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller7.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller7.php
 REQUEST_URI=/frontcontroller7.php/

@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : mb_ereg 'successfully' matching incorrectly
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--
@@ -13,10 +14,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
  * pattern is supplied to mb_ereg. Similar error message to ereg().
  */
 
-$unset_var = 10;
-unset ($unset_var);
-$inputs = array(NULL, null, false, FALSE, "", '', @$undefined_var,
-@$unset_var);
+$inputs = array(false, FALSE, "", '');
 
 $iterator = 1;
 foreach($inputs as $input) {
@@ -25,106 +23,48 @@ foreach($inputs as $input) {
     }
     echo "\n-- Iteration $iterator --\n";
     echo "Without \$regs arg:\n";
-    var_dump( mb_ereg($input, 'hello, world') );
+    try {
+        var_dump( mb_ereg($input, 'hello, world') );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     echo "With \$regs arg:\n";
-    var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+    try {
+        var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     var_dump($mb_regs);
     $iterator++;
 };
 ?>
---EXPECTF--
+--EXPECT--
 -- Iteration 1 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 2 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 3 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 4 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
-
--- Iteration 5 --
-Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
-
--- Iteration 6 --
-Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
-
--- Iteration 7 --
-Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
-
--- Iteration 8 --
-Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL

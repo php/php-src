@@ -1,9 +1,11 @@
 --TEST--
 DBA DB1 handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'db1';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'db1';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

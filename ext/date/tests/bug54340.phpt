@@ -16,6 +16,7 @@ $dt = new DateTime('first day of January 2011');
 
 $dt->sub($interval);
 var_dump($dt);
+?>
 --EXPECT--
 object(DateTime)#2 (3) {
   ["date"]=>

@@ -13,13 +13,13 @@ var_dump(srand("500"));
 var_dump(srand("500E3"));
 var_dump(srand(true));
 var_dump(srand(false));
-var_dump(srand(NULL));
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing srand() : basic functionality ***
 NULL
 NULL
-NULL
+
+Deprecated: Implicit conversion from float 500.1 to int loses precision in %s on line %d
 NULL
 NULL
 NULL

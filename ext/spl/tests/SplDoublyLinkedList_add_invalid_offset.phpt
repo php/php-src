@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-Exception: Offset invalid or out of range
+Exception: SplDoublyLinkedList::add(): Argument #1 ($index) is out of range

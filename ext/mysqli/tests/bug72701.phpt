@@ -1,13 +1,14 @@
 --TEST--
 Bug #72701 mysqli_get_host_info() wrong output
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 
 if ("127.0.0.1" != $host && "localhost" != $host) {
-	die("skip require 127.0.0.1 connection");
+    die("skip require 127.0.0.1 connection");
 }
 
 ?>

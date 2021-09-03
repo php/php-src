@@ -1,17 +1,17 @@
 --TEST--
-Test array_intersect() function : usage variations - unexpected values for 'arr1' argument
+Test array_intersect() function : usage variations - unexpected values for 'array1' argument
 --FILE--
 <?php
 /*
-* Testing array_intersect() function by passing values to $arr1 argument other than arrays
+* Testing array_intersect() function by passing values to $array1 argument other than arrays
 * and see that function emits proper warning messages wherever expected.
-* The $arr2 argument is a fixed array.
+* The $array2 argument is a fixed array.
 */
 
-echo "*** Testing array_intersect() : Passing non-array values to \$arr1 argument ***\n";
+echo "*** Testing array_intersect() : Passing non-array values to \$array1 argument ***\n";
 
-// array to be passsed to $arr2 as default argument
-$arr2 = array(1, 2);
+// array to be passsed to $array2 as default argument
+$array2 = array(1, 2);
 
 // array to be passed to optional argument
 $arr3 = array(1, 2, "one" => 1, "two" => 2);
@@ -36,7 +36,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-// unexpected values to be passed to $arr1 argument
+// unexpected values to be passed to $array1 argument
 $arrays = array(
 
        // int data
@@ -91,14 +91,14 @@ foreach($arrays as $unexpected_value) {
 
     // Calling array_intersect() with default arguments
     try {
-        var_dump( array_intersect($unexpected_value,$arr2) );
+        var_dump( array_intersect($unexpected_value,$array2) );
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
 
     // Calling array_intersect() with more arguments
     try {
-        var_dump( array_intersect($unexpected_value, $arr2, $arr3) );
+        var_dump( array_intersect($unexpected_value, $array2, $arr3) );
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
@@ -111,77 +111,77 @@ fclose($fp);
 echo "Done";
 ?>
 --EXPECT--
-*** Testing array_intersect() : Passing non-array values to $arr1 argument ***
+*** Testing array_intersect() : Passing non-array values to $array1 argument ***
 
--- Iterator 1 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
-array_intersect(): Argument #1 ($arr1) must be of type array, int given
+-- Iterator 1 --array_intersect(): Argument #1 ($array) must be of type array, int given
+array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 2 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
-array_intersect(): Argument #1 ($arr1) must be of type array, int given
+-- Iterator 2 --array_intersect(): Argument #1 ($array) must be of type array, int given
+array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 3 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
-array_intersect(): Argument #1 ($arr1) must be of type array, int given
+-- Iterator 3 --array_intersect(): Argument #1 ($array) must be of type array, int given
+array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 4 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
-array_intersect(): Argument #1 ($arr1) must be of type array, int given
+-- Iterator 4 --array_intersect(): Argument #1 ($array) must be of type array, int given
+array_intersect(): Argument #1 ($array) must be of type array, int given
 
--- Iterator 5 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
-array_intersect(): Argument #1 ($arr1) must be of type array, float given
+-- Iterator 5 --array_intersect(): Argument #1 ($array) must be of type array, float given
+array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 6 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
-array_intersect(): Argument #1 ($arr1) must be of type array, float given
+-- Iterator 6 --array_intersect(): Argument #1 ($array) must be of type array, float given
+array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 7 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
-array_intersect(): Argument #1 ($arr1) must be of type array, float given
+-- Iterator 7 --array_intersect(): Argument #1 ($array) must be of type array, float given
+array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 8 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
-array_intersect(): Argument #1 ($arr1) must be of type array, float given
+-- Iterator 8 --array_intersect(): Argument #1 ($array) must be of type array, float given
+array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 9 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
-array_intersect(): Argument #1 ($arr1) must be of type array, float given
+-- Iterator 9 --array_intersect(): Argument #1 ($array) must be of type array, float given
+array_intersect(): Argument #1 ($array) must be of type array, float given
 
--- Iterator 10 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
-array_intersect(): Argument #1 ($arr1) must be of type array, null given
+-- Iterator 10 --array_intersect(): Argument #1 ($array) must be of type array, null given
+array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 11 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
-array_intersect(): Argument #1 ($arr1) must be of type array, null given
+-- Iterator 11 --array_intersect(): Argument #1 ($array) must be of type array, null given
+array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 12 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+-- Iterator 12 --array_intersect(): Argument #1 ($array) must be of type array, bool given
+array_intersect(): Argument #1 ($array) must be of type array, bool given
 
--- Iterator 13 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+-- Iterator 13 --array_intersect(): Argument #1 ($array) must be of type array, bool given
+array_intersect(): Argument #1 ($array) must be of type array, bool given
 
--- Iterator 14 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+-- Iterator 14 --array_intersect(): Argument #1 ($array) must be of type array, bool given
+array_intersect(): Argument #1 ($array) must be of type array, bool given
 
--- Iterator 15 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+-- Iterator 15 --array_intersect(): Argument #1 ($array) must be of type array, bool given
+array_intersect(): Argument #1 ($array) must be of type array, bool given
 
--- Iterator 16 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
-array_intersect(): Argument #1 ($arr1) must be of type array, string given
+-- Iterator 16 --array_intersect(): Argument #1 ($array) must be of type array, string given
+array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 17 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
-array_intersect(): Argument #1 ($arr1) must be of type array, string given
+-- Iterator 17 --array_intersect(): Argument #1 ($array) must be of type array, string given
+array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 18 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
-array_intersect(): Argument #1 ($arr1) must be of type array, string given
+-- Iterator 18 --array_intersect(): Argument #1 ($array) must be of type array, string given
+array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 19 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
-array_intersect(): Argument #1 ($arr1) must be of type array, string given
+-- Iterator 19 --array_intersect(): Argument #1 ($array) must be of type array, string given
+array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 20 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
-array_intersect(): Argument #1 ($arr1) must be of type array, string given
+-- Iterator 20 --array_intersect(): Argument #1 ($array) must be of type array, string given
+array_intersect(): Argument #1 ($array) must be of type array, string given
 
--- Iterator 21 --array_intersect(): Argument #1 ($arr1) must be of type array, classA given
-array_intersect(): Argument #1 ($arr1) must be of type array, classA given
+-- Iterator 21 --array_intersect(): Argument #1 ($array) must be of type array, classA given
+array_intersect(): Argument #1 ($array) must be of type array, classA given
 
--- Iterator 22 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
-array_intersect(): Argument #1 ($arr1) must be of type array, null given
+-- Iterator 22 --array_intersect(): Argument #1 ($array) must be of type array, null given
+array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 23 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
-array_intersect(): Argument #1 ($arr1) must be of type array, null given
+-- Iterator 23 --array_intersect(): Argument #1 ($array) must be of type array, null given
+array_intersect(): Argument #1 ($array) must be of type array, null given
 
--- Iterator 24 --array_intersect(): Argument #1 ($arr1) must be of type array, resource given
-array_intersect(): Argument #1 ($arr1) must be of type array, resource given
+-- Iterator 24 --array_intersect(): Argument #1 ($array) must be of type array, resource given
+array_intersect(): Argument #1 ($array) must be of type array, resource given
 Done

@@ -7,7 +7,7 @@ file_get_contents() test using offset parameter out of range
 display_errors=false
 --SKIPIF--
 <?php
-	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+    if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php

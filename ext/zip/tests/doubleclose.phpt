@@ -1,9 +1,7 @@
 --TEST--
 close() called twice
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 

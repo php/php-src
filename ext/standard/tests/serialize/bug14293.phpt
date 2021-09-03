@@ -26,7 +26,7 @@ var_dump($t);
 --EXPECTF--
 __sleep called
 
-Notice: serialize(): "b" returned as member variable from __sleep() but does not exist in %sbug14293.php on line %d
+Warning: serialize(): "b" returned as member variable from __sleep() but does not exist in %s on line %d
 O:1:"t":1:{s:1:"a";s:5:"hello";}
 object(t)#%d (1) {
   ["a"]=>

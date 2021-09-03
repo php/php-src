@@ -2,8 +2,8 @@
 Test cal_days_in_month() function : error conditions
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 try {

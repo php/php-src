@@ -1,7 +1,7 @@
 --TEST--
 Bug #73847: Recursion when a variable is redefined as array
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test() {

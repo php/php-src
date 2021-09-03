@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, attributes test
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $filename = __DIR__ . '/_003.xml';
@@ -68,14 +68,18 @@ while ($reader->read()) {
 
             var_dump($reader->moveToAttributeNo(20));
             var_dump($reader->moveToAttribute('missing-attribute'));
-            var_dump($reader->moveToAttribute(''));
+            try {
+                $reader->moveToAttribute('');
+            } catch (ValueError $exception) {
+                echo $exception->getMessage() . "\n";
+            }
         }
     }
 }
 $reader->close();
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 num: 1
 idx: 2
 num: 1
@@ -84,6 +88,4 @@ num: 1
 idx: 2
 bool(false)
 bool(false)
-
-Warning: XMLReader::moveToAttribute(): Attribute Name is required in %s on line %d
-bool(false)
+XMLReader::moveToAttribute(): Argument #1 ($name) cannot be empty

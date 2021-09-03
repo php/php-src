@@ -1,8 +1,10 @@
 --TEST--
 Phar: process zlib-compressed zip alias
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--INI--
+phar.require_hash=0
+--EXTENSIONS--
+phar
+zlib
 --FILE--
 <?php
 try {

@@ -1,7 +1,7 @@
 --TEST--
 gmp_legendre() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -20,13 +20,25 @@ var_dump(gmp_strval(gmp_legendre($n, $n1)));
 var_dump(gmp_strval(gmp_legendre($n, 3)));
 var_dump(gmp_strval(gmp_legendre(3, $n1)));
 
-var_dump(gmp_legendre(3, array()));
-var_dump(gmp_legendre(array(), 3));
-var_dump(gmp_legendre(array(), array()));
+try {
+    var_dump(gmp_legendre(3, array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_legendre(array(), 3));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_legendre(array(), array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "0"
 string(2) "-1"
 string(1) "0"
@@ -44,13 +56,7 @@ string(1) "0"
 string(2) "-1"
 string(1) "0"
 string(2) "-1"
-
-Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
-
-Warning: gmp_legendre(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_legendre(): Argument #2 ($num2) must be of type GMP|string|int, array given
+gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
+gmp_legendre(): Argument #1 ($num1) must be of type GMP|string|int, array given
 Done

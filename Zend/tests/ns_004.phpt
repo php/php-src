@@ -5,6 +5,7 @@
 namespace test\ns1;
 
 echo get_class(new Exception()),"\n";
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Class "test\ns1\Exception" not found in %s:%d
 Stack trace:

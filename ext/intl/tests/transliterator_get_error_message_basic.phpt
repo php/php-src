@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::getErrorMessage (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -15,6 +15,7 @@ var_dump($t->transliterate(""));
 echo $t->getErrorMessage(), "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Warning: Transliterator::transliterate(): String conversion of string to UTF-16 failed in %s on line %d
 bool(false)

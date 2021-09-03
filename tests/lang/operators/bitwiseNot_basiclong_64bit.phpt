@@ -25,7 +25,7 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 --- testing: 9223372036854775807 ---
 int(-9223372036854775808)
 --- testing: -9223372036854775808 ---
@@ -51,6 +51,8 @@ int(-4294967294)
 --- testing: 9223372036854775806 ---
 int(-9223372036854775807)
 --- testing: 9.2233720368548E+18 ---
+
+Deprecated: Implicit conversion from float 9.223372036854776E+18 to int loses precision in %s on line %d
 int(9223372036854775807)
 --- testing: -9223372036854775807 ---
 int(9223372036854775806)

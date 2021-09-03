@@ -3,7 +3,7 @@ Bug #61371: stream_context_create() causes memory leaks on use streams_socket_cr
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-	die('skip non windows test');
+    die('skip non windows test');
 }
 --FILE--
 <?php

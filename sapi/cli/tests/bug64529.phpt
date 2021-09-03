@@ -1,16 +1,18 @@
 --TEST--
 Bug #64529 (Ran out of opcode space)
+--EXTENSIONS--
+readline
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == "WIN") {
-	die("skip non windows test");
+    die("skip non windows test");
 }
-if (!extension_loaded("readline") || !readline_info("done")) {
-	die("skip readline support required");
+if (!readline_info("done")) {
+    die("skip readline support required");
 }
 exec('which expect', $output, $ret);
 if ($ret) {
-	die("skip no expect installed");
+    die("skip no expect installed");
 }
 ?>
 --FILE--

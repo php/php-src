@@ -1,10 +1,7 @@
 --TEST--
 Test INI mbstring.internal_encoding basic - invalid encoding specified in INI
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_stripos') or die("skip mb_stripos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.internal_encoding=BAD
 --FILE--
@@ -20,9 +17,6 @@ echo ini_get('mbstring.internal_encoding')."\n";
 
 ?>
 --EXPECT--
-PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
-PHP Warning:  PHP Startup: Unknown encoding "BAD" in ini setting in Unknown on line 0
-
 Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 
 Warning: PHP Startup: Unknown encoding "BAD" in ini setting in Unknown on line 0

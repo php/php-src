@@ -1,13 +1,13 @@
 --TEST--
 mysqli_stmt_get_result() - meta data
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_stmt_get_result'))
-	die('skip mysqli_stmt_get_result not available');
+    die('skip mysqli_stmt_get_result not available');
 ?>
 --FILE--
 <?php
@@ -182,11 +182,19 @@ if (!function_exists('mysqli_stmt_get_result'))
                 printf("[032] Expecting %s/%s got %s/%s\n",
                     gettype($pos), $pos, gettype($tmp), $tmp);
         } else {
+            try {
+                $tmp = @mysqli_field_seek($res, $pos);
+                if ($pos >= $num && $tmp !== false) {
+                    printf("[033] field_seek(%d) did not fail\n", $pos);
+                }
+            } catch (ValueError $e) { /* Suppress output because pos is RANDOM */}
 
-            if (false !== @mysqli_field_seek($res, $pos))
-                printf("[033] field_seek(%d) did not fail\n", $pos);
-            if (false !== @mysqli_field_seek($res_meta, $pos))
-                printf("[034] field_seek(%d) did not fail\n", $pos);
+            try {
+                $tmp = @mysqli_field_seek($res_meta, $pos);
+                if ($pos >= $num && $tmp !== false) {
+                    printf("[034] field_seek(%d) did not fail\n", $pos);
+                }
+            } catch (ValueError $e) { /* Suppress output because pos is RANDOM */}
         }
     }
 
@@ -219,7 +227,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 array(2) {

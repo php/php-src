@@ -1,7 +1,8 @@
 // vim:ft=javascript
 
 EXTENSION("date", "php_date.c", false, "/Iext/date/lib /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /DHAVE_TIMELIB_CONFIG_H=1");
-ADD_SOURCES("ext/date/lib", "astro.c timelib.c dow.c parse_date.c parse_tz.c tm2unixtime.c unixtime2tm.c parse_iso_intervals.c interval.c", "date");
+PHP_DATE = "yes";
+ADD_SOURCES("ext/date/lib", "astro.c timelib.c dow.c parse_date.c parse_posix.c parse_tz.c tm2unixtime.c unixtime2tm.c parse_iso_intervals.c interval.c", "date");
 
 ADD_FLAG('CFLAGS_DATE', "/wd4244");
 
@@ -13,6 +14,7 @@ tl_config.WriteLine("#define timelib_malloc  emalloc");
 tl_config.WriteLine("#define timelib_realloc erealloc");
 tl_config.WriteLine("#define timelib_calloc  ecalloc");
 tl_config.WriteLine("#define timelib_strdup  estrdup");
+tl_config.WriteLine("#define timelib_strndup estrndup");
 tl_config.WriteLine("#define timelib_free    efree");
 tl_config.Close();
 

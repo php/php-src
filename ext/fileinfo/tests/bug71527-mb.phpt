@@ -1,9 +1,7 @@
 --TEST--
 Bug #71527 Buffer over-write in finfo_open with malformed magic file
---SKIPIF--
-<?php
-if (!class_exists('finfo'))
-	die('skip no fileinfo extension');
+--EXTENSIONS--
+fileinfo
 --ENV--
 USE_ZEND_ALLOC=0
 --FILE--
@@ -12,5 +10,5 @@ USE_ZEND_ALLOC=0
     var_dump($finfo);
 ?>
 --EXPECTF--
-Warning: finfo_open(): Failed to load magic database at '%sbug71527私はガラスを食べられます.magic'. in %sbug71527-mb.php on line %d
+Warning: finfo_open(): Failed to load magic database at "%sbug71527私はガラスを食べられます.magic" in %sbug71527-mb.php on line %d
 bool(false)

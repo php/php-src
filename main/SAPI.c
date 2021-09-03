@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,7 +54,7 @@ static void _type_dtor(zval *zv)
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init_ex(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1, 0);
+	zend_hash_init(&sapi_globals->known_post_content_types, 8, NULL, _type_dtor, 1);
 	php_setup_sapi_content_types();
 }
 
@@ -112,14 +112,11 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 /* {{{ call a header function */
 PHP_FUNCTION(header_register_callback)
 {
-	zval *callback_func;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback_func) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
-	}
-
-	if (!zend_is_callable(callback_func, 0, NULL)) {
-		RETURN_FALSE;
 	}
 
 	if (Z_TYPE(SG(callback_func)) != IS_UNDEF) {
@@ -127,7 +124,7 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), callback_func);
+	ZVAL_COPY(&SG(callback_func), &fci.function_name);
 
 	RETURN_TRUE;
 }
@@ -343,7 +340,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint32_t len;
+	uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -578,8 +575,8 @@ static void sapi_update_response_code(int ncode)
 }
 
 /*
- * since zend_llist_del_element only remove one matched item once,
- * we should remove them by ourself
+ * since zend_llist_del_element only removes one matched item once,
+ * we should remove them manually
  */
 static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;
@@ -609,7 +606,7 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -763,13 +760,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				while (*ptr == ' ') {
 					ptr++;
 					len--;
-				}
-
-				/* Disable possible output compression for images */
-				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-					zend_alter_ini_entry_chars(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-					zend_string_release_ex(key, 0);
 				}
 
 				mimetype = estrdup(ptr);

@@ -26,5 +26,6 @@ try {
     echo "6";
 }
 echo "\n";
+?>
 --EXPECT--
 123456

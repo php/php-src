@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,8 +16,6 @@
 
 #include "php.h"
 #include "php_string.h"
-
-#define LEVENSHTEIN_MAX_LENGTH 255
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
@@ -75,24 +73,12 @@ PHP_FUNCTION(levenshtein)
 	zend_long cost_ins = 1;
 	zend_long cost_rep = 1;
 	zend_long cost_del = 1;
-	zend_long distance = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lll", &string1, &string2, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ZSTR_LEN(string1) > LEVENSHTEIN_MAX_LENGTH) {
-		zend_argument_value_error(1, "must be less than %d characters", LEVENSHTEIN_MAX_LENGTH + 1);
-		RETURN_THROWS();
-	}
 
-	if (ZSTR_LEN(string2) > LEVENSHTEIN_MAX_LENGTH) {
-		zend_argument_value_error(2, "must be less than %d characters", LEVENSHTEIN_MAX_LENGTH + 1);
-		RETURN_THROWS();
-	}
-
-	distance = reference_levdist(string1, string2, cost_ins, cost_rep, cost_del);
-
-	RETURN_LONG(distance);
+	RETURN_LONG(reference_levdist(string1, string2, cost_ins, cost_rep, cost_del));
 }
 /* }}} */

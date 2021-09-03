@@ -22,12 +22,8 @@ C::s();
 $c = new C();
 $c->s();
 
-get_called_class();
-
 ?>
---EXPECTF--
+--EXPECT--
 Called class: D
 Called class: C
 Called class: C
-
-Warning: get_called_class() called from outside a class in %s on line %d

@@ -3,13 +3,13 @@ mysqli_get_client_stats() - skipped rows
 --INI--
 mysqlnd.collect_statistics="1"
 mysqlnd.collect_memory_statistics="1"
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?PHP
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_client_stats')) {
-	die("skip only available with mysqlnd");
+    die("skip only available with mysqlnd");
 }
 ?>
 --FILE--

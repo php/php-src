@@ -20,6 +20,7 @@ foreach ($subjects as $subject) {
     echo $bits, ': ', hash("sha3-$bits", $subject), "\n";
   }
 }
+?>
 --EXPECT--
 ==  ==
 224: 6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7

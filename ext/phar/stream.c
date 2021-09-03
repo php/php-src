@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -223,13 +223,10 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				idata->internal_file->flags |= Z_LVAL_P(pzoption);
 			}
 			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", sizeof("metadata")-1)) != NULL) {
-				if (Z_TYPE(idata->internal_file->metadata) != IS_UNDEF) {
-					zval_ptr_dtor(&idata->internal_file->metadata);
-					ZVAL_UNDEF(&idata->internal_file->metadata);
-				}
+				phar_metadata_tracker_free(&idata->internal_file->metadata_tracker, idata->internal_file->is_persistent);
 
 				metadata = pzoption;
-				ZVAL_COPY_DEREF(&idata->internal_file->metadata, metadata);
+				ZVAL_COPY_DEREF(&idata->internal_file->metadata_tracker.val, metadata);
 				idata->phar->is_modified = 1;
 			}
 		}
@@ -483,7 +480,7 @@ static int phar_stream_flush(php_stream *stream) /* {{{ */
 /**
  * stat an opened phar file handle stream, used by phar_stat()
  */
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_temp_dir)
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, bool is_temp_dir)
 {
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 
@@ -846,7 +843,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		/* mark the old one for deletion */
 		entry->is_deleted = 1;
 		entry->fp = NULL;
-		ZVAL_UNDEF(&entry->metadata);
+		ZVAL_UNDEF(&entry->metadata_tracker.val);
 		entry->link = entry->tmp = NULL;
 		source = entry;
 

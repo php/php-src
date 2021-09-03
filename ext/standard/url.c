@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -81,13 +81,33 @@ PHPAPI php_url *php_url_parse(char const *str)
 	return php_url_parse_ex(str, strlen(str));
 }
 
+static const char *binary_strcspn(const char *s, const char *e, const char *chars) {
+	while (*chars) {
+		const char *p = memchr(s, *chars, e - s);
+		if (p) {
+			e = p;
+		}
+		chars++;
+	}
+	return e;
+}
+
 /* {{{ php_url_parse */
 PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
+{
+	bool has_port;
+	return php_url_parse_ex2(str, length, &has_port);
+}
+
+/* {{{ php_url_parse_ex2
+ */
+PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
 
+	*has_port = 0;
 	s = str;
 	ue = s + length;
 
@@ -98,7 +118,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
-				if (e + 1 < ue && e < s + strcspn(s, "?#")) {
+				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 					s += 2;
@@ -172,10 +192,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
 			zend_long port;
+			char *end;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = ZEND_STRTOL(port_buf, NULL, 10);
-			if (port > 0 && port <= 65535) {
+			port = ZEND_STRTOL(port_buf, &end, 10);
+			if (port >= 0 && port <= 65535 && end != port_buf) {
+				*has_port = 1;
 				ret->port = (unsigned short) port;
 				if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 				    s += 2;
@@ -198,18 +220,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		goto just_path;
 	}
 
-	parse_host:
-	/* Binary-safe strcspn(s, "/?#") */
-	e = ue;
-	if ((p = memchr(s, '/', e - s))) {
-		e = p;
-	}
-	if ((p = memchr(s, '?', e - s))) {
-		e = p;
-	}
-	if ((p = memchr(s, '#', e - s))) {
-		e = p;
-	}
+parse_host:
+	e = binary_strcspn(s, ue, "/?#");
 
 	/* check for login and password */
 	if ((p = zend_memrchr(s, '@', (e-s)))) {
@@ -246,10 +258,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 				return NULL;
 			} else if (e - p > 0) {
 				zend_long port;
+				char *end;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = ZEND_STRTOL(port_buf, NULL, 10);
-				if (port > 0 && port <= 65535) {
+				port = ZEND_STRTOL(port_buf, &end, 10);
+				if (port >= 0 && port <= 65535 && end != port_buf) {
+					*has_port = 1;
 					ret->port = (unsigned short)port;
 				} else {
 					php_url_free(ret);
@@ -321,6 +335,7 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 	zval tmp;
+	bool has_port;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
@@ -328,7 +343,7 @@ PHP_FUNCTION(parse_url)
 		Z_PARAM_LONG(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	resource = php_url_parse_ex(str, str_len);
+	resource = php_url_parse_ex2(str, str_len, &has_port);
 	if (resource == NULL) {
 		/* @todo Find a method to determine why php_url_parse_ex() failed */
 		RETURN_FALSE;
@@ -343,7 +358,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->host != NULL) RETVAL_STR_COPY(resource->host);
 				break;
 			case PHP_URL_PORT:
-				if (resource->port != 0) RETVAL_LONG(resource->port);
+				if (has_port) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
 				if (resource->user != NULL) RETVAL_STR_COPY(resource->user);
@@ -379,7 +394,7 @@ PHP_FUNCTION(parse_url)
 		ZVAL_STR_COPY(&tmp, resource->host);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
-	if (resource->port != 0) {
+	if (has_port) {
 		ZVAL_LONG(&tmp, resource->port);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
 	}
@@ -441,10 +456,10 @@ static int php_htoi(char *s)
    For added safety, we only leave -_. unencoded.
  */
 
-static unsigned char hexchars[] = "0123456789ABCDEF";
+static const unsigned char hexchars[] = "0123456789ABCDEF";
 
-static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, zend_bool raw) /* {{{ */ {
-	register unsigned char c;
+static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t len, bool raw) /* {{{ */ {
+	unsigned char c;
 	unsigned char *to;
 	unsigned char const *from, *end;
 	zend_string *start;
@@ -572,7 +587,7 @@ PHP_FUNCTION(urldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -634,7 +649,7 @@ PHP_FUNCTION(rawurldecode)
 	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
 	ZSTR_LEN(out_str) = php_raw_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
 
-    RETURN_NEW_STR(out_str);
+	RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -668,14 +683,14 @@ PHP_FUNCTION(get_headers)
 	size_t url_len;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL;
-	zend_long format = 0;
+	bool format = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(format)
+		Z_PARAM_BOOL(format)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -713,7 +728,7 @@ no_name_header:
 
 				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
+				} else { /* some headers may occur more than once, therefore we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}

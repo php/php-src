@@ -8,6 +8,7 @@ function foo() {
 }
 \Exception\foo();
 \Exception::bar();
+?>
 --EXPECTF--
 ok
 

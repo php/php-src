@@ -21,5 +21,6 @@ class C {
 
 $o = new C;
 $o->foo();
+?>
 --EXPECT--
 C::foo() works.

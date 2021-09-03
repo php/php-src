@@ -1,7 +1,7 @@
 --TEST--
 Block pass: Bugs in BOOL/QM_ASSIGN elision
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 (bool) (true ? $x : $y);

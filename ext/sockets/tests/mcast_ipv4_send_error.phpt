@@ -1,18 +1,18 @@
 --TEST--
 Multicast support: IPv4 send options with unusual values
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 $domain = AF_INET;
 $level = IPPROTO_IP;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP);
 if ($s === false) {
-	die("skip unable to create socket");
+    die("skip unable to create socket");
 }
 if (socket_set_option($s, $level, IP_MULTICAST_IF, 1) === false) {
-	die("skip interface 1 either doesn't exist or has no ipv4 address");
+    die("skip interface 1 either doesn't exist or has no ipv4 address");
 }
 --FILE--
 <?php
@@ -66,6 +66,7 @@ try {
 $r = socket_get_option($s, $level, IP_MULTICAST_TTL);
 var_dump($r);
 echo "\n";
+?>
 --EXPECT--
 Setting IP_MULTICAST_LOOP with 256
 bool(true)
@@ -76,7 +77,7 @@ bool(true)
 int(0)
 
 Setting IP_MULTICAST_TTL with 256
-socket_set_option(): Argument #4 ($optval) must be between 0 and 255
+socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(1)
 
 Setting IP_MULTICAST_TTL with "254"
@@ -84,5 +85,5 @@ bool(true)
 int(254)
 
 Setting IP_MULTICAST_TTL with -1
-socket_set_option(): Argument #4 ($optval) must be between 0 and 255
+socket_set_option(): Argument #4 ($value) must be between 0 and 255
 int(254)

@@ -1,11 +1,12 @@
 --TEST--
 SQLite3 load extension
+--EXTENSIONS--
+sqlite3
 --SKIPIF--
 <?php
-require_once(__DIR__ . '/skipif.inc');
 $r = new ReflectionClass("sqlite3");
 if (!$r->hasMethod("loadExtension")) {
-	die("skip - sqlite3 doesn't have loadExtension enabled");
+    die("skip - sqlite3 doesn't have loadExtension enabled");
 }
 ?>
 --INI--

@@ -60,8 +60,8 @@ $d0 = $prefix . DIRECTORY_SEPARATOR . $dir_basename;
 
 $obj = scandir($d0);
 foreach ($obj as $file) {
-	if ("." == $file || ".." == $file) continue;
-	unlink($d0 . DIRECTORY_SEPARATOR . $file);
+    if ("." == $file || ".." == $file) continue;
+    unlink($d0 . DIRECTORY_SEPARATOR . $file);
 }
 
 rmdir($d0);

@@ -1,17 +1,17 @@
 --TEST--
 mysqli_commit()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
-	die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
@@ -77,15 +77,13 @@ if (!have_innodb($link))
     if (!$mysqli->commit(0 , "tx_name0123")) {
         printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }
-    if (!$mysqli->commit(0 , "*/ nonsense")) {
-        printf("[013] [%d] %s\n", $mysqli->errno, $mysqli->error);
-    }
-    if (!$mysqli->commit(0 , "tx_name ulf вендел")) {
-        printf("[014] [%d] %s\n", $mysqli->errno, $mysqli->error);
-    }
-    if (!$mysqli->commit(0 , "tx_name \t\n\r\b")) {
-        printf("[015] [%d] %s\n", $mysqli->errno, $mysqli->error);
-    }
+
+    var_dump($mysqli->commit(0 , "*/ nonsense"));
+
+    var_dump($mysqli->commit(0 , "tx_name ulf вендел"));
+
+    var_dump($mysqli->commit(0 , "tx_name \t\n\r\b"));
+
     if (!$mysqli->commit(MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_NO_RELEASE , "tx_name")) {
         printf("[016] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }
@@ -101,15 +99,18 @@ if (!have_innodb($link))
     print "done!";
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
 
-Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
+bool(true)
 
-Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
+bool(true)
 
-Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+Warning: mysqli::commit(): Transaction name has been truncated, since it can only contain the A-Z, a-z, 0-9, "\", "-", "_", and "=" characters in %s on line %d
+bool(true)
 my_mysqli object is already closed
 done!

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,7 @@
 /* true globals; only used from main thread and from kernel callback */
 static zval ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
-static zend_bool *vm_interrupt_flag = NULL;
+static bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
@@ -87,10 +87,13 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 /* {{{ Assigns a CTRL signal handler to a PHP function */
 PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 {
-	zval *handler = NULL;
-	zend_bool add = 1;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	bool add = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &handler, &add) == FAILURE) {
+
+	/* callable argument corresponds to the CTRL handler */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f!|b", &fci, &fcc, &add) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -106,9 +109,8 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_THROWS();
 	}
 
-
-	if (IS_NULL == Z_TYPE_P(handler)) {
-		zval_dtor(&ctrl_handler);
+	if (!ZEND_FCI_INITIALIZED(fci)) {
+		zval_ptr_dtor(&ctrl_handler);
 		ZVAL_UNDEF(&ctrl_handler);
 		if (!SetConsoleCtrlHandler(NULL, add)) {
 			RETURN_FALSE;
@@ -116,20 +118,15 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 		RETURN_TRUE;
 	}
 
-	if (!zend_is_callable(handler, 0, NULL)) {
-		zend_argument_type_error(1, "must be a valid callable function name");
-		RETURN_THROWS();
-	}
-
 	if (!SetConsoleCtrlHandler(NULL, FALSE) || !SetConsoleCtrlHandler(php_win32_signal_system_ctrl_handler, add)) {
-		zend_string *func_name = zend_get_callable_name(handler);
+		zend_string *func_name = zend_get_callable_name(&fci.function_name);
 		php_error_docref(NULL, E_WARNING, "Unable to attach %s as a CTRL handler", ZSTR_VAL(func_name));
 		zend_string_release_ex(func_name, 0);
 		RETURN_FALSE;
 	}
 
-	zval_dtor(&ctrl_handler);
-	ZVAL_COPY(&ctrl_handler, handler);
+	zval_ptr_dtor_nogc(&ctrl_handler);
+	ZVAL_COPY(&ctrl_handler, &fci.function_name);
 
 	RETURN_TRUE;
 }/*}}}*/
@@ -137,7 +134,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 PHP_FUNCTION(sapi_windows_generate_ctrl_event)
 {/*{{{*/
 	zend_long evt, pid = 0;
-	zend_bool ret = 0;
+	bool ret = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &evt, &pid) == FAILURE) {
 		RETURN_THROWS();

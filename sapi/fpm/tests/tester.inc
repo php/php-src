@@ -72,7 +72,7 @@ class Tester
     /**
      * Configuration template
      *
-     * @var string
+     * @var string|array
      */
     private $configTemplate;
 
@@ -152,7 +152,14 @@ class Tester
                 unlink($filePath);
             }
         }
-        // clean config files
+
+        self::cleanConfigFiles();
+    }
+
+    /**
+     * Clean config files
+     */
+    static public function cleanConfigFiles() {
         if (is_dir(self::CONF_DIR)) {
             foreach(glob(self::CONF_DIR . '/*.conf') as $name) {
                 unlink($name);
@@ -499,7 +506,7 @@ class Tester
         array $expectedFields,
         string $address = null,
         string $statusPath = '/status',
-        $formats = ['plain', 'html', 'xml', 'json']
+        $formats = ['plain', 'html', 'xml', 'json', 'openmetrics']
     ) {
         if (!is_array($formats)) {
             $formats = [$formats];
@@ -564,6 +571,10 @@ class Tester
             ],
             $headers
         );
+        $params = array_filter($params, function($value) {
+            return !is_null($value);
+        });
+
         try {
             $this->response = new Response(
                 $this->getClient($address, $connKeepAlive)->request_data($params, false)
@@ -682,6 +693,12 @@ class Tester
             }
         }
 
+        if ($this->debug) {
+            foreach ($lines as $line) {
+                echo "LOG LINE: " . $line;
+            }
+        }
+
         return $lines;
     }
 
@@ -725,6 +742,24 @@ class Tester
     public function getGid()
     {
         return getmygid();
+    }
+
+    /**
+     * Reload FPM by sending USR2 signal and optionally change config before that.
+     *
+     * @param string|array $configTemplate
+     * @return string
+     * @throws \Exception
+     */
+    public function reload($configTemplate = null)
+    {
+        if (!is_null($configTemplate)) {
+            self::cleanConfigFiles();
+            $this->configTemplate = $configTemplate;
+            $this->createConfig();
+        }
+
+        return $this->signal('USR2');
     }
 
     /**
@@ -780,14 +815,13 @@ class Tester
                 throw new \Exception('The config template array has to have main config');
             }
             $mainTemplate = $configTemplates['main'];
-            unset($configTemplates['main']);
             if (!is_dir(self::CONF_DIR)) {
                 mkdir(self::CONF_DIR);
             }
-            foreach ($configTemplates as $name => $configTemplate) {
+            foreach ($this->createPoolConfigs($configTemplates) as $name => $poolConfig) {
                 $this->makeFile(
                     'conf',
-                    $this->processTemplate($configTemplate),
+                    $this->processTemplate($poolConfig),
                     self::CONF_DIR,
                     $name
                 );
@@ -797,6 +831,36 @@ class Tester
         }
 
         return $this->makeFile($extension, $this->processTemplate($mainTemplate));
+    }
+
+    /**
+     * Create pool config templates.
+     *
+     * @param array $configTemplates
+     * @return array
+     * @throws \Exception
+     */
+    private function createPoolConfigs(array $configTemplates)
+    {
+        if (!isset($configTemplates['poolTemplate'])) {
+            unset($configTemplates['main']);
+            return $configTemplates;
+        }
+        $poolTemplate = $configTemplates['poolTemplate'];
+        $configs = [];
+        if (isset($configTemplates['count'])) {
+            $start = $configTemplates['start'] ?? 1;
+            for ($i = $start;  $i < $start + $configTemplates['count']; $i++) {
+                $configs[$i] = str_replace('%index%', $i, $poolTemplate);
+            }
+        } elseif (isset($configTemplates['names'])) {
+            foreach($configTemplates['names'] as $name) {
+                $configs[$name] = str_replace('%name%', $name, $poolTemplate);
+            }
+        } else {
+            throw new \Exception('The config template requires count or names if poolTemplate set');
+        }
+        return $configs;
     }
 
     /**
@@ -1107,6 +1171,16 @@ class Tester
     }
 
     /**
+     * Expect reloading lines to be logged.
+     *
+     * @param int $socketCount
+     */
+    public function expectLogReloadingNotices($socketCount = 1)
+    {
+        $this->logTool->expectReloadingLines($this->getLogLines($socketCount + 4));
+    }
+
+    /**
      * Expect starting lines to be logged.
      */
     public function expectLogStartNotices()
@@ -1173,15 +1247,35 @@ class Tester
     }
 
     /**
+     * Expect log entry.
+     *
+     * @param string $type The log type
+     * @param string $message The expected message
+     * @param string|null $pool The pool for pool prefixed log entry
+     * @param int $count The number of items
+     * @return bool
+     */
+    private function expectLogEntry(string $type, string $message, $pool = null, $count = 1)
+    {
+        for ($i = 0; $i < $count; $i++) {
+            if (!$this->logTool->expectEntry($type, $this->getLastLogLine(), $message, $pool)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Expect a log debug message.
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogDebug(string $message, $pool = null)
+    public function expectLogDebug(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectDebug($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::DEBUG, $message, $pool, $count);
     }
 
     /**
@@ -1189,11 +1283,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogNotice(string $message, $pool = null)
+    public function expectLogNotice(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectNotice($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::NOTICE, $message, $pool, $count);
     }
 
     /**
@@ -1201,11 +1296,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogWarning(string $message, $pool = null)
+    public function expectLogWarning(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectWarning($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::WARNING, $message, $pool, $count);
     }
 
     /**
@@ -1213,11 +1309,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogError(string $message, $pool = null)
+    public function expectLogError(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectError($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::ERROR, $message, $pool, $count);
     }
 
     /**
@@ -1225,11 +1322,12 @@ class Tester
      *
      * @param string $message
      * @param string|null $pool
+     * @param int $count
      * @return bool
      */
-    public function expectLogAlert(string $message, $pool = null)
+    public function expectLogAlert(string $message, $pool = null, $count = 1)
     {
-        return $this->logTool->expectAlert($this->getLastLogLine(), $message, $pool);
+        return $this->expectLogEntry(LogTool::ALERT, $message, $pool, $count);
     }
 
     /**
@@ -1247,6 +1345,48 @@ class Tester
         }
 
         return true;
+    }
+
+    /**
+     * Expect log config options
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function expectLogConfigOptions(array $options)
+    {
+        $configOptions = $this->getConfigOptions();
+        foreach ($options as $name => $value) {
+            if (!isset($configOptions[$name])) {
+                return $this->error("Expected config option: {$name} = {$value} but {$name} is not set");
+            }
+            if ($configOptions[$name] != $value) {
+                return $this->error(
+                    "Expected config option: {$name} = {$value} but got: {$name} = {$configOptions[$name]}"
+                );
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get set config options
+     *
+     * @return array
+     */
+    private function getConfigOptions()
+    {
+        $options = [];
+
+        foreach ($this->getLogLines(-1) as $line) {
+            preg_match('/.+NOTICE:\s+(.+)\s=\s(.+)/', $line, $matches);
+            if ($matches) {
+                $options[$matches[1]] = $matches[2];
+            }
+        }
+
+        return $options;
     }
 
     /**

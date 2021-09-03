@@ -30,6 +30,7 @@ $c = array($b,"__invoke");
 $c();
 call_user_func(array($b,"__invoke"));
 $z(array($b,"__invoke"));
+?>
 --EXPECT--
 string(1) "A"
 string(1) "A"

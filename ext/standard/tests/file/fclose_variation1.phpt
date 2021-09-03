@@ -13,6 +13,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 echo "\nDone.\n";
+?>
 --EXPECT--
 fread(): supplied resource is not a valid stream resource
 

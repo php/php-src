@@ -1,13 +1,13 @@
 --TEST--
 mysqli_stmt_fetch - geometry / spatial types
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
+    require_once('skipifconnectfailure.inc');
 
-	if (!defined("MYSQLI_TYPE_GEOMETRY"))
-		die("skip MYSQLI_TYPE_GEOMETRY not defined");
+    if (!defined("MYSQLI_TYPE_GEOMETRY"))
+        die("skip MYSQLI_TYPE_GEOMETRY not defined");
 ?>
 --FILE--
 <?php
@@ -136,7 +136,7 @@ mysqli_stmt_fetch - geometry / spatial types
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

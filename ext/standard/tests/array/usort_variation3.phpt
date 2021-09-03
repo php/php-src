@@ -37,7 +37,7 @@ EOT3;
 $array_arg = array(
   // numeric keys
   -2 => 9,
-  8.9 => 8,
+  8 => 8,
   012 => 7,
   0x34 => 6,
 

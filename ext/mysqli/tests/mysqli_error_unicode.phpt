@@ -1,9 +1,9 @@
 --TEST--
 mysqli_error()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -35,6 +35,7 @@ require_once('skipifconnectfailure.inc');
     }
 
     print "done!";
+?>
 --EXPECTF--
 string(%d) "Table 'няма_такава_таблица' doesn't exist"
 mysqli object is already closed

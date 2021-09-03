@@ -37,6 +37,6 @@ try {
 --EXPECT--
 Ok - ReflectionFunction::__construct(): Argument #1 ($function) must be of type Closure|string, array given
 Function nonExistentFunction() does not exist
-Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 0 given
-Ok - ReflectionFunction::__construct() expects exactly 1 parameter, 2 given
+Ok - ReflectionFunction::__construct() expects exactly 1 argument, 0 given
+Ok - ReflectionFunction::__construct() expects exactly 1 argument, 2 given
 Ok - ReflectionFunction::__construct(): Argument #1 ($function) must be of type Closure|string, array given

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,20 +26,14 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	char *s;
 	if (Size > 32 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
 	}
 
-	s = malloc(Size+1);
-	memcpy(s, Data, Size);
-	s[Size] = '\0';
+	fuzzer_do_request_from_buffer("fuzzer.php", (const char *) Data, Size, /* execute */ 0);
 
-	fuzzer_do_request_from_buffer("fuzzer.php", s, Size);
-
-	/* Do not free s: fuzzer_do_request_from_buffer() takes ownership of the allocation. */
 	return 0;
 }
 

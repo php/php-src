@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1ace9d7ae3e505ae2e14323e21fa6ac0a490896d */
+ * Stub hash: d383ac249ddc88aee4cfaaefd37e85d913281f8e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)
@@ -8,7 +8,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_from_jd, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, jd, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -25,7 +25,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_easter_date, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, year, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, method, IS_LONG, 0, "CAL_EASTER_DEFAULT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "CAL_EASTER_DEFAULT")
 ZEND_END_ARG_INFO()
 
 #define arginfo_easter_days arginfo_easter_date
@@ -39,31 +39,31 @@ ZEND_END_ARG_INFO()
 #define arginfo_gregoriantojd arginfo_frenchtojd
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_jddayofweek, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
-	ZEND_ARG_TYPE_INFO(0, juliandaycount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "CAL_DOW_DAYNO")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_jdmonthname, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, juliandaycount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_jdtofrench, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, juliandaycount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_jdtogregorian arginfo_jdtofrench
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_jdtojewish, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, juliandaycount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hebrew, _IS_BOOL, 0, "false")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fl, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_jdtojulian arginfo_jdtofrench
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_jdtounix, 0, 1, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, jday, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, julian_day, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_jewishtojd arginfo_frenchtojd

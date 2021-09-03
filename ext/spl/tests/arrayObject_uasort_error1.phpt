@@ -22,5 +22,5 @@ try {
 }
 ?>
 --EXPECT--
-ArrayObject::uasort() expects exactly 1 parameter, 0 given
-ArrayObject::uasort() expects exactly 1 parameter, 2 given
+ArrayObject::uasort() expects exactly 1 argument, 0 given
+ArrayObject::uasort() expects exactly 1 argument, 2 given

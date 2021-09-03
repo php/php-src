@@ -1,8 +1,9 @@
 --TEST--
 imagewebp() and imagecreatefromwebp() - basic test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.0', '<')) {
     die("skip test requires GD 2.2.0 or higher");
 }
@@ -28,11 +29,19 @@ imagewebp($im1, $filename);
 
 $im2 = imagecreatefromwebp($filename);
 imagewebp($im2, $filename);
+echo 'Is lossy conversion close enough? ';
 var_dump(calc_image_dissimilarity($im1, $im2) < 10e5);
+
+imagewebp($im1, $filename, IMG_WEBP_LOSSLESS);
+$im_lossless = imagecreatefromwebp($filename);
+echo 'Does lossless conversion work? ';
+var_dump(calc_image_dissimilarity($im1, $im_lossless) == 0);
+
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/webp_basic.webp');
 ?>
 --EXPECT--
-bool(true)
+Is lossy conversion close enough? bool(true)
+Does lossless conversion work? bool(true)

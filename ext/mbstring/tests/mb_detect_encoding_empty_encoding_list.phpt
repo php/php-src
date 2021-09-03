@@ -1,9 +1,7 @@
 --TEST--
 Test mb_detect_encoding() function : empty encoding list
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
@@ -22,5 +20,5 @@ try {
 
 ?>
 --EXPECT--
-mb_detect_encoding(): Argument #2 ($encoding_list) must specify at least one encoding
-mb_detect_encoding(): Argument #2 ($encoding_list) must specify at least one encoding
+mb_detect_encoding(): Argument #2 ($encodings) must specify at least one encoding
+mb_detect_encoding(): Argument #2 ($encodings) must specify at least one encoding

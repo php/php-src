@@ -1,7 +1,7 @@
 --TEST--
 gmp_random_range() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -9,10 +9,22 @@ $minusTen = gmp_init(-10);
 $plusTen = gmp_init(10);
 $zero = gmp_init(0);
 
-var_dump(gmp_random_range(10, -10));
+try {
+    var_dump(gmp_random_range(10, -10));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-var_dump(gmp_random_range($plusTen, $minusTen));
-var_dump(gmp_random_range($plusTen, $zero));
+try {
+    var_dump(gmp_random_range($plusTen, $minusTen));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+try {
+    var_dump(gmp_random_range($plusTen, $zero));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 // If these error the test fails.
 gmp_random_range(0, 10);
@@ -61,13 +73,8 @@ while (1) {
 
 echo "Done\n";
 ?>
---EXPECTF--
-Warning: gmp_random_range(): The minimum value must be less than the maximum value in %s on line %d
-bool(false)
-
-Warning: gmp_random_range(): The minimum value must be less than the maximum value in %s on line %d
-bool(false)
-
-Warning: gmp_random_range(): The minimum value must be less than the maximum value in %s on line %d
-bool(false)
+--EXPECT--
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
+gmp_random_range(): Argument #1 ($min) must be less than argument #2 ($maximum)
 Done

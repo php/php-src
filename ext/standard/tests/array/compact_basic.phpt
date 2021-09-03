@@ -19,12 +19,8 @@ $f="string";
 var_dump (compact(array("a", "b", "c", "d", "e", "f")));
 // simple parameter test
 var_dump (compact("a", "b", "c", "d", "e", "f"));
-var_dump (compact(array("keyval"=>"a", "b"=>"b", "c"=>1)));
-
-// cases which should not yield any output.
-var_dump (compact(array(10, 0.3, true, array(20), NULL)));
-var_dump (compact(10, 0.3, true, array(20), NULL));
-var_dump (compact(array("g")));
+var_dump (compact(array("keyval"=>"a", "b"=>"b")));
+var_dump(compact(array("g")));
 
 echo "Done";
 ?>
@@ -70,12 +66,8 @@ array(2) {
   ["b"]=>
   float(0.2)
 }
-array(0) {
-}
-array(0) {
-}
 
-Notice: compact(): Undefined variable $g in %s on line %d
+Warning: compact(): Undefined variable $g in %s on line %d
 array(0) {
 }
 Done

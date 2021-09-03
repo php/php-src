@@ -14,6 +14,7 @@ echo \test\ns1\FOO;
 echo \test\ns1\FOO;
 echo ns2\FOO;
 echo ns3\ns1\FOO;
+?>
 --EXPECT--
 ok
 ok

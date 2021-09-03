@@ -1,9 +1,11 @@
 --TEST--
 DBA LMDB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'lmdb';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'lmdb';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
@@ -14,7 +16,7 @@ DBA LMDB handler test
 ?>
 --CLEAN--
 <?php
-	require_once __DIR__ .'/clean.inc';
+    require_once __DIR__ .'/clean.inc';
 ?>
 --EXPECTF--
 database handler: lmdb

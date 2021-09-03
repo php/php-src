@@ -3,8 +3,8 @@ mb_str*() - unknown encoding
 --CREDITS--
 Jachim Coudenys <jachimcoudenys@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
@@ -144,7 +144,7 @@ try {
 --EXPECT--
 mb_chr(): Argument #2 ($encoding) must be a valid encoding, "UTF-0" given
 mb_convert_case(): Argument #3 ($encoding) must be a valid encoding, "UTF-0" given
-mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "UTF-0"
+mb_convert_encoding(): Argument #3 ($from_encoding) contains invalid encoding "UTF-0"
 mb_convert_kana(): Argument #3 ($encoding) must be a valid encoding, "UTF-0" given
 mb_decode_numericentity(): Argument #3 ($encoding) must be a valid encoding, "UTF-0" given
 mb_ord(): Argument #2 ($encoding) must be a valid encoding, "UTF-0" given

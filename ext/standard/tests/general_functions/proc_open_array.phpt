@@ -26,7 +26,7 @@ try {
 
 echo "\nNul byte in argument:\n";
 try {
-    proc_open(["php", "arg\0oops"], $ds, $pipes);
+    proc_open(["php", "array\0oops"], $ds, $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
@@ -68,7 +68,7 @@ proc_close($proc);
 ?>
 --EXPECT--
 Empty command array:
-proc_open(): Argument #1 ($cmd) must have at least one element
+proc_open(): Argument #1 ($command) must have at least one element
 
 Nul byte in program name:
 Command array element 1 contains a null byte

@@ -17,6 +17,7 @@ foo("foo");
 foo($closure);
 foo(array("bar", "foo"));
 foo(array("bar", "baz"));
+?>
 --EXPECTF--
 string(6) "strpos"
 string(3) "foo"

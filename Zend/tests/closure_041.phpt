@@ -61,6 +61,7 @@ $d = $nonstaticUnscoped->bindTo(new B); $d(); echo " (should be scoped to dummy 
 $d = $nonstaticScoped->bindTo(new B); $d(); echo "\n";
 
 echo "Done.\n";
+?>
 --EXPECTF--
 Before binding
 scoped to A: bool(false)

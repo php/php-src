@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.111 2019/05/07 02:27:11 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.114 2021/02/05 21:33:49 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -76,9 +76,6 @@ FILE_RCSID("@(#)$File: magic.c,v 1.111 2019/05/07 02:27:11 christos Exp $")
 #endif
 
 private int unreadable_info(struct magic_set *, mode_t, const char *);
-#if 0
-private const char* get_default_magic(void);
-#endif
 private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO
@@ -154,41 +151,7 @@ magic_list(struct magic_set *ms, const char *magicfile)
 	return file_apprentice(ms, magicfile, FILE_LIST);
 }
 
-#if 0
-private void
-close_and_restore(const struct magic_set *ms, const char *name, int fd,
-    const zend_stat_t *sb)
-{
-	if (fd == STDIN_FILENO || name == NULL)
-		return;
-	(void) close(fd);
-
-	if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
-		/*
-		 * Try to restore access, modification times if read it.
-		 * This is really *bad* because it will modify the status
-		 * time of the file... And of course this will affect
-		 * backup programs
-		 */
-#ifdef HAVE_UTIMES
-		struct timeval  utsbuf[2];
-		(void)memset(utsbuf, 0, sizeof(utsbuf));
-		utsbuf[0].tv_sec = sb->st_atime;
-		utsbuf[1].tv_sec = sb->st_mtime;
-
-		(void) utimes(name, utsbuf); /* don't care if loses */
-#elif defined(HAVE_UTIME_H) || defined(HAVE_SYS_UTIME_H)
-		struct utimbuf  utbuf;
-
-		(void)memset(&utbuf, 0, sizeof(utbuf));
-		utbuf.actime = sb->st_atime;
-		utbuf.modtime = sb->st_mtime;
-		(void) utime(name, &utbuf); /* don't care if loses */
-#endif
-	}
-}
-#endif
-
+#ifndef COMPILE_ONLY
 
 /*
  * find type of descriptor
@@ -312,6 +275,7 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 	}
 	return file_getbuffer(ms);
 }
+#endif
 
 public const char *
 magic_error(struct magic_set *ms)
@@ -384,6 +348,9 @@ magic_setparam(struct magic_set *ms, int param, const void *val)
 	case MAGIC_PARAM_BYTES_MAX:
 		ms->bytes_max = *CAST(const size_t *, val);
 		return 0;
+	case MAGIC_PARAM_ENCODING_MAX:
+		ms->encoding_max = *CAST(const size_t *, val);
+		return 0;
 	default:
 		errno = EINVAL;
 		return -1;
@@ -416,6 +383,9 @@ magic_getparam(struct magic_set *ms, int param, void *val)
 		return 0;
 	case MAGIC_PARAM_BYTES_MAX:
 		*CAST(size_t *, val) = ms->bytes_max;
+		return 0;
+	case MAGIC_PARAM_ENCODING_MAX:
+		*CAST(size_t *, val) = ms->encoding_max;
 		return 0;
 	default:
 		errno = EINVAL;

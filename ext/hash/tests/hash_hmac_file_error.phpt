@@ -28,7 +28,7 @@ echo "\n-- Testing hash_hmac_file() function with bad path --\n";
 try {
     var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
 }
-catch (TypeError $e) {
+catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -43,4 +43,4 @@ hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algo
 hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
-hash_hmac_file(): Argument #2 ($data) must be a valid path
+hash_hmac_file(): Argument #2 ($data) must not contain any null bytes

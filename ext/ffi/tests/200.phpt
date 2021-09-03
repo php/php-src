@@ -1,13 +1,14 @@
 --TEST--
 FFI 200: PHP callbacks
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('utils.inc'); ?>
 <?php
 try {
-	FFI::cdef("void* zend_write;", ffi_get_php_dll_name());
+    FFI::cdef("void* zend_write;", ffi_get_php_dll_name());
 } catch (Throwable $e) {
-	die('skip PHP symbols not available');
+    die('skip PHP symbols not available');
 }
 ?>
 --INI--

@@ -6,23 +6,23 @@ class A extends SplFixedArray {
     public $prop1 = NULL;
     public $prop2 = NULL;
 
-    public function count() {
+    public function count(): int {
         return 2;
     }
 
-    public function offsetGet($n) {
+    public function offsetGet($n): mixed {
         echo "A::offsetGet\n";
         return parent::offsetGet($n);
     }
-    public function offsetSet($n, $v) {
+    public function offsetSet($n, $v): void {
         echo "A::offsetSet\n";
-        return parent::offsetSet($n, $v);
+        parent::offsetSet($n, $v);
     }
-    public function offsetUnset($n) {
+    public function offsetUnset($n): void {
         echo "A::offsetUnset\n";
-        return parent::offsetUnset($n);
+        parent::offsetUnset($n);
     }
-    public function offsetExists($n) {
+    public function offsetExists($n): bool {
         echo "A::offsetExists\n";
         return parent::offsetExists($n);
     }
@@ -34,17 +34,17 @@ $a = new A;
 try {
     $a[0] = "value1";
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($a["asdf"]);
-} catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (\TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($a[-1]);
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $a->setSize(10);
 
@@ -69,11 +69,11 @@ var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 ?>
 --EXPECT--
 A::offsetSet
-Exception: Index invalid or out of range
+RuntimeException: Index invalid or out of range
 A::offsetGet
-Exception: Index invalid or out of range
+TypeError: Illegal offset type
 A::offsetUnset
-Exception: Index invalid or out of range
+RuntimeException: Index invalid or out of range
 A::offsetSet
 A::offsetSet
 A::offsetSet

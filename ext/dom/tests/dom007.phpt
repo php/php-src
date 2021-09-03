@@ -1,9 +1,7 @@
 --TEST--
 Test 7: DTD tests
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xml = <<< EOXML
@@ -88,6 +86,7 @@ $node = $ents->item(3);
 var_dump($node);
 $node = $ents->getNamedItem('xxx');
 var_dump($node);
+?>
 --EXPECT--
 Length: 1
 Key GIF: GIF (image/gif) (-)

@@ -57,5 +57,5 @@ Argument is name of class which has no methods:
 array(0) {
 }
 Argument is non existent class:
-get_class_methods(): Argument #1 ($object_or_class) must be a valid class name or object, string given
+get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 Done

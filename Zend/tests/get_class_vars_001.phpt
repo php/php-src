@@ -19,6 +19,12 @@ class B extends A {
 var_dump(get_class_vars('A'));
 var_dump(get_class_vars('B'));
 
+try {
+    get_class_vars("Unknown");
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 array(1) {
@@ -31,3 +37,4 @@ array(2) {
   ["aa"]=>
   int(4)
 }
+get_class_vars(): Argument #1 ($class) must be a valid class name, Unknown given

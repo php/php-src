@@ -1,9 +1,7 @@
 --TEST--
 Bug #64342 ZipArchive::addFile() has to check file existence (variation 2)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
@@ -37,6 +35,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 }
 @unlink($file);
 ?>
---EXPECT--
+--EXPECTF--
+Warning: ZipArchive::addFile(): No such file or directory in %s on line %d
 failed
 OK

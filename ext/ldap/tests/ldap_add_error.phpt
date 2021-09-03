@@ -3,8 +3,9 @@ ldap_add() - Add operation that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -38,7 +39,7 @@ for ($i = 0; $i < 2; $i++)
 var_dump(ldap_error($link), ldap_errno($link));
 
 // Wrong array indexes
-var_dump(
+try {
     ldap_add($link, "dc=my-domain2,dc=com", array(
         "objectClass"	=> array(
             0	=> "top",
@@ -46,13 +47,15 @@ var_dump(
             5	=> "organization"),
         "dc"			=> "my-domain",
         "o"				=> "my-domain",
-    ))
+    ));
     /* Is this correct behaviour to still have "Already exists" as error/errno?
     ,
     ldap_error($link),
     ldap_errno($link)
     */
-);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 // Invalid attribute
 var_dump(
@@ -101,9 +104,7 @@ Warning: ldap_add(): Add: Already exists in %s on line %d
 bool(false)
 string(14) "Already exists"
 int(68)
-
-Warning: ldap_add(): Value array must have consecutive indices 0, 1, ... in %s on line %d
-bool(false)
+ldap_add(): Argument #3 ($entry) must contain arrays with consecutive integer indices starting from 0
 
 Warning: ldap_add(): Add: Undefined attribute type in %s on line %d
 bool(false)

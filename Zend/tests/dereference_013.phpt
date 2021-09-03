@@ -34,5 +34,5 @@ array(1) {
   int(1)
 }
 
-Notice: Undefined array key 2 in %s on line %d
+Warning: Undefined array key 2 in %s on line %d
 NULL

@@ -28,41 +28,25 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stddef.h>
-
-#include "mbfl_allocators.h"
 #include "mbfl_string.h"
 #include "mbfilter_pass.h"
 
-/*
- * string object
- */
-void
-mbfl_string_init(mbfl_string *string)
-{
-	string->encoding = &mbfl_encoding_pass;
-	string->val = (unsigned char*)NULL;
-	string->len = 0;
-}
-
-void
-mbfl_string_init_set(mbfl_string *string, const mbfl_encoding *encoding)
+void mbfl_string_init_set(mbfl_string *string, const mbfl_encoding *encoding)
 {
 	string->encoding = encoding;
-	string->val = (unsigned char*)NULL;
+	string->val = NULL;
 	string->len = 0;
 }
 
-void
-mbfl_string_clear(mbfl_string *string)
+void mbfl_string_init(mbfl_string *string)
 {
-	if (string->val != (unsigned char*)NULL) {
-		mbfl_free(string->val);
+	mbfl_string_init_set(string, &mbfl_encoding_pass);
+}
+
+void mbfl_string_clear(mbfl_string *string)
+{
+	if (string->val) {
+		efree(string->val);
 	}
-	string->val = (unsigned char*)NULL;
-	string->len = 0;
+	mbfl_string_init_set(string, NULL); /* Poison it so any attempt to reuse will fail hard */
 }

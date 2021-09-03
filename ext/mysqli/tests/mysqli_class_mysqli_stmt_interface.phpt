@@ -1,10 +1,10 @@
 --TEST--
 Interface of the class mysqli_stmt
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
-	require_once('skipifemb.inc');
-	require_once('skipifconnectfailure.inc');
+    require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
@@ -154,16 +154,6 @@ param_count
 sqlstate
 
 Object variables:
-affected_rows
-insert_id
-num_rows
-param_count
-field_count
-errno
-error
-error_list
-sqlstate
-id
 
 Magic, magic properties:
 mysqli_stmt object is not fully initialized

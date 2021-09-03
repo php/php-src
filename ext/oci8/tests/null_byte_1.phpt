@@ -1,15 +1,14 @@
 --TEST--
 Protect against null bytes in LOB filenames
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8'))
-    die ("skip no oci8 extension");
 if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4))
     die ("skip Test only valid for PHP 5.4 onwards");
 ?>
 --INI--
 display_errors = On
-error_reporting = E_WARNING
 --FILE--
 <?php
 
@@ -23,21 +22,23 @@ require(__DIR__.'/connect.inc');
 echo "Test 1: Import\n";
 
 $lob = oci_new_descriptor($c, OCI_D_LOB);
-$r = $lob->savefile("/tmp/abc\0def");
-var_dump($r);
+try {
+    $lob->saveFile("/tmp/abc\0def");
+} catch (ValueError $e) {
+       echo $e->getMessage(), "\n";
+}
 
 echo "Test 2: Export\n";
 
-$r = $lob->export("/tmp/abc\0def");
-var_dump($r);
+try {
+    $lob->export("/tmp/abc\0def");
+} catch (ValueError $e) {
+       echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1: Import
-
-Warning: OCI_Lob::savefile(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
-NULL
+OCILob::savefile(): Argument #1 ($filename) must not contain any null bytes
 Test 2: Export
-
-Warning: OCI_Lob::export(): Argument #1 ($function) must be a valid path, string given in %snull_byte_1.php on line %d
-NULL
+OCILob::export(): Argument #1 ($filename) must not contain any null bytes

@@ -237,7 +237,7 @@ bool(true)
 int(%d)
 string(7) "integer"
 -- Iteration 14 --
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
@@ -296,7 +296,7 @@ bool(true)
 int(%d)
 string(7) "integer"
 -- Iteration 14 --
-8: Object of class point could not be converted to int
+2: Object of class point could not be converted to int
 bool(true)
 int(1)
 string(7) "integer"
@@ -348,14 +348,14 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 14 --
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
@@ -407,14 +407,14 @@ float(0)
 string(6) "double"
 -- Iteration 12 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 13 --
 bool(true)
-float(%d)
+float(%f)
 string(6) "double"
 -- Iteration 14 --
-8: Object of class point could not be converted to float
+2: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"

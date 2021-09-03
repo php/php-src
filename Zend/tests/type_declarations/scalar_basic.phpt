@@ -6,6 +6,7 @@ Scalar type basics
 $errnames = [
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',
+    E_DEPRECATED => 'E_DEPRECATED'
 ];
 set_error_handler(function (int $errno, string $errmsg, string $file, int $line) use ($errnames) {
     echo "$errnames[$errno]: $errmsg on line $line\n";
@@ -71,11 +72,11 @@ int(1)
 int(1)
 
 *** Trying float(1.5)
+E_DEPRECATED: Implicit conversion from float 1.5 to int loses precision on line 14
 int(1)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-int(1)
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(1) "a"
 *** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
@@ -128,8 +129,7 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-E_NOTICE: A non well formed numeric value encountered on line %d
-float(1)
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(1) "a"
 *** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d

@@ -28,7 +28,7 @@ try {
 
 try {
     var_dump(new ReflectionClass(array(1,2,3)));
-} catch (Exception $e) {
+} catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -46,12 +46,12 @@ try {
 
 ?>
 --EXPECTF--
-ReflectionClass::__construct() expects exactly 1 parameter, 0 given
+ReflectionClass::__construct() expects exactly 1 argument, 0 given
+
+Deprecated: ReflectionClass::__construct(): Passing null to parameter #1 ($objectOrClass) of type object|string is deprecated in %s on line %d
 Class "" does not exist
 Class "1" does not exist
 Class "1" does not exist
-
-Warning: Array to string conversion in %s on line %d
-Class "Array" does not exist
-ReflectionClass::__construct() expects exactly 1 parameter, 2 given
+ReflectionClass::__construct(): Argument #1 ($objectOrClass) must be of type object|string, array given
+ReflectionClass::__construct() expects exactly 1 argument, 2 given
 Class "X" does not exist

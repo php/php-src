@@ -1,7 +1,7 @@
 --TEST--
 Bug #79033 (Curl timeout error with specific url and post)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';
@@ -21,9 +21,10 @@ var_dump(curl_getinfo($ch)["request_header"]);
 string(%d) "array(0) {
 }
 "
-string(90) "POST /get.inc?test=post HTTP/1.1
+string(%d) "POST /get.inc?test=post HTTP/1.1
 Host: localhost:%d
 Accept: */*
 Content-Length: 0
+Content-Type: application/x-www-form-urlencoded
 
 "

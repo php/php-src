@@ -7,8 +7,8 @@ opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 ;opcache.jit_debug=257
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function bar($b) {
@@ -22,6 +22,7 @@ function bar($b) {
     return $a;
 }
 var_dump(bar(0));
+?>
 --EXPECT--
 int(2)
 int(3)

@@ -12,5 +12,6 @@ catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
+?>
 --EXPECT--
 hash_update(): Argument #1 ($context) must be a valid Hash Context resource

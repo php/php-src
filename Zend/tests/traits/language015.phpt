@@ -13,5 +13,6 @@ class C {
         T2::foo insteadof T1;
     }
 }
+?>
 --EXPECTF--
 Fatal error: Required Trait T2 wasn't added to C in %slanguage015.php on line %d

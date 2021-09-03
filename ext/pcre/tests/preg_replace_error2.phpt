@@ -35,6 +35,6 @@ Arg value is: this is a string
 string(64) "this is a stringthis is a stringthis is a stringthis is a string"
 
 Arg value is: Array
-preg_replace(): Argument #1 ($regex) must be of type array when argument #2 ($replace) is an array, string given
-preg_replace(): Argument #2 ($replace) must be of type string|array, stdClass given
+preg_replace(): Argument #1 ($pattern) must be of type array when argument #2 ($replacement) is an array, string given
+preg_replace(): Argument #2 ($replacement) must be of type array|string, stdClass given
 Done

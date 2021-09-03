@@ -9,6 +9,10 @@ Simone Gentili (sensorario@gmail.com)
 <?php
 if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
 if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
+exec('ps -p 1 -o "pid,nice"', $output, $exit_code);
+if ($exit_code !== 0) {
+    die("skip ps -p is not available");
+}
 ?>
 --FILE--
 <?php
@@ -21,7 +25,7 @@ if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
         else
             return -1;
     }
-    $delta = 10;
+    $delta = 5;
     $pid = getmypid();
     $niceBefore = getNice($pid);
     proc_nice($delta);

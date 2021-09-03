@@ -25,10 +25,6 @@
 #include "timelib.h"
 #include "timelib_private.h"
 
-/*                                    jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */
-static int month_tab_leap[12]     = {  -1,  30,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334 };
-static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334 };
-
 /*                                    dec  jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
@@ -113,9 +109,9 @@ static int do_range_limit_days(timelib_sll *y, timelib_sll *m, timelib_sll *d)
 	timelib_sll days_last_month;
 
 	/* can jump an entire leap year period quickly */
-	if (*d >= DAYS_PER_LYEAR_PERIOD || *d <= -DAYS_PER_LYEAR_PERIOD) {
-		*y += YEARS_PER_LYEAR_PERIOD * (*d / DAYS_PER_LYEAR_PERIOD);
-		*d -= DAYS_PER_LYEAR_PERIOD * (*d / DAYS_PER_LYEAR_PERIOD);
+	if (*d >= DAYS_PER_ERA || *d <= -DAYS_PER_ERA) {
+		*y += YEARS_PER_ERA * (*d / DAYS_PER_ERA);
+		*d -= DAYS_PER_ERA * (*d / DAYS_PER_ERA);
 	}
 
 	do_range_limit(1, 13, 12, m, y);
@@ -192,8 +188,6 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
-#define EPOCH_DAY 719468
-
 static void magic_date_calc(timelib_time *time)
 {
 	timelib_sll y, ddd, mi, mm, dd, g;
@@ -203,7 +197,7 @@ static void magic_date_calc(timelib_time *time)
 		return;
 	}
 
-	g = time->d + EPOCH_DAY - 1;
+	g = time->d + HINNANT_EPOCH_SHIFT - 1;
 
 	y = (10000 * g + 14780) / 3652425;
 	ddd = g - ((365*y) + (y/4) - (y/100) + (y/400));
@@ -360,70 +354,14 @@ static void do_adjust_special_early(timelib_time* time)
 	timelib_do_normalize(time);
 }
 
-static timelib_sll do_years(timelib_sll year)
-{
-	timelib_sll i;
-	timelib_sll res = 0;
-	timelib_sll eras;
-
-	eras = (year - 1970) / 40000;
-	if (eras != 0) {
-		year = year - (eras * 40000);
-		res += (SECS_PER_ERA * eras * 100);
-	}
-
-	if (year >= 1970) {
-		for (i = year - 1; i >= 1970; i--) {
-			if (timelib_is_leap(i)) {
-				res += (DAYS_PER_LYEAR * SECS_PER_DAY);
-			} else {
-				res += (DAYS_PER_YEAR * SECS_PER_DAY);
-			}
-		}
-	} else {
-		for (i = 1969; i >= year; i--) {
-			if (timelib_is_leap(i)) {
-				res -= (DAYS_PER_LYEAR * SECS_PER_DAY);
-			} else {
-				res -= (DAYS_PER_YEAR * SECS_PER_DAY);
-			}
-		}
-	}
-	return res;
-}
-
-static timelib_sll do_months(timelib_ull month, timelib_sll year)
-{
-	if (timelib_is_leap(year)) {
-		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
-	} else {
-		return ((month_tab[month - 1]) * SECS_PER_DAY);
-	}
-}
-
-static timelib_sll do_days(timelib_ull day)
-{
-	return ((day - 1) * SECS_PER_DAY);
-}
-
-static timelib_sll do_time(timelib_ull hour, timelib_ull minute, timelib_ull second)
-{
-	timelib_sll res = 0;
-
-	res += hour * 3600;
-	res += minute * 60;
-	res += second;
-	return res;
-}
-
-static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
+static void do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 {
 	switch (tz->zone_type) {
 		case TIMELIB_ZONETYPE_OFFSET:
 
 			tz->is_localtime = 1;
-			return -tz->z;
-			break;
+			tz->sse += -tz->z;
+			return;
 
 		case TIMELIB_ZONETYPE_ABBR: {
 			timelib_sll tmp;
@@ -431,73 +369,75 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			tz->is_localtime = 1;
 			tmp = -tz->z;
 			tmp -= tz->dst * 3600;
-			return tmp;
-			}
-			break;
+			tz->sse += (-tz->z - tz->dst * SECS_PER_HOUR);
+			return;
+		}
 
 		case TIMELIB_ZONETYPE_ID:
 			tzi = tz->tz_info;
 			/* Break intentionally missing */
 
-		default:
+		default: {
 			/* No timezone in struct, fallback to reference if possible */
-			if (tzi) {
-				timelib_time_offset *before, *after;
-				timelib_sll          tmp;
-				int                  in_transition;
+			timelib_time_offset *current, *after;
+			timelib_sll          adjustment;
+			int                  in_transition;
 
-				tz->is_localtime = 1;
-				before = timelib_get_time_zone_info(tz->sse, tzi);
-				after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
-				timelib_set_timezone(tz, tzi);
-
-				in_transition = (
-					((tz->sse - after->offset) >= (after->transition_time + (before->offset - after->offset))) &&
-					((tz->sse - after->offset) < after->transition_time)
-				);
-
-				if ((before->offset != after->offset) && !in_transition) {
-					tmp = -after->offset;
-				} else {
-					tmp = -tz->z;
-				}
-				timelib_time_offset_dtor(before);
-				timelib_time_offset_dtor(after);
-
-				{
-					timelib_time_offset *gmt_offset;
-
-					gmt_offset = timelib_get_time_zone_info(tz->sse + tmp, tzi);
-					tz->z = gmt_offset->offset;
-
-					tz->dst = gmt_offset->is_dst;
-					if (tz->tz_abbr) {
-						timelib_free(tz->tz_abbr);
-					}
-					tz->tz_abbr = timelib_strdup(gmt_offset->abbr);
-					timelib_time_offset_dtor(gmt_offset);
-				}
-				return tmp;
+			if (!tzi) {
+				return;
 			}
+
+			current = timelib_get_time_zone_info(tz->sse, tzi);
+			after = timelib_get_time_zone_info(tz->sse - current->offset, tzi);
+			tz->is_localtime = 1;
+
+			in_transition = (
+				((tz->sse - after->offset) >= (after->transition_time + (current->offset - after->offset))) &&
+				((tz->sse - after->offset) < after->transition_time)
+			);
+
+			if ((current->offset != after->offset) && !in_transition) {
+				adjustment = -after->offset;
+			} else {
+				adjustment = -current->offset;
+			}
+			timelib_time_offset_dtor(current);
+			timelib_time_offset_dtor(after);
+
+			tz->sse += adjustment;
+			timelib_set_timezone(tz, tzi);
+			return;
+		}
 	}
-	return 0;
+	return;
+}
+
+timelib_sll timelib_epoch_days_from_time(timelib_time *time)
+{
+	timelib_sll y = time->y; // Make copy, as we don't want to change the original one
+	timelib_sll era, year_of_era, day_of_year, day_of_era;
+
+	y -= time->m <= 2;
+	era = (y >= 0 ? y : y - 399) / YEARS_PER_ERA;
+	year_of_era = y - era * YEARS_PER_ERA;                                                        // [0, 399]
+	day_of_year = (153 * (time->m + (time->m > 2 ? -3 : 9)) + 2)/5 + time->d - 1;                 // [0, 365]
+	day_of_era = year_of_era * DAYS_PER_YEAR + year_of_era / 4 - year_of_era / 100 + day_of_year; // [0, 146096]
+
+	return era * DAYS_PER_ERA + day_of_era - HINNANT_EPOCH_SHIFT;
 }
 
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi)
 {
-	timelib_sll res = 0;
-
 	do_adjust_special_early(time);
 	do_adjust_relative(time);
 	do_adjust_special(time);
-	res += do_years(time->y);
-	res += do_months(time->m, time->y);
-	res += do_days(time->d);
-	res += do_time(time->h, time->i, time->s);
-	time->sse = res;
 
-	res += do_adjust_timezone(time, tzi);
-	time->sse = res;
+	time->sse =
+		(timelib_epoch_days_from_time(time) * SECS_PER_DAY) +
+		timelib_hms_to_seconds(time->h, time->i, time->s);
+
+	// This modifies time->sse, if needed
+	do_adjust_timezone(time, tzi);
 
 	time->sse_uptodate = 1;
 	time->have_relative = time->relative.have_weekday_relative = time->relative.have_special_relative = time->relative.first_last_day_of = 0;

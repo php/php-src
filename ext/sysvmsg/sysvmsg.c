@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -25,7 +25,6 @@
 #include "sysvmsg_arginfo.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "Zend/zend_interfaces.h"
 
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -108,19 +107,15 @@ static void sysvmsg_queue_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvmsg)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", class_SysvMessageQueue_methods);
-	sysvmsg_queue_ce = zend_register_internal_class(&ce);
-	sysvmsg_queue_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvmsg_queue_ce = register_class_SysvMessageQueue();
 	sysvmsg_queue_ce->create_object = sysvmsg_queue_create_object;
-	sysvmsg_queue_ce->serialize = zend_class_serialize_deny;
-	sysvmsg_queue_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvmsg_queue_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvmsg_queue_object_handlers.offset = XtOffsetOf(sysvmsg_queue_t, std);
 	sysvmsg_queue_object_handlers.free_obj = sysvmsg_queue_free_obj;
 	sysvmsg_queue_object_handlers.get_constructor = sysvmsg_queue_get_constructor;
 	sysvmsg_queue_object_handlers.clone_obj = NULL;
+	sysvmsg_queue_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("MSG_IPC_NOWAIT", PHP_MSG_IPC_NOWAIT, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("MSG_EAGAIN",	 EAGAIN, 	     CONST_PERSISTENT|CONST_CS);
@@ -281,7 +276,7 @@ PHP_FUNCTION(msg_receive)
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
 	zend_long desiredmsgtype, maxsize, flags = 0;
 	zend_long realflags = 0;
-	zend_bool do_unserialize = 1;
+	bool do_unserialize = 1;
 	sysvmsg_queue_t *mq = NULL;
 	struct php_msgbuf *messagebuffer = NULL; /* buffer to transmit */
 	int result;
@@ -295,8 +290,8 @@ PHP_FUNCTION(msg_receive)
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL, E_WARNING, "Maximum size of the message has to be greater than zero");
-		return;
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	if (flags != 0) {
@@ -363,11 +358,11 @@ PHP_FUNCTION(msg_send)
 {
 	zval *message, *queue, *zerror=NULL;
 	zend_long msgtype;
-	zend_bool do_serialize = 1, blocking = 1;
+	bool do_serialize = 1, blocking = 1;
 	sysvmsg_queue_t * mq = NULL;
 	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;
-	int message_len = 0;
+	size_t message_len = 0;
 
 	RETVAL_FALSE;
 
@@ -399,7 +394,6 @@ PHP_FUNCTION(msg_send)
 				p = Z_STRVAL_P(message);
 				message_len = Z_STRLEN_P(message);
 				break;
-
 			case IS_LONG:
 				message_len = spprintf(&p, 0, ZEND_LONG_FMT, Z_LVAL_P(message));
 				break;
@@ -412,9 +406,10 @@ PHP_FUNCTION(msg_send)
 			case IS_DOUBLE:
 				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
 				break;
+
 			default:
-				php_error_docref(NULL, E_WARNING, "Message parameter must be either a string or a number.");
-				RETURN_FALSE;
+				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_type_name(message));
+				RETURN_THROWS();
 		}
 
 		messagebuffer = safe_emalloc(message_len, 1, sizeof(struct php_msgbuf));

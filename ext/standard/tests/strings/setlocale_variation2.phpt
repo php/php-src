@@ -5,6 +5,10 @@ Test setlocale() function : usage variations - Setting all available locales in 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for windows');
 }
+exec("locale -a", $output, $exit_code);
+if ($exit_code !== 0) {
+    die("skip locale -a not available");
+}
 ?>
 --FILE--
 <?php

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -83,30 +83,16 @@ mysqlnd_plugin__get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED *
 }
 /* }}} */
 
-
-/* {{{ _mysqlnd_plugin__get_plugin_result_buffered_data */
-static void **
-mysqlnd_plugin__get_plugin_result_buffered_data_zval(const MYSQLND_RES_BUFFERED_ZVAL * result, const unsigned int plugin_id)
-{
-	DBG_ENTER("_mysqlnd_plugin__get_plugin_result_data");
-	DBG_INF_FMT("plugin_id=%u", plugin_id);
-	if (!result || plugin_id >= mysqlnd_plugin_count()) {
-		return NULL;
-	}
-	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_BUFFERED_ZVAL) + plugin_id * sizeof(void *)));
-}
-/* }}} */
-
 /* {{{ mysqlnd_plugin__get_plugin_result_buffered_data */
 static void **
-mysqlnd_plugin__get_plugin_result_buffered_data_c(const MYSQLND_RES_BUFFERED_C * result, const unsigned int plugin_id)
+mysqlnd_plugin__get_plugin_result_buffered_data(const MYSQLND_RES_BUFFERED * result, const unsigned int plugin_id)
 {
 	DBG_ENTER("mysqlnd_plugin__get_plugin_result_data");
 	DBG_INF_FMT("plugin_id=%u", plugin_id);
 	if (!result || plugin_id >= mysqlnd_plugin_count()) {
 		return NULL;
 	}
-	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_BUFFERED_C) + plugin_id * sizeof(void *)));
+	DBG_RETURN((void *)((char *)result + sizeof(MYSQLND_RES_BUFFERED) + plugin_id * sizeof(void *)));
 }
 /* }}} */
 
@@ -172,8 +158,7 @@ struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters =
 	mysqlnd_plugin__get_plugin_connection_data_data,
 	mysqlnd_plugin__get_plugin_result_data,
 	mysqlnd_plugin__get_plugin_result_unbuffered_data,
-	mysqlnd_plugin__get_plugin_result_buffered_data_zval,
-	mysqlnd_plugin__get_plugin_result_buffered_data_c,
+	mysqlnd_plugin__get_plugin_result_buffered_data,
 	mysqlnd_plugin__get_plugin_stmt_data,
 	mysqlnd_plugin__get_plugin_protocol_data,
 	mysqlnd_plugin__get_plugin_pfc_data,
@@ -184,7 +169,7 @@ struct st_mysqlnd_plugin__plugin_area_getters mysqlnd_plugin_area_getters =
 
 /* {{{ _mysqlnd_object_factory_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *
-_mysqlnd_object_factory_get_methods()
+_mysqlnd_object_factory_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory);
 }
@@ -201,7 +186,7 @@ _mysqlnd_object_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_fa
 
 /* {{{ _mysqlnd_conn_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *
-_mysqlnd_conn_get_methods()
+_mysqlnd_conn_get_methods(void)
 {
 	return mysqlnd_conn_methods;
 }
@@ -218,7 +203,7 @@ _mysqlnd_conn_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *methods)
 
 /* {{{ _mysqlnd_conn_data_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) *
-_mysqlnd_conn_data_get_methods()
+_mysqlnd_conn_data_get_methods(void)
 {
 	return mysqlnd_conn_data_methods;
 }
@@ -235,7 +220,7 @@ _mysqlnd_conn_data_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * m
 
 /* {{{ _mysqlnd_result_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) *
-_mysqlnd_result_get_methods()
+_mysqlnd_result_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_res);
 }
@@ -253,7 +238,7 @@ _mysqlnd_result_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * methods)
 
 /* {{{ _mysqlnd_result_unbuffered_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) *
-_mysqlnd_result_unbuffered_get_methods()
+_mysqlnd_result_unbuffered_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_unbuffered);
 }
@@ -271,7 +256,7 @@ _mysqlnd_result_unbuffered_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result
 
 /* {{{ _mysqlnd_result_buffered_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) *
-_mysqlnd_result_buffered_get_methods()
+_mysqlnd_result_buffered_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_result_buffered);
 }
@@ -289,7 +274,7 @@ _mysqlnd_result_buffered_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_b
 
 /* {{{ _mysqlnd_stmt_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) *
-_mysqlnd_stmt_get_methods()
+_mysqlnd_stmt_get_methods(void)
 {
 	return mysqlnd_stmt_methods;
 }
@@ -307,7 +292,7 @@ _mysqlnd_stmt_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) *methods)
 
 /* {{{ _mysqlnd_protocol_payload_decoder_factory_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *
-_mysqlnd_protocol_payload_decoder_factory_get_methods()
+_mysqlnd_protocol_payload_decoder_factory_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_payload_decoder_factory);
 }
@@ -325,7 +310,7 @@ _mysqlnd_protocol_payload_decoder_factory_set_methods(MYSQLND_CLASS_METHODS_TYPE
 
 /* {{{ _mysqlnd_pfc_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) *
-_mysqlnd_pfc_get_methods()
+_mysqlnd_pfc_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_protocol_packet_frame_codec);
 }
@@ -343,7 +328,7 @@ _mysqlnd_pfc_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_fram
 
 /* {{{ _mysqlnd_vio_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) *
-_mysqlnd_vio_get_methods()
+_mysqlnd_vio_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_vio);
 }
@@ -361,7 +346,7 @@ _mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
 
 /* {{{ mysqlnd_command_factory_get */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) *
-_mysqlnd_command_factory_get()
+_mysqlnd_command_factory_get(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_command);
 }
@@ -379,7 +364,7 @@ _mysqlnd_command_factory_set(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * metho
 
 /* {{{ _mysqlnd_error_info_get_methods */
 static MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *
-_mysqlnd_error_info_get_methods()
+_mysqlnd_error_info_get_methods(void)
 {
 	return &MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_error_info);
 }

@@ -6,7 +6,7 @@ memory_limit=8M
 <?php
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
 if ($zend_mm_enabled === "0") {
-	die("skip Zend MM disabled");
+    die("skip Zend MM disabled");
 }
 ?>
 --FILE--

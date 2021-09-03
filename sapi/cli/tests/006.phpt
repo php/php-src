@@ -1,13 +1,13 @@
 --TEST--
 show information about extension
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
 include "skipif.inc";
-if (!extension_loaded("session")) {
-	die("skip session extension required");
-}
+
 if (PCRE_JIT_SUPPORT == false) {
-	die ("skip not pcre jit support builtin");
+    die ("skip not pcre jit support builtin");
 }
 ?>
 --INI--
@@ -70,7 +70,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [5] {
         Parameter #0 [ <required> string $pattern ]
         Parameter #1 [ <required> string $subject ]
-        Parameter #2 [ <optional> &$subpatterns = null ]
+        Parameter #2 [ <optional> &$matches = null ]
         Parameter #3 [ <optional> int $flags = 0 ]
         Parameter #4 [ <optional> int $offset = 0 ]
       }
@@ -81,7 +81,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [5] {
         Parameter #0 [ <required> string $pattern ]
         Parameter #1 [ <required> string $subject ]
-        Parameter #2 [ <optional> &$subpatterns = null ]
+        Parameter #2 [ <optional> &$matches = null ]
         Parameter #3 [ <optional> int $flags = 0 ]
         Parameter #4 [ <optional> int $offset = 0 ]
       }
@@ -90,8 +90,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_replace ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> array|string $regex ]
-        Parameter #1 [ <required> array|string $replace ]
+        Parameter #0 [ <required> array|string $pattern ]
+        Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
@@ -101,8 +101,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_filter ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> array|string $regex ]
-        Parameter #1 [ <required> array|string $replace ]
+        Parameter #0 [ <required> array|string $pattern ]
+        Parameter #1 [ <required> array|string $replacement ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
         Parameter #4 [ <optional> &$count = null ]
@@ -112,7 +112,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_replace_callback ] {
 
       - Parameters [6] {
-        Parameter #0 [ <required> array|string $regex ]
+        Parameter #0 [ <required> array|string $pattern ]
         Parameter #1 [ <required> callable $callback ]
         Parameter #2 [ <required> array|string $subject ]
         Parameter #3 [ <optional> int $limit = -1 ]
@@ -125,7 +125,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [5] {
         Parameter #0 [ <required> array $pattern ]
-        Parameter #1 [ <required> $subject ]
+        Parameter #1 [ <required> array|string $subject ]
         Parameter #2 [ <optional> int $limit = -1 ]
         Parameter #3 [ <optional> &$count = null ]
         Parameter #4 [ <optional> int $flags = 0 ]
@@ -146,15 +146,15 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> string $str ]
-        Parameter #1 [ <optional> ?string $delim_char = null ]
+        Parameter #1 [ <optional> ?string $delimiter = null ]
       }
       - Return [ string ]
     }
     Function [ <internal:pcre> function preg_grep ] {
 
       - Parameters [3] {
-        Parameter #0 [ <required> string $regex ]
-        Parameter #1 [ <required> array $input ]
+        Parameter #0 [ <required> string $pattern ]
+        Parameter #1 [ <required> array $array ]
         Parameter #2 [ <optional> int $flags = 0 ]
       }
       - Return [ array|false ]

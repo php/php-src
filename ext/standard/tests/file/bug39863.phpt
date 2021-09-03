@@ -6,12 +6,7 @@ Andrew van der Stock, vanderaj @ owasp.org
 <?php
 
 $filename = __FILE__ . chr(0). ".ridiculous";
-
-try {
-    var_dump(file_exists($filename));
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(file_exists($filename));
 ?>
 --EXPECT--
-file_exists(): Argument #1 ($filename) must be a valid path, string given
+bool(false)

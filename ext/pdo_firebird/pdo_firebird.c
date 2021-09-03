@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,11 +26,6 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static const zend_function_entry pdo_firebird_functions[] = { /* {{{ */
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -42,7 +37,7 @@ zend_module_entry pdo_firebird_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_firebird_deps,
 	"PDO_Firebird",
-	pdo_firebird_functions,
+	NULL,
 	PHP_MINIT(pdo_firebird),
 	PHP_MSHUTDOWN(pdo_firebird),
 	NULL,
@@ -63,7 +58,14 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
 
-	php_pdo_register_driver(&pdo_firebird_driver);
+	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
+		return FAILURE;
+	}
+
+#ifdef ZEND_SIGNALS
+	/* firebird replaces some signals at runtime, suppress warnings. */
+	SIGG(check) = 0;
+#endif
 
 	return SUCCESS;
 }

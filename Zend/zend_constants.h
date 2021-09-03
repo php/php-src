@@ -69,22 +69,23 @@ typedef struct _zend_constant {
 BEGIN_EXTERN_C()
 void clean_module_constants(int module_number);
 void free_zend_constant(zval *zv);
-int zend_startup_constants(void);
-int zend_shutdown_constants(void);
+void zend_startup_constants(void);
+void zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
+ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
 ZEND_API zval *zend_get_constant_ex(zend_string *name, zend_class_entry *scope, uint32_t flags);
-ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zend_bool bval, int flags, int module_number);
+ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *constant_name, zend_class_entry *scope, uint32_t flags);
+ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number);
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number);
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number);
 ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number);
 ZEND_API void zend_register_string_constant(const char *name, size_t name_len, const char *strval, int flags, int module_number);
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, const char *strval, size_t strlen, int flags, int module_number);
-ZEND_API int zend_register_constant(zend_constant *c);
+ZEND_API zend_result zend_register_constant(zend_constant *c);
 #ifdef ZTS
-void zend_copy_constants(HashTable *target, HashTable *sourc);
+void zend_copy_constants(HashTable *target, HashTable *source);
 #endif
 
 ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);

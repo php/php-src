@@ -1,85 +1,74 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @not-serializable */
 class PDOStatement implements IteratorAggregate
 {
-    /**
-     * @param mixed $driverdata
-     * @return bool
-     */
-    public function bindColumn(int|string $column, &$param, int $type = 0, int $maxlen = 0, $driverdata = null) {}
+    public string $queryString;
 
-    /**
-     * @param mixed $driver_options
-     * @return bool
-     */
-    public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, $driverdata = null) {}
+    /** @tentative-return-type */
+    public function bindColumn(string|int $column, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool {}
 
-    /**
-     * @param int|string $parameter
-     * @param mixed $value
-     * @return bool
-     */
-    public function bindValue($parameter, $value, int $type = PDO::PARAM_STR) {}
+    /** @tentative-return-type */
+    public function bindParam(string|int $param, mixed &$var, int $type = PDO::PARAM_STR, int $maxLength = 0, mixed $driverOptions = null): bool {}
 
-    /** @return bool */
-    public function closeCursor() {}
+    /** @tentative-return-type */
+    public function bindValue(string|int $param, mixed $value, int $type = PDO::PARAM_STR): bool {}
 
-    /** @return int|false */
-    public function columnCount() {}
+    /** @tentative-return-type */
+    public function closeCursor(): bool {}
 
-    /** @return false|null */
-    public function debugDumpParams() {}
+    /** @tentative-return-type */
+    public function columnCount(): int {}
 
-    /** @return string|false|null */
-    public function errorCode() {}
+    /** @tentative-return-type */
+    public function debugDumpParams(): ?bool {}
 
-    /** @return array|false */
-    public function errorInfo() {}
+    /** @tentative-return-type */
+    public function errorCode(): ?string {}
 
-    /** @return bool */
-    public function execute(?array $input_parameters = null) {}
+    /** @tentative-return-type */
+    public function errorInfo(): array {}
 
-    /** @return mixed */
-    public function fetch(int $fetch_style = PDO::FETCH_BOTH, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {}
+    /** @tentative-return-type */
+    public function execute(?array $params = null): bool {}
 
-    /**
-     * @param mixed $fetch_argument
-     * @return array|false
-     */
-    public function fetchAll(int $fetch_style = PDO::FETCH_BOTH, $fetch_argument = UNKNOWN, array $ctor_args = []) {}
+    /** @tentative-return-type */
+    public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed {}
 
-    /** @return mixed */
-    public function fetchColumn(int $column_number = 0) {}
+    /** @tentative-return-type */
+    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args): array {}
 
-    /** @return mixed */
-    public function fetchObject(?string $class_name = "stdClass", ?array $ctor_args = null) {}
+    /** @tentative-return-type */
+    public function fetchColumn(int $column = 0): mixed {}
 
-    /** @return mixed */
-    public function getAttribute(int $attribute) {}
+    /** @tentative-return-type */
+    public function fetchObject(?string $class = "stdClass", array $constructorArgs = []): object|false {}
 
-    /** @return array|false */
-    public function getColumnMeta(int $column) {}
+    /** @tentative-return-type */
+    public function getAttribute(int $name): mixed {}
+
+    /** @tentative-return-type */
+    public function getColumnMeta(int $column): array|false {}
+
+    /** @tentative-return-type */
+    public function nextRowset(): bool {}
+
+    /** @tentative-return-type */
+    public function rowCount(): int {}
+
+    /** @tentative-return-type */
+    public function setAttribute(int $attribute, mixed $value): bool {}
 
     /** @return bool */
-    public function nextRowset() {}
-
-    /** @return int|false */
-    public function rowCount() {}
-
-    /**
-     * @param mixed $value
-     * @return bool
-     */
-    public function setAttribute(int $attribute, $value) {}
-
-    /** @return bool */
-    public function setFetchMode(int $mode, ...$params) {}
+    public function setFetchMode(int $mode, mixed ...$args) {} // TODO make return type void
 
     public function getIterator(): Iterator {}
 }
 
+/** @not-serializable */
 final class PDORow
 {
+    public string $queryString;
 }

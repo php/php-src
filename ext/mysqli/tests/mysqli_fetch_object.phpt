@@ -1,9 +1,9 @@
 --TEST--
 mysqli_fetch_object()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -128,8 +128,11 @@ require_once('skipifconnectfailure.inc');
     $obj = mysqli_fetch_object($res, 'mysqli_fetch_object_private_constructor', array('a', 'b'));
     mysqli_free_result($res);
 
-    // Fatal error, script execution will end
-    var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
+    try {
+        var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 
 
     mysqli_close($link);
@@ -137,7 +140,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
@@ -145,6 +148,6 @@ Exception: Too few arguments to function mysqli_fetch_object_construct::__constr
 NULL
 NULL
 mysqli_result object is already closed
-[0] mysqli_fetch_object(): Argument #3 ($params) must be of type array, string given in %s on line %d
-
-Fatal error: Class "this_class_does_not_exist" not found in %s on line %d
+[0] mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given in %s on line %d
+mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
+done!

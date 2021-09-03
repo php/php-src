@@ -1,123 +1,194 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-function mb_language(string $language = UNKNOWN): string|bool {}
+/** @refcount 1 */
+function mb_language(?string $language = null): string|bool {}
 
-function mb_internal_encoding(string $encoding = UNKNOWN): string|bool {}
+/** @refcount 1 */
+function mb_internal_encoding(?string $encoding = null): string|bool {}
 
-function mb_http_input(string $type = UNKNOWN): array|string|false {}
+/**
+ * @return array<int, string>|string|false
+ * @refcount 1
+ */
+function mb_http_input(?string $type = null): array|string|false {}
 
-function mb_http_output(string $encoding = UNKNOWN): string|bool {}
+/** @refcount 1 */
+function mb_http_output(?string $encoding = null): string|bool {}
 
-function mb_detect_order(array|string $encoding = UNKNOWN): array|bool {}
+/**
+ * @return array<int, string>|true
+ * @refcount 1
+ */
+function mb_detect_order(array|string|null $encoding = null): array|bool {}
 
+/** @refcount 1 */
 function mb_substitute_character(string|int|null $substitute_character = null): string|int|bool {}
 
+/** @refcount 1 */
 function mb_preferred_mime_name(string $encoding): string|false {}
 
-function mb_parse_str(string $encoded_string, &$result): bool {}
+/** @param array $result */
+function mb_parse_str(string $string, &$result): bool {}
 
-function mb_output_handler(string $contents, int $status): string {}
+/** @refcount 1 */
+function mb_output_handler(string $string, int $status): string {}
 
-function mb_str_split(string $str, int $split_length = 1, string $encoding = UNKNOWN): array {}
+function mb_str_split(string $string, int $length = 1, ?string $encoding = null): array {}
 
-function mb_strlen(string $str, string $encoding = UNKNOWN): int {}
+function mb_strlen(string $string, ?string $encoding = null): int {}
 
-function mb_strpos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
+function mb_strpos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
-function mb_strrpos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
+function mb_strrpos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
-function mb_stripos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
+function mb_stripos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
-function mb_strripos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
+function mb_strripos(string $haystack, string $needle, int $offset = 0, ?string $encoding = null): int|false {}
 
-function mb_strstr(string $haystack, string $needle, bool $part = false, string $encoding = UNKNOWN): string|false {}
+/** @refcount 1 */
+function mb_strstr(string $haystack, string $needle, bool $before_needle = false, ?string $encoding = null): string|false {}
 
-function mb_strrchr(string $haystack, string $needle, bool $part = false, string $encoding = UNKNOWN): string|false {}
+/** @refcount 1 */
+function mb_strrchr(string $haystack, string $needle, bool $before_needle = false, ?string $encoding = null): string|false {}
 
-function mb_stristr(string $haystack, string $needle, bool $part = false, string $encoding = UNKNOWN): string|false {}
+/** @refcount 1 */
+function mb_stristr(string $haystack, string $needle, bool $before_needle = false, ?string $encoding = null): string|false {}
 
-function mb_strrichr(string $haystack, string $needle, bool $part = false, string $encoding = UNKNOWN): string|false {}
+/** @refcount 1 */
+function mb_strrichr(string $haystack, string $needle, bool $before_needle = false, ?string $encoding = null): string|false {}
 
-function mb_substr_count(string $haystack, string $needle, string $encoding = UNKNOWN): int {}
+function mb_substr_count(string $haystack, string $needle, ?string $encoding = null): int {}
 
-function mb_substr(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string {}
+/** @refcount 1 */
+function mb_substr(string $string, int $start, ?int $length = null, ?string $encoding = null): string {}
 
-function mb_strcut(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string|false {}
+/** @refcount 1 */
+function mb_strcut(string $string, int $start, ?int $length = null, ?string $encoding = null): string {}
 
-function mb_strwidth(string $str, string $encoding = UNKNOWN): int {}
+function mb_strwidth(string $string, ?string $encoding = null): int {}
 
-function mb_strimwidth(string $str, int $start, int $width, string $trim_marker = UNKNOWN, string $encoding = UNKNOWN): string {}
+/** @refcount 1 */
+function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
-function mb_convert_encoding(array|string $str, string $to, array|string $from = UNKNOWN): array|string|false {}
+/**
+ * @return array<int|string, mixed>|string|false
+ * @refcount 1
+ */
+function mb_convert_encoding(array|string $string, string $to_encoding, array|string|null $from_encoding = null): array|string|false {}
 
-function mb_convert_case(string $source_string, int $mode, ?string $encoding = null): string {}
+/** @refcount 1 */
+function mb_convert_case(string $string, int $mode, ?string $encoding = null): string {}
 
-function mb_strtoupper(string $source_string, ?string $encoding = null): string {}
+/** @refcount 1 */
+function mb_strtoupper(string $string, ?string $encoding = null): string {}
 
-function mb_strtolower(string $source_string, ?string $encoding = null): string {}
+/** @refcount 1 */
+function mb_strtolower(string $string, ?string $encoding = null): string {}
 
-function mb_detect_encoding(string $str, array|string|null $encoding_list = null, bool $strict = false): string|false {}
+/** @refcount 1 */
+function mb_detect_encoding(string $string, array|string|null $encodings = null, bool $strict = false): string|false {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function mb_list_encodings(): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function mb_encoding_aliases(string $encoding): array {}
 
-function mb_encode_mimeheader(string $str, string $charset = UNKNOWN, string $transfer = UNKNOWN, string $linefeed = UNKNOWN, int $indent = 0): string {}
+/** @refcount 1 */
+function mb_encode_mimeheader(string $string, ?string $charset = null, ?string $transfer_encoding = null, string $newline = "\r\n", int $indent = 0): string {}
 
+/** @refcount 1 */
 function mb_decode_mimeheader(string $string): string {}
 
-function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding = UNKNOWN): string {}
+/** @refcount 1 */
+function mb_convert_kana(string $string, string $mode = "KV", ?string $encoding = null): string {}
 
-function mb_convert_variables(string $to, array|string $from, &$var, &...$vars): string|false {}
+/** @refcount 1 */
+function mb_convert_variables(string $to_encoding, array|string $from_encoding, mixed &$var, mixed &...$vars): string|false {}
 
-function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false): string {}
+/** @refcount 1 */
+function mb_encode_numericentity(string $string, array $map, ?string $encoding = null, bool $hex = false): string {}
 
-function mb_decode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN): string {}
+/** @refcount 1 */
+function mb_decode_numericentity(string $string, array $map, ?string $encoding = null): string {}
 
-function mb_send_mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = UNKNOWN): bool {}
+function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_params = null): bool {}
 
-function mb_get_info(string $type = UNKNOWN): array|string|int|false {}
+/**
+ * @return array<int|string, int|string|array>|string|int|false
+ * @refcount 1
+ */
+function mb_get_info(string $type = "all"): array|string|int|false {}
 
-function mb_check_encoding(array|string $var = UNKNOWN, string $encoding = UNKNOWN): bool {}
+function mb_check_encoding(array|string|null $value = null, ?string $encoding = null): bool {}
 
-function mb_scrub(string $str, string $encoding = UNKNOWN): string {}
+function mb_scrub(string $string, ?string $encoding = null): string {}
 
-function mb_ord(string $str, string $encoding = UNKNOWN): int|false {}
+function mb_ord(string $string, ?string $encoding = null): int|false {}
 
-function mb_chr(int $cp, string $encoding = UNKNOWN): string|false {}
+function mb_chr(int $codepoint, ?string $encoding = null): string|false {}
 
 #ifdef HAVE_MBREGEX
-function mb_regex_encoding(string $encoding = UNKNOWN): string|bool {}
+/** @refcount 1 */
+function mb_regex_encoding(?string $encoding = null): string|bool {}
 
-function mb_ereg(string $pattern, string $string, &$registers = UNKNOWN): int|false {}
+/** @param array $matches */
+function mb_ereg(string $pattern, string $string, &$matches = null): bool {}
 
-function mb_eregi(string $pattern, string $string, &$registers = UNKNOWN): int|false {}
+/** @param array $matches */
+function mb_eregi(string $pattern, string $string, &$matches = null): bool {}
 
-function mb_ereg_replace(string $pattern, string $replacement, string $string, string $option = UNKNOWN): string|false|null {}
+/** @refcount 1 */
+function mb_ereg_replace(string $pattern, string $replacement, string $string, ?string $options = null): string|false|null {}
 
-function mb_eregi_replace(string $pattern, string $replacement, string $string, string $option = UNKNOWN): string|false|null {}
+/** @refcount 1 */
+function mb_eregi_replace(string $pattern, string $replacement, string $string, ?string $options = null): string|false|null {}
 
-function mb_ereg_replace_callback(string $pattern, callable $callback, string $string, string $option = UNKNOWN): string|false|null {}
+/** @refcount 1 */
+function mb_ereg_replace_callback(string $pattern, callable $callback, string $string, ?string $options = null): string|false|null {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function mb_split(string $pattern, string $string, int $limit = -1): array|false {}
 
-function mb_ereg_match(string $pattern, string $string, string $option = UNKNOWN): bool {}
+function mb_ereg_match(string $pattern, string $string, ?string $options = null): bool {}
 
-function mb_ereg_search(string $pattern = UNKNOWN, string $option = UNKNOWN): bool {}
+function mb_ereg_search(?string $pattern = null, ?string $options = null): bool {}
 
-function mb_ereg_search_pos(string $pattern = UNKNOWN, string $option = UNKNOWN): array|false {}
+/**
+ * @return array<int, int>|false
+ * @refcount 1
+ */
+function mb_ereg_search_pos(?string $pattern = null, ?string $options = null): array|false {}
 
-function mb_ereg_search_regs(string $pattern = UNKNOWN, string $option = UNKNOWN): array|false {}
+/**
+ * @return array<int|string, string|false>|false
+ * @refcount 1
+ */
+function mb_ereg_search_regs(?string $pattern = null, ?string $options = null): array|false {}
 
-function mb_ereg_search_init(string $string, string $pattern = UNKNOWN, string $option = UNKNOWN): bool {}
+function mb_ereg_search_init(string $string, ?string $pattern = null, ?string $options = null): bool {}
 
+/**
+ * @return array<int|string, string|false>|false
+ * @refcount 1
+ */
 function mb_ereg_search_getregs(): array|false {}
 
 function mb_ereg_search_getpos(): int {}
 
-function mb_ereg_search_setpos(int $position): bool {}
+function mb_ereg_search_setpos(int $offset): bool {}
 
-function mb_regex_set_options(string $options = UNKNOWN): string {}
+/** @refcount 1 */
+function mb_regex_set_options(?string $options = null): string {}
 #endif

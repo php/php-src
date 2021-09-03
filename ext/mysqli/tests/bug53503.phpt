@@ -1,16 +1,17 @@
 --TEST--
 Bug #53503 (mysqli::query returns false after successful LOAD DATA query)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die("skip Cannot connect to MySQL");
+    die("skip Cannot connect to MySQL");
 
 include_once("local_infile_tools.inc");
 if ($msg = check_local_infile_support($link, $engine))
-	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+    die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
 mysqli_close($link);
 

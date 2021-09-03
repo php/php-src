@@ -1,7 +1,7 @@
 --TEST--
 Bug #38347 (Segmentation fault when using foreach with an unknown/empty SimpleXMLElement)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

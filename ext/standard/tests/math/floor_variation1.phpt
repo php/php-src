@@ -71,13 +71,17 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing floor() : usage variations ***
 
 -- Iteration 1 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 2 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 3 --
@@ -93,31 +97,35 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-floor(): Argument #1 ($number) must be of type int|float, string given
+floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-floor(): Argument #1 ($number) must be of type int|float, string given
+floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-floor(): Argument #1 ($number) must be of type int|float, array given
+floor(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-floor(): Argument #1 ($number) must be of type int|float, string given
+floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-floor(): Argument #1 ($number) must be of type int|float, string given
+floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-floor(): Argument #1 ($number) must be of type int|float, string given
+floor(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-floor(): Argument #1 ($number) must be of type int|float, classA given
+floor(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 15 --
+
+Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 16 --
-floor(): Argument #1 ($number) must be of type int|float, resource given
+floor(): Argument #1 ($num) must be of type int|float, resource given

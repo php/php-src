@@ -20,7 +20,7 @@ foreach ($config['ENV'] as $k => $v) {
 }
 
 /* MySQL specific settings */
-define('PDO_MYSQL_TEST_ENGINE', (false !== getenv('PDO_MYSQL_TEST_ENGINE')) ? getenv('PDO_MYSQL_TEST_ENGINE') : 'MyISAM');
+define('PDO_MYSQL_TEST_ENGINE', (false !== getenv('PDO_MYSQL_TEST_ENGINE')) ? getenv('PDO_MYSQL_TEST_ENGINE') : 'InnoDB');
 define('PDO_MYSQL_TEST_HOST', (false !== getenv('PDO_MYSQL_TEST_HOST')) ? getenv('PDO_MYSQL_TEST_HOST') : 'localhost');
 define('PDO_MYSQL_TEST_PORT', (false !== getenv('PDO_MYSQL_TEST_PORT')) ? getenv('PDO_MYSQL_TEST_PORT') : NULL);
 define('PDO_MYSQL_TEST_DB', (false !== getenv('PDO_MYSQL_TEST_DB')) ? getenv('PDO_MYSQL_TEST_DB') : 'test');

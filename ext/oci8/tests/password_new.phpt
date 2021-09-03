@@ -1,5 +1,7 @@
 --TEST--
 oci_password_change()
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -16,7 +18,7 @@ if (!(isset($matches_sv[0]) && isset($matches[0])
        && $matches_sv[3] == $matches[3]
        && $matches_sv[4] == $matches[4])) {
            // Avoid diffs due to cross version protocol changes (e.g. like 11.2.0.2-11.2.0.3) and bugs like Oracle bug: 6277160
-       	   die ("skip test only runs when database client libraries and database server are the same version");
+           die ("skip test only runs when database client libraries and database server are the same version");
 }
 
 // This test in Oracle 12c needs a non-CDB or the root container

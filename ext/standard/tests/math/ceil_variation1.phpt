@@ -71,13 +71,17 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing ceil() : usage variations ***
 
 -- Iteration 1 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 2 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 3 --
@@ -93,31 +97,35 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-ceil(): Argument #1 ($number) must be of type int|float, string given
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 8 --
-ceil(): Argument #1 ($number) must be of type int|float, string given
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 9 --
-ceil(): Argument #1 ($number) must be of type int|float, array given
+ceil(): Argument #1 ($num) must be of type int|float, array given
 
 -- Iteration 10 --
-ceil(): Argument #1 ($number) must be of type int|float, string given
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 11 --
-ceil(): Argument #1 ($number) must be of type int|float, string given
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 12 --
-ceil(): Argument #1 ($number) must be of type int|float, string given
+ceil(): Argument #1 ($num) must be of type int|float, string given
 
 -- Iteration 13 --
-ceil(): Argument #1 ($number) must be of type int|float, classA given
+ceil(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 14 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 15 --
+
+Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 16 --
-ceil(): Argument #1 ($number) must be of type int|float, resource given
+ceil(): Argument #1 ($num) must be of type int|float, resource given

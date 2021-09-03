@@ -12,12 +12,15 @@ fputcsv($fp, array(
 fclose($fp);
 
 $fo = new SplFileObject('SplFileObject__fgetcsv3.csv');
-var_dump($fo->fgetcsv('invalid'));
+try {
+    var_dump($fo->fgetcsv('invalid'));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --CLEAN--
 <?php
 unlink('SplFileObject__fgetcsv3.csv');
 ?>
---EXPECTF--
-Warning: SplFileObject::fgetcsv(): delimiter must be a character in %s on line %d
-bool(false)
+--EXPECT--
+SplFileObject::fgetcsv(): Argument #1 ($separator) must be a single character

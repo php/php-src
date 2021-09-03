@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-spl_autoload_call(): Argument #1 ($class_name) must be of type string, array given
+spl_autoload_call(): Argument #1 ($class) must be of type string, array given

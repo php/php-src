@@ -26,6 +26,6 @@ try {
 
 ?>
 --EXPECT--
-Ok - ReflectionProperty::__construct() expects exactly 2 parameters, 0 given
-Ok - ReflectionProperty::__construct() expects exactly 2 parameters, 1 given
-Ok - ReflectionProperty::__construct() expects exactly 2 parameters, 3 given
+Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 0 given
+Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 1 given
+Ok - ReflectionProperty::__construct() expects exactly 2 arguments, 3 given

@@ -8,7 +8,7 @@ $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
 --EXPECT--
-array(19) {
+array(24) {
   ["ReflectionException"]=>
   object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -59,49 +59,74 @@ array(19) {
     ["name"]=>
     string(19) "ReflectionUnionType"
   }
-  ["ReflectionMethod"]=>
+  ["ReflectionIntersectionType"]=>
   object(ReflectionClass)#12 (1) {
+    ["name"]=>
+    string(26) "ReflectionIntersectionType"
+  }
+  ["ReflectionMethod"]=>
+  object(ReflectionClass)#13 (1) {
     ["name"]=>
     string(16) "ReflectionMethod"
   }
   ["ReflectionClass"]=>
-  object(ReflectionClass)#13 (1) {
+  object(ReflectionClass)#14 (1) {
     ["name"]=>
     string(15) "ReflectionClass"
   }
   ["ReflectionObject"]=>
-  object(ReflectionClass)#14 (1) {
+  object(ReflectionClass)#15 (1) {
     ["name"]=>
     string(16) "ReflectionObject"
   }
   ["ReflectionProperty"]=>
-  object(ReflectionClass)#15 (1) {
+  object(ReflectionClass)#16 (1) {
     ["name"]=>
     string(18) "ReflectionProperty"
   }
   ["ReflectionClassConstant"]=>
-  object(ReflectionClass)#16 (1) {
+  object(ReflectionClass)#17 (1) {
     ["name"]=>
     string(23) "ReflectionClassConstant"
   }
   ["ReflectionExtension"]=>
-  object(ReflectionClass)#17 (1) {
+  object(ReflectionClass)#18 (1) {
     ["name"]=>
     string(19) "ReflectionExtension"
   }
   ["ReflectionZendExtension"]=>
-  object(ReflectionClass)#18 (1) {
+  object(ReflectionClass)#19 (1) {
     ["name"]=>
     string(23) "ReflectionZendExtension"
   }
   ["ReflectionReference"]=>
-  object(ReflectionClass)#19 (1) {
+  object(ReflectionClass)#20 (1) {
     ["name"]=>
     string(19) "ReflectionReference"
   }
   ["ReflectionAttribute"]=>
-  object(ReflectionClass)#20 (1) {
+  object(ReflectionClass)#21 (1) {
     ["name"]=>
     string(19) "ReflectionAttribute"
+  }
+  ["ReflectionEnum"]=>
+  object(ReflectionClass)#22 (1) {
+    ["name"]=>
+    string(14) "ReflectionEnum"
+  }
+  ["ReflectionEnumUnitCase"]=>
+  object(ReflectionClass)#23 (1) {
+    ["name"]=>
+    string(22) "ReflectionEnumUnitCase"
+  }
+  ["ReflectionEnumBackedCase"]=>
+  object(ReflectionClass)#24 (1) {
+    ["name"]=>
+    string(24) "ReflectionEnumBackedCase"
+  }
+  ["ReflectionFiber"]=>
+  object(ReflectionClass)#25 (1) {
+    ["name"]=>
+    string(15) "ReflectionFiber"
   }
 }

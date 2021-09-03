@@ -3,22 +3,22 @@ Attributes comply with inheritance rules.
 --FILE--
 <?php
 
-<<A2>>
+#[A2]
 class C1
 {
-	<<A1>>
-	public function foo() { }
+    #[A1]
+    public function foo() { }
 }
 
 class C2 extends C1
 {
-	public function foo() { }
+    public function foo() { }
 }
 
 class C3 extends C1
 {
-	<<A1>>
-	public function bar() { }
+    #[A1]
+    public function bar() { }
 }
 
 $ref = new \ReflectionClass(C1::class);
@@ -37,20 +37,20 @@ echo "\n";
 
 trait T1
 {
-	<<A2>>
-	public $a;
+    #[A2]
+    public $a;
 }
 
 class C4
 {
-	use T1;
+    use T1;
 }
 
 class C5
 {
-	use T1;
-	
-	public $a;
+    use T1;
+
+    public $a;
 }
 
 $ref = new \ReflectionClass(T1::class);

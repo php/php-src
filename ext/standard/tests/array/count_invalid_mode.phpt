@@ -9,11 +9,9 @@ $modes = [
     0,
     1,
     -1,
-    -1.45,
     2,
     TRUE,
     FALSE,
-    NULL,
 ];
 
 foreach ($modes as $mode) {
@@ -31,7 +29,5 @@ int(0)
 int(0)
 count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
 count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
-count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
-int(0)
 int(0)
 int(0)

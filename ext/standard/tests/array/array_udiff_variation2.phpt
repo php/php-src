@@ -5,7 +5,7 @@ Test array_udiff() function : usage variation
 echo "*** Testing array_udiff() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
-$arr1 = array(1, 2);
+$array1 = array(1, 2);
 
 include('compare_function.inc');
 $data_comp_func = 'compare_function';
@@ -82,12 +82,12 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for arr2
+// loop through each element of the array for array2
 
 foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
     try {
-        var_dump( array_udiff($arr1, $value, $data_comp_func) );
+        var_dump( array_udiff($array1, $value, $data_comp_func) );
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
@@ -98,76 +98,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_udiff() : usage variation ***
 
 --int 0--
-array_udiff(): Argument #2 ($arr2) must be of type array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int 1--
-array_udiff(): Argument #2 ($arr2) must be of type array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int 12345--
-array_udiff(): Argument #2 ($arr2) must be of type array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --int -12345--
-array_udiff(): Argument #2 ($arr2) must be of type array, int given
+array_udiff(): Argument #2 must be of type array, int given
 
 --float 10.5--
-array_udiff(): Argument #2 ($arr2) must be of type array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float -10.5--
-array_udiff(): Argument #2 ($arr2) must be of type array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float 12.3456789000e10--
-array_udiff(): Argument #2 ($arr2) must be of type array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float -12.3456789000e10--
-array_udiff(): Argument #2 ($arr2) must be of type array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --float .5--
-array_udiff(): Argument #2 ($arr2) must be of type array, float given
+array_udiff(): Argument #2 must be of type array, float given
 
 --uppercase NULL--
-array_udiff(): Argument #2 ($arr2) must be of type array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --lowercase null--
-array_udiff(): Argument #2 ($arr2) must be of type array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --lowercase true--
-array_udiff(): Argument #2 ($arr2) must be of type array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --lowercase false--
-array_udiff(): Argument #2 ($arr2) must be of type array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --uppercase TRUE--
-array_udiff(): Argument #2 ($arr2) must be of type array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --uppercase FALSE--
-array_udiff(): Argument #2 ($arr2) must be of type array, bool given
+array_udiff(): Argument #2 must be of type array, bool given
 
 --empty string DQ--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --empty string SQ--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --string DQ--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --string SQ--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --mixed case string--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --heredoc--
-array_udiff(): Argument #2 ($arr2) must be of type array, string given
+array_udiff(): Argument #2 must be of type array, string given
 
 --instance of classWithToString--
-array_udiff(): Argument #2 ($arr2) must be of type array, classWithToString given
+array_udiff(): Argument #2 must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_udiff(): Argument #2 ($arr2) must be of type array, classWithoutToString given
+array_udiff(): Argument #2 must be of type array, classWithoutToString given
 
 --undefined var--
-array_udiff(): Argument #2 ($arr2) must be of type array, null given
+array_udiff(): Argument #2 must be of type array, null given
 
 --unset var--
-array_udiff(): Argument #2 ($arr2) must be of type array, null given
+array_udiff(): Argument #2 must be of type array, null given

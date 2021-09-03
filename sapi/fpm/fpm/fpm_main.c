@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -142,12 +142,12 @@ static const opt_struct OPTIONS[] = {
 };
 
 typedef struct _php_cgi_globals_struct {
-	zend_bool rfc2616_headers;
-	zend_bool nph;
-	zend_bool fix_pathinfo;
-	zend_bool force_redirect;
-	zend_bool discard_path;
-	zend_bool fcgi_logging;
+	bool rfc2616_headers;
+	bool nph;
+	bool fix_pathinfo;
+	bool force_redirect;
+	bool discard_path;
+	bool fcgi_logging;
 	char *redirect_status_env;
 	HashTable user_config_cache;
 	char *error_header;
@@ -309,7 +309,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
-	zend_bool ignore_status = 0;
+	bool ignore_status = 0;
 	int response_status = SG(sapi_headers).http_response_code;
 
 	if (SG(request_info).no_headers == 1) {
@@ -319,11 +319,11 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 	if (CGIG(nph) || SG(sapi_headers).http_response_code != 200)
 	{
 		int len;
-		zend_bool has_status = 0;
+		bool has_status = 0;
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			char *s;
-			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
+			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s", SG(sapi_headers).http_status_line);
 			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
 				response_status = atoi((s + 1));
 			}
@@ -340,7 +340,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 				(s - SG(sapi_headers).http_status_line) >= 5 &&
 				strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0
 			) {
-				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
+				len = slprintf(buf, sizeof(buf), "Status:%s", s);
 				response_status = atoi((s + 1));
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
@@ -363,9 +363,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 						err++;
 					}
 					if (err->str) {
-						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->str);
+						len = slprintf(buf, sizeof(buf), "Status: %d %s", SG(sapi_headers).http_response_code, err->str);
 					} else {
-						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
+						len = slprintf(buf, sizeof(buf), "Status: %d", SG(sapi_headers).http_response_code);
 					}
 				}
 			}
@@ -373,6 +373,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 
 		if (!has_status) {
 			PHPWRITE_H(buf, len);
+			PHPWRITE_H("\r\n", 2);
 			ignore_status = 1;
 		}
 	}
@@ -729,10 +730,7 @@ static int sapi_cgi_activate(void) /* {{{ */
 
 		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
-			/* Prefer CONTEXT_DOCUMENT_ROOT if set */
-			doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
-			doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
-
+			doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);
@@ -967,7 +965,7 @@ static void init_request_info(void)
 
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
-	SG(request_info).request_method = NULL;
+	SG(request_info).request_method = FCGI_GETENV(request, "REQUEST_METHOD");
 	SG(request_info).proto_num = 1000;
 	SG(request_info).query_string = NULL;
 	SG(request_info).request_uri = NULL;
@@ -975,10 +973,8 @@ static void init_request_info(void)
 	SG(request_info).content_length = 0;
 	SG(sapi_headers).http_response_code = 200;
 
-	/* script_path_translated being set is a good indication that
-	 * we are running in a cgi environment, since it is always
-	 * null otherwise.  otherwise, the filename
-	 * of the script will be retrieved later via argc/argv */
+	/* if script_path_translated is not set, then there is no point to carry on
+	 * as the response is 404 and there is no further processing. */
 	if (script_path_translated) {
 		const char *auth;
 		char *content_length = FCGI_GETENV(request, "CONTENT_LENGTH");
@@ -1308,7 +1304,6 @@ static void init_request_info(void)
 			SG(request_info).path_translated = estrdup(script_path_translated);
 		}
 
-		SG(request_info).request_method = FCGI_GETENV(request, "REQUEST_METHOD");
 		/* FIXME - Work out proto_num here */
 		SG(request_info).query_string = FCGI_GETENV(request, "QUERY_STRING");
 		SG(request_info).content_type = (content_type ? content_type : "" );
@@ -1539,7 +1534,7 @@ int main(int argc, char *argv[])
 	int php_allow_to_run_as_root = 0;
 	int ret;
 #if ZEND_RC_DEBUG
-	zend_bool old_rc_debug;
+	bool old_rc_debug;
 #endif
 
 #if defined(SIGPIPE) && defined(SIG_IGN)

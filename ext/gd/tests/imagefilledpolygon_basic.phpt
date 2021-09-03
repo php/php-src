@@ -1,8 +1,10 @@
 --TEST--
 imagefilledpolygon()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
+    if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
 ?>
 --FILE--
 <?php
@@ -57,8 +59,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/imagefilledpolygon.png';
-	@unlink($dest);
+    $dest = dirname(realpath(__FILE__)) . '/imagefilledpolygon.png';
+    @unlink($dest);
 ?>
 --EXPECT--
 Simple test of imagefilledpolygon() function

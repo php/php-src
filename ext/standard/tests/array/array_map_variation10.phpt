@@ -27,7 +27,7 @@ var_dump( array_map( function() { return NULL; }, $array1));
 echo "-- anonymous function with NULL body --\n";
 var_dump( array_map( function($a) { }, $array1));
 
-echo "-- passing NULL as 'arr1' --\n";
+echo "-- passing NULL as 'array1' --\n";
 try {
     var_dump( array_map( function($a) { return array($a); }, NULL));
 } catch (TypeError $e) {
@@ -82,6 +82,6 @@ array(3) {
   [2]=>
   NULL
 }
--- passing NULL as 'arr1' --
-array_map(): Argument #2 ($arr1) must be of type array, null given
+-- passing NULL as 'array1' --
+array_map(): Argument #2 ($array) must be of type array, null given
 Done

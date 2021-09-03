@@ -3,7 +3,7 @@ Bug #47021 (SoapClient stumbles over WSDL delivered with "Transfer-Encoding: chu
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif('tcp://127.0.0.1:12342'); ?>
+<?php require 'server.inc'; http_server_skipif(); ?>
 --FILE--
 <?php
 require 'server.inc';
@@ -45,11 +45,11 @@ function do_test($num_spaces, $leave_trailing_space=false) {
       . "Content-Length:{$spaces}5{$trailing}\r\n\r\n"
       . "World"
   ];
-  $pid = http_server('tcp://127.0.0.1:12342', $responses);
+  ['pid' => $pid, 'uri' => $uri] = http_server($responses);
 
-  echo file_get_contents('http://127.0.0.1:12342/', false, $ctx);
+  echo file_get_contents($uri, false, $ctx);
   echo "\n";
-  echo file_get_contents('http://127.0.0.1:12342/', false, $ctx);
+  echo file_get_contents($uri, false, $ctx);
   echo "\n";
 
   http_server_kill($pid);

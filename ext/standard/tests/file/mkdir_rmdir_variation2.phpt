@@ -25,12 +25,12 @@ var_dump( rmdir("$file_path/mkdir_variation2/") );
 echo "\n*** Testing mkdir() and rmdir() for binary safe functionality ***\n";
 try {
     var_dump( mkdir("$file_path/temp".chr(0)."/") );
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( rmdir("$file_path/temp".chr(0)."/") );
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -60,8 +60,8 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-mkdir(): Argument #1 ($pathname) must be a valid path, string given
-rmdir(): Argument #1 ($dirname) must be a valid path, string given
+mkdir(): Argument #1 ($directory) must not contain any null bytes
+rmdir(): Argument #1 ($directory) must not contain any null bytes
 
 *** Testing mkdir() with miscellaneous input ***
 bool(true)

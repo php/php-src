@@ -37,7 +37,7 @@ foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
   try {
     var_dump( fileinode( $file_path."/".$file ) );
-  } catch (TypeError $e) {
+  } catch (Error $e) {
     echo $e->getMessage(), "\n";
   }
   clearstatcache();
@@ -74,8 +74,12 @@ bool(false)
 Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileinode(): Argument #1 ($filename) must be a valid path, string given
+
+Warning: fileinode(): Filename contains null byte in %s on line %d
+bool(false)
 - Iteration 8 -
-fileinode(): Argument #1 ($filename) must be a valid path, string given
+
+Warning: fileinode(): Filename contains null byte in %s on line %d
+bool(false)
 
 *** Done ***

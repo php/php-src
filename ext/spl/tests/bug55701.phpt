@@ -15,7 +15,7 @@ function testBaseClass($f) {
     } catch (RuntimeException $e) {
         // Throwing a RuntimeException is the correct behaviour for some methods
         echo "ran normally (expected)\n";
-    } catch (LogicException $e) {
+    } catch (\Error $e) {
         // Throwing a LogicException is not correct
         echo "threw LogicException (unexpected)\n";
     }
@@ -27,8 +27,8 @@ function testChildClass($f) {
     try {
         $f();
         echo "didn't throw (unexpected)\n";
-    } catch (LogicException $e) {
-        echo "threw LogicException (expected)\n";
+    } catch (\Error $e) {
+        echo "threw Error (expected)\n";
     } catch (Exception $e) {
         echo "threw other exception (unexpected)\n";
     }
@@ -293,6 +293,7 @@ testChildClass( function() {
     $o = new SplTempFileObjectChild();
     $o->count();
 } );
+?>
 --EXPECT--
 ->count()... ran normally (expected)
 ->rewind()... ran normally (expected)
@@ -329,6 +330,6 @@ non-empty GlobIterator... ran normally (expected)
 ======================= test there are no regressions =======================
 SplFileObject existent file... ran normally (expected)
 SplFileObject non-existent file... ran normally (expected)
-extends GlobIterator... threw LogicException (expected)
-extends SplFileObject... threw LogicException (expected)
-extends SplTempFileObject... threw LogicException (expected)
+extends GlobIterator... threw Error (expected)
+extends SplFileObject... threw Error (expected)
+extends SplTempFileObject... threw Error (expected)

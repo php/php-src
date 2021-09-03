@@ -1,9 +1,11 @@
 --TEST--
 Bug #36436 (DBA problem with Berkeley DB4)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'db4';
-	require_once(__DIR__ .'/skipif.inc');
+    $handler = 'db4';
+    require_once(__DIR__ .'/skipif.inc');
 ?>
 --FILE--
 <?php
@@ -26,7 +28,7 @@ dba_close($db);
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 resource(%d) of type (dba persistent)

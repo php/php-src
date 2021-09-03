@@ -1,177 +1,164 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-/** @param array|string $config_options */
-function tidy_parse_string(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): tidy|false {}
+function tidy_parse_string(string $string, array|string|null $config = null, ?string $encoding = null): tidy|false {}
 
-function tidy_get_error_buffer(tidy $object): string|false {}
+function tidy_get_error_buffer(tidy $tidy): string|false {}
 
-function tidy_get_output(tidy $object): string {}
+function tidy_get_output(tidy $tidy): string {}
 
-/** @param array|string $config_options */
-function tidy_parse_file(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): tidy|false {}
+function tidy_parse_file(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): tidy|false {}
 
-function tidy_clean_repair(tidy $object): bool {}
+function tidy_clean_repair(tidy $tidy): bool {}
 
-/** @param array|string $config_options */
-function tidy_repair_string(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): string|false {}
+function tidy_repair_string(string $string, array|string|null $config = null, ?string $encoding = null): string|false {}
 
-/** @param array|string $config_options */
-function tidy_repair_file(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): string|false {}
+function tidy_repair_file(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): string|false {}
 
-function tidy_diagnose(tidy $object): bool {}
+function tidy_diagnose(tidy $tidy): bool {}
 
 function tidy_get_release(): string {}
 
 #ifdef HAVE_TIDYOPTGETDOC
-function tidy_get_opt_doc(tidy $object, string $optname): string|false {}
+function tidy_get_opt_doc(tidy $tidy, string $option): string|false {}
 #endif
 
-function tidy_get_config(tidy $object): array {}
+function tidy_get_config(tidy $tidy): array {}
 
-function tidy_get_status(tidy $object): int {}
+function tidy_get_status(tidy $tidy): int {}
 
-function tidy_get_html_ver(tidy $object): int {}
+function tidy_get_html_ver(tidy $tidy): int {}
 
-function tidy_is_xhtml(tidy $object): bool {}
+function tidy_is_xhtml(tidy $tidy): bool {}
 
-function tidy_is_xml(tidy $object): bool {}
+function tidy_is_xml(tidy $tidy): bool {}
 
-function tidy_error_count(tidy $object): int {}
+function tidy_error_count(tidy $tidy): int {}
 
-function tidy_warning_count(tidy $object): int {}
+function tidy_warning_count(tidy $tidy): int {}
 
-function tidy_access_count(tidy $object): int {}
+function tidy_access_count(tidy $tidy): int {}
 
-function tidy_config_count(tidy $object): int {}
+function tidy_config_count(tidy $tidy): int {}
 
-function tidy_getopt(tidy $object, string $option): string|int|bool {}
+function tidy_getopt(tidy $tidy, string $option): string|int|bool {}
 
-function tidy_get_root(tidy $object): ?tidyNode {}
+function tidy_get_root(tidy $tidy): ?tidyNode {}
 
-function tidy_get_html(tidy $object): ?tidyNode {}
+function tidy_get_html(tidy $tidy): ?tidyNode {}
 
-function tidy_get_head(tidy $object): ?tidyNode {}
+function tidy_get_head(tidy $tidy): ?tidyNode {}
 
 function tidy_get_body(tidy $tidy): ?tidyNode {}
 
 class tidy
 {
-    /** @param array|string $config_options */
-    public function __construct(string $filename = UNKNOWN, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+    public function __construct(?string $filename = null, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
 
     /**
-     * @return string|int|bool
+     * @tentative-return-type
      * @alias tidy_getopt
      */
-    public function getOpt(string $option) {}
+    public function getOpt(string $option): string|int|bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_clean_repair
      */
-    public function cleanRepair() {}
+    public function cleanRepair(): bool {}
+
+    /** @tentative-return-type */
+    public function parseFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): bool {}
+
+    /** @tentative-return-type */
+    public function parseString(string $string, array|string|null $config = null, ?string $encoding = null): bool {}
 
     /**
-     * @param array|string $config_options
-     * @return bool
-     */
-    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
-
-    /**
-     * @param array|string $config_options
-     * @return bool
-     */
-    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
-
-    /**
-     * @param array|string $config_options
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_repair_string
      */
-    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
+    public static function repairString(string $string, array|string|null $config = null, ?string $encoding = null): string|false {}
 
     /**
-     * @param array|string $config_options
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_repair_file
      */
-    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+    public static function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): string|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_diagnose
      */
-    public function diagnose() {}
+    public function diagnose(): bool {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias tidy_get_release
      */
-    public function getRelease() {}
+    public function getRelease(): string {}
 
     /**
-     * @return array
+     * @tentative-return-type
      * @alias tidy_get_config
      */
-    public function getConfig() {}
+    public function getConfig(): array {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias tidy_get_status
      */
-    public function getStatus() {}
+    public function getStatus(): int {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias tidy_get_html_ver
      */
-    public function getHtmlVer() {}
+    public function getHtmlVer(): int {}
 
 #ifdef HAVE_TIDYOPTGETDOC
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias tidy_get_opt_doc
      */
-    public function getOptDoc(string $optname) {}
+    public function getOptDoc(string $option): string|false {}
 #endif
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_is_xhtml
      */
-    public function isXhtml() {}
+    public function isXhtml(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_is_xml
      */
-    public function isXml() {}
+    public function isXml(): bool {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_root
      */
-    public function root() {}
+    public function root(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_head
      */
-    public function head() {}
+    public function head(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_html
      */
-    public function html() {}
+    public function html(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_body
      */
-    public function body() {}
+    public function body(): ?tidyNode {}
 }
 
 final class tidyNode

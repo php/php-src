@@ -1,7 +1,7 @@
 --TEST--
 iconv_strpos()
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 iconv.internal_charset=ISO-8859-1
 --FILE--
@@ -16,14 +16,19 @@ function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = fal
     } catch (ValueError $exception) {
         echo $exception->getMessage() . "\n";
     }
-    if ($to_charset !== false) {
-        var_dump(iconv_strpos($haystk, $needle, $offset, $to_charset));
-    } else {
-        var_dump(iconv_strpos($haystk, $needle, $offset));
+    try {
+        if ($to_charset !== false) {
+            var_dump(iconv_strpos($haystk, $needle, $offset, $to_charset));
+        } else {
+            var_dump(iconv_strpos($haystk, $needle, $offset));
+        }
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
     }
 }
 foo("abecdbcdabef", "bcd", -1);
 foo("abecdbcdabef", "bcd", -7);
+foo("abecdbcdabef", "bcd", 12);
 foo("abecdbcdabef", "bcd", 100000);
 foo("abcabcabcdabcababcdabc", "bcd", 0);
 foo("abcabcabcdabcababcdabc", "bcd", 10);
@@ -41,8 +46,10 @@ bool(false)
 bool(false)
 int(5)
 int(5)
-strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 bool(false)
+bool(false)
+strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+iconv_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(7)
 int(7)
 int(16)

@@ -40,5 +40,5 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-str_replace(): Argument #3 ($subject) must be of type string|array, resource given
+str_replace(): Argument #1 ($search) must be of type array|string, resource given
 resource(%d) of type (stream)

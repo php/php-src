@@ -1,13 +1,14 @@
 --TEST--
 FFI 101: PHP symbols (function address)
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('utils.inc'); ?>
 <?php
 try {
-	ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
+    ffi_cdef("extern void *zend_printf;", ffi_get_php_dll_name());
 } catch (Throwable $e) {
-	die('skip PHP symbols not available');
+    die('skip PHP symbols not available');
 }
 ?>
 --INI--

@@ -1,7 +1,7 @@
 --TEST--
 Basic UConverter::convert() usage
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $c = new UConverter('utf-8', 'latin1');
@@ -13,6 +13,7 @@ var_dump(urlencode($c->convert("Stra\xC3\x9Fa", true))); // Reverse prior op
 
 $k = new UConverter('utf-8', 'koi8-r');
 var_dump(bin2hex($k->convert("\xE4"))); // U+0414 CYRILLIC CAPITAL LETTER DE
+?>
 --EXPECT--
 string(23) "This is an ascii string"
 string(12) "Espa%C3%B1ol"

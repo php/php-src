@@ -1,8 +1,10 @@
 --TEST--
 imagedashedline()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
+    if (!function_exists('imagedashedline')) die('skip imagedashedline() not available');
 ?>
 --FILE--
 <?php
@@ -41,8 +43,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
-	@unlink($dest);
+    $dest = dirname(realpath(__FILE__)) . '/imagedashedline.png';
+    @unlink($dest);
 ?>
 --EXPECT--
 Simple test of imagedashedline() function

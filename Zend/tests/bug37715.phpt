@@ -24,6 +24,7 @@ foreach($a as $k => $d)
 }
 // Alternatively $c = $a; and foreachloop removal will cause identical results.
 var_dump(key($a['b']));
+?>
 --EXPECT--
 int(3)
 int(3)

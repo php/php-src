@@ -12,7 +12,7 @@ try {
 
 try {
     password_hash("foo", array());
-} catch (ValueError $exception) {
+} catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
@@ -35,11 +35,9 @@ try {
 }
 
 ?>
---EXPECTF--
-password_hash() expects at least 2 parameters, 1 given
-
-Warning: Array to string conversion in %s on line %d
-password_hash(): Argument #2 ($algo) must be a valid password hashing algorithm
+--EXPECT--
+password_hash() expects at least 2 arguments, 1 given
+password_hash(): Argument #2 ($algo) must be of type string|int|null, array given
 password_hash(): Argument #3 ($options) must be of type array, stdClass given
 password_hash(): Argument #3 ($options) must be of type array, string given
 password_hash(): Argument #1 ($password) must be of type string, array given

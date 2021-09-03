@@ -1,9 +1,7 @@
 --TEST--
 Test mb_convert_variables() function : empty encoding list
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 
@@ -22,5 +20,5 @@ try {
 
 ?>
 --EXPECT--
-mb_convert_variables(): Argument #2 ($from) must specify at least one encoding
-mb_convert_variables(): Argument #2 ($from) must specify at least one encoding
+mb_convert_variables(): Argument #2 ($from_encoding) must specify at least one encoding
+mb_convert_variables(): Argument #2 ($from_encoding) must specify at least one encoding

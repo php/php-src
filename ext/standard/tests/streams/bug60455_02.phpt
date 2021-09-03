@@ -26,6 +26,7 @@ while (!feof($f)) {
     $line = stream_get_line($f, 99, "\n");
     var_dump($line);
 }
+?>
 --EXPECT--
 string(1) "a"
 bool(false)

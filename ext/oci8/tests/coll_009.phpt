@@ -1,5 +1,7 @@
 --TEST--
 collections and wrong dates
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -38,7 +40,7 @@ require __DIR__."/drop_type.inc";
 
 ?>
 --EXPECTF--
-Warning: OCI_Collection::append(): OCI-01861: literal does not match format string in %s on line %d
+Warning: OCICollection::append(): OCI-01861: literal does not match format string in %s on line %d
 bool(false)
 bool(true)
 bool(false)

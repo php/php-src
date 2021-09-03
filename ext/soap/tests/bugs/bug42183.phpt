@@ -1,7 +1,7 @@
 --TEST--
 Bug #42183 (classmap cause crash in non-wsdl mode )
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class PHPObject {
@@ -23,5 +23,6 @@ ob_start();
 $server->handle($req);
 ob_end_clean();
 echo "ok\n";
+?>
 --EXPECT--
 ok

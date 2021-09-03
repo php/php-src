@@ -105,6 +105,8 @@ echo "Done";
 -->    : string(0) ""
 --> /   : string(1) "/"
 --> /rest/Users?filter={"id":"123"}   : string(11) "/rest/Users"
+--> %:x   : string(3) "%:x"
+--> https://example.com:0/   : string(1) "/"
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)

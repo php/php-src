@@ -2,7 +2,7 @@
 GetImageSize() with 246x247 pixels
 --SKIPIF--
 <?php
-	require_once('skipif_imagetype.inc');
+    require_once('skipif_imagetype.inc');
 ?>
 --FILE--
 <?php

@@ -1,5 +1,7 @@
 --TEST--
-Bug #44008 (Incorrect usage of OCI_Lob->close crashes PHP)
+Bug #44008 (Incorrect usage of OCILob->close crashes PHP)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -30,7 +32,7 @@ $r = $textLob->load();
 echo "$r\n";
 
 // Incorrectly closing the lob doesn't cause a crash.
-// OCI-LOB->close() is documented for use only with OCI_Lob->writeTemporary()
+// OCI-LOB->close() is documented for use only with OCILob->writeTemporary()
 $textLob->close();
 
 // Cleanup

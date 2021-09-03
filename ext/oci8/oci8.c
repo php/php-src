@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -120,12 +120,24 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh);
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G) || defined(COMPILE_DL_OCI8_12C)
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G) || defined(COMPILE_DL_OCI8_12C) || defined(COMPILE_DL_OCI8_19)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
 #include "oci8_arginfo.h"
+
+static PHP_INI_MH(OnUpdateOldCloseSemantics)
+{
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	*p = zend_ini_parse_bool(new_value);
+
+	if (*p) {
+		zend_error(E_DEPRECATED, "Directive oci8.old_oci_close_semantics is deprecated");
+	}
+
+	return SUCCESS;
+}
 
 /* {{{ extension definition structures */
 
@@ -155,7 +167,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("oci8.privileged_connect",		"0",	PHP_INI_SYSTEM,	OnUpdateBool,		privileged_connect,		zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.statement_cache_size",	"20",	PHP_INI_SYSTEM,	OnUpdateLong,	statement_cache_size,	zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.default_prefetch",		"100",	PHP_INI_SYSTEM,	OnUpdateLong,	default_prefetch,		zend_oci_globals,	oci_globals)
-	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateBool,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
+	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateOldCloseSemantics,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
 #if (OCI_MAJOR_VERSION >= 11)
 	STD_PHP_INI_ENTRY(	"oci8.connection_class",		"",		PHP_INI_ALL,	OnUpdateString,		connection_class,		zend_oci_globals,	oci_globals)
 #endif
@@ -279,9 +291,6 @@ static PHP_GSHUTDOWN_FUNCTION(oci)
 
 PHP_MINIT_FUNCTION(oci)
 {
-	zend_class_entry oci_lob_class_entry;
-	zend_class_entry oci_coll_class_entry;
-
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
@@ -291,11 +300,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI_Lob", class_OCI_Lob_methods);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI_Collection", class_OCI_Collection_methods);
-
-	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
-	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);
+	oci_lob_class_entry_ptr = register_class_OCILob();
+	oci_coll_class_entry_ptr = register_class_OCICollection();
 
 /* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);
@@ -646,7 +652,7 @@ void php_oci_define_hash_dtor(zval *data)
 
 	zval_ptr_dtor(&define->val);
 
-    efree(define);
+	efree(define);
 }
 /* }}} */
 
@@ -877,7 +883,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 		Z_PARAM_STRING(username, username_len)
 		Z_PARAM_STRING(password, password_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(dbname, dbname_len)
+		Z_PARAM_STRING_OR_NULL(dbname, dbname_len)
 		Z_PARAM_STRING(charset, charset_len)
 		Z_PARAM_LONG(session_mode)
 	ZEND_PARSE_PARAMETERS_END();
@@ -917,14 +923,14 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, zend_long session_mode, int persistent, int exclusive)
 {
 	zval *zvp;
-	zend_resource *le;
+	zend_resource *le = NULL;
 	zend_resource new_le;
 	php_oci_connection *connection = NULL;
 	smart_str hashed_details = {0};
 	time_t timestamp;
 	php_oci_spool *session_pool = NULL;
-	zend_bool use_spool = 1;	   /* Default is to use client-side session pool */
-	zend_bool ping_done = 0;
+	bool use_spool = 1;	   /* Default is to use client-side session pool */
+	bool ping_done = 0;
 
 	ub2 charsetid = 0;
 	ub2 charsetid_nls_lang = 0;
@@ -1042,7 +1048,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
-		zend_bool found = 0;
+		bool found = 0;
 
 		if (persistent && ((zvp = zend_hash_find(&EG(persistent_list), hashed_details.s))) != NULL) {
 			zend_resource *le = Z_RES_P(zvp);
@@ -1163,7 +1169,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				/* We have to do a hash_del but need to preserve the resource if there is a positive
 				 * refcount. Set the data pointer in the list entry to NULL
 				 */
-				if (connection == connection->id->ptr) {
+				if (connection == connection->id->ptr && le) {
 					le->ptr = NULL;
 				}
 
@@ -1190,7 +1196,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	 * a last resort, return a non-persistent connection.
 	 */
 	if (persistent) {
-		zend_bool alloc_non_persistent = 0;
+		bool alloc_non_persistent = 0;
 
 		if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 			/* try to find an idle connection and kill it */
@@ -1436,7 +1442,7 @@ int php_oci_connection_commit(php_oci_connection *connection)
 static int php_oci_connection_close(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECTION_CLOSE_ENABLED()) {
@@ -1528,7 +1534,7 @@ static int php_oci_connection_close(php_oci_connection *connection)
 int php_oci_connection_release(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 	time_t timestamp = time(NULL);
 
 	if (connection->is_stub) {
@@ -1705,7 +1711,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
 			if (!descriptor) {
-				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid->handle);
+				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #" ZEND_LONG_FMT, column->descid->handle);
 				return 1;
 			}
 
@@ -1891,7 +1897,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		} else {
 			RETURN_FALSE;
 		}
-    }
+	}
 #endif /* OCI_MAJOR_VERSION */
 
 	if (placeholder == NULL) {
@@ -1989,7 +1995,7 @@ static int php_oci_persistent_helper(zval *zv)
 static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid)
 {
 	php_oci_spool *session_pool = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	ub4 poolmode = OCI_DEFAULT;	/* Mode to be passed to OCISessionPoolCreate */
 	OCIAuthInfo *spoolAuth = NULL;
 	sword errstatus;
@@ -2052,7 +2058,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus);
 		iserror = 1;
 		goto exit_create_spool;
- 	}
+	}
 	/* }}} */
 
 	/* {{{ Set the edition attribute on the auth handle */
@@ -2128,7 +2134,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
 	zend_resource *spool_out_le = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	zval *spool_out_zv = NULL;
 
 	/* {{{ Create the spool hash key */

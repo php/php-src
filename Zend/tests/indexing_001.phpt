@@ -67,6 +67,8 @@ Cannot use a scalar value as an array
 int(1)
 Cannot use a scalar value as an array
 bool(true)
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
 array(1) {
   ["foo"]=>
   array(1) {
@@ -74,20 +76,10 @@ array(1) {
     int(1)
   }
 }
-
-Warning: Illegal string offset "foo" in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Only the first byte will be assigned to the string offset in %s on line %d
-string(1) "A"
-
-Warning: Illegal string offset "foo" in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Only the first byte will be assigned to the string offset in %s on line %d
-string(1) "A"
+Cannot access offset of type string on string
+string(0) ""
+Cannot access offset of type string on string
+string(1) " "
 Cannot use a scalar value as an array
 float(0.1)
 array(1) {
@@ -112,6 +104,8 @@ Cannot use a scalar value as an array
 int(1)
 Cannot use a scalar value as an array
 bool(true)
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
 array(1) {
   ["foo"]=>
   &array(1) {
@@ -142,6 +136,8 @@ Cannot use a scalar value as an array
 int(1)
 Cannot use a scalar value as an array
 bool(true)
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
 array(1) {
   [0]=>
   array(1) {
@@ -173,6 +169,8 @@ Cannot use a scalar value as an array
 int(1)
 Cannot use a scalar value as an array
 bool(true)
+
+Deprecated: Automatic conversion of false to array is deprecated in %s
 array(1) {
   [0]=>
   &array(1) {

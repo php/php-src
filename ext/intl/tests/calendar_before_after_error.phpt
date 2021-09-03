@@ -2,10 +2,8 @@
 IntlCalendar::before()/after(): bad arguments
 --INI--
 date.timezone=Atlantic/Azores
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -60,19 +58,20 @@ try {
 } catch (Error $ex) {
     echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+?>
 --EXPECT--
-error: 0, IntlCalendar::after() expects exactly 1 parameter, 0 given
+error: 0, IntlCalendar::after() expects exactly 1 argument, 0 given
 
-error: 0, IntlCalendar::before() expects exactly 1 parameter, 0 given
+error: 0, IntlCalendar::before() expects exactly 1 argument, 0 given
 
-error: 0, IntlCalendar::after(): Argument #1 ($calendar) must be of type IntlCalendar, int given
+error: 0, IntlCalendar::after(): Argument #1 ($other) must be of type IntlCalendar, int given
 
-error: 0, IntlCalendar::before(): Argument #1 ($calendar) must be of type IntlCalendar, int given
+error: 0, IntlCalendar::before(): Argument #1 ($other) must be of type IntlCalendar, int given
 
-error: 0, IntlCalendar::after() expects exactly 1 parameter, 2 given
+error: 0, IntlCalendar::after() expects exactly 1 argument, 2 given
 
-error: 0, IntlCalendar::before() expects exactly 1 parameter, 2 given
+error: 0, IntlCalendar::before() expects exactly 1 argument, 2 given
 
-error: 0, intlcal_after() expects exactly 2 parameters, 1 given
+error: 0, intlcal_after() expects exactly 2 arguments, 1 given
 
-error: 0, intlcal_before() expects exactly 2 parameters, 1 given
+error: 0, intlcal_before() expects exactly 2 arguments, 1 given

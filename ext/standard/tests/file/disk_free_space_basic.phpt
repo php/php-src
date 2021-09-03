@@ -50,18 +50,18 @@ rmdir($file_path."/disk_free_space");
 ?>
 --EXPECTF--
 *** Testing with existing directory ***
-float(%d)
-float(%d)
+float(%f)
+float(%f)
 *** Testing with newly created directory ***
  
  Free Space before writing to a file
-float(%d)
+float(%f)
 
  Free Space after writing to a file
-float(%d)
+float(%f)
 
  Free Space Value Is Correct
 *** Testing with Binary Input ***
-float(%d)
+float(%f)
 
 --- Done ---

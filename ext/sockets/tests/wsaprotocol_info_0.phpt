@@ -1,13 +1,13 @@
 --TEST--
 Winsock export/import socket, basic test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
-	die('skip.. Windows only test');
+    die('skip.. Windows only test');
 }
-if (!extension_loaded('sockets')) {
-	die('skip sockets extension not available.');
-}
+
 ?>
 --FILE--
 <?php
@@ -48,12 +48,15 @@ if (!extension_loaded('sockets')) {
 ?>
 --EXPECTF--
 bool(true)
-resource(%d) of type (Socket)
-resource(%d) of type (Socket)
-resource(%d) of type (Socket)
-resource(%d) of type (Unknown)
+object(Socket)#%d (0) {
+}
+object(Socket)#%d (0) {
+}
+object(Socket)#%d (0) {
+}
+object(Socket)#%d (0) {
+}
 
-Warning: socket_wsaprotocol_info_export(): Unable to export WSA protocol info [0x00002726]: %s
- in %s on line %d
+Warning: socket_wsaprotocol_info_export(): Unable to export WSA protocol info [0x00002726]: %s in %s on line %d
 
 Warning: socket_wsaprotocol_info_import(): Unable to open file mapping [0x00000002] in %s on line %d

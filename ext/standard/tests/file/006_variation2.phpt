@@ -137,15 +137,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-chmod(): Argument #2 ($mode) must be of type int, string given
-chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 13 --
-chmod(): Argument #2 ($mode) must be of type int, string given
-chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 14 --
-chmod(): Argument #2 ($mode) must be of type int, string given
-chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 -- Iteration 15 --
-chmod(): Argument #2 ($mode) must be of type int, string given
-chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
+chmod(): Argument #2 ($permissions) must be of type int, string given
 *** Done ***

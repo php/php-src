@@ -14,6 +14,7 @@ $I->unit = 42;
 echo $I->unit."\n";
 $I->d++;
 print_r($I);
+?>
 --EXPECT--
 1
 2

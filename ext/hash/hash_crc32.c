@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -18,35 +18,48 @@
 #include "php_hash.h"
 #include "php_hash_crc32.h"
 #include "php_hash_crc32_tables.h"
+#include "ext/standard/crc32_x86.h"
 
-PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context)
+PHP_HASH_API void PHP_CRC32Init(PHP_CRC32_CTX *context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->state = ~0;
 }
 
 PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	size_t i;
+	size_t i = 0;
 
-	for (i = 0; i < len; ++i) {
+#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+	i += crc32_x86_simd_update(X86_CRC32, &context->state, input, len);
+#endif
+
+	for (; i < len; ++i) {
 		context->state = (context->state << 8) ^ crc32_table[(context->state >> 24) ^ (input[i] & 0xff)];
 	}
 }
 
 PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	size_t i;
+	size_t i = 0;
 
-	for (i = 0; i < len; ++i) {
+#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+	i += crc32_x86_simd_update(X86_CRC32B, &context->state, input, len);
+#endif
+
+	for (; i < len; ++i) {
 		context->state = (context->state >> 8) ^ crc32b_table[(context->state ^ input[i]) & 0xff];
 	}
 }
 
 PHP_HASH_API void PHP_CRC32CUpdate(PHP_CRC32_CTX *context, const unsigned char *input, size_t len)
 {
-	size_t i;
+	size_t i = 0;
 
-	for (i = 0; i < len; ++i) {
+#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+	i += crc32_x86_simd_update(X86_CRC32C, &context->state, input, len);
+#endif
+
+	for (; i < len; ++i) {
 		context->state = (context->state >> 8) ^ crc32c_table[(context->state ^ input[i]) & 0xff];
 	}
 }

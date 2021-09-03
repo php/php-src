@@ -1,13 +1,14 @@
 --TEST--
 MySQL PDO->commit()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-	die("skip Transactional engine not found");
+    die("skip Transactional engine not found");
 ?>
 --FILE--
 <?php
@@ -23,9 +24,14 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
         // DDL will issue an implicit commit
         $db->exec(sprintf('DROP TABLE IF EXISTS test_commit'));
         $db->exec(sprintf('CREATE TABLE test_commit(id INT) ENGINE=%s', MySQLPDOTest::detect_transactional_mysql_engine($db)));
-        if (true !== ($tmp = $db->commit())) {
-            printf("[002] No commit allowed? [%s] %s\n",
-                $db->errorCode(), implode(' ', $db->errorInfo()));
+        try {
+            $db->commit();
+            $failed = false;
+        } catch (PDOException $e) {
+            $failed = true;
+        }
+        if (!$failed) {
+            printf("[002] Commit should have failed\n");
         }
 
         // pdo_transaction_transitions should check this as well...

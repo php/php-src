@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -101,7 +101,7 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 }
 
 # ifdef COOKIE_SEEKER_USES_OFF64_T
-static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
+static int stream_cookie_seeker(void *cookie, off64_t *position, int whence)
 {
 
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);

@@ -4,8 +4,8 @@ Test jdtounix() function : error conditions
 edgarsandi - <edgar.r.sandi@gmail.com>
 --INI--
 date.timezone=UTC
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 try {
@@ -14,5 +14,5 @@ try {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
---EXPECT--
-jday must be within the Unix epoch
+--EXPECTF--
+jday must be between 2440588 and %d

@@ -21,6 +21,7 @@ for ($i = 0; $i < 5; $i++) {
         echo $e->getMessage() . "\n";
     }
 }
+?>
 --EXPECT--
 Cannot assign string to property Foo::$bbb of type int
 Cannot assign string to property Foo::$bbb of type int

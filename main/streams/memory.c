@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -33,10 +33,8 @@ PHPAPI size_t php_url_decode(char *str, size_t len);
 /* {{{ ------- MEMORY stream implementation -------*/
 
 typedef struct {
-	char        *data;
+	zend_string *data;
 	size_t      fpos;
-	size_t      fsize;
-	size_t      smax;
 	int			mode;
 } php_stream_memory_data;
 
@@ -50,23 +48,16 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (ms->mode & TEMP_STREAM_READONLY) {
 		return (ssize_t) -1;
 	} else if (ms->mode & TEMP_STREAM_APPEND) {
-		ms->fpos = ms->fsize;
+		ms->fpos = ZSTR_LEN(ms->data);
 	}
-	if (ms->fpos + count > ms->fsize) {
-		char *tmp;
-		if (!ms->data) {
-			tmp = emalloc(ms->fpos + count);
-		} else {
-			tmp = erealloc(ms->data, ms->fpos + count);
-		}
-		ms->data = tmp;
-		ms->fsize = ms->fpos + count;
+	if (ms->fpos + count > ZSTR_LEN(ms->data)) {
+		ms->data = zend_string_realloc(ms->data, ms->fpos + count, 0);
+	} else {
+		ms->data = zend_string_separate(ms->data, 0);
 	}
-	if (!ms->data)
-		count = 0;
 	if (count) {
-		assert(buf!= NULL);
-		memcpy(ms->data+ms->fpos, (char*)buf, count);
+		ZEND_ASSERT(buf != NULL);
+		memcpy(ZSTR_VAL(ms->data) + ms->fpos, (char*) buf, count);
 		ms->fpos += count;
 	}
 	return count;
@@ -80,17 +71,16 @@ static ssize_t php_stream_memory_read(php_stream *stream, char *buf, size_t coun
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
-	if (ms->fpos == ms->fsize) {
+	if (ms->fpos == ZSTR_LEN(ms->data)) {
 		stream->eof = 1;
 		count = 0;
 	} else {
-		if (ms->fpos + count >= ms->fsize) {
-			count = ms->fsize - ms->fpos;
+		if (ms->fpos + count > ZSTR_LEN(ms->data)) {
+			count = ZSTR_LEN(ms->data) - ms->fpos;
 		}
 		if (count) {
-			assert(ms->data!= NULL);
-			assert(buf!= NULL);
-			memcpy(buf, ms->data+ms->fpos, count);
+			ZEND_ASSERT(buf != NULL);
+			memcpy(buf, ZSTR_VAL(ms->data) + ms->fpos, count);
 			ms->fpos += count;
 		}
 	}
@@ -103,11 +93,8 @@ static ssize_t php_stream_memory_read(php_stream *stream, char *buf, size_t coun
 static int php_stream_memory_close(php_stream *stream, int close_handle)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
-	assert(ms != NULL);
-
-	if (ms->data && close_handle && ms->mode != TEMP_STREAM_READONLY) {
-		efree(ms->data);
-	}
+	ZEND_ASSERT(ms != NULL);
+	zend_string_release(ms->data);
 	efree(ms);
 	return 0;
 }
@@ -143,8 +130,8 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					return 0;
 				}
 			} else {
-				if (ms->fpos + (size_t)(offset) > ms->fsize) {
-					ms->fpos = ms->fsize;
+				if (ms->fpos + (size_t)(offset) > ZSTR_LEN(ms->data)) {
+					ms->fpos = ZSTR_LEN(ms->data);
 					*newoffs = -1;
 					return -1;
 				} else {
@@ -155,8 +142,8 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 				}
 			}
 		case SEEK_SET:
-			if (ms->fsize < (size_t)(offset)) {
-				ms->fpos = ms->fsize;
+			if (ZSTR_LEN(ms->data) < (size_t)(offset)) {
+				ms->fpos = ZSTR_LEN(ms->data);
 				*newoffs = -1;
 				return -1;
 			} else {
@@ -167,15 +154,15 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
-				ms->fpos = ms->fsize;
+				ms->fpos = ZSTR_LEN(ms->data);
 				*newoffs = -1;
 				return -1;
-			} else if (ms->fsize < (size_t)(-offset)) {
+			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
 				ms->fpos = 0;
 				*newoffs = -1;
 				return -1;
 			} else {
-				ms->fpos = ms->fsize + offset;
+				ms->fpos = ZSTR_LEN(ms->data) + offset;
 				*newoffs = ms->fpos;
 				stream->eof = 0;
 				return 0;
@@ -205,7 +192,7 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 	ssb->sb.st_mode = ms->mode & TEMP_STREAM_READONLY ? 0444 : 0666;
 
-	ssb->sb.st_size = ms->fsize;
+	ssb->sb.st_size = ZSTR_LEN(ms->data);
 	ssb->sb.st_mode |= S_IFREG; /* regular file */
 	ssb->sb.st_mtime = timestamp;
 	ssb->sb.st_atime = timestamp;
@@ -242,16 +229,16 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
 					newsize = *(size_t*)ptrparam;
-					if (newsize <= ms->fsize) {
+					if (newsize <= ZSTR_LEN(ms->data)) {
+						ms->data = zend_string_truncate(ms->data, newsize, 0);
 						if (newsize < ms->fpos) {
 							ms->fpos = newsize;
 						}
 					} else {
-						ms->data = erealloc(ms->data, newsize);
-						memset(ms->data+ms->fsize, 0, newsize - ms->fsize);
-						ms->fsize = newsize;
+						size_t old_size = ZSTR_LEN(ms->data);
+						ms->data = zend_string_realloc(ms->data, newsize, 0);
+						memset(ZSTR_VAL(ms->data) + old_size, 0, newsize - old_size);
 					}
-					ms->fsize = newsize;
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}
 	}
@@ -301,10 +288,8 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 	php_stream *stream;
 
 	self = emalloc(sizeof(*self));
-	self->data = NULL;
+	self->data = ZSTR_EMPTY_ALLOC();
 	self->fpos = 0;
-	self->fsize = 0;
-	self->smax = ~0u;
 	self->mode = mode;
 
 	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, _php_stream_mode_to_str(mode));
@@ -315,24 +300,14 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 
 
 /* {{{ */
-PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t length STREAMS_DC)
+PHPAPI php_stream *_php_stream_memory_open(int mode, zend_string *buf STREAMS_DC)
 {
 	php_stream *stream;
 	php_stream_memory_data *ms;
 
 	if ((stream = php_stream_memory_create_rel(mode)) != NULL) {
 		ms = (php_stream_memory_data*)stream->abstract;
-
-		if (mode == TEMP_STREAM_READONLY || mode == TEMP_STREAM_TAKE_BUFFER) {
-			/* use the buffer directly */
-			ms->data = (char *) buf;
-			ms->fsize = length;
-		} else {
-			if (length) {
-				assert(buf != NULL);
-				php_stream_write(stream, buf, length);
-			}
-		}
+		ms->data = zend_string_copy(buf);
 	}
 	return stream;
 }
@@ -340,14 +315,10 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, const char *buf, size_t len
 
 
 /* {{{ */
-PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length STREAMS_DC)
+PHPAPI zend_string *_php_stream_memory_get_buffer(php_stream *stream STREAMS_DC)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
-
-	assert(ms != NULL);
-	assert(length != 0);
-
-	*length = ms->fsize;
+	ZEND_ASSERT(ms != NULL);
 	return ms->data;
 }
 /* }}} */
@@ -375,16 +346,15 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 		return -1;
 	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
-		size_t memsize;
-		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
+		zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
 
-		if (memsize + count >= ts->smax) {
+		if (ZSTR_LEN(membuf) + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			if (file == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
 				return 0;
 			}
-			php_stream_write(file, membuf, memsize);
+			php_stream_write(file, ZSTR_VAL(membuf), ZSTR_LEN(membuf));
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
 			php_stream_encloses(stream, ts->innerstream);
@@ -479,8 +449,7 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
 	php_stream *file;
-	size_t memsize;
-	char *membuf;
+	zend_string *membuf;
 	zend_off_t pos;
 
 	assert(ts != NULL);
@@ -513,8 +482,8 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 	}
 
 	/* perform the conversion and then pass the request on to the innerstream */
-	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
-	php_stream_write(file, membuf, memsize);
+	membuf = php_stream_memory_get_buffer(ts->innerstream);
+	php_stream_write(file, ZSTR_VAL(membuf), ZSTR_LEN(membuf));
 	pos = php_stream_tell(ts->innerstream);
 
 	php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);

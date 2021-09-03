@@ -35,7 +35,7 @@ object(ArrayObject)#%d (1) {
     int(3)
   }
 }
-ksort(): Argument #2 ($sort_flags) must be of type int, string given
+ArrayObject::ksort(): Argument #1 ($flags) must be of type int, string given
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   array(4) {

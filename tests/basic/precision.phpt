@@ -77,6 +77,7 @@ echo "OUTPUTS".PHP_EOL;
 echo join(' ', $v).PHP_EOL;
 var_dump(serialize($v));
 var_export($v);echo PHP_EOL;
+?>
 --EXPECT--
 INI
 -1
@@ -98,7 +99,7 @@ OUTPUTS
 string(60) "a:4:{i:0;d:1.0E+8;i:1;d:3.0E+0;i:2;d:1.0E+103;i:3;d:1.0E+1;}"
 array (
   0 => 1.0E+8,
-  1 => 3.0E+0,
+  1 => 3.0,
   2 => 1.0E+103,
   3 => 1.0E+1,
 )

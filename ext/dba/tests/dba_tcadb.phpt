@@ -1,9 +1,11 @@
 --TEST--
 DBA TCADB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'tcadb';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'tcadb';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,11 +1,12 @@
 --TEST--
 xml_parse_into_struct/umlauts in tags
+--EXTENSIONS--
+xml
 --SKIPIF--
 <?php
-include("skipif.inc");
 if(strtoupper("äöüß") != "ÄÖÜß")
 {
-	die("skip strtoupper on non-ascii not supported on this platform");
+    die("skip strtoupper on non-ascii not supported on this platform");
 }
 ?>
 --FILE--

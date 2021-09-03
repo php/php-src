@@ -19,6 +19,7 @@ Foo::bar();
 Bar::bar();
 ns2\Foo::bar();
 ns1\Foo::bar();
+?>
 --EXPECT--
 test\ns1\Foo
 test\ns1\Foo

@@ -3,12 +3,12 @@ Trailing comma in attribute argument list
 --FILE--
 <?php
 
-<<MyAttribute(
-	"there",
-	"are",
-	"many",
-	"arguments",
-)>>
+#[MyAttribute(
+    "there",
+    "are",
+    "many",
+    "arguments",
+)]
 class Foo { }
 
 $ref = new \ReflectionClass(Foo::class);

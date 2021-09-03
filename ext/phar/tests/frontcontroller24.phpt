@@ -2,8 +2,8 @@
 Phar front controller with custom 404 php script
 --INI--
 default_charset=UTF-8
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller24.php
 REQUEST_URI=/frontcontroller24.php/unknown/file

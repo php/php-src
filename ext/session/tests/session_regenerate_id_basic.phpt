@@ -1,5 +1,7 @@
 --TEST--
 Test session_regenerate_id() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -26,7 +28,7 @@ ob_end_flush();
 *** Testing session_regenerate_id() : basic functionality ***
 string(0) ""
 
-Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
+Warning: session_regenerate_id(): Session ID cannot be regenerated when there is no active session in %s on line %d
 bool(false)
 string(0) ""
 bool(true)
@@ -34,7 +36,7 @@ bool(true)
 string(%d) "%s"
 bool(true)
 
-Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
+Warning: session_regenerate_id(): Session ID cannot be regenerated when there is no active session in %s on line %d
 bool(false)
 string(0) ""
 Done

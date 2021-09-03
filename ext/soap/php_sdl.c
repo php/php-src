@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -313,6 +313,8 @@ void sdl_restore_uri_credentials(sdlCtx *ctx)
 	ctx->context = NULL;
 }
 
+#define SAFE_STR(a) ((a)?((const char *)a):"")
+
 static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 {
 	sdlPtr tmpsdl = ctx->sdl;
@@ -374,7 +376,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				if (node_is_equal_ex(trav2, "schema", XSD_NAMESPACE)) {
 					load_schema(ctx, trav2);
 				} else if (is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", SAFE_STR(trav2->name));
 				}
 				trav2 = trav2->next;
 			}
@@ -435,7 +437,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 				soap_error0(E_ERROR, "Parsing WSDL: <service> has no name attribute");
 			}
 		} else if (!node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -545,7 +547,7 @@ static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xml
 				}
 				smart_str_free(&key);
 			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+				soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 			}
 			trav = trav->next;
 		}
@@ -647,7 +649,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			}
 			smart_str_free(&key);
 		} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		trav = trav->next;
 	}
@@ -679,14 +681,14 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 		sdlParamPtr param;
 
 		if (trav->ns != NULL && strcmp((char*)trav->ns->href, WSDL_NAMESPACE) != 0) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected extensibility element <%s>",  SAFE_STR(trav->name));
 		}
 		if (node_is_equal(trav,"documentation")) {
 			trav = trav->next;
 			continue;
 		}
 		if (!node_is_equal(trav,"part")) {
-			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+			soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 		}
 		part = trav;
 		param = emalloc(sizeof(sdlParam));
@@ -695,7 +697,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 
 		name = get_attribute(part->properties, "name");
 		if (name == NULL) {
-			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'", message->name);
+			soap_error1(E_ERROR, "Parsing WSDL: No name associated with <part> '%s'",  SAFE_STR(message->name));
 		}
 
 		param->paramName = estrdup((char*)name->children->content);
@@ -737,9 +739,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 	zend_hash_init(&ctx.portTypes, 0, NULL, NULL, 0);
 	zend_hash_init(&ctx.services,  0, NULL, NULL, 0);
 
-	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	zend_try {
-
+	load_wsdl_ex(this_ptr, struri, &ctx, 0);
 	schema_pass2(&ctx);
 
 	n = zend_hash_num_elements(&ctx.services);
@@ -766,7 +767,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					continue;
 				}
 				if (!node_is_equal(trav,"port")) {
-					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+					soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 				}
 
 				port = trav;
@@ -805,7 +806,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						}
 					}
 					if (trav2 != address && is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 				  trav2 = trav2->next;
 				}
@@ -907,7 +908,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						continue;
 					}
 					if (!node_is_equal(trav2,"operation")) {
-						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav2->name);
+						soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav2->name));
 					}
 
 					operation = trav2;
@@ -926,7 +927,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						           !node_is_equal(trav3,"output") &&
 						           !node_is_equal(trav3,"fault") &&
 						           !node_is_equal(trav3,"documentation")) {
-							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav3->name);
+							soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav3->name));
 						}
 						trav3 = trav3->next;
 					}
@@ -1104,7 +1105,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 												}
 											}
 										} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
-											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>", trav->name);
+											soap_error1(E_ERROR, "Parsing WSDL: Unexpected WSDL element <%s>",  SAFE_STR(trav->name));
 										}
 										trav = trav->next;
 									}
@@ -2116,11 +2117,8 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	HashTable tmp_bindings;
 	HashTable tmp_functions;
 
-#ifdef ZEND_WIN32
 	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#else
-	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
-#endif
+
 	if (f < 0) {return;}
 
 	zend_hash_init(&tmp_types, 0, NULL, NULL, 0);
@@ -3165,12 +3163,12 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	char* old_error_code = SOAP_GLOBAL(error_code);
 	size_t uri_len = 0;
 	php_stream_context *context=NULL;
-	zval *tmp, *proxy_host, *proxy_port, orig_context, new_context;
+	zval *tmp, orig_context, new_context;
 	smart_str headers = {0};
 	char* key = NULL;
 	time_t t = time(0);
-	zend_bool has_proxy_authorization = 0;
-	zend_bool has_authorization = 0;
+	bool has_proxy_authorization = 0;
+	bool has_authorization = 0;
 
 	ZVAL_UNDEF(&orig_context);
 	ZVAL_UNDEF(&new_context);
@@ -3239,53 +3237,56 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		}
 	}
 
-	if (NULL != (tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr),
-			"_stream_context", sizeof("_stream_context")-1))) {
-		context = php_stream_context_from_zval(tmp, 0);
-	} else {
+	if (instanceof_function(Z_OBJCE_P(this_ptr), soap_class_entry)) {
+		tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
+		if (Z_TYPE_P(tmp) == IS_RESOURCE) {
+			context = php_stream_context_from_zval(tmp, 0);
+		}
+
+		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
+		if (Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
+			smart_str_appends(&headers, "User-Agent: ");
+			smart_str_appends(&headers, Z_STRVAL_P(tmp));
+			smart_str_appends(&headers, "\r\n");
+		}
+
+		zval *proxy_host = Z_CLIENT_PROXY_HOST_P(this_ptr);
+		zval *proxy_port = Z_CLIENT_PROXY_PORT_P(this_ptr);
+		if (Z_TYPE_P(proxy_host) == IS_STRING && Z_TYPE_P(proxy_port) == IS_LONG) {
+			zval str_proxy;
+			smart_str proxy = {0};
+			smart_str_appends(&proxy,"tcp://");
+			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
+			smart_str_appends(&proxy,":");
+			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
+			smart_str_0(&proxy);
+			ZVAL_NEW_STR(&str_proxy, proxy.s);
+
+			if (!context) {
+				context = php_stream_context_alloc();
+			}
+			php_stream_context_set_option(context, "http", "proxy", &str_proxy);
+			zval_ptr_dtor(&str_proxy);
+
+			if (uri_len < sizeof("https://")-1 ||
+				strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
+				ZVAL_TRUE(&str_proxy);
+				php_stream_context_set_option(context, "http", "request_fulluri", &str_proxy);
+			}
+
+			has_proxy_authorization = proxy_authentication(this_ptr, &headers);
+		}
+
+		has_authorization = basic_authentication(this_ptr, &headers);
+	}
+
+	if (!context) {
 		context = php_stream_context_alloc();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
-		smart_str_appends(&headers, "User-Agent: ");
-		smart_str_appends(&headers, Z_STRVAL_P(tmp));
-		smart_str_appends(&headers, "\r\n");
-	}
-
-	if ((proxy_host = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1)) != NULL &&
-	    Z_TYPE_P(proxy_host) == IS_STRING &&
-	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
-	    Z_TYPE_P(proxy_port) == IS_LONG) {
-	        zval str_proxy;
-	    	smart_str proxy = {0};
-		smart_str_appends(&proxy,"tcp://");
-		smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
-		smart_str_appends(&proxy,":");
-		smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
-		smart_str_0(&proxy);
-		ZVAL_NEW_STR(&str_proxy, proxy.s);
-
-		if (!context) {
-			context = php_stream_context_alloc();
-		}
-		php_stream_context_set_option(context, "http", "proxy", &str_proxy);
-		zval_ptr_dtor(&str_proxy);
-
-		if (uri_len < sizeof("https://")-1 ||
-		    strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
-			ZVAL_TRUE(&str_proxy);
-			php_stream_context_set_option(context, "http", "request_fulluri", &str_proxy);
-		}
-
-		has_proxy_authorization = proxy_authentication(this_ptr, &headers);
-	}
-
-	has_authorization = basic_authentication(this_ptr, &headers);
-
 	/* Use HTTP/1.1 with "Connection: close" by default */
 	if ((tmp = php_stream_context_get_option(context, "http", "protocol_version")) == NULL) {
-    	zval http_version;
+		zval http_version;
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);

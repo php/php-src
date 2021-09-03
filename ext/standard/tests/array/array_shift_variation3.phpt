@@ -28,18 +28,6 @@ $inputs = array(
        -2345 => 'negative',
        ),
 
-       // float data
-/*2*/  'float' => array(
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ),
-
-/*3*/  'extreme floats' => array(
-       12.3456789000e10 => 'large',
-       12.3456789000E-10 => 'small',
-       ),
-
        // null data
 /*4*/  'null uppercase' => array(
        NULL => 'null 1',
@@ -112,57 +100,41 @@ array(3) {
   string(8) "negative"
 }
 
--- Iteration 2 : float data --
-string(8) "positive"
-array(2) {
-  [0]=>
-  string(8) "negative"
-  [1]=>
-  string(4) "half"
-}
-
--- Iteration 3 : extreme floats data --
-string(5) "large"
-array(1) {
-  [0]=>
-  string(5) "small"
-}
-
--- Iteration 4 : null uppercase data --
+-- Iteration 2 : null uppercase data --
 string(6) "null 1"
 array(0) {
 }
 
--- Iteration 5 : null lowercase data --
+-- Iteration 3 : null lowercase data --
 string(6) "null 2"
 array(0) {
 }
 
--- Iteration 6 : bool lowercase data --
+-- Iteration 4 : bool lowercase data --
 string(6) "lowert"
 array(1) {
   [0]=>
   string(6) "lowerf"
 }
 
--- Iteration 7 : bool uppercase data --
+-- Iteration 5 : bool uppercase data --
 string(6) "uppert"
 array(1) {
   [0]=>
   string(6) "upperf"
 }
 
--- Iteration 8 : empty double quotes data --
+-- Iteration 6 : empty double quotes data --
 string(6) "emptyd"
 array(0) {
 }
 
--- Iteration 9 : empty single quotes data --
+-- Iteration 7 : empty single quotes data --
 string(6) "emptys"
 array(0) {
 }
 
--- Iteration 10 : string data --
+-- Iteration 8 : string data --
 string(7) "stringd"
 array(2) {
   ["strings"]=>
@@ -171,12 +143,12 @@ array(2) {
   string(7) "stringh"
 }
 
--- Iteration 11 : undefined data --
+-- Iteration 9 : undefined data --
 string(9) "undefined"
 array(0) {
 }
 
--- Iteration 12 : unset data --
+-- Iteration 10 : unset data --
 string(5) "unset"
 array(0) {
 }

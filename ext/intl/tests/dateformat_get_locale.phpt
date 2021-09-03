@@ -1,8 +1,9 @@
 --TEST--
 datefmt_get_locale()
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) die('skip');
-if (PHP_INT_SIZE != 8) die('skip 64-bit only');
+<?php if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php

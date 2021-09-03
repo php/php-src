@@ -1,7 +1,7 @@
 --TEST--
 Bug #54440: libxml extension ignores default context
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml required for this test'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 
@@ -32,6 +32,7 @@ stream_context_set_default(stream_context_get_options($ctx1));
 
 libxml_set_streams_context($ctx2);
 @simplexml_load_file('test://sdfsdf');
+?>
 --EXPECT--
 Array
 (

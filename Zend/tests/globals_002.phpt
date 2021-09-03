@@ -29,9 +29,9 @@ string(5) "array"
 int(%d)
 string(%d) "%s"
 
-Notice: Undefined array key "PHP_SELF" in %s on line %d
+Warning: Undefined array key "PHP_SELF" in %s on line %d
 NULL
 
-Warning: Undefined variable $_SERVER in %s on line %d
+Warning: Undefined global variable $_SERVER in %s on line %d
 NULL
 Done

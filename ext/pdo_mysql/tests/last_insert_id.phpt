@@ -1,8 +1,10 @@
 --TEST--
 PDO MySQL auto_increment / last insert id
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -19,6 +21,7 @@ print_r($db->query("INSERT INTO test (id, num) VALUES (23, 42)"));
 print_r($db->query("INSERT INTO test (num) VALUES (451)"));
 
 print_r($db->lastInsertId());
+?>
 --EXPECT--
 PDOStatement Object
 (

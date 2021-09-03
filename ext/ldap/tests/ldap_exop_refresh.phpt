@@ -2,16 +2,17 @@
 ldap_exop_refresh() - Test LDAP refresh extended operation
 --CREDITS--
 Emmanuel Dreyfus <manu@netbsd.org>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
-	$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
-	$r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
-	$info = ldap_get_entries($link, $r)[0];
-	if (!isset($info['dynamicsubtrees'])) {
-		die("skip Overlay DDS not available");
-	}
+    $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+    $r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
+    $info = ldap_get_entries($link, $r)[0];
+    if (!isset($info['dynamicsubtrees'])) {
+        die("skip Overlay DDS not available");
+    }
 ?>
 --FILE--
 <?php

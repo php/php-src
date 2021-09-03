@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::createFromRules (error)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -24,6 +24,7 @@ RULES;
 $t = Transliterator::createFromRules($rules);
 echo intl_get_error_message(),"\n";
 echo "Done.\n";
+?>
 --EXPECTF--
 Warning: Transliterator::createFromRules(): String conversion of rules to UTF-16 failed in %s on line %d
 String conversion of rules to UTF-16 failed: U_INVALID_CHAR_FOUND

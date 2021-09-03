@@ -1,7 +1,7 @@
 --TEST--
 Bug #45798 (sqlite3 doesn't notice if variable was bound)
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+sqlite3
 --FILE--
 <?php
 

@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : usage variations - match special characters
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--
@@ -78,13 +79,13 @@ Regex encoding set to utf-8
 
 --** Pattern is: \w+ **--
 -- ASCII String: --
-int(4)
+bool(true)
 array(1) {
   [0]=>
   string(8) "VGhpcw=="
 }
 -- Multibyte String: --
-int(27)
+bool(true)
 array(1) {
   [0]=>
   string(36) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ"
@@ -92,13 +93,13 @@ array(1) {
 
 --** Pattern is: \W+ **--
 -- ASCII String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   string(4) "IA=="
 }
 -- Multibyte String: --
-int(3)
+bool(true)
 array(1) {
   [0]=>
   string(4) "44CC"
@@ -106,7 +107,7 @@ array(1) {
 
 --** Pattern is: \s+ **--
 -- ASCII String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   string(4) "IA=="
@@ -117,13 +118,13 @@ NULL
 
 --** Pattern is: \S+ **--
 -- ASCII String: --
-int(4)
+bool(true)
 array(1) {
   [0]=>
   string(8) "VGhpcw=="
 }
 -- Multibyte String: --
-int(53)
+bool(true)
 array(1) {
   [0]=>
   string(72) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII="
@@ -131,13 +132,13 @@ array(1) {
 
 --** Pattern is: \d+ **--
 -- ASCII String: --
-int(10)
+bool(true)
 array(1) {
   [0]=>
   string(16) "MDEyMzQ1Njc4OQ=="
 }
 -- Multibyte String: --
-int(20)
+bool(true)
 array(1) {
   [0]=>
   string(28) "MDEyMzTvvJXvvJbvvJfvvJjvvJk="
@@ -145,13 +146,13 @@ array(1) {
 
 --** Pattern is: \D+ **--
 -- ASCII String: --
-int(27)
+bool(true)
 array(1) {
   [0]=>
   string(36) "VGhpcyBpcyBhbiBFbmdsaXNoIHN0cmluZy4g"
 }
 -- Multibyte String: --
-int(30)
+bool(true)
 array(1) {
   [0]=>
   string(40) "5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC"
@@ -159,13 +160,13 @@ array(1) {
 
 --** Pattern is: \b **--
 -- ASCII String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   bool(false)
 }
 -- Multibyte String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   bool(false)
@@ -173,13 +174,13 @@ array(1) {
 
 --** Pattern is: \B **--
 -- ASCII String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   bool(false)
 }
 -- Multibyte String: --
-int(1)
+bool(true)
 array(1) {
   [0]=>
   bool(false)

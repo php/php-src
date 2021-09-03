@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -133,6 +133,10 @@ PHPAPI zend_string *php_uudecode(const char *src, size_t src_len) /* {{{ */
 	const char *s, *e, *ee;
 	zend_string *dest;
 
+	if (src_len == 0) {
+		return NULL;
+	}
+
 	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
 	p = ZSTR_VAL(dest);
 	s = src;
@@ -204,7 +208,6 @@ PHP_FUNCTION(convert_uuencode)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(src)
 	ZEND_PARSE_PARAMETERS_END();
-	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
@@ -219,10 +222,9 @@ PHP_FUNCTION(convert_uudecode)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(src)
 	ZEND_PARSE_PARAMETERS_END();
-	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {
-		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");
+		php_error_docref(NULL, E_WARNING, "Argument #1 ($data) is not a valid uuencoded string");
 		RETURN_FALSE;
 	}
 

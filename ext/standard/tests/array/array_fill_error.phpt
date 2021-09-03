@@ -18,4 +18,4 @@ try {
 ?>
 --EXPECT--
 *** Testing array_fill() : error conditions ***
-array_fill(): Argument #2 ($num) must be greater than or equal to 0
+array_fill(): Argument #2 ($count) must be greater than or equal to 0

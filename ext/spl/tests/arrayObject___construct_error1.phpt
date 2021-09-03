@@ -20,6 +20,6 @@ try {
 ?>
 --EXPECT--
 Bad iterator type:
-ArrayObject::__construct(): Argument #3 ($iterator_class) must be a class name derived from Iterator, Exception given(6)
+ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, Exception given(6)
 Non-existent class:
-ArrayObject::__construct(): Argument #3 ($iterator_class) must be a class name derived from Iterator, nonExistentClassName given(13)
+ArrayObject::__construct(): Argument #3 ($iteratorClass) must be a class name derived from ArrayIterator, nonExistentClassName given(13)

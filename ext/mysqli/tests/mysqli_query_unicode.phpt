@@ -1,14 +1,14 @@
 --TEST--
 mysqli_query() - unicode (cyrillic)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 require_once('table.inc');
 if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))
-	die("skip UTF8 chatset seems not available");
+    die("skip UTF8 chatset seems not available");
 mysqli_free_result($res);
 mysqli_close($link);
 ?>
@@ -82,6 +82,14 @@ mysqli_close($link);
     }
 
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS процедурка');
+$link->query('DROP FUNCTION IF EXISTS функцийка');
+$link->close();
 ?>
 --EXPECTF--
 array(1) {

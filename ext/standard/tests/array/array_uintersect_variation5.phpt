@@ -30,7 +30,6 @@ function too_few_parameters ($val1) {
 var_dump(array_uintersect($arr1, $arr2, 'too_few_parameters'));
 
 ?>
-
 --EXPECT--
 *** Testing array_uintersect() : usage variation - differing comparison functions***
 

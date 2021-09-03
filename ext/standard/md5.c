@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -42,7 +42,7 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 PHP_FUNCTION(md5)
 {
 	zend_string *arg;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 
@@ -70,7 +70,7 @@ PHP_FUNCTION(md5_file)
 {
 	char          *arg;
 	size_t           arg_len;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
@@ -290,7 +290,7 @@ static const void *body(PHP_MD5_CTX *ctx, const void *data, size_t size)
 	return ptr;
 }
 
-PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx)
+PHPAPI void PHP_MD5InitArgs(PHP_MD5_CTX *ctx, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	ctx->a = 0x67452301;
 	ctx->b = 0xefcdab89;

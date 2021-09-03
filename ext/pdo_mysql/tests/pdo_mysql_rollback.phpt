@@ -1,13 +1,14 @@
 --TEST--
 PDO::rollBack()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-	die("skip Transactional engine not found");
+    die("skip Transactional engine not found");
 ?>
 --FILE--
 <?php
@@ -37,12 +38,15 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     $db->query('DROP TABLE IF EXISTS test2');
     $db->query('CREATE TABLE test2(id INT)');
     $num++;
-    $db->rollBack();
-    $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
-    if ($row['_num'] != $num)
-        printf("[002] ROLLBACK should have no effect because of the implicit COMMIT
-            triggered by DROP/CREATE TABLE\n");
-
+    try {
+        $db->rollBack();
+        $failed = false;
+    } catch (PDOException $e) {
+        $failed = true;
+    }
+    if (!$failed) {
+        printf("[003] Rollback should have failed\n");
+    }
 
     $db->query('DROP TABLE IF EXISTS test2');
     $db->query('CREATE TABLE test2(id INT) ENGINE=MyISAM');

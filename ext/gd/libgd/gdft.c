@@ -774,7 +774,7 @@ void gdFontCacheShutdown()
 	gdMutexUnlock(gdFontCacheMutex);
 }
 
-void gdFreeFontCache()
+void gdFreeFontCache(void)
 {
 	gdFontCacheShutdown();
 }

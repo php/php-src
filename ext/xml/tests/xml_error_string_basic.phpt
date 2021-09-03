@@ -1,11 +1,7 @@
 --TEST--
 xml_error_string() - Basic test on 5 error codes
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) {
-    exit('Skip - XML extension not loaded');
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 $xmls = array(

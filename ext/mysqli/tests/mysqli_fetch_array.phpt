@@ -1,9 +1,9 @@
 --TEST--
 mysqli_fetch_array() - all datatypes but BIT
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -49,15 +49,17 @@ require_once('skipifconnectfailure.inc');
         $illegal_mode = mt_rand(-10000, 10000);
     } while (in_array($illegal_mode, array(MYSQLI_ASSOC, MYSQLI_NUM, MYSQLI_BOTH)));
     // NOTE: for BC reasons with ext/mysql, ext/mysqli accepts invalid result modes.
-    $tmp = mysqli_fetch_array($res, $illegal_mode);
-    if (false !== $tmp)
-            printf("[013] Expecting boolean/false although, got %s/%s. [%d] %s\n",
-                gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
+    try {
+        mysqli_fetch_array($res, $illegal_mode);
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-    $tmp = mysqli_fetch_array($res, $illegal_mode);
-    if (false !== $tmp)
-        printf("[014] Expecting boolean/false, got %s/%s. [%d] %s\n",
-                gettype($tmp), $tmp, mysqli_errno($link), mysqli_error($link));
+    try {
+        mysqli_fetch_array($res, $illegal_mode);
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     mysqli_free_result($res);
 
@@ -174,9 +176,7 @@ require_once('skipifconnectfailure.inc');
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
-    if ($IS_MYSQLND ||
-        ((mysqli_get_server_version($link) >= 51000) &&
-        (mysqli_get_client_version($link) >= 51000))) {
+    if ($IS_MYSQLND || mysqli_get_server_version($link) >= 51000) {
         func_mysqli_fetch_array($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
         func_mysqli_fetch_array($link, $engine, "BIGINT", NULL, NULL, 260);
         func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 260);
@@ -287,7 +287,7 @@ require_once('skipifconnectfailure.inc');
 
     print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(4) {
   [0]=>
@@ -360,9 +360,7 @@ array(11) {
   ["e"]=>
   string(1) "1"
 }
-
-Warning: mysqli_fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
-
-Warning: mysqli_fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
+mysqli_fetch_array(): Argument #2 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
+mysqli_fetch_array(): Argument #2 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!

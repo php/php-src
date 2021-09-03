@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -40,8 +40,8 @@ PHP_RSHUTDOWN_FUNCTION(filestat);
 /* Compatibility. */
 typedef size_t php_stat_len;
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
-PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
+PHPAPI void php_clear_stat_cache(bool clear_realpath_cache, const char *filename, size_t filename_len);
+PHPAPI void php_stat(zend_string *filename, int type, zval *return_value);
 
 /* Switches for various filestat functions: */
 #define FS_PERMS    0
@@ -62,5 +62,6 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 #define FS_EXISTS  15
 #define FS_LSTAT   16
 #define FS_STAT    17
+#define FS_LPERMS  18
 
 #endif /* PHP_FILESTAT_H */

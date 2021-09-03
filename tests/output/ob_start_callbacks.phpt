@@ -32,6 +32,7 @@ $a = 'my_strtoupper';
 ob_start($a);
 echo 'function via variable', "\n";
 ob_end_flush();
+?>
 --EXPECT--
 CLOSURE IN VARIABLE
 OBJECT IN VARIABLE

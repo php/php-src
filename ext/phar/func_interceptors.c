@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -36,7 +36,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r!", &filename, &filename_len, &zcontext) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -94,10 +94,11 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	zend_string *contents;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	php_stream *stream;
 	zend_long offset = -1;
-	zend_long maxlen = PHP_STREAM_COPY_ALL;
+	zend_long maxlen;
+	bool maxlen_is_null = 1;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -110,8 +111,12 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll!", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen, &maxlen_is_null) == FAILURE) {
 		goto skip_phar;
+	}
+
+	if (maxlen_is_null) {
+		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;
 	}
 
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -135,10 +140,10 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 
-			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
+			if (!maxlen_is_null && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
-				RETURN_FALSE;
+				zend_argument_value_error(5, "must be greater than or equal to 0");
+				RETURN_THROWS();
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */
@@ -229,7 +234,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	int size = 0;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 
@@ -329,7 +334,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
-	zend_bool use_include_path = 0;
+	bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
 
@@ -342,7 +347,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ps|br!", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		goto skip_phar;
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {

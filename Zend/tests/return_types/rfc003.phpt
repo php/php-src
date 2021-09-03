@@ -7,6 +7,7 @@ function foo(): DateTime {
 }
 
 foo();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: foo(): Return value must be of type DateTime, null returned in %s:%d
 Stack trace:

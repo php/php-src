@@ -1,7 +1,7 @@
 PHP_ARG_WITH([openssl],
   [for OpenSSL support],
   [AS_HELP_STRING([--with-openssl],
-    [Include OpenSSL support (requires OpenSSL >= 1.0.1)])])
+    [Include OpenSSL support (requires OpenSSL >= 1.0.2)])])
 
 PHP_ARG_WITH([kerberos],
   [for Kerberos support],
@@ -28,14 +28,15 @@ if test "$PHP_OPENSSL" != "no"; then
     PHP_EVAL_LIBLINE($KERBEROS_LIBS, OPENSSL_SHARED_LIBADD)
   fi
 
-  AC_CHECK_FUNCS([RAND_egd])
-
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
     AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
   ], [
     AC_MSG_ERROR([OpenSSL check failed. Please check config.log for more information.])
   ])
+
+  AC_CHECK_FUNCS([RAND_egd])
+
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
   fi

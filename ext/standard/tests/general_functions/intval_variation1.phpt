@@ -4,15 +4,6 @@ Test intval() function : usage variation
 <?php
 echo "*** Testing intval() : usage variation ***\n";
 
-// Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-    if (error_reporting() & $err_no) {
-        // report non-silenced errors
-        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-    }
-}
-set_error_handler('test_error_handler');
-
 // Initialise function arguments not being substituted (if any)
 $base = 10;
 
@@ -181,11 +172,13 @@ int(0)
 int(0)
 
 --instance of classWithToString--
-Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
+
+Warning: Object of class classWithToString could not be converted to int in %s on line %d
 int(1)
 
 --instance of classWithoutToString--
-Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
+
+Warning: Object of class classWithoutToString could not be converted to int in %s on line %d
 int(1)
 
 --undefined var--

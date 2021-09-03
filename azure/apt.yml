@@ -34,8 +34,31 @@ steps:
                        libldap2-dev \
                        libsodium-dev \
                        libargon2-0-dev \
+                       libmm-dev \
+                       libsnmp-dev \
                        postgresql \
                        postgresql-contrib \
+                       snmpd \
+                       snmp-mibs-downloader \
+                       freetds-dev \
+                       unixodbc-dev \
                        llvm \
+                       libc-client-dev \
+                       libkrb5-dev \
+                       dovecot-core \
+                       dovecot-pop3d \
+                       dovecot-imapd \
+                       sendmail \
+                       firebird-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
+  - script: |
+      mkdir /opt/oracle
+      wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
+      unzip instantclient-basiclite-linuxx64.zip
+      wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
+      unzip instantclient-sdk-linuxx64.zip
+      mv instantclient_*_* /opt/oracle/instantclient
+      # Interferes with libldap2 headers.
+      rm /opt/oracle/instantclient/sdk/include/ldap.h
+    displayName: 'Install Oracle Instant Client'

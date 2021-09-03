@@ -8,7 +8,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Run only on Windows");
 
 if (!is_writable('c:\\')) {
-	die('skip. C:\\ not writable.');
+    die('skip. C:\\ not writable.');
 }
 
 ?>

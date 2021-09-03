@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs12_export_to_file() error tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
@@ -23,7 +23,7 @@ var_dump(openssl_pkcs12_export_to_file($cert, '.', $priv, $pass));
 <?php
 $pkcsfile = __DIR__ . "/openssl_pkcs12_export_to_file__pkcsfile.tmp";
 if (file_exists($pkcsfile)) {
-	unlink($pkcsfile);
+    unlink($pkcsfile);
 }
 ?>
 --EXPECTF--

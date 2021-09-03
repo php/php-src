@@ -21,6 +21,7 @@ var_dump(gc_collect_cycles());
 unset($a); // 10000 zvals collected automatic
 var_dump(gc_collect_cycles());
 echo "ok\n";
+?>
 --EXPECT--
 int(0)
 int(9999)

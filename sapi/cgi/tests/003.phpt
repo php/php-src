@@ -4,7 +4,7 @@ strip comments and whitespace with -w
 <?php
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die ("skip not for Windows");
+    die ("skip not for Windows");
 }
 
 include "skipif.inc";

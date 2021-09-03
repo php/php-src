@@ -22,4 +22,4 @@ try {
 *** Testing date_create() : error conditions ***
 
 -- Testing new DateTime() with more than expected no. of arguments --
-DateTime::__construct() expects at most 2 parameters, 3 given
+DateTime::__construct() expects at most 2 arguments, 3 given

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 class IntlDateFormatter
 {
@@ -8,132 +8,146 @@ class IntlDateFormatter
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar
      */
-    public function __construct(?string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "") {}
+    public function __construct(
+        ?string $locale,
+        int $dateType = IntlDateFormatter::FULL,
+        int $timeType = IntlDateFormatter::FULL,
+        $timezone = null,
+        $calendar = null,
+        ?string $pattern = null
+    ) {}
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
-     * @param IntlCalendar|int|null $calendar
-     * @return IntlDateFormatter|null
+     * @tentative-return-type
      * @alias datefmt_create
      */
-    public static function create(?string $locale, int $datetype, int $timetype, $timezone = null, $calendar = null, string $pattern = "") {}
+    public static function create(
+        ?string $locale,
+        int $dateType = IntlDateFormatter::FULL,
+        int $timeType = IntlDateFormatter::FULL,
+        $timezone = null,
+        IntlCalendar|int|null $calendar = null,
+        ?string $pattern = null
+    ): ?IntlDateFormatter {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_datetype
      */
-    public function getDateType() {}
+    public function getDateType(): int|false {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_timetype
      */
-    public function getTimeType() {}
+    public function getTimeType(): int|false {}
 
     /**
-     * @return int|false
+     * @tentative-return-type
      * @alias datefmt_get_calendar
      */
-    public function getCalendar() {}
+    public function getCalendar(): int|false {}
 
     /**
-     * @param IntlCalendar|int|null $which
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_set_calendar
      */
-    public function setCalendar($which) {}
+    public function setCalendar(IntlCalendar|int|null $calendar): bool {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_timezone_id
      */
-    public function getTimeZoneId() {}
+    public function getTimeZoneId(): string|false {}
 
     /**
-     * @return IntlCalendar|null|false
+     * @tentative-return-type
      * @alias datefmt_get_calendar_object
      */
-    public function getCalendarObject() {}
+    public function getCalendarObject(): IntlCalendar|false|null {}
 
     /**
-     * @return IntlTimeZone|false
+     * @tentative-return-type
      * @alias datefmt_get_timezone
      */
-    public function getTimeZone() {}
+    public function getTimeZone(): IntlTimeZone|false {}
 
     /**
-     * @param IntlTimeZone|DateTimeZone|string|null $zone
-     * @return bool|null
+     * @param IntlTimeZone|DateTimeZone|string|null $timezone
+     * @tentative-return-type
      * @alias datefmt_set_timezone
      */
-    public function setTimeZone($zone) {}
+    public function setTimeZone($timezone): ?bool {} // TODO return true on success
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_set_pattern
      */
-    public function setPattern(string $pattern) {}
+    public function setPattern(string $pattern): bool {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_pattern
      */
-    public function getPattern() {}
+    public function getPattern(): string|false {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_get_locale
      */
-    public function getLocale(int $which = ULOC_ACTUAL_LOCALE) {}
+    public function getLocale(int $type = ULOC_ACTUAL_LOCALE): string|false {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @alias datefmt_set_lenient
      */
-    public function setLenient(bool $lenient) {}
+    public function setLenient(bool $lenient): void {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias datefmt_is_lenient
      */
-    public function isLenient() {}
+    public function isLenient(): bool {}
 
     /**
-     * @param array|int $value
-     * @return string|false
+     * @param IntlCalendar|DateTimeInterface|array|string|int|float $datetime
+     * @tentative-return-type
      * @alias datefmt_format
      */
-    public function format($value) {}
+    public function format($datetime): string|false {}
 
     /**
-     * @param IntlCalendar|DateTime $object
+     * @param IntlCalendar|DateTime $datetime
      * @param array|int|string|null $format
-     * @return string|false
+     * @tentative-return-type
      * @alias datefmt_format_object
      */
-    public static function formatObject($object, $format = null, ?string $locale = null) {}
+    public static function formatObject($datetime, $format = null, ?string $locale = null): string|false {}
 
     /**
-     * @return int|float|false
+     * @param int $offset
+     * @tentative-return-type
      * @alias datefmt_parse
      */
-    public function parse(string $value, &$position = null) {}
+    public function parse(string $string, &$offset = null): int|float|false {}
 
     /**
-     * @return array|false
+     * @param int $offset
+     * @tentative-return-type
      * @alias datefmt_localtime
      */
-    public function localtime(string $value, &$position = null) {}
+    public function localtime(string $string, &$offset = null): array|false {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias datefmt_get_error_code
      */
-    public function getErrorCode() {}
+    public function getErrorCode(): int {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias datefmt_get_error_message
      */
-    public function getErrorMessage() {}
+    public function getErrorMessage(): string {}
 }

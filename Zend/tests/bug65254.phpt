@@ -16,5 +16,6 @@ catch (Exception $e)
 {
     echo 'caught';
 }
+?>
 --EXPECT--
 caught

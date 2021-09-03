@@ -18,6 +18,7 @@ Foo\Bar();
 $x = new Foo\Foo;
 Foo\Foo::Bar();
 \Foo\Bar();
+?>
 --EXPECT--
 Method - Foo::__construct
 Func   - Foo\Bar

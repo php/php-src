@@ -20,8 +20,8 @@
 #ifndef ZEND_GDB
 #define ZEND_GDB
 
-ZEND_API int  zend_gdb_register_code(const void *object, size_t size);
+ZEND_API bool zend_gdb_register_code(const void *object, size_t size);
 ZEND_API void zend_gdb_unregister_all(void);
-ZEND_API int  zend_gdb_present(void);
+ZEND_API bool zend_gdb_present(void);
 
 #endif

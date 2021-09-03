@@ -1,11 +1,11 @@
 --TEST--
 Bug #62915: cloning of several classes is defective
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-	    die('skip intl extension not enabled');
 if (!class_exists('Spoofchecker'))
-		die('skip intl extension does not have spoof checker');
+        die('skip intl extension does not have spoof checker');
 --FILE--
 <?php
 class A extends IntlDateFormatter {
@@ -28,6 +28,7 @@ foreach (range('A', 'D') as $subclass) {
                 $clone = clone $obj;
                     var_dump(get_class($clone));
 }
+?>
 --EXPECT--
 string(1) "A"
 string(1) "B"

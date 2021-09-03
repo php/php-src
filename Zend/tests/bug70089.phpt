@@ -1,7 +1,5 @@
 --TEST--
 Bug #70089 (segfault in PHP 7 at ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER ())
---INI--
-opcache.enable=0
 --FILE--
 <?php
 function dummy($a) {

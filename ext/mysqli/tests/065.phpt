@@ -1,12 +1,13 @@
 --TEST--
 set character set
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_charset')) {
-	die('skip mysqli_set_charset() not available');
+    die('skip mysqli_set_charset() not available');
 }
 ?>
 --FILE--

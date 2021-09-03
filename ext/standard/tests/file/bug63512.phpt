@@ -13,6 +13,7 @@ $array = parse_ini_string('
         d = INSTALL_ROOT "INSTALL_ROOT"', false, INI_SCANNER_RAW);
 
 var_dump($array);
+?>
 --EXPECT--
 array(7) {
   ["int"]=>

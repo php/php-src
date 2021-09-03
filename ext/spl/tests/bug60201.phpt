@@ -13,7 +13,7 @@ array(3) {
   [0]=>
   object(ReflectionParameter)#%d (1) {
     ["name"]=>
-    string(9) "delimiter"
+    string(9) "separator"
   }
   [1]=>
   object(ReflectionParameter)#%d (1) {

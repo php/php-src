@@ -36,7 +36,7 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-asort(): Argument #2 ($sort_flags) must be of type int, string given
+ArrayObject::asort(): Argument #1 ($flags) must be of type int, string given
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {

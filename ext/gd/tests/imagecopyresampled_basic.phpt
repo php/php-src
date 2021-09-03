@@ -1,9 +1,7 @@
 --TEST--
 imagecopyresampled()
---SKIPIF--
-<?php
-	if (!function_exists('imagecopyresampled')) die('skip imagecopyresampled() not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 
@@ -52,10 +50,10 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-	$dest_lge = dirname(realpath(__FILE__)) . '/imagelarge.png';
-	$dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
-	@unlink($dest_lge);
-	@unlink($dest_sml);
+    $dest_lge = dirname(realpath(__FILE__)) . '/imagelarge.png';
+    $dest_sml = dirname(realpath(__FILE__)) . '/imagesmall.png';
+    @unlink($dest_lge);
+    @unlink($dest_sml);
 ?>
 --EXPECT--
 Simple test of imagecopyresampled() function

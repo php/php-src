@@ -1,7 +1,5 @@
 --TEST--
 Bug #70557 (Memleak on return type verifying failed).
---INI--
-opcache.enable=0
 --FILE--
 <?php
 

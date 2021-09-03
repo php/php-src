@@ -1,17 +1,15 @@
 --TEST--
 gif --> png conversion test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-	if (!extension_loaded('gd')) {
-		die("skip gd extension not available.");
-	}
-
-	if (!function_exists("imagepng")) {
-		die("skip png support unavailable");
-	}
-	if (!function_exists("imagecreatefromgif")) {
-		die("skip gif read support unavailable");
-	}
+    if (!function_exists("imagepng")) {
+        die("skip png support unavailable");
+    }
+    if (!function_exists("imagecreatefromgif")) {
+        die("skip gif read support unavailable");
+    }
 ?>
 --FILE--
 <?php

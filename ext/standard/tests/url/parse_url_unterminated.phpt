@@ -1,9 +1,7 @@
 --TEST--
 Test parse_url() function: Parse unterminated string
---SKIPIF--
-<?php
-if (!function_exists('zend_create_unterminated_string')) die('skip ext/test required');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -874,6 +872,22 @@ echo "Done";
   string(11) "/rest/Users"
   ["query"]=>
   string(19) "filter={"id":"123"}"
+}
+
+--> %:x: array(1) {
+  ["path"]=>
+  string(3) "%:x"
+}
+
+--> https://example.com:0/: array(4) {
+  ["scheme"]=>
+  string(5) "https"
+  ["host"]=>
+  string(11) "example.com"
+  ["port"]=>
+  int(0)
+  ["path"]=>
+  string(1) "/"
 }
 
 --> http:///blah.com: bool(false)

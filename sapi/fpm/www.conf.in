@@ -93,6 +93,8 @@ listen = 127.0.0.1:9000
 ;                                    state (waiting to process). If the number
 ;                                    of 'idle' processes is greater than this
 ;                                    number then some children will be killed.
+;             pm.max_spawn_rate    - the maximum number of rate to spawn child
+;                                    processes at once.
 ;  ondemand - no children are created at startup. Children will be forked when
 ;             new requests will connect. The following parameter are used:
 ;             pm.max_children           - the maximum number of children that
@@ -127,6 +129,12 @@ pm.min_spare_servers = 1
 ; Note: Used only when pm is set to 'dynamic'
 ; Note: Mandatory when pm is set to 'dynamic'
 pm.max_spare_servers = 3
+
+; The number of rate to spawn child processes at once.
+; Note: Used only when pm is set to 'dynamic'
+; Note: Mandatory when pm is set to 'dynamic'
+; Default Value: 32
+;pm.max_spawn_rate = 32
 
 ; The number of seconds after which an idle process will be killed.
 ; Note: Used only when pm is set to 'ondemand'
@@ -238,6 +246,22 @@ pm.max_spare_servers = 3
 ; Default Value: not set
 ;pm.status_path = /status
 
+; The address on which to accept FastCGI status request. This creates a new
+; invisible pool that can handle requests independently. This is useful
+; if the main pool is busy with long running requests because it is still possible
+; to get the status before finishing the long running requests.
+;
+; Valid syntaxes are:
+;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific IPv4 address on
+;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
+;   'port'                 - to listen on a TCP socket to all addresses
+;                            (IPv6 and IPv4-mapped) on a specific port;
+;   '/path/to/unix/socket' - to listen on a unix socket.
+; Default Value: value of the listen option
+;pm.status_listen = 127.0.0.1:9001
+
 ; The ping URI to call the monitoring page of FPM. If this value is not set, no
 ; URI will be recognized as a ping page. This could be used to test from outside
 ; that FPM is alive and responding, or to
@@ -271,7 +295,7 @@ pm.max_spare_servers = 3
 ;      it can accept the following format:
 ;      - %{seconds}d (default)
 ;      - %{milliseconds}d
-;      - %{mili}d
+;      - %{milli}d
 ;      - %{microseconds}d
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
@@ -306,17 +330,17 @@ pm.max_spare_servers = 3
 ;  %t: server time the request was received
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %T: time the log has been written (the request has finished)
 ;      it can accept a strftime(3) format:
 ;      %d/%b/%Y:%H:%M:%S %z (default)
-;      The strftime(3) format must be encapsuled in a %{<strftime_format>}t tag
+;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
 ;  %u: remote user
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
-;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
 
 ; The log file for slow requests
 ; Default Value: not set

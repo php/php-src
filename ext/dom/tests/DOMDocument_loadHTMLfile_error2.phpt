@@ -6,18 +6,24 @@ Verifies that an error message is showed if an empty string is passed as argumen
 Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
 assert.bail=true
---SKIPIF--
-<?php include('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument();
-$result = $doc->loadHTMLFile("");
-assert($result === false);
-$doc = new DOMDocument();
-$result = $doc->loadHTMLFile("text.html\0something");
-assert($result === false);
-?>
---EXPECTF--
-%r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Empty string supplied as input %s
+try {
+    $result = $doc->loadHTMLFile("");
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
 
-%r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Invalid file source %s
+$doc = new DOMDocument();
+try {
+    $result = $doc->loadHTMLFile("text.html\0something");
+} catch (ValueError $e) {
+    echo $e->getMessage() . "\n";
+}
+?>
+--EXPECT--
+DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not be empty
+DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not contain any null bytes

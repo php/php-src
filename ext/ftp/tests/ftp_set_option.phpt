@@ -2,8 +2,9 @@
 Testing ftp_set_option basic functionality
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

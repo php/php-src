@@ -1,7 +1,7 @@
 --TEST--
 iconv_mime_decode()
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 iconv.internal_charset=iso-8859-1
 --FILE--
@@ -64,6 +64,7 @@ $mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 do_regression_test();
 $mode = ICONV_MIME_DECODE_STRICT | ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 do_regression_test();
+?>
 --EXPECT--
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 (32) "Subject: Prüfung PrüfungkůÔńÓlet"

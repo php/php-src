@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -224,7 +224,7 @@ PHP_FUNCTION(apache_note)
 	size_t note_name_len, note_val_len;
 	char *old_note_val=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -253,7 +253,7 @@ PHP_FUNCTION(apache_setenv)
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	zend_bool walk_to_top = 0;
+	bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
 
@@ -287,7 +287,7 @@ PHP_FUNCTION(apache_getenv)
 	php_struct *ctx;
 	char *variable;
 	size_t variable_len;
-	zend_bool walk_to_top = 0;
+	bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;

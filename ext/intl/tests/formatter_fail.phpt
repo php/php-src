@@ -1,7 +1,7 @@
 --TEST--
 numfmt creation failures
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -75,6 +75,15 @@ try {
 }
 err($fmt);
 
+$fmt = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
+try {
+    $fmt->__construct('en_US', NumberFormatter::DECIMAL);
+} catch (Error $e) {
+    print_exception($e);
+    $fmt = null;
+}
+err($fmt);
+
 foreach($args as $arg) {
     $fmt = crt("O", $arg[0], $arg[1]);
     err($fmt);
@@ -86,14 +95,29 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-ArgumentCountError: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::__construct() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: numfmt_create() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
 
-ArgumentCountError: NumberFormatter::create() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::create() expects at least 2 arguments, 0 given in %s on line %d
 'U_ZERO_ERROR'
+
+Error: NumberFormatter object is already constructed in %s on line %d
+'U_ZERO_ERROR'
+
+Deprecated: NumberFormatter::__construct(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::__construct(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: NumberFormatter::create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
+
+Deprecated: numfmt_create(): Passing null to parameter #1 ($locale) of type string is deprecated in %s on line %d
+
+Deprecated: numfmt_create(): Passing null to parameter #2 ($style) of type int is deprecated in %s on line %d
 
 IntlException: Constructor failed in %s on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'

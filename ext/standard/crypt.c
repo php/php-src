@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -79,19 +79,7 @@ PHP_MSHUTDOWN_FUNCTION(crypt) /* {{{ */
 }
 /* }}} */
 
-static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-/* Encode a string of bytes as Base64 */
-static void php_to64(char *s, int n) /* {{{ */
-{
-	while (--n >= 0) {
-		*s = itoa64[*s & 0x3f];
-		s++;
-	}
-}
-/* }}} */
-
-PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, zend_bool quiet)
+PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, bool quiet)
 {
 	char *crypt_res;
 	zend_string *result;
@@ -216,9 +204,8 @@ PHP_FUNCTION(crypt)
 	size_t str_len, salt_in_len = 0;
 	zend_string *result;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(str, str_len)
-		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(salt_in, salt_in_len)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -227,23 +214,9 @@ PHP_FUNCTION(crypt)
 	/* This will produce suitable results if people depend on DES-encryption
 	 * available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
+	memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
 
-	if (salt_in) {
-		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
-	} else {
-		php_error_docref(NULL, E_NOTICE, "No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash.");
-	}
-
-	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */
-	if (!*salt) {
-		memcpy(salt, "$1$", 3);
-		php_random_bytes_throw(&salt[3], 8);
-		php_to64(&salt[3], 8);
-		strncpy(&salt[11], "$", PHP_MAX_SALT_LEN - 11);
-		salt_in_len = strlen(salt);
-	} else {
-		salt_in_len = MIN(PHP_MAX_SALT_LEN, salt_in_len);
-	}
+	salt_in_len = MIN(PHP_MAX_SALT_LEN, salt_in_len);
 	salt[salt_in_len] = '\0';
 
 	if ((result = php_crypt(str, (int)str_len, salt, (int)salt_in_len, 0)) == NULL) {

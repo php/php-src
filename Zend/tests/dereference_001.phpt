@@ -44,7 +44,7 @@ var_dump(e()['b']); // string(3) "bar"
 --EXPECTF--
 int(5)
 
-Notice: Undefined array key 0 in %s on line %d
+Warning: Undefined array key 0 in %s on line %d
 NULL
 int(1)
 string(1) "b"

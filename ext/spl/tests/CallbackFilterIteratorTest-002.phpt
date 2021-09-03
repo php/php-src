@@ -40,9 +40,10 @@ try {
 } catch(Exception $e) {
     echo $e->getMessage() . "\n";
 }
+?>
 --EXPECT--
-CallbackFilterIterator::__construct() expects exactly 2 parameters, 0 given
-CallbackFilterIterator::__construct() expects exactly 2 parameters, 1 given
+CallbackFilterIterator::__construct() expects exactly 2 arguments, 0 given
+CallbackFilterIterator::__construct() expects exactly 2 arguments, 1 given
 CallbackFilterIterator::__construct(): Argument #2 ($callback) must be a valid callback, no array or string given
-CallbackFilterIterator::__construct(): Argument #2 ($callback) must be a valid callback, array must have exactly two members
+CallbackFilterIterator::__construct(): Argument #2 ($callback) must be a valid callback, array callback must have exactly two members
 some message

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -214,6 +214,12 @@ C.WriteLine("var PHP_PREFIX = " + '"' + PHP_PREFIX.replace(new RegExp('(["\\\\])
 C.WriteLine("var PHP_ANALYZER = 'disabled';");
 C.WriteLine("var PHP_PGO = 'no';");
 C.WriteLine("var PHP_PGI = 'no';");
+
+C.WriteLine("var PHP_VERSION=" + PHP_VERSION);
+C.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
+C.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
+C.WriteLine("var PHP_EXTRA_VERSION=\"" + PHP_EXTRA_VERSION + "\"");
+C.WriteLine("var PHP_VERSION_STRING=\"" + PHP_VERSION_STRING + "\"");
 
 C.Write(file_get_contents(PHP_DIR + "//script//ext_deps.js"));
 if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {

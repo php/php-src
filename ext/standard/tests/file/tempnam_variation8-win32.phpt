@@ -12,9 +12,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
 
 echo "*** Testing tempnam() with absolute and relative paths ***\n";
-$dir_name = __DIR__."\\tempnam_variation2";
+$dir_name = __DIR__."\\tempnam_variation8";
 mkdir($dir_name);
-$dir_path = $dir_name."/tempnam_variation2_sub";
+$dir_path = $dir_name."/tempnam_variation8_sub";
 mkdir($dir_path);
 
 $old_dir_path = getcwd();
@@ -25,23 +25,23 @@ $dir_paths = array(
   "$dir_path\\",
   "$dir_path\\..",
   "$dir_path\\\\..\\",
-  "$dir_path\\..\\..\\.\\tempnam_variation2",
-  "$dir_path\\..\\\\\\tempnam_variation2_sub\\\\..\\\\..\\tempnam_variation2",
+  "$dir_path\\..\\..\\.\\tempnam_variation8",
+  "$dir_path\\..\\\\\\tempnam_variation8_sub\\\\..\\\\..\\tempnam_variation8",
   "$dir_path\\BADDIR",
 
 
   // relative paths
-  "tempname_variation2\\",
-  "tempnam_variation2\\tempnam_variation2_sub",
-  "tempnam_variation2\\\\tempnam_variation2_sub",
-  ".\\tempnam_variation2\\..\\tempnam_variation2\\tempnam_variation2_sub",
+  "tempname_variation8\\",
+  "tempnam_variation8\\tempnam_variation8_sub",
+  "tempnam_variation8\\\\tempnam_variation8_sub",
+  ".\\tempnam_variation8\\..\\tempnam_variation8\\tempnam_variation8_sub",
   "BADDIR",
 );
 
 for($i = 0; $i<count($dir_paths); $i++) {
   $j = $i+1;
   echo "\n-- Iteration $j --\n";
-  $file_name = tempnam($dir_paths[$i], "tempnam_variation2.tmp");
+  $file_name = tempnam($dir_paths[$i], "tempnam_variation8.tmp");
 
   if( file_exists($file_name) ){
 
@@ -86,27 +86,27 @@ echo "\n*** Done ***\n";
 *** Testing tempnam() with absolute and relative paths ***
 
 -- Iteration 1 --
-File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File name is => %s\tempnam_variation8\tempnam_variation8_sub\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 2 --
-File name is => %s\tempnam_variation2\t%s
+File name is => %s\tempnam_variation8\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 3 --
-File name is => %s\tempnam_variation2\t%s
+File name is => %s\tempnam_variation8\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 4 --
-File name is => %s\tempnam_variation2\t%s
+File name is => %s\tempnam_variation8\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 5 --
-File name is => %s\tempnam_variation2\t%s
+File name is => %s\tempnam_variation8\t%s
 File permissions are => 100666
 File created in => directory specified
 
@@ -125,17 +125,17 @@ File permissions are => 100666
 File created in => temp dir
 
 -- Iteration 8 --
-File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File name is => %s\tempnam_variation8\tempnam_variation8_sub\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 9 --
-File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File name is => %s\tempnam_variation8\tempnam_variation8_sub\t%s
 File permissions are => 100666
 File created in => directory specified
 
 -- Iteration 10 --
-File name is => %s\tempnam_variation2\tempnam_variation2_sub\t%s
+File name is => %s\tempnam_variation8\tempnam_variation8_sub\t%s
 File permissions are => 100666
 File created in => directory specified
 

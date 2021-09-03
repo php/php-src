@@ -36,10 +36,6 @@ struct _zend_property_info;
 #define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-((intptr_t)(offset) + 2)))
 
 
-/* The following rule applies to read_property() and read_dimension() implementations:
-   If you return a zval which is not otherwise referenced by the extension or the engine's
-   symbol table, its reference count should be 0.
-*/
 /* Used to fetch property from the object, read-only */
 typedef zval *(*zend_object_read_property_t)(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 
@@ -47,20 +43,22 @@ typedef zval *(*zend_object_read_property_t)(zend_object *object, zend_string *m
 typedef zval *(*zend_object_read_dimension_t)(zend_object *object, zval *offset, int type, zval *rv);
 
 
-/* The following rule applies to write_property() and write_dimension() implementations:
-   If you receive a value zval in write_property/write_dimension, you may only modify it if
-   its reference count is 1.  Otherwise, you must create a copy of that zval before making
-   any changes.  You should NOT modify the reference count of the value passed to you.
+/* Used to set property of the object
    You must return the final value of the assigned property.
 */
-/* Used to set property of the object */
 typedef zval *(*zend_object_write_property_t)(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zend_object *object, zval *offset, zval *value);
 
 
-/* Used to create pointer to the property of the object, for future direct r/w access */
+/* Used to create pointer to the property of the object, for future direct r/w access.
+ * May return one of:
+ *  * A zval pointer, without incrementing the reference count.
+ *  * &EG(error_zval), if an exception has been thrown.
+ *  * NULL, if acquiring a direct pointer is not possible.
+ *    In this case, the VM will fall back to using read_property and write_property.
+ */
 typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_string *member, int type, void **cache_slot);
 
 /* Used to check if a property of the object exists */
@@ -112,9 +110,29 @@ typedef zend_array *(*zend_object_get_properties_for_t)(zend_object *object, zen
 typedef zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const zval *key);
 typedef zend_function *(*zend_object_get_constructor_t)(zend_object *object);
 
-/* Object maintenance/destruction */
-typedef void (*zend_object_dtor_obj_t)(zend_object *object);
+/* free_obj should release any resources the object holds, without freeing the
+ * object structure itself. The object does not need to be in a valid state after
+ * free_obj finishes running.
+ *
+ * free_obj will always be invoked, even if the object leaks or a fatal error
+ * occurs. However, during shutdown it may be called once the executor is no
+ * longer active, in which case execution of user code may be skipped.
+ */
 typedef void (*zend_object_free_obj_t)(zend_object *object);
+
+/* dtor_obj is called before free_obj. The object must remain in a valid state
+ * after dtor_obj finishes running. Unlike free_obj, it is run prior to
+ * deactivation of the executor during shutdown, which allows user code to run.
+ *
+ * This handler is not guaranteed to be called (e.g. on fatal error), and as
+ * such should not be used to release resources or deallocate memory. Furthermore,
+ * releasing resources in this handler can break detection of memory leaks, as
+ * cycles may be broken early.
+ *
+ * dtor_obj should be used *only* to call user destruction hooks, such as __destruct.
+ */
+typedef void (*zend_object_dtor_obj_t)(zend_object *object);
+
 typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
 
 /* Get class name for display in var_dump and other debugging functions.
@@ -132,7 +150,7 @@ typedef int (*zend_object_cast_t)(zend_object *readobj, zval *retval, int type);
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
 typedef int (*zend_object_count_elements_t)(zend_object *object, zend_long *count);
 
-typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
+typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
@@ -185,7 +203,7 @@ ZEND_API void zend_class_init_statics(zend_class_entry *ce);
 ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, struct _zend_property_info **prop_info);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
-ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
+ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
@@ -204,12 +222,18 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset);
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key);
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
+
+ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
+
+/* Handler for objects that cannot be meaningfully compared.
+ * Only objects with the same identity will be considered equal. */
+ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, zend_bool is_dynamic);
+ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 

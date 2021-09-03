@@ -72,7 +72,11 @@ $values = array(
 $iterator = 1;
 foreach($values as $value) {
       echo "-- Iteration $iterator --\n";
-      var_dump( strip_tags($string, $value) );
+      try {
+        var_dump(strip_tags($string, $value));
+      } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+      }
       $iterator++;
 };
 
@@ -121,5 +125,5 @@ string(10) "helloworld"
 -- Iteration 20 --
 string(10) "helloworld"
 -- Iteration 21 --
-string(10) "helloworld"
+strip_tags(): Argument #2 ($allowed_tags) must be of type array|string|null, resource given
 Done

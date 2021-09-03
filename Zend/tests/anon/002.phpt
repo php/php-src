@@ -15,6 +15,7 @@ $a = new class extends A implements B {
 };
 
 var_dump($a instanceof A, $a instanceof B);
+?>
 --EXPECT--
 bool(true)
 bool(true)

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -250,7 +250,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 	void *handlepp;
 	ub4 typep, iterp, idxp;
 	ub1 in_outp, piecep;
-	zend_bool piecewisecols = 0;
+	bool piecewisecols = 0;
 	php_oci_out_column *column;
 	sword errstatus;
 
@@ -258,7 +258,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 
 	if (statement->has_descr && statement->columns) {
 		zend_hash_apply(statement->columns, php_oci_cleanup_pre_fetch);
-    }
+	}
 
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));
@@ -1832,7 +1832,7 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, zend_long max_table_le
 			bind->array.element_lengths[i] = sizeof(oci_phpsized_int);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_long_ex(entry);
+			convert_to_long(entry);
 			((oci_phpsized_int *)bind->array.elements)[i] = (oci_phpsized_int) Z_LVAL_P(entry);
 			zend_hash_move_forward(hash);
 		} else {
@@ -1873,7 +1873,7 @@ php_oci_bind *php_oci_bind_array_helper_double(zval *var, zend_long max_table_le
 			bind->array.element_lengths[i] = sizeof(double);
 		}
 		if ((i < bind->array.current_length) && (entry = zend_hash_get_current_data(hash)) != NULL) {
-			convert_to_double_ex(entry);
+			convert_to_double(entry);
 			((double *)bind->array.elements)[i] = (double) Z_DVAL_P(entry);
 			zend_hash_move_forward(hash);
 		} else {

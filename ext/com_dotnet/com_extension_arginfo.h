@@ -1,14 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 965dcbb494d51bb3fd41a2898a1c53d7478fd699 */
+ * Stub hash: 6d32c6c4ed91fb542f6d78de50a4f099b9285614 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_add, 0, 2, variant, 0)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_variant_cat arginfo_variant_add
@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_xor arginfo_variant_add
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_abs, 0, 1, variant, 0)
-	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_variant_fix arginfo_variant_abs
@@ -48,14 +48,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_variant_not arginfo_variant_abs
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_round, 0, 2, variant, 1)
-	ZEND_ARG_INFO(0, left)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_cmp, 0, 2, IS_LONG, 0)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-	ZEND_ARG_TYPE_INFO(0, lcid, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale_id, IS_LONG, 0, "LOCALE_SYSTEM_DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_date_to_timestamp, 0, 1,
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_date_from_timestamp, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_date_from_timestamp, 0, 1, variant, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -82,43 +82,43 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_cast, 0, 2, variant, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_com_get_active_object, 0, 1, variant, 0)
-	ZEND_ARG_TYPE_INFO(0, progid, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, prog_id, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_com_create_guid, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_event_sink, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, comobject, variant, 0)
-	ZEND_ARG_TYPE_INFO(0, sinkobject, IS_OBJECT, 0)
-	ZEND_ARG_INFO(0, sinkinterface)
+	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
+	ZEND_ARG_TYPE_INFO(0, sink_object, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_MASK(0, sink_interface, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_print_typeinfo, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, comobject)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dispinterface, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, wantsink, _IS_BOOL, 0, "false")
+	ZEND_ARG_OBJ_TYPE_MASK(0, variant, variant, MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dispatch_interface, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, display_sink, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_message_pump, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeoutms, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout_milliseconds, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_load_typelib, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, typelib_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, typelib, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, case_insensitive, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_variant___construct, 0, 0, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, value, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_MIXED, 0, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "VT_EMPTY")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_com___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, module_name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, server_name)
+	ZEND_ARG_TYPE_MASK(0, server_name, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, typelib, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
@@ -226,3 +226,66 @@ static const zend_function_entry class_dotnet_methods[] = {
 #endif
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_com_safearray_proxy_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_com_exception_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_variant(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com(zend_class_entry *class_entry_variant)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_variant)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com_safearray_proxy(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", class_com_safearray_proxy_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_com_exception(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "com_exception", class_com_exception_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}

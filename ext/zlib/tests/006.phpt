@@ -1,7 +1,7 @@
 --TEST--
 gzdeflate()/gzinflate() and invalid params
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 
@@ -54,7 +54,7 @@ bool(false)
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)
-gzinflate(): Argument #2 ($max_decoded_len) must be greater than or equal to 0
+gzinflate(): Argument #2 ($max_length) must be greater than or equal to 0
 
 Warning: gzinflate(): data error in %s on line %d
 bool(false)

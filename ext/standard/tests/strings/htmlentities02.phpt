@@ -4,7 +4,7 @@ htmlentities() test 2 (setlocale / fr_FR.ISO-8859-15)
 <?php
 $result = (bool)setlocale(LC_CTYPE, "fr_FR.ISO-8859-15", "fr_FR.ISO8859-15", 'fr_FR@euro');
 if (!$result) {
-	die("skip setlocale() failed\n");
+    die("skip setlocale() failed\n");
 }
 ?>
 --INI--

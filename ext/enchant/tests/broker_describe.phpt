@@ -2,24 +2,21 @@
 enchant_broker_describe() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if (!extension_loaded('enchant')) {
-	echo "skip: Enchant extension not enabled\n";
-	exit;
-}
-
 $broker = enchant_broker_init();
 
 if (!$broker) {
-	echo "skip: Unable to init broker\n";
-	exit;
+    echo "skip: Unable to init broker\n";
+    exit;
 }
 
 if (!enchant_broker_describe($broker)) {
-	@enchant_broker_free($broker);
+    @enchant_broker_free($broker);
 
-	echo "skip: No broker providers found\n";
+    echo "skip: No broker providers found\n";
 }
 
 @enchant_broker_free($broker);

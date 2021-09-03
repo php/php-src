@@ -3,7 +3,7 @@ zend_dval_to_lval preserves low bits  (32 bit long)
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4)
-	 die("skip for machines with 32-bit longs");
+     die("skip for machines with 32-bit longs");
 ?>
 --FILE--
 <?php

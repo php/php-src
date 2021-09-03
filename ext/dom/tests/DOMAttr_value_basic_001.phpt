@@ -3,8 +3,8 @@ Read empty $value.
 --CREDITS--
 Jason Bouffard <jbouffard1@yahoo.com>
 # TestFest Atlanta 2009-05-14
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $attr = new DOMAttr('category');

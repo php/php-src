@@ -21,23 +21,27 @@ try {
 }
 
 /* Using offset and length to go beyond the size of the string:
-   Warning message expected, as length+offset > length of string */
-var_dump( substr_count($str, "i", 5, 7) );
+   Exception is expected, as length+offset > length of string */
+try {
+    substr_count($str, "i", 5, 7);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* length too small */
-var_dump( substr_count($str, "t", 2, -20) );
+try {
+    substr_count($str, "t", 2, -20);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing error conditions ***
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
-
-Warning: substr_count(): Invalid length value in %s on line %d
-bool(false)
-
-Warning: substr_count(): Invalid length value in %s on line %d
-bool(false)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
+substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)
 Done

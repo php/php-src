@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -58,6 +58,8 @@ PHPAPI zend_long php_var_unserialize_get_cur_depth(php_unserialize_data_t d);
 
 #define PHP_VAR_UNSERIALIZE_DESTROY(d) \
 	php_var_unserialize_destroy(d)
+
+PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, const size_t buf_len, HashTable *options, const char* function_name);
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);

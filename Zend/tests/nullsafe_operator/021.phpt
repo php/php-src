@@ -17,5 +17,6 @@ $foo->bar = new Bar();
 [$foo?->bar->baz] = ['bar'];
 var_dump($foo);
 
+?>
 --EXPECTF--
 Fatal error: Assignments can only happen to writable values in %s on line %d

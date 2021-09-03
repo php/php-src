@@ -35,11 +35,6 @@ extern const mbfl_encoding mbfl_encoding_utf8_kddi_a;
 extern const mbfl_encoding mbfl_encoding_utf8_kddi_b;
 extern const mbfl_encoding mbfl_encoding_utf8_sb;
 
-extern const struct mbfl_identify_vtbl vtbl_identify_utf8_docomo;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_a;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf8_kddi_b;
-extern const struct mbfl_identify_vtbl vtbl_identify_utf8_sb;
-
 extern const struct mbfl_convert_vtbl vtbl_utf8_docomo_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_utf8_docomo;
 extern const struct mbfl_convert_vtbl vtbl_utf8_kddi_a_wchar;

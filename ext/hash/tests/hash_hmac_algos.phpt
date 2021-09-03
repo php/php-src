@@ -4,6 +4,7 @@ Hash: hash_hmac_algos() function : basic functionality
 <?php
 
 print_r(hash_hmac_algos());
+?>
 --EXPECTF--
 Array
 (

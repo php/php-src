@@ -1,7 +1,7 @@
 --TEST--
 DOMNode::remove() dangling element
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
@@ -14,5 +14,6 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 Not Found Error

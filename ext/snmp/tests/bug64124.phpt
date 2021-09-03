@@ -2,13 +2,15 @@
 Bug #64124 IPv6 malformed
 --CREDITS--
 Boris Lytochkin
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {
-	die("skip no IPv6 support");
+    die("skip no IPv6 support");
 }
 ?>
 --FILE--

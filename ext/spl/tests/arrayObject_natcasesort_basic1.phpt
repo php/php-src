@@ -38,7 +38,7 @@ object(ArrayObject)#1 (1) {
     string(5) "boo22"
   }
 }
-ArrayObject::natcasesort() expects exactly 0 parameters, 1 given
+ArrayObject::natcasesort() expects exactly 0 arguments, 1 given
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   array(5) {

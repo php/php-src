@@ -1,9 +1,7 @@
 --TEST--
 DOMDocument::save  Test basic function of save method
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $doc = new DOMDocument('1.0');
@@ -25,8 +23,8 @@ echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
 ?>
 --CLEAN--
 <?php
-	$temp_filename = __DIR__."/DomDocument_save_basic.tmp";
-	unlink($temp_filename);
+    $temp_filename = __DIR__."/DomDocument_save_basic.tmp";
+    unlink($temp_filename);
 ?>
 --EXPECT--
 Wrote: 72 bytes

@@ -1,17 +1,17 @@
 --TEST--
 mysqli_savepoint()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 
 require_once('connect.inc');
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (!have_innodb($link))
-	die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
@@ -21,8 +21,11 @@ if (!have_innodb($link))
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
 
-    if (false !== ($tmp = mysqli_savepoint($link, '')))
-        printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_savepoint($link, '');
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     if (!mysqli_query($link, 'DROP TABLE IF EXISTS test'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -48,8 +51,8 @@ if (!have_innodb($link))
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_savepoint(): Savepoint name cannot be empty in %s on line %d
+--EXPECT--
+mysqli_savepoint(): Argument #2 ($name) cannot be empty
 done!

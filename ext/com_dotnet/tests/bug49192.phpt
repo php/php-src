@@ -1,8 +1,7 @@
 --TEST--
 Bug #49192 (PHP crashes when GC invoked on COM object)
---SKIPIF--
-<?php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 

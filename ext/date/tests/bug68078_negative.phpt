@@ -12,6 +12,7 @@ var_dump($earlyDate1 == $earlyDate2);
 var_dump($earlyDate1 > $earlyDate2);
 var_dump($earlyDate2 < $earlyDate1);
 var_dump($earlyDate2 == $earlyDate3);
+?>
 --EXPECT--
 bool(false)
 bool(true)

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 interface Throwable extends Stringable
 {
@@ -22,11 +22,22 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    final private function __clone() {}
+    /** @var string Intentionally left untyped for BC reasons */
+    protected $message = "";
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
+    protected $code = 0;
+    protected string $file = "";
+    protected int $line = 0;
+    private array $trace = [];
+    private ?Throwable $previous = null;
 
-    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+    private function __clone(): void {}
 
-    public function __wakeup() {}
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
+
+    /** @tentative-return-type */
+    public function __wakeup(): void {}
 
     final public function getMessage(): string {}
 
@@ -48,47 +59,69 @@ class Exception implements Throwable
 
 class ErrorException extends Exception
 {
-    public function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
+    protected int $severity = E_ERROR;
+
+    public function __construct(
+        string $message = "",
+        int $code = 0,
+        int $severity = E_ERROR,
+        ?string $filename = null,
+        ?int $line = null,
+        ?Throwable $previous = null
+    ) {}
 
     final public function getSeverity(): int {}
 }
 
 class Error implements Throwable
 {
-    /** @alias Exception::__clone */
-    final private function __clone() {}
+    /** @var string Intentionally left untyped for BC reasons */
+    protected $message = "";
+    private string $string = "";
+    /** @var int Intentionally left untyped for BC reasons */
+    protected $code = 0;
+    protected string $file = "";
+    protected int $line;
+    private array $trace = [];
+    private ?Throwable $previous = null;
 
-    /** @alias Exception::__construct */
-    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+    /** @implementation-alias Exception::__clone */
+    private function __clone(): void {}
 
-    /** @alias Exception::__wakeup */
-    public function __wakeup() {}
+    /** @implementation-alias Exception::__construct */
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
-    /** @alias Exception::getMessage */
+    /**
+     * @tentative-return-type
+     * @implementation-alias Exception::__wakeup
+     */
+    public function __wakeup(): void {}
+
+    /** @implementation-alias Exception::getMessage */
     final public function getMessage(): string {}
 
     /**
      * @return int
-     * @alias Exception::getCode
+     * @implementation-alias Exception::getCode
      */
     final public function getCode() {}
 
-    /** @alias Exception::getFile */
+    /** @implementation-alias Exception::getFile */
     final public function getFile(): string {}
 
-    /** @alias Exception::getLine */
+    /** @implementation-alias Exception::getLine */
     final public function getLine(): int {}
 
-    /** @alias Exception::getTrace */
+    /** @implementation-alias Exception::getTrace */
     final public function getTrace(): array {}
 
-    /** @alias Exception::getPrevious */
+    /** @implementation-alias Exception::getPrevious */
     final public function getPrevious(): ?Throwable {}
 
-    /** @alias Exception::getTraceAsString */
+    /** @implementation-alias Exception::getTraceAsString */
     final public function getTraceAsString(): string {}
 
-    /** @alias Exception::__toString */
+    /** @implementation-alias Exception::__toString */
     public function __toString(): string {}
 }
 
@@ -117,5 +150,9 @@ class ArithmeticError extends Error
 }
 
 class DivisionByZeroError extends ArithmeticError
+{
+}
+
+class UnhandledMatchError extends Error
 {
 }

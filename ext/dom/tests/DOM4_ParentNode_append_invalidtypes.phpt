@@ -1,7 +1,7 @@
 --TEST--
 DOMParentNode::append() exception on invalid argument
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");
@@ -14,5 +14,6 @@ try {
 } catch(TypeError $e) {
     echo "OK! {$e->getMessage()}";
 }
+?>
 --EXPECT--
 OK! DOMElement::append(): Argument #1 must be of type DOMNode|string, array given

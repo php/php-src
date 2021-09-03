@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -168,7 +168,7 @@ std:
 		return PHP_JSON_T_FALSE;
 	}
 	<JS>INT                  {
-		zend_bool bigint = 0, negative = s->token[0] == '-';
+		bool bigint = 0, negative = s->token[0] == '-';
 		size_t digits = (size_t) (s->cursor - s->token - negative);
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {

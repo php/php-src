@@ -25,6 +25,7 @@ try {
     echo "FAIL\n";
 }
 
+?>
 --EXPECT--
 Exception
 Exception

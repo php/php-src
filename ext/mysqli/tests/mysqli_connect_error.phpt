@@ -1,9 +1,9 @@
 --TEST--
 mysqli_connect_error()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -39,5 +39,5 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --EXPECT--
-mysqli_connect_error() expects exactly 0 parameters, 1 given
+mysqli_connect_error() expects exactly 0 arguments, 1 given
 done!

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -22,6 +22,7 @@
 #include "zend_multiply.h"
 #include "zend_exceptions.h"
 #include "zend_portability.h"
+#include "zend_bitset.h"
 
 #include <math.h>
 #include <float.h>
@@ -299,7 +300,7 @@ PHP_FUNCTION(round)
 			if (places >= 0) {
 				RETURN_DOUBLE((double) Z_LVAL_P(value));
 			}
-			/* break omitted intentionally */
+			ZEND_FALLTHROUGH;
 
 		case IS_DOUBLE:
 			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
@@ -703,7 +704,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 
 		{
 
-			php_error_docref(NULL, E_WARNING, "Number '%s' is too big to fit in long", s);
+			php_error_docref(NULL, E_WARNING, "Number %s is too big to fit in long", s);
 			return ZEND_LONG_MAX;
 		}
 	}
@@ -772,7 +773,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 				fnum = (double)num;
 				mode = 1;
 			}
-			/* fall-through */
+			ZEND_FALLTHROUGH;
 		case 1: /* Float */
 			fnum = fnum * base + c;
 		}
@@ -795,18 +796,18 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
+PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
 {
-	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char buf[(sizeof(zend_ulong) << 3) + 1];
 	char *ptr, *end;
 	zend_ulong value;
 
-	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
+	if (base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();
 	}
 
-	value = Z_LVAL_P(arg);
+	value = arg;
 
 	end = ptr = buf + sizeof(buf) - 1;
 	*ptr = '\0';
@@ -821,6 +822,41 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 }
 /* }}} */
 
+/* {{{ _php_math_longtobase_pwr2 */
+/*
+ * Convert a long to a string containing a base(2,4,6,16,32) representation of
+ * the number.
+ */
+static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg, int base_log2)
+{
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	zend_ulong value;
+	size_t len;
+	zend_string *ret;
+	char *ptr;
+
+	value = arg;
+
+	if (value == 0) {
+		len = 1;
+	} else {
+		len = ((sizeof(value) * 8 - zend_ulong_nlz(value)) + (base_log2 - 1)) / base_log2;
+	}
+
+	ret = zend_string_alloc(len, 0);
+	ptr = ZSTR_VAL(ret) + len;
+	*ptr = '\0';
+
+	do {
+		ZEND_ASSERT(ptr > ZSTR_VAL(ret));
+		*--ptr = digits[value & ((1 << base_log2) - 1)];
+		value >>= base_log2;
+	} while (value);
+
+	return ret;
+}
+/* }}} */
+
 /* {{{ _php_math_zvaltobase */
 /*
  * Convert a zval to a string containing a base(2-36) representation of
@@ -828,7 +864,7 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
  */
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 {
-	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
 		return ZSTR_EMPTY_ALLOC();
@@ -841,8 +877,8 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 
 		/* Don't try to convert +/- infinity */
 		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
-			php_error_docref(NULL, E_WARNING, "Number too large");
-			return ZSTR_EMPTY_ALLOC();
+			zend_value_error("An infinite value cannot be converted to base %d", base);
+			return NULL;
 		}
 
 		end = ptr = buf + sizeof(buf) - 1;
@@ -856,7 +892,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
 		return zend_string_init(ptr, end - ptr, 0);
 	}
 
-	return _php_math_longtobase(arg, base);
+	return _php_math_longtobase(Z_LVAL_P(arg), base);
 }
 /* }}} */
 
@@ -902,67 +938,55 @@ PHP_FUNCTION(octdec)
 /* {{{ Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
-	zval *arg;
-	zend_string *result;
+	zend_long arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 2);
-	RETURN_STR(result);
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 1));
 }
 /* }}} */
 
 /* {{{ Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
 {
-	zval *arg;
-	zend_string *result;
+	zend_long arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 8);
-	RETURN_STR(result);
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 3));
 }
 /* }}} */
 
 /* {{{ Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
 {
-	zval *arg;
-	zend_string *result;
+	zend_long arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
+		Z_PARAM_LONG(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 16);
-	RETURN_STR(result);
+	RETURN_STR(_php_math_longtobase_pwr2(arg, 4));
 }
 /* }}} */
 
 /* {{{ Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
-	zval *number, temp;
+	zval temp;
+	zend_string *number;
 	zend_long frombase, tobase;
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_ZVAL(number)
+		Z_PARAM_STR(number)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (!try_convert_to_string(number)) {
-		RETURN_THROWS();
-	}
 
 	if (frombase < 2 || frombase > 36) {
 		zend_argument_value_error(2, "must be between 2 and 36 (inclusive)");
@@ -973,8 +997,12 @@ PHP_FUNCTION(base_convert)
 		RETURN_THROWS();
 	}
 
-	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
+	_php_math_basetozval(number, (int)frombase, &temp);
 	result = _php_math_zvaltobase(&temp, (int)tobase);
+	if (!result) {
+		RETURN_THROWS();
+	}
+
 	RETVAL_STR(result);
 }
 /* }}} */
@@ -1109,7 +1137,6 @@ PHP_FUNCTION(number_format)
 	double num;
 	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
-	char thousand_sep_chr = ',', dec_point_chr = '.';
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
@@ -1120,30 +1147,16 @@ PHP_FUNCTION(number_format)
 		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch(ZEND_NUM_ARGS()) {
-	case 1:
-		RETURN_STR(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr));
-		break;
-	case 2:
-		RETURN_STR(_php_math_number_format(num, (int)dec, dec_point_chr, thousand_sep_chr));
-		break;
-	case 4:
-		if (dec_point == NULL) {
-			dec_point = &dec_point_chr;
-			dec_point_len = 1;
-		}
-
-		if (thousand_sep == NULL) {
-			thousand_sep = &thousand_sep_chr;
-			thousand_sep_len = 1;
-		}
-
-		RETVAL_STR(_php_math_number_format_ex(num, (int)dec,
-				dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+	if (dec_point == NULL) {
+		dec_point = ".";
+		dec_point_len = 1;
 	}
+	if (thousand_sep == NULL) {
+		thousand_sep = ",";
+		thousand_sep_len = 1;
+	}
+
+	RETURN_STR(_php_math_number_format_ex(num, (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 }
 /* }}} */
 

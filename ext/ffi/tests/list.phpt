@@ -1,7 +1,7 @@
 --TEST--
 FFI Double linked lists
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 --FILE--
@@ -89,6 +89,7 @@ $dlist->print();
 $dlist->del(3);
 $dlist->print();
 echo "OK\n";
+?>
 --EXPECT--
 [1, 3, 5]
 [1, 5]

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -63,10 +63,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
 		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
 
-		if (!dbh) {
-			php_error_docref(NULL, E_WARNING, "Failed to retrieve handle from object store");
-			return NULL;
-		}
+		ZEND_ASSERT(dbh);
 
 		if (dbh->driver != &pdo_mysql_driver) {
 			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
@@ -126,6 +123,9 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 #ifdef PDO_USE_MYSQLND
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_VERIFY_SERVER_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
+#endif
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE_DIRECTORY", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY);
 #endif
 
 #ifdef PDO_USE_MYSQLND
@@ -214,12 +214,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 }
 /* }}} */
 
-/* {{{ pdo_mysql_functions[] */
-static const zend_function_entry pdo_mysql_functions[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ pdo_mysql_deps[] */
 static const zend_module_dep pdo_mysql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -235,7 +229,7 @@ zend_module_entry pdo_mysql_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_mysql_deps,
 	"pdo_mysql",
-	pdo_mysql_functions,
+	NULL,
 	PHP_MINIT(pdo_mysql),
 	PHP_MSHUTDOWN(pdo_mysql),
 #if defined(PDO_USE_MYSQLND) && PDO_DBG_ENABLED

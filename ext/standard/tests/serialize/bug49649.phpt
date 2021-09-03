@@ -32,6 +32,7 @@ class Foo
 
 $class = unserialize(base64_decode($serialized));
 var_dump($class);
+?>
 --EXPECT--
 object(Foo)#1 (4) {
   ["public"]=>

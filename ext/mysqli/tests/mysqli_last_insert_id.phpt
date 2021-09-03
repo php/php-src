@@ -1,8 +1,9 @@
 --TEST--
 API vs. SQL LAST_INSERT_ID()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-  require_once('skipif.inc');
   require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -176,7 +177,7 @@ API vs. SQL LAST_INSERT_ID()
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 API: %d, SQL: %d

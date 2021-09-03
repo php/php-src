@@ -1,7 +1,7 @@
 --TEST--
 Bug #64931 (phar_add_file is too restrictive on filename)
---SKIPIF--
-<?php extension_loaded("phar") or die("skip need ext/phar support"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -38,7 +38,7 @@ try {
 
 try {
     $phar->addFromString(".phar\0", "gotcha");
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo "CAUGHT: ". $e->getMessage() ."\n";
 }
 
@@ -53,4 +53,4 @@ CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Phar::addFromString(): Argument #1 ($localname) must be a valid path, string given
+CAUGHT: Phar::addFromString(): Argument #1 ($localName) must not contain any null bytes

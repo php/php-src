@@ -27,10 +27,6 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mbfilter.h"
 #include "mbfilter_sjis_mac.h"
 
@@ -39,10 +35,10 @@
 
 #include "sjis_mac2uni.h"
 
-extern int mbfl_filt_ident_sjis(int c, mbfl_identify_filter *filter);
 extern const unsigned char mblen_table_sjis[];
 
-static int mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter);
+static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter);
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
 
@@ -50,27 +46,20 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	mbfl_no_encoding_sjis_mac,
 	"SJIS-mac",
 	"Shift_JIS",
-	(const char *(*)[])&mbfl_encoding_sjis_mac_aliases,
+	mbfl_encoding_sjis_mac_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis_mac_wchar,
 	&vtbl_wchar_sjis_mac
-};
-
-const struct mbfl_identify_vtbl vtbl_identify_sjis_mac = {
-	mbfl_no_encoding_sjis_mac,
-	mbfl_filt_ident_common_ctor,
-	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_sjis
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis_mac_wchar = {
 	mbfl_no_encoding_sjis_mac,
 	mbfl_no_encoding_wchar,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_sjis_mac_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_sjis_mac_wchar_flush,
 	NULL,
 };
 
@@ -78,9 +67,9 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_mac = {
 	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_sjis_mac,
 	mbfl_filt_conv_common_ctor,
-	mbfl_filt_conv_common_dtor,
+	NULL,
 	mbfl_filt_conv_wchar_sjis_mac,
-	mbfl_filt_conv_sjis_mac_flush,
+	mbfl_filt_conv_wchar_sjis_mac_flush,
 	NULL,
 };
 
@@ -144,7 +133,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(c, filter->data));
 		} else if (c > 0xa0 && c < 0xe0) {	/* kana */
 			CK((*filter->output_function)(0xfec0 + c, filter->data));
-		} else if (c > 0x80 && c < 0xfd && c != 0xa0) {	/* kanji first char */
+		} else if (c > 0x80 && c <= 0xed && c != 0xa0) {	/* kanji first char */
 			filter->status = 1;
 			filter->cache = c;
 		} else if (c == 0x5c) {
@@ -161,9 +150,7 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x2026, filter->data));
 			CK((*filter->output_function)(0xf87f, filter->data));
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -228,6 +215,10 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 				for (i=0; i<8; i++) {
 					if (s >= code_ofst_tbl[i][0] && s <= code_ofst_tbl[i][1]) {
 						w = code_map[i][s - code_ofst_tbl[i][0]];
+						if (w == 0) {
+							CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+							return 0;
+						}
 						s2 = 0;
 						if (s >= 0x043e && s <= 0x0441) {
 							s2 = 0xf87a;
@@ -254,18 +245,11 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = (s1 << 8) | s2;
-				w &= MBFL_WCSPLANE_MASK;
-				w |= MBFL_WCSPLANE_WINCP932;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -274,7 +258,15 @@ mbfl_filt_conv_sjis_mac_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
+}
+
+static int mbfl_filt_conv_sjis_mac_wchar_flush(mbfl_convert_filter *filter)
+{
+	if (filter->status == 1) {
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+	}
+	return 0;
 }
 
 /*
@@ -372,6 +364,8 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		if (s2 <= 0 || s1 == -1) {
 			break;
 		}
+		s1 = s2 = 0;
+		ZEND_FALLTHROUGH;
 
 	case 0:
 
@@ -402,31 +396,25 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 				if (c == s_form_tbl[i]) {
 					filter->status = 1;
 					filter->cache = c;
-					return c;
+					return 0;
 				}
 			}
 
 			if (c == 0xf860 || c == 0xf861 || c == 0xf862) {
+				/* Apple 'transcoding hint' codepoints (from private use area) */
 				filter->status = 2;
 				filter->cache = c;
-				return c;
+				return 0;
 			}
 		}
 
 		if (s1 <= 0) {
-			c1 = c & ~MBFL_WCSPLANE_MASK;
-			if (c1 == MBFL_WCSPLANE_WINCP932) {
-				s1 = c & MBFL_WCSPLANE_MASK;
-				s2 = 1;
-			} else if (c1 == MBFL_WCSPLANE_JIS0208) {
-				s1 = c & MBFL_WCSPLANE_MASK;
-			} else if (c1 == MBFL_WCSPLANE_JIS0212) {
-				s1 = c & MBFL_WCSPLANE_MASK;
-				s1 |= 0x8080;
-			} else if (c == 0xa0) {
+			if (c == 0xa0) {
 				s1 = 0x00a0;
-			} else if (c == 0xa5) {		/* YEN SIGN */
-				s1 = 0x216f;	/* FULLWIDTH YEN SIGN */
+			} else if (c == 0xa5) { /* YEN SIGN */
+				/* Unicode has codepoint 0xFFE5 for a fullwidth Yen sign;
+				 * convert codepoint 0xA5 to halfwidth Yen sign */
+				s1 = 0x5c; /* HALFWIDTH YEN SIGN */
 			} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 				s1 = 0x2140;
 			}
@@ -524,8 +512,9 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		}
 
 		if (filter->status == 0) {
+			/* Didn't find any of expected codepoints after Apple transcoding hint */
 			CK(mbfl_filt_conv_illegal_output(c1, filter));
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			return mbfl_filt_conv_wchar_sjis_mac(c, filter);
 		}
 
 		break;
@@ -668,11 +657,11 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		break;
 	}
-	return c;
+	return 0;
 }
 
 static int
-mbfl_filt_conv_sjis_mac_flush(mbfl_convert_filter *filter)
+mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)
 {
 	int i, c1, s1 = 0;
 	if (filter->status == 1 && filter->cache > 0) {

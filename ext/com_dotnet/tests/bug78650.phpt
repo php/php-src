@@ -1,9 +1,7 @@
 --TEST--
 Bug #78650 (new COM Crash)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 $fname = __DIR__ . '/bug78650/foo/bar';

@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->__construct(), PDO::ATTR_PERSISTENT
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -23,7 +24,7 @@ MySQLPDOTest::skip();
         $db1->exec('SET @pdo_persistent_connection=1');
         $stmt = $db2->query('SELECT @pdo_persistent_connection as _pers');
         $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($tmp['_pers'] !== '1')
+        if ($tmp['_pers'] != 1)
             printf("[001] Both handles should use the same connection.");
 
         $stmt = $db1->query('SELECT CONNECTION_ID() as _con1');

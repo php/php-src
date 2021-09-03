@@ -3,7 +3,7 @@ Test scandir() function : usage variations - different directory permissions
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip Not for Windows');
+    die('skip Not for Windows');
 }
 require __DIR__ . '/../skipif_root.inc';
 ?>

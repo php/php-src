@@ -1,8 +1,9 @@
 --TEST--
 security_level setting to prohibit cert
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (OPENSSL_VERSION_NUMBER < 0x10100000) die("skip OpenSSL >= v1.1.0 required");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
@@ -24,7 +25,7 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
         // Make sure the server side starts up successfully if the default security level is
         // higher. We want to test the error at the client side.
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -66,7 +67,7 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
 --EXPECTF--
 Warning: stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:
-error:1416F086:SSL routines:tls_process_server_certificate:certificate verify failed in %s : eval()'d code on line %d
+error:%s:SSL routines:%S:certificate verify failed in %s : eval()'d code on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s : eval()'d code on line %d
 

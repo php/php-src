@@ -1,9 +1,7 @@
 --TEST--
 IntlBreakIterator factories: basic tests
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -22,6 +20,7 @@ foreach ($m as $method) {
     var_dump($o1 == $o2 && $o2 == $o3);
     echo "\n";
 }
+?>
 --EXPECT--
 ===== createWordInstance =====
 bool(true)

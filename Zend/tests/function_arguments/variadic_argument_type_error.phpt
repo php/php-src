@@ -17,6 +17,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+?>
 --EXPECTF--
-foo(): Argument #2 ($bar) must be of type int, array given, called in %s on line %d
-foo(): Argument #4 ($bar) must be of type int, array given, called in %s on line %d
+foo(): Argument #2 must be of type int, array given, called in %s on line %d
+foo(): Argument #4 must be of type int, array given, called in %s on line %d

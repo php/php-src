@@ -3,10 +3,8 @@ Testing imagecolordeallocate() of GD library with Out of range integers (Above)
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-	if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require_once __DIR__ . '/func.inc';
@@ -22,4 +20,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] imagecolordeallocate(): Argument #2 ($index) must be between 0 and 1
+!! [ValueError] imagecolordeallocate(): Argument #2 ($color) must be between 0 and 1

@@ -1,7 +1,7 @@
 --TEST--
 IntlChar basic functionality
---SKIPIF--
-<?php if (!extension_loaded('intl')) die("skip requires ext/intl") ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 
@@ -49,6 +49,7 @@ IntlChar::enumCharNames(0x2600, 0x2610, function($cp, $nc, $name) {
 });
 echo "RECYCLING SYMBOL FOR TYPE-1 PLASTICS => ";
 var_dump(IntlChar::charFromName("RECYCLING SYMBOL FOR TYPE-1 PLASTICS"));
+?>
 --EXPECT--
 Codepoint range: 0000-10ffff
 Codepoint U+0050

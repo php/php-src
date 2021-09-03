@@ -1,9 +1,9 @@
 --TEST--
 $res->fetch_field_direct(s)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -27,9 +27,19 @@ require_once('skipifconnectfailure.inc');
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
-    var_dump($res->fetch_field_direct(-1));
+    try {
+        var_dump($res->fetch_field_direct(-1));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     var_dump($res->fetch_field_direct(0));
-    var_dump($res->fetch_field_direct(2));
+
+    try {
+        var_dump($res->fetch_field_direct(2));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     $res->free_result();
 
@@ -44,13 +54,11 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+    require_once("clean_table.inc");
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
-
-Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
+mysqli_result::fetch_field_direct(): Argument #1 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -79,8 +87,6 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(%d)
 }
-
-Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
-bool(false)
+mysqli_result::fetch_field_direct(): Argument #1 ($index) must be less than the number of fields for this result set
 mysqli_result object is already closed
 done!

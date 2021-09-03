@@ -1,7 +1,7 @@
 --TEST--
 sysvmsg functions on non-existing queue
---SKIPIF--
-<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extension is not available")?>
+--EXTENSIONS--
+sysvmsg
 --FILE--
 <?php
 
@@ -27,8 +27,12 @@ foreach ($tests as $i => $q) {
 
     var_dump(msg_receive($q, 0, $null, 1, $msg, true, 0, $errno));
     var_dump($errno != 0);
-    // again, but triggering an E_WARNING
-    var_dump(msg_receive($q, 0, $null, 0, $msg));
+    // again, but triggering an exception
+    try {
+        msg_receive($q, 0, $null, 0, $msg);
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
     var_dump(msg_send($q, 1, 'foo', true, true, $errno));
     var_dump($errno != 0);
@@ -42,9 +46,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-
-Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
-bool(false)
+msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)
@@ -54,9 +56,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-
-Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
-bool(false)
+msg_receive(): Argument #4 ($max_message_size) must be greater than 0
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
 bool(false)

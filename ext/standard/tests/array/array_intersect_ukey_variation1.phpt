@@ -91,7 +91,7 @@ $inputs = array(
       'resource var' => $fp,
 );
 
-// loop through each element of the array for arr1
+// loop through each element of the array for array1
 
 foreach($inputs as $key =>$value) {
     echo "\n--$key--\n";
@@ -113,105 +113,105 @@ fclose($fp);
 *** Testing array_intersect_ukey() : usage variation ***
 
 --int 0--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
 
 --int 1--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
 
 --int 12345--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
 
 --int -12345--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, int given
 
 --float 10.5--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
 
 --float -10.5--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
 
 --float 12.3456789000e10--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
 
 --float -12.3456789000e10--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
 
 --float .5--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, float given
 
 --uppercase NULL--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
 
 --lowercase null--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
 
 --lowercase true--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
 
 --lowercase false--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase TRUE--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
 
 --uppercase FALSE--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, bool given
 
 --empty string DQ--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --empty string SQ--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --string DQ--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --string SQ--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --mixed case string--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --heredoc--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, string given
 
 --instance of classWithToString--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, classWithToString given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, classWithToString given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, classWithToString given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, classWithToString given
 
 --instance of classWithoutToString--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, classWithoutToString given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, classWithoutToString given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, classWithoutToString given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, classWithoutToString given
 
 --undefined var--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
 
 --unset var--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, null given
 
 --resource var--
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, resource given
-array_intersect_ukey(): Argument #1 ($arr1) must be of type array, resource given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, resource given
+array_intersect_ukey(): Argument #1 ($array) must be of type array, resource given

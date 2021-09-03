@@ -1,26 +1,28 @@
 --TEST--
 MySQL PDO: PDOStatement->fetchObject()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 
 try {
-	$query = "SELECT '', NULL, \"\" FROM DUAL";
-	$stmt = $db->prepare($query);
-	$ok = @$stmt->execute();
+    $query = "SELECT '', NULL, \"\" FROM DUAL";
+    $stmt = $db->prepare($query);
+    $ok = @$stmt->execute();
 } catch (PDOException $e) {
-	die("skip: Test cannot be run with SQL mode ANSI");
+    die("skip: Test cannot be run with SQL mode ANSI");
 }
 if (!$ok)
-	die("skip: Test cannot be run with SQL mode ANSI");
+    die("skip: Test cannot be run with SQL mode ANSI");
 ?>
 --FILE--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 MySQLPDOTest::createTestTable($db);
 
 try {
@@ -67,6 +69,11 @@ try {
 
     var_dump($rows[$rowno - 1]);
 
+    try {
+        $stmt->fetchObject('class_does_not_exist');
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 } catch (PDOException $e) {
     // we should never get here, we use warnings, but never trust a system...
     printf("[001] %s, [%s} %s\n",
@@ -106,4 +113,5 @@ object(myclass)#%d (4) {
   ["null"]=>
   NULL
 }
+PDOStatement::fetchObject(): Argument #1 ($class) must be a valid class name, class_does_not_exist given
 done!

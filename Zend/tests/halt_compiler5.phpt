@@ -4,6 +4,7 @@ Using __COMPILER_HALF_OFFSET__ with trailing {} (OSS-Fuzz #17895)
 <?php
 __COMPILER_HALT_OFFSET__;
 {}
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant "__COMPILER_HALT_OFFSET__" in %s:%d
 Stack trace:

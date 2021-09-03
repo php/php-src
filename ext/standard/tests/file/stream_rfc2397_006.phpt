@@ -16,15 +16,15 @@ foreach($streams as $stream)
 {
     try {
         var_dump(file_get_contents($stream));
-    } catch (TypeError $e) {
+    } catch (ValueError $e) {
         echo $e->getMessage(), "\n";
     }
 }
 
 ?>
 --EXPECTF--
-file_get_contents(): Argument #1 ($filename) must be a valid path, string given
-file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+file_get_contents(): Argument #1 ($filename) must not contain any null bytes
+file_get_contents(): Argument #1 ($filename) must not contain any null bytes
 
 Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhcg==): Failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
 bool(false)

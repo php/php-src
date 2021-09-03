@@ -1,7 +1,7 @@
 --TEST--
 Bug #71263: fread() does not report bzip2.decompress errors
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip bz2 extension not loaded"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 

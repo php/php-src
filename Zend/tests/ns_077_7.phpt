@@ -8,6 +8,7 @@ function foo($a = array(0 => namespace\unknown))
 }
 
 foo();
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant "unknown" in %s:%d
 Stack trace:

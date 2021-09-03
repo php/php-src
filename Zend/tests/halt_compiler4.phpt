@@ -7,4 +7,4 @@ __HALT_COMPILER();
 ?>
 ==DONE==
 --EXPECTF--
-Notice: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d
+Warning: Constant __COMPILER_HALT_OFFSET__ already defined in %s on line %d

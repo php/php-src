@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -50,18 +50,6 @@ PHP_RINIT_FUNCTION(spl);
 PHP_RSHUTDOWN_FUNCTION(spl);
 PHP_MINFO_FUNCTION(spl);
 
-
-ZEND_BEGIN_MODULE_GLOBALS(spl)
-	zend_string *autoload_extensions;
-	HashTable   *autoload_functions;
-	intptr_t     hash_mask_handle;
-	intptr_t     hash_mask_handlers;
-	int          hash_mask_init;
-ZEND_END_MODULE_GLOBALS(spl)
-
-ZEND_EXTERN_MODULE_GLOBALS(spl)
-#define SPL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(spl, v)
-
-PHPAPI zend_string *php_spl_object_hash(zval *obj);
+PHPAPI zend_string *php_spl_object_hash(zend_object *obj);
 
 #endif /* PHP_SPL_H */

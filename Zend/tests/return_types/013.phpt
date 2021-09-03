@@ -13,6 +13,7 @@ class foo {
 
 $baz = new foo();
 var_dump($func=$baz->bar(), $func());
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: foo::{closure}(): Return value must be of type array, null returned in %s:%d
 Stack trace:

@@ -4,8 +4,8 @@ Test with optimization of function calls
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -89,6 +89,7 @@ function ref(&$b) {
     $b = "changed";
     return "ref";
 }
+?>
 --EXPECTF--
 Array
 (
@@ -127,7 +128,7 @@ Array
 string(7) "changed"
 string(7) "changed"
 
-Fatal error: Uncaught Error: Cannot pass parameter 1 by reference in %soptimize_func_calls.php:%d
+Fatal error: Uncaught Error: ref(): Argument #1 ($b) cannot be passed by reference in %soptimize_func_calls.php:%d
 Stack trace:
 #0 {main}
   thrown in %soptimize_func_calls.php on line %d

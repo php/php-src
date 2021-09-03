@@ -13,5 +13,6 @@ try {
 } catch(Throwable $e) {
     echo "Exception is thrown";
 }
+?>
 --EXPECT--
 Exception is thrown

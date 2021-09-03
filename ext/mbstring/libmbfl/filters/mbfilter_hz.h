@@ -33,7 +33,6 @@
 #include "mbfilter.h"
 
 extern const mbfl_encoding mbfl_encoding_hz;
-extern const struct mbfl_identify_vtbl vtbl_identify_hz;
 extern const struct mbfl_convert_vtbl vtbl_hz_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_hz;
 

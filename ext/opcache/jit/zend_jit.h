@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,6 +18,16 @@
 
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
+
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
+# define ZEND_JIT_TARGET_X86   1
+# define ZEND_JIT_TARGET_ARM64 0
+#elif defined (__aarch64__)
+# define ZEND_JIT_TARGET_X86   0
+# define ZEND_JIT_TARGET_ARM64 1
+#else
+# error "JIT not supported on this platform"
+#endif
 
 #define ZEND_JIT_LEVEL_NONE        0     /* no JIT */
 #define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
@@ -37,7 +47,6 @@
 #define ZEND_JIT_REG_ALLOC_GLOBAL (1<<1) /* global linear scan register allocation */
 #define ZEND_JIT_CPU_AVX          (1<<2) /* use AVX instructions, if available */
 
-#define ZEND_JIT_DEFAULT_OPTIONS      "1254"
 #define ZEND_JIT_DEFAULT_BUFFER_SIZE  "0"
 
 #define ZEND_JIT_COUNTER_INIT         32531
@@ -54,6 +63,7 @@
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
 #define ZEND_JIT_DEBUG_SIZE      (1<<9)
+#define ZEND_JIT_DEBUG_ASM_ADDR  (1<<10)
 
 #define ZEND_JIT_DEBUG_TRACE_START     (1<<12)
 #define ZEND_JIT_DEBUG_TRACE_STOP      (1<<13)
@@ -69,7 +79,6 @@
 
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */
-#define ZEND_JIT_TRACE_MAX_EXIT_COUNTERS 8192 /* max number of side exits for all trace */
 
 #define ZEND_JIT_TRACE_MAX_FUNCS           30 /* max number of different functions in a single trace */
 #define ZEND_JIT_TRACE_MAX_CALL_DEPTH      10 /* max depth of inlined calls */
@@ -83,8 +92,8 @@ typedef struct _zend_jit_trace_stack_frame zend_jit_trace_stack_frame;
 typedef struct _sym_node zend_sym_node;
 
 typedef struct _zend_jit_globals {
-	zend_bool enabled;
-	zend_bool on;
+	bool enabled;
+	bool on;
 	uint8_t   trigger;
 	uint8_t   opt_level;
 	uint32_t  opt_flags;
@@ -96,20 +105,21 @@ typedef struct _zend_jit_globals {
 	double      prof_threshold;
 	zend_long   max_root_traces;       /* max number of root traces */
 	zend_long   max_side_traces;       /* max number of side traces (per root trace) */
+	zend_long   max_exit_counters;     /* max total number of side exits for all traces */
 	zend_long   hot_loop;
 	zend_long   hot_func;
 	zend_long   hot_return;
 	zend_long   hot_side_exit;         /* number of exits before taking side trace */
 	zend_long   blacklist_root_trace;  /* number of attempts to JIT a root trace before blacklist it */
 	zend_long   blacklist_side_trace;  /* number of attempts to JIT a side trace before blacklist it */
-	zend_long   max_loops_unroll;      /* max number of unrolled loops */
+	zend_long   max_loop_unrolls;      /* max number of unrolled loops */
 	zend_long   max_recursive_calls;   /* max number of recursive inlined call unrolls */
 	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 	zend_long   max_polymorphic_calls; /* max number of inlined polymorphic calls */
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
-	zend_bool tracing;
+	bool tracing;
 
 	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
@@ -119,7 +129,7 @@ typedef struct _zend_jit_globals {
 	uint8_t bad_root_cache_stop[ZEND_JIT_TRACE_BAD_ROOT_SLOTS];
 	uint32_t bad_root_slot;
 
-	uint8_t  exit_counters[ZEND_JIT_TRACE_MAX_EXIT_COUNTERS];
+	uint8_t  *exit_counters;
 } zend_jit_globals;
 
 #ifdef ZTS
@@ -137,7 +147,8 @@ ZEND_EXT_API void zend_jit_protect(void);
 ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
-ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, zend_bool reattached);
+ZEND_EXT_API int  zend_jit_check_support(void);
+ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);

@@ -25,4 +25,4 @@ class A extends foo {
 
 ?>
 --EXPECTF--
-Fatal error: Class A cannot extend from trait foo in %s on line %d
+Fatal error: Class A cannot extend trait foo in %s on line %d

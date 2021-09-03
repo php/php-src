@@ -1,8 +1,10 @@
 --TEST--
 shm_attach() tests
+--EXTENSIONS--
+sysvshm
 --SKIPIF--
 <?php
-if (!extension_loaded("sysvshm")){ print 'skip'; }
+
 if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
@@ -55,11 +57,11 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
-shm_attach(): Argument #2 ($memsize) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
+shm_attach(): Argument #2 ($size) must be greater than 0
 object(SysvSharedMemory)#%d (0) {
 }
 object(SysvSharedMemory)#%d (0) {

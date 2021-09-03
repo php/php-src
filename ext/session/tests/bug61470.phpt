@@ -1,5 +1,7 @@
 --TEST--
 Bug #61470 (session_regenerate_id() does not create session file)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

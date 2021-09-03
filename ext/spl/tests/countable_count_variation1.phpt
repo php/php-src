@@ -4,29 +4,34 @@ SPL: Countable::count() with wrong return types and exception.
 <?php
 
 Class returnNull implements Countable {
-    function count() {
+    function count(): int {
+        return 0;
     }
 }
 
 Class returnString implements Countable {
+    #[ReturnTypeWillChange]
     function count() {
         return "hello";
     }
 }
 
 Class returnObject implements Countable {
+    #[ReturnTypeWillChange]
     function count() {
         return new returnObject;
     }
 }
 
 Class returnArray implements Countable {
+    #[ReturnTypeWillChange]
     function count() {
         return array(1,2,3);
     }
 }
 
 Class throwException implements Countable {
+    #[ReturnTypeWillChange]
     function count() {
         throw new Exception('Thrown from count');
     }
@@ -60,7 +65,7 @@ Count returns a string:
 int(0)
 Count returns an object:
 
-Notice: Object of class returnObject could not be converted to int in %s on line 40
+Warning: Object of class returnObject could not be converted to int in %s on line %d
 int(1)
 Count returns an array:
 int(1)

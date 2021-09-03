@@ -38,5 +38,5 @@ unlink( $file );
 ?>
 --EXPECT--
 -- Testing vfprintf() function with more than expected no. of arguments --
-Wrong parameter count for vfprintf()
-Wrong parameter count for vfprintf()
+vfprintf() expects exactly 3 arguments, 4 given
+vfprintf() expects exactly 3 arguments, 4 given

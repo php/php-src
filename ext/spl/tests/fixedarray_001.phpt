@@ -7,17 +7,17 @@ $a = new SplFixedArray(0);
 try {
     $a[0] = "value1";
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     var_dump($a["asdf"]);
-} catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (\TypeError $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 try {
     unset($a[-1]);
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo $e::class, ': ', $e->getMessage(), "\n";
 }
 $a->setSize(10);
 
@@ -45,9 +45,9 @@ $a[0] = "valueNew";
 var_dump($b[0]);
 ?>
 --EXPECT--
-Exception: Index invalid or out of range
-Exception: Index invalid or out of range
-Exception: Index invalid or out of range
+RuntimeException: Index invalid or out of range
+TypeError: Illegal offset type
+RuntimeException: Index invalid or out of range
 string(6) "value0"
 string(6) "value2"
 string(6) "value3"

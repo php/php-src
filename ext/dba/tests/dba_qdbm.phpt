@@ -1,9 +1,11 @@
 --TEST--
 DBA QDBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'qdbm';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'qdbm';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
@@ -14,7 +16,7 @@ DBA QDBM handler test
 ?>
 --CLEAN--
 <?php
-	require(__DIR__ .'/clean.inc');
+    require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: qdbm

@@ -35,14 +35,14 @@ print_r($rcB->getStaticProperties());
 
 echo "\nSet non-existent values from A with no default value:\n";
 try {
-	var_dump($rcA->setStaticPropertyValue("protectedDoesNotExist", "new value 8"));
+    var_dump($rcA->setStaticPropertyValue("protectedDoesNotExist", "new value 8"));
     echo "you should not see this";
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-	var_dump($rcA->setStaticPropertyValue("privateDoesNotExist", "new value 9"));
+    var_dump($rcA->setStaticPropertyValue("privateDoesNotExist", "new value 9"));
     echo "you should not see this";
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";

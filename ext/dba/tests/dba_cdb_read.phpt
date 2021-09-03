@@ -1,9 +1,11 @@
 --TEST--
 DBA CDB handler test (read only)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-	$handler = 'cdb_make';
-	require_once __DIR__ .'/skipif.inc';
+    $handler = 'cdb_make';
+    require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php

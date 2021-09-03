@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::createFromRules (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -21,6 +21,7 @@ $u = transliterator_create_from_rules($rules, Transliterator::REVERSE);
 echo $u->transliterate("``akk ``bkk ``aooy"), "\n";
 
 echo "Done.\n";
+?>
 --EXPECT--
 RulesTransPHP
 “akk ``bkk “aooy

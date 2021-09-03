@@ -5,6 +5,7 @@ Bug #55082: var_export() doesn't escape properties properly
     $x = new stdClass();
     $x->{'\'\\'} = 7;
     echo var_export($x);
+?>
 --EXPECT--
 (object) array(
    '\'\\' => 7,

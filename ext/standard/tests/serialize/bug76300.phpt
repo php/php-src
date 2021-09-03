@@ -21,9 +21,10 @@ $a = new Derived(44);
 $s = serialize($a);
 $u = unserialize($s);
 print_r($u);
+?>
 --EXPECT--
 Derived Object
 (
-    [id:protected] => 44
     [id:Base:private] => 64
+    [id:protected] => 44
 )

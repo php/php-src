@@ -5,6 +5,7 @@ assert.active = 0
 assert.warning = 1
 assert.callback =
 assert.bail = 0
+assert.exception=0
 --FILE--
 <?php
 function a($file, $line, $unused, $desc)

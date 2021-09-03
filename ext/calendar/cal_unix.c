@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,20 +21,25 @@
 #include "sdncal.h"
 #include <time.h>
 
+#define SECS_PER_DAY (24 * 3600)
+
 /* {{{ Convert UNIX timestamp to Julian Day */
 PHP_FUNCTION(unixtojd)
 {
 	time_t ts;
-	zend_bool ts_is_null = 1;
+	zend_long tl = 0;
+	bool tl_is_null = 1;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &ts, &ts_is_null) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &tl, &tl_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (ts_is_null) {
+	if (tl_is_null) {
 		ts = time(NULL);
-	} else if (ts < 0) {
+	} else if (tl >= 0) {
+		ts = (time_t) tl;
+	} else {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
@@ -57,11 +62,11 @@ PHP_FUNCTION(jdtounix)
 	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) {
-		zend_value_error("jday must be within the Unix epoch");
+	if (uday < 0 || uday > ZEND_LONG_MAX / SECS_PER_DAY) { /* before beginning of unix epoch or greater than representable */
+		zend_value_error("jday must be between 2440588 and " ZEND_LONG_FMT, ZEND_LONG_MAX / SECS_PER_DAY + 2440588);
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG(uday * 24 * 3600);
+	RETURN_LONG(uday * SECS_PER_DAY);
 }
 /* }}} */

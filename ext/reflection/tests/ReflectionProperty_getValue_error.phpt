@@ -29,13 +29,8 @@ try {
 }
 
 echo "\nProtected property:\n";
-try {
-    $propInfo = new ReflectionProperty('TestClass', 'prot');
-    var_dump($propInfo->getValue($instance));
-}
-catch(Exception $exc) {
-    echo $exc->getMessage();
-}
+$propInfo = new ReflectionProperty('TestClass', 'prot');
+var_dump($propInfo->getValue($instance));
 
 echo "\n\nInvalid instance:\n";
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
@@ -57,10 +52,11 @@ try {
 Instance without property:
 
 Static property / too many args:
-ReflectionProperty::getValue() expects at most 1 parameter, 2 given
+ReflectionProperty::getValue() expects at most 1 argument, 2 given
 
 Protected property:
-Cannot access non-public property TestClass::$prot
+int(4)
+
 
 Invalid instance:
 Given object is not an instance of the class this property was declared in

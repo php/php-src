@@ -12,7 +12,7 @@ class try_class
 
     static public function on_shutdown ()
     {
-        printf ("CHECKPOINT\n"); /* never reached */
+        printf ("CHECKPOINT\n");
     }
 }
 
@@ -22,5 +22,4 @@ echo "Done\n";
 ?>
 --EXPECT--
 Done
-
-Warning: (Registered shutdown functions) Unable to call self::on_shutdown() - function does not exist in Unknown on line 0
+CHECKPOINT

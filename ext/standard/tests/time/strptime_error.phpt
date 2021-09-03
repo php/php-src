@@ -3,7 +3,7 @@ Test localtime() function : error conditions
 --SKIPIF--
 <?php
 if (!function_exists('strptime')) {
-	echo "SKIP strptime function not available in build";
+    echo "SKIP strptime function not available in build";
 }
 ?>
 --FILE--
@@ -18,8 +18,10 @@ $format = '%b %d %Y %H:%M:%S';
 var_dump( strptime('foo', $format) );
 
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : error conditions ***
 
 -- Testing strptime() function on failure --
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 bool(false)

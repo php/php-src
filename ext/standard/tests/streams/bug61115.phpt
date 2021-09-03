@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-preg_replace(): Argument #2 ($replace) must be of type string|array, Closure given
+preg_replace(): Argument #2 ($replacement) must be of type array|string, Closure given

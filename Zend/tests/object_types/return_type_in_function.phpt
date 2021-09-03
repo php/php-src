@@ -7,6 +7,7 @@ function a() : object {
     return 12345;
 }
 a();
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: a(): Return value must be of type object, int returned in %s:%d
 Stack trace:

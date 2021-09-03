@@ -20,5 +20,6 @@ new foo1;
 new foo;
 echo "===DONE===\n";
 }
+?>
 --EXPECTF--
 Fatal error: No code may exist outside of namespace {} in %s on line 10

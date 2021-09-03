@@ -36,10 +36,6 @@ extern const mbfl_encoding mbfl_encoding_sjis_docomo;
 extern const mbfl_encoding mbfl_encoding_sjis_kddi;
 extern const mbfl_encoding mbfl_encoding_sjis_sb;
 
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis_docomo;
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis_kddi;
-extern const struct mbfl_identify_vtbl vtbl_identify_sjis_sb;
-
 extern const struct mbfl_convert_vtbl vtbl_sjis_docomo_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_sjis_docomo;
 extern const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar;

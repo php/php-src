@@ -1,12 +1,10 @@
 --TEST--
 socket_import_stream: effects of leaked handles
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-	die('SKIP sockets extension not available.');
-}
-if (!function_exists('zend_leak_variable'))
-	die('SKIP only for debug builds');
+--EXTENSIONS--
+sockets
+zend_test
+--INI--
+report_memleaks=0
 --FILE--
 <?php
 
@@ -19,5 +17,6 @@ $sock1 = socket_import_stream($stream1);
 zend_leak_variable($sock1);
 
 echo "Done.\n";
+?>
 --EXPECT--
 Done.

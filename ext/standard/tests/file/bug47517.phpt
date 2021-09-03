@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 }
 exec('net session 2>&1', $out, $status);
 if (!$status) {
-	die('skip test runs under an elevated user account');
+    die('skip test runs under an elevated user account');
 }
 ?>
 --FILE--

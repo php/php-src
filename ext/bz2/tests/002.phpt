@@ -1,7 +1,7 @@
 --TEST--
 bzopen() using fd opened in wrong mode
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 
@@ -90,10 +90,10 @@ bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: fopen(bz_open_002.txt): Failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
 bzopen(): Argument #1 ($file) must be of type string or file-resource, bool given
 
-Warning: fopen(bz_open_002.txt): Failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(bz_open_002.txt): Failed to open stream: `br' is not a valid mode for fopen in %s on line %d
 bzopen(): Argument #1 ($file) must be of type string or file-resource, bool given
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d

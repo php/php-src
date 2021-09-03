@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -32,18 +32,6 @@
 
 #include "php_version.h"
 #define PHP_ICONV_VERSION PHP_VERSION
-
-#ifdef PHP_ATOM_INC
-#include "ext/iconv/php_have_iconv.h"
-#include "ext/iconv/php_have_libiconv.h"
-#include "ext/iconv/php_iconv_aliased_libiconv.h"
-#include "ext/iconv/php_have_glibc_iconv.h"
-#include "ext/iconv/php_have_bsd_iconv.h"
-#include "ext/iconv/php_have_ibm_iconv.h"
-#include "ext/iconv/php_iconv_supports_errno.h"
-#include "ext/iconv/php_php_iconv_impl.h"
-#include "ext/iconv/php_php_iconv_h_path.h"
-#endif
 
 #ifdef HAVE_ICONV
 extern zend_module_entry iconv_module_entry;
@@ -99,7 +87,8 @@ typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_ILLEGAL_CHAR      = 5,
 	PHP_ICONV_ERR_UNKNOWN           = 6,
 	PHP_ICONV_ERR_MALFORMED         = 7,
-	PHP_ICONV_ERR_ALLOC             = 8
+	PHP_ICONV_ERR_ALLOC             = 8,
+	PHP_ICONV_ERR_OUT_BY_BOUNDS     = 9
 } php_iconv_err_t;
 /* }}} */
 

@@ -1,7 +1,7 @@
 --TEST--
 mb_chr() and mb_ord()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 ini_set('internal_encoding', 'utf-8');
@@ -16,6 +16,7 @@ for($ch = 1; $ch < 80000; $ch++) {
     }
 }
 echo 'OK';
+?>
 --EXPECT--
 ERROR(55296)
 ERROR(55297)

@@ -1,7 +1,7 @@
 --TEST--
 gmp_prob_prime() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -28,11 +28,15 @@ var_dump(gmp_prob_prime($n));
 $n = gmp_init(0);
 var_dump(gmp_prob_prime($n));
 
-var_dump(gmp_prob_prime(array()));
+try {
+    var_dump(gmp_prob_prime(array()));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(2)
 int(2)
@@ -71,7 +75,5 @@ int(0)
 int(0)
 int(0)
 int(0)
-
-Warning: gmp_prob_prime(): Unable to convert variable to GMP - wrong type in %s on line %d
-bool(false)
+gmp_prob_prime(): Argument #1 ($num) must be of type GMP|string|int, array given
 Done

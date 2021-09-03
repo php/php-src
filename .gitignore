@@ -41,6 +41,9 @@
 # Standard object files generated during build process
 *.o
 
+# Dependency files generated during build process
+*.dep
+
 # Cache directories created by Autoconf tools
 autom4te.cache/
 
@@ -89,16 +92,6 @@ build/PHP-Parser-*
 config.h
 config.h.in
 /ext/date/lib/timelib_config.h
-/ext/iconv/php_have_bsd_iconv.h
-/ext/iconv/php_have_glibc_iconv.h
-/ext/iconv/php_have_ibm_iconv.h
-/ext/iconv/php_have_iconv.h
-/ext/iconv/php_have_libiconv.h
-/ext/iconv/php_iconv_aliased_libiconv.h
-/ext/iconv/php_iconv_broken_ignore.h
-/ext/iconv/php_iconv_supports_errno.h
-/ext/iconv/php_php_iconv_h_path.h
-/ext/iconv/php_php_iconv_impl.h
 /main/build-defs.h
 /main/php_config.h.in
 /main/php_config.h
