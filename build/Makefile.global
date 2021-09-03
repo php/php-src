@@ -118,6 +118,7 @@ clean:
 	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
 	rm -f ext/opcache/jit/zend_jit_x86.c
 	rm -f ext/opcache/jit/zend_jit_arm64.c
+	rm -f ext/opcache/minilua
 
 distclean: clean
 	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h
