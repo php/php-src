@@ -799,7 +799,11 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 	filename_str = zend_string_init(filename, strlen(filename), 0);
 	zend_prepare_string_for_scanning(&tmp, filename_str);
 	zend_string_release(filename_str);
-	BEGIN(ST_IN_SCRIPTING);
+	if (CG(skip_initial)) {
+		BEGIN(INITIAL);
+	} else {
+		BEGIN(ST_IN_SCRIPTING);
+	}
 	op_array = zend_compile(ZEND_EVAL_CODE);
 
 	zend_restore_lexical_state(&original_lex_state);

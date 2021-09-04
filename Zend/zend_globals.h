@@ -94,6 +94,7 @@ struct _zend_compiler_globals {
 	struct _zend_ini_parser_param *ini_parser_param;
 
 	bool skip_shebang;
+	bool skip_initial;
 	bool increment_lineno;
 
 	bool variable_width_locale;   /* UTF-8, Shift-JIS, Big5, ISO 2022, EUC, etc */
