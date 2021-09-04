@@ -60,15 +60,17 @@ static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	}
 }
 
-static zend_op_array *(*orig_compile_string)(zend_string *source_string, const char *filename);
+static zend_op_array *(*orig_compile_string)(
+		zend_string *source_string, const char *filename, zend_compile_position position);
 
-static zend_op_array *fuzzer_compile_string(zend_string *str, const char *filename) {
+static zend_op_array *fuzzer_compile_string(
+		zend_string *str, const char *filename, zend_compile_position position) {
 	if (ZSTR_LEN(str) > MAX_SIZE) {
 		/* Avoid compiling huge inputs via eval(). */
 		fuzzer_bailout();
 	}
 
-	return orig_compile_string(str, filename);
+	return orig_compile_string(str, filename, position);
 }
 
 static void (*orig_execute_internal)(zend_execute_data *execute_data, zval *return_value);

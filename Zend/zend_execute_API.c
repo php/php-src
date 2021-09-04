@@ -1223,7 +1223,7 @@ ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *re
 
 	original_compiler_options = CG(compiler_options);
 	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
-	new_op_array = zend_compile_string(code_str, string_name);
+	new_op_array = zend_compile_string(code_str, string_name, ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 	CG(compiler_options) = original_compiler_options;
 
 	if (new_op_array) {
