@@ -175,7 +175,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *domain;
-	zend_long option = 0,
+	zend_long option = UIDNA_DEFAULT,
 	variant = INTL_IDN_VARIANT_UTS46;
 	zval *idna_info = NULL;
 
