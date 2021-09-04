@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 55a689451b2c1ff5900c47111d350168f3ddec00 */
+ * Stub hash: 2e8cfd93b809a0595709dc5c544ec326f7ce1922 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -494,7 +494,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_idn_to_ascii, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "IDNA_DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, variant, IS_LONG, 0, "INTL_IDNA_VARIANT_UTS46")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, idna_info, "null")
 ZEND_END_ARG_INFO()
