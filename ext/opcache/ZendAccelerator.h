@@ -313,6 +313,8 @@ void accelerator_shm_read_unlock(void);
 zend_string *accel_make_persistent_key(zend_string *path);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
+bool accel_is_script_preloaded(zend_string *script_name);
+
 #define IS_ACCEL_INTERNED(str) \
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 

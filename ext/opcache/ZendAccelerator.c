@@ -3608,6 +3608,7 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 //???		efree(op_array->refcount);
 		op_array->refcount = NULL;
 
+		script->script.main_op_array.fn_flags |= ZEND_ACC_PRELOADED;
 		zend_hash_add_ptr(preload_scripts, script->script.filename, script);
 	}
 
@@ -4579,6 +4580,31 @@ finish:
 	preload_scripts = NULL;
 
 	return ret;
+}
+
+bool accel_is_script_preloaded(zend_string *script_name)
+{
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD) {
+		if (preload_scripts) {
+			return zend_hash_exists(preload_scripts, script_name);
+		}
+	} else {
+		zend_string *key;
+
+		if (!ZCG(accelerator_enabled) || !ZCSG(preload_script)) {
+			return false;
+		}
+
+		key = accel_make_persistent_key(script_name);
+		if (key != NULL) {
+			zend_persistent_script *persistent_script = zend_accel_hash_find(&ZCSG(hash), key);
+			if (persistent_script && (persistent_script->script.main_op_array.fn_flags & ZEND_ACC_PRELOADED)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 static size_t preload_ub_write(const char *str, size_t str_length)

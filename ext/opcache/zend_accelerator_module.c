@@ -923,3 +923,19 @@ ZEND_FUNCTION(opcache_is_script_cached)
 
 	RETURN_BOOL(filename_is_in_cache(script_name));
 }
+
+/* {{{ Return true if the script is preloaded in OPCache, false if it is not cached or if OPCache is not running. */
+ZEND_FUNCTION(opcache_is_script_preloaded)
+{
+	zend_string *script_name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(script_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!validate_api_restriction()) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(accel_is_script_preloaded(script_name));
+}
