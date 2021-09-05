@@ -114,16 +114,6 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 		} else if (c == 0x22) {
 			return 0x201d; /* RIGHT DOUBLE QUOTATION MARK */
 		}
-	} else if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT2) { /* special ascii to symbol */
-		if (c == 0x5c) {
-			return 0xff3c; /* FULLWIDTH REVERSE SOLIDUS */
-		} else if (c == 0x7e) {
-			return 0xff5e; /* FULLWIDTH TILDE */
-		} else if (c == 0x27) {
-			return 0xff07; /* FULLWIDTH APOSTROPHE */
-		} else if (c == 0x22) {
-			return 0xff02; /* FULLWIDTH QUOTATION MARK */
-		}
 	}
 
 	if (mode & (MBFL_FILT_TL_ZEN2HAN_ALL | MBFL_FILT_TL_ZEN2HAN_ALPHA | MBFL_FILT_TL_ZEN2HAN_NUMERIC | MBFL_FILT_TL_ZEN2HAN_SPACE)) {
@@ -201,18 +191,6 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 		} else if (c == 0x201c) { /* LEFT DOUBLE QUOTATION MARK */
 			return 0x22;
 		} else if (c == 0x201d) { /* RIGHT DOUBLE QUOTATION MARK */
-			return 0x22;
-		}
-	}
-
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT2) { /* special symbol to ascii */
-		if (c == 0xff3c) { /* FULLWIDTH REVERSE SOLIDUS */
-			return 0x5c;
-		} else if (c == 0xff5e) { /* FULLWIDTH TILDE */
-			return 0x7e;
-		} else if (c == 0xff07) { /* FULLWIDTH APOSTROPHE */
-			return 0x27;
-		} else if (c == 0xff02) { /* FULLWIDTH QUOTATION MARK */
 			return 0x22;
 		}
 	}
