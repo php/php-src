@@ -165,11 +165,11 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 		} else if (c == 0x30fb) {
 			return 0xff65; /* HALFWIDTH KATAKANA MIDDLE DOT */
 		}
-	} else if (mode & (MBFL_FILT_TL_ZEN2HAN_HIRA2KANA | MBFL_FILT_TL_ZEN2HAN_KANA2HIRA)) {
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRA2KANA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
+	} else if (mode & (MBFL_FILT_TL_ZENKAKU_HIRA2KANA | MBFL_FILT_TL_ZENKAKU_KANA2HIRA)) {
+		if ((mode & MBFL_FILT_TL_ZENKAKU_HIRA2KANA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
 			/* Zenkaku hiragana to Zenkaku katakana */
 			return c + 0x60;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_KANA2HIRA) && ((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
+		} else if ((mode & MBFL_FILT_TL_ZENKAKU_KANA2HIRA) && ((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
 			/* Zenkaku katakana to Zenkaku hiragana */
 			return c - 0x60;
 		}
