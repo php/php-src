@@ -87,7 +87,7 @@ class Status
         if ($startTimeTimestamp && $fields['start time'][0] === '\\') {
             $fields['start time'] = '\d+';
         }
-        $pattern = '|' . $header;
+        $pattern = '(' . $header;
         foreach ($fields as $name => $value) {
             if ($nameTransformer) {
                 $name = call_user_func($nameTransformer, $name);
@@ -102,7 +102,7 @@ class Status
             }
         }
         $pattern = rtrim($pattern, $rowPattern[strlen($rowPattern) - 1]);
-        $pattern .= $footer . '|';
+        $pattern .= $footer . ')';
 
         if (!preg_match($pattern, $body)) {
             echo "ERROR: Expected body does not match pattern\n";
