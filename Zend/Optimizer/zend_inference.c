@@ -2244,7 +2244,7 @@ static uint32_t zend_convert_type_declaration_mask(uint32_t type_mask) {
 	if (type_mask & MAY_BE_ITERABLE) {
 		result_mask |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
-	if (type_mask & MAY_BE_STATIC) {
+	if (type_mask & (MAY_BE_STATIC|MAY_BE_THIS)) {
 		result_mask |= MAY_BE_OBJECT;
 	}
 	if (type_mask & MAY_BE_ARRAY) {

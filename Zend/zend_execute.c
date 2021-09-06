@@ -964,6 +964,20 @@ static zend_always_inline bool zend_value_instanceof_static(zval *zv) {
 	return instanceof_function(Z_OBJCE_P(zv), called_scope);
 }
 
+static zend_always_inline bool zend_value_is_this(zval *zv) {
+	if (Z_TYPE_P(zv) != IS_OBJECT) {
+		return false;
+	}
+
+	zval *this_zv = &EG(current_execute_data)->This;
+	if (UNEXPECTED(Z_TYPE_P(this_zv) != IS_OBJECT)) {
+		/* This may happen for closures with unbound $this. */
+		return false;
+	}
+
+	return Z_OBJ_P(zv) == Z_OBJ_P(this_zv);
+}
+
 /* The cache_slot may only be NULL in debug builds, where arginfo verification of
  * internal functions is enabled. Avoid unnecessary checks in release builds. */
 #if ZEND_DEBUG
@@ -1055,6 +1069,9 @@ static zend_always_inline bool zend_check_type_slow(
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
+		return 1;
+	}
+	if ((type_mask & MAY_BE_THIS) && zend_value_is_this(arg)) {
 		return 1;
 	}
 	if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {

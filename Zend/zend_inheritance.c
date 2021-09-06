@@ -342,9 +342,9 @@ static bool zend_type_contains_traversable(zend_type type) {
 	return 0;
 }
 
-static bool zend_type_permits_self(
+static bool zend_type_permits_static(
 		zend_type type, zend_class_entry *scope, zend_class_entry *self) {
-	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
+	if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_OBJECT|MAY_BE_STATIC)) {
 		return 1;
 	}
 
@@ -578,10 +578,10 @@ static inheritance_status zend_perform_covariant_type_check(
 			/* Replacing iterable with array is okay */
 			added_types &= ~MAY_BE_ARRAY;
 		}
-		if ((added_types & MAY_BE_STATIC)
-				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
-			/* Replacing type that accepts self with static is okay */
-			added_types &= ~MAY_BE_STATIC;
+		if ((added_types & (MAY_BE_STATIC|MAY_BE_THIS))
+				&& zend_type_permits_static(proto_type, proto_scope, fe_scope)) {
+			/* Replacing type that accepts static with static/$this is okay */
+			added_types &= ~(MAY_BE_STATIC|MAY_BE_THIS);
 		}
 
 		if (added_types == MAY_BE_NEVER) {

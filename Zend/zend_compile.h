@@ -786,6 +786,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 bool zend_handle_encoding_declaration(zend_ast *ast);
+bool zend_handle_this_type(zend_ast *ast);
 
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);

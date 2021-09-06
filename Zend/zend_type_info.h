@@ -42,6 +42,7 @@
 #define MAY_BE_VOID                 (1 << IS_VOID)
 #define MAY_BE_NEVER                (1 << IS_NEVER)
 #define MAY_BE_STATIC               (1 << IS_STATIC)
+#define MAY_BE_THIS       	        (1 << IS_THIS)
 
 #define MAY_BE_ARRAY_SHIFT          (IS_REFERENCE)
 
@@ -57,9 +58,9 @@
 #define MAY_BE_ARRAY_OF_ANY			(MAY_BE_ANY      << MAY_BE_ARRAY_SHIFT)
 #define MAY_BE_ARRAY_OF_REF			(MAY_BE_REF      << MAY_BE_ARRAY_SHIFT)
 
-#define MAY_BE_ARRAY_PACKED         (1<<21)
-#define MAY_BE_ARRAY_NUMERIC_HASH   (1<<22) /* hash with numeric keys */
-#define MAY_BE_ARRAY_STRING_HASH    (1<<23) /* hash with string keys */
+#define MAY_BE_ARRAY_PACKED         (1<<22)
+#define MAY_BE_ARRAY_NUMERIC_HASH   (1<<23) /* hash with numeric keys */
+#define MAY_BE_ARRAY_STRING_HASH    (1<<24) /* hash with string keys */
 
 #define MAY_BE_ARRAY_KEY_LONG       (MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_NUMERIC_HASH)
 #define MAY_BE_ARRAY_KEY_STRING     MAY_BE_ARRAY_STRING_HASH
@@ -70,8 +71,8 @@
 #define MAY_BE_PACKED_ONLY(t)       (MAY_BE_PACKED(t) && !MAY_BE_HASH(t))
 #define MAY_BE_HASH_ONLY(t)         (MAY_BE_HASH(t) && !MAY_BE_PACKED(t))
 
-#define MAY_BE_CLASS                (1<<24)
-#define MAY_BE_INDIRECT             (1<<25)
+#define MAY_BE_CLASS                (1<<25)
+#define MAY_BE_INDIRECT             (1<<26)
 
 #define MAY_BE_RC1                  (1<<30) /* may be non-reference with refcount == 1 */
 #define MAY_BE_RCN                  (1u<<31) /* may be non-reference with refcount > 1  */

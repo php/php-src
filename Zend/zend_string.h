@@ -523,6 +523,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_ERROR_REPORTING,        "error_reporting") \
 	_(ZEND_STR_STATIC,                 "static") \
 	_(ZEND_STR_THIS,                   "this") \
+	_(ZEND_STR_THIS_VAR,               "$this") \
 	_(ZEND_STR_VALUE,                  "value") \
 	_(ZEND_STR_KEY,                    "key") \
 	_(ZEND_STR_MAGIC_INVOKE,           "__invoke") \

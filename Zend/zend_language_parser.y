@@ -810,6 +810,11 @@ type_expr:
 type:
 		type_without_static	{ $$ = $1; }
 	|	T_STATIC			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STATIC); }
+	|	T_VARIABLE {
+			if (!zend_handle_this_type($1)) { YYERROR; }
+			$$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_THIS);
+			zend_string_release(zend_ast_get_str($1));
+		}
 ;
 
 union_type:

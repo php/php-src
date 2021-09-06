@@ -1224,6 +1224,9 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 		return str;
 	}
+	if (type_mask & MAY_BE_THIS) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_THIS_VAR), /* is_intersection */ false);
+	}
 	if (type_mask & MAY_BE_STATIC) {
 		zend_string *name = ZSTR_KNOWN(ZEND_STR_STATIC);
 		if (scope) {
@@ -6033,6 +6036,17 @@ bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+bool zend_handle_this_type(zend_ast *ast)
+{
+	zend_string *name = zend_ast_get_str(ast);
+	if (!zend_string_equals_literal(name, "this")) {
+		zend_throw_exception_ex(zend_ce_compile_error, 0, "Cannot use $%s as type", ZSTR_VAL(name));
+		zend_string_release(name);
+		return false;
+	}
+	return true;
+}
+
 /* Check whether this is the first statement, not counting declares. */
 static zend_result zend_is_first_statement(zend_ast *ast, bool allow_nop) /* {{{ */
 {
@@ -6161,6 +6175,17 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use \"static\" when no class scope is active");
+		}
+		if (ast->attr == IS_THIS) {
+			if (!CG(active_class_entry) && zend_is_scope_known()) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use \"$this\" type when no class scope is active");
+			}
+			if (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use \"$this\" type on static %s",
+					CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE ? "closure" : "method");
+			}
 		}
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
@@ -6378,10 +6403,17 @@ static zend_type zend_compile_typename(
 		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be marked as nullable since mixed already includes null");
 	}
 
-	if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_IS_COMPLEX(type) || (type_mask & MAY_BE_STATIC))) {
+	if ((type_mask & MAY_BE_OBJECT)
+			&& (ZEND_TYPE_IS_COMPLEX(type) || (type_mask & (MAY_BE_STATIC|MAY_BE_THIS)))) {
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both object and a class type, which is redundant",
+			ZSTR_VAL(type_str));
+	}
+	if ((type_mask & MAY_BE_STATIC) && (type_mask & MAY_BE_THIS)) {
+		zend_string *type_str = zend_type_to_string(type);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type %s contains both static and $this, which is redundant",
 			ZSTR_VAL(type_str));
 	}
 

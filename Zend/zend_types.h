@@ -142,17 +142,17 @@ typedef struct {
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
+/* TODO: bit 23 is not used */
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
-/* TODO: bit 21 is not used */
 /* Whether the type list is arena allocated */
-#define _ZEND_TYPE_ARENA_BIT (1u << 20)
+#define _ZEND_TYPE_ARENA_BIT (1u << 21)
 /* Whether the type list is an intersection type */
-#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
+#define _ZEND_TYPE_INTERSECTION_BIT (1u << 20)
 /* Whether the type is a union type */
-#define _ZEND_TYPE_UNION_BIT (1u << 18)
+#define _ZEND_TYPE_UNION_BIT (1u << 19)
 /* Type mask excluding the flags above. */
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 19) - 1)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
@@ -538,6 +538,7 @@ struct _zend_ast_ref {
 #define IS_STATIC					15
 #define IS_MIXED					16
 #define IS_NEVER					17
+#define IS_THIS						18
 
 /* internal types */
 #define IS_INDIRECT             	12
@@ -546,8 +547,8 @@ struct _zend_ast_ref {
 #define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					19
+#define _IS_NUMBER					20
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
