@@ -729,14 +729,18 @@ PHP_RSHUTDOWN_FUNCTION(random)
 /* {{{ random_module_entry */
 zend_module_entry random_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"random",				/* Extension name */
-	ext_functions,			/* zend_function_entry */
-	PHP_MINIT(random),		/* PHP_MINIT - Module initialization */
-	NULL,					/* PHP_MSHUTDOWN - Module shutdown */
-	NULL,					/* PHP_RINIT - Request initialization */
-	PHP_RSHUTDOWN(random),	/* PHP_RSHUTDOWN - Request shutdown */
-	NULL,					/* PHP_MINFO - Module info */
-	PHP_VERSION,			/* Version */
-	STANDARD_MODULE_PROPERTIES
+	"random",
+	ext_functions,
+	PHP_MINIT(random),
+	NULL,
+	NULL,
+	PHP_RSHUTDOWN(random),
+	NULL,
+	PHP_VERSION,
+	PHP_MODULE_GLOBALS(random),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
