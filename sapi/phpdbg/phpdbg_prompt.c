@@ -514,7 +514,7 @@ exec_code:
 } /* }}} */
 
 int phpdbg_compile_stdin(zend_string *code) {
-	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code");
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", 0);
 	zend_string_release(code);
 
 	if (EG(exception)) {
