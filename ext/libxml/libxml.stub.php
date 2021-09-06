@@ -19,6 +19,10 @@ function libxml_use_internal_errors(?bool $use_errors = null): bool {}
 
 function libxml_get_last_error(): LibXMLError|false {}
 
+/**
+ * @return array<int, LibXMLError>
+ * @refcount 1
+ */
 function libxml_get_errors(): array {}
 
 function libxml_clear_errors(): void {}
