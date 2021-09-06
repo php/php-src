@@ -26,7 +26,7 @@ function ftp_chdir($ftp, string $directory): bool {}
 function ftp_exec($ftp, string $command): bool {}
 
 /** @param resource $ftp */
-function ftp_raw($ftp, string $command): array {}
+function ftp_raw($ftp, string $command): ?array {}
 
 /** @param resource $ftp */
 function ftp_mkdir($ftp, string $directory): string|false {}
