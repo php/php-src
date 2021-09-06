@@ -352,9 +352,10 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 	while (n--) {
 		for (int i = 0; i < num; i++) {
 			mbfl_convert_filter *filter = identd->filter_list[i];
-			if (!filter->num_illegalchar) {
+			mbfl_encoding_detector_data *data = &identd->filter_data[i];
+			if (!data->num_illegalchars) {
 				(*filter->filter_function)(*p, filter);
-				if (identd->filter_data[i].num_illegalchars) {
+				if (data->num_illegalchars) {
 					bad++;
 				}
 			}
