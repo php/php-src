@@ -27,7 +27,7 @@ namespace {
     function ftp_cdup(FTP\Connection $ftp): bool {}
     function ftp_chdir(FTP\Connection $ftp, string $directory): bool {}
     function ftp_exec(FTP\Connection $ftp, string $command): bool {}
-    function ftp_raw(FTP\Connection $ftp, string $command): array {}
+    function ftp_raw(FTP\Connection $ftp, string $command): ?array {}
     function ftp_mkdir(FTP\Connection $ftp, string $directory): string|false {}
     function ftp_rmdir(FTP\Connection $ftp, string $directory): bool {}
     function ftp_chmod(FTP\Connection $ftp, int $permissions, string $filename): int|false {}
