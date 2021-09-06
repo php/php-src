@@ -12,6 +12,10 @@ function readline_add_history(string $prompt): bool {}
 function readline_clear_history(): bool {}
 
 #ifdef HAVE_HISTORY_LIST
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function readline_list_history(): array {}
 #endif
 
