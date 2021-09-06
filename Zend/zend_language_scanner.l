@@ -1718,6 +1718,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_READONLY);
 }
 
+/* Don't treat "readonly(" as a keyword, to allow using it as a function name. */
+<ST_IN_SCRIPTING>"readonly"[ \n\r\t]*"(" {
+	yyless(strlen("readonly"));
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	RETURN_TOKEN_WITH_IDENT(T_UNSET);
 }
