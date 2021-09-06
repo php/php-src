@@ -26,8 +26,10 @@ opendir("foo/hi");
 include $pname . '/foo/hi';
 ?>
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php'); ?>
+<?php
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php');
+?>
 --EXPECTF--
 Warning: readfile(foo/hi): Failed to open stream: No such file or directory in phar://%sphar_gobyebye-win32.phar.php/foo/hi on line %d
 
