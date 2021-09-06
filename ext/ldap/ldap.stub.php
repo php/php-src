@@ -68,21 +68,41 @@ namespace {
 
     function ldap_next_entry(LDAP\Connection $ldap, LDAP\ResultEntry $entry): LDAP\ResultEntry|false {}
 
+    /**
+     * @return array<int|string, int|array>|false
+     * @refcount 1
+     */
     function ldap_get_entries(LDAP\Connection $ldap, LDAP\Result $result): array|false {}
 
     function ldap_first_attribute(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
     function ldap_next_attribute(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
+    /**
+     * @return array<int|string, int|string|array>
+     * @refcount 1
+     */
     function ldap_get_attributes(LDAP\Connection $ldap, LDAP\ResultEntry $entry): array {}
 
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     */
     function ldap_get_values_len(LDAP\Connection $ldap, LDAP\ResultEntry $entry, string $attribute): array|false {}
 
-    /** @alias ldap_get_values_len */
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     * @alias ldap_get_values_len
+     */
     function ldap_get_values(LDAP\Connection $ldap, LDAP\ResultEntry $entry, string $attribute): array|false {}
 
     function ldap_get_dn(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     */
     function ldap_explode_dn(string $dn, int $with_attrib): array|false {}
 
     function ldap_dn2ufn(string $dn): string|false {}
