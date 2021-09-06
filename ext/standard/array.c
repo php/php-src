@@ -36,7 +36,7 @@
 #include "php_array.h"
 #include "basic_functions.h"
 #include "php_string.h"
-#include "php_rand.h"
+#include "ext/random/php_random.h"
 #include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
