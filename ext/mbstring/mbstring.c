@@ -2713,10 +2713,15 @@ PHP_FUNCTION(mb_detect_encoding)
 		strict = MBSTRG(strict_detection);
 	}
 
-	mbfl_string_init(&string);
-	string.val = (unsigned char *)str;
-	string.len = str_len;
-	ret = mbfl_identify_encoding(&string, elist, size, strict);
+	if (strict && size == 1) {
+		/* If there is only a single candidate encoding, mb_check_encoding is faster */
+		ret = (php_mb_check_encoding(str, str_len, *elist)) ? *elist : NULL;
+	} else {
+		mbfl_string_init(&string);
+		string.val = (unsigned char *)str;
+		string.len = str_len;
+		ret = mbfl_identify_encoding(&string, elist, size, strict);
+	}
 
 	if (free_elist) {
 		efree(ZEND_VOIDP(elist));
