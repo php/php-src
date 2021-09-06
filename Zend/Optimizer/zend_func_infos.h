@@ -730,8 +730,9 @@ static const func_info_t func_infos[] = {
     F1("gzinflate", MAY_BE_STRING|MAY_BE_FALSE),
     F1("gzdecode", MAY_BE_STRING|MAY_BE_FALSE),
     F1("gzuncompress", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("apache_request_headers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
+    F1("apache_get_modules", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     F1("fpm_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-    F1("litespeed_request_headers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
     F1("litespeed_response_headers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("phpdbg_get_executable", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY),
 };

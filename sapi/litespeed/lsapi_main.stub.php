@@ -4,20 +4,19 @@
 
 /**
  * @return array<string, string>
- * @refcount 1
+ * @alias apache_request_headers
  */
 function litespeed_request_headers(): array {}
 
 /**
  * @return array<string, string>
- * @refcount 1
- * @alias litespeed_request_headers
+ * @alias apache_request_headers
  */
 function getallheaders(): array {}
 
 /**
  * @return array<string, string>
- * @alias litespeed_request_headers
+ * @refcount 1
  */
 function apache_request_headers(): array {}
 
@@ -33,6 +32,10 @@ function litespeed_response_headers(): array|false {}
  */
 function apache_response_headers(): array|false {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function apache_get_modules(): array {}
 
 function litespeed_finish_request(): bool {}
