@@ -24,6 +24,10 @@ function tidy_get_release(): string {}
 function tidy_get_opt_doc(tidy $tidy, string $option): string|false {}
 #endif
 
+/**
+ * @return array<string, bool|int|string>
+ * @refcount 1
+ */
 function tidy_get_config(tidy $tidy): array {}
 
 function tidy_get_status(tidy $tidy): int {}
@@ -99,6 +103,7 @@ class tidy
     public function getRelease(): string {}
 
     /**
+     * @return array<string, bool|int|string>
      * @tentative-return-type
      * @alias tidy_get_config
      */

@@ -35,6 +35,10 @@ function msg_receive(
 
 function msg_remove_queue(SysvMessageQueue $queue): bool {}
 
+/**
+ * @return array<string, int>|false
+ * @refcount 1
+ */
 function msg_stat_queue(SysvMessageQueue $queue): array|false {}
 
 function msg_set_queue(SysvMessageQueue $queue, array $data): bool {}
