@@ -16,7 +16,6 @@
    |          Pedro Melo <melo@ip.pt>                                     |
    |          Sterling Hughes <sterling@php.net>                          |
    |          Sammy Kaye Powers <me@sammyk.me>                            |
-   |          Go Kudo <zeriyoshi@gmail.com>                               |
    |                                                                      |
    | Rand based on code from: Shawn Cokus <Cokus@math.washington.edu>     |
    +----------------------------------------------------------------------+
