@@ -1602,13 +1602,7 @@ int main( int argc, char * argv[] )
     return ret;
 }
 
-
 /*   LiteSpeed PHP module starts here */
-
-PHP_FUNCTION(litespeed_request_headers);
-PHP_FUNCTION(litespeed_response_headers);
-PHP_FUNCTION(apache_get_modules);
-PHP_FUNCTION(litespeed_finish_request);
 
 PHP_MINFO_FUNCTION(litespeed);
 

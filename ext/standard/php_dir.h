@@ -20,9 +20,6 @@
 /* directory functions */
 PHP_MINIT_FUNCTION(dir);
 PHP_RINIT_FUNCTION(dir);
-PHP_FUNCTION(closedir);
-PHP_FUNCTION(rewinddir);
-PHP_FUNCTION(readdir);
 
 #define PHP_SCANDIR_SORT_ASCENDING 0
 #define PHP_SCANDIR_SORT_DESCENDING 1

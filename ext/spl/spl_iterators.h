@@ -44,10 +44,6 @@ extern PHPAPI zend_class_entry *spl_ce_SeekableIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
-PHP_FUNCTION(iterator_apply);
-PHP_FUNCTION(iterator_count);
-PHP_FUNCTION(iterator_to_array);
-
 typedef enum {
 	DIT_Default = 0,
 	DIT_FilterIterator = DIT_Default,

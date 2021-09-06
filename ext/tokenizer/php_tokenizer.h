@@ -34,7 +34,4 @@ char *get_token_type_name(int token_type);
 PHP_MINIT_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
 
-PHP_FUNCTION(token_get_all);
-PHP_FUNCTION(token_name);
-
 #endif	/* PHP_TOKENIZER_H */
