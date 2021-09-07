@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.11
+?? ??? 2021, PHP 8.0.12
+
+
+23 Sep 2021, PHP 8.0.11
 
 - Core:
   . Fixed bug #81302 (Stream position after stream filter removed). (cmb)
