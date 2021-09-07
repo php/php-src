@@ -8464,21 +8464,19 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 
 			if (opline->opcode == ZEND_INIT_FCALL) {
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv);
+				|	add FCARG2x, REG2, #opline->result.num
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv + 1);
+				|	add FCARG2x, REG2, #opline->result.num
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, zv;
+				|	add FCARG2x, REG2, #opline->result.num
 				|	EXT_CALL zend_jit_find_ns_func_helper, REG0
 			} else {
 				ZEND_UNREACHABLE();
 			}
-			|	// CACHE_PTR(opline->result.num, fbc);
-			|	ldr REG1, EX->run_time_cache
-			|	// Get the return value of function zend_jit_find_func_helper/zend_jit_find_ns_func_helper
-			|	mov REG0, RETVALx
-			|	str REG0, [REG1, #opline->result.num]
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
