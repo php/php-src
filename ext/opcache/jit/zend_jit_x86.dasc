@@ -9030,19 +9030,19 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 
 			if (opline->opcode == ZEND_INIT_FCALL) {
 				|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+				|	lea FCARG2a, aword [r2 + opline->result.num]
 				|	EXT_CALL zend_jit_find_func_helper, r0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1a, Z_STR_P(zv + 1);
+				|	lea FCARG2a, aword [r2 + opline->result.num]
 				|	EXT_CALL zend_jit_find_func_helper, r0
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1a, zv;
+				|	lea FCARG2a, aword [r2 + opline->result.num]
 				|	EXT_CALL zend_jit_find_ns_func_helper, r0
 			} else {
 				ZEND_UNREACHABLE();
 			}
-			|	// CACHE_PTR(opline->result.num, fbc);
-			|	mov r1, EX->run_time_cache
-			|	mov aword [r1 + opline->result.num], r0
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
