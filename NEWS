@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.24
+?? ??? ????, PHP 7.4.25
+
+
+23 Dep 2021, PHP 7.4.24
 
 - Core:
   . Fixed bug #81302 (Stream position after stream filter removed). (cmb)
