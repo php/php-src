@@ -80,7 +80,7 @@ static inline uint32_t zend_alloc_cache_slot(void) {
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
-ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, bool skip_initial);
+ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, bool begin_initial);
 
 #ifndef ZTS
 ZEND_API zend_compiler_globals compiler_globals;

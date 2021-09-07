@@ -62,7 +62,7 @@ namespace {
 
     function zend_test_void_return(): void {}
 
-    function zend_test_compile_string(string $source_string, string $filename, bool $skip_initial): void {}
+    function zend_test_compile_string(string $source_string, string $filename, bool $begin_initial): void {}
 
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}

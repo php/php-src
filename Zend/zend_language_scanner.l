@@ -782,7 +782,7 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-zend_op_array *compile_string(zend_string *source_string, const char *filename, bool skip_initial)
+zend_op_array *compile_string(zend_string *source_string, const char *filename, bool begin_initial)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
@@ -799,7 +799,7 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename, 
 	filename_str = zend_string_init(filename, strlen(filename), 0);
 	zend_prepare_string_for_scanning(&tmp, filename_str);
 	zend_string_release(filename_str);
-	if (skip_initial) {
+	if (begin_initial) {
 		BEGIN(INITIAL);
 	} else {
 		BEGIN(ST_IN_SCRIPTING);
