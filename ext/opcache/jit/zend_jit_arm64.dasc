@@ -4804,12 +4804,14 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			}
 			|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
 			|	LOAD_ZVAL_ADDR CARG3, op2_addr
-			|	EXT_CALL zend_jit_fast_concat_helper, REG0
+			if (op1_type == IS_CV || op1_type == IS_CONST) {
+				|	EXT_CALL zend_jit_fast_concat_helper, REG0
+			} else {
+				|	EXT_CALL zend_jit_fast_concat_tmp_helper, REG0
+			}
 		}
 		/* concatination with empty string may increase refcount */
-		op1_info |= MAY_BE_RCN;
 		op2_info |= MAY_BE_RCN;
-		|	FREE_OP op1_type, op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		|	FREE_OP op2_type, op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		|5:
 	}
