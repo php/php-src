@@ -124,9 +124,9 @@ bindTo(null, Cls::class):
 Cannot rebind scope of closure created from function
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class DynamicObject
 
-bindTo(new stdClass, null):
+bindTo(new DynamicObject, null):
 Success!
 
 strlen()
@@ -145,9 +145,9 @@ bindTo(null, Cls::class):
 Cannot rebind scope of closure created from function
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class DynamicObject
 
-bindTo(new stdClass, null):
+bindTo(new DynamicObject, null):
 Success!
 
 Cls::staticMethod()
@@ -235,7 +235,7 @@ bindTo(null, Cls::class):
 Success!
 
 bindTo(null, stdClass::class):
-Cannot bind closure to scope of internal class stdClass
+Cannot bind closure to scope of internal class DynamicObject
 
-bindTo(new stdClass, null):
+bindTo(new DynamicObject, null):
 Success!

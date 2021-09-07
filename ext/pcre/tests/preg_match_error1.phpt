@@ -57,4 +57,4 @@ preg_match(): Argument #1 ($pattern) must be of type string, array given
 
 Arg value is /[a-zA-Z]/
 int(1)
-preg_match(): Argument #1 ($pattern) must be of type string, stdClass given
+preg_match(): Argument #1 ($pattern) must be of type string, DynamicObject given

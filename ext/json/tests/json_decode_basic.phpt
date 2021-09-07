@@ -37,7 +37,7 @@ foreach($inputs as $input) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing json_decode() : basic functionality ***
 -- Iteration 1 --
 int(0)
@@ -111,7 +111,7 @@ array(5) {
   int(5)
 }
 -- Iteration 16 --
-object(stdClass)#%d (5) {
+object(DynamicObject)#1 (5) {
   ["myInt"]=>
   int(99)
   ["myFloat"]=>
@@ -136,7 +136,7 @@ array(5) {
   string(11) "Hello World"
 }
 -- Iteration 17 --
-object(stdClass)#%d (6) {
+object(DynamicObject)#1 (6) {
   ["Jan"]=>
   int(31)
   ["Feb"]=>
@@ -168,7 +168,7 @@ array(6) {
 string(0) ""
 string(0) ""
 -- Iteration 19 --
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 array(0) {
 }

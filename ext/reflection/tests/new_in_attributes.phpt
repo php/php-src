@@ -41,21 +41,21 @@ array(2) {
   [0]=>
   NULL
   [1]=>
-  object(stdClass)#3 (0) {
+  object(DynamicObject)#3 (0) {
   }
 }
 object(MyAttribute)#4 (2) {
   ["x"]=>
   NULL
   ["y"]=>
-  object(stdClass)#5 (0) {
+  object(DynamicObject)#5 (0) {
   }
 }
 bool(true)
 bool(true)
 array(2) {
   ["y"]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
   ["x"]=>
   NULL
@@ -64,6 +64,6 @@ object(MyAttribute)#10 (2) {
   ["x"]=>
   NULL
   ["y"]=>
-  object(stdClass)#11 (0) {
+  object(DynamicObject)#11 (0) {
   }
 }

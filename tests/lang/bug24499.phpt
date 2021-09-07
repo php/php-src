@@ -18,7 +18,7 @@ $id->tester($obj);
 print_r($obj);
 ?>
 --EXPECT--
-stdClass Object
+DynamicObject Object
 (
     [foo] => bar
     [id] => bar

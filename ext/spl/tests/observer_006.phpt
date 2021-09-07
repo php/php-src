@@ -172,7 +172,7 @@ object(MyStorage)#%d (2) {
         int(3)
       }
       ["inf"]=>
-      object(stdClass)#%d (0) {
+      object(DynamicObject)#15 (0) {
       }
     }
     [3]=>
@@ -231,7 +231,7 @@ object(MyStorage)#%d (2) {
         int(3)
       }
       ["inf"]=>
-      object(stdClass)#%d (0) {
+      object(DynamicObject)#14 (0) {
       }
     }
     [3]=>

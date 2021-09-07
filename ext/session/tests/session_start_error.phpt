@@ -21,7 +21,7 @@ ob_end_flush();
 
 ?>
 --EXPECTF--
-session_start(): Option "option" must be of type string|int|bool, stdClass given
+session_start(): Option "option" must be of type string|int|bool, DynamicObject given
 
 Warning: session_start(): Setting option "option" failed in %s on line %d
 bool(true)

@@ -207,7 +207,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mail() : basic functionality ***
 
 
@@ -244,7 +244,7 @@ TypeError: Header "foo3" must only contain values of type string, int found
 TypeError: Header "foo4" must only contain values of type string, float found
 TypeError: Header "foo5" must only contain values of type string, bool found
 TypeError: Header "foo6" must only contain values of type string, null found
-TypeError: Header "foo7" must only contain values of type string, stdClass found
+TypeError: Header "foo7" must only contain values of type string, DynamicObject found
 
 
 ************* TEST ******************

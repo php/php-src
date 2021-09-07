@@ -21,16 +21,16 @@ var_dump(new $test::$className);
 var_dump(new $weird[0]->foo::$className);
 
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }

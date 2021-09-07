@@ -198,54 +198,54 @@ catch (Throwable $e) {}
 var_dump($x);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(1)
 int(1)
 array(0) {
 }
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 int(1)
 string(3) "foo"
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
 string(3) "foo"

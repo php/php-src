@@ -25,9 +25,9 @@ var_dump(pg_result_seek($result, 0));
 
 echo "Ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
-object(stdClass)#%d (3) {
+object(DynamicObject)#3 (3) {
   ["num"]=>
   string(1) "1"
   ["str"]=>

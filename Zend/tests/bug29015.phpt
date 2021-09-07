@@ -10,7 +10,7 @@ $a->{"\0"} = 42;
 var_dump($a);
 ?>
 --EXPECTF--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   [""]=>
   string(10) "string('')"
 }

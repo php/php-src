@@ -12,8 +12,8 @@ $gen->throw(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Generator::throw(): Argument #1 ($exception) must be of type Throwable, stdClass given in %s:%d
+Fatal error: Uncaught TypeError: Generator::throw(): Argument #1 ($exception) must be of type Throwable, DynamicObject given in %s:%d
 Stack trace:
-#0 %s(%d): Generator->throw(Object(stdClass))
+#0 %s(%d): Generator->throw(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

@@ -127,19 +127,19 @@ foreach ($illegalValues as $illegalValue) {
 --EXPECT--
 BINARY OP:
 No error for [] + []
-Unsupported operand types: array + stdClass
+Unsupported operand types: array + DynamicObject
 Unsupported operand types: array + resource
 Unsupported operand types: array + string
-Unsupported operand types: stdClass + array
-Unsupported operand types: stdClass + stdClass
-Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + string
+Unsupported operand types: DynamicObject + array
+Unsupported operand types: DynamicObject + DynamicObject
+Unsupported operand types: DynamicObject + resource
+Unsupported operand types: DynamicObject + string
 Unsupported operand types: resource + array
-Unsupported operand types: resource + stdClass
+Unsupported operand types: resource + DynamicObject
 Unsupported operand types: resource + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + array
-Unsupported operand types: string + stdClass
+Unsupported operand types: string + DynamicObject
 Unsupported operand types: string + resource
 Unsupported operand types: string + string
 Unsupported operand types: array + null
@@ -157,21 +157,21 @@ Unsupported operand types: string + array
 Unsupported operand types: array + string
 Warning: A non-numeric value encountered
 Unsupported operand types: string + array
-Unsupported operand types: stdClass + null
-Unsupported operand types: null + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + int
-Unsupported operand types: int + stdClass
-Unsupported operand types: stdClass + float
-Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + string
-Unsupported operand types: string + stdClass
-Unsupported operand types: stdClass + string
+Unsupported operand types: DynamicObject + null
+Unsupported operand types: null + DynamicObject
+Unsupported operand types: DynamicObject + bool
+Unsupported operand types: bool + DynamicObject
+Unsupported operand types: DynamicObject + bool
+Unsupported operand types: bool + DynamicObject
+Unsupported operand types: DynamicObject + int
+Unsupported operand types: int + DynamicObject
+Unsupported operand types: DynamicObject + float
+Unsupported operand types: float + DynamicObject
+Unsupported operand types: DynamicObject + string
+Unsupported operand types: string + DynamicObject
+Unsupported operand types: DynamicObject + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + stdClass
+Unsupported operand types: string + DynamicObject
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
 Unsupported operand types: resource + bool
@@ -203,19 +203,19 @@ Unsupported operand types: string + string
 Warning: A non-numeric value encountered
 Unsupported operand types: string + string
 Unsupported operand types: array - array
-Unsupported operand types: array - stdClass
+Unsupported operand types: array - DynamicObject
 Unsupported operand types: array - resource
 Unsupported operand types: array - string
-Unsupported operand types: stdClass - array
-Unsupported operand types: stdClass - stdClass
-Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - string
+Unsupported operand types: DynamicObject - array
+Unsupported operand types: DynamicObject - DynamicObject
+Unsupported operand types: DynamicObject - resource
+Unsupported operand types: DynamicObject - string
 Unsupported operand types: resource - array
-Unsupported operand types: resource - stdClass
+Unsupported operand types: resource - DynamicObject
 Unsupported operand types: resource - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - array
-Unsupported operand types: string - stdClass
+Unsupported operand types: string - DynamicObject
 Unsupported operand types: string - resource
 Unsupported operand types: string - string
 Unsupported operand types: array - null
@@ -233,21 +233,21 @@ Unsupported operand types: string - array
 Unsupported operand types: array - string
 Warning: A non-numeric value encountered
 Unsupported operand types: string - array
-Unsupported operand types: stdClass - null
-Unsupported operand types: null - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - int
-Unsupported operand types: int - stdClass
-Unsupported operand types: stdClass - float
-Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - string
-Unsupported operand types: string - stdClass
-Unsupported operand types: stdClass - string
+Unsupported operand types: DynamicObject - null
+Unsupported operand types: null - DynamicObject
+Unsupported operand types: DynamicObject - bool
+Unsupported operand types: bool - DynamicObject
+Unsupported operand types: DynamicObject - bool
+Unsupported operand types: bool - DynamicObject
+Unsupported operand types: DynamicObject - int
+Unsupported operand types: int - DynamicObject
+Unsupported operand types: DynamicObject - float
+Unsupported operand types: float - DynamicObject
+Unsupported operand types: DynamicObject - string
+Unsupported operand types: string - DynamicObject
+Unsupported operand types: DynamicObject - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - stdClass
+Unsupported operand types: string - DynamicObject
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
 Unsupported operand types: resource - bool
@@ -279,19 +279,19 @@ Unsupported operand types: string - string
 Warning: A non-numeric value encountered
 Unsupported operand types: string - string
 Unsupported operand types: array * array
-Unsupported operand types: stdClass * array
+Unsupported operand types: DynamicObject * array
 Unsupported operand types: resource * array
 Unsupported operand types: array * string
-Unsupported operand types: stdClass * array
-Unsupported operand types: stdClass * stdClass
-Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * string
+Unsupported operand types: DynamicObject * array
+Unsupported operand types: DynamicObject * DynamicObject
+Unsupported operand types: DynamicObject * resource
+Unsupported operand types: DynamicObject * string
 Unsupported operand types: resource * array
-Unsupported operand types: stdClass * resource
+Unsupported operand types: DynamicObject * resource
 Unsupported operand types: resource * resource
 Unsupported operand types: resource * string
 Unsupported operand types: string * array
-Unsupported operand types: stdClass * string
+Unsupported operand types: DynamicObject * string
 Unsupported operand types: resource * string
 Unsupported operand types: string * string
 Unsupported operand types: array * null
@@ -309,20 +309,20 @@ Unsupported operand types: string * array
 Unsupported operand types: array * string
 Warning: A non-numeric value encountered
 Unsupported operand types: string * array
-Unsupported operand types: stdClass * null
-Unsupported operand types: stdClass * null
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * bool
-Unsupported operand types: stdClass * int
-Unsupported operand types: stdClass * int
-Unsupported operand types: stdClass * float
-Unsupported operand types: stdClass * float
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
-Unsupported operand types: stdClass * string
+Unsupported operand types: DynamicObject * null
+Unsupported operand types: DynamicObject * null
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: DynamicObject * int
+Unsupported operand types: DynamicObject * int
+Unsupported operand types: DynamicObject * float
+Unsupported operand types: DynamicObject * float
+Unsupported operand types: DynamicObject * string
+Unsupported operand types: DynamicObject * string
+Unsupported operand types: DynamicObject * string
+Unsupported operand types: DynamicObject * string
 Unsupported operand types: resource * null
 Unsupported operand types: resource * null
 Unsupported operand types: resource * bool
@@ -353,19 +353,19 @@ Unsupported operand types: string * string
 Warning: A non-numeric value encountered
 Unsupported operand types: string * string
 Unsupported operand types: array / array
-Unsupported operand types: array / stdClass
+Unsupported operand types: array / DynamicObject
 Unsupported operand types: array / resource
 Unsupported operand types: array / string
-Unsupported operand types: stdClass / array
-Unsupported operand types: stdClass / stdClass
-Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / string
+Unsupported operand types: DynamicObject / array
+Unsupported operand types: DynamicObject / DynamicObject
+Unsupported operand types: DynamicObject / resource
+Unsupported operand types: DynamicObject / string
 Unsupported operand types: resource / array
-Unsupported operand types: resource / stdClass
+Unsupported operand types: resource / DynamicObject
 Unsupported operand types: resource / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / array
-Unsupported operand types: string / stdClass
+Unsupported operand types: string / DynamicObject
 Unsupported operand types: string / resource
 Unsupported operand types: string / string
 Unsupported operand types: array / null
@@ -383,21 +383,21 @@ Unsupported operand types: string / array
 Unsupported operand types: array / string
 Warning: A non-numeric value encountered
 Unsupported operand types: string / array
-Unsupported operand types: stdClass / null
-Unsupported operand types: null / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / int
-Unsupported operand types: int / stdClass
-Unsupported operand types: stdClass / float
-Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / string
-Unsupported operand types: string / stdClass
-Unsupported operand types: stdClass / string
+Unsupported operand types: DynamicObject / null
+Unsupported operand types: null / DynamicObject
+Unsupported operand types: DynamicObject / bool
+Unsupported operand types: bool / DynamicObject
+Unsupported operand types: DynamicObject / bool
+Unsupported operand types: bool / DynamicObject
+Unsupported operand types: DynamicObject / int
+Unsupported operand types: int / DynamicObject
+Unsupported operand types: DynamicObject / float
+Unsupported operand types: float / DynamicObject
+Unsupported operand types: DynamicObject / string
+Unsupported operand types: string / DynamicObject
+Unsupported operand types: DynamicObject / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / stdClass
+Unsupported operand types: string / DynamicObject
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
 Unsupported operand types: resource / bool
@@ -429,19 +429,19 @@ Unsupported operand types: string / string
 Warning: A non-numeric value encountered
 Unsupported operand types: string / string
 Unsupported operand types: array % array
-Unsupported operand types: array % stdClass
+Unsupported operand types: array % DynamicObject
 Unsupported operand types: array % resource
 Unsupported operand types: array % string
-Unsupported operand types: stdClass % array
-Unsupported operand types: stdClass % stdClass
-Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % string
+Unsupported operand types: DynamicObject % array
+Unsupported operand types: DynamicObject % DynamicObject
+Unsupported operand types: DynamicObject % resource
+Unsupported operand types: DynamicObject % string
 Unsupported operand types: resource % array
-Unsupported operand types: resource % stdClass
+Unsupported operand types: resource % DynamicObject
 Unsupported operand types: resource % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % array
-Unsupported operand types: string % stdClass
+Unsupported operand types: string % DynamicObject
 Unsupported operand types: string % resource
 Unsupported operand types: string % string
 Unsupported operand types: array % null
@@ -460,22 +460,22 @@ Unsupported operand types: string % array
 Unsupported operand types: array % string
 Warning: A non-numeric value encountered
 Unsupported operand types: string % array
-Unsupported operand types: stdClass % null
-Unsupported operand types: null % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % int
-Unsupported operand types: int % stdClass
-Unsupported operand types: stdClass % float
+Unsupported operand types: DynamicObject % null
+Unsupported operand types: null % DynamicObject
+Unsupported operand types: DynamicObject % bool
+Unsupported operand types: bool % DynamicObject
+Unsupported operand types: DynamicObject % bool
+Unsupported operand types: bool % DynamicObject
+Unsupported operand types: DynamicObject % int
+Unsupported operand types: int % DynamicObject
+Unsupported operand types: DynamicObject % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % string
-Unsupported operand types: string % stdClass
-Unsupported operand types: stdClass % string
+Unsupported operand types: float % DynamicObject
+Unsupported operand types: DynamicObject % string
+Unsupported operand types: string % DynamicObject
+Unsupported operand types: DynamicObject % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % stdClass
+Unsupported operand types: string % DynamicObject
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
 Unsupported operand types: resource % bool
@@ -509,19 +509,19 @@ Unsupported operand types: string % string
 Warning: A non-numeric value encountered
 Unsupported operand types: string % string
 Unsupported operand types: array ** array
-Unsupported operand types: array ** stdClass
+Unsupported operand types: array ** DynamicObject
 Unsupported operand types: array ** resource
 Unsupported operand types: array ** string
-Unsupported operand types: stdClass ** array
-Unsupported operand types: stdClass ** stdClass
-Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** string
+Unsupported operand types: DynamicObject ** array
+Unsupported operand types: DynamicObject ** DynamicObject
+Unsupported operand types: DynamicObject ** resource
+Unsupported operand types: DynamicObject ** string
 Unsupported operand types: resource ** array
-Unsupported operand types: resource ** stdClass
+Unsupported operand types: resource ** DynamicObject
 Unsupported operand types: resource ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** array
-Unsupported operand types: string ** stdClass
+Unsupported operand types: string ** DynamicObject
 Unsupported operand types: string ** resource
 Unsupported operand types: string ** string
 Unsupported operand types: array ** null
@@ -539,21 +539,21 @@ Unsupported operand types: string ** array
 Unsupported operand types: array ** string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
-Unsupported operand types: stdClass ** null
-Unsupported operand types: null ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** int
-Unsupported operand types: int ** stdClass
-Unsupported operand types: stdClass ** float
-Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** string
-Unsupported operand types: string ** stdClass
-Unsupported operand types: stdClass ** string
+Unsupported operand types: DynamicObject ** null
+Unsupported operand types: null ** DynamicObject
+Unsupported operand types: DynamicObject ** bool
+Unsupported operand types: bool ** DynamicObject
+Unsupported operand types: DynamicObject ** bool
+Unsupported operand types: bool ** DynamicObject
+Unsupported operand types: DynamicObject ** int
+Unsupported operand types: int ** DynamicObject
+Unsupported operand types: DynamicObject ** float
+Unsupported operand types: float ** DynamicObject
+Unsupported operand types: DynamicObject ** string
+Unsupported operand types: string ** DynamicObject
+Unsupported operand types: DynamicObject ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** stdClass
+Unsupported operand types: string ** DynamicObject
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
 Unsupported operand types: resource ** bool
@@ -585,19 +585,19 @@ Unsupported operand types: string ** string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ** string
 Unsupported operand types: array << array
-Unsupported operand types: array << stdClass
+Unsupported operand types: array << DynamicObject
 Unsupported operand types: array << resource
 Unsupported operand types: array << string
-Unsupported operand types: stdClass << array
-Unsupported operand types: stdClass << stdClass
-Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << string
+Unsupported operand types: DynamicObject << array
+Unsupported operand types: DynamicObject << DynamicObject
+Unsupported operand types: DynamicObject << resource
+Unsupported operand types: DynamicObject << string
 Unsupported operand types: resource << array
-Unsupported operand types: resource << stdClass
+Unsupported operand types: resource << DynamicObject
 Unsupported operand types: resource << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << array
-Unsupported operand types: string << stdClass
+Unsupported operand types: string << DynamicObject
 Unsupported operand types: string << resource
 Unsupported operand types: string << string
 Unsupported operand types: array << null
@@ -616,22 +616,22 @@ Unsupported operand types: string << array
 Unsupported operand types: array << string
 Warning: A non-numeric value encountered
 Unsupported operand types: string << array
-Unsupported operand types: stdClass << null
-Unsupported operand types: null << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << int
-Unsupported operand types: int << stdClass
-Unsupported operand types: stdClass << float
+Unsupported operand types: DynamicObject << null
+Unsupported operand types: null << DynamicObject
+Unsupported operand types: DynamicObject << bool
+Unsupported operand types: bool << DynamicObject
+Unsupported operand types: DynamicObject << bool
+Unsupported operand types: bool << DynamicObject
+Unsupported operand types: DynamicObject << int
+Unsupported operand types: int << DynamicObject
+Unsupported operand types: DynamicObject << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << string
-Unsupported operand types: string << stdClass
-Unsupported operand types: stdClass << string
+Unsupported operand types: float << DynamicObject
+Unsupported operand types: DynamicObject << string
+Unsupported operand types: string << DynamicObject
+Unsupported operand types: DynamicObject << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << stdClass
+Unsupported operand types: string << DynamicObject
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
 Unsupported operand types: resource << bool
@@ -665,19 +665,19 @@ Unsupported operand types: string << string
 Warning: A non-numeric value encountered
 Unsupported operand types: string << string
 Unsupported operand types: array >> array
-Unsupported operand types: array >> stdClass
+Unsupported operand types: array >> DynamicObject
 Unsupported operand types: array >> resource
 Unsupported operand types: array >> string
-Unsupported operand types: stdClass >> array
-Unsupported operand types: stdClass >> stdClass
-Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> string
+Unsupported operand types: DynamicObject >> array
+Unsupported operand types: DynamicObject >> DynamicObject
+Unsupported operand types: DynamicObject >> resource
+Unsupported operand types: DynamicObject >> string
 Unsupported operand types: resource >> array
-Unsupported operand types: resource >> stdClass
+Unsupported operand types: resource >> DynamicObject
 Unsupported operand types: resource >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> array
-Unsupported operand types: string >> stdClass
+Unsupported operand types: string >> DynamicObject
 Unsupported operand types: string >> resource
 Unsupported operand types: string >> string
 Unsupported operand types: array >> null
@@ -696,22 +696,22 @@ Unsupported operand types: string >> array
 Unsupported operand types: array >> string
 Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
-Unsupported operand types: stdClass >> null
-Unsupported operand types: null >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> int
-Unsupported operand types: int >> stdClass
-Unsupported operand types: stdClass >> float
+Unsupported operand types: DynamicObject >> null
+Unsupported operand types: null >> DynamicObject
+Unsupported operand types: DynamicObject >> bool
+Unsupported operand types: bool >> DynamicObject
+Unsupported operand types: DynamicObject >> bool
+Unsupported operand types: bool >> DynamicObject
+Unsupported operand types: DynamicObject >> int
+Unsupported operand types: int >> DynamicObject
+Unsupported operand types: DynamicObject >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> string
-Unsupported operand types: string >> stdClass
-Unsupported operand types: stdClass >> string
+Unsupported operand types: float >> DynamicObject
+Unsupported operand types: DynamicObject >> string
+Unsupported operand types: string >> DynamicObject
+Unsupported operand types: DynamicObject >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> stdClass
+Unsupported operand types: string >> DynamicObject
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
 Unsupported operand types: resource >> bool
@@ -745,19 +745,19 @@ Unsupported operand types: string >> string
 Warning: A non-numeric value encountered
 Unsupported operand types: string >> string
 Unsupported operand types: array & array
-Unsupported operand types: stdClass & array
+Unsupported operand types: DynamicObject & array
 Unsupported operand types: resource & array
 Unsupported operand types: array & string
-Unsupported operand types: stdClass & array
-Unsupported operand types: stdClass & stdClass
-Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & string
+Unsupported operand types: DynamicObject & array
+Unsupported operand types: DynamicObject & DynamicObject
+Unsupported operand types: DynamicObject & resource
+Unsupported operand types: DynamicObject & string
 Unsupported operand types: resource & array
-Unsupported operand types: stdClass & resource
+Unsupported operand types: DynamicObject & resource
 Unsupported operand types: resource & resource
 Unsupported operand types: resource & string
 Unsupported operand types: string & array
-Unsupported operand types: stdClass & string
+Unsupported operand types: DynamicObject & string
 Unsupported operand types: resource & string
 No error for "foo" & "foo"
 Unsupported operand types: array & null
@@ -776,20 +776,20 @@ Unsupported operand types: string & array
 Unsupported operand types: array & string
 Warning: A non-numeric value encountered
 Unsupported operand types: string & array
-Unsupported operand types: stdClass & null
-Unsupported operand types: stdClass & null
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & bool
-Unsupported operand types: stdClass & int
-Unsupported operand types: stdClass & int
-Unsupported operand types: stdClass & float
-Unsupported operand types: stdClass & float
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
-Unsupported operand types: stdClass & string
+Unsupported operand types: DynamicObject & null
+Unsupported operand types: DynamicObject & null
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: DynamicObject & int
+Unsupported operand types: DynamicObject & int
+Unsupported operand types: DynamicObject & float
+Unsupported operand types: DynamicObject & float
+Unsupported operand types: DynamicObject & string
+Unsupported operand types: DynamicObject & string
+Unsupported operand types: DynamicObject & string
+Unsupported operand types: DynamicObject & string
 Unsupported operand types: resource & null
 Unsupported operand types: resource & null
 Unsupported operand types: resource & bool
@@ -820,19 +820,19 @@ No error for "123" & "foo"
 No error for "foo" & "123foo"
 No error for "123foo" & "foo"
 Unsupported operand types: array | array
-Unsupported operand types: stdClass | array
+Unsupported operand types: DynamicObject | array
 Unsupported operand types: resource | array
 Unsupported operand types: array | string
-Unsupported operand types: stdClass | array
-Unsupported operand types: stdClass | stdClass
-Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | string
+Unsupported operand types: DynamicObject | array
+Unsupported operand types: DynamicObject | DynamicObject
+Unsupported operand types: DynamicObject | resource
+Unsupported operand types: DynamicObject | string
 Unsupported operand types: resource | array
-Unsupported operand types: stdClass | resource
+Unsupported operand types: DynamicObject | resource
 Unsupported operand types: resource | resource
 Unsupported operand types: resource | string
 Unsupported operand types: string | array
-Unsupported operand types: stdClass | string
+Unsupported operand types: DynamicObject | string
 Unsupported operand types: resource | string
 No error for "foo" | "foo"
 Unsupported operand types: array | null
@@ -851,20 +851,20 @@ Unsupported operand types: string | array
 Unsupported operand types: array | string
 Warning: A non-numeric value encountered
 Unsupported operand types: string | array
-Unsupported operand types: stdClass | null
-Unsupported operand types: stdClass | null
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | bool
-Unsupported operand types: stdClass | int
-Unsupported operand types: stdClass | int
-Unsupported operand types: stdClass | float
-Unsupported operand types: stdClass | float
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
-Unsupported operand types: stdClass | string
+Unsupported operand types: DynamicObject | null
+Unsupported operand types: DynamicObject | null
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: DynamicObject | int
+Unsupported operand types: DynamicObject | int
+Unsupported operand types: DynamicObject | float
+Unsupported operand types: DynamicObject | float
+Unsupported operand types: DynamicObject | string
+Unsupported operand types: DynamicObject | string
+Unsupported operand types: DynamicObject | string
+Unsupported operand types: DynamicObject | string
 Unsupported operand types: resource | null
 Unsupported operand types: resource | null
 Unsupported operand types: resource | bool
@@ -895,19 +895,19 @@ No error for "123" | "foo"
 No error for "foo" | "123foo"
 No error for "123foo" | "foo"
 Unsupported operand types: array ^ array
-Unsupported operand types: stdClass ^ array
+Unsupported operand types: DynamicObject ^ array
 Unsupported operand types: resource ^ array
 Unsupported operand types: array ^ string
-Unsupported operand types: stdClass ^ array
-Unsupported operand types: stdClass ^ stdClass
-Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ string
+Unsupported operand types: DynamicObject ^ array
+Unsupported operand types: DynamicObject ^ DynamicObject
+Unsupported operand types: DynamicObject ^ resource
+Unsupported operand types: DynamicObject ^ string
 Unsupported operand types: resource ^ array
-Unsupported operand types: stdClass ^ resource
+Unsupported operand types: DynamicObject ^ resource
 Unsupported operand types: resource ^ resource
 Unsupported operand types: resource ^ string
 Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ string
+Unsupported operand types: DynamicObject ^ string
 Unsupported operand types: resource ^ string
 No error for "foo" ^ "foo"
 Unsupported operand types: array ^ null
@@ -926,20 +926,20 @@ Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: stdClass ^ float
-Unsupported operand types: stdClass ^ float
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: stdClass ^ string
+Unsupported operand types: DynamicObject ^ null
+Unsupported operand types: DynamicObject ^ null
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: DynamicObject ^ int
+Unsupported operand types: DynamicObject ^ int
+Unsupported operand types: DynamicObject ^ float
+Unsupported operand types: DynamicObject ^ float
+Unsupported operand types: DynamicObject ^ string
+Unsupported operand types: DynamicObject ^ string
+Unsupported operand types: DynamicObject ^ string
+Unsupported operand types: DynamicObject ^ string
 Unsupported operand types: resource ^ null
 Unsupported operand types: resource ^ null
 Unsupported operand types: resource ^ bool
@@ -1045,24 +1045,24 @@ Warning: Array to string conversion
 Warning: Array to string conversion
 No error for [] . []
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 Warning: Array to string conversion
 No error for [] . STDOUT
 Warning: Array to string conversion
 No error for [] . "foo"
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
 Warning: Array to string conversion
 No error for STDOUT . []
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for STDOUT . STDOUT
 No error for STDOUT . "foo"
 Warning: Array to string conversion
 No error for "foo" . []
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for "foo" . STDOUT
 No error for "foo" . "foo"
 Warning: Array to string conversion
@@ -1093,20 +1093,20 @@ Warning: Array to string conversion
 No error for [] . "123foo"
 Warning: Array to string conversion
 No error for "123foo" . []
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for STDOUT . null
 No error for null . STDOUT
 No error for STDOUT . true
@@ -1139,19 +1139,19 @@ No error for "123foo" . "foo"
 
 ASSIGN OP:
 No error for [] += []
-Unsupported operand types: array + stdClass
+Unsupported operand types: array + DynamicObject
 Unsupported operand types: array + resource
 Unsupported operand types: array + string
-Unsupported operand types: stdClass + array
-Unsupported operand types: stdClass + stdClass
-Unsupported operand types: stdClass + resource
-Unsupported operand types: stdClass + string
+Unsupported operand types: DynamicObject + array
+Unsupported operand types: DynamicObject + DynamicObject
+Unsupported operand types: DynamicObject + resource
+Unsupported operand types: DynamicObject + string
 Unsupported operand types: resource + array
-Unsupported operand types: resource + stdClass
+Unsupported operand types: resource + DynamicObject
 Unsupported operand types: resource + resource
 Unsupported operand types: resource + string
 Unsupported operand types: string + array
-Unsupported operand types: string + stdClass
+Unsupported operand types: string + DynamicObject
 Unsupported operand types: string + resource
 Unsupported operand types: string + string
 Unsupported operand types: array + null
@@ -1169,21 +1169,21 @@ Unsupported operand types: string + array
 Unsupported operand types: array + string
 Warning: A non-numeric value encountered
 Unsupported operand types: string + array
-Unsupported operand types: stdClass + null
-Unsupported operand types: null + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + bool
-Unsupported operand types: bool + stdClass
-Unsupported operand types: stdClass + int
-Unsupported operand types: int + stdClass
-Unsupported operand types: stdClass + float
-Unsupported operand types: float + stdClass
-Unsupported operand types: stdClass + string
-Unsupported operand types: string + stdClass
-Unsupported operand types: stdClass + string
+Unsupported operand types: DynamicObject + null
+Unsupported operand types: null + DynamicObject
+Unsupported operand types: DynamicObject + bool
+Unsupported operand types: bool + DynamicObject
+Unsupported operand types: DynamicObject + bool
+Unsupported operand types: bool + DynamicObject
+Unsupported operand types: DynamicObject + int
+Unsupported operand types: int + DynamicObject
+Unsupported operand types: DynamicObject + float
+Unsupported operand types: float + DynamicObject
+Unsupported operand types: DynamicObject + string
+Unsupported operand types: string + DynamicObject
+Unsupported operand types: DynamicObject + string
 Warning: A non-numeric value encountered
-Unsupported operand types: string + stdClass
+Unsupported operand types: string + DynamicObject
 Unsupported operand types: resource + null
 Unsupported operand types: null + resource
 Unsupported operand types: resource + bool
@@ -1215,19 +1215,19 @@ Unsupported operand types: string + string
 Warning: A non-numeric value encountered
 Unsupported operand types: string + string
 Unsupported operand types: array - array
-Unsupported operand types: array - stdClass
+Unsupported operand types: array - DynamicObject
 Unsupported operand types: array - resource
 Unsupported operand types: array - string
-Unsupported operand types: stdClass - array
-Unsupported operand types: stdClass - stdClass
-Unsupported operand types: stdClass - resource
-Unsupported operand types: stdClass - string
+Unsupported operand types: DynamicObject - array
+Unsupported operand types: DynamicObject - DynamicObject
+Unsupported operand types: DynamicObject - resource
+Unsupported operand types: DynamicObject - string
 Unsupported operand types: resource - array
-Unsupported operand types: resource - stdClass
+Unsupported operand types: resource - DynamicObject
 Unsupported operand types: resource - resource
 Unsupported operand types: resource - string
 Unsupported operand types: string - array
-Unsupported operand types: string - stdClass
+Unsupported operand types: string - DynamicObject
 Unsupported operand types: string - resource
 Unsupported operand types: string - string
 Unsupported operand types: array - null
@@ -1245,21 +1245,21 @@ Unsupported operand types: string - array
 Unsupported operand types: array - string
 Warning: A non-numeric value encountered
 Unsupported operand types: string - array
-Unsupported operand types: stdClass - null
-Unsupported operand types: null - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - bool
-Unsupported operand types: bool - stdClass
-Unsupported operand types: stdClass - int
-Unsupported operand types: int - stdClass
-Unsupported operand types: stdClass - float
-Unsupported operand types: float - stdClass
-Unsupported operand types: stdClass - string
-Unsupported operand types: string - stdClass
-Unsupported operand types: stdClass - string
+Unsupported operand types: DynamicObject - null
+Unsupported operand types: null - DynamicObject
+Unsupported operand types: DynamicObject - bool
+Unsupported operand types: bool - DynamicObject
+Unsupported operand types: DynamicObject - bool
+Unsupported operand types: bool - DynamicObject
+Unsupported operand types: DynamicObject - int
+Unsupported operand types: int - DynamicObject
+Unsupported operand types: DynamicObject - float
+Unsupported operand types: float - DynamicObject
+Unsupported operand types: DynamicObject - string
+Unsupported operand types: string - DynamicObject
+Unsupported operand types: DynamicObject - string
 Warning: A non-numeric value encountered
-Unsupported operand types: string - stdClass
+Unsupported operand types: string - DynamicObject
 Unsupported operand types: resource - null
 Unsupported operand types: null - resource
 Unsupported operand types: resource - bool
@@ -1291,19 +1291,19 @@ Unsupported operand types: string - string
 Warning: A non-numeric value encountered
 Unsupported operand types: string - string
 Unsupported operand types: array * array
-Unsupported operand types: array * stdClass
+Unsupported operand types: array * DynamicObject
 Unsupported operand types: array * resource
 Unsupported operand types: array * string
-Unsupported operand types: stdClass * array
-Unsupported operand types: stdClass * stdClass
-Unsupported operand types: stdClass * resource
-Unsupported operand types: stdClass * string
+Unsupported operand types: DynamicObject * array
+Unsupported operand types: DynamicObject * DynamicObject
+Unsupported operand types: DynamicObject * resource
+Unsupported operand types: DynamicObject * string
 Unsupported operand types: resource * array
-Unsupported operand types: resource * stdClass
+Unsupported operand types: resource * DynamicObject
 Unsupported operand types: resource * resource
 Unsupported operand types: resource * string
 Unsupported operand types: string * array
-Unsupported operand types: string * stdClass
+Unsupported operand types: string * DynamicObject
 Unsupported operand types: string * resource
 Unsupported operand types: string * string
 Unsupported operand types: array * null
@@ -1321,21 +1321,21 @@ Unsupported operand types: string * array
 Unsupported operand types: array * string
 Warning: A non-numeric value encountered
 Unsupported operand types: string * array
-Unsupported operand types: stdClass * null
-Unsupported operand types: null * stdClass
-Unsupported operand types: stdClass * bool
-Unsupported operand types: bool * stdClass
-Unsupported operand types: stdClass * bool
-Unsupported operand types: bool * stdClass
-Unsupported operand types: stdClass * int
-Unsupported operand types: int * stdClass
-Unsupported operand types: stdClass * float
-Unsupported operand types: float * stdClass
-Unsupported operand types: stdClass * string
-Unsupported operand types: string * stdClass
-Unsupported operand types: stdClass * string
+Unsupported operand types: DynamicObject * null
+Unsupported operand types: null * DynamicObject
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: bool * DynamicObject
+Unsupported operand types: DynamicObject * bool
+Unsupported operand types: bool * DynamicObject
+Unsupported operand types: DynamicObject * int
+Unsupported operand types: int * DynamicObject
+Unsupported operand types: DynamicObject * float
+Unsupported operand types: float * DynamicObject
+Unsupported operand types: DynamicObject * string
+Unsupported operand types: string * DynamicObject
+Unsupported operand types: DynamicObject * string
 Warning: A non-numeric value encountered
-Unsupported operand types: string * stdClass
+Unsupported operand types: string * DynamicObject
 Unsupported operand types: resource * null
 Unsupported operand types: null * resource
 Unsupported operand types: resource * bool
@@ -1367,19 +1367,19 @@ Unsupported operand types: string * string
 Warning: A non-numeric value encountered
 Unsupported operand types: string * string
 Unsupported operand types: array / array
-Unsupported operand types: array / stdClass
+Unsupported operand types: array / DynamicObject
 Unsupported operand types: array / resource
 Unsupported operand types: array / string
-Unsupported operand types: stdClass / array
-Unsupported operand types: stdClass / stdClass
-Unsupported operand types: stdClass / resource
-Unsupported operand types: stdClass / string
+Unsupported operand types: DynamicObject / array
+Unsupported operand types: DynamicObject / DynamicObject
+Unsupported operand types: DynamicObject / resource
+Unsupported operand types: DynamicObject / string
 Unsupported operand types: resource / array
-Unsupported operand types: resource / stdClass
+Unsupported operand types: resource / DynamicObject
 Unsupported operand types: resource / resource
 Unsupported operand types: resource / string
 Unsupported operand types: string / array
-Unsupported operand types: string / stdClass
+Unsupported operand types: string / DynamicObject
 Unsupported operand types: string / resource
 Unsupported operand types: string / string
 Unsupported operand types: array / null
@@ -1397,21 +1397,21 @@ Unsupported operand types: string / array
 Unsupported operand types: array / string
 Warning: A non-numeric value encountered
 Unsupported operand types: string / array
-Unsupported operand types: stdClass / null
-Unsupported operand types: null / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / bool
-Unsupported operand types: bool / stdClass
-Unsupported operand types: stdClass / int
-Unsupported operand types: int / stdClass
-Unsupported operand types: stdClass / float
-Unsupported operand types: float / stdClass
-Unsupported operand types: stdClass / string
-Unsupported operand types: string / stdClass
-Unsupported operand types: stdClass / string
+Unsupported operand types: DynamicObject / null
+Unsupported operand types: null / DynamicObject
+Unsupported operand types: DynamicObject / bool
+Unsupported operand types: bool / DynamicObject
+Unsupported operand types: DynamicObject / bool
+Unsupported operand types: bool / DynamicObject
+Unsupported operand types: DynamicObject / int
+Unsupported operand types: int / DynamicObject
+Unsupported operand types: DynamicObject / float
+Unsupported operand types: float / DynamicObject
+Unsupported operand types: DynamicObject / string
+Unsupported operand types: string / DynamicObject
+Unsupported operand types: DynamicObject / string
 Warning: A non-numeric value encountered
-Unsupported operand types: string / stdClass
+Unsupported operand types: string / DynamicObject
 Unsupported operand types: resource / null
 Unsupported operand types: null / resource
 Unsupported operand types: resource / bool
@@ -1443,19 +1443,19 @@ Unsupported operand types: string / string
 Warning: A non-numeric value encountered
 Unsupported operand types: string / string
 Unsupported operand types: array % array
-Unsupported operand types: array % stdClass
+Unsupported operand types: array % DynamicObject
 Unsupported operand types: array % resource
 Unsupported operand types: array % string
-Unsupported operand types: stdClass % array
-Unsupported operand types: stdClass % stdClass
-Unsupported operand types: stdClass % resource
-Unsupported operand types: stdClass % string
+Unsupported operand types: DynamicObject % array
+Unsupported operand types: DynamicObject % DynamicObject
+Unsupported operand types: DynamicObject % resource
+Unsupported operand types: DynamicObject % string
 Unsupported operand types: resource % array
-Unsupported operand types: resource % stdClass
+Unsupported operand types: resource % DynamicObject
 Unsupported operand types: resource % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % array
-Unsupported operand types: string % stdClass
+Unsupported operand types: string % DynamicObject
 Unsupported operand types: string % resource
 Unsupported operand types: string % string
 Unsupported operand types: array % null
@@ -1474,22 +1474,22 @@ Unsupported operand types: string % array
 Unsupported operand types: array % string
 Warning: A non-numeric value encountered
 Unsupported operand types: string % array
-Unsupported operand types: stdClass % null
-Unsupported operand types: null % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % bool
-Unsupported operand types: bool % stdClass
-Unsupported operand types: stdClass % int
-Unsupported operand types: int % stdClass
-Unsupported operand types: stdClass % float
+Unsupported operand types: DynamicObject % null
+Unsupported operand types: null % DynamicObject
+Unsupported operand types: DynamicObject % bool
+Unsupported operand types: bool % DynamicObject
+Unsupported operand types: DynamicObject % bool
+Unsupported operand types: bool % DynamicObject
+Unsupported operand types: DynamicObject % int
+Unsupported operand types: int % DynamicObject
+Unsupported operand types: DynamicObject % float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float % stdClass
-Unsupported operand types: stdClass % string
-Unsupported operand types: string % stdClass
-Unsupported operand types: stdClass % string
+Unsupported operand types: float % DynamicObject
+Unsupported operand types: DynamicObject % string
+Unsupported operand types: string % DynamicObject
+Unsupported operand types: DynamicObject % string
 Warning: A non-numeric value encountered
-Unsupported operand types: string % stdClass
+Unsupported operand types: string % DynamicObject
 Unsupported operand types: resource % null
 Unsupported operand types: null % resource
 Unsupported operand types: resource % bool
@@ -1523,19 +1523,19 @@ Unsupported operand types: string % string
 Warning: A non-numeric value encountered
 Unsupported operand types: string % string
 Unsupported operand types: array ** array
-Unsupported operand types: array ** stdClass
+Unsupported operand types: array ** DynamicObject
 Unsupported operand types: array ** resource
 Unsupported operand types: array ** string
-Unsupported operand types: stdClass ** array
-Unsupported operand types: stdClass ** stdClass
-Unsupported operand types: stdClass ** resource
-Unsupported operand types: stdClass ** string
+Unsupported operand types: DynamicObject ** array
+Unsupported operand types: DynamicObject ** DynamicObject
+Unsupported operand types: DynamicObject ** resource
+Unsupported operand types: DynamicObject ** string
 Unsupported operand types: resource ** array
-Unsupported operand types: resource ** stdClass
+Unsupported operand types: resource ** DynamicObject
 Unsupported operand types: resource ** resource
 Unsupported operand types: resource ** string
 Unsupported operand types: string ** array
-Unsupported operand types: string ** stdClass
+Unsupported operand types: string ** DynamicObject
 Unsupported operand types: string ** resource
 Unsupported operand types: string ** string
 Unsupported operand types: array ** null
@@ -1553,21 +1553,21 @@ Unsupported operand types: string ** array
 Unsupported operand types: array ** string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ** array
-Unsupported operand types: stdClass ** null
-Unsupported operand types: null ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** bool
-Unsupported operand types: bool ** stdClass
-Unsupported operand types: stdClass ** int
-Unsupported operand types: int ** stdClass
-Unsupported operand types: stdClass ** float
-Unsupported operand types: float ** stdClass
-Unsupported operand types: stdClass ** string
-Unsupported operand types: string ** stdClass
-Unsupported operand types: stdClass ** string
+Unsupported operand types: DynamicObject ** null
+Unsupported operand types: null ** DynamicObject
+Unsupported operand types: DynamicObject ** bool
+Unsupported operand types: bool ** DynamicObject
+Unsupported operand types: DynamicObject ** bool
+Unsupported operand types: bool ** DynamicObject
+Unsupported operand types: DynamicObject ** int
+Unsupported operand types: int ** DynamicObject
+Unsupported operand types: DynamicObject ** float
+Unsupported operand types: float ** DynamicObject
+Unsupported operand types: DynamicObject ** string
+Unsupported operand types: string ** DynamicObject
+Unsupported operand types: DynamicObject ** string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ** stdClass
+Unsupported operand types: string ** DynamicObject
 Unsupported operand types: resource ** null
 Unsupported operand types: null ** resource
 Unsupported operand types: resource ** bool
@@ -1599,19 +1599,19 @@ Unsupported operand types: string ** string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ** string
 Unsupported operand types: array << array
-Unsupported operand types: array << stdClass
+Unsupported operand types: array << DynamicObject
 Unsupported operand types: array << resource
 Unsupported operand types: array << string
-Unsupported operand types: stdClass << array
-Unsupported operand types: stdClass << stdClass
-Unsupported operand types: stdClass << resource
-Unsupported operand types: stdClass << string
+Unsupported operand types: DynamicObject << array
+Unsupported operand types: DynamicObject << DynamicObject
+Unsupported operand types: DynamicObject << resource
+Unsupported operand types: DynamicObject << string
 Unsupported operand types: resource << array
-Unsupported operand types: resource << stdClass
+Unsupported operand types: resource << DynamicObject
 Unsupported operand types: resource << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << array
-Unsupported operand types: string << stdClass
+Unsupported operand types: string << DynamicObject
 Unsupported operand types: string << resource
 Unsupported operand types: string << string
 Unsupported operand types: array << null
@@ -1630,22 +1630,22 @@ Unsupported operand types: string << array
 Unsupported operand types: array << string
 Warning: A non-numeric value encountered
 Unsupported operand types: string << array
-Unsupported operand types: stdClass << null
-Unsupported operand types: null << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << bool
-Unsupported operand types: bool << stdClass
-Unsupported operand types: stdClass << int
-Unsupported operand types: int << stdClass
-Unsupported operand types: stdClass << float
+Unsupported operand types: DynamicObject << null
+Unsupported operand types: null << DynamicObject
+Unsupported operand types: DynamicObject << bool
+Unsupported operand types: bool << DynamicObject
+Unsupported operand types: DynamicObject << bool
+Unsupported operand types: bool << DynamicObject
+Unsupported operand types: DynamicObject << int
+Unsupported operand types: int << DynamicObject
+Unsupported operand types: DynamicObject << float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float << stdClass
-Unsupported operand types: stdClass << string
-Unsupported operand types: string << stdClass
-Unsupported operand types: stdClass << string
+Unsupported operand types: float << DynamicObject
+Unsupported operand types: DynamicObject << string
+Unsupported operand types: string << DynamicObject
+Unsupported operand types: DynamicObject << string
 Warning: A non-numeric value encountered
-Unsupported operand types: string << stdClass
+Unsupported operand types: string << DynamicObject
 Unsupported operand types: resource << null
 Unsupported operand types: null << resource
 Unsupported operand types: resource << bool
@@ -1679,19 +1679,19 @@ Unsupported operand types: string << string
 Warning: A non-numeric value encountered
 Unsupported operand types: string << string
 Unsupported operand types: array >> array
-Unsupported operand types: array >> stdClass
+Unsupported operand types: array >> DynamicObject
 Unsupported operand types: array >> resource
 Unsupported operand types: array >> string
-Unsupported operand types: stdClass >> array
-Unsupported operand types: stdClass >> stdClass
-Unsupported operand types: stdClass >> resource
-Unsupported operand types: stdClass >> string
+Unsupported operand types: DynamicObject >> array
+Unsupported operand types: DynamicObject >> DynamicObject
+Unsupported operand types: DynamicObject >> resource
+Unsupported operand types: DynamicObject >> string
 Unsupported operand types: resource >> array
-Unsupported operand types: resource >> stdClass
+Unsupported operand types: resource >> DynamicObject
 Unsupported operand types: resource >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> array
-Unsupported operand types: string >> stdClass
+Unsupported operand types: string >> DynamicObject
 Unsupported operand types: string >> resource
 Unsupported operand types: string >> string
 Unsupported operand types: array >> null
@@ -1710,22 +1710,22 @@ Unsupported operand types: string >> array
 Unsupported operand types: array >> string
 Warning: A non-numeric value encountered
 Unsupported operand types: string >> array
-Unsupported operand types: stdClass >> null
-Unsupported operand types: null >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> bool
-Unsupported operand types: bool >> stdClass
-Unsupported operand types: stdClass >> int
-Unsupported operand types: int >> stdClass
-Unsupported operand types: stdClass >> float
+Unsupported operand types: DynamicObject >> null
+Unsupported operand types: null >> DynamicObject
+Unsupported operand types: DynamicObject >> bool
+Unsupported operand types: bool >> DynamicObject
+Unsupported operand types: DynamicObject >> bool
+Unsupported operand types: bool >> DynamicObject
+Unsupported operand types: DynamicObject >> int
+Unsupported operand types: int >> DynamicObject
+Unsupported operand types: DynamicObject >> float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float >> stdClass
-Unsupported operand types: stdClass >> string
-Unsupported operand types: string >> stdClass
-Unsupported operand types: stdClass >> string
+Unsupported operand types: float >> DynamicObject
+Unsupported operand types: DynamicObject >> string
+Unsupported operand types: string >> DynamicObject
+Unsupported operand types: DynamicObject >> string
 Warning: A non-numeric value encountered
-Unsupported operand types: string >> stdClass
+Unsupported operand types: string >> DynamicObject
 Unsupported operand types: resource >> null
 Unsupported operand types: null >> resource
 Unsupported operand types: resource >> bool
@@ -1759,19 +1759,19 @@ Unsupported operand types: string >> string
 Warning: A non-numeric value encountered
 Unsupported operand types: string >> string
 Unsupported operand types: array & array
-Unsupported operand types: array & stdClass
+Unsupported operand types: array & DynamicObject
 Unsupported operand types: array & resource
 Unsupported operand types: array & string
-Unsupported operand types: stdClass & array
-Unsupported operand types: stdClass & stdClass
-Unsupported operand types: stdClass & resource
-Unsupported operand types: stdClass & string
+Unsupported operand types: DynamicObject & array
+Unsupported operand types: DynamicObject & DynamicObject
+Unsupported operand types: DynamicObject & resource
+Unsupported operand types: DynamicObject & string
 Unsupported operand types: resource & array
-Unsupported operand types: resource & stdClass
+Unsupported operand types: resource & DynamicObject
 Unsupported operand types: resource & resource
 Unsupported operand types: resource & string
 Unsupported operand types: string & array
-Unsupported operand types: string & stdClass
+Unsupported operand types: string & DynamicObject
 Unsupported operand types: string & resource
 No error for "foo" &= "foo"
 Unsupported operand types: array & null
@@ -1790,22 +1790,22 @@ Unsupported operand types: string & array
 Unsupported operand types: array & string
 Warning: A non-numeric value encountered
 Unsupported operand types: string & array
-Unsupported operand types: stdClass & null
-Unsupported operand types: null & stdClass
-Unsupported operand types: stdClass & bool
-Unsupported operand types: bool & stdClass
-Unsupported operand types: stdClass & bool
-Unsupported operand types: bool & stdClass
-Unsupported operand types: stdClass & int
-Unsupported operand types: int & stdClass
-Unsupported operand types: stdClass & float
+Unsupported operand types: DynamicObject & null
+Unsupported operand types: null & DynamicObject
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: bool & DynamicObject
+Unsupported operand types: DynamicObject & bool
+Unsupported operand types: bool & DynamicObject
+Unsupported operand types: DynamicObject & int
+Unsupported operand types: int & DynamicObject
+Unsupported operand types: DynamicObject & float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float & stdClass
-Unsupported operand types: stdClass & string
-Unsupported operand types: string & stdClass
-Unsupported operand types: stdClass & string
+Unsupported operand types: float & DynamicObject
+Unsupported operand types: DynamicObject & string
+Unsupported operand types: string & DynamicObject
+Unsupported operand types: DynamicObject & string
 Warning: A non-numeric value encountered
-Unsupported operand types: string & stdClass
+Unsupported operand types: string & DynamicObject
 Unsupported operand types: resource & null
 Unsupported operand types: null & resource
 Unsupported operand types: resource & bool
@@ -1838,19 +1838,19 @@ No error for "123" &= "foo"
 No error for "foo" &= "123foo"
 No error for "123foo" &= "foo"
 Unsupported operand types: array | array
-Unsupported operand types: array | stdClass
+Unsupported operand types: array | DynamicObject
 Unsupported operand types: array | resource
 Unsupported operand types: array | string
-Unsupported operand types: stdClass | array
-Unsupported operand types: stdClass | stdClass
-Unsupported operand types: stdClass | resource
-Unsupported operand types: stdClass | string
+Unsupported operand types: DynamicObject | array
+Unsupported operand types: DynamicObject | DynamicObject
+Unsupported operand types: DynamicObject | resource
+Unsupported operand types: DynamicObject | string
 Unsupported operand types: resource | array
-Unsupported operand types: resource | stdClass
+Unsupported operand types: resource | DynamicObject
 Unsupported operand types: resource | resource
 Unsupported operand types: resource | string
 Unsupported operand types: string | array
-Unsupported operand types: string | stdClass
+Unsupported operand types: string | DynamicObject
 Unsupported operand types: string | resource
 No error for "foo" |= "foo"
 Unsupported operand types: array | null
@@ -1869,22 +1869,22 @@ Unsupported operand types: string | array
 Unsupported operand types: array | string
 Warning: A non-numeric value encountered
 Unsupported operand types: string | array
-Unsupported operand types: stdClass | null
-Unsupported operand types: null | stdClass
-Unsupported operand types: stdClass | bool
-Unsupported operand types: bool | stdClass
-Unsupported operand types: stdClass | bool
-Unsupported operand types: bool | stdClass
-Unsupported operand types: stdClass | int
-Unsupported operand types: int | stdClass
-Unsupported operand types: stdClass | float
+Unsupported operand types: DynamicObject | null
+Unsupported operand types: null | DynamicObject
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: bool | DynamicObject
+Unsupported operand types: DynamicObject | bool
+Unsupported operand types: bool | DynamicObject
+Unsupported operand types: DynamicObject | int
+Unsupported operand types: int | DynamicObject
+Unsupported operand types: DynamicObject | float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float | stdClass
-Unsupported operand types: stdClass | string
-Unsupported operand types: string | stdClass
-Unsupported operand types: stdClass | string
+Unsupported operand types: float | DynamicObject
+Unsupported operand types: DynamicObject | string
+Unsupported operand types: string | DynamicObject
+Unsupported operand types: DynamicObject | string
 Warning: A non-numeric value encountered
-Unsupported operand types: string | stdClass
+Unsupported operand types: string | DynamicObject
 Unsupported operand types: resource | null
 Unsupported operand types: null | resource
 Unsupported operand types: resource | bool
@@ -1917,19 +1917,19 @@ No error for "123" |= "foo"
 No error for "foo" |= "123foo"
 No error for "123foo" |= "foo"
 Unsupported operand types: array ^ array
-Unsupported operand types: array ^ stdClass
+Unsupported operand types: array ^ DynamicObject
 Unsupported operand types: array ^ resource
 Unsupported operand types: array ^ string
-Unsupported operand types: stdClass ^ array
-Unsupported operand types: stdClass ^ stdClass
-Unsupported operand types: stdClass ^ resource
-Unsupported operand types: stdClass ^ string
+Unsupported operand types: DynamicObject ^ array
+Unsupported operand types: DynamicObject ^ DynamicObject
+Unsupported operand types: DynamicObject ^ resource
+Unsupported operand types: DynamicObject ^ string
 Unsupported operand types: resource ^ array
-Unsupported operand types: resource ^ stdClass
+Unsupported operand types: resource ^ DynamicObject
 Unsupported operand types: resource ^ resource
 Unsupported operand types: resource ^ string
 Unsupported operand types: string ^ array
-Unsupported operand types: string ^ stdClass
+Unsupported operand types: string ^ DynamicObject
 Unsupported operand types: string ^ resource
 No error for "foo" ^= "foo"
 Unsupported operand types: array ^ null
@@ -1948,22 +1948,22 @@ Unsupported operand types: string ^ array
 Unsupported operand types: array ^ string
 Warning: A non-numeric value encountered
 Unsupported operand types: string ^ array
-Unsupported operand types: stdClass ^ null
-Unsupported operand types: null ^ stdClass
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: bool ^ stdClass
-Unsupported operand types: stdClass ^ bool
-Unsupported operand types: bool ^ stdClass
-Unsupported operand types: stdClass ^ int
-Unsupported operand types: int ^ stdClass
-Unsupported operand types: stdClass ^ float
+Unsupported operand types: DynamicObject ^ null
+Unsupported operand types: null ^ DynamicObject
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: bool ^ DynamicObject
+Unsupported operand types: DynamicObject ^ bool
+Unsupported operand types: bool ^ DynamicObject
+Unsupported operand types: DynamicObject ^ int
+Unsupported operand types: int ^ DynamicObject
+Unsupported operand types: DynamicObject ^ float
 Warning: Implicit conversion from float 3.5 to int loses precision
-Unsupported operand types: float ^ stdClass
-Unsupported operand types: stdClass ^ string
-Unsupported operand types: string ^ stdClass
-Unsupported operand types: stdClass ^ string
+Unsupported operand types: float ^ DynamicObject
+Unsupported operand types: DynamicObject ^ string
+Unsupported operand types: string ^ DynamicObject
+Unsupported operand types: DynamicObject ^ string
 Warning: A non-numeric value encountered
-Unsupported operand types: string ^ stdClass
+Unsupported operand types: string ^ DynamicObject
 Unsupported operand types: resource ^ null
 Unsupported operand types: null ^ resource
 Unsupported operand types: resource ^ bool
@@ -1999,23 +1999,23 @@ Warning: Array to string conversion
 Warning: Array to string conversion
 No error for [] .= []
 Warning: Array to string conversion
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 Warning: Array to string conversion
 No error for [] .= STDOUT
 Warning: Array to string conversion
 No error for [] .= "foo"
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
 Warning: Array to string conversion
 No error for STDOUT .= []
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for STDOUT .= STDOUT
 No error for STDOUT .= "foo"
 Warning: Array to string conversion
 No error for "foo" .= []
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for "foo" .= STDOUT
 No error for "foo" .= "foo"
 Warning: Array to string conversion
@@ -2046,20 +2046,20 @@ Warning: Array to string conversion
 No error for [] .= "123foo"
 Warning: Array to string conversion
 No error for "123foo" .= []
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
+Object of class DynamicObject could not be converted to string
 No error for STDOUT .= null
 No error for null .= STDOUT
 No error for STDOUT .= true
@@ -2092,7 +2092,7 @@ No error for "123foo" .= "foo"
 
 UNARY OP:
 Cannot perform bitwise not on array
-Cannot perform bitwise not on stdClass
+Cannot perform bitwise not on DynamicObject
 Cannot perform bitwise not on resource
 No error for ~"foo"
 
@@ -2100,8 +2100,8 @@ No error for ~"foo"
 INCDEC:
 Cannot increment array
 Cannot decrement array
-Cannot increment stdClass
-Cannot decrement stdClass
+Cannot increment DynamicObject
+Cannot decrement DynamicObject
 Cannot increment resource
 Cannot decrement resource
 No error for fop++

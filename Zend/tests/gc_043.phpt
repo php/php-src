@@ -9,7 +9,7 @@ var_dump(unserialize($s));
 gc_collect_cycles();
 ?>
 --EXPECT--
-object(stdClass)#1 (2) {
+object(DynamicObject)#1 (2) {
   ["5"]=>
   object(SplStack)#2 (2) {
     ["flags":"SplDoublyLinkedList":private]=>
@@ -19,7 +19,7 @@ object(stdClass)#1 (2) {
       [0]=>
       *RECURSION*
       [1]=>
-      object(stdClass)#3 (0) {
+      object(DynamicObject)#3 (0) {
       }
     }
   }
@@ -36,7 +36,7 @@ object(stdClass)#1 (2) {
         [0]=>
         *RECURSION*
         [1]=>
-        object(stdClass)#6 (0) {
+        object(DynamicObject)#6 (0) {
         }
       }
     }

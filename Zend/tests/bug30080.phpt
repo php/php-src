@@ -10,9 +10,9 @@ class foo {
 
 new foo(array(new stdClass));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#2 (0) {
   }
 }

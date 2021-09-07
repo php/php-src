@@ -8,8 +8,8 @@ throw new Hello(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Error::__construct(): Argument #1 ($message) must be of type string, stdClass given in %s:%d
+Fatal error: Uncaught TypeError: Error::__construct(): Argument #1 ($message) must be of type string, DynamicObject given in %s:%d
 Stack trace:
-#0 %sexception_021.php(%d): Error->__construct(Object(stdClass))
+#0 %s(%d): Error->__construct(Object(DynamicObject))
 #1 {main}
   thrown in %sexception_021.php on line %d

@@ -33,5 +33,5 @@ object(SimpleXMLElement)#%d (1) {
 }
 
 Warning: Array to string conversion in %s on line %d
-It's not possible to assign a complex type to properties, stdClass given
+It's not possible to assign a complex type to properties, DynamicObject given
 Done

@@ -71,7 +71,7 @@ MySQLPDOTest::skip();
 ?>
 --EXPECTF--
 Attribute value must be of type int for selected attribute, array given
-Attribute value must be of type int for selected attribute, stdClass given
+Attribute value must be of type int for selected attribute, DynamicObject given
 Attribute value must be of type int for selected attribute, string given
 array(1) {
   [0]=>

@@ -166,7 +166,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#1 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -174,7 +174,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#2 (0) {
   }
   [3]=>
   array(0) {
@@ -188,7 +188,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(DynamicObject)#3 (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -242,14 +242,14 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(DynamicObject)#4 (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(DynamicObject)#7 (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(DynamicObject)#6 (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(DynamicObject)#5 (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>
@@ -528,7 +528,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#8 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -536,7 +536,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#9 (0) {
   }
   [3]=>
   array(0) {
@@ -550,7 +550,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#%d (36) {
+  object(DynamicObject)#10 (36) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -604,14 +604,14 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#%d (0) {
+    object(DynamicObject)#11 (0) {
     }
     ["123"]=>
-    object(stdClass)#%d (1) {
+    object(DynamicObject)#14 (1) {
       ["456"]=>
-      object(stdClass)#%d (1) {
+      object(DynamicObject)#13 (1) {
         ["abc"]=>
-        object(stdClass)#%d (3) {
+        object(DynamicObject)#12 (3) {
           ["789"]=>
           string(3) "def"
           ["012"]=>

@@ -118,7 +118,7 @@ getName: string(3) "std"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-getClass: stdClass
+getClass: DynamicObject
 getDeclaringClass: NULL
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
@@ -144,7 +144,7 @@ getName: string(3) "opt"
 isPassedByReference: bool(true)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-getClass: stdClass
+getClass: DynamicObject
 getDeclaringClass: NULL
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
@@ -212,7 +212,7 @@ getName: string(3) "std"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-getClass: stdClass
+getClass: DynamicObject
 getDeclaringClass: test
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
@@ -238,7 +238,7 @@ getName: string(3) "opt"
 isPassedByReference: bool(false)
 
 Deprecated: Method ReflectionParameter::getClass() is deprecated in %s on line %d
-getClass: stdClass
+getClass: DynamicObject
 getDeclaringClass: test
 isArray: 
 Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d

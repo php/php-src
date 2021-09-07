@@ -282,7 +282,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-Number must be of type GMP|string|int, stdClass given
+Number must be of type GMP|string|int, DynamicObject given
 object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"

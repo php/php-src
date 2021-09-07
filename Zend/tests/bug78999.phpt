@@ -11,7 +11,7 @@ var_dump(get());
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["prop"]=>
   *RECURSION*
 }

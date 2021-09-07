@@ -124,7 +124,7 @@ int(42)
 Exception
 Exception
 Exception
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 Exception
 string(1) "a"

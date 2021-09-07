@@ -36,8 +36,8 @@ $soapClient = new TestSoapClient($wsdl,
 $result = $soapClient->getObject();
 var_dump($result);
 ?>
---EXPECTF--
-object(stdClass)#%d (2) {
+--EXPECT--
+object(DynamicObject)#2 (2) {
   ["accountId"]=>
   int(1234)
   ["parent"]=>

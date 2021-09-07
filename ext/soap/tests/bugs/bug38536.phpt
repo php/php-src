@@ -40,10 +40,10 @@ $SOAPObject = new LocalSoapClient(__DIR__.'/bug38536.wsdl');
 print_r($SOAPObject->test());
 ?>
 --EXPECT--
-stdClass Object
+DynamicObject Object
 (
     [id] => 2
-    [address] => stdClass Object
+    [address] => DynamicObject Object
         (
             [idClient] => 2
             [address] => Test

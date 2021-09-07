@@ -10,6 +10,6 @@ $f(new stdClass);
 --EXPECT--
 array(1) {
   [0]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
 }

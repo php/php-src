@@ -92,9 +92,9 @@ int(0)
 *** Trying array(0) {
 }
 *** Caught {closure}(): Return value must be of type int, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(DynamicObject)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type int, stdClass returned in %s on line %d
+*** Caught {closure}(): Return value must be of type int, DynamicObject returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 *** Caught {closure}(): Return value must be of type int, StringCapable returned in %s on line %d
@@ -129,9 +129,9 @@ float(0)
 *** Trying array(0) {
 }
 *** Caught {closure}(): Return value must be of type float, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(DynamicObject)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type float, stdClass returned in %s on line %d
+*** Caught {closure}(): Return value must be of type float, DynamicObject returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 *** Caught {closure}(): Return value must be of type float, StringCapable returned in %s on line %d
@@ -166,9 +166,9 @@ string(0) ""
 *** Trying array(0) {
 }
 *** Caught {closure}(): Return value must be of type string, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(DynamicObject)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type string, stdClass returned in %s on line %d
+*** Caught {closure}(): Return value must be of type string, DynamicObject returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 string(6) "foobar"
@@ -203,9 +203,9 @@ bool(false)
 *** Trying array(0) {
 }
 *** Caught {closure}(): Return value must be of type bool, array returned in %s on line %d
-*** Trying object(stdClass)#6 (0) {
+*** Trying object(DynamicObject)#6 (0) {
 }
-*** Caught {closure}(): Return value must be of type bool, stdClass returned in %s on line %d
+*** Caught {closure}(): Return value must be of type bool, DynamicObject returned in %s on line %d
 *** Trying object(StringCapable)#7 (0) {
 }
 *** Caught {closure}(): Return value must be of type bool, StringCapable returned in %s on line %d

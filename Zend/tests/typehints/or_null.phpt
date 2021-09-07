@@ -219,17 +219,17 @@ try {
 
 ?>
 --EXPECTF--
-TypeError: unloadedClass(): Argument #1 ($param) must be of type ?I\Dont\Exist, stdClass given, called in %s:%d
+TypeError: unloadedClass(): Argument #1 ($param) must be of type ?I\Dont\Exist, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(8): unloadedClass(Object(stdClass))
+#0 %s(%d): unloadedClass(Object(DynamicObject))
 #1 {main}
-TypeError: loadedClass(): Argument #1 ($param) must be of type ?RealClass, stdClass given, called in %s:%d
+TypeError: loadedClass(): Argument #1 ($param) must be of type ?RealClass, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(20): loadedClass(Object(stdClass))
+#0 %s(%d): loadedClass(Object(DynamicObject))
 #1 {main}
-TypeError: loadedInterface(): Argument #1 ($param) must be of type ?RealInterface, stdClass given, called in %s:%d
+TypeError: loadedInterface(): Argument #1 ($param) must be of type ?RealInterface, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(26): loadedInterface(Object(stdClass))
+#0 %s(%d): loadedInterface(Object(DynamicObject))
 #1 {main}
 TypeError: unloadedClass(): Argument #1 ($param) must be of type ?I\Dont\Exist, int given, called in %s:%d
 Stack trace:
@@ -251,19 +251,19 @@ TypeError: iterableF(): Argument #1 ($param) must be of type ?iterable, int give
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
-TypeError: intF(): Argument #1 ($param) must be of type ?int, stdClass given, called in %s:%d
+TypeError: intF(): Argument #1 ($param) must be of type ?int, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(68): intF(Object(stdClass))
+#0 %s(%d): intF(Object(DynamicObject))
 #1 {main}
-TypeError: returnUnloadedClass(): Return value must be of type ?I\Dont\Exist, stdClass returned in %s:%d
+TypeError: returnUnloadedClass(): Return value must be of type ?I\Dont\Exist, DynamicObject returned in %s:%d
 Stack trace:
 #0 %s(78): returnUnloadedClass()
 #1 {main}
-TypeError: returnLoadedClass(): Return value must be of type ?RealClass, stdClass returned in %s:%d
+TypeError: returnLoadedClass(): Return value must be of type ?RealClass, DynamicObject returned in %s:%d
 Stack trace:
 #0 %s(88): returnLoadedClass()
 #1 {main}
-TypeError: returnLoadedInterface(): Return value must be of type ?RealInterface, stdClass returned in %s:%d
+TypeError: returnLoadedInterface(): Return value must be of type ?RealInterface, DynamicObject returned in %s:%d
 Stack trace:
 #0 %s(98): returnLoadedInterface()
 #1 {main}
@@ -287,7 +287,7 @@ TypeError: returnIterable(): Return value must be of type ?iterable, int returne
 Stack trace:
 #0 %s(148): returnIterable()
 #1 {main}
-TypeError: returnInt(): Return value must be of type ?int, stdClass returned in %s:%d
+TypeError: returnInt(): Return value must be of type ?int, DynamicObject returned in %s:%d
 Stack trace:
 #0 %s(158): returnInt()
 #1 {main}

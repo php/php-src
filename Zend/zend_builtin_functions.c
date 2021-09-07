@@ -33,7 +33,8 @@
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
-	zend_standard_class_def = register_class_stdClass();
+	zend_standard_class_def = register_class_DynamicObject();
+	zend_register_class_alias("stdClass", zend_standard_class_def);
 
 	zend_register_default_classes();
 

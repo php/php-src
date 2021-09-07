@@ -26,7 +26,7 @@ object(ArrayObject)#1 (1) {
 --> Object argument:
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#1 (1) {
+  object(DynamicObject)#1 (1) {
     ["p"]=>
     string(5) "hello"
   }
@@ -44,7 +44,7 @@ object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(ArrayObject)#3 (1) {
     ["storage":"ArrayObject":private]=>
-    object(stdClass)#1 (1) {
+    object(DynamicObject)#1 (1) {
       ["p"]=>
       string(5) "hello"
     }

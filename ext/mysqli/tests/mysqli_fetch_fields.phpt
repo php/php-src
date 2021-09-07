@@ -56,7 +56,7 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECTF--
-object(stdClass)#%d (13) {
+object(DynamicObject)#5 (13) {
   ["name"]=>
   string(2) "ID"
   ["orgname"]=>
@@ -84,7 +84,7 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-object(stdClass)#%d (13) {
+object(DynamicObject)#6 (13) {
   ["name"]=>
   string(5) "label"
   ["orgname"]=>

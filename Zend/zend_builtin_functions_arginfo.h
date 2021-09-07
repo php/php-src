@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f87d92c002674c431827895a8d8b3a5da3b95482 */
+ * Stub hash: d47f825593c3065523ce49df587b4dd9dc48c12a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -342,15 +342,15 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
-static const zend_function_entry class_stdClass_methods[] = {
+static const zend_function_entry class_DynamicObject_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_stdClass(void)
+static zend_class_entry *register_class_DynamicObject(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "stdClass", class_stdClass_methods);
+	INIT_CLASS_ENTRY(ce, "DynamicObject", class_DynamicObject_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	return class_entry;

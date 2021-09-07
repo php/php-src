@@ -50,8 +50,8 @@ try {
 --EXPECT--
 Value of type int is not callable
 Call to undefined function does_not_exist()
-Call to undefined method stdClass::doesNotExist()
-Call to undefined method stdClass::doesNotExist()
-Call to undefined method stdClass::doesNotExist()
+Call to undefined method DynamicObject::doesNotExist()
+Call to undefined method DynamicObject::doesNotExist()
+Call to undefined method DynamicObject::doesNotExist()
 Call to private method Test::privateMethod() from global scope
 Non-static method Test::instanceMethod() cannot be called statically

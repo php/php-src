@@ -22,6 +22,6 @@ $fo = new foo;
 var_dump($fo()[0]);
 
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#2 (0) {
 }

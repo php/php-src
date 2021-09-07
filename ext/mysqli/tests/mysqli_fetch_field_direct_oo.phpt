@@ -59,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 mysqli object is not fully initialized
 mysqli_result::fetch_field_direct(): Argument #1 ($index) must be greater than or equal to 0
-object(stdClass)#%d (13) {
+object(DynamicObject)#8 (13) {
   ["name"]=>
   string(2) "ID"
   ["orgname"]=>

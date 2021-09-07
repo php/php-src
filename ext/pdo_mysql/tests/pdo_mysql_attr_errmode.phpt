@@ -159,7 +159,7 @@ error_reporting=E_ALL
 ?>
 --EXPECTF--
 TypeError: Attribute value must be of type int for selected attribute, array given
-TypeError: Attribute value must be of type int for selected attribute, stdClass given
+TypeError: Attribute value must be of type int for selected attribute, DynamicObject given
 TypeError: Attribute value must be of type int for selected attribute, string given
 ValueError: Error mode must be one of the PDO::ERRMODE_* constants
 

@@ -12,8 +12,8 @@ unset($a);
 var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
---EXPECTF--
-object(stdClass)#%d (1) {
+--EXPECT--
+object(DynamicObject)#1 (1) {
   ["a"]=>
   array(1) {
     [0]=>

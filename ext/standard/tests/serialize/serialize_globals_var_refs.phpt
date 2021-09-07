@@ -13,10 +13,10 @@ var_dump($obj2);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["obj"]=>
-  object(stdClass)#1 (0) {
+  object(DynamicObject)#1 (0) {
   }
 }

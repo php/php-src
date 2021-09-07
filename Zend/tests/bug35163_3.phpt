@@ -11,8 +11,8 @@ var_dump($a);
 $a->b = null;
 $a = null;
 ?>
---EXPECTF--
-object(stdClass)#%d (1) {
+--EXPECT--
+object(DynamicObject)#1 (1) {
   ["b"]=>
   &array(3) {
     [0]=>

@@ -138,7 +138,7 @@ string(2) "hi"
 string(3) "hi3"
 string(3) "hi2"
 bool(false)
-Phar::extractTo(): Argument #2 ($files) must be of type array|string|null, stdClass given
+Phar::extractTo(): Argument #2 ($files) must be of type array|string|null, DynamicObject given
 Phar::extractTo(): Argument #1 ($directory) must be of type string, array given
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory

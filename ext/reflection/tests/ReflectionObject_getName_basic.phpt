@@ -16,6 +16,6 @@ var_dump($r3->getName());
 
 ?>
 --EXPECT--
-string(8) "stdClass"
+string(13) "DynamicObject"
 string(1) "C"
 string(16) "ReflectionObject"

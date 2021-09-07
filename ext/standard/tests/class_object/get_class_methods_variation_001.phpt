@@ -160,7 +160,7 @@ get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid
 Arg value string
 get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value stdClass
+Arg value DynamicObject
 array(0) {
 }
 

@@ -67,7 +67,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli object is not fully initialized
-object(stdClass)#%d (13) {
+object(DynamicObject)#8 (13) {
   ["name"]=>
   string(2) "ID"
   ["orgname"]=>
@@ -95,7 +95,7 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-object(stdClass)#%d (13) {
+object(DynamicObject)#8 (13) {
   ["name"]=>
   string(5) "label"
   ["orgname"]=>

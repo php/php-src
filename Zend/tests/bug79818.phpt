@@ -10,6 +10,6 @@ test(new stdClass);
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant "UNDEFINED" in %s:%d
 Stack trace:
-#0 %s(%d): test(Object(stdClass))
+#0 %s(%d): test(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

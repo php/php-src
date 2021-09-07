@@ -20,7 +20,7 @@ var_dump(new C);
 --EXPECTF--
 object(C)#%d (1) {
   ["p"]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["x"]=>
     array(1) {
       [0]=>

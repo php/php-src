@@ -40,4 +40,4 @@ bool(false)
 bool(false)
 openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, array given
 bool(false)
-openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, stdClass given
+openssl_x509_parse(): Argument #1 ($certificate) must be of type OpenSSLCertificate|string, DynamicObject given

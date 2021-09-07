@@ -25,7 +25,7 @@ throw new my_exception;
 
 ?>
 --EXPECT--
-Fatal error: Uncaught Error: Object of class stdClass could not be converted to string in [no active file]:0
+Fatal error: Uncaught Error: Object of class DynamicObject could not be converted to string in [no active file]:0
 Stack trace:
 #0 [internal function]: Exception->__toString()
 #1 {main}

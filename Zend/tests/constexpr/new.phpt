@@ -47,13 +47,13 @@ try {
 ?>
 --EXPECT--
 Class "DoesNotExist" not found
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 Unsupported operand types: array + int
 Unsupported operand types: array + int
 object(Test)#4 (2) {
   ["a"]=>
-  object(stdClass)#1 (0) {
+  object(DynamicObject)#1 (0) {
   }
   ["b"]=>
   int(42)

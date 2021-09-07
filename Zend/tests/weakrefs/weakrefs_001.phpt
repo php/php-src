@@ -22,18 +22,17 @@ debug_zval_dump($wr->get());
 debug_zval_dump($wr2->get());
 ?>
 --EXPECT--
-object(stdClass)#1 (0) refcount(2){
+object(DynamicObject)#1 (0) refcount(2){
 }
-object(stdClass)#1 (0) refcount(2){
-}
-object(WeakReference)#2 (0) {
+object(DynamicObject)#1 (0) refcount(2){
 }
 object(WeakReference)#2 (0) {
 }
-object(stdClass)#1 (0) refcount(2){
+object(WeakReference)#2 (0) {
 }
-object(stdClass)#1 (0) refcount(2){
+object(DynamicObject)#1 (0) refcount(2){
+}
+object(DynamicObject)#1 (0) refcount(2){
 }
 NULL
 NULL
-

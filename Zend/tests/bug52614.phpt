@@ -78,7 +78,7 @@ array(0) {
 }
 Attempt to assign property "a" on null
 NULL
-object(stdClass)#3 (1) {
+object(DynamicObject)#3 (1) {
   ["a"]=>
   int(1)
 }

@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-class stdClass
+class DynamicObject
 {
 }
 

@@ -80,7 +80,7 @@ WeakMap key must be an object
 WeakMap key must be an object
 Cannot append to WeakMap
 Cannot append to WeakMap
-Object stdClass#2 not contained in WeakMap
+Object DynamicObject#2 not contained in WeakMap
 
 Warning: Undefined property: WeakMap::$prop in %s on line %d
 NULL

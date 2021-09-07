@@ -43,9 +43,9 @@ var_dump($test->propY);
 
 ?>
 --EXPECT--
-Cannot assign stdClass to property Test::$propX of type X
+Cannot assign DynamicObject to property Test::$propX of type X
 object(X)#3 (0) {
 }
-Cannot assign stdClass to property Test::$propY of type ?Y
+Cannot assign DynamicObject to property Test::$propY of type ?Y
 object(Y)#4 (0) {
 }

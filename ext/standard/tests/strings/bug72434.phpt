@@ -21,9 +21,9 @@ $fill_freed_space_3 = "filler_zval_3";
 $fill_freed_space_4 = "filler_zval_4";
 debug_zval_dump($unserialized_payload[1]);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) refcount(3){
   [0]=>
-  object(stdClass)#%d (0) refcount(1){
+  object(DynamicObject)#3 (0) refcount(1){
   }
 }

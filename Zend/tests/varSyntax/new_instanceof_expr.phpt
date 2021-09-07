@@ -11,8 +11,8 @@ var_dump($obj instanceof ('std'.$class));
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 bool(true)

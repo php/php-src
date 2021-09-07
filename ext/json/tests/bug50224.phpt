@@ -22,7 +22,7 @@ var_dump(json_decode(json_encode(array(12, 12.0, 12.3), JSON_PRESERVE_ZERO_FRACT
 var_dump(json_decode(json_encode((object)array('float' => 12.0, 'integer' => 12), JSON_PRESERVE_ZERO_FRACTION)));
 var_dump(json_decode(json_encode((object)array('float' => 12.0, 'integer' => 12), JSON_PRESERVE_ZERO_FRACTION), true));
 ?>
---EXPECTF--
+--EXPECT--
 * Testing JSON output
 
 string(4) "12.3"
@@ -46,7 +46,7 @@ array(3) {
   [2]=>
   float(12.3)
 }
-object(stdClass)#%d (2) {
+object(DynamicObject)#1 (2) {
   ["float"]=>
   float(12)
   ["integer"]=>

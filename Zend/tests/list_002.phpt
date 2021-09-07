@@ -13,8 +13,8 @@ var_dump($a, $b, $a === $b);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 bool(true)

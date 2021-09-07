@@ -11,6 +11,6 @@ var_dump(bar);
 
 ?>
 --EXPECTF--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 resource(%d) of type (stream)

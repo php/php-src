@@ -18,7 +18,7 @@ print_r($d);
 DOMDocument Object
 (
     [config] => 
-    [dynamicProperty] => stdClass Object
+    [dynamicProperty] => DynamicObject Object
         (
         )
 

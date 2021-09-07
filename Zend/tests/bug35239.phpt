@@ -12,10 +12,10 @@ var_dump($a);
 $a->x0->y1 = "ok\n";
 echo $a->x0;
 ?>
---EXPECTF--
-object(stdClass)#%d (1) {
+--EXPECT--
+object(DynamicObject)#1 (1) {
   ["x0"]=>
-  &object(stdClass)#%d (3) {
+  &object(DynamicObject)#2 (3) {
     ["y0"]=>
     string(1) "b"
     ["y1"]=>

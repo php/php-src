@@ -114,7 +114,7 @@ Warning: filter_var_array(): Unknown filter with ID 1000000 in %s on line %d
 bool(false)
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
 -- (4)
-filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
+filter_var_array(): Argument #2 ($options) must be of type array|int, DynamicObject given
 array(0) {
 }
 array(1) {

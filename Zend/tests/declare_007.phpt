@@ -15,5 +15,5 @@ foo();
 }
 ?>
 --EXPECT--
-tick: stdClass 3
-tick: stdClass 3
+tick: DynamicObject 3
+tick: DynamicObject 3

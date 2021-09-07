@@ -28,4 +28,4 @@ try {
 
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string

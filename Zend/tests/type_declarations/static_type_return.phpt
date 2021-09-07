@@ -86,6 +86,6 @@ object(A)#3 (0) {
 }
 A::test4(): Return value must be of type B|array, A returned
 
-{closure}(): Return value must be of type static, stdClass returned
+{closure}(): Return value must be of type static, DynamicObject returned
 object(A)#1 (0) {
 }

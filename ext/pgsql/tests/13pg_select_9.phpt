@@ -81,6 +81,6 @@ SELECT * FROM "php_pgsql_test" WHERE "num"='1234';
 Array of values must be an associative array with string keys
 Array of values must be an associative array with string keys
 Values must be of type string|int|float|bool|null, array given
-Values must be of type string|int|float|bool|null, stdClass given
+Values must be of type string|int|float|bool|null, DynamicObject given
 Values must be of type string|int|float|bool|null, PgSql\Connection given
 Ok

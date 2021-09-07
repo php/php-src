@@ -21,7 +21,7 @@ var_dump($x);
 --EXPECT--
 object(Test)#1 (1) {
   ["x"]=>
-  object(stdClass)#2 (1) {
+  object(DynamicObject)#2 (1) {
     ["t"]=>
     *RECURSION*
   }

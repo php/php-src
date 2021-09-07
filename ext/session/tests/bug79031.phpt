@@ -53,13 +53,13 @@ var_dump($_SESSION);
 
 ?>
 --EXPECT--
-obj1|C:17:"SerializableClass":65:{a:1:{s:10:"sharedProp";O:8:"stdClass":1:{s:4:"name";s:4:"test";}}}obj2|C:17:"SerializableClass":28:{a:1:{s:10:"sharedProp";r:3;}}
+obj1|C:17:"SerializableClass":71:{a:1:{s:10:"sharedProp";O:13:"DynamicObject":1:{s:4:"name";s:4:"test";}}}obj2|C:17:"SerializableClass":28:{a:1:{s:10:"sharedProp";r:3;}}
 
 array(2) {
   ["obj1"]=>
   object(SerializableClass)#4 (1) {
     ["sharedProp"]=>
-    object(stdClass)#5 (1) {
+    object(DynamicObject)#5 (1) {
       ["name"]=>
       string(4) "test"
     }
@@ -67,7 +67,7 @@ array(2) {
   ["obj2"]=>
   object(SerializableClass)#6 (1) {
     ["sharedProp"]=>
-    object(stdClass)#5 (1) {
+    object(DynamicObject)#5 (1) {
       ["name"]=>
       string(4) "test"
     }

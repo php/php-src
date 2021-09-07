@@ -13,8 +13,8 @@ function f(UndefClass $x)
 f(new stdClass);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: f(): Argument #1 ($x) must be of type UndefClass, stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: f(): Argument #1 ($x) must be of type UndefClass, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(%d): f(Object(stdClass))
+#0 %s(%d): f(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

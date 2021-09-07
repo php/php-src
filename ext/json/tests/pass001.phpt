@@ -151,7 +151,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#1 (1) {
+  object(DynamicObject)#1 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -159,7 +159,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
   [3]=>
   array(0) {
@@ -173,7 +173,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#3 (31) {
+  object(DynamicObject)#3 (31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -219,7 +219,7 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#4 (0) {
+    object(DynamicObject)#4 (0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -427,7 +427,7 @@ array(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  object(stdClass)#5 (1) {
+  object(DynamicObject)#5 (1) {
     ["object with 1 member"]=>
     array(1) {
       [0]=>
@@ -435,7 +435,7 @@ array(14) {
     }
   }
   [2]=>
-  object(stdClass)#6 (0) {
+  object(DynamicObject)#6 (0) {
   }
   [3]=>
   array(0) {
@@ -449,7 +449,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  object(stdClass)#7 (31) {
+  object(DynamicObject)#7 (31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -495,7 +495,7 @@ array(14) {
     array(0) {
     }
     ["object"]=>
-    object(stdClass)#8 (0) {
+    object(DynamicObject)#8 (0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"

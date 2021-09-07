@@ -52,4 +52,4 @@ count(): Argument #1 ($value) must be of type Countable|array, string given
 count(): Argument #1 ($value) must be of type Countable|array, int given
 count(): Argument #1 ($value) must be of type Countable|array, bool given
 count(): Argument #1 ($value) must be of type Countable|array, bool given
-count(): Argument #1 ($value) must be of type Countable|array, stdClass given
+count(): Argument #1 ($value) must be of type Countable|array, DynamicObject given

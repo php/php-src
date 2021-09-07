@@ -15,7 +15,7 @@ var_dump($a);
 
 ?>
 --EXPECT--
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["undefined"]=>
   string(4) "test"
 }

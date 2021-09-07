@@ -7,7 +7,7 @@ var_dump(json_decode('{"zero": 0e0}'));
 
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["zero"]=>
   float(0)
 }

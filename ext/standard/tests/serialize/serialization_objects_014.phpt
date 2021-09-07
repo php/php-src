@@ -59,9 +59,9 @@ check($obj);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --- a refs external:
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -69,8 +69,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(61) "O:13:"DynamicObject":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
+object(DynamicObject)#2 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -78,7 +78,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -86,7 +86,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -94,7 +94,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -105,7 +105,7 @@ object(stdClass)#%d (3) {
 
 
 --- b refs external:
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -113,8 +113,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(61) "O:13:"DynamicObject":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
+object(DynamicObject)#1 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -122,7 +122,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -130,7 +130,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -138,7 +138,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -149,7 +149,7 @@ object(stdClass)#%d (3) {
 
 
 --- c refs external:
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -157,8 +157,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(61) "O:13:"DynamicObject":3:{s:1:"a";i:1;s:1:"b";i:1;s:1:"c";i:1;}"
+object(DynamicObject)#2 (3) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -166,7 +166,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -174,7 +174,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -182,7 +182,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   string(14) "obj->a.changed"
   ["b"]=>
@@ -193,7 +193,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b ref external:
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -201,8 +201,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";i:1;}"
-object(stdClass)#%d (3) {
+string(61) "O:13:"DynamicObject":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";i:1;}"
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -210,7 +210,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -218,7 +218,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -226,7 +226,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -237,7 +237,7 @@ object(stdClass)#%d (3) {
 
 
 --- a,b,c ref external:
-object(stdClass)#%d (3) {
+object(DynamicObject)#1 (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -245,8 +245,8 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-string(55) "O:8:"stdClass":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";R:2;}"
-object(stdClass)#%d (3) {
+string(61) "O:13:"DynamicObject":3:{s:1:"a";i:1;s:1:"b";R:2;s:1:"c";R:2;}"
+object(DynamicObject)#2 (3) {
   ["a"]=>
   &int(1)
   ["b"]=>
@@ -254,7 +254,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &int(1)
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   &string(14) "obj->a.changed"
   ["b"]=>
@@ -262,7 +262,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->a.changed"
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   &string(14) "obj->b.changed"
   ["b"]=>
@@ -270,7 +270,7 @@ object(stdClass)#%d (3) {
   ["c"]=>
   &string(14) "obj->b.changed"
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#2 (3) {
   ["a"]=>
   &string(14) "obj->c.changed"
   ["b"]=>

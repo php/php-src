@@ -36,7 +36,7 @@ var_dump($client->__getTypes());
 $x = $client->getContinentList(array("AFFILIATE_ID"=>1,"PASSWORD"=>"x"));
 var_dump($x);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(71) "getContinentListResponse getContinentList(getContinentList $parameters)"
@@ -61,9 +61,9 @@ array(3) {
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://tempuri.org/PRWebServ/getOtherInformation"><SOAP-ENV:Body><ns1:getContinentList><ns1:AFFILIATE_ID>1</ns1:AFFILIATE_ID><ns1:PASSWORD>x</ns1:PASSWORD></ns1:getContinentList></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://tempuri.org/PRWebServ/getOtherInformation"><SOAP-ENV:Body><ns1:getContinentListResponse><ns1:getContinentListResult><xsd:schema><element name="test" type="xsd:string"/></xsd:schema><test>Hello World!</test><test>Bye World!</test></ns1:getContinentListResult></ns1:getContinentListResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["getContinentListResult"]=>
-  object(stdClass)#%d (2) {
+  object(DynamicObject)#4 (2) {
     ["schema"]=>
     string(65) "<xsd:schema><element name="test" type="xsd:string"/></xsd:schema>"
     ["any"]=>

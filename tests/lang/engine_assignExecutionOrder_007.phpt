@@ -21,18 +21,18 @@ Array
 
     [0] => Array
         (
-            [1] => stdClass Object
+            [1] => DynamicObject Object
                 (
                 )
 
         )
 
 )
-stdClass Object
+DynamicObject Object
 (
-    [a] => stdClass Object
+    [a] => DynamicObject Object
         (
-            [b] => stdClass Object
+            [b] => DynamicObject Object
                 (
                 )
 

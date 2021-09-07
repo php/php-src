@@ -14,7 +14,7 @@ object(SplObjectStorage)#%d (1) {
     [0]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#%d (0) {
+      object(DynamicObject)#2 (0) {
       }
       ["inf"]=>
       *RECURSION*

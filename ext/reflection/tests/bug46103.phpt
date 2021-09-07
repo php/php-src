@@ -9,10 +9,10 @@ var_dump($obj);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["r"]=>
   object(ReflectionObject)#2 (1) {
     ["name"]=>
-    string(8) "stdClass"
+    string(13) "DynamicObject"
   }
 }

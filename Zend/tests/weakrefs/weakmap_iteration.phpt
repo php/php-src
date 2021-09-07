@@ -38,24 +38,24 @@ var_dump($map);
 Empty loop:
 
 Simple loop:
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 int(0)
-object(stdClass)#3 (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
-object(stdClass)#4 (0) {
+object(DynamicObject)#4 (0) {
 }
 int(2)
 
 Object removed during loop:
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 int(0)
-object(stdClass)#3 (0) {
+object(DynamicObject)#3 (0) {
 }
 int(1)
-object(stdClass)#4 (0) {
+object(DynamicObject)#4 (0) {
 }
 int(2)
 
@@ -64,7 +64,7 @@ object(WeakMap)#1 (2) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
     ["value"]=>
     &int(1)
@@ -72,7 +72,7 @@ object(WeakMap)#1 (2) {
   [1]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#4 (0) {
+    object(DynamicObject)#4 (0) {
     }
     ["value"]=>
     &int(3)

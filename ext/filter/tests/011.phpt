@@ -27,7 +27,7 @@ echo "Done\n";
 --EXPECT--
 string(18) "http://example.com"
 string(27) "&#60;b&#62;test&#60;/b&#62;"
-filter_input(): Argument #4 ($options) must be of type array|int, stdClass given
+filter_input(): Argument #4 ($options) must be of type array|int, DynamicObject given
 float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)

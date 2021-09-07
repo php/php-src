@@ -33,4 +33,4 @@ Exception: IntlDateFormatter::__construct(): datefmt_create: No such time zone: 
 
 Exception: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s on line %d
 
-Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, stdClass given in %s on line %d
+Exception: IntlDateFormatter::__construct(): Argument #5 ($calendar) must be of type IntlCalendar|int|null, DynamicObject given in %s on line %d

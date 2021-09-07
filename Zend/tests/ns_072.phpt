@@ -30,8 +30,8 @@ object(foo\test)#%d (0) {
 }
 NULL
 
-Fatal error: Uncaught TypeError: foo\bar::__construct(): Argument #1 ($x) must be of type ?foo\foo, stdClass given, called in %s:%d
+Fatal error: Uncaught TypeError: foo\bar::__construct(): Argument #1 ($x) must be of type ?foo\foo, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(%d): foo\bar->__construct(Object(stdClass))
+#0 %s(%d): foo\bar->__construct(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

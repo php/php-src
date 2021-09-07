@@ -38,7 +38,7 @@ string(1) "1"
 
 Deprecated: zend_string_or_object(): Passing null to parameter #1 ($param) of type object|string is deprecated in %s on line %d
 string(0) ""
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 object(Foo)#1 (0) {
 }
@@ -46,7 +46,7 @@ zend_string_or_object(): Argument #1 ($param) must be of type object|string, arr
 string(6) "string"
 string(1) "1"
 NULL
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 object(Foo)#2 (0) {
 }

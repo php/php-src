@@ -7,6 +7,6 @@ Test nullsafe in binary op
 
 ?>
 --EXPECTF--
-Warning: Undefined property: stdClass::$ in %s on line 3
+Warning: Undefined property: DynamicObject::$ in %s on line %d
 
 Warning: Attempt to read property "y" on null in %s on line 3

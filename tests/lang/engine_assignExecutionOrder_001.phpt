@@ -71,7 +71,7 @@ C::$string[getOffset()] = newChar();
 var_dump(C::$string);
 
 ?>
---EXPECTF--
+--EXPECT--
 Order with local assignment:
 in f()
 in g()
@@ -90,7 +90,7 @@ array(1) {
 Order with object property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(DynamicObject)#1 (1) {
   ["assigned value"]=>
   string(14) "assigned value"
 }
@@ -99,11 +99,11 @@ object(stdClass)#%d (1) {
 Order with nested object property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(DynamicObject)#2 (1) {
   ["o1"]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#3 (1) {
     ["o2"]=>
-    object(stdClass)#%d (1) {
+    object(DynamicObject)#4 (1) {
       ["assigned value"]=>
       string(14) "assigned value"
     }
@@ -114,7 +114,7 @@ object(stdClass)#%d (1) {
 Order with dim_list property assignment:
 in f()
 in g()
-object(stdClass)#%d (1) {
+object(DynamicObject)#5 (1) {
   ["a"]=>
   array(1) {
     ["assigned value"]=>

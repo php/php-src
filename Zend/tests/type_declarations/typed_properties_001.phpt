@@ -34,7 +34,7 @@ object(class@anonymous)#%d (6) {
     string(4) "four"
   }
   ["std"]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#2 (0) {
   }
   ["it"]=>
   array(1) {

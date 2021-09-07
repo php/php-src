@@ -20,9 +20,9 @@ var_dump($function->getShortName());
 ?>
 --EXPECT--
 bool(false)
-string(8) "stdClass"
+string(13) "DynamicObject"
 string(0) ""
-string(8) "stdClass"
+string(13) "DynamicObject"
 bool(true)
 string(7) "A\B\Foo"
 string(3) "A\B"

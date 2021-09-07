@@ -42,17 +42,17 @@ $client = new TestSoapClient(__DIR__.'/bug44882.wsdl');
 print_r($client->GetExpressCheckoutDetails());
 ?>
 --EXPECT--
-stdClass Object
+DynamicObject Object
 (
     [Timestamp] => 2008-06-23T14:51:08Z
     [Ack] => Success
     [CorrelationID] => ae013a0ccdf13
     [Version] => 50.000000
     [Build] => 588340
-    [GetExpressCheckoutDetailsResponseDetails] => stdClass Object
+    [GetExpressCheckoutDetailsResponseDetails] => DynamicObject Object
         (
             [Token] => EC-11Y75137T2399952C
-            [PayerInfo] => stdClass Object
+            [PayerInfo] => DynamicObject Object
                 (
                     [Payer] => example@example.com
                     [PayerID] => MU82WA43YXM9C

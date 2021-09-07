@@ -17,11 +17,11 @@ var_dump($rm->getClosureScopeClass()->name); //dummy sope is Closure
 
 echo "Done.\n";
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#2 (0) {
 }
 string(7) "Closure"
-object(stdClass)#%d (0) {
+object(DynamicObject)#5 (0) {
 }
 string(7) "Closure"
 Done.

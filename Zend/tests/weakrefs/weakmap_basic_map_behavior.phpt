@@ -72,12 +72,12 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (1) {
+    object(DynamicObject)#2 (1) {
       ["value"]=>
       int(1)
     }
     ["value"]=>
-    object(stdClass)#3 (1) {
+    object(DynamicObject)#3 (1) {
       ["value"]=>
       int(2)
     }
@@ -85,7 +85,7 @@ object(WeakMap)#1 (1) {
 }
 bool(true)
 bool(true)
-object(stdClass)#3 (1) {
+object(DynamicObject)#3 (1) {
   ["value"]=>
   int(2)
 }
@@ -93,7 +93,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (1) {
+    object(DynamicObject)#2 (1) {
       ["value"]=>
       int(1)
     }
@@ -108,7 +108,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (1) {
+    object(DynamicObject)#2 (1) {
       ["value"]=>
       int(1)
     }
@@ -123,7 +123,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (1) {
+    object(DynamicObject)#2 (1) {
       ["value"]=>
       int(1)
     }
@@ -138,14 +138,14 @@ object(WeakMap)#1 (0) {
 }
 bool(false)
 bool(false)
-Object stdClass#2 not contained in WeakMap
+Object DynamicObject#2 not contained in WeakMap
 
 Indirect modification:
 object(WeakMap)#1 (2) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (1) {
+    object(DynamicObject)#2 (1) {
       ["value"]=>
       int(1)
     }
@@ -158,7 +158,7 @@ object(WeakMap)#1 (2) {
   [1]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#3 (1) {
+    object(DynamicObject)#3 (1) {
       ["value"]=>
       int(2)
     }

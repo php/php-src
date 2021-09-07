@@ -59,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 int(0)
 int(0)
-object(stdClass)#%d (13) {
+object(DynamicObject)#4 (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>

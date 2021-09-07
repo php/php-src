@@ -72,33 +72,33 @@ var_dump($ucontainer);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Array containing same object twice:
 array(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#1 (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#1 (0) {
   }
 }
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;r:2;}"
+string(43) "a:2:{i:0;O:13:"DynamicObject":0:{}i:1;r:2;}"
 array(2) {
   [0]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#2 (0) {
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#2 (0) {
   }
 }
 array(2) {
   [0]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["a"]=>
     string(7) "newProp"
   }
   [1]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -107,7 +107,7 @@ array(2) {
   [0]=>
   string(10) "a0.changed"
   [1]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -117,29 +117,29 @@ array(2) {
 Array containing object and reference to that object:
 array(2) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#3 (0) {
   }
   [1]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#3 (0) {
   }
 }
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;R:2;}"
+string(43) "a:2:{i:0;O:13:"DynamicObject":0:{}i:1;R:2;}"
 array(2) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#1 (0) {
   }
   [1]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#1 (0) {
   }
 }
 array(2) {
   [0]=>
-  &object(stdClass)#%d (1) {
+  &object(DynamicObject)#1 (1) {
     ["a"]=>
     string(7) "newProp"
   }
   [1]=>
-  &object(stdClass)#%d (1) {
+  &object(DynamicObject)#1 (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -152,40 +152,40 @@ array(2) {
 }
 
 
-Object containing same object twice:object(stdClass)#%d (2) {
+Object containing same object twice:object(DynamicObject)#2 (2) {
   ["a"]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#1 (0) {
   }
   ["b"]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#1 (0) {
   }
 }
-string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";r:2;}"
-object(stdClass)#%d (2) {
+string(70) "O:13:"DynamicObject":2:{s:1:"a";O:13:"DynamicObject":0:{}s:1:"b";r:2;}"
+object(DynamicObject)#4 (2) {
   ["a"]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#5 (0) {
   }
   ["b"]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#5 (0) {
   }
 }
-object(stdClass)#%d (2) {
+object(DynamicObject)#4 (2) {
   ["a"]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#5 (1) {
     ["a"]=>
     string(7) "newProp"
   }
   ["b"]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#5 (1) {
     ["a"]=>
     string(7) "newProp"
   }
 }
-object(stdClass)#%d (2) {
+object(DynamicObject)#4 (2) {
   ["a"]=>
   string(20) "container->a.changed"
   ["b"]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#5 (1) {
     ["a"]=>
     string(7) "newProp"
   }
@@ -193,36 +193,36 @@ object(stdClass)#%d (2) {
 
 
 Object containing object and reference to that object:
-object(stdClass)#%d (2) {
+object(DynamicObject)#7 (2) {
   ["a"]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#6 (0) {
   }
   ["b"]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#6 (0) {
   }
 }
-string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";R:2;}"
-object(stdClass)#%d (2) {
+string(70) "O:13:"DynamicObject":2:{s:1:"a";O:13:"DynamicObject":0:{}s:1:"b";R:2;}"
+object(DynamicObject)#2 (2) {
   ["a"]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#1 (0) {
   }
   ["b"]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#1 (0) {
   }
 }
-object(stdClass)#%d (2) {
+object(DynamicObject)#2 (2) {
   ["a"]=>
-  &object(stdClass)#%d (1) {
+  &object(DynamicObject)#1 (1) {
     ["a"]=>
     string(7) "newProp"
   }
   ["b"]=>
-  &object(stdClass)#%d (1) {
+  &object(DynamicObject)#1 (1) {
     ["a"]=>
     string(7) "newProp"
   }
 }
-object(stdClass)#%d (2) {
+object(DynamicObject)#2 (2) {
   ["a"]=>
   &string(20) "container->a.changed"
   ["b"]=>

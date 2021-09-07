@@ -53,11 +53,11 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-printf(): Argument #1 ($format) must be of type string, stdClass given
+printf(): Argument #1 ($format) must be of type string, DynamicObject given
 
 
 Try 2:
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 
 
 Object with bad __toString():

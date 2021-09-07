@@ -14,5 +14,5 @@ var_dump($ref?->foo);
 --EXPECTF--
 NULL
 
-Warning: Undefined property: stdClass::$foo in %s on line %d
+Warning: Undefined property: DynamicObject::$foo in %s on line %d
 NULL

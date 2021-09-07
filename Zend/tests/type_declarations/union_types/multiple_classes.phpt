@@ -67,8 +67,8 @@ int(42)
 int(42)
 int(42)
 int(42)
-Cannot assign stdClass to property Test::$prop of type X|Y|Z|int
-Test::method(): Argument #1 ($arg) must be of type X|Y|Z|int, stdClass given, called in %s on line %d
+Cannot assign DynamicObject to property Test::$prop of type X|Y|Z|int
+Test::method(): Argument #1 ($arg) must be of type X|Y|Z|int, DynamicObject given, called in %s on line %d
 object(X)#4 (0) {
 }
 object(X)#6 (0) {

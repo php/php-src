@@ -19,8 +19,8 @@ var_dump(clone (new bar)->z);
 var_dump(clone (new bar)->getZ());
 
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#1 (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }

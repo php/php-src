@@ -20,6 +20,6 @@ var_dump($r1->getName(), $r2->getName(), $r3->getName());
 
 ?>
 --EXPECT--
-string(8) "stdClass"
-string(8) "stdClass"
+string(13) "DynamicObject"
+string(13) "DynamicObject"
 string(10) "TrickClass"

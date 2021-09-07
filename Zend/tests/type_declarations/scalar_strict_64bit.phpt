@@ -96,9 +96,9 @@ int(9223372036854775807)
 }
 *** Caught {closure}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(DynamicObject)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($i) must be of type int, stdClass given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, DynamicObject given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
@@ -149,9 +149,9 @@ float(NAN)
 }
 *** Caught {closure}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(DynamicObject)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($f) must be of type float, stdClass given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, DynamicObject given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
@@ -202,9 +202,9 @@ string(0) ""
 }
 *** Caught {closure}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(DynamicObject)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($s) must be of type string, stdClass given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, DynamicObject given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }
@@ -255,9 +255,9 @@ bool(false)
 }
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
-*** Trying object(stdClass)#5 (0) {
+*** Trying object(DynamicObject)#5 (0) {
 }
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, stdClass given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, DynamicObject given, called in %s on line %d
 
 *** Trying object(StringCapable)#6 (0) {
 }

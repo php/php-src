@@ -29,7 +29,7 @@ object(SplObjectStorage)#2 (1) {
     [0]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#3 (0) {
+      object(DynamicObject)#3 (0) {
       }
       ["inf"]=>
       int(1)
@@ -37,10 +37,10 @@ object(SplObjectStorage)#2 (1) {
     [1]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#1 (0) {
+      object(DynamicObject)#1 (0) {
       }
       ["inf"]=>
-      object(stdClass)#3 (0) {
+      object(DynamicObject)#3 (0) {
       }
     }
   }

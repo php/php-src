@@ -12,4 +12,4 @@ try {
 }
 ?>
 --EXPECT--
-error_reporting(): Argument #1 ($error_level) must be of type ?int, stdClass given
+error_reporting(): Argument #1 ($error_level) must be of type ?int, DynamicObject given

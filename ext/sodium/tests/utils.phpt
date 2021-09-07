@@ -116,7 +116,7 @@ string(22) "0102840507090b0d000305"
 int(-1)
 int(0)
 int(1)
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["foo"]=>
   string(3) "bar"
 }

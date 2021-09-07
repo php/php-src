@@ -101,7 +101,7 @@ Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset string offsets
-Cannot use object of type stdClass as array
+Cannot use object of type DynamicObject as array
 
 Warning: Undefined variable $x in %s on line %d
 
@@ -110,4 +110,4 @@ Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset offset in a non-array variable
 Cannot unset string offsets
-Cannot use object of type stdClass as array
+Cannot use object of type DynamicObject as array

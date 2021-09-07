@@ -19,12 +19,12 @@ var_dump($foo, $x);
 --EXPECT--
 array(2) {
   [0]=>
-  object(stdClass)#1 (1) {
+  object(DynamicObject)#1 (1) {
     ["a"]=>
     &int(2)
   }
   [1]=>
-  object(stdClass)#2 (1) {
+  object(DynamicObject)#2 (1) {
     ["a"]=>
     &int(2)
   }

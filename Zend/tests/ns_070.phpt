@@ -15,7 +15,7 @@ new bar(new \stdclass);
 new bar(null);
 
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#2 (0) {
 }
 NULL

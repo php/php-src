@@ -31,7 +31,7 @@ array(1) {
   [0]=>
   int(1)
 }
-object(stdClass)#1 (2) {
+object(DynamicObject)#1 (2) {
   ["aa"]=>
   int(1)
   ["bb"]=>

@@ -31,13 +31,13 @@ unset($obj);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 object(WeakMap)#3 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#1 (0) {
+    object(DynamicObject)#1 (0) {
     }
     ["value"]=>
     int(1)
@@ -47,7 +47,7 @@ object(WeakMap)#4 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#1 (0) {
+    object(DynamicObject)#1 (0) {
     }
     ["value"]=>
     int(1)
@@ -57,7 +57,7 @@ object(WeakMap)#5 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#1 (0) {
+    object(DynamicObject)#1 (0) {
     }
     ["value"]=>
     int(1)
@@ -70,5 +70,5 @@ object(WeakMap)#4 (0) {
 }
 object(WeakMap)#5 (0) {
 }
-object(stdClass)#4 (0) {
+object(DynamicObject)#4 (0) {
 }

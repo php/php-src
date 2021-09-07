@@ -44,7 +44,7 @@ bool(false)
 Warning: shm_get_var(): Variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 string(11) "test string"
-object(stdClass)#%d (0) {
+object(DynamicObject)#2 (0) {
 }
 array(3) {
   [0]=>

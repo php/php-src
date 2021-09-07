@@ -13,8 +13,8 @@ unset($a);
 var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
---EXPECTF--
-object(stdClass)#%d (1) {
+--EXPECT--
+object(DynamicObject)#2 (1) {
   ["a"]=>
   *RECURSION*
 }

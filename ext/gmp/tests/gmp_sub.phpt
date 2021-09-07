@@ -49,6 +49,6 @@ object(GMP)#3 (1) {
   string(5) "10001"
 }
 string(5) "10001"
-gmp_sub(): Argument #2 ($num2) must be of type GMP|string|int, stdClass given
-gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, stdClass given
+gmp_sub(): Argument #2 ($num2) must be of type GMP|string|int, DynamicObject given
+gmp_sub(): Argument #1 ($num1) must be of type GMP|string|int, DynamicObject given
 Done

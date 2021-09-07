@@ -10,5 +10,5 @@ echo get_class($obj)."\n";
 echo "Done\n";
 ?>
 --EXPECT--
-stdClass
+DynamicObject
 Done

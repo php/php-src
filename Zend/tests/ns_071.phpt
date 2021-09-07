@@ -18,8 +18,8 @@ new bar(new \stdclass);
 --EXPECTF--
 NULL
 
-Fatal error: Uncaught TypeError: foo\bar::__construct(): Argument #1 ($x) must be of type ?array, stdClass given, called in %s:%d
+Fatal error: Uncaught TypeError: foo\bar::__construct(): Argument #1 ($x) must be of type ?array, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(%d): foo\bar->__construct(Object(stdClass))
+#0 %s(%d): foo\bar->__construct(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

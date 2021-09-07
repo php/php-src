@@ -36,8 +36,8 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Fatal error: Uncaught TypeError: foo::testFoo(): Argument #1 ($obj) must be of type foo, stdClass given, called in %s:%d
+Fatal error: Uncaught TypeError: foo::testFoo(): Argument #1 ($obj) must be of type foo, DynamicObject given, called in %s:%d
 Stack trace:
-#0 %s(%d): foo->testFoo(Object(stdClass))
+#0 %s(%d): foo->testFoo(Object(DynamicObject))
 #1 {main}
   thrown in %s on line %d

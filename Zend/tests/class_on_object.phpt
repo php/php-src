@@ -22,7 +22,7 @@ try {
 
 ?>
 --EXPECT--
-string(8) "stdClass"
-string(8) "stdClass"
-string(8) "stdClass"
+string(13) "DynamicObject"
+string(13) "DynamicObject"
+string(13) "DynamicObject"
 Cannot use "::class" on value of type null

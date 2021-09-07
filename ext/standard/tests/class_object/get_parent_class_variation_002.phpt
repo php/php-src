@@ -165,7 +165,7 @@ Arg value String
 In autoload(String)
 get_parent_class(): Argument #1 ($object_or_class) must be an object or a valid class name, string given
 
-Arg value stdClass
+Arg value DynamicObject
 bool(false)
 
 Arg value 

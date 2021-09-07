@@ -16,11 +16,11 @@ var_dump($o);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["0"]=>
   int(1)
 }
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["0"]=>
   int(2)
 }
@@ -29,5 +29,5 @@ array(1) {
   [0]=>
   int(2)
 }
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }

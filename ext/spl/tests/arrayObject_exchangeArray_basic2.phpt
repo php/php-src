@@ -48,7 +48,7 @@ object(ArrayObject)#%d (1) {
 string(18) "normal object prop"
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["key"]=>
     string(18) "normal object prop"
   }

@@ -12,17 +12,17 @@ $x[0]->a = 1;
 var_dump($x);
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#2 (1) {
     ["a"]=>
     int(1)
   }
   [1]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#3 (0) {
   }
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }

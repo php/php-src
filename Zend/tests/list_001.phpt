@@ -10,11 +10,11 @@ var_dump($a, $b);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
-object(stdClass)#3 (0) {
+object(DynamicObject)#3 (0) {
 }
-object(stdClass)#4 (0) {
+object(DynamicObject)#4 (0) {
 }

@@ -20,5 +20,5 @@ $x(new \stdclass);
 NULL
 object(foo\stdclass)#%d (0) {
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#2 (0) {
 }

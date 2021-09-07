@@ -46,7 +46,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli_fetch_field_direct(): Argument #2 ($index) must be greater than or equal to 0
-object(stdClass)#%d (13) {
+object(DynamicObject)#5 (13) {
   ["name"]=>
   string(2) "ID"
   ["orgname"]=>

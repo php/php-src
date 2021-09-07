@@ -112,7 +112,7 @@ foreach($m as $key => $value) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Default flags, no iterators --
 Called current() on an invalid iterator
 Called key() on an invalid iterator
@@ -132,7 +132,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }
 array(3) {
@@ -169,7 +169,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }
 array(3) {
@@ -219,7 +219,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }
 array(3) {
@@ -271,7 +271,7 @@ array(3) {
   ["iter2"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }
 array(3) {
@@ -307,7 +307,7 @@ array(3) {
   int(3)
 }
 -- Associate with invalid value --
-TypeError thrown: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, stdClass given
+TypeError thrown: MultipleIterator::attachIterator(): Argument #2 ($info) must be of type string|int|null, DynamicObject given
 -- Associate with duplicate value --
 InvalidArgumentException thrown: Key duplication error
 -- Count, contains, detach, count, contains, iterate --
@@ -326,7 +326,7 @@ array(2) {
   ["iter1"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(DynamicObject)#4 (0) {
   }
 }
 array(2) {

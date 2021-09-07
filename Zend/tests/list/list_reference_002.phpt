@@ -7,13 +7,13 @@ list(&$a, &$b) = $arr;
 var_dump($a, $b);
 var_dump($arr);
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#1 (0) {
 }
 NULL
 array(2) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  &object(DynamicObject)#1 (0) {
   }
   [1]=>
   &NULL

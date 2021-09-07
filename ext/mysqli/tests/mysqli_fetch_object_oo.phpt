@@ -130,6 +130,13 @@ require_once('skipifconnectfailure.inc');
 mysqli object is not fully initialized
 [0] Object of class mysqli could not be converted to string in %s on line %d
 [0] mysqli_result::fetch_object() expects at most 2 arguments, 3 given in %s on line %d
+[007] Object seems wrong. [0] 
+object(DynamicObject)#7 (2) {
+  ["ID"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
+}
 mysqli_result::fetch_object(): Argument #2 ($constructor_args) must be of type array, null given
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL

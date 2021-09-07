@@ -14,8 +14,8 @@ foreach(gen(new stdClass()) as $value)
 --EXPECTF--
 foo
 
-Fatal error: Uncaught Error: Call to undefined method stdClass::fatalError() in %s:%d
+Fatal error: Uncaught Error: Call to undefined method DynamicObject::fatalError() in %s:%d
 Stack trace:
-#0 %s(%d): gen(Object(stdClass))
+#0 %s(%d): gen(Object(DynamicObject))
 #1 {main}
   thrown in %sbug63066.php on line 5

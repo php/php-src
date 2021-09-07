@@ -10,7 +10,7 @@ var_dump($obj);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (2) {
+object(DynamicObject)#1 (2) {
   ["ref"]=>
   &int(42)
   ["val"]=>

@@ -26,9 +26,9 @@ var_dump($t->a, $t->b, $t->c, $t->d);
 --EXPECT--
 string(3) "str"
 string(3) "str"
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
-object(stdClass)#3 (0) {
+object(DynamicObject)#3 (0) {
 }
 NULL
 NULL

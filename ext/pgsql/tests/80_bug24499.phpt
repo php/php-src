@@ -49,7 +49,7 @@ pg_close($dbh);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => 1
@@ -60,7 +60,7 @@ Array
     [0] => 2
     [id] => 2
 )
-object(stdClass)#%d (1) {
+object(DynamicObject)#4 (1) {
   ["id"]=>
   string(1) "3"
 }

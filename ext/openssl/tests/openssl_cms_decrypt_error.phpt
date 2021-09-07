@@ -30,8 +30,8 @@ var_dump(openssl_cms_decrypt($a, $b, 0, 0));
 echo "Done\n";
 ?>
 --EXPECT--
-Object of class stdClass could not be converted to string
-object(stdClass)#1 (0) {
+Object of class DynamicObject could not be converted to string
+object(DynamicObject)#1 (0) {
 }
 string(60) "openssl_cms_decrypt(): X.509 Certificate cannot be retrieved"
 bool(false)

@@ -25,5 +25,5 @@ Catchable fatal error [2]
     echo "ALIVE!\n";
 ?>
 --EXPECTF--
-blah(): Argument #1 ($a) must be of type Foo, stdClass given, called in %scatchable_error_002.php on line %d
+blah(): Argument #1 ($a) must be of type Foo, DynamicObject given, called in %s on line %d
 ALIVE!

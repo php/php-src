@@ -37,33 +37,33 @@ foreach ($vars as $var) {
 echo "Done\n";
 ?>
 --EXPECTF--
-object(stdClass)#%d (1) {
+object(DynamicObject)#2 (1) {
   ["scalar"]=>
   string(6) "string"
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   string(7) "8754456"
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#2 (1) {
   ["scalar"]=>
   string(0) ""
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   string(1) "%0"
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#2 (1) {
   ["scalar"]=>
   int(9876545)
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   float(0.1)
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#2 (0) {
 }
-object(stdClass)#%d (3) {
+object(DynamicObject)#3 (3) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -71,17 +71,17 @@ object(stdClass)#%d (3) {
   ["2"]=>
   int(3)
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#2 (1) {
   ["scalar"]=>
   bool(false)
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   bool(true)
 }
-object(stdClass)#%d (0) {
+object(DynamicObject)#2 (0) {
 }
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }

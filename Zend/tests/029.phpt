@@ -18,34 +18,34 @@ var_dump($arr);
 --EXPECT--
 array(1) {
   [0]=>
-  object(stdClass)#1 (1) {
+  object(DynamicObject)#1 (1) {
     ["a"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
   }
 }
 array(1) {
   [0]=>
-  object(stdClass)#1 (2) {
+  object(DynamicObject)#1 (2) {
     ["a"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
     ["b"]=>
-    object(stdClass)#3 (0) {
+    object(DynamicObject)#3 (0) {
     }
   }
 }
 array(1) {
   [0]=>
-  object(stdClass)#1 (3) {
+  object(DynamicObject)#1 (3) {
     ["a"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
     ["b"]=>
-    object(stdClass)#3 (0) {
+    object(DynamicObject)#3 (0) {
     }
     ["c"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
   }
 }

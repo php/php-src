@@ -101,7 +101,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  object(stdClass)#1 (0) {
+  object(DynamicObject)#1 (0) {
   }
 }
 define(): Argument #2 ($value) cannot be a recursive array

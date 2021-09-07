@@ -51,7 +51,7 @@ function f($x)
 
 $a = f(null) ?? f(1) ?? f(2);
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
 
 int(7)
@@ -65,7 +65,7 @@ int(3)
 int(7)
 string(3) "bar"
 int(3)
-object(stdClass)#%d (%d) {
+object(DynamicObject)#1 (1) {
   ["boo"]=>
   int(7)
 }

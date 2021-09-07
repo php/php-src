@@ -52,7 +52,7 @@ Array
 Resource id #%d
 
 %s with {}:
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string
 
 d with null:
 0
@@ -83,7 +83,7 @@ d with resource:
 
 d with {}:
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: Object of class DynamicObject could not be converted to int in %s on line %d
 1
 
 u with null:
@@ -115,7 +115,7 @@ u with resource:
 
 u with {}:
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: Object of class DynamicObject could not be converted to int in %s on line %d
 1
 
 f with null:
@@ -147,7 +147,7 @@ f with resource:
 
 f with {}:
 
-Warning: Object of class stdClass could not be converted to float in %s on line %d
+Warning: Object of class DynamicObject could not be converted to float in %s on line %d
 1.000000
 
 c with null:
@@ -179,7 +179,7 @@ c with resource:
 
 c with {}:
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: Object of class DynamicObject could not be converted to int in %s on line %d
 
 
 x with null:
@@ -211,5 +211,5 @@ x with resource:
 
 x with {}:
 
-Warning: Object of class stdClass could not be converted to int in %s on line %d
+Warning: Object of class DynamicObject could not be converted to int in %s on line %d
 1

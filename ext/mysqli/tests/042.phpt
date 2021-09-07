@@ -60,8 +60,8 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
-object(stdClass)#%d (7) {
+--EXPECT--
+object(DynamicObject)#5 (7) {
   ["c1"]=>
   string(1) "0"
   ["c2"]=>

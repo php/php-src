@@ -85,11 +85,11 @@ if ($db) {
 var_dump($resp);
 ?>
 --EXPECT--
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["entries"]=>
   array(1) {
     [0]=>
-    object(stdClass)#4 (10) {
+    object(DynamicObject)#4 (10) {
       ["sid"]=>
       string(19) "20171016083645_5337"
       ["sgroupid"]=>

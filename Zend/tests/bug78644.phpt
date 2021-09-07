@@ -10,7 +10,7 @@ var_dump($a);
 
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["b"]=>
   NULL
 }

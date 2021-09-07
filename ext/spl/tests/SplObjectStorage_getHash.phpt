@@ -54,6 +54,6 @@ var_dump($s3[$o1] === $s3[$o2]);
 some_value
 caught 1
 caught 2
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 bool(true)

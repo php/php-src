@@ -101,7 +101,7 @@ array(2) {
 }
 
 Objects:
-object(stdClass)#1 (2) {
+object(DynamicObject)#1 (2) {
   ["foo"]=>
   int(123)
   ["bar"]=>
@@ -110,7 +110,7 @@ object(stdClass)#1 (2) {
 id(foo)
 id(foo)
 id(bar)
-object(stdClass)#2 (2) {
+object(DynamicObject)#2 (2) {
   ["foo"]=>
   int(123)
   ["bar"]=>

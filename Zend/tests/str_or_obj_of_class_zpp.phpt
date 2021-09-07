@@ -55,16 +55,16 @@ string(1) "1"
 
 Deprecated: zend_string_or_stdclass(): Passing null to parameter #1 ($param) of type string is deprecated in %s on line %d
 string(0) ""
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 string(8) "ToString"
-zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, array given
-zend_string_or_stdclass(): Argument #1 ($param) must be of type stdClass|string, Foo given
+zend_string_or_stdclass(): Argument #1 ($param) must be of type DynamicObject|string, array given
+zend_string_or_stdclass(): Argument #1 ($param) must be of type DynamicObject|string, Foo given
 string(6) "string"
 string(1) "1"
 NULL
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
 string(8) "ToString"
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, array given
-zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type stdClass|string|null, Foo given
+zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type DynamicObject|string|null, array given
+zend_string_or_stdclass_or_null(): Argument #1 ($param) must be of type DynamicObject|string|null, Foo given

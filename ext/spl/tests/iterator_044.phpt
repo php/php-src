@@ -81,10 +81,10 @@ bool(false)
 Warning: Undefined array key "0" in %s on line %d
 NULL
 ===1===
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
-CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
+CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, DynamicObject given
+CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, DynamicObject given
 ===2===
 object(MyFoo)#%d (0) {
 }
@@ -126,10 +126,10 @@ int(0)
 bool(true)
 int(0)
 ===1===
-object(stdClass)#1 (0) {
+object(DynamicObject)#1 (0) {
 }
-CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, stdClass given
-CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, stdClass given
+CachingIterator::offsetExists(): Argument #1 ($key) must be of type string, DynamicObject given
+CachingIterator::offsetGet(): Argument #1 ($key) must be of type string, DynamicObject given
 ===2===
 object(MyFoo)#2 (0) {
 }

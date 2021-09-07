@@ -79,7 +79,7 @@ Calling getMetadata with too low max_depth
 
 Warning: Phar::getMetadata(): Maximum depth of 1 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %sphar_metadata_write3.php on line 39
 
-Notice: Phar::getMetadata(): Error at offset 34 of 59 bytes in %sphar_metadata_write3.php on line 39
+Notice: Phar::getMetadata(): Error at offset 34 of 65 bytes in %s on line %d
 bool(false)
 Calling getMetadata with some allowed classes
 In wakeup
@@ -90,7 +90,7 @@ array(2) {
   [1]=>
   object(__PHP_Incomplete_Class)#5 (1) {
     ["__PHP_Incomplete_Class_Name"]=>
-    string(8) "stdClass"
+    string(13) "DynamicObject"
   }
 }
 Calling getMetadata with no options returns the original metadata value
@@ -99,6 +99,6 @@ array(2) {
   object(EchoesOnWakeup)#2 (0) {
   }
   [1]=>
-  object(stdClass)#3 (0) {
+  object(DynamicObject)#3 (0) {
   }
 }

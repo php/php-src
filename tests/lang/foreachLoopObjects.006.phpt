@@ -76,7 +76,7 @@ string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
 string(10) "Original e"
-object(stdClass)#%d (6) {
+object(DynamicObject)#2 (6) {
   ["a"]=>
   string(5) "new a"
   ["b"]=>

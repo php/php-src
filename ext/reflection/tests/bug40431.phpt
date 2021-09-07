@@ -84,7 +84,7 @@ array(1) {
     ["name"]=>
     string(5) "value"
     ["class"]=>
-    string(8) "stdClass"
+    string(13) "DynamicObject"
   }
 }
 bool(false)

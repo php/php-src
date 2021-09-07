@@ -40,7 +40,7 @@ echo get_class($fault);
 ?>
 --EXPECT--
 SoapFault::__construct(): Argument #1 ($code) is not a valid fault code
-SoapFault::__construct(): Argument #1 ($code) must be of type array|string|null, stdClass given
+SoapFault::__construct(): Argument #1 ($code) must be of type array|string|null, DynamicObject given
 SoapFault
 SoapFault
 SoapFault::__construct(): Argument #1 ($code) is not a valid fault code

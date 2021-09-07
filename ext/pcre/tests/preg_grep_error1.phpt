@@ -65,5 +65,5 @@ array(2) {
   [2]=>
   string(4) "test"
 }
-preg_grep(): Argument #1 ($pattern) must be of type string, stdClass given
+preg_grep(): Argument #1 ($pattern) must be of type string, DynamicObject given
 Done

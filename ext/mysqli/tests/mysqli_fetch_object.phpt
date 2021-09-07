@@ -143,6 +143,13 @@ require_once('skipifconnectfailure.inc');
     require_once("clean_table.inc");
 ?>
 --EXPECTF--
+[004] Object seems wrong. [0] 
+object(DynamicObject)#4 (2) {
+  ["ID"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
+}
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL

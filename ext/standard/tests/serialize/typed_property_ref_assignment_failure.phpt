@@ -23,7 +23,7 @@ var_dump(unserialize($s));
 
 ?>
 --EXPECTF--
-Cannot assign stdClass to property Test::$prop of type int
+Cannot assign DynamicObject to property Test::$prop of type int
 
 Notice: unserialize(): Error at offset 38 of 38 bytes in %s on line %d
 bool(false)

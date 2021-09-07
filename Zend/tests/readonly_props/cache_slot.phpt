@@ -98,11 +98,11 @@ Cannot modify readonly property Test::$prop2
 array(0) {
 }
 
-object(stdClass)#3 (1) {
+object(DynamicObject)#3 (1) {
   ["foo"]=>
   int(1)
 }
-object(stdClass)#3 (1) {
+object(DynamicObject)#3 (1) {
   ["foo"]=>
   int(1)
 }
@@ -112,11 +112,11 @@ Cannot modify readonly property Test::$prop2
 array(0) {
 }
 
-object(stdClass)#5 (1) {
+object(DynamicObject)#5 (1) {
   ["foo"]=>
   int(1)
 }
-object(stdClass)#5 (1) {
+object(DynamicObject)#5 (1) {
   ["foo"]=>
   int(1)
 }

@@ -20,7 +20,7 @@ object(SplPriorityQueue)#1 (3) {
     [0]=>
     array(2) {
       ["data"]=>
-      object(stdClass)#2 (0) {
+      object(DynamicObject)#2 (0) {
       }
       ["priority"]=>
       int(1)
@@ -37,7 +37,7 @@ object(SplPriorityQueue)#1 (3) {
     [0]=>
     array(2) {
       ["data"]=>
-      object(stdClass)#2 (0) {
+      object(DynamicObject)#2 (0) {
       }
       ["priority"]=>
       int(1)

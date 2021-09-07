@@ -66,7 +66,7 @@ object(_ZendTestClass)#1 (3) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
   ["classUnionProp"]=>
   NULL
@@ -80,7 +80,7 @@ object(Test)#4 (3) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>
-  object(stdClass)#1 (0) {
+  object(DynamicObject)#1 (0) {
   }
   ["classUnionProp"]=>
   NULL

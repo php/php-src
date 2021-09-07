@@ -48,7 +48,7 @@ object(Test)#%d (4) {
   ["_columns"]=>
   array(1) {
     ["name"]=>
-    object(stdClass)#%d (0) {
+    object(DynamicObject)#2 (0) {
     }
   }
   ["_primary"]=>

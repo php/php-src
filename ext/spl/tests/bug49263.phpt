@@ -16,33 +16,33 @@ echo $ss."\n";
 var_dump(unserialize($ss));
 ?>
 --EXPECT--
-O:16:"SplObjectStorage":2:{i:0;a:4:{i:0;O:8:"stdClass":0:{}i:1;a:2:{s:4:"prev";i:2;s:4:"next";O:8:"stdClass":0:{}}i:2;r:6;i:3;a:1:{s:4:"prev";r:3;}}i:1;a:0:{}}
+O:16:"SplObjectStorage":2:{i:0;a:4:{i:0;O:13:"DynamicObject":0:{}i:1;a:2:{s:4:"prev";i:2;s:4:"next";O:13:"DynamicObject":0:{}}i:2;r:6;i:3;a:1:{s:4:"prev";r:3;}}i:1;a:0:{}}
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {
     [0]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#1 (0) {
+      object(DynamicObject)#1 (0) {
       }
       ["inf"]=>
       array(2) {
         ["prev"]=>
         int(2)
         ["next"]=>
-        object(stdClass)#3 (0) {
+        object(DynamicObject)#3 (0) {
         }
       }
     }
     [1]=>
     array(2) {
       ["obj"]=>
-      object(stdClass)#3 (0) {
+      object(DynamicObject)#3 (0) {
       }
       ["inf"]=>
       array(1) {
         ["prev"]=>
-        object(stdClass)#1 (0) {
+        object(DynamicObject)#1 (0) {
         }
       }
     }

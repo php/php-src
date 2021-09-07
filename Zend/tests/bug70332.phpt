@@ -14,7 +14,7 @@ test($arg)->name[1] = "xxxx";
 print_r($arg);
 ?>
 --EXPECT--
-stdClass Object
+DynamicObject Object
 (
     [name] => Array
         (

@@ -6,7 +6,7 @@ unserialize('O:12:"DateInterval":1:{s:4:"days";O:9:"Exception":7:{s:10:"'."\0".'
 ?>
 OK
 --EXPECTF--
-Fatal error: Uncaught TypeError: Cannot assign stdClass to property Exception::$previous of type ?Throwable in %s:%d
+Fatal error: Uncaught TypeError: Cannot assign DynamicObject to property Exception::$previous of type ?Throwable in %s:%d
 Stack trace:
 #0 %s(%d): unserialize('O:12:"DateInter...')
 #1 {main}

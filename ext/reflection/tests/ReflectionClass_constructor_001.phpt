@@ -21,11 +21,11 @@ var_dump($r1, $r2, $r3);
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>
-  string(8) "stdClass"
+  string(13) "DynamicObject"
 }
 object(ReflectionClass)#%d (1) {
   ["name"]=>
-  string(8) "stdClass"
+  string(13) "DynamicObject"
 }
 object(ReflectionClass)#%d (1) {
   ["name"]=>

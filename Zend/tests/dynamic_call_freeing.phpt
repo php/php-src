@@ -25,4 +25,4 @@ try {
 --EXPECT--
 Call to undefined function foobar()
 Array callback must have exactly two elements
-Object of type stdClass is not callable
+Object of type DynamicObject is not callable

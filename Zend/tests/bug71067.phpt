@@ -20,7 +20,7 @@ $o->test();
 print_r($o->test());
 ?>
 --EXPECT--
-stdClass Object
+DynamicObject Object
 (
     [children] => Array
         (

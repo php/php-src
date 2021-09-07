@@ -112,7 +112,7 @@ bool(true)
 int(%d)
 bool(true)
 int(%d)
-string(54) "Object of class stdClass could not be converted to int"
+string(59) "Object of class DynamicObject could not be converted to int"
 bool(true)
 int(%d)
 bool(true)
@@ -135,7 +135,7 @@ bool(true)
 float(%f)
 bool(true)
 float(%f)
-string(56) "Object of class stdClass could not be converted to float"
+string(61) "Object of class DynamicObject could not be converted to float"
 bool(true)
 float(%f)
 bool(true)
@@ -195,7 +195,7 @@ resource(%d) of type (Unknown)
 Error: Cannot convert to resource type
 resource(%d) of type (stream)
 Error: Cannot convert to resource type
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 bool(true)
 array(3) {
@@ -257,7 +257,7 @@ bool(true)
 array(0) {
 }
 bool(true)
-object(stdClass)#%d (3) {
+object(DynamicObject)#3 (3) {
   ["0"]=>
   int(1)
   ["1"]=>
@@ -266,12 +266,12 @@ object(stdClass)#%d (3) {
   int(3)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   string(14) "another string"
 }
 bool(true)
-object(stdClass)#%d (3) {
+object(DynamicObject)#3 (3) {
   ["0"]=>
   int(2)
   ["1"]=>
@@ -280,40 +280,40 @@ object(stdClass)#%d (3) {
   int(4)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   int(1)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   float(2)
 }
 bool(true)
-object(stdClass)#%d (0) {
+object(DynamicObject)#3 (0) {
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   bool(false)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   string(11) "some string"
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   resource(%d) of type (Unknown)
 }
 bool(true)
-object(stdClass)#%d (1) {
+object(DynamicObject)#3 (1) {
   ["scalar"]=>
   resource(%d) of type (stream)
 }
 bool(true)
-object(stdClass)#%d (0) {
+object(DynamicObject)#1 (0) {
 }
 string(26) "Array to string conversion"
 bool(true)
@@ -337,6 +337,6 @@ bool(true)
 string(14) "Resource id #%d"
 bool(true)
 string(14) "Resource id #%d"
-Error: Object of class stdClass could not be converted to string
+Error: Object of class DynamicObject could not be converted to string
 string(0) ""
 Done

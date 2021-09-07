@@ -44,14 +44,14 @@ var_dump($test->prop);
 
 ?>
 --EXPECT--
-Unsupported operand types: stdClass + int
+Unsupported operand types: DynamicObject + int
 Cannot modify readonly property Test::$prop
 Cannot modify readonly property Test::$prop
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["foo"]=>
   int(3)
 }
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["foo"]=>
   int(3)
 }

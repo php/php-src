@@ -14,4 +14,4 @@ $a[]=&$a == $a=&$b > gc_collect_cycles();
 
 ?>
 --EXPECT--
-Unsupported operand types: stdClass % int
+Unsupported operand types: DynamicObject % int

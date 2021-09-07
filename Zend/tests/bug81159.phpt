@@ -17,5 +17,5 @@ try {
 }
 ?>
 --EXPECT--
-Cannot access offset of type stdClass on string
-Cannot access offset of type stdClass on string
+Cannot access offset of type DynamicObject on string
+Cannot access offset of type DynamicObject on string

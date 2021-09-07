@@ -21,7 +21,7 @@ var_dump($c->foo());
 --EXPECT--
 array(1) {
   [0]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
 }
 array(1) {

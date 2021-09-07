@@ -28,6 +28,6 @@ try {
 object(TestClass)#1 (0) {
 }
 string(3) "Foo"
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
-Object of class stdClass could not be converted to string
+Object of class DynamicObject could not be converted to string

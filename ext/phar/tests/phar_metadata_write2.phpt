@@ -39,7 +39,7 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php.copy.php');
 --EXPECT--
 string(1) "a"
 NULL
-object(stdClass)#2 (1) {
+object(DynamicObject)#2 (1) {
   ["my"]=>
   string(6) "friend"
 }

@@ -32,7 +32,7 @@ array(2) {
   ["val"]=>
   string(11) "changed.val"
 }
-object(stdClass)#1 (2) {
+object(DynamicObject)#1 (2) {
   ["ref"]=>
   &string(11) "changed.ref"
   ["val"]=>

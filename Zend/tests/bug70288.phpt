@@ -14,6 +14,6 @@ function test(&$obj) {
 $a = new A;
 test($a->dummy);
 ?>
---EXPECTF--
-object(stdClass)#%d (0) {
+--EXPECT--
+object(DynamicObject)#2 (0) {
 }

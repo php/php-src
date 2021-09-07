@@ -25,9 +25,9 @@ var_dump($bar);
 --EXPECT--
 object(bad)#2 (2) {
   ["x"]=>
-  object(stdClass)#3 (0) {
+  object(DynamicObject)#3 (0) {
   }
   ["y"]=>
-  object(stdClass)#4 (0) {
+  object(DynamicObject)#4 (0) {
   }
 }

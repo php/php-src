@@ -18,5 +18,5 @@ var_dump(test($x));
 
 ?>
 --EXPECT--
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }

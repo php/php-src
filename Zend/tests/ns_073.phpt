@@ -13,7 +13,7 @@ $x(NULL);
 $x(new \stdclass);
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
-object(stdClass)#%d (0) {
+object(DynamicObject)#2 (0) {
 }

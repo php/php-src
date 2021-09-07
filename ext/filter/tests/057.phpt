@@ -48,5 +48,5 @@ Warning: filter_var_array(): Unknown filter with ID 1 in %s on line %d
 bool(false)
 filter_input_array(): Argument #2 ($options) must be of type array|int, string given
 filter_var_array(): Argument #2 ($options) must be of type array|int, string given
-filter_input_array(): Argument #2 ($options) must be of type array|int, stdClass given
-filter_var_array(): Argument #2 ($options) must be of type array|int, stdClass given
+filter_input_array(): Argument #2 ($options) must be of type array|int, DynamicObject given
+filter_var_array(): Argument #2 ($options) must be of type array|int, DynamicObject given

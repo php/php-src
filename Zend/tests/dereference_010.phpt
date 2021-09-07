@@ -27,7 +27,7 @@ NULL
 Warning: Trying to access array offset on value of type int in %s on line %d
 NULL
 
-Fatal error: Uncaught Error: Cannot use object of type stdClass as array in %s:%d
+Fatal error: Uncaught Error: Cannot use object of type DynamicObject as array in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -69,8 +69,8 @@ var_dump($o2[2][2] === $o2[2]);
 --EXPECT--
 bool(true)
 bool(true)
-string(96) "O:11:"ArrayObject":4:{i:0;i:0;i:1;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;}i:2;a:0:{}i:3;N;}"
-string(137) "x:i:0;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:3;i:2;O:11:"ArrayObject":4:{i:0;i:0;i:1;a:3:{i:0;r:3;i:1;r:3;i:2;r:5;}i:2;a:0:{}i:3;N;}};m:a:0:{}"
+string(102) "O:11:"ArrayObject":4:{i:0;i:0;i:1;a:3:{i:0;O:13:"DynamicObject":0:{}i:1;r:4;i:2;r:1;}i:2;a:0:{}i:3;N;}"
+string(143) "x:i:0;a:3:{i:0;O:13:"DynamicObject":0:{}i:1;r:3;i:2;O:11:"ArrayObject":4:{i:0;i:0;i:1;a:3:{i:0;r:3;i:1;r:3;i:2;r:5;}i:2;a:0:{}i:3;N;}};m:a:0:{}"
 bool(true)
 bool(true)
 bool(true)
@@ -79,17 +79,17 @@ bool(true)
 #### Extending ArrayObject
 bool(true)
 bool(true)
-string(97) "O:12:"ArrayObject2":4:{i:0;i:0;i:1;a:3:{i:0;O:8:"stdClass":0:{}i:1;r:4;i:2;r:1;}i:2;a:0:{}i:3;N;}"
+string(103) "O:12:"ArrayObject2":4:{i:0;i:0;i:1;a:3:{i:0;O:13:"DynamicObject":0:{}i:1;r:4;i:2;r:1;}i:2;a:0:{}i:3;N;}"
 array(4) {
   [0]=>
   int(0)
   [1]=>
   array(3) {
     [0]=>
-    object(stdClass)#8 (0) {
+    object(DynamicObject)#8 (0) {
     }
     [1]=>
-    object(stdClass)#8 (0) {
+    object(DynamicObject)#8 (0) {
     }
     [2]=>
     object(ArrayObject2)#5 (1) {

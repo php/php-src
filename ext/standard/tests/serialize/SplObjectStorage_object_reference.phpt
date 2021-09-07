@@ -20,7 +20,7 @@ array(2) {
       [0]=>
       array(2) {
         ["obj"]=>
-        object(stdClass)#2 (0) {
+        object(DynamicObject)#2 (0) {
         }
         ["inf"]=>
         NULL
@@ -28,6 +28,6 @@ array(2) {
     }
   }
   [1]=>
-  object(stdClass)#2 (0) {
+  object(DynamicObject)#2 (0) {
   }
 }

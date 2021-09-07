@@ -8,7 +8,7 @@ $ref =& $obj->$name;
 var_dump($obj);
 ?>
 --EXPECT--
-object(stdClass)#1 (1) {
+object(DynamicObject)#1 (1) {
   ["0"]=>
   &NULL
 }

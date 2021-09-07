@@ -66,7 +66,7 @@ array(2) {
     NULL
   }
   [1]=>
-  object(stdClass)#%d (1) {
+  object(DynamicObject)#4 (1) {
     ["value"]=>
     NULL
   }

@@ -124,7 +124,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 mysqli_field_seek(): Argument #2 ($index) must be greater than or equal to 0
-object(stdClass)#%d (13) {
+object(DynamicObject)#6 (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -153,7 +153,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (13) {
+object(DynamicObject)#6 (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -182,7 +182,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(true)
-object(stdClass)#%d (13) {
+object(DynamicObject)#6 (13) {
   ["name"]=>
   string(5) "label"
   ["orgname"]=>
@@ -214,7 +214,7 @@ int(2)
 mysqli_field_seek(): Argument #2 ($index) must be less than the number of fields for this result set
 bool(false)
 bool(true)
-object(stdClass)#%d (13) {
+object(DynamicObject)#8 (13) {
   ["name"]=>
   string(5) "_null"
   ["orgname"]=>

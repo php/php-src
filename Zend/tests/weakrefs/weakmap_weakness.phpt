@@ -67,7 +67,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#2 (0) {
+    object(DynamicObject)#2 (0) {
     }
     ["value"]=>
     int(2)
@@ -84,7 +84,7 @@ object(WeakMap)#1 (0) {
 }
 
 Destroying map with live object:
-object(stdClass)#2 (0) {
+object(DynamicObject)#2 (0) {
 }
 
 Object freed by GC:
@@ -92,7 +92,7 @@ object(WeakMap)#1 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#3 (1) {
+    object(DynamicObject)#3 (1) {
       ["obj"]=>
       *RECURSION*
     }
@@ -108,10 +108,10 @@ object(WeakMap)#3 (1) {
   [0]=>
   array(2) {
     ["key"]=>
-    object(stdClass)#1 (0) {
+    object(DynamicObject)#1 (0) {
     }
     ["value"]=>
-    object(stdClass)#1 (0) {
+    object(DynamicObject)#1 (0) {
     }
   }
 }
