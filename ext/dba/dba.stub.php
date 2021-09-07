@@ -69,7 +69,10 @@ function dba_optimize($dba): bool {}
 /** @param resource $dba */
 function dba_sync($dba): bool {}
 
-/** @return array<int|string, string> */
+/**
+ * @return array<int|string, string>
+ * @refcount 1
+ */
 function dba_handlers(bool $full_info = false): array {}
 
 /** @return array<int, string> */

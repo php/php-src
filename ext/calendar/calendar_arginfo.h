@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 74487adb4b537523bc5fa9a09ac8bc0ee74eada4 */
+ * Stub hash: 574dfd0c871b5c71677a3bfa07fd605aea343477 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_cal_days_in_month, 0, 3, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, calendar, IS_LONG, 0)
