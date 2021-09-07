@@ -14740,9 +14740,11 @@ static int zend_jit_fetch_constant(dasm_State          **Dst,
 	|	// if (c != NULL)
 	|	test r0, r0
 	|	jz >9
-	|	// if (!IS_SPECIAL_CACHE_VAL(c))
-	|	test r0, CACHE_SPECIAL
-	|	jnz >9
+	if (!zend_jit_is_persistent_constant(zv, opline->op1.num)) {
+		|	// if (!IS_SPECIAL_CACHE_VAL(c))
+		|	test r0, CACHE_SPECIAL
+		|	jnz >9
+	}
 	|8:
 
 	if ((res_info & MAY_BE_GUARD) && JIT_G(current_frame)) {

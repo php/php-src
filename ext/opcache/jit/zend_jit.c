@@ -576,6 +576,25 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 	return 0;
 }
 
+static bool zend_jit_is_persistent_constant(zval *key, uint32_t flags)
+{
+	zval *zv;
+	zend_constant *c = NULL;
+
+	/* null/true/false are resolved during compilation, so don't check for them here. */
+	zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
+	if (zv) {
+		c = (zend_constant*)Z_PTR_P(zv);
+	} else if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+		key++;
+		zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
+		if (zv) {
+			c = (zend_constant*)Z_PTR_P(zv);
+		}
+	}
+	return c && (ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
+}
+
 static zend_property_info* zend_get_known_property_info(const zend_op_array *op_array, zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
 {
 	zend_property_info *info = NULL;
