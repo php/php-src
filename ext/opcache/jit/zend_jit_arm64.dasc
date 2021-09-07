@@ -8479,6 +8479,8 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			} else {
 				ZEND_UNREACHABLE();
 			}
+			|	// Get the return value of function zend_jit_find_func_helper/zend_jit_find_ns_func_helper
+			|	mov REG0, RETVALx
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
