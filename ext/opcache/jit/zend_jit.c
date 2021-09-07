@@ -640,12 +640,18 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 		return NULL;
 	}
 
-	if (!(info->flags & ZEND_ACC_PUBLIC) &&
-	    (!on_this || info->ce != ce)) {
-		return NULL;
+	if (info->flags & ZEND_ACC_PUBLIC) {
+		return info;
+	} else if (on_this) {
+		if (ce == info->ce) {
+			return info;
+		} else if ((info->flags & ZEND_ACC_PROTECTED)
+				&& instanceof_function_slow(ce, info->ce)) {
+			return info;
+		}
 	}
 
-	return info;
+	return NULL;
 }
 
 static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
