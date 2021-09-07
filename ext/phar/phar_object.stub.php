@@ -46,7 +46,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null) {}
 
     /** @return bool */
-    public function copy(string $to, string $from) {}
+    public function copy(string $from, string $to) {}
 
     /** @return int */
     public function count(int $mode = COUNT_NORMAL) {}
@@ -258,7 +258,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::copy
      */
-    public function copy(string $to, string $from) {}
+    public function copy(string $from, string $to) {}
 
     /**
      * @return int

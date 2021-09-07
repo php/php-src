@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0973430f90bd972380a9c4434808e9857f703548 */
+ * Stub hash: 32161bce721911d28984bc8198e615d345cb89d7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -58,8 +58,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Phar_convertToData arginfo_class_Phar_convertToExecutable
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_copy, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_count, 0, 0, 0)
