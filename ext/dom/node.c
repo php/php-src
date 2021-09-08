@@ -1000,7 +1000,7 @@ Since:
 PHP_METHOD(DOMNode, replaceChild)
 {
 	zval *id, *newnode, *oldnode;
-	xmlNodePtr children, newchild, oldchild, nodep;
+	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 	int stricterror;
 
@@ -1020,8 +1020,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
 	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
-	children = nodep->children;
-	if (!children) {
+	if (!nodep->children) {
 		RETURN_FALSE;
 	}
 
@@ -1078,7 +1077,7 @@ Since:
 PHP_METHOD(DOMNode, removeChild)
 {
 	zval *id, *node;
-	xmlNodePtr children, child, nodep;
+	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
@@ -1103,23 +1102,13 @@ PHP_METHOD(DOMNode, removeChild)
 		RETURN_FALSE;
 	}
 
-	children = nodep->children;
-	if (!children) {
+	if (!nodep->children || child->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
-	while (children) {
-		if (children == child) {
-			xmlUnlinkNode(child);
-			DOM_RET_OBJ(child, &ret, intern);
-			return;
-		}
-		children = children->next;
-	}
-
-	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_FALSE;
+	xmlUnlinkNode(child);
+	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
 
