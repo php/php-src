@@ -2115,9 +2115,7 @@ static HashTable *date_object_get_properties(zend_object *object) /* {{{ */
 	PHP_DATE_OBJECT_ADD_PROPERTY("hour", h);
 	PHP_DATE_OBJECT_ADD_PROPERTY("minute", i);
 	PHP_DATE_OBJECT_ADD_PROPERTY("second", s);
-	
-	ZVAL_STR(&zv, date_format("P", sizeof("P")-1, obj->time, 1));
-	zend_hash_str_update(props, "timezone", sizeof("timezone") - 1, &zv);
+	PHP_DATE_OBJECT_ADD_PROPERTY("microsecond", us);
 
 	return props;
 } /* }}} */
@@ -3823,9 +3821,6 @@ static zval *date_object_read_property(zend_object *object, zend_string *name, i
 {
 	php_date_obj *obj;
 	zval *retval;
-	// timelib_sll value = -1;
-
-	// ZVAL_NULL(retval);
 
 	obj = php_date_obj_from_obj(object);
 
@@ -3843,9 +3838,8 @@ static zval *date_object_read_property(zend_object *object, zend_string *name, i
 		ZVAL_LONG(retval, obj->time->i);
 	} else if (zend_string_equals_literal(name, "second")) {
 		ZVAL_LONG(retval, obj->time->s);
-	} else if (zend_string_equals_literal(name, "timezone")) {
-		zend_string *buf = date_format("P", sizeof("P")-1, obj->time, 1);
-		ZVAL_STR(retval, buf);
+	} else if (zend_string_equals_literal(name, "microsecond")) {
+		ZVAL_LONG(retval, obj->time->us);
 	} else {
 		retval = zend_std_read_property(object, name, type, cache_slot, rv);
 		return retval;

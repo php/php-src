@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 309c82089d655b81b8ed186ee080b32170a46892 */
+ * Stub hash: c3c07b41e9c9919e8d1e99cb75b1785fc3378ee6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -755,11 +755,11 @@ static zend_class_entry *register_class_DateTime(zend_class_entry *class_entry_D
 	zend_declare_typed_property(class_entry, property_second_name, &property_second_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_second_name);
 
-	zval property_timezone_default_value;
-	ZVAL_UNDEF(&property_timezone_default_value);
-	zend_string *property_timezone_name = zend_string_init("timezone", sizeof("timezone") - 1, 1);
-	zend_declare_typed_property(class_entry, property_timezone_name, &property_timezone_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-	zend_string_release(property_timezone_name);
+	zval property_microsecond_default_value;
+	ZVAL_UNDEF(&property_microsecond_default_value);
+	zend_string *property_microsecond_name = zend_string_init("microsecond", sizeof("microsecond") - 1, 1);
+	zend_declare_typed_property(class_entry, property_microsecond_name, &property_microsecond_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_microsecond_name);
 
 	return class_entry;
 }

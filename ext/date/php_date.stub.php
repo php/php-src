@@ -215,7 +215,7 @@ class DateTime implements DateTimeInterface
     public int $hour;
     public int $minute;
     public int $second;
-    public string $timezone;
+    public int $microsecond;
 
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
