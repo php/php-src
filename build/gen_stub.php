@@ -1380,6 +1380,8 @@ class PropertyInfo
     public $flags;
     /** @var Type|null */
     public $type;
+    /** @var Type|null */
+    public $phpDocType;
     /** @var Expr|null */
     public $defaultValue;
     /** @var string|null */
@@ -1387,11 +1389,19 @@ class PropertyInfo
     /** @var bool */
     public $isDocReadonly;
 
-    public function __construct(PropertyName $name, int $flags, ?Type $type, ?Expr $defaultValue, ?string $defaultValueString, bool $isDocReadonly)
-    {
+    public function __construct(
+        PropertyName $name,
+        int $flags,
+        ?Type $type,
+        ?Type $phpDocType,
+        ?Expr $defaultValue,
+        ?string $defaultValueString,
+        bool $isDocReadonly
+    ) {
         $this->name = $name;
         $this->flags = $flags;
         $this->type = $type;
+        $this->phpDocType = $phpDocType;
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
@@ -1517,10 +1527,8 @@ class PropertyInfo
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
         }
 
-        if ($this->type) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($this->type->getTypeForDoc($doc));
-        }
+        $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+        $fieldsynopsisElement->appendChild($this->getFieldSynopsisSynopsisType()->getTypeForDoc($doc));
 
         $className = str_replace("\\", "-", $this->name->class->toLowerString());
         $varnameElement = $doc->createElement("varname", $this->name->property);
@@ -1537,6 +1545,18 @@ class PropertyInfo
         $fieldsynopsisElement->appendChild(new DOMText("\n    "));
 
         return $fieldsynopsisElement;
+    }
+
+    private function getFieldSynopsisSynopsisType(): Type {
+        if ($this->type) {
+            return $this->type;
+        }
+
+        if ($this->phpDocType) {
+            return $this->phpDocType;
+        }
+
+        throw new Exception("A property must have a type");
     }
 
     /** @return mixed */
@@ -1796,7 +1816,7 @@ class ClassInfo {
 
         foreach ($this->extends as $k => $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
-            if (!$parentInfo) {
+            if ($parentInfo === null) {
                 throw new Exception("Missing parent class " . $parent->toString());
             }
 
@@ -1859,10 +1879,11 @@ class ClassInfo {
 
             foreach ($parentsWithInheritedProperties as $parent) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
-                $parentClassName = self::getClassSynopsisFilename($parent);
+                $parentReference = self::getClassSynopsisReference($parent);
+
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:partintro/db:section/db:classsynopsis/db:fieldsynopsis[preceding-sibling::db:classsynopsisinfo[1][@role='comment' and text()='&Properties;']]))"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1874,13 +1895,13 @@ class ClassInfo {
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
-            $className = self::getClassSynopsisFilename($this->name);
+            $classReference = self::getClassSynopsisReference($this->name);
 
             if ($this->hasConstructor()) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:constructorsynopsis[not(@role='procedural')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1889,7 +1910,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1898,7 +1919,7 @@ class ClassInfo {
                 $classSynopsis->appendChild(new DOMText("\n    "));
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$className')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$classReference')/db:refentry/db:refsect1[@role='description']/descendant::db:destructorsynopsis[not(@role='procedural')])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1912,10 +1933,10 @@ class ClassInfo {
 
             foreach ($parentsWithInheritedMethods as $parent) {
                 $classSynopsis->appendChild(new DOMText("\n    "));
-                $parentClassName = self::getClassSynopsisFilename($parent);
+                $parentReference = self::getClassSynopsisReference($parent);
                 $includeElement = $this->createIncludeElement(
                     $doc,
-                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.$parentClassName')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
+                    "xmlns(db=http://docbook.org/ns/docbook) xpointer(id('$parentReference')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[1])"
                 );
                 $classSynopsis->appendChild($includeElement);
             }
@@ -1968,6 +1989,10 @@ class ClassInfo {
 
     public static function getClassSynopsisFilename(Name $name): string {
         return strtolower(implode('-', $name->parts));
+    }
+
+    public static function getClassSynopsisReference(Name $name): string {
+        return "class." . strtolower(implode('-', $name->parts));
     }
 
     /**
@@ -2107,15 +2132,15 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*\$\w+.*$/', $value, $matches);
-        } elseif ($this->name === "return") {
-            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)(\s+|$)/', $value, $matches);
+        } elseif ($this->name === "return" || $this->name === "var") {
+            preg_match('/^\s*([\w\|\\\\\[\]<>, ]+)\s*/', $value, $matches);
         }
 
         if (!isset($matches[1])) {
             throw new Exception("@$this->name doesn't contain a type or has an invalid format \"$value\"");
         }
 
-        return $matches[1];
+        return trim($matches[1]);
     }
 
     public function getVariableName(): string {
@@ -2310,14 +2335,14 @@ function parseProperty(
     ?DocComment $comment,
     PrettyPrinterAbstract $prettyPrinter
 ): PropertyInfo {
-    $docType = false;
+    $phpDocType = null;
     $isDocReadonly = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
         foreach ($tags as $tag) {
             if ($tag->name === 'var') {
-                $docType = true;
+                $phpDocType = $tag->getType();
             } elseif ($tag->name === 'readonly') {
                 $isDocReadonly = true;
             }
@@ -2325,7 +2350,7 @@ function parseProperty(
     }
 
     $propertyType = $type ? Type::fromNode($type) : null;
-    if ($propertyType === null && !$docType) {
+    if ($propertyType === null && !$phpDocType) {
         throw new Exception("Missing type for property $class::\$$property->name");
     }
 
@@ -2344,6 +2369,7 @@ function parseProperty(
         new PropertyName($class, $property->name->__toString()),
         $flags,
         $propertyType,
+        $phpDocType ? Type::fromString($phpDocType) : null,
         $property->default,
         $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
         $isDocReadonly

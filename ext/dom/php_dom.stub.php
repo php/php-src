@@ -564,7 +564,10 @@ class DOMDocument extends DOMNode implements DOMParentNode
 
 final class DOMException extends Exception
 {
-    /** @var int Intentionally left untyped */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var int
+     */
     public $code = 0;
 }
 
