@@ -1777,7 +1777,7 @@ class ClassInfo {
         $classSynopsis = $doc->createElement("classsynopsis");
         $classSynopsis->appendChild(new DOMText("\n    "));
 
-        $ooElement = self::createOoElement($doc, $this, false, false, 4);
+        $ooElement = self::createOoElement($doc, $this, true, false, false, 4);
         if (!$ooElement) {
             return null;
         }
@@ -1786,7 +1786,7 @@ class ClassInfo {
 
         $classSynopsisInfo = $doc->createElement("classsynopsisinfo");
         $classSynopsisInfo->appendChild(new DOMText("\n     "));
-        $ooElement = self::createOoElement($doc, $this, true, false, 5);
+        $ooElement = self::createOoElement($doc, $this, false, true, false, 5);
         if (!$ooElement) {
             return null;
         }
@@ -1800,7 +1800,14 @@ class ClassInfo {
                 throw new Exception("Missing parent class " . $parent->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $parentInfo, false, $k === 0 && $parentInfo->type === "class", 5);
+            $ooElement = self::createOoElement(
+                $doc,
+                $parentInfo,
+                $this->type === "interface",
+                false,
+                $k === 0,
+                5
+            );
             if (!$ooElement) {
                 return null;
             }
@@ -1815,7 +1822,7 @@ class ClassInfo {
                 throw new Exception("Missing implemented interface " . $interface->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false, 5);
+            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false, false, 5);
             if (!$ooElement) {
                 return null;
             }
@@ -1922,6 +1929,7 @@ class ClassInfo {
     private static function createOoElement(
         DOMDocument $doc,
         ClassInfo $classInfo,
+        bool $overrideToClass,
         bool $withModifiers,
         bool $isExtends,
         int $indentationLevel
@@ -1933,7 +1941,9 @@ class ClassInfo {
             return null;
         }
 
-        $ooElement = $doc->createElement('oo' . $classInfo->type);
+        $type = $overrideToClass ? "class" : $classInfo->type;
+
+        $ooElement = $doc->createElement("oo$type");
         $ooElement->appendChild(new DOMText("\n$indentation "));
         if ($isExtends) {
             $ooElement->appendChild($doc->createElement('modifier', 'extends'));
@@ -1949,7 +1959,7 @@ class ClassInfo {
             }
         }
 
-        $nameElement = $doc->createElement($classInfo->type . 'name', $classInfo->name->toString());
+        $nameElement = $doc->createElement("{$type}name", $classInfo->name->toString());
         $ooElement->appendChild($nameElement);
         $ooElement->appendChild(new DOMText("\n$indentation"));
 
