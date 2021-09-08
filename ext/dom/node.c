@@ -1002,7 +1002,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
-	int foundoldchild = 0, stricterror;
+	int stricterror;
 
 	int ret;
 
@@ -1043,42 +1043,32 @@ PHP_METHOD(DOMNode, replaceChild)
 		RETURN_FALSE;
 	}
 
-	/* check for the old child and whether the new child is already a child */
-	while (children) {
-		if (children == oldchild) {
-			foundoldchild = 1;
-			break;
-		}
-		children = children->next;
-	}
-
-	if (foundoldchild) {
-		if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
-			xmlNodePtr prevsib, nextsib;
-			prevsib = oldchild->prev;
-			nextsib = oldchild->next;
-
-			xmlUnlinkNode(oldchild);
-
-			newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
-			if (newchild) {
-				dom_reconcile_ns(nodep->doc, newchild);
-			}
-		} else if (oldchild != newchild) {
-			if (newchild->doc == NULL && nodep->doc != NULL) {
-				xmlSetTreeDoc(newchild, nodep->doc);
-				newchildobj->document = intern->document;
-				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
-			}
-			xmlReplaceNode(oldchild, newchild);
-			dom_reconcile_ns(nodep->doc, newchild);
-		}
-		DOM_RET_OBJ(oldchild, &ret, intern);
-		return;
-	} else {
+	if (oldchild->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
+
+	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNodePtr prevsib, nextsib;
+		prevsib = oldchild->prev;
+		nextsib = oldchild->next;
+
+		xmlUnlinkNode(oldchild);
+
+		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
+		if (newchild) {
+			dom_reconcile_ns(nodep->doc, newchild);
+		}
+	} else if (oldchild != newchild) {
+		if (newchild->doc == NULL && nodep->doc != NULL) {
+			xmlSetTreeDoc(newchild, nodep->doc);
+			newchildobj->document = intern->document;
+			php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
+		}
+		xmlReplaceNode(oldchild, newchild);
+		dom_reconcile_ns(nodep->doc, newchild);
+	}
+	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
 
