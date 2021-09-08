@@ -4831,7 +4831,11 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		if (may_throw) {
-			zend_jit_check_exception(Dst);
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			} else {
+				zend_jit_check_exception(Dst);
+			}
 		}
 		if (Z_MODE(res_addr) == IS_REG) {
 			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, res_var);
@@ -5167,7 +5171,11 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		if (may_throw) {
-			zend_jit_check_exception(Dst);
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			} else {
+				zend_jit_check_exception(Dst);
+			}
 		}
 		if (Z_MODE(res_addr) == IS_REG) {
 			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, res_var);
@@ -5281,7 +5289,11 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		if (may_throw) {
-			zend_jit_check_exception(Dst);
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			} else {
+				zend_jit_check_exception(Dst);
+			}
 		}
 #if 1
 		if ((op1_info & MAY_BE_STRING) && (op2_info & MAY_BE_STRING)) {
