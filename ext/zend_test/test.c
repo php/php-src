@@ -203,17 +203,17 @@ static ZEND_FUNCTION(zend_test_compile_string)
 {
 	zend_string *source_string = NULL;
 	zend_string *filename = NULL;
-	bool begin_initial = 0;
+	zend_long begin_state = ZEND_LEX_BEGIN_STATE_INITIAL;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)
 		Z_PARAM_STR(filename)
-		Z_PARAM_BOOL(begin_initial)
+		Z_PARAM_LONG(begin_state)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_op_array *op_array = NULL;
 
-	op_array = compile_string(source_string, ZSTR_VAL(filename), begin_initial);
+	op_array = compile_string(source_string, ZSTR_VAL(filename), begin_state);
 
 	if (op_array) {
 		zval retval;

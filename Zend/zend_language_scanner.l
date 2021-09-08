@@ -782,7 +782,7 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-zend_op_array *compile_string(zend_string *source_string, const char *filename, bool begin_initial)
+zend_op_array *compile_string(zend_string *source_string, const char *filename, zend_lex_begin_state begin_state)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
@@ -799,11 +799,19 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename, 
 	filename_str = zend_string_init(filename, strlen(filename), 0);
 	zend_prepare_string_for_scanning(&tmp, filename_str);
 	zend_string_release(filename_str);
-	if (begin_initial) {
-		BEGIN(INITIAL);
-	} else {
-		BEGIN(ST_IN_SCRIPTING);
+
+	switch (begin_state) {
+		case ZEND_LEX_BEGIN_STATE_SHEBANG:
+			BEGIN(SHEBANG);
+			break;
+		case ZEND_LEX_BEGIN_STATE_INITIAL:
+			BEGIN(INITIAL);
+			break;
+		case ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING:
+			BEGIN(ST_IN_SCRIPTING);
+			break;
 	}
+
 	op_array = zend_compile(ZEND_EVAL_CODE);
 
 	zend_restore_lexical_state(&original_lex_state);

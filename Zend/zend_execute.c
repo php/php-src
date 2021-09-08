@@ -4394,7 +4394,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code");
-				new_op_array = zend_compile_string(inc_filename, eval_desc, 0);
+				new_op_array = zend_compile_string(inc_filename, eval_desc, ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING);
 				efree(eval_desc);
 			}
 			break;
