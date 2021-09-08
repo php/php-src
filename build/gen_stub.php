@@ -2911,13 +2911,15 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    "/<phpdoc:classref\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
-                    "/<phpdoc:classref\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
+                    "/<phpdoc:(classref|exceptionref)\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
                 ],
                 [
                     "&$1",
-                    "<phpdoc:classref xml:id=\"$4\" xmlns:phpdoc=\"$1\" xmlns=\"$2\" xmlns:xi=\"$4\">",
-                    "<phpdoc:classref xml:id=\"$5\" xmlns:phpdoc=\"$1\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
+                    "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
+                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
+                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
                 ],
                 $replacedXml
             );
