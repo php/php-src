@@ -4157,9 +4157,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_TRACE_TYPE();
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
-						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
-							break;
-						}
 						if (!zend_jit_supported_binary_op(
 								opline->extended_value, op1_info, op2_info)) {
 							break;
@@ -4184,11 +4181,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_ASSIGN_DIM_OP:
-						if (opline->extended_value == ZEND_POW
-						 || opline->extended_value == ZEND_DIV) {
-							// TODO: check for division by zero ???
-							break;
-						}
 						if (opline->result_type != IS_UNUSED) {
 							break;
 						}

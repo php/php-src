@@ -2070,6 +2070,9 @@ failure:
 
 static bool zend_jit_supported_binary_op(zend_uchar op, uint32_t op1_info, uint32_t op2_info)
 {
+	if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+		return false;
+	}
 	switch (op) {
 		case ZEND_POW:
 		case ZEND_DIV:
@@ -2522,9 +2525,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
-						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
-							break;
-						}
 						if (!zend_jit_supported_binary_op(
 								opline->extended_value, op1_info, op2_info)) {
 							break;
