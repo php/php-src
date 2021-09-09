@@ -1388,7 +1388,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && (ssa->var_info[result_var].type & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
 						int use = ssa->vars[result_var].use_chain;
 
-						if (op_array->opcodes[use].opcode == ZEND_IS_SMALLER
+						if (use >= 0 && op_array->opcodes[use].opcode == ZEND_IS_SMALLER
 						 && ssa->ops[use].op1_use == result_var
 						 && zend_dfa_try_to_replace_result(op_array, ssa, op_1, v)) {
 							opline->opcode = ZEND_PRE_INC;
@@ -1402,7 +1402,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && (ssa->var_info[result_var].type & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) == 0) {
 						int use = ssa->vars[result_var].use_chain;
 
-						if (op_array->opcodes[use].opcode == ZEND_IS_SMALLER
+						if (use >= 0 && op_array->opcodes[use].opcode == ZEND_IS_SMALLER
 						 && ssa->ops[use].op2_use == result_var
 						 && zend_dfa_try_to_replace_result(op_array, ssa, op_1, v)) {
 							opline->opcode = ZEND_PRE_DEC;
