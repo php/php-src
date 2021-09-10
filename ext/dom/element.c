@@ -1157,11 +1157,9 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 			xmlAddID(NULL, attrp->doc, id_val, attrp);
 			xmlFree(id_val);
 		}
-	} else {
-		if (attrp->atype == XML_ATTRIBUTE_ID) {
-			xmlRemoveID(attrp->doc, attrp);
-			attrp->atype = 0;
-		}
+	} else if (is_id == 0 && attrp->atype == XML_ATTRIBUTE_ID) {
+		xmlRemoveID(attrp->doc, attrp);
+		attrp->atype = 0;
 	}
 }
 /* }}} */
