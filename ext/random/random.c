@@ -702,6 +702,10 @@ PHP_MINIT_FUNCTION(random)
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP",     MT_RAND_PHP, CONST_CS | CONST_PERSISTENT);
 
+	RANDOM_G(lcg_seeded) = 0;
+	RANDOM_G(mt_rand_is_seeded) = 0;
+	RANDOM_G(random_fd) = -1;
+
 	return SUCCESS;
 }
 /* }}} */
@@ -720,6 +724,7 @@ PHP_MSHUTDOWN_FUNCTION(random)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(random)
 {
+	RANDOM_G(lcg_seeded) = 0;
 	RANDOM_G(mt_rand_is_seeded) = 0;
 
 	return SUCCESS;
