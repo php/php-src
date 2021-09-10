@@ -43,6 +43,8 @@ ZEND_GET_MODULE(spl_fixedarray)
 typedef struct _spl_fixedarray { /* {{{ */
 	zend_long size;
 	zval *elements;
+	unsigned int is_resizing:1;
+	unsigned int reserved:31;
 } spl_fixedarray;
 /* }}} */
 
@@ -88,6 +90,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size) /* {{{ */
 		array->elements = NULL;
 		array->size = 0;
 	}
+	array->is_resizing = 0;
 }
 /* }}} */
 
@@ -103,6 +106,8 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 		spl_fixedarray_init(array, size);
 		return;
 	}
+
+	array->is_resizing = 1;
 
 	/* clearing the array */
 	if (size == 0) {
@@ -129,6 +134,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 	}
 
 	array->size = size;
+	array->is_resizing = 0;
 }
 /* }}} */
 
@@ -737,6 +743,11 @@ SPL_METHOD(SplFixedArray, setSize)
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
+
+	if (intern->array.is_resizing) {
+		zend_throw_exception_ex(spl_ce_LogicException, 0, "recursive resize is not allowed");
+		return;
+	}
 
 	spl_fixedarray_resize(&intern->array, size);
 	RETURN_TRUE;
