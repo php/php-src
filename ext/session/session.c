@@ -40,7 +40,6 @@
 #include "ext/random/php_random.h"
 #include "ext/standard/php_var.h"
 #include "ext/date/php_date.h"
-#include "ext/random/php_random.h"
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/info.h"
 #include "zend_smart_str.h"
