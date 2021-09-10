@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
     (Viktor Volkov)
 
+- PCRE:
+  . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
+
 23 Dep 2021, PHP 7.4.24
 
 - Core:
