@@ -3969,6 +3969,8 @@ static EVP_PKEY *php_openssl_pkey_init_dsa(zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 
+	*is_private = false;
+
 	if (!ctx || !bld || !p || !q || !g) {
 		goto cleanup;
 	}
@@ -4140,6 +4142,8 @@ static EVP_PKEY *php_openssl_pkey_init_dh(zval *data, bool *is_private)
 	OPENSSL_PKEY_SET_BN(data, priv_key);
 	OPENSSL_PKEY_SET_BN(data, pub_key);
 
+	*is_private = false;
+
 	if (!ctx || !bld || !p || !g) {
 		goto cleanup;
 	}
@@ -4233,6 +4237,8 @@ static bool php_openssl_pkey_init_legacy_ec(EC_KEY *eckey, zval *data, bool *is_
 	zval *x;
 	zval *y;
 
+	*is_private = false;
+
 	if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1)) != NULL &&
 			Z_TYPE_P(bn) == IS_STRING) {
 		int nid = OBJ_sn2nid(Z_STRVAL_P(bn));
@@ -4257,7 +4263,6 @@ static bool php_openssl_pkey_init_legacy_ec(EC_KEY *eckey, zval *data, bool *is_
 	}
 
 	// The public key 'pnt' can be calculated from 'd' or is defined by 'x' and 'y'
-	*is_private = false;
 	if ((bn = zend_hash_str_find(Z_ARRVAL_P(data), "d", sizeof("d") - 1)) != NULL &&
 			Z_TYPE_P(bn) == IS_STRING) {
 		*is_private = true;
@@ -4337,6 +4342,8 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 	OPENSSL_PKEY_SET_BN(data, d);
 	OPENSSL_PKEY_SET_BN(data, x);
 	OPENSSL_PKEY_SET_BN(data, y);
+
+	*is_private = false;
 
 	if (!ctx || !bld || !curve_name_zv || Z_TYPE_P(curve_name_zv) != IS_STRING) {
 		goto cleanup;
