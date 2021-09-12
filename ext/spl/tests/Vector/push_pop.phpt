@@ -20,12 +20,20 @@ expect_throws(fn() => $it->pop());
 $it->push(strtoupper('test'));
 $it->push(['literal']);
 $it->push(new stdClass());
+$it[] = strtoupper('test2');
+$it[] = null;
 echo json_encode($it), "\n";
 printf("count=%d capacity=%d\n", count($it), $it->capacity());
 var_dump($it->pop());
 var_dump($it->pop());
-echo "After popping 2 elements: ", json_encode($it->toArray()), "\n";
 var_dump($it->pop());
+var_dump($it->pop());
+echo "After popping 4 elements: ", json_encode($it->toArray()), "\n";
+var_dump($it->pop());
+echo json_encode($it), "\n";
+printf("count=%d capacity=%d\n", count($it), $it->capacity());
+echo "After shrinkToFit\n";
+$it->shrinkToFit();
 echo json_encode($it), "\n";
 printf("count=%d capacity=%d\n", count($it), $it->capacity());
 
@@ -35,15 +43,20 @@ Test empty vector
 count=0 capacity=0
 Caught UnderflowException: Cannot pop from empty Vector
 Caught UnderflowException: Cannot pop from empty Vector
-["TEST",["literal"],{}]
-count=3 capacity=4
+["TEST",["literal"],{},"TEST2",null]
+count=5 capacity=8
+NULL
+string(5) "TEST2"
 object(stdClass)#2 (0) {
 }
 array(1) {
   [0]=>
   string(7) "literal"
 }
-After popping 2 elements: ["TEST"]
+After popping 4 elements: ["TEST"]
 string(4) "TEST"
 []
 count=0 capacity=4
+After shrinkToFit
+[]
+count=0 capacity=0

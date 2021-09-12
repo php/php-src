@@ -1043,15 +1043,8 @@ PHP_METHOD(Vector, offsetSet)
 	spl_vector_set_value_at_offset(Z_OBJ_P(ZEND_THIS), offset, value);
 }
 
-PHP_METHOD(Vector, push)
+static zend_always_inline void spl_vector_push(spl_vector *intern, zval *value)
 {
-	zval *value;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
-
-	spl_vector *intern = Z_VECTOR_P(ZEND_THIS);
 	const size_t old_size = intern->array.size;
 	const size_t old_capacity = intern->array.capacity;
 
@@ -1061,6 +1054,17 @@ PHP_METHOD(Vector, push)
 	}
 	ZVAL_COPY(&intern->array.entries[old_size], value);
 	intern->array.size++;
+}
+
+PHP_METHOD(Vector, push)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	spl_vector_push(Z_VECTOR_P(ZEND_THIS), value);
 }
 
 PHP_METHOD(Vector, pop)
@@ -1134,27 +1138,27 @@ PHP_METHOD(Vector, jsonSerialize)
 
 static void spl_vector_write_dimension(zend_object *object, zval *offset_zv, zval *value)
 {
+	spl_vector *intern = spl_vector_from_object(object);
 	if (!offset_zv) {
-		zend_throw_exception(spl_ce_RuntimeException, "[] operator not supported for Vector", 0);
+		spl_vector_push(intern, value);
 		return;
 	}
 
 	zend_long offset;
 	CONVERT_OFFSET_TO_LONG_OR_THROW(offset, offset_zv);
 
-	const spl_vector *intern = spl_vector_from_object(object);
 	if (offset < 0 || offset >= intern->array.size) {
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	}
+	ZVAL_DEREF(value);
 	spl_vector_set_value_at_offset(object, offset, value);
 }
 
 static zval *spl_vector_read_dimension(zend_object *object, zval *offset_zv, int type, zval *rv)
 {
-	if (!offset_zv) {
-		zend_throw_exception(spl_ce_RuntimeException, "[] operator not supported for Vector", 0);
-		return NULL;
+	if (UNEXPECTED(!offset_zv || Z_ISUNDEF_P(offset_zv))) {
+		return &EG(uninitialized_zval);
 	}
 
 	zend_long offset;
@@ -1162,7 +1166,7 @@ static zval *spl_vector_read_dimension(zend_object *object, zval *offset_zv, int
 
 	const spl_vector *intern = spl_vector_from_object(object);
 
-	if (offset < 0 || offset >= intern->array.size) {
+	if (UNEXPECTED(offset < 0 || offset >= intern->array.size)) {
 		if (type != BP_VAR_IS) {
 			zend_throw_exception(spl_ce_OutOfBoundsException, "Index out of range", 0);
 		}
@@ -1170,6 +1174,31 @@ static zval *spl_vector_read_dimension(zend_object *object, zval *offset_zv, int
 	} else {
 		return &intern->array.entries[offset];
 	}
+}
+
+static int spl_vector_has_dimension(zend_object *object, zval *offset_zv, int check_empty)
+{
+	zend_long offset;
+	if (UNEXPECTED(Z_TYPE_P(offset_zv) != IS_LONG)) {
+		offset = spl_offset_convert_to_long(offset_zv);
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
+	} else {
+		offset = Z_LVAL_P(offset_zv);
+	}
+
+	const spl_vector *intern = spl_vector_from_object(object);
+
+	if (UNEXPECTED(offset < 0 || offset >= intern->array.size)) {
+		return 0;
+	}
+
+	zval *val = &intern->array.entries[offset];
+	if (check_empty) {
+		return zend_is_true(val);
+	}
+	return Z_TYPE_P(val) != IS_NULL;
 }
 
 PHP_MINIT_FUNCTION(spl_vector)
@@ -1189,6 +1218,7 @@ PHP_MINIT_FUNCTION(spl_vector)
 
 	spl_handler_Vector.read_dimension  = spl_vector_read_dimension;
 	spl_handler_Vector.write_dimension = spl_vector_write_dimension;
+	spl_handler_Vector.has_dimension   = spl_vector_has_dimension;
 
 	spl_ce_Vector->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 	spl_ce_Vector->get_iterator = spl_vector_get_iterator;
