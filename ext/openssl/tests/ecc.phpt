@@ -6,9 +6,11 @@ openssl
 <?php if (!defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
 --FILE--
 <?php
+$config =  __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
 $args = array(
     "curve_name" => "secp384r1",
     "private_key_type" => OPENSSL_KEYTYPE_EC,
+    "config" => $config,
 );
 echo "Testing openssl_pkey_new\n";
 $key1 = openssl_pkey_new($args);
@@ -17,6 +19,7 @@ var_dump($key1);
 $argsFailed = array(
     "curve_name" => "invalid_cuve_name",
     "private_key_type" => OPENSSL_KEYTYPE_EC,
+    "config" => $config,
 );
 
 $keyFailed = openssl_pkey_new($argsFailed);

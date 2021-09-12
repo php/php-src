@@ -100,18 +100,19 @@ echo "\n";
 $err_pem_no_start_line = '0480006C';
 
 // PKEY
+$options = ['config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf'];
 echo "PKEY errors\n";
 // file for pkey (file:///) fails when opennig (BIO_new_file)
-@openssl_pkey_export_to_file("file://" . $invalid_file_for_read, $output_file);
+@openssl_pkey_export_to_file("file://" . $invalid_file_for_read, $output_file, null, $options);
 expect_openssl_errors('openssl_pkey_export_to_file opening', ['10000080']);
 // file or private pkey is not correct PEM - failing PEM_read_bio_PrivateKey
-@openssl_pkey_export_to_file($csr_file, $output_file);
+@openssl_pkey_export_to_file($csr_file, $output_file, null, $options);
 expect_openssl_errors('openssl_pkey_export_to_file pem', ['1E08010C']);
 // file to export cannot be written
-@openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
+@openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write, null, $options);
 expect_openssl_errors('openssl_pkey_export_to_file write', ['10080002']);
 // successful export
-@openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
+@openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd', $options);
 expect_openssl_errors('openssl_pkey_export', ['1C800064', '04800065']);
 // invalid x509 for getting public key
 @openssl_pkey_get_public($private_key_file);
