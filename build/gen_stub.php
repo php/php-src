@@ -71,14 +71,16 @@ function processStubFile(string $stubFile, Context $context): ?FileInfo {
         }
 
         if ($fileInfo->generateLegacyArginfo) {
-            foreach ($fileInfo->getAllFuncInfos() as $funcInfo) {
+            $legacyFileInfo = clone $fileInfo;
+
+            foreach ($legacyFileInfo->getAllFuncInfos() as $funcInfo) {
                 $funcInfo->discardInfoForOldPhpVersions();
             }
-            foreach ($fileInfo->getAllPropertyInfos() as $propertyInfo) {
+            foreach ($legacyFileInfo->getAllPropertyInfos() as $propertyInfo) {
                 $propertyInfo->discardInfoForOldPhpVersions();
             }
 
-            $arginfoCode = generateArgInfoCode($fileInfo, $stubHash);
+            $arginfoCode = generateArgInfoCode($legacyFileInfo, $stubHash);
             if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($legacyFile, $arginfoCode)) {
                 echo "Saved $legacyFile\n";
             }
@@ -1324,6 +1326,14 @@ class FuncInfo {
 
         return $methodSynopsis;
     }
+
+    public function __clone()
+    {
+        foreach ($this->args as $key => $argInfo) {
+            $this->args[$key] = clone $argInfo;
+        }
+        $this->return = clone $this->return;
+    }
 }
 
 function initializeZval(string $zvalName, $value): string
@@ -1554,6 +1564,13 @@ class PropertyInfo
         );
 
         return $evaluator->evaluateDirectly($this->defaultValue);
+    }
+
+    public function __clone()
+    {
+        if ($this->type) {
+            $this->type = clone $this->type;
+        }
     }
 }
 
@@ -2045,6 +2062,17 @@ class ClassInfo {
 
         return $includeElement;
     }
+
+    public function __clone()
+    {
+        foreach ($this->propertyInfos as $key => $propertyInfo) {
+            $this->propertyInfos[$key] = clone $propertyInfo;
+        }
+
+        foreach ($this->funcInfos as $key => $funcInfo) {
+            $this->funcInfos[$key] = clone $funcInfo;
+        }
+    }
 }
 
 class FileInfo {
@@ -2077,6 +2105,17 @@ class FileInfo {
     public function getAllPropertyInfos(): iterable {
         foreach ($this->classInfos as $classInfo) {
             yield from $classInfo->propertyInfos;
+        }
+    }
+
+    public function __clone()
+    {
+        foreach ($this->funcInfos as $key => $funcInfo) {
+            $this->funcInfos[$key] = clone $funcInfo;
+        }
+
+        foreach ($this->classInfos as $key => $classInfo) {
+            $this->classInfos[$key] = clone $classInfo;
         }
     }
 }
