@@ -569,8 +569,8 @@ PHP_METHOD(PDO, prepare)
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
 
 		stmt->select_all = 0;
-		if (php_stristr(Z_STR_P(stmt->query_string), "select", sizeof(stmt->query_string) - 1, sizeof("select") - 1) &&
-			php_stristr(Z_STR_P(stmt->query_string), "*", sizeof(stmt->query_string) - 1, sizeof("*") - 1)) {
+		if (php_stristr(ZSTR_VAL(stmt->query_string), "select", sizeof(stmt->query_string) - 1, sizeof("select") - 1) &&
+			php_stristr(ZSTR_VAL(stmt->query_string), "*", sizeof(stmt->query_string) - 1, sizeof("*") - 1)) {
 			stmt->select_all = 1;
 		}
 		return;
