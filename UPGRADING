@@ -109,7 +109,7 @@ PHP 8.1 UPGRADE NOTES
   . mysqli::connect() will now return true instead of null on success.
 
 - MySQLnd:
-  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
+  . The mysqlnd.fetch_data_copy ini setting has been removed. However, this
     should not result in user-visible behavior changes.
 
 - OpenSSL:
