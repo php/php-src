@@ -33,6 +33,7 @@
 #include "spl_observer.h"
 #include "spl_dllist.h"
 #include "spl_fixedarray.h"
+#include "spl_vector.h"
 #include "spl_heap.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -708,6 +709,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_dllist)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_vector)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
