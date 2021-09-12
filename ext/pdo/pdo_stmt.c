@@ -461,6 +461,13 @@ PHP_METHOD(PDOStatement, execute)
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt)) {
+		/* When selecting all fields,
+		 * we have to check column name and reload columns descriptions to prevent a column name change. */
+		if (stmt->select_all) {
+			pdo_stmt_reset_columns(stmt);
+			stmt->executed = 0;
+		}
+
 		if (!stmt->executed) {
 			/* this is the first execute */
 

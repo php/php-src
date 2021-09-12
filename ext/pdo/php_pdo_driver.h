@@ -558,6 +558,8 @@ struct _pdo_stmt_t {
 	/* if true, we've already successfully executed this statement at least
 	 * once */
 	unsigned executed:1;
+	/* if true, it means select all fields */
+	unsigned select_all:1;
 	/* if true, the statement supports placeholders and can implement
 	 * bindParam() for its prepared statements, if false, PDO should
 	 * emulate prepare and bind on its behalf */

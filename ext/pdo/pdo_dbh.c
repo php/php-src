@@ -25,6 +25,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
@@ -566,6 +567,12 @@ PHP_METHOD(PDO, prepare)
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
+
+		stmt->select_all = 0;
+		if (php_stristr(stmt->query_string, "select", sizeof(stmt->query_string) - 1, sizeof("select") - 1) &&
+			php_stristr(stmt->query_string, "*", sizeof(stmt->query_string) - 1, sizeof("*") - 1)) {
+			stmt->select_all = 1;
+		}
 		return;
 	}
 
