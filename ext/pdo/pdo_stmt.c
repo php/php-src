@@ -464,7 +464,7 @@ PHP_METHOD(PDOStatement, execute)
 		/* When selecting all fields,
 		 * we have to check column name and reload columns descriptions to prevent a column name change. */
 		if (stmt->select_all && stmt->columns) {
-			pdo_stmt_reset_columns(stmt);
+			php_pdo_stmt_set_column_count(stmt, stmt->column_count);
 			stmt->executed = 0;
 		}
 
