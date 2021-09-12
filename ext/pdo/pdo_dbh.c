@@ -579,6 +579,8 @@ PHP_METHOD(PDO, prepare)
 			php_stristr(query_string_val, wildcard, query_string_len, sizeof("*") - 1)) {
 			stmt->select_all = 1;
 		}
+		efree(action);
+		efree(wildcard);
 		return;
 	}
 
