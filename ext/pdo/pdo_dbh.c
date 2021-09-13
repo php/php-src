@@ -586,8 +586,7 @@ PHP_METHOD(PDO, prepare)
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
-
-
+		pdo_stmt_check_select_all(stmt);
 		return;
 	}
 
