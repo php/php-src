@@ -308,7 +308,10 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 	if (UNEXPECTED(*(ZEND_OP_TRACE_INFO(opline, offset)->counter) <= 0)) {
 		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_COUNTER_INIT;
 		if (UNEXPECTED(zend_jit_trace_hot_root(execute_data, opline) < 0)) {
-#ifndef HAVE_GCC_GLOBAL_REGS
+#ifdef HAVE_GCC_GLOBAL_REGS
+			opline = NULL;
+			return;
+#else
 			return -1;
 #endif
 		}
