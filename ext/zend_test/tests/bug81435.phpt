@@ -1,9 +1,12 @@
 --TEST--
 Bug #81435 (Observer current_observed_frame may point to an old (overwritten) frame)
+--EXTENSIONS--
+zend_test
 --INI--
 memory_limit=20M
 zend_test.observer.enabled=1
 zend_test.observer.observe_function_names=a,d
+opcache.optimization_level=0
 --FILE--
 <?php
 
