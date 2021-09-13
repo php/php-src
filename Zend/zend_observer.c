@@ -228,7 +228,10 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
 		current_observed_frame = NULL;
 	} else {
 		zend_execute_data *ex = execute_data->prev_execute_data;
-		while (ex && !ex->func) {
+		while (ex && (!ex->func || ex->func->type == ZEND_INTERNAL_FUNCTION
+		          || !ZEND_OBSERVABLE_FN(ex->func->common.fn_flags)
+		          || !ZEND_OBSERVER_DATA(&ex->func->op_array)
+		          || ZEND_OBSERVER_DATA(&ex->func->op_array) == ZEND_OBSERVER_NOT_OBSERVED)) {
 			ex = ex->prev_execute_data;
 		}
 		current_observed_frame = ex;
