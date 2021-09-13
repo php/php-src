@@ -2,7 +2,7 @@
 Bug #78227 Prepared statements ignore RENAME COLUMN
 --EXTENSIONS--
 pdo
---SKIPIF--
+--FILE--
 <?php
 $db = new PDO('sqlite::memory:');
 $db->exec("CREATE TABLE user (id INTEGER PRIMARY KEY NOT NULL, foo VARCHAR(255) NOT NULL)");

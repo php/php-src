@@ -569,7 +569,6 @@ PHP_METHOD(PDO, prepare)
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
 
 		stmt->select_all = 0;
-
 		char *action = estrdup("select");
 		char *wildcard = estrdup("*");
 		char *query_string_val = ZSTR_VAL(stmt->query_string);
