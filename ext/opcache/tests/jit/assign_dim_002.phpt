@@ -120,6 +120,13 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+function array_access_undef() {
+    $ao = new ArrayObject;
+    $ao[0] = $undef;
+    var_dump($ao[0]);
+}
+
+array_access_undef();
 ?>
 --EXPECTF--
 array(1) {
@@ -215,3 +222,6 @@ array(1) {
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Illegal offset type
+
+Warning: Undefined variable $undef in %s on line %d
+NULL
