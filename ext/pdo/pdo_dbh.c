@@ -489,16 +489,14 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 static void pdo_stmt_check_select_all(pdo_stmt_t *stmt) /* {{{ */
 {
-	stmt->select_all = 0;
-
 	zend_string *statement = zend_string_dup(stmt->query_string, 0);
 	char *query_string_val = ZSTR_VAL(statement));
 	size_t query_string_len = ZSTR_LEN(statement);
+	const char *end = query_string_val + query_string_len;
 	php_strtolower(query_string_val, query_string_len);
 
-	if (php_memnstr(query_string_val, "select", sizeof("select") - 1, query_string_val + query_string_len) &&
-		php_memnstr(query_string_val, "*", sizeof("*") - 1, query_string_val + query_string_len)
-	) {
+	stmt->select_all = 0;
+	if (php_memnstr(query_string_val, "select", sizeof("select") - 1, end) && php_memnstr(query_string_val, "*", sizeof("*") - 1, end)) {
 		stmt->select_all = 1;
 	}
 
