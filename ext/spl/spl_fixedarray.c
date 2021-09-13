@@ -390,13 +390,11 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		return;
 	} else {
 		/* Fix #81429 */
-		zval *const ptr = &(intern->array.elements[index]);
+		zval *ptr = &(intern->array.elements[index]);
 		zval tmp;
 		ZVAL_COPY_VALUE(&tmp, ptr);
 		ZVAL_COPY_DEREF(ptr, value);
-		if (!Z_ISUNDEF(tmp)) {
-			zval_ptr_dtor(&tmp);
-		}
+		zval_ptr_dtor(&tmp);
 	}
 }
 /* }}} */
