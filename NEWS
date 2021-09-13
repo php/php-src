@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC2
 
+- DOM:
+  . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
+    (Viktor Volkov)
+
 - Shmop:
   . Fixed bug #81407 (shmop_open won't attach and causes php to crash). (cmb)
 
