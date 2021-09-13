@@ -435,7 +435,8 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	} else {
 		const zend_op *end = call_info->caller_call_opline;
 
-		if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
+		/* end may be null if an opcode like EXIT is part of the argument list. */
+		if (!end || end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
 			/* INIT_FCALL and DO_FCALL in different BasicBlocks */
 			return 1;
 		}
