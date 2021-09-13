@@ -88,9 +88,15 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-/* workaround typo in system libgd 2.3.0 */
-#if defined(GD_FLIP_HORINZONTAL) && !defined(GD_FLIP_HORIZONTAL)
-#define GD_FLIP_HORIZONTAL GD_FLIP_HORINZONTAL
+/* not used in libgd, so going to be removed */
+#ifndef GD_FLIP_HORIZONTAL
+#define GD_FLIP_HORIZONTAL 1
+#endif
+#ifndef GD_FLIP_VERTICAL
+#define GD_FLIP_VERTICAL   2
+#endif
+#ifndef GD_FLIP_BOTH
+#define GD_FLIP_BOTH       3
 #endif
 
 #ifdef HAVE_GD_FREETYPE
