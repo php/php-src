@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #81409 (Incorrect JIT code for ADD with a reference to array).
     (Dmitry)
 
+- PCRE:
+  . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
+
 - Zip:
   . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)
 

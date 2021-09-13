@@ -11228,7 +11228,7 @@ early_fail_type = (early_fail_ptr & 0x7);
 early_fail_ptr >>= 3;
 
 /* During recursion, these optimizations are disabled. */
-if (common->early_fail_start_ptr == 0)
+if (common->early_fail_start_ptr == 0 && common->fast_forward_bc_ptr == NULL)
   {
   early_fail_ptr = 0;
   early_fail_type = type_skip;
