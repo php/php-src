@@ -411,6 +411,15 @@ static void accel_interned_strings_restore_state(void)
 	n = 0;
 	if (EXPECTED(s < top)) {
 		do {
+			if (ZSTR_HAS_CE_CACHE(s)) {
+				/* Discard non-global CE_CACHE slots on reset. */
+				uintptr_t idx = (GC_REFCOUNT(s) - 1) / sizeof(void *);
+				if (idx >= ZCSG(map_ptr_last)) {
+					GC_SET_REFCOUNT(s, 2);
+					GC_DEL_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+				}
+			}
+
 			hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), ZSTR_H(s));
 			STRTAB_COLLISION(s) = *hash_slot;
 			*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
