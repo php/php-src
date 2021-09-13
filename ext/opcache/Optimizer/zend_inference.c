@@ -4558,9 +4558,11 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 				/* Destructor may throw. */
 				return 1;
+			} else {
+				zval *value = (zval*)((char*)op_array->static_variables + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT)));
+				/* May throw if initializer is CONSTANT_AST. */
+				return Z_TYPE_P(value) == IS_CONSTANT_AST;
 			}
-			/* TODO: May not throw if initializer is not CONSTANT_AST. */
-			return 1;
 		case ZEND_ASSIGN_DIM:
 			if ((opline+1)->op1_type == IS_CV) {
 				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {
