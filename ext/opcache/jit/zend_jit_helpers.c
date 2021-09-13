@@ -1239,6 +1239,13 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_rw_helper(zval *object_ptr, zva
 
 static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value, zval *result)
 {
+	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		const zend_op *op_data = EG(current_execute_data)->opline + 1;
+		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+		zend_jit_undefined_op_helper(op_data->op1.var);
+		value = &EG(uninitialized_zval);
+	}
+
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 		ZVAL_DEREF(value);
 		Z_OBJ_HT_P(object_ptr)->write_dimension(Z_OBJ_P(object_ptr), dim, value);

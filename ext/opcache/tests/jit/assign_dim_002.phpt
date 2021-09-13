@@ -81,6 +81,15 @@ function foo5() {
 }
 var_dump(foo5());
 
+
+function array_access_undef() {
+    $ao = new ArrayObject;
+    $ao[0] = $undef;
+    var_dump($ao[0]);
+}
+
+array_access_undef();
+
 ?>
 --EXPECTF--
 array(1) {
@@ -136,3 +145,6 @@ array(1) {
 }
 Cannot use a scalar value as an array
 int(1)
+
+Warning: Undefined variable $undef in %s on line %d
+NULL
