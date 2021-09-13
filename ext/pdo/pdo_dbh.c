@@ -489,8 +489,9 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 static void pdo_stmt_check_select_all(pdo_stmt_t *stmt) /* {{{ */
 {
+	/* Avoid polluting stmt->query_string */
 	zend_string *statement = zend_string_dup(stmt->query_string, 0);
-	char *query_string_val = ZSTR_VAL(statement));
+	char *query_string_val = ZSTR_VAL(statement);
 	size_t query_string_len = ZSTR_LEN(statement);
 	const char *end = query_string_val + query_string_len;
 	php_strtolower(query_string_val, query_string_len);
