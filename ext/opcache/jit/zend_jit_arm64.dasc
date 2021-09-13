@@ -2358,7 +2358,8 @@ static int zend_jit_trace_halt_stub(dasm_State **Dst)
 		|	EXT_JMP zend_jit_halt_op->handler, REG0
 	} else if (GCC_GLOBAL_REGS) {
 		|	ldp x29, x30, [sp], # SPAD    // stack alignment
-		|	ret // PC must be zero
+		|	mov IP, xzr                   // PC must be zero
+		|	ret
 	} else {
 		|	ldp FP, RX, T2                // retore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
