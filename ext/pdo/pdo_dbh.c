@@ -487,6 +487,29 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 }
 /* }}} */
 
+static void pdo_stmt_check_select_all(pdo_stmt_t *stmt) /* {{{ */
+{
+	stmt->select_all = 0;
+	char *action = estrdup("select");
+	char *wildcard = estrdup("*");
+
+	zend_string *statement = zend_string_dup(stmt->query_string, 0);
+	char *query_string_val = ZSTR_VAL(statement));
+	size_t query_string_len = ZSTR_LEN(statement);
+	php_strtolower(query_string_val, query_string_len);
+
+	if (php_memnstr(query_string_val, action, sizeof("select") - 1, query_string_val + query_string_len) &&
+		php_memnstr(query_string_val, wildcard, sizeof("*") - 1, query_string_val + query_string_len)
+	) {
+		stmt->select_all = 1;
+	}
+
+	efree(action);
+	efree(wildcard);
+	zend_string_release(statement);
+}
+/* }}} */
+
 /* {{{ Prepares a statement for execution and returns a statement object */
 PHP_METHOD(PDO, prepare)
 {
@@ -568,18 +591,7 @@ PHP_METHOD(PDO, prepare)
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
 
-		stmt->select_all = 0;
-		char *action = estrdup("select");
-		char *wildcard = estrdup("*");
-		char *query_string_val = ZSTR_VAL(stmt->query_string);
-		size_t query_string_len = ZSTR_LEN(stmt->query_string);
 
-		if (php_stristr(query_string_val, action, query_string_len, sizeof("select") - 1) &&
-			php_stristr(query_string_val, wildcard, query_string_len, sizeof("*") - 1)) {
-			stmt->select_all = 1;
-		}
-		efree(action);
-		efree(wildcard);
 		return;
 	}
 
