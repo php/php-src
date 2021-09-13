@@ -40,5 +40,5 @@ a();
   </d>
   <!-- init bailout() -->
 
-Fatal error: Allowed memory size of 20971520 bytes exhausted at %s (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 20971520 bytes exhausted %s in %s on line %d
 </a>
