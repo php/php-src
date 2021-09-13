@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.12
 
+- Core:
+  . Fixed bug #81435 (Observer current_observed_frame may point to an old
+    (overwritten) frame). (Bob)
+
 - DOM:
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
     (Viktor Volkov)
