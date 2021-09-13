@@ -1,0 +1,31 @@
+--TEST--
+Bug #81433 (DOMElement::setIdAttribute(attr, true) called twice removes ID)
+--SKIPIF--
+<?php
+require_once('skipif.inc');
+if (LIBXML_VERSION >= 20912) die('skip For libxml2 < 2.9.12 only');
+?>
+--FILE--
+<?php
+$dom = new DOMDocument('1.0', 'utf-8');
+
+$element = $dom->createElement('test', 'root');
+
+$dom->appendChild($element);
+
+$element->setAttribute("id", 123);
+$element->setIdAttribute("id", true);
+
+$node = $element->getAttributeNode("id");
+var_dump($node->isId());
+
+$element->setIdAttribute("id", true);
+var_dump($node->isId());
+?>
+--CLEAN--
+<?php
+unlink(__DIR__ . '/81433.html');
+?>
+--EXPECT--
+bool(true)
+bool(true)
