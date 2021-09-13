@@ -1528,7 +1528,7 @@ class PropertyInfo
         }
 
         $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-        $fieldsynopsisElement->appendChild($this->getFieldSynopsisSynopsisType()->getTypeForDoc($doc));
+        $fieldsynopsisElement->appendChild($this->getFieldSynopsisType()->getTypeForDoc($doc));
 
         $className = str_replace("\\", "-", $this->name->class->toLowerString());
         $varnameElement = $doc->createElement("varname", $this->name->property);
@@ -1547,7 +1547,7 @@ class PropertyInfo
         return $fieldsynopsisElement;
     }
 
-    private function getFieldSynopsisSynopsisType(): Type {
+    private function getFieldSynopsisType(): Type {
         if ($this->type) {
             return $this->type;
         }
