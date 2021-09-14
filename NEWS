@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC2
+?? ??? ????, PHP 8.1.0RC3
+
+
+16 Sep 2021, PHP 8.1.0RC2
 
 - DOM:
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
