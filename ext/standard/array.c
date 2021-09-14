@@ -2876,6 +2876,18 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	n_left = n_elems;
 
 	if (!HT_IS_PACKED(hash)) {
+		if (!HT_HAS_STATIC_KEYS_ONLY(hash)) {
+			Bucket *p = hash->arData;
+			uint32_t i = hash->nNumUsed;
+
+			for (; i > 0; p++, i--) {
+				if (Z_ISUNDEF(p->val)) continue;
+				if (p->key) {
+					zend_string_release(p->key);
+					p->key = NULL;
+				}
+			}
+		}
 		zend_hash_to_packed(hash);
 	}
 
