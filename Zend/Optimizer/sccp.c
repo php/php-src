@@ -2188,12 +2188,13 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		zend_op *opline = &op_array->opcodes[var->definition];
 		zend_ssa_op *ssa_op = &ssa->ops[var->definition];
 
-		if (opline->opcode == ZEND_ASSIGN) {
-			/* Leave assigns to DCE (due to dtor effects) */
-			return 0;
-		}
-
 		if (ssa_op->result_def == var_num) {
+			if (opline->opcode == ZEND_ASSIGN) {
+				/* We can't drop the ASSIGN, but we can remove the result. */
+				opline->result_type = IS_UNUSED;
+				zend_ssa_remove_result_def(ssa, ssa_op);
+				return 0;
+			}
 			if (ssa_op->op1_def >= 0
 					|| ssa_op->op2_def >= 0) {
 				/* we cannot remove instruction that defines other variables */
@@ -2257,6 +2258,11 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				}
 			}
 		} else if (ssa_op->op1_def == var_num) {
+			if (opline->opcode == ZEND_ASSIGN) {
+				/* Leave assigns to DCE (due to dtor effects) */
+				return 0;
+			}
+
 			/* Compound assign or incdec -> convert to direct ASSIGN */
 
 			if (!value) {
