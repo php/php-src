@@ -62,8 +62,10 @@ zend_persistent_script* create_persistent_script(void)
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
 	if (!destroy_elements) {
-		persistent_script->script.function_table.pDestructor = NULL;
-		persistent_script->script.class_table.pDestructor = NULL;
+		/* Both the keys and values have been transferred into the global tables.
+		 * Set nNumUsed=0 to only deallocate the table, but not destroy any elements. */
+		persistent_script->script.function_table.nNumUsed = 0;
+		persistent_script->script.class_table.nNumUsed = 0;
 	} else {
 		destroy_op_array(&persistent_script->script.main_op_array);
 	}
