@@ -2191,8 +2191,10 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 		if (ssa_op->result_def == var_num) {
 			if (opline->opcode == ZEND_ASSIGN) {
 				/* We can't drop the ASSIGN, but we can remove the result. */
-				opline->result_type = IS_UNUSED;
-				zend_ssa_remove_result_def(ssa, ssa_op);
+				if (var->use_chain < 0 && var->phi_use_chain == NULL) {
+					opline->result_type = IS_UNUSED;
+					zend_ssa_remove_result_def(ssa, ssa_op);
+				}
 				return 0;
 			}
 			if (ssa_op->op1_def >= 0
