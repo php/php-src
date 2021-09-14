@@ -2170,8 +2170,8 @@ collector_encode_htmlnumericentity(int c, void *data)
 		if (c >= mapelm[0] && c <= mapelm[1]) {
 			s = (c + mapelm[2]) & mapelm[3];
 			if (s >= 0) {
-				(*pc->decoder->filter_function)(0x26, pc->decoder);	/* '&' */
-				(*pc->decoder->filter_function)(0x23, pc->decoder);	/* '#' */
+				(*pc->decoder->filter_function)('&', pc->decoder);
+				(*pc->decoder->filter_function)('#', pc->decoder);
 				r = 100000000;
 				s %= r;
 				while (r > 0) {
@@ -2185,9 +2185,9 @@ collector_encode_htmlnumericentity(int c, void *data)
 				}
 				if (!f) {
 					f = 1;
-					(*pc->decoder->filter_function)(mbfl_hexchar_table[0], pc->decoder);
+					(*pc->decoder->filter_function)('0', pc->decoder);
 				}
-				(*pc->decoder->filter_function)(0x3b, pc->decoder);		/* ';' */
+				(*pc->decoder->filter_function)(';', pc->decoder);
 			}
 		}
 		if (f) {
@@ -2210,38 +2210,38 @@ collector_decode_htmlnumericentity(int c, void *data)
 
 	switch (pc->status) {
 	case 1:
-		if (c == 0x23) {	/* '#' */
+		if (c == '#') {
 			pc->status = 2;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 2:
-		if (c == 0x78) {	/* 'x' */
+		if (c == 'x') {
 			pc->status = 4;
-		} else if (c >= 0x30 && c <= 0x39) { /* '0' - '9' */
-			pc->cache = c - 0x30;
+		} else if (c >= '0' && c <= '9') {
+			pc->cache = c - '0';
 			pc->status = 3;
 			pc->digit = 1;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 3:
 		s = 0;
 		f = 0;
-		if (c >= 0x30 && c <= 0x39) {	/* '0' - '9' */
+		if (c >= '0' && c <= '9') {
 			s = pc->cache;
 			if (pc->digit > 9 || s > INT_MAX/10) {
 				pc->status = 0;
 				f = 1;
 			} else {
-				s = s*10 + (c - 0x30);
+				s = s*10 + (c - '0');
 				pc->cache = s;
 				pc->digit++;
 			}
@@ -2257,7 +2257,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 				if (d >= mapelm[0] && d <= mapelm[1]) {
 					f = 0;
 					(*pc->decoder->filter_function)(d, pc->decoder);
-					if (c != 0x3b) {	/* ';' */
+					if (c != ';') {
 						(*pc->decoder->filter_function)(c, pc->decoder);
 					}
 					break;
@@ -2266,8 +2266,8 @@ collector_decode_htmlnumericentity(int c, void *data)
 			}
 		}
 		if (f) {
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			r = 1;
 			n = pc->digit;
 			while (n > 1) {
@@ -2284,43 +2284,41 @@ collector_decode_htmlnumericentity(int c, void *data)
 		}
 		break;
 	case 4:
-		if (c >= 0x30 && c <= 0x39) { /* '0' - '9' */
-			pc->cache = c - 0x30;
+		if (c >= '0' && c <= '9') {
+			pc->cache = c - '0';
 			pc->status = 5;
 			pc->digit = 1;
-		} else if (c >= 0x41 && c <= 0x46) { /* 'A' - 'F'  */
-			pc->cache = c - 0x41 + 10;
+		} else if (c >= 'A' && c <= 'F') {
+			pc->cache = c - 'A' + 10;
 			pc->status = 5;
 			pc->digit = 1;
-		} else if (c >= 0x61 && c <= 0x66) { /* 'a' - 'f'  */
-			pc->cache = c - 0x61 + 10;
+		} else if (c >= 'a' && c <= 'f') {
+			pc->cache = c - 'a' + 10;
 			pc->status = 5;
 			pc->digit = 1;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 5:
 		s = 0;
 		f = 0;
-		if ((c >= 0x30 && c <= 0x39) ||
-			(c >= 0x41 && c <= 0x46) ||
-			(c >= 0x61 && c <= 0x66)) {	/* '0' - '9' or 'a' - 'f'  */
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
 			if (pc->digit > 9) {
 				pc->status = 0;
 				s = pc->cache;
 				f = 1;
 			} else {
-				if (c >= 0x30 && c <= 0x39) {
-					s = pc->cache*16 + (c - 0x30);
-				} else if (c >= 0x41 && c <= 0x46)  {
-					s = pc->cache*16 + (c - 0x41 + 10);
+				if (c >= '0' && c <= '9') {
+					s = pc->cache*16 + (c - '0');
+				} else if (c >= 'A' && c <= 'F')  {
+					s = pc->cache*16 + (c - 'A' + 10);
 				} else {
-					s = pc->cache*16 + (c - 0x61 + 10);
+					s = pc->cache*16 + (c - 'a' + 10);
 				}
 				pc->cache = s;
 				pc->digit++;
@@ -2337,7 +2335,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 				if (d >= mapelm[0] && d <= mapelm[1]) {
 					f = 0;
 					(*pc->decoder->filter_function)(d, pc->decoder);
-					if (c != 0x3b) {	/* ';' */
+					if (c != ';') {
 						(*pc->decoder->filter_function)(c, pc->decoder);
 					}
 					break;
@@ -2346,9 +2344,9 @@ collector_decode_htmlnumericentity(int c, void *data)
 			}
 		}
 		if (f) {
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			r = 1;
 			n = pc->digit;
 			while (n > 0) {
@@ -2367,7 +2365,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 		}
 		break;
 	default:
-		if (c == 0x26) {	/* '&' */
+		if (c == '&') {
 			pc->status = 1;
 		} else {
 			(*pc->decoder->filter_function)(c, pc->decoder);
@@ -2392,9 +2390,9 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 		if (c >= mapelm[0] && c <= mapelm[1]) {
 			s = (c + mapelm[2]) & mapelm[3];
 			if (s >= 0) {
-				(*pc->decoder->filter_function)(0x26, pc->decoder);	/* '&' */
-				(*pc->decoder->filter_function)(0x23, pc->decoder);	/* '#' */
-				(*pc->decoder->filter_function)(0x78, pc->decoder);	/* 'x' */
+				(*pc->decoder->filter_function)('&', pc->decoder);
+				(*pc->decoder->filter_function)('#', pc->decoder);
+				(*pc->decoder->filter_function)('x', pc->decoder);
 				r = 0x1000000;
 				s %= r;
 				while (r > 0) {
@@ -2408,9 +2406,9 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 				}
 				if (!f) {
 					f = 1;
-					(*pc->decoder->filter_function)(mbfl_hexchar_table[0], pc->decoder);
+					(*pc->decoder->filter_function)('0', pc->decoder);
 				}
-				(*pc->decoder->filter_function)(0x3b, pc->decoder);		/* ';' */
+				(*pc->decoder->filter_function)(';', pc->decoder);
 			}
 		}
 		if (f) {
@@ -2433,15 +2431,15 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 	if (pc->status) {
 		switch (pc->status) {
 		case 1: /* '&' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
 			break;
 		case 2: /* '#' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			break;
 		case 3: /* '0'-'9' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 
 			s = pc->cache;
 			r = 1;
@@ -2459,14 +2457,14 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 
 			break;
 		case 4: /* 'x' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			break;
 		case 5: /* '0'-'9','a'-'f' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 
 			s = pc->cache;
 			r = 1;
