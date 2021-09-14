@@ -219,7 +219,6 @@ class SimpleType {
             case "float":
             case "string":
             case "callable":
-            case "iterable":
             case "object":
             case "resource":
             case "mixed":
@@ -231,6 +230,8 @@ class SimpleType {
                 return ArrayType::createGenericArray();
             case "self":
                 throw new Exception('The exact class name must be used instead of "self"');
+            case "iterable":
+                throw new Exception('This should not happen');
         }
 
         $matches = [];
@@ -369,8 +370,6 @@ class SimpleType {
                 return "IS_VOID";
             case "callable":
                 return "IS_CALLABLE";
-            case "iterable":
-                return "IS_ITERABLE";
             case "mixed":
                 return "IS_MIXED";
             case "static":
@@ -408,8 +407,6 @@ class SimpleType {
                 return "MAY_BE_OBJECT";
             case "callable":
                 return "MAY_BE_CALLABLE";
-            case "iterable":
-                return "MAY_BE_ITERABLE";
             case "mixed":
                 return "MAY_BE_ANY";
             case "void":
@@ -515,8 +512,17 @@ class Type {
         if ($node instanceof Node\NullableType) {
             return new Type(
                 [
-                    SimpleType::fromNode($node->type),
+                    ...Type::fromNode($node->type)->types,
                     SimpleType::null(),
+                ]
+            );
+        }
+
+        if ($node instanceof Node\Identifier && $node->toLowerString() === "iterable") {
+            return new Type(
+                [
+                    SimpleType::fromString("Traversable"),
+                    ArrayType::createGenericArray(),
                 ]
             );
         }
