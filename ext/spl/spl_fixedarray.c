@@ -414,8 +414,12 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		zval_ptr_dtor(&(intern->array.elements[index]));
-		ZVAL_COPY_DEREF(&intern->array.elements[index], value);
+		/* Fix #81429 */
+		zval *ptr = &(intern->array.elements[index]);
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, ptr);
+		ZVAL_COPY_DEREF(ptr, value);
+		zval_ptr_dtor(&tmp);
 	}
 }
 
