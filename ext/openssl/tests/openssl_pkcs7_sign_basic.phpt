@@ -47,7 +47,11 @@ NULL
 
 Warning: openssl_pkcs7_sign(): error opening input file %s in %s on line %d
 bool(false)
+
+Warning: openssl_pkcs7_sign(): Path '' not found in %s on line %d
 bool(false)
+
+Warning: openssl_pkcs7_sign(): Path '' not found in %s on line %d
 bool(false)
 
 Warning: openssl_pkcs7_sign(): error getting cert in %s on line %d

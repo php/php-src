@@ -45,6 +45,8 @@ unlink(__DIR__ . DIRECTORY_SEPARATOR . '/openssl_pkcs7_verify__pkcsfile.tmp');
 ?>
 --EXPECTF--
 int(-1)
+
+Warning: openssl_pkcs7_verify(): Path '' not found in %s on line %d
 int(-1)
 bool(false)
 bool(false)

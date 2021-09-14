@@ -55,7 +55,11 @@ bool(true)
 Warning: openssl_pkcs7_encrypt() expects parameter 4 to be array, string given in %s on line %d
 bool(false)
 bool(false)
+
+Warning: openssl_pkcs7_encrypt(): Path '' not found in %s on line %d
 bool(false)
+
+Warning: openssl_pkcs7_encrypt(): Path '' not found in %s on line %d
 bool(false)
 bool(false)
 bool(false)

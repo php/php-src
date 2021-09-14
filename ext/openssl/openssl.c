@@ -1150,6 +1150,14 @@ static int php_openssl_spki_cleanup(const char *src, char *dest)
 }
 /* }}} */
 
+static char *php_openssl_expand_filepath(const char *file_path, char *real_path) {
+	char *res = expand_filepath(file_path, real_path);
+	if (res == NULL) {
+		php_error_docref(NULL, E_WARNING, "Path '%s' not found", file_path);
+	}
+	return res;
+}
+
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args) /* {{{ */
 {
 	char * str, path[MAXPATHLEN];
@@ -1169,7 +1177,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 
 	/* read in the oids */
 	str = php_openssl_conf_get_string(req->req_config, NULL, "oid_file");
-	if (str != NULL && expand_filepath(str, path) && !php_openssl_open_base_dir_chk(path)) {
+	if (str != NULL && php_openssl_expand_filepath(str, path) && !php_openssl_open_base_dir_chk(path)) {
 		BIO *oid_bio = BIO_new_file(path, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 		if (oid_bio) {
 			OBJ_create_objects(oid_bio);
@@ -1740,7 +1748,7 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 
 	if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 
-		if (!expand_filepath(Z_STRVAL_P(val) + (sizeof("file://") - 1), path) || php_openssl_open_base_dir_chk(path)) {
+		if (!php_openssl_expand_filepath(Z_STRVAL_P(val) + (sizeof("file://") - 1), path) || php_openssl_open_base_dir_chk(path)) {
 			return NULL;
 		}
 
@@ -1804,7 +1812,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		return;
 	}
 
-	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+	if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		return;
 	}
 
@@ -2538,7 +2546,7 @@ static STACK_OF(X509) *php_openssl_load_all_certs_from_file(char *certfile)
 		goto end;
 	}
 
-	if (!expand_filepath(certfile, certpath) || php_openssl_open_base_dir_chk(certpath)) {
+	if (!php_openssl_expand_filepath(certfile, certpath) || php_openssl_open_base_dir_chk(certpath)) {
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -2877,7 +2885,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 		goto cleanup;
 	}
 
-	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+	if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		goto cleanup;
 	}
 
@@ -3328,7 +3336,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
 	}
 	if (filename) {
-		if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+		if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 			return NULL;
 		}
 		in = BIO_new_file(filepath, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
@@ -3375,7 +3383,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 		return;
 	}
 
-	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+	if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		return;
 	}
 
@@ -3914,7 +3922,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 			filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
-			if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+			if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 				TMP_CLEAN;
 			}
 		}
@@ -4617,7 +4625,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		RETURN_FALSE;
 	}
 
-	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+	if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		RETURN_FALSE;
 	}
 
@@ -5189,7 +5197,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	if (!store) {
 		goto clean_exit;
 	}
-	if (!expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
+	if (!php_openssl_expand_filepath(filename, filepath) || php_openssl_open_base_dir_chk(filepath)) {
 		goto clean_exit;
 	}
 
@@ -5208,7 +5216,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	}
 
 	if (datafilename) {
-		if (!expand_filepath(datafilename, datafilepath) || php_openssl_open_base_dir_chk(datafilepath)) {
+		if (!php_openssl_expand_filepath(datafilename, datafilepath) || php_openssl_open_base_dir_chk(datafilepath)) {
 			goto clean_exit;
 		}
 
@@ -5220,7 +5228,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	}
 
 	if (p7bfilename) {
-		if (!expand_filepath(p7bfilename, p7bfilepath) || php_openssl_open_base_dir_chk(p7bfilepath)) {
+		if (!php_openssl_expand_filepath(p7bfilename, p7bfilepath) || php_openssl_open_base_dir_chk(p7bfilepath)) {
 			goto clean_exit;
 		}
 
@@ -5241,7 +5249,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		if (signersfilename) {
 			BIO *certout;
 
-			if (!expand_filepath(signersfilename, signersfilepath) || php_openssl_open_base_dir_chk(signersfilepath)) {
+			if (!php_openssl_expand_filepath(signersfilename, signersfilepath) || php_openssl_open_base_dir_chk(signersfilepath)) {
 				goto clean_exit;
 			}
 
@@ -5318,7 +5326,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
 		return;
 
-	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
+	if (!php_openssl_expand_filepath(infilename, infilepath) || !php_openssl_expand_filepath(outfilename, outfilepath)) {
 		return;
 	}
 
@@ -5586,7 +5594,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
+	if (!php_openssl_expand_filepath(infilename, infilepath) || !php_openssl_expand_filepath(outfilename, outfilepath)) {
 		goto clean_exit;
 	}
 
@@ -5696,7 +5704,7 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 		goto clean_exit;
 	}
 
-	if (!expand_filepath(infilename, infilepath) || !expand_filepath(outfilename, outfilepath)) {
+	if (!php_openssl_expand_filepath(infilename, infilepath) || !php_openssl_expand_filepath(outfilename, outfilepath)) {
 		goto clean_exit;
 	}
 

@@ -54,7 +54,11 @@ bool(false)
 Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
 bool(false)
 bool(false)
+
+Warning: openssl_pkcs7_decrypt(): Path '' not found in %s on line %d
 bool(false)
+
+Warning: openssl_pkcs7_decrypt(): Path '' not found in %s on line %d
 bool(false)
 
 Warning: openssl_pkcs7_decrypt(): unable to coerce parameter 3 to x509 cert in %s on line %d
