@@ -506,7 +506,12 @@ class Type {
 
     public static function fromNode(Node $node): Type {
         if ($node instanceof Node\UnionType) {
-            return new Type(array_map(['SimpleType', 'fromNode'], $node->types));
+            $nestedTypeObjects = array_map(['Type', 'fromNode'], $node->types);
+            $types = [];
+            foreach ($nestedTypeObjects as $typeObject) {
+                array_push($types, ...$typeObject->types);
+            }
+            return new Type($types);
         }
 
         if ($node instanceof Node\NullableType) {
