@@ -1042,6 +1042,11 @@ static zend_always_inline bool zend_check_type_slow(
 	}
 
 	type_mask = ZEND_TYPE_FULL_MASK(*type);
+	/* Fallback for iterable */
+	// TODO Fix gen_stubs
+	if ((type_mask & _ZEND_TYPE_ITERABLE_BIT) && zend_is_iterable(arg)) {
+		return 1;
+	}
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
 		return 1;
 	}
