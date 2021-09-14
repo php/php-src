@@ -4799,7 +4799,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 				/* Destructor may throw. */
 				return 1;
 			} else {
-				zval *value = (zval*)((char*)op_array->static_variables + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
+				zval *value = (zval*)((char*)op_array->static_variables->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 				/* May throw if initializer is CONSTANT_AST. */
 				return Z_TYPE_P(value) == IS_CONSTANT_AST;
 			}
