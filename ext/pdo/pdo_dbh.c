@@ -491,8 +491,8 @@ static void pdo_stmt_check_select_all(pdo_stmt_t *stmt) /* {{{ */
 {
 	/* Avoid modifying stmt->query_string */
 	zend_string *statement = zend_string_init(ZSTR_VAL(stmt->query_string), ZSTR_LEN(stmt->query_string), 0);
-	char *statement_val = ZSTR_VAL(statement_val);
-	size_t statement_len = ZSTR_LEN(statement_val);
+	char *statement_val = ZSTR_VAL(statement);
+	size_t statement_len = ZSTR_LEN(statement);
 	char *end = statement_val + statement_len;
 	php_strtolower(statement_val, statement_len);
 
