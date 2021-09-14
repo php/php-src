@@ -464,6 +464,7 @@ PHP_FUNCTION(spl_autoload_call)
 } /* }}} */
 
 #define HT_MOVE_TAIL_TO_HEAD(ht)						        \
+	ZEND_ASSERT(!HT_IS_PACKED(ht));						        \
 	do {												        \
 		Bucket tmp = (ht)->arData[(ht)->nNumUsed-1];				\
 		memmove((ht)->arData + 1, (ht)->arData,					\

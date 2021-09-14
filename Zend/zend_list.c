@@ -216,10 +216,11 @@ void zend_close_rsrc_list(HashTable *ht)
 {
 	/* Reload ht->arData on each iteration, as it may be reallocated. */
 	uint32_t i = ht->nNumUsed;
+
 	while (i-- > 0) {
-		Bucket *p = &ht->arData[i];
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			zend_resource *res = Z_PTR(p->val);
+		zval *p = HT_IS_PACKED(ht) ? &ht->arPacked[i] : &ht->arData[i].val;
+		if (Z_TYPE_P(p) != IS_UNDEF) {
+			zend_resource *res = Z_PTR_P(p);
 			if (res->type >= 0) {
 				zend_resource_dtor(res);
 			}

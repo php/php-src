@@ -54,7 +54,9 @@ static void zend_hash_persist_calc(HashTable *ht)
 		return;
 	}
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED) && ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
+	if (HT_IS_PACKED(ht)) {
+		ADD_SIZE(HT_PACKED_USED_SIZE(ht));
+	} else if (ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		uint32_t hash_size;
 
@@ -112,16 +114,26 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
-				Bucket *p;
+				HashTable *ht = Z_ARRVAL_P(z);
 
 				ADD_SIZE(size);
-				zend_hash_persist_calc(Z_ARRVAL_P(z));
-				ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
-					if (p->key) {
-						ADD_INTERNED_STRING(p->key);
-					}
-					zend_persist_zval_calc(&p->val);
-				} ZEND_HASH_FOREACH_END();
+				zend_hash_persist_calc(ht);
+				if (HT_IS_PACKED(ht)) {
+					zval *zv;
+
+					ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
+						zend_persist_zval_calc(zv);
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					Bucket *p;
+
+					ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
+						if (p->key) {
+							ADD_INTERNED_STRING(p->key);
+						}
+						zend_persist_zval_calc(&p->val);
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 			break;
 		case IS_CONSTANT_AST:
@@ -534,15 +546,24 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		}
 
 		if (ce->backed_enum_table) {
-			Bucket *p;
 			ADD_SIZE(sizeof(HashTable));
 			zend_hash_persist_calc(ce->backed_enum_table);
-			ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
-				if (p->key != NULL) {
-					ADD_INTERNED_STRING(p->key);
-				}
-				zend_persist_zval_calc(&p->val);
-			} ZEND_HASH_FOREACH_END();
+			if (HT_IS_PACKED(ce->backed_enum_table)) {
+				zval *zv;
+
+				ZEND_HASH_FOREACH_VAL(ce->backed_enum_table, zv) {
+					zend_persist_zval_calc(zv);
+				} ZEND_HASH_FOREACH_END();
+			} else {
+				Bucket *p;
+
+				ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
+					if (p->key != NULL) {
+						ADD_INTERNED_STRING(p->key);
+					}
+					zend_persist_zval_calc(&p->val);
+				} ZEND_HASH_FOREACH_END();
+			}
 		}
 	}
 }

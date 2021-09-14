@@ -115,12 +115,12 @@ static void zend_hash_persist(HashTable *ht)
 		HT_FLAGS(ht) |= HASH_FLAG_UNINITIALIZED;
 		return;
 	}
-	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
+	if (HT_IS_PACKED(ht)) {
 		void *data = HT_GET_DATA_ADDR(ht);
 		if (GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) {
-			data = zend_shared_memdup(data, HT_USED_SIZE(ht));
+			data = zend_shared_memdup(data, HT_PACKED_USED_SIZE(ht));
 		} else {
-			data = zend_shared_memdup_free(data, HT_USED_SIZE(ht));
+			data = zend_shared_memdup_free(data, HT_PACKED_USED_SIZE(ht));
 		}
 		HT_SET_DATA_ADDR(ht, data);
 	} else if (ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
@@ -215,21 +215,32 @@ static void zend_persist_zval(zval *z)
 			 && zend_accel_in_shm(Z_ARR_P(z))) {
 				/* pass */
 			} else {
-				Bucket *p;
+				HashTable *ht;
 
 				if (!Z_REFCOUNTED_P(z)) {
-					Z_ARR_P(z) = zend_shared_memdup_put(Z_ARR_P(z), sizeof(zend_array));
+					ht = zend_shared_memdup_put(Z_ARR_P(z), sizeof(zend_array));
 				} else {
 					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					Z_ARR_P(z) = zend_shared_memdup_put_free(Z_ARR_P(z), sizeof(zend_array));
+					ht = zend_shared_memdup_put_free(Z_ARR_P(z), sizeof(zend_array));
 				}
-				zend_hash_persist(Z_ARRVAL_P(z));
-				ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
-					if (p->key) {
-						zend_accel_store_interned_string(p->key);
-					}
-					zend_persist_zval(&p->val);
-				} ZEND_HASH_FOREACH_END();
+				Z_ARR_P(z) = ht;
+				zend_hash_persist(ht);
+				if (HT_IS_PACKED(ht)) {
+					zval *zv;
+
+					ZEND_HASH_FOREACH_VAL(ht, zv) {
+						zend_persist_zval(zv);
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					Bucket *p;
+
+					ZEND_HASH_FOREACH_BUCKET(ht, p) {
+						if (p->key) {
+							zend_accel_store_interned_string(p->key);
+						}
+						zend_persist_zval(&p->val);
+					} ZEND_HASH_FOREACH_END();
+				}
 				/* make immutable array */
 				Z_TYPE_FLAGS_P(z) = 0;
 				GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
@@ -328,15 +339,24 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
 {
 	HashTable *ptr;
-	Bucket *p;
 	zend_hash_persist(backed_enum_table);
 
-	ZEND_HASH_FOREACH_BUCKET(backed_enum_table, p) {
-		if (p->key != NULL) {
-			zend_accel_store_interned_string(p->key);
-		}
-		zend_persist_zval(&p->val);
-	} ZEND_HASH_FOREACH_END();
+	if (HT_IS_PACKED(backed_enum_table)) {
+		zval *zv;
+
+		ZEND_HASH_FOREACH_VAL(backed_enum_table, zv) {
+			zend_persist_zval(zv);
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		Bucket *p;
+
+		ZEND_HASH_FOREACH_BUCKET(backed_enum_table, p) {
+			if (p->key != NULL) {
+				zend_accel_store_interned_string(p->key);
+			}
+			zend_persist_zval(&p->val);
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	ptr = zend_shared_memdup_free(backed_enum_table, sizeof(HashTable));
 	GC_SET_REFCOUNT(ptr, 2);

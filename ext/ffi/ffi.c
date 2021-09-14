@@ -2969,6 +2969,7 @@ static int zend_ffi_same_types(zend_ffi_type *old, zend_ffi_type *type) /* {{{ *
 				zend_string *key;
 				Bucket *b = type->record.fields.arData;
 
+				ZEND_ASSERT(!HT_IS_PACKED(&type->record.fields));
 				ZEND_HASH_FOREACH_STR_KEY_PTR(&old->record.fields, key, old_field) {
 					while (Z_TYPE(b->val) == IS_UNDEF) {
 						b++;
@@ -3001,17 +3002,32 @@ static int zend_ffi_same_types(zend_ffi_type *old, zend_ffi_type *type) /* {{{ *
 				return 0;
 			} else if (old->func.args) {
 				zend_ffi_type *arg_type;
-				Bucket *b = type->func.args->arData;
 
-				ZEND_HASH_FOREACH_PTR(old->func.args, arg_type) {
-					while (Z_TYPE(b->val) == IS_UNDEF) {
+				if (HT_IS_PACKED(type->func.args)) {
+					zval *zv = type->func.args->arPacked;
+
+					ZEND_HASH_FOREACH_PTR(old->func.args, arg_type) {
+						while (Z_TYPE_P(zv) == IS_UNDEF) {
+							zv++;
+						}
+						if (!zend_ffi_same_types(ZEND_FFI_TYPE(arg_type), ZEND_FFI_TYPE(Z_PTR_P(zv)))) {
+							return 0;
+						}
+						zv++;
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					Bucket *b = type->func.args->arData;
+
+					ZEND_HASH_FOREACH_PTR(old->func.args, arg_type) {
+						while (Z_TYPE(b->val) == IS_UNDEF) {
+							b++;
+						}
+						if (!zend_ffi_same_types(ZEND_FFI_TYPE(arg_type), ZEND_FFI_TYPE(Z_PTR(b->val)))) {
+							return 0;
+						}
 						b++;
-					}
-					if (!zend_ffi_same_types(ZEND_FFI_TYPE(arg_type), ZEND_FFI_TYPE(Z_PTR(b->val)))) {
-						return 0;
-					}
-					b++;
-				} ZEND_HASH_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 			break;
 		default:
