@@ -8460,7 +8460,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 	} else {
 		|	// if (CACHED_PTR(opline->result.num))
 		|	ldr REG2, EX->run_time_cache
-		|	ldr REG0, [REG2, #opline->result.num]
+		|	MEM_ACCESS_64_WITH_UOFFSET ldr, REG0, REG2, opline->result.num, TMP1
 		|	cbz REG0, >1
 		|.cold_code
 		|1:
@@ -8469,25 +8469,24 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		 && func->type == ZEND_USER_FUNCTION
 		 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
 			|	LOAD_ADDR FCARG1x, func
-			|	str FCARG1x, [REG2, #opline->result.num]
+			|	MEM_ACCESS_64_WITH_UOFFSET str, FCARG1x, REG2, opline->result.num, TMP1
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, REG0
 			|	mov REG0, RETVALx
-			||	ZEND_ASSERT(opline->result.num <= LDR_STR_PIMM64);
 			|	b >3
 		} else {
 			zval *zv = RT_CONSTANT(opline, opline->op2);
 
 			if (opline->opcode == ZEND_INIT_FCALL) {
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv);
-				|	add FCARG2x, REG2, #opline->result.num
+				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv + 1);
-				|	add FCARG2x, REG2, #opline->result.num
+				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, zv;
-				|	add FCARG2x, REG2, #opline->result.num
+				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
 				|	EXT_CALL zend_jit_find_ns_func_helper, REG0
 			} else {
 				ZEND_UNREACHABLE();
