@@ -2609,6 +2609,7 @@ add_unpack_again:
 					zend_hash_update(result_ht, Z_STR(key), val);
 					zval_ptr_dtor_str(&key);
 				} else {
+					zval_ptr_dtor(&key);
 					if (!zend_hash_next_index_insert(result_ht, val)) {
 						zend_cannot_add_element();
 						zval_ptr_dtor_nogc(val);
