@@ -865,7 +865,7 @@ static void handle_dasm_error(int ret) {
 			break;
 #endif
 		case DASM_S_UNDEF_PC:
-			fprintf(stderr, "DASM_S_UNDEF_PC\n");
+			fprintf(stderr, "DASM_S_UNDEF_PC %d\n", ret & 0xffffffu);
 			break;
 		default:
 			fprintf(stderr, "DASM_S_%0x\n", ret & 0xff000000u);
