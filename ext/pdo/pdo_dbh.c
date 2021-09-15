@@ -487,7 +487,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 }
 /* }}} */
 
-static void pdo_stmt_check_select_all(pdo_stmt_t *stmt) /* {{{ */
+static void pdo_stmt_set_select_all(pdo_stmt_t *stmt) /* {{{ */
 {
 	/* Avoid modifying stmt->query_string */
 	zend_string *statement = zend_string_init(ZSTR_VAL(stmt->query_string), ZSTR_LEN(stmt->query_string), 0);
@@ -585,7 +585,7 @@ PHP_METHOD(PDO, prepare)
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
 		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args);
-		pdo_stmt_check_select_all(stmt);
+		pdo_stmt_set_select_all(stmt);
 		return;
 	}
 
