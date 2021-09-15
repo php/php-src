@@ -881,9 +881,28 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		}
 
 		if (!Z_ISUNDEF(parser->data)) {
+			size_t i;
+			int doprint = 0;
 			zend_string *decoded_value;
 
 			decoded_value = xml_utf8_decode(s, len, parser->target_encoding);
+			if (parser->skipwhite) {
+				for (i = 0; i < ZSTR_LEN(decoded_value); i++) {
+					switch (ZSTR_VAL(decoded_value)[i]) {
+						case ' ':
+						case '\t':
+						case '\n':
+							continue;
+						default:
+							doprint = 1;
+							break;
+					}
+					if (doprint) {
+						break;
+					}
+				}
+			}
+
 			if (parser->lastwasopen) {
 				zval *myval;
 
@@ -895,26 +914,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 							ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
 					zend_string_release_ex(decoded_value, 0);
 				} else {
-					size_t i;
-					int doprint = 0;
-					if (parser->skipwhite) {
-						for (i = 0; i < ZSTR_LEN(decoded_value); i++) {
-							switch (ZSTR_VAL(decoded_value)[i]) {
-								case ' ':
-								case '\t':
-								case '\n':
-									continue;
-								default:
-									doprint = 1;
-									break;
-							}
-							if (doprint) {
-								break;
-							}
-						}
-					}
-
-					if (doprint || !parser->skipwhite) {
+					if (doprint || (! parser->skipwhite)) {
 						add_assoc_str(parser->ctag, "value", decoded_value);
 					} else {
 						zend_string_release_ex(decoded_value, 0);
@@ -941,7 +941,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					break;
 				} ZEND_HASH_FOREACH_END();
 
-				if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
+				if (parser->level <= XML_MAXLEVEL && parser->level > 0 && (doprint || (! parser->skipwhite))) {
 					array_init(&tag);
 
 					_xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
@@ -953,7 +953,9 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 					zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
 				} else if (parser->level == (XML_MAXLEVEL + 1)) {
-										php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
+					php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
+				} else {
+					zend_string_release_ex(decoded_value, 0);
 				}
 			}
 		}

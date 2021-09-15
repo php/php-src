@@ -16,7 +16,7 @@ function parseAndOutput($xml)
     return $values;
 }
 
-$xml = "<a><b>&lt;d&gt;\n &lt;e&gt;</b><c>\n \t</c></a>";
+$xml = "<a><b>&lt;d&gt;\n &lt;e&gt;</b><![CDATA[  ]]><c>\n \t</c></a>";
 
 $parsed = parseAndOutput($xml);
 
@@ -26,8 +26,12 @@ echo $parsed[1]['value'] . "\n";
 // Check XML_OPTION_SKIP_WHITE ignores values of tags containing whitespace characters only.
 var_dump(isset($parsed[2]['value']));
 
+// Check XML_OPTION_SKIP_WHITE ignores empty <![CDATA[  ]]> values.
+var_dump(count($parsed));
+
 ?>
 --EXPECT--
 <d>
  <e>
 bool(false)
+int(4)
