@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
     (Viktor Volkov)
 
+- FFI:
+  . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
+    defined). (Dmitry)
+
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
