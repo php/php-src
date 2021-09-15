@@ -15,6 +15,7 @@ final class Vector implements IteratorAggregate, Countable, JsonSerializable, Ar
     public function getIterator(): InternalIterator {}
     public function count(): int {}
     public function capacity(): int {}
+    public function shrinkToFit(): void {}
     public function clear(): void {}
     public function setSize(int $size): void {}
 
@@ -39,7 +40,17 @@ final class Vector implements IteratorAggregate, Countable, JsonSerializable, Ar
     public function indexOf(mixed $value): int|false {}
     public function contains(mixed $value): bool {}
 
-    public function shrinkToFit(): void {}
+    public function map(callable $callback): Vector {}
+    /**
+     * Returns the subset of elements of the Vector satisfying the predicate.
+     *
+     * If the value returned by the callback is truthy
+     * (e.g. true, non-zero number, non-empty array, truthy object, etc.),
+     * this is treated as satisfying the predicate.
+     *
+     * (at)param null|callable(mixed):mixed $callback
+     */
+    public function filter(?callable $callback = null): Vector {}
 
     public function jsonSerialize(): array {}
 }

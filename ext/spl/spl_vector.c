@@ -983,6 +983,191 @@ PHP_METHOD(Vector, indexOf)
 	RETURN_FALSE;
 }
 
+PHP_METHOD(Vector, filter)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const spl_vector *intern = Z_VECTOR_P(ZEND_THIS);
+	size_t size = 0;
+	size_t capacity = 0;
+	zval *entries = NULL;
+	zval operand;
+	if (intern->array.size == 0) {
+		/* do nothing */
+	} else if (ZEND_FCI_INITIALIZED(fci)) {
+		zval retval;
+
+		fci.params = &operand;
+		fci.param_count = 1;
+		fci.retval = &retval;
+
+		for (size_t i = 0; i < intern->array.size; i++) {
+			ZVAL_COPY(&operand, &intern->array.entries[i]);
+			const int result = zend_call_function(&fci, &fci_cache);
+			if (UNEXPECTED(result != SUCCESS || EG(exception))) {
+				zval_ptr_dtor(&operand);
+cleanup:
+				if (entries) {
+					for (; size > 0; size--) {
+						zval_ptr_dtor(&entries[size]);
+					}
+					efree(entries);
+				}
+				return;
+			}
+			const bool is_true = zend_is_true(&retval);
+			zval_ptr_dtor(&retval);
+			if (UNEXPECTED(EG(exception))) {
+				goto cleanup;
+			}
+			if (!is_true) {
+				zval_ptr_dtor(&operand);
+				if (UNEXPECTED(EG(exception))) {
+					goto cleanup;
+				}
+				continue;
+			}
+
+			if (size >= capacity) {
+				if (entries) {
+					capacity = size + intern->array.size - i;
+					entries = safe_erealloc(entries, capacity, sizeof(zval), 0);
+				} else {
+					ZEND_ASSERT(size == 0);
+					ZEND_ASSERT(capacity == 0);
+					capacity = intern->array.size > i ? intern->array.size - i : 1;
+					entries = safe_emalloc(capacity, sizeof(zval), 0);
+				}
+			}
+			ZEND_ASSERT(size < capacity);
+			ZVAL_COPY_VALUE(&entries[size], &operand);
+			size++;
+		}
+	} else {
+		for (size_t i = 0; i < intern->array.size; i++) {
+			ZVAL_COPY(&operand, &intern->array.entries[i]);
+			const bool is_true = zend_is_true(&operand);
+			if (!is_true) {
+				zval_ptr_dtor(&operand);
+				if (UNEXPECTED(EG(exception))) {
+					goto cleanup;
+				}
+				continue;
+			}
+
+			if (size >= capacity) {
+				if (entries) {
+					capacity = size + intern->array.size - i;
+					entries = safe_erealloc(entries, capacity, sizeof(zval), 0);
+				} else {
+					ZEND_ASSERT(size == 0);
+					ZEND_ASSERT(capacity == 0);
+					capacity = intern->array.size > i ? intern->array.size - i : 1;
+					entries = safe_emalloc(capacity, sizeof(zval), 0);
+				}
+			}
+			ZEND_ASSERT(size < capacity);
+			ZVAL_COPY_VALUE(&entries[size], &operand);
+			size++;
+		}
+	}
+
+	zend_object *new_object = spl_vector_new_ex(spl_ce_Vector, NULL, 0);
+	spl_vector *new_intern = spl_vector_from_object(new_object);
+	if (size == 0) {
+		ZEND_ASSERT(!entries);
+		spl_vector_entries_set_empty_list(&new_intern->array);
+		RETURN_OBJ(new_object);
+	}
+	if (capacity > size) {
+		/* Shrink allocated value to actual required size */
+		entries = erealloc(entries, size * sizeof(zval));
+	}
+
+	new_intern->array.entries = entries;
+	new_intern->array.size = size;
+	new_intern->array.capacity = size;
+	RETURN_OBJ(new_object);
+}
+
+PHP_METHOD(Vector, map)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const spl_vector *intern = Z_VECTOR_P(ZEND_THIS);
+	size_t new_capacity = intern->array.size;
+
+	if (new_capacity == 0) {
+		zend_object *new_object = spl_vector_new_ex(spl_ce_Vector, NULL, 0);
+		spl_vector *new_intern = spl_vector_from_object(new_object);
+		spl_vector_entries_set_empty_list(&new_intern->array);
+		RETURN_OBJ(new_object);
+	}
+
+	zval *entries = emalloc(new_capacity * sizeof(zval));
+	size_t size = 0;
+
+	zval operand;
+	fci.params = &operand;
+	fci.param_count = 1;
+
+	do {
+		if (UNEXPECTED(size >= new_capacity)) {
+			if (entries) {
+				new_capacity = size + 1;
+				entries = safe_erealloc(entries, new_capacity, sizeof(zval), 0);
+			} else {
+				ZEND_ASSERT(size == 0);
+				ZEND_ASSERT(new_capacity == 0);
+				new_capacity = intern->array.size;
+				entries = safe_emalloc(new_capacity, sizeof(zval), 0);
+			}
+		}
+		fci.retval = &entries[size];
+		ZVAL_COPY(&operand, &intern->array.entries[size]);
+		const int result = zend_call_function(&fci, &fci_cache);
+		fci.retval = &entries[size];
+		zval_ptr_dtor(&operand);
+		if (UNEXPECTED(result != SUCCESS || EG(exception))) {
+cleanup:
+			if (entries) {
+				for (; size > 0; size--) {
+					zval_ptr_dtor(&entries[size]);
+				}
+				efree(entries);
+			}
+			return;
+		}
+		size++;
+	} while (size < intern->array.size);
+
+	zend_object *new_object = spl_vector_new_ex(spl_ce_Vector, NULL, 0);
+	spl_vector *new_intern = spl_vector_from_object(new_object);
+	if (size == 0) {
+		ZEND_ASSERT(!entries);
+		spl_vector_entries_set_empty_list(&new_intern->array);
+		RETURN_OBJ(new_object);
+	}
+	if (UNEXPECTED(new_capacity > size)) {
+		/* Shrink allocated value to actual required size */
+		entries = erealloc(entries, size * sizeof(zval));
+	}
+
+	new_intern->array.entries = entries;
+	new_intern->array.size = size;
+	new_intern->array.capacity = size;
+	RETURN_OBJ(new_object);
+}
+
 PHP_METHOD(Vector, contains)
 {
 	zval *value;
@@ -1213,7 +1398,6 @@ PHP_MINIT_FUNCTION(spl_vector)
 	spl_handler_Vector.count_elements  = spl_vector_count_elements;
 	spl_handler_Vector.get_properties  = spl_vector_get_properties;
 	spl_handler_Vector.get_gc          = spl_vector_get_gc;
-	spl_handler_Vector.dtor_obj        = zend_objects_destroy_object;
 	spl_handler_Vector.free_obj        = spl_vector_free_storage;
 
 	spl_handler_Vector.read_dimension  = spl_vector_read_dimension;
