@@ -1880,6 +1880,18 @@ static void ZEND_FASTCALL zend_jit_assign_var_to_typed_ref(zend_reference *ref, 
 
 static void ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, zval *value)
 {
+	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		const zend_op *opline = EG(current_execute_data)->opline;
+		uint32_t var;
+		if (opline->opcode == ZEND_ASSIGN) {
+			var = opline->op2.var;
+		} else {
+			ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
+			var = (opline + 1)->op1.var;
+		}
+		zend_jit_undefined_op_helper(var);
+		value = &EG(uninitialized_zval);
+	}
 	zend_jit_assign_to_typed_ref_helper(ref, value, IS_CV);
 }
 
@@ -2131,6 +2143,13 @@ static zend_array *ZEND_FASTCALL zend_jit_add_arrays_helper(zend_array *op1, zen
 
 static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_string *name, zval *value, void **cache_slot, zval *result)
 {
+	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		const zend_op *op_data = EG(current_execute_data)->opline + 1;
+		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+		zend_jit_undefined_op_helper(op_data->op1.var);
+		value = &EG(uninitialized_zval);
+	}
+
 	ZVAL_DEREF(value);
 	value = zobj->handlers->write_property(zobj, name, value, cache_slot);
 	if (result) {

@@ -4575,6 +4575,11 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			if (t1 & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_OBJECT))) {
 				return 1;
 			}
+			if ((opline+1)->op1_type == IS_CV) {
+				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {
+					return 1;
+				}
+			}
 			if (ssa_op->op1_use) {
 				zend_ssa_var_info *var_info = ssa->var_info + ssa_op->op1_use;
 				zend_class_entry *ce = var_info->ce;
