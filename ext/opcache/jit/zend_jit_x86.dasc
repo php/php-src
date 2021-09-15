@@ -8987,7 +8987,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	return 1;
 }
 
-static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, zend_jit_trace_rec *trace)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	int skip;
 
@@ -9062,7 +9062,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (!skip) {
 				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
@@ -9135,7 +9135,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (skip) {
 				switch (opline->opcode) {
@@ -9375,7 +9375,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		return 0;
 	}
 
-	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, ssa_op, opline, trace)) {
+	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, ssa_op, opline, call_level, trace)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
@@ -9626,7 +9626,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	}
 	zend_jit_start_reuse_ip();
 
-	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, ssa_op, opline, trace)) {
+	if (zend_jit_needs_call_chain(call_info, b, op_array, ssa, ssa_op, opline, call_level, trace)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
@@ -9719,7 +9719,7 @@ static int zend_jit_init_closure_call(dasm_State          **Dst,
 		return 0;
 	}
 
-	if (zend_jit_needs_call_chain(NULL, b, op_array, ssa, ssa_op, opline, trace)) {
+	if (zend_jit_needs_call_chain(NULL, b, op_array, ssa, ssa_op, opline, call_level, trace)) {
 		if (!zend_jit_save_call_chain(Dst, call_level)) {
 			return 0;
 		}
