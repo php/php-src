@@ -3,6 +3,7 @@ Bug #79576 ("TYPE *" shows unhelpful message when type is not defined)
 --SKIPIF--
 <?php
 if (!extension_loaded('ffi')) die('skip ffi extension not available');
+if (PHP_DEBUG || getenv('SKIP_ASAN')) echo "xfail: FFI cleanup after parser error is nor implemented";
 ?>
 --FILE--
 <?php
