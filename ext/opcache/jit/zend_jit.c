@@ -292,7 +292,7 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	return 0;
 }
 
-static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, zend_jit_trace_rec *trace)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	int skip;
 
@@ -368,7 +368,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (!skip) {
 				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
@@ -443,7 +443,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (skip) {
 				switch (opline->opcode) {
