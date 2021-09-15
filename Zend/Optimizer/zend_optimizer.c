@@ -305,6 +305,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) == 0) {
 				MAKE_NOP(opline);
+				return 1;
 			}
 			/* TODO: In a subsequent pass, *after* this step and compacting nops, combine consecutive ZEND_ECHOs using the block information from ssa->cfg */
 			/* (e.g. for ext/opcache/tests/opt/sccp_010.phpt) */
