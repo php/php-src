@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
     (Viktor Volkov)
 
+- FFI:
+  . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
+    defined). (Dmitry)
+
 - Shmop:
   . Fixed bug #81407 (shmop_open won't attach and causes php to crash). (cmb)
 
