@@ -30,7 +30,7 @@ typedef struct _simple_struct {
 ?>
 DONE
 --EXPECT--
-FFI\ParserException: undefined C type 'oid' at line 1
-FFI\ParserException: undefined C type 'oid' at line 1
-FFI\ParserException: undefined C type 'some_not_declared_type' at line 3
+FFI\ParserException: Undefined C type 'oid' at line 1
+FFI\ParserException: Undefined C type 'oid' at line 1
+FFI\ParserException: Undefined C type 'some_not_declared_type' at line 3
 DONE
