@@ -10,11 +10,14 @@ CC=clang CXX=clang++ \
     --enable-fuzzer \
     --with-pic \
     --enable-debug-assertions \
+    --enable-address-sanitizer \
     --enable-exif \
     --enable-mbstring
 ```
 
 The `--with-pic` option is required to avoid a linking failure. The `--enable-debug-assertions` option can be used to enable debug assertions despite the use of a release build.
+
+You can combine fuzzing with `--enable-address-sanitizer`, `--enable-undefined-sanitizer` or `--enable-memory-sanitizer`. The first two options can also be used together.
 
 You will need a recent version of clang that supports the `-fsanitize=fuzzer-no-link` option.
 
