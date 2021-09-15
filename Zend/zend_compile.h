@@ -27,16 +27,19 @@
 
 #include "zend_llist.h"
 
-#define SET_UNUSED(op)  op ## _type = IS_UNUSED
+#define SET_UNUSED(op) do { \
+	op ## _type = IS_UNUSED; \
+	op.num = (uint32_t) -1; \
+} while (0)
 
 #define MAKE_NOP(opline) do { \
 	(opline)->op1.num = 0; \
 	(opline)->op2.num = 0; \
 	(opline)->result.num = 0; \
 	(opline)->opcode = ZEND_NOP; \
-	(opline)->op1_type =  IS_UNUSED; \
-	(opline)->op2_type = IS_UNUSED; \
-	(opline)->result_type = IS_UNUSED; \
+	SET_UNUSED((opline)->op1); \
+	SET_UNUSED((opline)->op2); \
+	SET_UNUSED((opline)->result); \
 } while (0)
 
 #define RESET_DOC_COMMENT() do { \
