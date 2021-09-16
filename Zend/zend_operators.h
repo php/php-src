@@ -222,7 +222,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 	}
 
 	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
-		if (*e == (const unsigned char)c) {
+		if (*e == (unsigned char)c) {
 			return (const void *)e;
 		}
 	}
