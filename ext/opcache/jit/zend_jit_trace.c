@@ -975,7 +975,7 @@ static int find_return_ssa_var(zend_jit_trace_rec *p, zend_ssa_op *ssa_op)
 				}
 			}
 			return -1;
-		} else if (p->op == ZEND_JIT_TRACE_OP1_TYPE || p->op == ZEND_JIT_TRACE_OP2_TYPE) {
+		} else if (p->op >= ZEND_JIT_TRACE_OP1_TYPE && p->op <= ZEND_JIT_TRACE_VAL_INFO) {
 			/*skip */
 		} else {
 			return -1;
@@ -1001,7 +1001,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 					return p->opline;
 				}
 				return NULL;
-			} else if (p->op == ZEND_JIT_TRACE_OP1_TYPE || p->op == ZEND_JIT_TRACE_OP2_TYPE) {
+			} else if (p->op >= ZEND_JIT_TRACE_OP1_TYPE && p->op <= ZEND_JIT_TRACE_VAL_INFO) {
 				/*skip */
 			} else {
 				return NULL;
@@ -1595,6 +1595,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
 				op2_ce = (zend_class_entry*)(p+1)->ce;
+				p++;
+			}
+			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
 				p++;
 			}
 
@@ -4072,6 +4075,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			uint8_t op3_type = p->op3_type;
 			uint8_t orig_op1_type = op1_type;
 			uint8_t orig_op2_type = op2_type;
+			uint8_t val_type = IS_UNKNOWN;
 			bool op1_indirect;
 			zend_class_entry *op1_ce = NULL;
 			zend_class_entry *op2_ce = NULL;
@@ -4096,6 +4100,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_TYPE) {
 				op2_ce = (zend_class_entry*)(p+1)->ce;
+				p++;
+			}
+			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
+				val_type = (p+1)->op1_type;
 				p++;
 			}
 
@@ -4387,7 +4395,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_assign_dim_op(&dasm_state, opline,
 								op1_info, op1_def_info, op1_addr, op2_info,
-								op1_data_info, OP1_DATA_RANGE(),
+								op1_data_info, OP1_DATA_RANGE(), val_type,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
@@ -4636,7 +4644,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_dim(&dasm_state, opline,
-								op1_info, op1_addr, op2_info, op1_data_info,
+								op1_info, op1_addr, op2_info, op1_data_info, val_type,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
@@ -6918,6 +6926,25 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 					const char *type = (op3_type == 0) ? "undef" : zend_get_type_by_const(op3_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT));
 					fprintf(stderr, " op3(%s%s)", ref, type);
 				}
+			}
+			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
+				uint8_t val_type;
+				const char *type;
+
+				if (op1_type == IS_UNKNOWN && op2_type == IS_UNKNOWN && op3_type == IS_UNKNOWN) {
+					fprintf(stderr, " ;");
+				}
+				p++;
+				val_type = p->op1_type;
+
+				if (val_type == IS_UNDEF) {
+					type = "undef";
+				} else if (val_type == IS_REFERENCE) {
+					type = "ref";
+				} else {
+					type = zend_get_type_by_const(val_type);
+				}
+				fprintf(stderr, " val(%s)", type);
 			}
 			fprintf(stderr, "\n");
 			idx++;
