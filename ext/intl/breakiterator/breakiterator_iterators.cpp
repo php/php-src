@@ -32,7 +32,6 @@ extern "C" {
 }
 
 static zend_class_entry *IntlPartsIterator_ce_ptr;
-static zend_object_handlers IntlPartsIterator_handlers;
 
 /* BreakIterator's iterator */
 
@@ -87,7 +86,8 @@ static const zend_object_iterator_funcs breakiterator_iterator_funcs = {
 	NULL,
 	_breakiterator_move_forward,
 	_breakiterator_rewind,
-	zoi_with_current_invalidate_current
+	zoi_with_current_invalidate_current,
+	NULL, /* get_gc */
 };
 
 U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
@@ -200,7 +200,8 @@ static const zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	_breakiterator_parts_get_current_key,
 	_breakiterator_parts_move_forward,
 	_breakiterator_parts_rewind,
-	zoi_with_current_invalidate_current
+	zoi_with_current_invalidate_current,
+	NULL, /* get_gc */
 };
 
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
