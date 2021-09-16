@@ -4812,7 +4812,7 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_TRUE|MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)) || opline->op2_type == IS_UNUSED ||
 				(t2 & (MAY_BE_UNDEF|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_ASSIGN_OBJ:
-			if (t1 & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_OBJECT))) {
+			if (t1 & (MAY_BE_ANY-MAY_BE_OBJECT)) {
 				return 1;
 			}
 			if ((opline+1)->op1_type == IS_CV) {
@@ -4829,24 +4829,21 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 					return 1;
 				}
 
-				if (op_array->scope != ce && ce->default_properties_count) {
-					zend_property_info *prop_info;
+				if (opline->op2_type != IS_CONST) {
+					return 1;
+				}
 
-					if (opline->op2_type == IS_CONST) {
-						prop_info = zend_hash_find_ptr(&ce->properties_info,
-							Z_STR_P(CRT_CONSTANT(opline->op2)));
-						if (prop_info && !(prop_info->flags & ZEND_ACC_PUBLIC)) {
-							return 1;
-						}
-					} else {
-						if (t2 & (MAY_BE_ANY-MAY_BE_STRING)) {
-							return 1;
-						}
-						ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-							if (!(prop_info->flags & ZEND_ACC_PUBLIC)) {
-								return 1;
-							}
-						} ZEND_HASH_FOREACH_END();
+				zend_string *prop_name = Z_STR_P(CRT_CONSTANT(opline->op2));
+				if (ZSTR_LEN(prop_name) > 0 && ZSTR_VAL(prop_name)[0] == '\0') {
+					return 1;
+				}
+
+				if (op_array->scope != ce && ce->default_properties_count) {
+					zend_property_info *prop_info =
+						zend_hash_find_ptr(&ce->properties_info, prop_name);
+					if (prop_info && (!(prop_info->flags & ZEND_ACC_PUBLIC)
+								|| ZEND_TYPE_IS_SET(prop_info->type))) {
+						return 1;
 					}
 				}
 				return 0;
