@@ -14,7 +14,7 @@ pdo
 	if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 	require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 	$db = PDOTest::factory();
-	$db->exec("drop table bug_78227");
+	@$db->exec("drop table bug_78227");
 
 	$db->exec("CREATE TABLE bug_78227 (id INTEGER PRIMARY KEY NOT NULL, foo VARCHAR(255) NOT NULL)");
 	$db->exec("INSERT INTO bug_78227 (id, foo) VALUES (10, 'test')");
@@ -28,6 +28,8 @@ pdo
 			$db->exec("ALTER TABLE bug_78227 change foo bat varchar(20)");
 			break;
 		case "sqlite" == $driver:
+			$db->exec("ALTER TABLE bug_78227 rename foo to bar");
+			break;
 		case "oci" == $driver:
 		case "pgsql" == $driver:
 			$db->exec("ALTER TABLE bug_78227 rename column foo to bar");
@@ -36,13 +38,13 @@ pdo
 			$db->exec("ALTER TABLE bug_78227 alter column foo to bar");
 			break;
 		case "mssql" == $driver:
+		case "dblib" == $driver:
+		case "odbc" == $driver:
 			$db->exec("execute sp_rename 'bug_78227.foo','bar','column'");
 			break;
 		case "sybase" == $driver:
 			$db->exec("sp_rename 'bug_78227.foo','bar','column'");
 			break;
-		default:
-			die('skip unknown driver');
 	}
 
 	$res = $stmt->execute(['id' => 10]);
