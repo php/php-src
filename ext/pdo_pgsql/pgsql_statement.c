@@ -173,7 +173,10 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	} else if (S->stmt_name) {
 		/* using a prepared statement */
 
-		if (!S->is_prepared) {
+		/* it will issue a warning that cached plan must not change result type if altering the table,
+		 * so wo have to reset S->result to solve it.
+		 * stmt->select_all means select all column.*/
+		if (!S->is_prepared || stmt->select_all) {
 stmt_retry:
 			/* we deferred the prepare until now, because we didn't
 			 * know anything about the parameter types; now we do */
