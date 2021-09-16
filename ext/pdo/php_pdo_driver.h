@@ -565,7 +565,7 @@ struct _pdo_stmt_t {
 	 * emulate prepare and bind on its behalf */
 	unsigned supports_placeholders:2;
 
-	unsigned _reserved:29;
+	unsigned _reserved:28;
 
 	/* the number of columns in the result set; not valid until after
 	 * the statement has been executed at least once.  In some cases, might
