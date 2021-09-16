@@ -14,6 +14,8 @@ pdo
 	if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 	require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 	$db = PDOTest::factory();
+	$db->exec("drop table bug_78227");
+
 	$db->exec("CREATE TABLE bug_78227 (id INTEGER PRIMARY KEY NOT NULL, foo VARCHAR(255) NOT NULL)");
 	$db->exec("INSERT INTO bug_78227 (id, foo) VALUES (10, 'test')");
 	$stmt = $db->prepare("SELECT * FROM bug_78227 WHERE id = :id");
@@ -45,6 +47,13 @@ pdo
 
 	$res = $stmt->execute(['id' => 10]);
 	print_r($stmt->fetch(PDO::FETCH_ASSOC));
+?>
+--CLEAN--
+<?php
+	if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+	require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+	$db = PDOTest::factory();
+	$db->exec("drop table bug_78227");
 ?>
 --EXPECT--
 Array
