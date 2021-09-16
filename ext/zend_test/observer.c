@@ -323,4 +323,8 @@ void zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS)
 	if (type != MODULE_TEMPORARY) {
 		UNREGISTER_INI_ENTRIES();
 	}
+
+	if (ZT_G(observer_observe_function_names)) {
+		zend_hash_release(ZT_G(observer_observe_function_names));
+	}
 }
