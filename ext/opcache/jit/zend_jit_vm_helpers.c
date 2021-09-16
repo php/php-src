@@ -729,6 +729,63 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			TRACE_RECORD(ZEND_JIT_TRACE_OP2_TYPE, 0, ce2);
 		}
 
+		switch (opline->opcode) {
+			case ZEND_FETCH_DIM_R:
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_DIM_RW:
+			case ZEND_FETCH_DIM_IS:
+			case ZEND_FETCH_DIM_FUNC_ARG:
+			case ZEND_FETCH_DIM_UNSET:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
+			case ZEND_ASSIGN_DIM:
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_UNSET_DIM:
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				if (opline->op1_type == IS_CONST) {
+					zval *arr = RT_CONSTANT(opline, opline->op1);
+					op1_type = Z_TYPE_P(arr);
+				}
+				if ((op1_type & IS_TRACE_TYPE_MASK) == IS_ARRAY
+				 && opline->op2_type != IS_UNDEF) {
+					zval *arr, *dim, *val;
+					uint8_t val_type = IS_UNDEF;
+
+					if (opline->op2_type == IS_CONST) {
+						dim	= RT_CONSTANT(opline, opline->op2);
+					} else {
+						dim = EX_VAR(opline->op2.var);
+					}
+
+					if (Z_TYPE_P(dim) == IS_LONG || Z_TYPE_P(dim) == IS_STRING) {
+						if (opline->op1_type == IS_CONST) {
+							arr = RT_CONSTANT(opline, opline->op1);
+						} else {
+							arr = EX_VAR(opline->op1.var);
+						}
+						if (Z_TYPE_P(arr) == IS_INDIRECT) {
+							arr = Z_INDIRECT_P(arr);
+						}
+						if (Z_TYPE_P(arr) == IS_REFERENCE) {
+							arr = Z_REFVAL_P(arr);
+						}
+						ZEND_ASSERT(Z_TYPE_P(arr) == IS_ARRAY);
+						if (Z_TYPE_P(dim) == IS_LONG) {
+							val = zend_hash_index_find(Z_ARRVAL_P(arr), Z_LVAL_P(dim));
+						} else /*if Z_TYPE_P(dim) == IS_STRING)*/ {
+							val = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(dim));
+						}
+						if (val) {
+							val_type = Z_TYPE_P(val);
+						}
+						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, val_type, 0, 0);
+					}
+				}
+				break;
+			default:
+				break;
+		}
+
 		if (opline->opcode == ZEND_DO_FCALL
 		 || opline->opcode == ZEND_DO_ICALL
 		 || opline->opcode == ZEND_DO_UCALL
