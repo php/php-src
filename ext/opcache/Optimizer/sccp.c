@@ -704,6 +704,10 @@ static inline int ct_eval_assign_obj(zval *result, zval *value, zval *key) {
 }
 
 static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
+	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
+		return FAILURE;
+	}
+
 	ZVAL_COPY(result, op1);
 	if (opcode == ZEND_PRE_INC
 			|| opcode == ZEND_POST_INC
