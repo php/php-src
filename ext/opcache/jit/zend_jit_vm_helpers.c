@@ -773,7 +773,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						if (Z_TYPE_P(dim) == IS_LONG) {
 							val = zend_hash_index_find(Z_ARRVAL_P(arr), Z_LVAL_P(dim));
 						} else /*if Z_TYPE_P(dim) == IS_STRING)*/ {
-							val = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(dim));
+							val = zend_symtable_find(Z_ARRVAL_P(arr), Z_STR_P(dim));
 						}
 						if (val) {
 							val_type = Z_TYPE_P(val);
