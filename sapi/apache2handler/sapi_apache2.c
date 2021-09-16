@@ -363,10 +363,15 @@ static void php_apache_sapi_log_message_ex(const char *msg, request_rec *r)
 	}
 }
 
-static double php_apache_sapi_get_request_time(void)
+static zend_result php_apache_sapi_get_request_time(double *request_time)
 {
 	php_struct *ctx = SG(server_context);
-	return ((double) ctx->r->request_time) / 1000000.0;
+	if (!ctx) {
+		return FAILURE;
+	}
+
+	*request_time = ((double) ctx->r->request_time) / 1000000.0;
+	return SUCCESS;
 }
 
 extern zend_module_entry php_apache_module;
