@@ -124,7 +124,11 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	/* Don't store callback if headers have already been sent:
+	 * It won't get used and we won't have a chance to release it. */
+	if (!SG(headers_sent)) {
+		ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	}
 
 	RETURN_TRUE;
 }
