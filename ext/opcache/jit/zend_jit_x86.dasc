@@ -5584,7 +5584,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (packed_loaded) {
 					|	IF_NOT_Z_TYPE r0, IS_UNDEF, >8
 				}
-//				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded) {
+				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || dim_type == IS_UNDEF) {
 					|2:
 					|4:
 					if (!op2_loaded) {
@@ -5592,7 +5592,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr
 					}
 					|	EXT_CALL zend_hash_index_lookup, r0
-//				}
+				}
 				break;
 			default:
 				ZEND_UNREACHABLE();
