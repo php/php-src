@@ -1020,6 +1020,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
+				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
+					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize")) {
+					retval = &EG(error_zval);
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
