@@ -5527,7 +5527,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FE_RESET_R:
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
-						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) != MAY_BE_ARRAY) {
 							break;
 						}
 						if (!zend_jit_fe_reset(&dasm_state, opline, op1_info)) {
