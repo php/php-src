@@ -5543,6 +5543,28 @@ static int zend_jit_assign_to_variable_call(dasm_State    **Dst,
                                             zend_jit_addr   __res_addr,
                                             bool            __check_exception)
 {
+	if (val_info & MAY_BE_UNDEF) {
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+
+			|	IF_ZVAL_TYPE val_addr, IS_UNDEF, &exit_addr, ZREG_TMP1
+		} else {
+			|	IF_ZVAL_TYPE val_addr, IS_UNDEF, >1, ZREG_TMP1
+			|.cold_code
+			|1:
+			|	SET_EX_OPLINE opline, REG0
+			|	LOAD_32BIT_VAL FCARG1w, Z_OFFSET(val_addr)
+			|	EXT_CALL zend_jit_undefined_op_helper, REG0
+			|	b >1
+			|.code
+			|1:
+		}
+	}
 	if (Z_MODE(var_addr) != IS_MEM_ZVAL || Z_REG(var_addr) != ZREG_FCARG1 || Z_OFFSET(var_addr) != 0) {
 		|	LOAD_ZVAL_ADDR FCARG1x, var_addr
 	}
