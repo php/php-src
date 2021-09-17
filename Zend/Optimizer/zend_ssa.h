@@ -151,6 +151,7 @@ ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *op
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
 void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
+void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op);
 void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);

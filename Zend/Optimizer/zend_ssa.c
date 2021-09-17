@@ -1290,7 +1290,7 @@ static void zend_ssa_remove_phi_from_block(zend_ssa *ssa, zend_ssa_phi *phi) /* 
 }
 /* }}} */
 
-static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op) /* {{{ */
+void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op) /* {{{ */
 {
 	if (ssa_op->op1_def >= 0) {
 		zend_ssa_remove_uses_of_var(ssa, ssa_op->op1_def);
