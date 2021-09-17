@@ -5567,7 +5567,12 @@ static int zend_jit_assign_to_variable_call(dasm_State    **Dst,
 			if (Z_REG(var_addr) != ZREG_FP) {
 				|	ldr Rx(Z_REG(var_addr)), T1 // restore
 			}
-			|	b >1
+			if (Z_MODE(var_addr) != IS_MEM_ZVAL || Z_REG(var_addr) != ZREG_FCARG1 || Z_OFFSET(var_addr) != 0) {
+				|	LOAD_ZVAL_ADDR FCARG1x, var_addr
+			}
+			|	LOAD_ADDR_ZTS FCARG2x, executor_globals, uninitialized_zval
+			|	bl ->assign_const
+			|	b >9
 			|.code
 			|1:
 		}
@@ -5598,6 +5603,9 @@ static int zend_jit_assign_to_variable_call(dasm_State    **Dst,
 			|	bl ->assign_cv_noref
 		} else {
 			|	bl ->assign_cv
+		}
+		if ((val_info & MAY_BE_UNDEF) && JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+			|9:
 		}
 	} else {
 		ZEND_UNREACHABLE();
