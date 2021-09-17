@@ -5367,13 +5367,16 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
-	}
-
 	arg = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		Z_TRY_ADDREF_P(arg);
+		ZVAL_NEW_REF(param, arg);
+	} else {
+		ZVAL_COPY(param, arg);
+	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
