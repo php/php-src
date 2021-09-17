@@ -5239,7 +5239,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	EXT_CALL zend_jit_hash_lookup_rw, REG0
 				}
 				|	mov REG0, RETVALx
-				|	cbz REG0, >9
+				if (not_found_exit_addr) {
+					|	cbz REG0, &not_found_exit_addr
+				} else {
+					|	cbz REG0, >9
+				}
 				break;
 			case BP_VAR_W:
 				if (opline->op2_type != IS_CONST) {
