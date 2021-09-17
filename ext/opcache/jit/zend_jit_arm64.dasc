@@ -5557,9 +5557,16 @@ static int zend_jit_assign_to_variable_call(dasm_State    **Dst,
 			|	IF_ZVAL_TYPE val_addr, IS_UNDEF, >1, ZREG_TMP1
 			|.cold_code
 			|1:
+			ZEND_ASSERT(Z_REG(val_addr) == ZREG_FP);
+			if (Z_REG(var_addr) != ZREG_FP) {
+				|	str Rx(Z_REG(var_addr)), T1 // save
+			}
 			|	SET_EX_OPLINE opline, REG0
 			|	LOAD_32BIT_VAL FCARG1w, Z_OFFSET(val_addr)
 			|	EXT_CALL zend_jit_undefined_op_helper, REG0
+			if (Z_REG(var_addr) != ZREG_FP) {
+				|	ldr Rx(Z_REG(var_addr)), T1 // restore
+			}
 			|	b >1
 			|.code
 			|1:
