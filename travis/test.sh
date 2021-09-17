@@ -2,7 +2,7 @@
 set -ex
 
 # ARM64 CI reports nproc=32, which is excessive.
-if [ -z "$ARM64" ]; then export JOBS=$(nproc); else export JOBS=16; fi
+if [ -z "$ARM64" ]; then export JOBS=$(nproc); else export JOBS=1; fi
 
 export SKIP_IO_CAPTURE_TESTS=1
 ./sapi/cli/php run-tests.php -P \
