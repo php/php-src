@@ -3452,6 +3452,10 @@ static zend_always_inline int _zend_update_type_info(
 							tmp &= ~MAY_BE_RC1;
 						}
 					}
+					if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+						/* IS check may return null for uninitialized typed property. */
+						tmp |= MAY_BE_NULL;
+					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				if (ce) {
