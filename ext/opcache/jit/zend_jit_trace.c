@@ -1568,6 +1568,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			uint8_t orig_op1_type, orig_op2_type, op1_type, op2_type, op3_type;
+			uint8_t val_type = IS_UNKNOWN;
 //			zend_class_entry *op1_ce = NULL;
 			zend_class_entry *op2_ce = NULL;
 
@@ -1598,6 +1599,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				p++;
 			}
 			if ((p+1)->op == ZEND_JIT_TRACE_VAL_INFO) {
+				val_type = (p+1)->op1_type;
 				p++;
 			}
 
@@ -1638,17 +1640,27 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ADD_OP2_TRACE_GUARD();
 					}
 					if (op1_type == IS_ARRAY
-					 && !(orig_op1_type & IS_TRACE_PACKED)
 					 && ((opline->op2_type == IS_CONST
 					   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
 					  || (opline->op2_type != IS_CONST
 					   && op2_type == IS_LONG))) {
 
-						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
+						if (!(orig_op1_type & IS_TRACE_PACKED)) {
+							zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
 
-						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
-							info->type |= MAY_BE_PACKED_GUARD;
-							info->type &= ~MAY_BE_ARRAY_PACKED;
+							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+								info->type |= MAY_BE_PACKED_GUARD;
+								info->type &= ~MAY_BE_ARRAY_PACKED;
+							}
+						} else if (opline->opcode == ZEND_ASSIGN_DIM_OP
+								&& val_type != IS_UNKNOWN
+								&& val_type != IS_UNDEF) {
+							zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
+
+							if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+								info->type |= MAY_BE_PACKED_GUARD;
+								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+							}
 						}
 					}
 					break;
@@ -2071,6 +2083,20 @@ propagate_arg:
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 					// TODO:
 					assert(0);
+				}
+				if (opline->opcode == ZEND_ASSIGN_DIM_OP
+				 && ssa_ops[idx].op1_def > 0
+				 && op1_type == IS_ARRAY
+				 && (orig_op1_type & IS_TRACE_PACKED)
+				 && val_type != IS_UNKNOWN
+				 && val_type != IS_UNDEF
+				 && ((opline->op2_type == IS_CONST
+				   && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG)
+				  || (opline->op2_type != IS_CONST
+				   && op2_type == IS_LONG))) {
+					zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_def];
+
+					info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 				}
 			}
 			if (ssa->var_info) {
