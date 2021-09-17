@@ -5117,7 +5117,6 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|	SET_EX_OPLINE opline, REG0
 				|	EXT_CALL zend_jit_hash_index_lookup_rw, REG0
 				|	mov REG0, RETVALx
-				|	cbz REG0, >9
 				if (not_found_exit_addr) {
 					if (packed_loaded) {
 						|	cbnz REG0, >8
