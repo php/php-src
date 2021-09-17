@@ -5101,32 +5101,35 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				|.code
 				break;
 			case BP_VAR_RW:
-				if (packed_loaded) {
-					if (not_found_exit_addr) {
+				if (packed_loaded && !not_found_exit_addr) {
+					|	IF_NOT_Z_TYPE REG0, IS_UNDEF, >8, TMP1w
+				}
+				if (!packed_loaded ||
+						!not_found_exit_addr ||
+						(op1_info & MAY_BE_ARRAY_NUMERIC_HASH)) {
+					if (packed_loaded && not_found_exit_addr) {
 						|.cold_code
-					} else {
-						|	IF_NOT_Z_TYPE REG0, IS_UNDEF, >8, TMP1w
 					}
-				}
-				|2:
-				|4:
-				if (!op2_loaded) {
-					|	// hval = Z_LVAL_P(dim);
-					|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr, TMP1
-				}
-				|	SET_EX_OPLINE opline, REG0
-				|	EXT_CALL zend_jit_hash_index_lookup_rw, REG0
-				|	mov REG0, RETVALx
-				if (not_found_exit_addr) {
-					if (packed_loaded) {
-						|	cbnz REG0, >8
-						|	b &not_found_exit_addr
-						|.code
-					} else {
-						|	cbz REG0, &not_found_exit_addr
+					|2:
+					|4:
+					if (!op2_loaded) {
+						|	// hval = Z_LVAL_P(dim);
+						|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr, TMP1
 					}
-				} else {
-					|	cbz REG0, >9
+					|	SET_EX_OPLINE opline, REG0
+					|	EXT_CALL zend_jit_hash_index_lookup_rw, REG0
+					|	mov REG0, RETVALx
+					if (not_found_exit_addr) {
+						if (packed_loaded) {
+							|	cbnz REG0, >8
+							|	b &not_found_exit_addr
+							|.code
+						} else {
+							|	cbz REG0, &not_found_exit_addr
+						}
+					} else {
+						|	cbz REG0, >9
+					}
 				}
 				break;
 			case BP_VAR_W:
