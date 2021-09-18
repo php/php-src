@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2020-05-09 20:57:15.000000000 +0200
-+++ libmagic/apprentice.c	2020-11-07 14:41:13.543842900 +0100
++++ libmagic/apprentice.c	2021-09-18 21:52:40.223205758 +0200
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -929,7 +929,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
 --- libmagic.orig/ascmagic.c	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/ascmagic.c	2020-11-07 14:41:13.543842900 +0100
++++ libmagic/ascmagic.c	2021-09-18 21:52:40.223205758 +0200
 @@ -50,7 +50,7 @@
  #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \
  		  || (x) == 0x85 || (x) == '\f')
@@ -995,7 +995,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  	unsigned char *end = buf + len;
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
 --- libmagic.orig/buffer.c	2020-02-16 16:52:49.000000000 +0100
-+++ libmagic/buffer.c	2020-11-07 14:41:13.543842900 +0100
++++ libmagic/buffer.c	2021-09-18 21:52:40.223205758 +0200
 @@ -31,19 +31,23 @@
  #endif	/* lint */
  
@@ -1051,7 +1051,7 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  	}
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2019-09-30 17:42:50.000000000 +0200
-+++ libmagic/cdf.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/cdf.c	2021-09-18 21:52:40.223205758 +0200
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1286,7 +1286,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2019-09-30 17:42:50.000000000 +0200
-+++ libmagic/cdf.h	2020-10-09 14:15:33.483358900 +0200
++++ libmagic/cdf.h	2021-09-17 21:22:51.278410517 +0200
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1303,7 +1303,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  #define timespec timeval
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2019-03-12 21:43:05.000000000 +0100
-+++ libmagic/cdf_time.c	2020-10-09 14:15:33.484360000 +0200
++++ libmagic/cdf_time.c	2021-09-17 21:22:51.278410517 +0200
 @@ -23,6 +23,7 @@
   * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   * POSSIBILITY OF SUCH DAMAGE.
@@ -1332,7 +1332,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2020-05-31 02:11:06.000000000 +0200
-+++ libmagic/compress.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/compress.c	2021-09-18 21:52:40.223205758 +0200
 @@ -51,7 +51,7 @@
  #ifndef HAVE_SIG_T
  typedef void (*sig_t)(int);
@@ -1469,7 +1469,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/der.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/der.c	2021-09-18 21:52:40.223205758 +0200
 @@ -54,7 +54,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1482,7 +1482,7 @@ diff -u libmagic.orig/der.c libmagic/der.c
  #endif
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2019-02-20 02:30:19.000000000 +0100
-+++ libmagic/elfclass.h	2020-10-09 14:15:33.488358700 +0200
++++ libmagic/elfclass.h	2021-09-17 21:22:51.278410517 +0200
 @@ -41,7 +41,7 @@
  			return toomany(ms, "program headers", phnum);
  		flags |= FLAGS_IS_CORE;
@@ -1512,7 +1512,7 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
 --- libmagic.orig/encoding.c	2019-06-10 23:34:41.000000000 +0200
-+++ libmagic/encoding.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/encoding.c	2021-09-18 21:59:22.216670967 +0200
 @@ -43,14 +43,14 @@
  #include <stdlib.h>
  
@@ -1535,7 +1535,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
  
  #ifdef DEBUG_ENCODING
-@@ -62,11 +62,11 @@
+@@ -62,19 +62,19 @@
  /*
   * Try to determine whether text is in some character code we can
   * identify.  Each of these tests, if it succeeds, will leave
@@ -1549,7 +1549,8 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
      size_t *ulen, const char **code, const char **code_mime, const char **type)
  {
  	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
-@@ -74,7 +74,7 @@
+-	size_t nbytes = b->flen;
++	size_t nbytes = b->flen > 64*1024 ? 64*1024 : b->flen;
  	size_t mlen;
  	int rv = 1, ucs_type;
  	unsigned char *nbuf = NULL;
@@ -1702,7 +1703,7 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  			return 0;
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/file.h	2020-11-24 13:44:41.506472900 +0100
++++ libmagic/file.h	2021-09-18 21:52:40.223205758 +0200
 @@ -33,17 +33,13 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1996,7 +1997,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #endif /* __file_h__ */
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2019-07-16 15:30:32.000000000 +0200
-+++ libmagic/fsmagic.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/fsmagic.c	2021-09-18 21:52:40.223205758 +0200
 @@ -66,26 +66,10 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -2289,7 +2290,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2020-02-20 16:50:20.000000000 +0100
-+++ libmagic/funcs.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/funcs.c	2021-09-18 21:52:40.223205758 +0200
 @@ -48,6 +48,13 @@
  #define SIZE_MAX	((size_t)~0)
  #endif
@@ -2664,7 +2665,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/magic.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/magic.c	2021-09-18 21:52:40.223205758 +0200
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -3139,8 +3140,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  	}
  	return file_getbuffer(ms);
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2020-11-24 13:45:15.355600300 +0100
-+++ libmagic/magic.h	2020-11-07 14:41:13.559464400 +0100
+--- libmagic.orig/magic.h	2021-09-18 22:03:56.174790722 +0200
++++ libmagic/magic.h	2021-09-18 21:52:40.227205733 +0200
 @@ -126,6 +126,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -3151,7 +3152,7 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2020-05-09 20:57:15.000000000 +0200
-+++ libmagic/print.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/print.c	2021-09-18 21:52:40.227205733 +0200
 @@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
@@ -3216,7 +3217,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2019-09-30 17:42:50.000000000 +0200
-+++ libmagic/readcdf.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/readcdf.c	2021-09-18 21:52:40.227205733 +0200
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3340,7 +3341,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2020-06-15 02:01:01.000000000 +0200
-+++ libmagic/softmagic.c	2020-11-07 14:41:13.559464400 +0100
++++ libmagic/softmagic.c	2021-09-18 21:52:40.227205733 +0200
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3691,7 +3692,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	case FILE_INDIRECT:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
 --- libmagic.orig/strcasestr.c	2014-09-11 17:05:33.000000000 +0200
-+++ libmagic/strcasestr.c	2020-10-09 14:15:33.499288400 +0200
++++ libmagic/strcasestr.c	2021-09-17 21:22:51.282410490 +0200
 @@ -39,6 +39,8 @@
  
  #include "file.h"
