@@ -27,7 +27,7 @@ var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
 *** Testing finfo_file() : basic functionality ***
 string(28) "text/x-php; charset=us-ascii"
 string(%d) "PHP script, ASCII text%A"
-string(32) "text/plain; charset=unknown-8bit"
+string(28) "text/plain; charset=us-ascii"
 
 Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
 bool(false)

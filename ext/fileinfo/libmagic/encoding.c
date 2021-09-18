@@ -71,7 +71,7 @@ file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
     size_t *ulen, const char **code, const char **code_mime, const char **type)
 {
 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
-	size_t nbytes = b->flen;
+	size_t nbytes = b->flen > 64*1024 ? 64*1024 : b->flen;
 	size_t mlen;
 	int rv = 1, ucs_type;
 	unsigned char *nbuf = NULL;
