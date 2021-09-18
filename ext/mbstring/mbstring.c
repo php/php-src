@@ -1699,6 +1699,11 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_THROWS();
 	}
 
+	if (ZSTR_LEN(str) == 0) {
+		array_init_size(return_value, 0);
+		return;
+	}
+
 	p = ZSTR_VAL(str); /* string cursor pointer */
 	last = ZSTR_VAL(str) + ZSTR_LEN(str); /* last string char pointer */
 
