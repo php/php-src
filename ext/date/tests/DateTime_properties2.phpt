@@ -28,6 +28,12 @@ assert($datetime->microsecond === 7);
 
 var_dump($datetime);
 
+$datetime->second = 61;
+assert($datetime->second === 1 && $datetime->minute === 6);
+
+$datetime->second = '61'; // will cast to integer
+assert($datetime->second === 1 && $datetime->minute === 7);
+
 ?>
 --EXPECT--
 object(DateTime)#1 (10) {
