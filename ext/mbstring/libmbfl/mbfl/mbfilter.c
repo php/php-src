@@ -692,9 +692,7 @@ mbfl_substr_count(
 	  needle->encoding,
 	  &mbfl_encoding_wchar,
 	  mbfl_wchar_device_output, 0, &pc.needle);
-	if (filter == NULL) {
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	mbfl_convert_filter_feed_string(filter, needle->val, needle->len);
 	mbfl_convert_filter_flush(filter);
 	mbfl_convert_filter_delete(filter);
@@ -711,10 +709,7 @@ mbfl_substr_count(
 	  haystack->encoding,
 	  &mbfl_encoding_wchar,
 	  collector_strpos, 0, &pc);
-	if (filter == NULL) {
-		mbfl_wchar_device_clear(&pc.needle);
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	pc.start = 0;
 	pc.output = 0;
 	pc.needle_pos = 0;
