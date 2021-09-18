@@ -1,47 +1,54 @@
 --TEST--
-DateTime: Test cannot modify read only properties
+DateTime: Test modify properties
 --FILE--
 <?php
 
-$period = new DateTime();
+$datetime = new DateTime('2000-01-02 03:04:05.100000Z');
 
-$properties = [
-    "year",
-    "month",
-    "day",
-    "hour",
-    "minute",
-    "second",
-    "microsecond",
-];
+$datetime->year = 2001;
+assert($datetime->year === 2001);
 
-foreach ($properties as $property) {
-    try {
-        $period->$property = "new";
-    } catch (Error $e) {
-        echo $e->getMessage() . "\n";
-    }
+$datetime->month = 2;
+assert($datetime->month === 2);
 
-    try {
-        $period->$property[] = "extra";
-    } catch (Error $e) {
-        echo $e->getMessage() . "\n";
-    }
-}
+$datetime->day = 3;
+assert($datetime->day === 3);
+
+$datetime->hour = 4;
+assert($datetime->hour === 4);
+
+$datetime->minute = 5;
+assert($datetime->minute === 5);
+
+$datetime->second = 6;
+assert($datetime->second === 6);
+
+$datetime->microsecond = 7;
+assert($datetime->microsecond === 7);
+
+var_dump($datetime);
 
 ?>
 --EXPECT--
-Writing to DateTime->year is unsupported
-Retrieval of DateTime->year for modification is unsupported
-Writing to DateTime->month is unsupported
-Retrieval of DateTime->month for modification is unsupported
-Writing to DateTime->day is unsupported
-Retrieval of DateTime->day for modification is unsupported
-Writing to DateTime->hour is unsupported
-Retrieval of DateTime->hour for modification is unsupported
-Writing to DateTime->minute is unsupported
-Retrieval of DateTime->minute for modification is unsupported
-Writing to DateTime->second is unsupported
-Retrieval of DateTime->second for modification is unsupported
-Writing to DateTime->microsecond is unsupported
-Retrieval of DateTime->microsecond for modification is unsupported
+object(DateTime)#1 (10) {
+  ["year"]=>
+  int(2001)
+  ["month"]=>
+  int(2)
+  ["day"]=>
+  int(3)
+  ["hour"]=>
+  int(4)
+  ["minute"]=>
+  int(5)
+  ["second"]=>
+  int(6)
+  ["microsecond"]=>
+  int(7)
+  ["date"]=>
+  string(26) "2001-02-03 04:05:06.000007"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(1) "Z"
+}

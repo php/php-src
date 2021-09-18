@@ -181,6 +181,7 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
 static int date_interval_compare_objects(zval *o1, zval *o2);
 static zval *date_object_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
+static zval *date_object_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
@@ -1664,6 +1665,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_date.clone_obj = date_object_clone_date;
 	date_object_handlers_date.has_property = date_object_has_property;
 	date_object_handlers_date.read_property = date_object_read_property;
+	date_object_handlers_date.write_property = date_object_write_property;
 	date_object_handlers_date.get_properties = date_object_get_properties;
 	date_object_handlers_date.compare = date_object_compare_date;
 	date_object_handlers_date.get_properties_for = date_object_get_properties_for;
@@ -1834,7 +1836,11 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 	}
 
 	dateobj = php_date_obj_from_obj(object);
-	props = zend_array_dup(zend_std_get_properties(object));
+	if (purpose == ZEND_PROP_PURPOSE_VAR_EXPORT) {
+		props = zend_array_dup(zend_std_get_properties(object));
+	} else {
+		props = zend_array_dup(date_object_get_properties(object));
+	}
 	if (!dateobj->time) {
 		return props;
 	}
@@ -3900,6 +3906,36 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 	return retval;
 }
 /* }}} */
+
+static zval *date_object_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
+{
+	php_date_obj *obj;
+
+	obj = php_date_obj_from_obj(object);
+
+	if (zend_string_equals_literal(name, "year")) {
+		obj->time->y = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "month")) {
+		obj->time->m = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "day")) {
+		obj->time->d = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "hour")) {
+		obj->time->h = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "minute")) {
+		obj->time->i = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "second")) {
+		obj->time->s = zval_get_long(value);
+	} else if (zend_string_equals_literal(name, "microsecond")) {
+		obj->time->us = zval_get_long(value);
+	} else {
+		value = zend_std_write_property(object, name, value, cache_slot);
+	}
+
+	timelib_update_ts(obj->time, NULL);
+	timelib_update_from_sse(obj->time);
+
+	return value;
+}
 
 /* {{{ date_interval_write_property */
 static zval *date_interval_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
