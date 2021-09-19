@@ -31,6 +31,7 @@
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
 #include "spl_iterators.h"
+#include "spl_util.h"
 #include "ext/json/php_json.h"
 
 zend_object_handlers spl_handler_SplFixedArray;
@@ -304,37 +305,6 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object)
 	zend_objects_clone_members(new_object, old_object);
 
 	return new_object;
-}
-
-static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
-{
-	try_again:
-	switch (Z_TYPE_P(offset)) {
-		case IS_STRING: {
-			zend_ulong index;
-			if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), index)) {
-				return (zend_long) index;
-			}
-			break;
-		}
-		case IS_DOUBLE:
-			return zend_dval_to_lval_safe(Z_DVAL_P(offset));
-		case IS_LONG:
-			return Z_LVAL_P(offset);
-		case IS_FALSE:
-			return 0;
-		case IS_TRUE:
-			return 1;
-		case IS_REFERENCE:
-			offset = Z_REFVAL_P(offset);
-			goto try_again;
-		case IS_RESOURCE:
-			zend_use_resource_as_offset(offset);
-			return Z_RES_HANDLE_P(offset);
-	}
-
-	zend_type_error("Illegal offset type");
-	return 0;
 }
 
 static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset)
