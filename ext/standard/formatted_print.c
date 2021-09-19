@@ -452,7 +452,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 
 					if (argnum <= 0) {
 						zend_string_efree(result);
-						php_error_docref(NULL, E_WARNING, "Argument number must be greater than zero");
+						php_error_docref(NULL, E_WARNING, "Argument number specifier must be greater than zero and less than %d", INT_MAX);
 						return NULL;
 					}
 					argnum--;

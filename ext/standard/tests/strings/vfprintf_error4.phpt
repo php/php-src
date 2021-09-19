@@ -38,6 +38,6 @@ unlink( $file );
 Warning: vfprintf() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Warning: vfprintf(): Argument number must be greater than zero in %s on line %d
+Warning: vfprintf(): Argument number specifier must be greater than zero and less than %d in %s on line %d
 bool(false)
 ===DONE===
