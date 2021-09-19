@@ -570,6 +570,9 @@ PHP 8.1 UPGRADE NOTES
   quality. This constant is only defined, if a libgd is used which supports
   lossless WebP encoding.
 
+- Mbstring:
+  . Unicode data tables have been updated to Unicode 14.
+
 - MySQLi:
   . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
     available when linking against libmysqlclient.
