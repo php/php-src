@@ -9,17 +9,30 @@ LC_CTYPE=de_DE
 --FILE--
 <?php
 
-var_dump(setlocale(LC_CTYPE, "0"));
-var_dump(bin2hex(strtoupper("\xe4")));
+echo "inherited\n";
+echo 'ctype_lower(\xe4): ' . (ctype_lower("\xe4") ? 'y' : 'n') . "\n";
+echo 'preg_match(\w, \xe4): ';
 var_dump(preg_match('/\w/', "\xe4"));
+
+var_dump(setlocale(LC_CTYPE, "0"));
+echo 'ctype_lower(\xe4): ' . (ctype_lower("\xe4") ? 'y' : 'n') . "\n";
+echo 'preg_match(\w, \xe4): ';
+var_dump(preg_match('/\w/', "\xe4"));
+
+echo "de_DE\n";
 var_dump(setlocale(LC_CTYPE, "de_DE", "de-DE") !== false);
-var_dump(bin2hex(strtoupper("\xe4")));
+echo 'ctype_lower(\xe4): ' . (ctype_lower("\xe4") ? 'y' : 'n') . "\n";
+echo 'preg_match(\w, \xe4): ';
 var_dump(preg_match('/\w/', "\xe4"));
 ?>
 --EXPECTF--
+inherited
+ctype_lower(\xe4): n
+preg_match(\w, \xe4): int(0)
 string(%d) "C%r(\.UTF-8)?%r"
-string(2) "e4"
-int(0)
+ctype_lower(\xe4): n
+preg_match(\w, \xe4): int(0)
+de_DE
 bool(true)
-string(2) "c4"
-int(1)
+ctype_lower(\xe4): y
+preg_match(\w, \xe4): int(1)

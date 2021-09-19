@@ -21,7 +21,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
