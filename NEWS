@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
     defined). (Dmitry)
 
+- Fileinfo:
+  . Fixed bug #78987 (High memory usage during encoding detection). (Anatol)
+
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
