@@ -806,9 +806,8 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len, int ip[8]) /* {{
 				if (++str == end) {
 					if (blocks > 8) {
 						return 0;
-					} else {
-						goto fixup_ip;
 					}
+					goto fixup_ip;
 				}
 			} else if ((str - 1) == s) {
 				/* don't allow leading : without another : following */
