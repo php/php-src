@@ -115,9 +115,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 			zval_ptr_dtor(&(elements[i]));
 		}
 
-		if (elements) {
-			efree(elements);
-		}
+		efree(elements);
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
 		memset(array->elements + array->size, '\0', sizeof(zval) * (size - array->size));
