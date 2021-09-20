@@ -2410,6 +2410,7 @@ PHP_FUNCTION(substr_replace)
 			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
 			if (from_ht) {
+				if (HT_IS_PACKED(from_ht)) {
 					while (from_idx < from_ht->nNumUsed) {
 						tmp_from = &from_ht->arPacked[from_idx];
 						if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
@@ -2417,7 +2418,6 @@ PHP_FUNCTION(substr_replace)
 						}
 						from_idx++;
 					}
-				if (HT_IS_PACKED(from_ht)) {
 				} else {
 					while (from_idx < from_ht->nNumUsed) {
 						tmp_from = &from_ht->arData[from_idx].val;
