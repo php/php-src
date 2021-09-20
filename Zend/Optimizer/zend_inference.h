@@ -234,7 +234,7 @@ ZEND_API int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_arra
 
 ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 
-ZEND_API int zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
+ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, zend_ssa_op* ssa_op, int var, zend_ssa_range *tmp);
 
 ZEND_API uint32_t zend_fetch_arg_info_type(
 	const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce);
@@ -244,10 +244,10 @@ uint32_t zend_get_return_info_from_signature_only(
 		const zend_function *func, const zend_script *script,
 		zend_class_entry **ce, bool *ce_is_instanceof, bool use_tentative_return_info);
 
-ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
-ZEND_API int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa, uint32_t t1, uint32_t t2);
+ZEND_API bool zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
 
-ZEND_API int zend_update_type_info(
+ZEND_API zend_result zend_update_type_info(
 	const zend_op_array *op_array, zend_ssa *ssa, const zend_script *script,
 	zend_op *opline, zend_ssa_op *ssa_op, const zend_op **ssa_opcodes,
 	zend_long optimization_level);

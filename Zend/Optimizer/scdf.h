@@ -49,7 +49,7 @@ typedef struct _scdf_ctx {
 void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
 void scdf_solve(scdf_ctx *scdf, const char *name);
 
-int scdf_remove_unreachable_blocks(scdf_ctx *scdf);
+uint32_t scdf_remove_unreachable_blocks(scdf_ctx *scdf);
 
 /* Add uses to worklist */
 static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {

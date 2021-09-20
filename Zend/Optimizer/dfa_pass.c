@@ -38,7 +38,7 @@
 # include "ssa_integrity.c"
 #endif
 
-int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
+zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	uint32_t build_flags;
 
@@ -410,7 +410,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 				 && (send_needly->opcode == ZEND_SEND_VAL
 				  || send_needly->opcode == ZEND_SEND_VAR)
 			    ) {
-					int ok = 1;
+					bool ok = 1;
 
 					HashTable *src = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, send_array->op1.constant));
 					HashTable *dst;
@@ -996,7 +996,7 @@ optimize_nop:
 	return removed_ops;
 }
 
-static int zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa, int def, int cv_var)
+static bool zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa, int def, int cv_var)
 {
 	int result_var = ssa->ops[def].result_def;
 	int cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);

@@ -31,7 +31,7 @@
 #include "zend_vm.h"
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline int in_hitlist(zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
