@@ -4492,9 +4492,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	checkpoint = zend_arena_checkpoint(CG(arena));
 
 	call_graph.op_arrays_count = 0;
-	if (zend_build_call_graph(&CG(arena), script, &call_graph) != SUCCESS) {
-		goto jit_failure;
-	}
+	zend_build_call_graph(&CG(arena), script, &call_graph);
 
 	zend_analyze_call_graph(&CG(arena), script, &call_graph);
 
