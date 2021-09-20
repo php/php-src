@@ -1231,7 +1231,9 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 {
 	reflection_object *intern;
 
-	reflection_instantiate(reflection_class_ptr, object);
+	zend_class_entry *reflection_ce =
+		ce->ce_flags & ZEND_ACC_ENUM ? reflection_enum_ptr : reflection_class_ptr;
+	reflection_instantiate(reflection_ce, object);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1239,18 +1241,6 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 	ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
 }
 /* }}} */
-
-static void zend_reflection_enum_factory(zend_class_entry *ce, zval *object)
-{
-	reflection_object *intern;
-
-	reflection_instantiate(reflection_enum_ptr, object);
-	intern = Z_REFLECTION_P(object);
-	intern->ptr = ce;
-	intern->ref_type = REF_TYPE_OTHER;
-	intern->ce = ce;
-	ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
-}
 
 /* {{{ reflection_extension_factory */
 static void reflection_extension_factory(zval *object, const char *name_str)
@@ -6849,7 +6839,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, getEnum)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	zend_reflection_enum_factory(ref->ce, return_value);
+	zend_reflection_class_factory(ref->ce, return_value);
 }
 
 ZEND_METHOD(ReflectionEnumBackedCase, __construct)

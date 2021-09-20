@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC3
 
+- Reflection:
+  . Fixed bug #81457 (Enum: ReflectionMethod->getDeclaringClass() return a
+    ReflectionClass). (Nikita)
+
 - XML:
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
