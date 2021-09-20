@@ -1315,9 +1315,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 			return FAILURE;
 		}
 
-		if (zend_ssa_compute_use_def_chains(&CG(arena), op_array, ssa) != SUCCESS) {
-			return FAILURE;
-		}
+		zend_ssa_compute_use_def_chains(&CG(arena), op_array, ssa);
 
 		zend_ssa_find_false_dependencies(op_array, ssa);
 

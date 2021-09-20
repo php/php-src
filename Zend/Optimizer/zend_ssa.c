@@ -1043,7 +1043,7 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 }
 /* }}} */
 
-ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars;
 	int i;
@@ -1158,8 +1158,6 @@ ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_a
 			ssa_vars[i].alias = ssa_vars[ssa_vars[i].var].alias;
 		}
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
