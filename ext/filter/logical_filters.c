@@ -848,9 +848,13 @@ fixup_ip:
 		ip[i++] = 256 * ip4elm[2] + ip4elm[3];
 	} else if (ip && compressed_pos >= 0 && blocks <= 8) {
 		int offset = 8 - blocks;
-		for (i = 7; i > compressed_pos; i--) {
+		int blocks_to_copy = blocks - compressed_pos - 1;
+		ZEND_ASSERT(blocks_to_copy >= 0);
+		/* copy blocks after compressed_pos + 1 to end of array */
+		for (i = 7; i > 7 - blocks_to_copy; i--) {
 			ip[i] = ip[i - offset];
 		}
+		/* zero compressed blocks */
 		for (i = compressed_pos + offset; i >= compressed_pos; i--) {
 			ip[i] = 0;
 		}
