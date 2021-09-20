@@ -4357,7 +4357,7 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 	return SUCCESS;
 }
 
-static int zend_mark_cv_references(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
+static void zend_mark_cv_references(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa)
 {
 	int var, def;
 	const zend_op *opline;
@@ -4492,7 +4492,6 @@ static int zend_mark_cv_references(const zend_op_array *op_array, const zend_scr
 	} WHILE_WORKLIST_END();
 
 	free_alloca(worklist,  use_heap);
-	return SUCCESS;
 }
 
 ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
@@ -4524,9 +4523,7 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 		ssa_var_info[i].has_range = 0;
 	}
 
-	if (zend_mark_cv_references(op_array, script, ssa) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_mark_cv_references(op_array, script, ssa);
 
 	zend_infer_ranges(op_array, ssa);
 
