@@ -1768,7 +1768,7 @@ static void zend_infer_ranges_warmup(const zend_op_array *op_array, zend_ssa *ss
 	free_alloca(worklist, use_heap);
 }
 
-static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static void zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	int worklist_len = zend_bitset_len(ssa->vars_count);
 	zend_bitset worklist;
@@ -1882,8 +1882,6 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 	}
 
 	free_alloca(worklist, use_heap);
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -4530,9 +4528,7 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 		return FAILURE;
 	}
 
-	if (zend_infer_ranges(op_array, ssa) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_infer_ranges(op_array, ssa);
 
 	if (zend_infer_types(op_array, script, ssa, optimization_level) != SUCCESS) {
 		return FAILURE;
