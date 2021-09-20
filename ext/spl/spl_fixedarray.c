@@ -93,7 +93,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size) /* {{{ */
 
 static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ */
 {
-	if (size == array->size) {
+	if (size == array->size || (size == 0 && array->elements == NULL)) {
 		/* nothing to do */
 		return;
 	}
@@ -107,14 +107,16 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 	/* clearing the array */
 	if (size == 0) {
 		zend_long i;
+		zval *elements = array->elements;
+
+		array->elements = NULL;
 
 		for (i = 0; i < array->size; i++) {
-			zval_ptr_dtor(&(array->elements[i]));
+			zval_ptr_dtor(&(elements[i]));
 		}
 
-		if (array->elements) {
-			efree(array->elements);
-			array->elements = NULL;
+		if (elements) {
+			efree(elements);
 		}
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
