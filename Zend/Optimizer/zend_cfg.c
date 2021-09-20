@@ -269,7 +269,7 @@ static void initialize_block(zend_basic_block *block) {
 		block_map[i]++; \
 	} while (0)
 
-ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -597,8 +597,6 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 	/* Build CFG, Step 4, Mark Reachable Basic Blocks */
 	cfg->flags |= flags;
 	zend_mark_reachable_blocks(op_array, cfg, 0);
-
-	return SUCCESS;
 }
 /* }}} */
 

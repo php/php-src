@@ -50,9 +50,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
     /* Build SSA */
 	memset(ssa, 0, sizeof(zend_ssa));
 
-	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &ssa->cfg) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &ssa->cfg);
 
 	if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 		/* TODO: we can't analyze functions with indirect variable access ??? */
