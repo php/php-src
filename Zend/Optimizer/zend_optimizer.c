@@ -1424,7 +1424,7 @@ static void zend_optimizer_call_registered_passes(zend_script *script, void *ctx
 	}
 }
 
-ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
+ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
 	zend_class_entry *ce;
 	zend_string *key;
@@ -1575,8 +1575,6 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 		zend_hash_destroy(ctx.constants);
 	}
 	zend_arena_destroy(ctx.arena);
-
-	return 1;
 }
 
 ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass)
