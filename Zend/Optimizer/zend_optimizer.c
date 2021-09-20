@@ -1431,7 +1431,6 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	zend_op_array *op_array;
 	zend_string *name;
 	zend_optimizer_ctx ctx;
-	zend_call_graph call_graph;
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -1440,9 +1439,11 @@ ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_le
 	ctx.debug_level = debug_level;
 
 	if ((ZEND_OPTIMIZER_PASS_6 & optimization_level) &&
-	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
-	    zend_build_call_graph(&ctx.arena, script, &call_graph) == SUCCESS) {
+	    (ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		/* Optimize using call-graph */
+		zend_call_graph call_graph;
+		zend_build_call_graph(&ctx.arena, script, &call_graph);
+
 		int i;
 		zend_func_info *func_info;
 
@@ -1585,7 +1586,7 @@ ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass)
 	}
 
 	if (zend_optimizer_registered_passes.last == ZEND_OPTIMIZER_MAX_REGISTERED_PASSES) {
-		return -1;	
+		return -1;
 	}
 
 	zend_optimizer_registered_passes.pass[
