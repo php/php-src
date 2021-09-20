@@ -1323,9 +1323,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 			return FAILURE;
 		}
 
-		if (zend_ssa_find_sccs(op_array, ssa) != SUCCESS){
-			return FAILURE;
-		}
+		zend_ssa_find_sccs(op_array, ssa);
 	}
 
 	return SUCCESS;

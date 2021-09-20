@@ -97,9 +97,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 		return FAILURE;
 	}
 
-	if (zend_ssa_find_sccs(op_array, ssa) != SUCCESS){
-		return FAILURE;
-	}
+	zend_ssa_find_sccs(op_array, ssa);
 
 	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) != SUCCESS) {
 		return FAILURE;

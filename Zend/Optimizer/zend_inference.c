@@ -210,7 +210,7 @@ static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa,
 }
 /* }}} */
 
-ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	int index = 0, *dfs, *root;
 	zend_worklist_stack stack;
@@ -251,8 +251,6 @@ ZEND_API int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /*
 	ZEND_WORKLIST_STACK_FREE_ALLOCA(&stack, stack_use_heap);
 	free_alloca(root, root_use_heap);
 	free_alloca(dfs, dfs_use_heap);
-
-	return SUCCESS;
 }
 /* }}} */
 
