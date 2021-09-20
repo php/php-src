@@ -245,13 +245,16 @@ static int mbfl_estimate_encoding_likelihood(int c, void *void_data)
 	 * it's the wrong one. */
 	if (c == MBFL_BAD_INPUT) {
 		data->num_illegalchars++;
-	} else if (php_unicode_is_cntrl(c) || php_unicode_is_private(c)) {
+	} else if (c < 0x9 || (c >= 0xE && c <= 0x1F) || (c >= 0xE000 && c <= 0xF8FF) || c >= 0xF0000) {
 		/* Otherwise, count how many control characters and 'private use'
 		 * codepoints we see. Those are rarely used and may indicate that
 		 * the candidate encoding is not the right one. */
 		data->score += 10;
-	} else if (php_unicode_is_punct(c)) {
-		/* Punctuation is also less common than letters/digits */
+	} else if ((c >= 0x21 && c <= 0x2F) || (c >= 0x3A && c <= 0x40) || (c >= 0x5B && c <= 0x60)) {
+		/* Punctuation is also less common than letters/digits; further, if
+		 * text in ISO-2022 or similar encodings is mistakenly identified as
+		 * ASCII or UTF-8, the misinterpreted string will tend to have an
+		 * unusually high density of ASCII punctuation characters. */
 		data->score++;
 	}
 	return 0;
@@ -300,9 +303,10 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 	while (n--) {
 		for (int i = 0; i < num; i++) {
 			mbfl_convert_filter *filter = identd->filter_list[i];
-			if (!filter->num_illegalchar) {
+			mbfl_encoding_detector_data *data = &identd->filter_data[i];
+			if (!data->num_illegalchars) {
 				(*filter->filter_function)(*p, filter);
-				if (identd->filter_data[i].num_illegalchars) {
+				if (data->num_illegalchars) {
 					bad++;
 				}
 			}
