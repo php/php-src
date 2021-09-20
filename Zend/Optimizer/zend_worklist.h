@@ -94,7 +94,7 @@ static inline int zend_worklist_len(zend_worklist *worklist)
 	return worklist->stack.len;
 }
 
-static inline int zend_worklist_push(zend_worklist *worklist, int i)
+static inline bool zend_worklist_push(zend_worklist *worklist, int i)
 {
 	ZEND_ASSERT(i >= 0 && i < worklist->stack.capacity);
 

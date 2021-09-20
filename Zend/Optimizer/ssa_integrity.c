@@ -111,7 +111,8 @@ static inline bool is_var_type(zend_uchar type) {
 void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *extra) {
 	zend_cfg *cfg = &ssa->cfg;
 	zend_ssa_phi *phi;
-	int i, status = SUCCESS;
+	int i;
+	zend_result status = SUCCESS;
 
 	/* Vars */
 	for (i = 0; i < ssa->vars_count; i++) {

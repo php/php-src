@@ -33,7 +33,7 @@ typedef uint32_t (*info_func_t)(const zend_call_info *call_info, const zend_ssa 
 
 typedef struct _func_info_t {
 	const char *name;
-	int         name_len;
+	unsigned    name_len;
 	uint32_t    info;
 	info_func_t info_func;
 } func_info_t;
@@ -197,7 +197,7 @@ static void zend_func_info_add(const func_info_t *func_infos, size_t n)
 	}
 }
 
-int zend_func_info_startup(void)
+zend_result zend_func_info_startup(void)
 {
 	if (zend_func_info_rid == -1) {
 		zend_func_info_rid = zend_get_resource_handle("Zend Optimizer");
@@ -214,7 +214,7 @@ int zend_func_info_startup(void)
 	return SUCCESS;
 }
 
-int zend_func_info_shutdown(void)
+zend_result zend_func_info_shutdown(void)
 {
 	if (zend_func_info_rid != -1) {
 		zend_hash_destroy(&func_info);

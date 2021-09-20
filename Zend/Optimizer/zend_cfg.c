@@ -776,7 +776,7 @@ ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zen
 }
 /* }}} */
 
-static int dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
+static bool dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
 {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;

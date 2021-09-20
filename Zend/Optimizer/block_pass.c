@@ -30,7 +30,7 @@
 #include "zend_dump.h"
 
 /* Checks if a constant (like "true") may be replaced by its value */
-int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
+bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
@@ -220,7 +220,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						 * Float to string conversion may be affected by current
 						 * locale setting.
 						 */
-						int l, old_len;
+						size_t l, old_len;
 
 						if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
 							convert_to_string(&ZEND_OP1_LITERAL(opline));
@@ -327,7 +327,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			   ) {
 				zval *arg = &OPLINE_OP1_LITERAL(sv);
 				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
-				int flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
+				size_t flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
 				if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
 						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
 						  ) {
@@ -341,7 +341,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					}
 				} else if(flen == sizeof("constant")-1 && zend_binary_strcasecmp(fname, flen, "constant", sizeof("constant")-1) == 0) {
 					zval c;
-					if(zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 1 ELS_CC) != 0) {
+					if (zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 1 ELS_CC)) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -712,7 +712,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					     src->opcode == ZEND_FAST_CONCAT) &&
 					    src->op2_type == IS_CONST) {
 						/* compress consecutive CONCATs */
-						int l, old_len;
+						size_t l, old_len;
 
 						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 							convert_to_string(&ZEND_OP2_LITERAL(opline));
@@ -960,7 +960,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	zend_op *new_opcodes;
 	zend_op *opline;
 	uint32_t len = 0;
-	int n;
 
 	for (b = blocks; b < end; b++) {
 		if (b->len == 0) {
@@ -1129,7 +1128,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 
 	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
-	for (n = 0; n < cfg->blocks_count; n++) {
+	for (int n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			cfg->map[cfg->blocks[n].start] = n;
 		}
@@ -1189,7 +1188,7 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline int in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
@@ -1642,7 +1641,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BLOCK_PASS_VARS) {
-		int printed = 0;
+		bool printed = 0;
 		uint32_t i;
 
 		for (i = op_array->last_var; i< op_array->T; i++) {

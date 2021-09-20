@@ -153,11 +153,11 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 	return SUCCESS;
 }
 
-static int zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
+static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
 {
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	int ret = 0;
+	bool ret = 0;
 
 	if (op_array == root) {
 		return 1;

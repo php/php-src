@@ -57,7 +57,7 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 	zend_hash_add(ctx->constants, Z_STR_P(name), &val);
 }
 
-int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
+zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
@@ -68,7 +68,7 @@ int zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zv
 }
 /* }}} */
 
-int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* {{{ */
 {
 	unary_op_type unary_op = get_unary_op(opcode);
 
@@ -84,7 +84,7 @@ int zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* 
 }
 /* }}} */
 
-int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 {
 	switch (type) {
 		case IS_NULL:
@@ -116,7 +116,7 @@ int zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* {{{ */
 }
 /* }}} */
 
-int zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		return FAILURE;
@@ -126,7 +126,7 @@ int zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
 }
 /* }}} */
 
-int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
+bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {
 	zval *val;
 
@@ -181,7 +181,7 @@ static inline uint32_t alloc_cache_slots(zend_op_array *op_array, uint32_t num) 
 	convert_to_string(val); \
 } while (0)
 
-int zend_optimizer_update_op1_const(zend_op_array *op_array,
+bool zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
 {
@@ -336,7 +336,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 	return 1;
 }
 
-int zend_optimizer_update_op2_const(zend_op_array *op_array,
+bool zend_optimizer_update_op2_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
 {
@@ -518,7 +518,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 	return 1;
 }
 
-int zend_optimizer_replace_by_const(zend_op_array *op_array,
+bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zend_uchar     type,
                                     uint32_t       var,
@@ -1599,12 +1599,12 @@ ZEND_API void zend_optimizer_unregister_pass(int idx)
 	zend_optimizer_registered_passes.pass[idx-1] = NULL;
 }
 
-int zend_optimizer_startup(void)
+zend_result zend_optimizer_startup(void)
 {
 	return zend_func_info_startup();
 }
 
-int zend_optimizer_shutdown(void)
+zend_result zend_optimizer_shutdown(void)
 {
 	return zend_func_info_shutdown();
 }
