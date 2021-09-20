@@ -553,9 +553,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 			}
 
 			if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNCS) {
-				if (zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, (zend_op_array*)op_array, &jit_extension->func_info) != SUCCESS) {
-					break;
-				}
+				zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, (zend_op_array*)op_array, &jit_extension->func_info);
 				jit_extension->func_info.call_map = zend_build_call_map(&CG(arena), &jit_extension->func_info, op_array);
 				if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 					zend_init_func_return_info(op_array, script, &jit_extension->func_info.return_info);
