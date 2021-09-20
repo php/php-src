@@ -1435,7 +1435,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							break;
 						}
 
-						if (ct_eval_binary_op(&tmp, opline->extended_value, &tmp, data) != SUCCESS) {
+						if (ct_eval_binary_op(&tmp, opline->extended_value, &tmp, data) == FAILURE) {
 							SET_RESULT_BOT(result);
 							SET_RESULT_BOT(op1);
 							zval_ptr_dtor_nogc(&tmp);
@@ -1480,7 +1480,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							break;
 						}
 
-						if (ct_eval_binary_op(&tmp, opline->extended_value, &tmp, data) != SUCCESS) {
+						if (ct_eval_binary_op(&tmp, opline->extended_value, &tmp, data) == FAILURE) {
 							SET_RESULT_BOT(result);
 							SET_RESULT_BOT(op1);
 							zval_ptr_dtor_nogc(&tmp);
@@ -2049,17 +2049,17 @@ static void join_phi_values(zval *a, zval *b, bool escape) {
 		return;
 	}
 	if (IS_PARTIAL_ARRAY(a) || IS_PARTIAL_ARRAY(b)) {
-		if (join_partial_arrays(a, b) != SUCCESS) {
+		if (join_partial_arrays(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
 	} else if (IS_PARTIAL_OBJECT(a) || IS_PARTIAL_OBJECT(b)) {
-		if (escape || join_partial_objects(a, b) != SUCCESS) {
+		if (escape || join_partial_objects(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}
 	} else if (!zend_is_identical(a, b)) {
-		if (join_partial_arrays(a, b) != SUCCESS) {
+		if (join_partial_arrays(a, b) == FAILURE) {
 			zval_ptr_dtor_nogc(a);
 			MAKE_BOT(a);
 		}

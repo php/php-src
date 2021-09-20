@@ -882,7 +882,7 @@ static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build
 	j = blocks[n].children;
 	while (j >= 0) {
 		// FIXME: Tail call optimization?
-		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) != SUCCESS)
+		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) == FAILURE)
 			return FAILURE;
 		j = blocks[j].next_child;
 	}
@@ -1030,7 +1030,7 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 		var[j] = j;
 	}
 	ssa->vars_count = op_array->last_var;
-	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) != SUCCESS) {
+	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) == FAILURE) {
 		free_alloca(var, var_use_heap);
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
