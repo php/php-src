@@ -586,6 +586,8 @@ PHP_METHOD(SQLite3, query)
 	result = Z_SQLITE3_RESULT_P(return_value);
 	result->db_obj = db_obj;
 	result->stmt_obj = stmt_obj;
+	result->column_names = NULL;
+	result->column_count = -1;
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
 	return_code = sqlite3_step(result->stmt_obj->stmt);
@@ -1792,6 +1794,8 @@ PHP_METHOD(SQLite3Stmt, execute)
 			result->is_prepared_statement = 1;
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
+			result->column_names = NULL;
+			result->column_count = -1;
 			ZVAL_OBJ_COPY(&result->stmt_obj_zval, Z_OBJ_P(object));
 
 			break;
@@ -1945,11 +1949,25 @@ PHP_METHOD(SQLite3Result, fetchArray)
 				RETURN_FALSE;
 			}
 
-			array_init(return_value);
-			
-			int column_count = sqlite3_data_count(result_obj->stmt_obj->stmt);
+			if (result_obj->column_count == -1) {
+				result_obj->column_count = sqlite3_column_count(result_obj->stmt_obj->stmt);
+			}
 
-			for (i = 0; i < column_count; i++) {
+			int n_cols = result_obj->column_count;
+
+			/* Cache column names to speed up repeated fetchArray calls. */
+			if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
+				result_obj->column_names = emalloc(n_cols * sizeof(zend_string*));
+
+				for (int i = 0; i < n_cols; i++) {
+					const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+					result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
+				}
+			}
+
+			array_init(return_value);
+
+			for (i = 0; i < n_cols; i++) {
 				zval data;
 
 				sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
@@ -1964,7 +1982,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 							Z_ADDREF(data);
 						}
 					}
-					add_assoc_zval(return_value, (char*)sqlite3_column_name(result_obj->stmt_obj->stmt, i), &data);
+					zend_symtable_add_new(Z_ARR_P(return_value), result_obj->column_names[i], &data);
 				}
 			}
 			break;
@@ -1979,6 +1997,17 @@ PHP_METHOD(SQLite3Result, fetchArray)
 }
 /* }}} */
 
+static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
+	if (result->column_names) {
+		for (int i = 0; i < result->column_count; i++) {
+			zend_string_release(result->column_names[i]);
+		}
+		efree(result->column_names);
+	}
+	result->column_names = NULL;
+	result->column_count = -1;
+}
+
 /* {{{ Resets the result set back to the first row. */
 PHP_METHOD(SQLite3Result, reset)
 {
@@ -1989,6 +2018,8 @@ PHP_METHOD(SQLite3Result, reset)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	sqlite3result_clear_column_names_cache(result_obj);
 
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
 		RETURN_FALSE;
@@ -2008,6 +2039,8 @@ PHP_METHOD(SQLite3Result, finalize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	sqlite3result_clear_column_names_cache(result_obj);
 
 	/* We need to finalize an internal statement */
 	if (result_obj->is_prepared_statement == 0) {
@@ -2234,6 +2267,8 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 	if (!intern) {
 		return;
 	}
+
+	sqlite3result_clear_column_names_cache(intern);
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
 		if (intern->stmt_obj && intern->stmt_obj->initialised) {
