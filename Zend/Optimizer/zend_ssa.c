@@ -926,10 +926,7 @@ ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *scrip
 	dfg.in  = dfg.use + set_size * blocks_count;
 	dfg.out = dfg.in  + set_size * blocks_count;
 
-	if (zend_build_dfg(op_array, &ssa->cfg, &dfg, build_flags) != SUCCESS) {
-		free_alloca(dfg.tmp, dfg_use_heap);
-		return FAILURE;
-	}
+	zend_build_dfg(op_array, &ssa->cfg, &dfg, build_flags);
 
 	if (build_flags & ZEND_SSA_DEBUG_LIVENESS) {
 		zend_dump_dfg(op_array, &ssa->cfg, &dfg);
