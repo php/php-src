@@ -793,7 +793,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 	*b = tmp;
 }
 
-ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	int i, j, k, n;
 	int time;
@@ -905,7 +905,5 @@ ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cf
 	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 
 	cfg->flags |= flag;
-
-	return SUCCESS;
 }
 /* }}} */
