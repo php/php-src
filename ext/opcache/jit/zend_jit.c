@@ -4128,7 +4128,7 @@ jit_failure:
 	return FAILURE;
 }
 
-static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
+static void zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 {
 	zend_func_info *func_info;
 
@@ -4140,7 +4140,7 @@ static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 		func_info = zend_arena_calloc(&CG(arena), 1, sizeof(zend_func_info));
 		ZEND_SET_FUNC_INFO(op_array, func_info);
 	}
-	return zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, op_array, func_info);
+	zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, op_array, func_info);
 }
 
 static void zend_jit_cleanup_func_info(zend_op_array *op_array)
@@ -4200,9 +4200,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 	}
 
 	if (JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNCS) {
-		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
-			goto jit_failure;
-		}
+		zend_jit_collect_calls(op_array, script);
 		func_info = ZEND_FUNC_INFO(op_array);
 		func_info->call_map = zend_build_call_map(&CG(arena), func_info, op_array);
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {

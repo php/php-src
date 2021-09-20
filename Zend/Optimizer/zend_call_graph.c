@@ -43,7 +43,7 @@ static void zend_op_array_collect(zend_op_array *op_array, void *context)
 	call_graph->op_arrays_count++;
 }
 
-ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
+ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -150,7 +150,6 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 		opline++;
 	}
 	free_alloca(call_stack, use_heap);
-	return SUCCESS;
 }
 
 static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
