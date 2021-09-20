@@ -681,7 +681,7 @@ static void compute_postnum_recursive(
 
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
-ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
@@ -768,7 +768,6 @@ ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zen
 	}
 
 	free_alloca(postnum, use_heap);
-	return SUCCESS;
 }
 /* }}} */
 

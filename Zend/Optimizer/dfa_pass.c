@@ -64,9 +64,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 	}
 
 	/* Compute Dominators Tree */
-	if (zend_cfg_compute_dominators_tree(op_array, &ssa->cfg) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_cfg_compute_dominators_tree(op_array, &ssa->cfg);
 
 	/* Identify reducible and irreducible loops */
 	if (zend_cfg_identify_loops(op_array, &ssa->cfg) != SUCCESS) {
