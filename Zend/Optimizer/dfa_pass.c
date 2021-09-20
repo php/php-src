@@ -57,9 +57,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 		return FAILURE;
 	}
 
-	if (zend_cfg_build_predecessors(&ctx->arena, &ssa->cfg) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_cfg_build_predecessors(&ctx->arena, &ssa->cfg);
 
 	if (ctx->debug_level & ZEND_DUMP_DFA_CFG) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG, "dfa cfg", &ssa->cfg);

@@ -600,7 +600,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 }
 /* }}} */
 
-ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 {
 	int j, s, edges;
 	zend_basic_block *b;
@@ -658,8 +658,6 @@ ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {
 			}
 		}
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
