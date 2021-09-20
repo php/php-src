@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #78987 (High memory usage during encoding detection). (Anatol)
 
+- Filter:
+  . Fixed bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing).
+    (cmb, Nikita)
+
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
