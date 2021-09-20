@@ -4055,7 +4055,7 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 		return SUCCESS;
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) != SUCCESS) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) == FAILURE) {
 		free_alloca(visited, use_heap);
 		return FAILURE;
 	}
@@ -4341,7 +4341,7 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 		zend_bitset_incl(worklist, j);
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) != SUCCESS) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) == FAILURE) {
 		free_alloca(worklist,  use_heap);
 		return FAILURE;
 	}
@@ -4527,7 +4527,7 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 
 	zend_infer_ranges(op_array, ssa);
 
-	if (zend_infer_types(op_array, script, ssa, optimization_level) != SUCCESS) {
+	if (zend_infer_types(op_array, script, ssa, optimization_level) == FAILURE) {
 		return FAILURE;
 	}
 

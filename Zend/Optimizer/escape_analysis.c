@@ -401,7 +401,7 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 		return FAILURE;
 	}
 
-	if (zend_build_equi_escape_sets(ees, op_array, ssa) != SUCCESS) {
+	if (zend_build_equi_escape_sets(ees, op_array, ssa) == FAILURE) {
 		return FAILURE;
 	}
 

@@ -80,7 +80,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 	if (ctx->debug_level & ZEND_DUMP_DFA_PHI) {
 		build_flags |= ZEND_SSA_DEBUG_PHI_PLACEMENT;
 	}
-	if (zend_build_ssa(&ctx->arena, ctx->script, op_array, build_flags, ssa) != SUCCESS) {
+	if (zend_build_ssa(&ctx->arena, ctx->script, op_array, build_flags, ssa) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -95,11 +95,11 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 
 	zend_ssa_find_sccs(op_array, ssa);
 
-	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) != SUCCESS) {
+	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) == FAILURE) {
 		return FAILURE;
 	}
 
-	if (zend_ssa_escape_analysis(ctx->script, op_array, ssa) != SUCCESS) {
+	if (zend_ssa_escape_analysis(ctx->script, op_array, ssa) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1657,7 +1657,7 @@ void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 	zend_ssa ssa;
 
-	if (zend_dfa_analyze_op_array(op_array, ctx, &ssa) != SUCCESS) {
+	if (zend_dfa_analyze_op_array(op_array, ctx, &ssa) == FAILURE) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
