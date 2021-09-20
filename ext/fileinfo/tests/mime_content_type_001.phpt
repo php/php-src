@@ -41,10 +41,10 @@ try {
 
 ?>
 --EXPECTF--
-mime_content_type(): Argument #2 must be of type resource|string, int given
-mime_content_type(): Argument #2 must be of type resource|string, null given
-mime_content_type(): Argument #2 must be of type resource|string, stdClass given
-mime_content_type(): Argument #2 must be of type resource|string, array given
+mime_content_type(): Argument #1 ($filename) must be of type resource|string, int given
+mime_content_type(): Argument #1 ($filename) must be of type resource|string, null given
+mime_content_type(): Argument #1 ($filename) must be of type resource|string, stdClass given
+mime_content_type(): Argument #1 ($filename) must be of type resource|string, array given
 
 Warning: mime_content_type(foo/inexistent): Failed to open stream: No such file or directory in %s on line %d
 mime_content_type(): Argument #1 ($filename) cannot be empty
