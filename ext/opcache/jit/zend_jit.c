@@ -1277,9 +1277,7 @@ static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 		return FAILURE;
 	}
 
-	if (zend_cfg_build_predecessors(&CG(arena), cfg) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_cfg_build_predecessors(&CG(arena), cfg);
 
 	/* Compute Dominators Tree */
 	if (zend_cfg_compute_dominators_tree(op_array, cfg) != SUCCESS) {
