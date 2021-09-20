@@ -753,7 +753,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len, int ip[8]) /* {{
 {
 	int compressed_pos = -1;
 	int blocks = 0;
-	int num, n, i, j;
+	int num, n, i;
 	char *ipv4;
 	char *end;
 	int ip4elm[4];
@@ -846,11 +846,12 @@ fixup_ip:
 		ip[i++] = 0xffff;
 		ip[i++] = 256 * ip4elm[0] + ip4elm[1];
 		ip[i++] = 256 * ip4elm[2] + ip4elm[3];
-	} else if (ip && compressed_pos >= 0 && blocks < 8) {
-		for (i = compressed_pos + 1, j = 7; i < blocks; i++, j--) {
-			ip[j] = ip[i];
+	} else if (ip && compressed_pos >= 0 && blocks <= 8) {
+		int offset = 8 - blocks;
+		for (i = 7; i > compressed_pos + 1; i--) {
+			ip[i] = ip[i - offset];
 		}
-		for (i = compressed_pos; i <= j; i++) {
+		for (i = compressed_pos + offset; i >= compressed_pos; i--) {
 			ip[i] = 0;
 		}
 	}
