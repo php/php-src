@@ -815,18 +815,15 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len, int ip[8]) /* {{
 			}
 		}
 		num = n = 0;
-		while ((str < end) &&
-		       ((*str >= '0' && *str <= '9') ||
-		        (*str >= 'a' && *str <= 'f') ||
-		        (*str >= 'A' && *str <= 'F'))) {
-			if (ip) {
-				if (*str >= '0' && *str <= '9') {
-					num = 16 * num + (*str - '0');
-				} else if (*str >= 'a' && *str <= 'f') {
-					num = 16 * num + (*str - 'a') + 10;
-				} else if (*str >= 'A' && *str <= 'F') {
-					num = 16 * num + (*str - 'A') + 10;
-				}
+		while (str < end) {
+			if (*str >= '0' && *str <= '9') {
+				num = 16 * num + (*str - '0');
+			} else if (*str >= 'a' && *str <= 'f') {
+				num = 16 * num + (*str - 'a') + 10;
+			} else if (*str >= 'A' && *str <= 'F') {
+				num = 16 * num + (*str - 'A') + 10;
+			} else {
+				break;
 			}
 			n++;
 			str++;
