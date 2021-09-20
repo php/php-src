@@ -93,9 +93,7 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 		return FAILURE;
 	}
 
-	if (zend_ssa_find_false_dependencies(op_array, ssa) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_ssa_find_false_dependencies(op_array, ssa);
 
 	zend_ssa_find_sccs(op_array, ssa);
 

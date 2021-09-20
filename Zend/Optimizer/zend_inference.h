@@ -228,7 +228,7 @@ static zend_always_inline bool zend_sub_will_overflow(zend_long a, zend_long b) 
 
 BEGIN_EXTERN_C()
 
-ZEND_API int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 

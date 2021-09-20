@@ -254,7 +254,7 @@ ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /
 }
 /* }}} */
 
-ZEND_API int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	zend_ssa_op *ssa_ops = ssa->ops;
@@ -265,7 +265,7 @@ ZEND_API int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zen
 	ALLOCA_FLAG(use_heap);
 
 	if (!op_array->function_name || !ssa->vars || !ssa->ops) {
-		return SUCCESS;
+		return;
 	}
 
 	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
@@ -306,8 +306,6 @@ ZEND_API int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zen
 	} WHILE_WORKLIST_END();
 
 	free_alloca(worklist, use_heap);
-
-	return SUCCESS;
 }
 /* }}} */
 
