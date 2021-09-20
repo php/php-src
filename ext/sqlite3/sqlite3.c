@@ -586,6 +586,8 @@ PHP_METHOD(SQLite3, query)
 	result = Z_SQLITE3_RESULT_P(return_value);
 	result->db_obj = db_obj;
 	result->stmt_obj = stmt_obj;
+	result->column_names = NULL;
+	result->column_count = -1;
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
 	return_code = sqlite3_step(result->stmt_obj->stmt);
@@ -1792,6 +1794,8 @@ PHP_METHOD(SQLite3Stmt, execute)
 			result->is_prepared_statement = 1;
 			result->db_obj = stmt_obj->db_obj;
 			result->stmt_obj = stmt_obj;
+			result->column_names = NULL;
+			result->column_count = -1;
 			ZVAL_OBJ_COPY(&result->stmt_obj_zval, Z_OBJ_P(object));
 
 			break;
@@ -1945,11 +1949,26 @@ PHP_METHOD(SQLite3Result, fetchArray)
 				RETURN_FALSE;
 			}
 
-			array_init(return_value);
-			
-			int column_count = sqlite3_data_count(result_obj->stmt_obj->stmt);
+			if (result_obj->column_count == -1) {
+				result_obj->column_count = sqlite3_column_count(result_obj->stmt_obj->stmt);
+			}
 
-			for (i = 0; i < column_count; i++) {
+			zend_long n_cols = result_obj->column_count;
+
+			/* Cache column names to speed up repeated fetchArray calls.
+			 * Names are deallocated in php_sqlite3_result_object_free_storage. */
+			if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
+				result_obj->column_names = pemalloc(n_cols * sizeof(zend_string*), 0);
+
+				for (int i = 0; i < n_cols; i++) {
+					const char* column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+					result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
+				}
+			}
+
+			array_init(return_value);
+
+			for (i = 0; i < n_cols; i++) {
 				zval data;
 
 				sqlite_value_to_zval(result_obj->stmt_obj->stmt, i, &data);
@@ -1964,7 +1983,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 							Z_ADDREF(data);
 						}
 					}
-					add_assoc_zval(return_value, (char*)sqlite3_column_name(result_obj->stmt_obj->stmt, i), &data);
+					zend_symtable_add_new(Z_ARR_P(return_value), result_obj->column_names[i], &data);
 				}
 			}
 			break;
@@ -2233,6 +2252,13 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 
 	if (!intern) {
 		return;
+	}
+
+	if (intern->column_names) {
+		for (int i = 0; i < intern->column_count; i++) {
+			zend_string_release(intern->column_names[i]);
+		}
+		efree(intern->column_names);
 	}
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
