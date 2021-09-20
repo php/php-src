@@ -1283,9 +1283,7 @@ static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 	zend_cfg_compute_dominators_tree(op_array, cfg);
 
 	/* Identify reducible and irreducible loops */
-	if (zend_cfg_identify_loops(op_array, cfg) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_cfg_identify_loops(op_array, cfg);
 
 	return SUCCESS;
 }
