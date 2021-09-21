@@ -1321,83 +1321,84 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 // op_2: #src_var.T = OP ...                                        => #v.CV = OP ...
 // op_1: QM_ASSIGN #src_var.T #orig_var.CV [undef,scalar] -> #v.CV,    NOP
 
-					if (orig_var < 0) {
+					if (orig_var >= 0) {
 						zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
-						/* Reconstruct SSA */
-						ssa->vars[v].definition = op_2;
-						ssa->ops[op_2].result_def = v;
+					}
 
-						ssa->vars[src_var].definition = -1;
-						ssa->vars[src_var].use_chain = -1;
+					/* Reconstruct SSA */
+					ssa->vars[v].definition = op_2;
+					ssa->ops[op_2].result_def = v;
 
-						ssa->ops[op_1].op1_use = -1;
-						ssa->ops[op_1].op1_def = -1;
-						ssa->ops[op_1].op1_use_chain = -1;
-						ssa->ops[op_1].result_use = -1;
-						ssa->ops[op_1].result_def = -1;
-						ssa->ops[op_1].res_use_chain = -1;
+					ssa->vars[src_var].definition = -1;
+					ssa->vars[src_var].use_chain = -1;
 
-						/* Update opcodes */
-						op_array->opcodes[op_2].result_type = opline->result_type;
-						op_array->opcodes[op_2].result.var = opline->result.var;
+					ssa->ops[op_1].op1_use = -1;
+					ssa->ops[op_1].op1_def = -1;
+					ssa->ops[op_1].op1_use_chain = -1;
+					ssa->ops[op_1].result_use = -1;
+					ssa->ops[op_1].result_def = -1;
+					ssa->ops[op_1].res_use_chain = -1;
 
-						MAKE_NOP(opline);
-						remove_nops = 1;
+					/* Update opcodes */
+					op_array->opcodes[op_2].result_type = opline->result_type;
+					op_array->opcodes[op_2].result.var = opline->result.var;
 
-						if (op_array->opcodes[op_2].opcode == ZEND_SUB
-						 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
-						 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
-						 && op_array->opcodes[op_2].op2_type == IS_CONST
-						 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
-						 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
-						 && ssa->ops[op_2].op1_use >= 0
-						 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+					MAKE_NOP(opline);
+					remove_nops = 1;
 
-							op_array->opcodes[op_2].opcode = ZEND_PRE_DEC;
-							SET_UNUSED(op_array->opcodes[op_2].op2);
-							SET_UNUSED(op_array->opcodes[op_2].result);
+					if (op_array->opcodes[op_2].opcode == ZEND_SUB
+					 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
+					 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
+					 && op_array->opcodes[op_2].op2_type == IS_CONST
+					 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
+					 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
+					 && ssa->ops[op_2].op1_use >= 0
+					 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
-							ssa->ops[op_2].result_def = -1;
-							ssa->ops[op_2].op1_def = v;
+						op_array->opcodes[op_2].opcode = ZEND_PRE_DEC;
+						SET_UNUSED(op_array->opcodes[op_2].op2);
+						SET_UNUSED(op_array->opcodes[op_2].result);
 
-						} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
-						 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
-						 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
-						 && op_array->opcodes[op_2].op2_type == IS_CONST
-						 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
-						 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
-						 && ssa->ops[op_2].op1_use >= 0
-						 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+						ssa->ops[op_2].result_def = -1;
+						ssa->ops[op_2].op1_def = v;
 
-							op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
-							SET_UNUSED(op_array->opcodes[op_2].op2);
-							SET_UNUSED(op_array->opcodes[op_2].result);
+					} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
+					 && op_array->opcodes[op_2].op1_type == op_array->opcodes[op_2].result_type
+					 && op_array->opcodes[op_2].op1.var == op_array->opcodes[op_2].result.var
+					 && op_array->opcodes[op_2].op2_type == IS_CONST
+					 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == IS_LONG
+					 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op2.constant)) == 1
+					 && ssa->ops[op_2].op1_use >= 0
+					 && !(ssa->var_info[ssa->ops[op_2].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
-							ssa->ops[op_2].result_def = -1;
-							ssa->ops[op_2].op1_def = v;
+						op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
+						SET_UNUSED(op_array->opcodes[op_2].op2);
+						SET_UNUSED(op_array->opcodes[op_2].result);
 
-						} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
-						 && op_array->opcodes[op_2].op2_type == op_array->opcodes[op_2].result_type
-						 && op_array->opcodes[op_2].op2.var == op_array->opcodes[op_2].result.var
-						 && op_array->opcodes[op_2].op1_type == IS_CONST
-						 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == IS_LONG
-						 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == 1
-						 && ssa->ops[op_2].op2_use >= 0
-						 && !(ssa->var_info[ssa->ops[op_2].op2_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+						ssa->ops[op_2].result_def = -1;
+						ssa->ops[op_2].op1_def = v;
 
-							op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
-							op_array->opcodes[op_2].op1_type = op_array->opcodes[op_2].op2_type;
-							op_array->opcodes[op_2].op1.var = op_array->opcodes[op_2].op2.var;
-							SET_UNUSED(op_array->opcodes[op_2].op2);
-							SET_UNUSED(op_array->opcodes[op_2].result);
+					} else if (op_array->opcodes[op_2].opcode == ZEND_ADD
+					 && op_array->opcodes[op_2].op2_type == op_array->opcodes[op_2].result_type
+					 && op_array->opcodes[op_2].op2.var == op_array->opcodes[op_2].result.var
+					 && op_array->opcodes[op_2].op1_type == IS_CONST
+					 && Z_TYPE_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == IS_LONG
+					 && Z_LVAL_P(CT_CONSTANT_EX(op_array, op_array->opcodes[op_2].op1.constant)) == 1
+					 && ssa->ops[op_2].op2_use >= 0
+					 && !(ssa->var_info[ssa->ops[op_2].op2_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
-							ssa->ops[op_2].result_def = -1;
-							ssa->ops[op_2].op1_def = v;
-							ssa->ops[op_2].op1_use = ssa->ops[op_2].op2_use;
-							ssa->ops[op_2].op1_use_chain = ssa->ops[op_2].op2_use_chain;
-							ssa->ops[op_2].op2_use = -1;
-							ssa->ops[op_2].op2_use_chain = -1;
-						}
+						op_array->opcodes[op_2].opcode = ZEND_PRE_INC;
+						op_array->opcodes[op_2].op1_type = op_array->opcodes[op_2].op2_type;
+						op_array->opcodes[op_2].op1.var = op_array->opcodes[op_2].op2.var;
+						SET_UNUSED(op_array->opcodes[op_2].op2);
+						SET_UNUSED(op_array->opcodes[op_2].result);
+
+						ssa->ops[op_2].result_def = -1;
+						ssa->ops[op_2].op1_def = v;
+						ssa->ops[op_2].op1_use = ssa->ops[op_2].op2_use;
+						ssa->ops[op_2].op1_use_chain = ssa->ops[op_2].op2_use_chain;
+						ssa->ops[op_2].op2_use = -1;
+						ssa->ops[op_2].op2_use_chain = -1;
 					}
 				}
 			}
