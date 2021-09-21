@@ -2068,6 +2068,13 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval tmp;
 
+	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		const zend_op *op_data = execute_data->opline + 1;
+		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+		zend_jit_undefined_op_helper(op_data->op1.var);
+		value = &EG(uninitialized_zval);
+	}
+
 	if (UNEXPECTED(info->flags & ZEND_ACC_READONLY)) {
 		zend_readonly_property_modification_error(info);
 		if (result) {
