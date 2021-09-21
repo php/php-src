@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
-    (cmb)
+    (CVE-2021-21706) (cmb)
 
 26 Aug 2021, PHP 7.3.30
 
