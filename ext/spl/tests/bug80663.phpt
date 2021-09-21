@@ -12,11 +12,4 @@ $obj = new SplFixedArray(1000);
 $obj[0] = new InvalidDestructor();
 $obj->setSize(0);
 ?>
---EXPECTF--
-Notice: Undefined index: obj in %s on line %d
-
-Fatal error: Uncaught Error: Call to a member function setSize() on null in %s:%d
-Stack trace:
-#0 [internal function]: InvalidDestructor->__destruct()
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--

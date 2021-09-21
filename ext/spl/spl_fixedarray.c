@@ -109,11 +109,12 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 		if (array->elements != NULL) {
 			zend_long i;
 			zval *elements = array->elements;
+			zend_long old_size = array->size;
 
 			array->elements = NULL;
 			array->size = 0;
 
-			for (i = 0; i < array->size; i++) {
+			for (i = 0; i < old_size; i++) {
 				zval_ptr_dtor(&(elements[i]));
 			}
 
