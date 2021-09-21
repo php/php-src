@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)
+  . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
+    (cmb)
 
 26 Aug 2021, PHP 8.0.10
 
