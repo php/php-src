@@ -16,6 +16,9 @@ function test(\SplObjectStorage $definitions = null) {
 function test2() {
     $a[[]] = $undef;
 }
+function test3() {
+    foreach (range(0, $undef) as $v) { }
+}
 
 ?>
 ===DONE===
