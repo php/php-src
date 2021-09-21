@@ -20,11 +20,15 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
+- SPL:
+  . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
+    (cmb, Nikita, Tyson Andre)
+
 - XML:
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
 
-23 Dep 2021, PHP 7.4.24
+23 Sep 2021, PHP 7.4.24
 
 - Core:
   . Fixed bug #81302 (Stream position after stream filter removed). (cmb)
