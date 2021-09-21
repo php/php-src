@@ -5536,7 +5536,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	jmp >2 // NOT_FOUND
 					}
 				}
-				if (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) {
+				if (!packed_loaded || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH)) {
 					|4:
 					if (!op2_loaded) {
 						|	// hval = Z_LVAL_P(dim);
