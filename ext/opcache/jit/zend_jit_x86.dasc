@@ -9866,7 +9866,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						}
 					}
 
-					if (!trace && op_array == &func->op_array
+					if (GCC_GLOBAL_REGS && !trace && op_array == &func->op_array
 							&& num_args >= op_array->required_num_args) {
 						/* recursive call */
 						if (ZEND_OBSERVER_ENABLED) {
