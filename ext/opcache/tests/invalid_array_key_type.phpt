@@ -13,6 +13,9 @@ function test(\SplObjectStorage $definitions = null) {
     $definitions[$argument] = 1;
     $definitions[$argument] += 1;
 }
+function test2() {
+    $a[[]] = $undef;
+}
 
 ?>
 ===DONE===

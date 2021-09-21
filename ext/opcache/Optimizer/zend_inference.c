@@ -2047,7 +2047,7 @@ static uint32_t assign_dim_result_type(
 		 * key type exists iff a value type exists even in dead code that may use empty types. */
 		if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
 			if (value_type & MAY_BE_UNDEF) {
-				tmp |= MAY_BE_ARRAY_OF_NULL;
+				value_type |= MAY_BE_NULL;
 			}
 			if (dim_op_type == IS_UNUSED) {
 				tmp |= MAY_BE_ARRAY_KEY_LONG;
