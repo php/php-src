@@ -8923,7 +8923,14 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 				|	EXT_CALL zend_jit_int_extend_stack_helper, r0
 			} else {
 				if (!is_closure) {
-					|	mov FCARG2a, r0
+					if (func
+					 && op_array == &func->op_array
+					 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)
+					 && (sizeof(void*) != 8 || IS_SIGNED_32BIT(func))) {
+						|	LOAD_ADDR FCARG2a, func
+					} else {
+						|	mov FCARG2a, r0
+					}
 				} else {
 					|	lea FCARG2a, aword [r0 + offsetof(zend_closure, func)]
 				}
