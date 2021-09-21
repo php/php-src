@@ -18,6 +18,7 @@
 
 #include "fuzzer.h"
 #include "fuzzer-sapi.h"
+#include "zend_exceptions.h"
 
 #define MAX_STEPS 1000
 #define MAX_SIZE (8 * 1024)
@@ -37,6 +38,8 @@ static zend_always_inline void fuzzer_step(void) {
 		zend_bailout();
 	}
 }
+
+static void (*orig_execute_ex)(zend_execute_data *execute_data);
 
 static void fuzzer_execute_ex(zend_execute_data *execute_data) {
 	while (1) {
@@ -91,9 +94,31 @@ static void fuzzer_init_php_for_execute(const char *extra_ini) {
 
 	fuzzer_init_php(extra_ini);
 
+	orig_execute_ex = zend_execute_ex;
 	zend_execute_ex = fuzzer_execute_ex;
 	orig_execute_internal = zend_execute_internal ? zend_execute_internal : execute_internal;
 	zend_execute_internal = fuzzer_execute_internal;
 	orig_compile_string = zend_compile_string;
 	zend_compile_string = fuzzer_compile_string;
+}
+
+ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
+	steps_left = MAX_STEPS;
+	zend_exception_save();
+	zval retval, func, args[2];
+	ZVAL_STRING(&func, "opcache_invalidate");
+	ZVAL_STRING(&args[0], "/fuzzer.php");
+	ZVAL_TRUE(&args[1]);
+	call_user_function(CG(function_table), NULL, &func, &retval, 2, args);
+	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func);
+	zend_exception_restore();
+}
+
+ZEND_ATTRIBUTE_UNUSED char *get_opcache_path(void) {
+	// TODO: Make this more general.
+	char *opcache_path = "modules/opcache.so";
+	return realpath(opcache_path, NULL);
 }

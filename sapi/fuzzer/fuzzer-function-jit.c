@@ -15,22 +15,6 @@
  */
 
 #include "fuzzer-execute-common.h"
-#include "zend_exceptions.h"
-
-static void opcache_invalidate(void) {
-	steps_left = MAX_STEPS;
-	zend_exception_save();
-	zval retval, func, args[2];
-	ZVAL_STRING(&func, "opcache_invalidate");
-	ZVAL_STRING(&args[0], "/fuzzer.php");
-	ZVAL_TRUE(&args[1]);
-	call_user_function(CG(function_table), NULL, &func, &retval, 2, args);
-	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
-	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func);
-	zend_exception_restore();
-}
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	if (Size > MAX_SIZE) {
@@ -63,12 +47,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	return 0;
 }
 
-char *get_opcache_path(void) {
-	// TODO: Make this more general.
-	char *opcache_path = "modules/opcache.so";
-	return realpath(opcache_path, NULL);
-}
-
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	char *opcache_path = get_opcache_path();
 	assert(opcache_path && "Failed to determine opcache path");
@@ -78,7 +56,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
-		"opcache.jit_buffer_size=512M",
+		"opcache.jit_buffer_size=256M",
 		opcache_path);
 	free(opcache_path);
 	fuzzer_init_php_for_execute(ini_buf);
