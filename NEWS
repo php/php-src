@@ -53,6 +53,10 @@ PHP                                                                        NEWS
 - XML:
   . Fixed bug #81351 (xml_parse may fail, but has no error code). (cmb, Nikita)
 
+- Zip:
+  . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
+    (cmb)
+
 26 Aug 2021, PHP 7.4.23
 
 - Core:
