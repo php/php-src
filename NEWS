@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
 
+- Zip:
+  . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
+    (cmb)
+
 16 Sep 2021, PHP 8.1.0RC2
 
 - DOM:
