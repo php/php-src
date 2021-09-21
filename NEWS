@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.31
 
+- Zip:
+  . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
+    (cmb)
 
 26 Aug 2021, PHP 7.3.30
 
