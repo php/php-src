@@ -2938,6 +2938,9 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_REF:
+			if (ssa_op->result_def >= 0) {
+				UPDATE_SSA_TYPE(MAY_BE_REF, ssa_op->result_def);
+			}
 			if ((opline+1)->op1_type == IS_CV) {
 				opline++;
 				ssa_op++;
