@@ -4498,6 +4498,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_incdec_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr,
 								op1_indirect, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
+								val_type,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -4571,6 +4572,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_obj_op(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_data_info, OP1_DATA_RANGE(),
 								op1_indirect, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
+								val_type,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -4637,6 +4639,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_data_info,
 								op1_indirect, ce, ce_is_instanceof, delayed_fetch_this, op1_ce,
+								val_type,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -5572,7 +5575,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_indirect, ce, ce_is_instanceof,
-								delayed_fetch_this, avoid_refcounting, op1_ce,
+								delayed_fetch_this, avoid_refcounting, op1_ce, val_type,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, MAY_BE_STRING))) {
 							goto jit_failure;
 						}
@@ -7747,7 +7750,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 
 	if (repeat_last_opline) {
 		EX(opline) = t->exit_info[exit_num].opline - 1;
-		return (EX(opline) == t->opline);
+		return 1;
 	}
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_TO_VM) {
