@@ -32,14 +32,14 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	zend_alter_ini_entry_chars(
 		jit_option, "off", sizeof("off")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	fuzzer_do_request_from_buffer(
-		"/fuzzer.php", (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
+		FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
 
 	if (!bailed_out) {
 		steps_left = MAX_STEPS;
 		zend_alter_ini_entry_chars(jit_option,
 			"function", sizeof("function")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		fuzzer_do_request_from_buffer(
-			"/fuzzer.php", (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
+			FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
 	}
 
 	zend_string_release(jit_option);
@@ -59,6 +59,8 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"opcache.jit_buffer_size=256M",
 		opcache_path);
 	free(opcache_path);
+
+	create_file();
 	fuzzer_init_php_for_execute(ini_buf);
 	return 0;
 }

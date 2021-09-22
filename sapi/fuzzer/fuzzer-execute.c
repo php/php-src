@@ -25,7 +25,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 	steps_left = MAX_STEPS;
 	fuzzer_do_request_from_buffer(
-		"/fuzzer.php", (const char *) Data, Size, /* execute */ 1, /* before_shutdown */ NULL);
+		FILE_NAME, (const char *) Data, Size, /* execute */ 1, /* before_shutdown */ NULL);
 
 	return 0;
 }

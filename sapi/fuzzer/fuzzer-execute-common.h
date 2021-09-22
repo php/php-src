@@ -20,6 +20,7 @@
 #include "fuzzer-sapi.h"
 #include "zend_exceptions.h"
 
+#define FILE_NAME "/tmp/fuzzer.php"
 #define MAX_STEPS 1000
 #define MAX_SIZE (8 * 1024)
 static uint32_t steps_left;
@@ -102,12 +103,19 @@ static void fuzzer_init_php_for_execute(const char *extra_ini) {
 	zend_compile_string = fuzzer_compile_string;
 }
 
+ZEND_ATTRIBUTE_UNUSED static void create_file(void) {
+	/* For opcache_invalidate() to work, the dummy file name used for fuzzing needs to
+	 * actually exist. */
+	FILE *f = fopen(FILE_NAME, "w");
+	fclose(f);
+}
+
 ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 	steps_left = MAX_STEPS;
 	zend_exception_save();
 	zval retval, func, args[2];
 	ZVAL_STRING(&func, "opcache_invalidate");
-	ZVAL_STRING(&args[0], "/fuzzer.php");
+	ZVAL_STRING(&args[0], FILE_NAME);
 	ZVAL_TRUE(&args[1]);
 	call_user_function(CG(function_table), NULL, &func, &retval, 2, args);
 	ZEND_ASSERT(Z_TYPE(retval) == IS_TRUE);
