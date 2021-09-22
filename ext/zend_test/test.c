@@ -203,7 +203,7 @@ static ZEND_FUNCTION(zend_test_compile_string)
 {
 	zend_string *source_string = NULL;
 	zend_string *filename = NULL;
-	zend_long begin_state = ZEND_LEX_BEGIN_STATE_INITIAL;
+	zend_long begin_state = ZEND_COMPILE_POSITION_AT_OPEN_TAG;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(source_string)

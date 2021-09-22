@@ -743,11 +743,11 @@ struct _zend_execute_data {
 
 #include "zend_globals.h"
 
-typedef enum _zend_lex_begin_state {
-	ZEND_LEX_BEGIN_STATE_SHEBANG = 0,
-	ZEND_LEX_BEGIN_STATE_INITIAL,
-	ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING
-} zend_lex_begin_state;
+typedef enum _zend_compile_position {
+	ZEND_COMPILE_POSITION_AT_SHEBANG = 0,
+	ZEND_COMPILE_POSITION_AT_OPEN_TAG,
+	ZEND_COMPILE_POSITION_AFTER_OPEN_TAG
+} zend_compile_position;
 
 BEGIN_EXTERN_C()
 
@@ -761,7 +761,7 @@ void zend_file_context_begin(zend_file_context *prev_context);
 void zend_file_context_end(zend_file_context *prev_context);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
-extern ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_lex_begin_state begin_state);
+extern ZEND_API zend_op_array *(*zend_compile_string)(zend_string *source_string, const char *filename, zend_compile_position begin_state);
 
 ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
 void startup_scanner(void);
@@ -816,7 +816,7 @@ zend_string *zval_make_interned_string(zval *zv);
 struct _zend_arena;
 
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
-ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *filename, zend_lex_begin_state begin_state);
+ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *filename, zend_compile_position begin_state);
 ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);

@@ -5,9 +5,9 @@ zend_test
 --FILE--
 <?php
 
-define('ZEND_LEX_BEGIN_STATE_SHEBANG', 0);
-define('ZEND_LEX_BEGIN_STATE_INITIAL', 1);
-define('ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING', 2);
+define('ZEND_COMPILE_POSITION_AT_SHEBANG', 0);
+define('ZEND_COMPILE_POSITION_AT_OPEN_TAG', 1);
+define('ZEND_COMPILE_POSITION_AFTER_OPEN_TAG', 2);
 
 $source_string = <<<EOF
 #!/path/to/php
@@ -15,7 +15,7 @@ $source_string = <<<EOF
 var_dump('php');
 EOF;
 
-zend_test_compile_string($source_string, 'Source string', ZEND_LEX_BEGIN_STATE_SHEBANG);
+zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AT_SHEBANG);
 
 $source_string = <<<EOF
 #!/path/to/php
@@ -23,27 +23,27 @@ $source_string = <<<EOF
 var_dump('php');
 EOF;
 
-zend_test_compile_string($source_string, 'Source string', ZEND_LEX_BEGIN_STATE_INITIAL);
+zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AT_OPEN_TAG);
 
 $source_string = <<<EOF
 <?php
 var_dump('php');
 EOF;
 
-zend_test_compile_string($source_string, 'Source string', ZEND_LEX_BEGIN_STATE_INITIAL);
+zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AT_OPEN_TAG);
 
 $source_string = <<<EOF
 var_dump('php');
 EOF;
 
-zend_test_compile_string($source_string, 'Source string', ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING);
+zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 
 $source_string = <<<EOF
 <?php
 var_dump('php');
 EOF;
 
-zend_test_compile_string($source_string, 'Source string', ZEND_LEX_BEGIN_STATE_ST_IN_SCRIPTING);
+zend_test_compile_string($source_string, 'Source string', ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 ?>
 --EXPECT--
 string(3) "php"
