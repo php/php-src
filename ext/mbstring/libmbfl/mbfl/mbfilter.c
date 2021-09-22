@@ -1203,31 +1203,33 @@ mbfl_strcut(
 	return result;
 }
 
-
-/*
- *  strwidth
- */
-static size_t is_fullwidth(int c)
+/* Some East Asian characters, when printed at a terminal (or the like), require double
+ * the usual amount of horizontal space. We call these "fullwidth" characters. */
+static size_t character_width(int c)
 {
-	int i;
-
-	if (c < mbfl_eaw_table[0].begin) {
-		return 0;
+	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
+		return 1;
 	}
 
-	for (i = 0; i < sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]); i++) {
-		if (mbfl_eaw_table[i].begin <= c && c <= mbfl_eaw_table[i].end) {
-			return 1;
+	/* Do a binary search to see if we fall in any of the fullwidth ranges */
+	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	while (lo < hi) {
+		int probe = (lo + hi) / 2;
+		if (c < mbfl_eaw_table[probe].begin) {
+			hi = probe;
+		} else if (c > mbfl_eaw_table[probe].end) {
+			lo = probe + 1;
+		} else {
+			return 2;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
-static int
-filter_count_width(int c, void* data)
+static int filter_count_width(int c, void* data)
 {
-	(*(size_t *)data) += (is_fullwidth(c) ? 2: 1);
+	(*(size_t *)data) += character_width(c);
 	return 0;
 }
 
@@ -1289,7 +1291,7 @@ collector_strimwidth(int c, void* data)
 		break;
 	default:
 		if (pc->outchar >= pc->from) {
-			pc->outwidth += (is_fullwidth(c) ? 2: 1);
+			pc->outwidth += character_width(c);
 
 			if (pc->outwidth > pc->width) {
 				if (pc->status == 0) {
