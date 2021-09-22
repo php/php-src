@@ -1955,13 +1955,12 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 			zend_long n_cols = result_obj->column_count;
 
-			/* Cache column names to speed up repeated fetchArray calls.
-			 * Names are deallocated in php_sqlite3_result_object_free_storage. */
+			/* Cache column names to speed up repeated fetchArray calls. */
 			if (mode & PHP_SQLITE3_ASSOC && !result_obj->column_names) {
-				result_obj->column_names = pemalloc(n_cols * sizeof(zend_string*), 0);
+				result_obj->column_names = emalloc(n_cols * sizeof(zend_string*));
 
 				for (int i = 0; i < n_cols; i++) {
-					const char* column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
+					const char *column = sqlite3_column_name(result_obj->stmt_obj->stmt, i);
 					result_obj->column_names[i] = zend_string_init(column, strlen(column), 0);
 				}
 			}
@@ -1998,6 +1997,18 @@ PHP_METHOD(SQLite3Result, fetchArray)
 }
 /* }}} */
 
+static void sqlite3result_clear_column_names_cache(php_sqlite3_result *result) {
+	if (result->column_names) {
+		for (int i = 0; i < result->column_count; i++) {
+			zend_string_release(result->column_names[i]);
+		}
+		efree(result->column_names);
+	}
+	result->column_names = NULL;
+	result->column_count = -1;
+}
+
+
 /* {{{ Resets the result set back to the first row. */
 PHP_METHOD(SQLite3Result, reset)
 {
@@ -2008,6 +2019,8 @@ PHP_METHOD(SQLite3Result, reset)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	sqlite3result_clear_column_names_cache(result_obj);
 
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
 		RETURN_FALSE;
@@ -2027,6 +2040,8 @@ PHP_METHOD(SQLite3Result, finalize)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
+
+	sqlite3result_clear_column_names_cache(result_obj);
 
 	/* We need to finalize an internal statement */
 	if (result_obj->is_prepared_statement == 0) {
@@ -2254,12 +2269,7 @@ static void php_sqlite3_result_object_free_storage(zend_object *object) /* {{{ *
 		return;
 	}
 
-	if (intern->column_names) {
-		for (int i = 0; i < intern->column_count; i++) {
-			zend_string_release(intern->column_names[i]);
-		}
-		efree(intern->column_names);
-	}
+	sqlite3result_clear_column_names_cache(intern);
 
 	if (!Z_ISNULL(intern->stmt_obj_zval)) {
 		if (intern->stmt_obj && intern->stmt_obj->initialised) {
