@@ -38,8 +38,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		steps_left = MAX_STEPS;
 		zend_alter_ini_entry_chars(jit_option,
 			"function", sizeof("function")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_execute_ex = orig_execute_ex;
 		fuzzer_do_request_from_buffer(
 			FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
+		zend_execute_ex = fuzzer_execute_ex;
 	}
 
 	zend_string_release(jit_option);
