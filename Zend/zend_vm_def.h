@@ -3712,17 +3712,16 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zval *function_name, *func;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
-		if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
+		fbc = zend_lookup_function(Z_STR_P(function_name+1));
+		//fbc = zend_lookup_function(Z_STR_P(function_name));
+		if (UNEXPECTED(fbc == NULL)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -3854,22 +3853,19 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
-	zval *func_name;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
-		if (func == NULL) {
-			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
-			if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
+		fbc = zend_lookup_function(Z_STR_P(function_name+1));
+		if (fbc == NULL) {
+			fbc = zend_lookup_function(Z_STR_P(function_name+2));
+			if (fbc == NULL) {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -3887,19 +3883,16 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
-	zval *fname;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fname = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
-		if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
+		fbc = zend_lookup_function(Z_STR_P(function_name));
+		if (UNEXPECTED(fbc == NULL)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
