@@ -2,6 +2,12 @@
 SQLite3 - rename column while SQLite3Result is open
 --EXTENSIONS--
 sqlite3
+--SKIPIF--
+<?php
+if (SQLite3::version()['versionNumber'] < 3025000) {
+    die("skip: sqlite3 library version < 3.25: no support for rename column");
+}
+?>
 --FILE--
 <?php
 
