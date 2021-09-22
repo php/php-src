@@ -827,23 +827,6 @@ PHP_RINIT_FUNCTION(mysqli)
 }
 /* }}} */
 
-#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
-static void php_mysqli_persistent_helper_for_every(void *p)
-{
-	mysqlnd_end_psession((MYSQLND *) p);
-} /* }}} */
-
-
-static int php_mysqli_persistent_helper_once(zend_rsrc_list_entry *le)
-{
-	if (le->type == php_le_pmysqli()) {
-		mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-		zend_ptr_stack_apply(&plist->free_links, php_mysqli_persistent_helper_for_every);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-} /* }}} */
-#endif
-
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
@@ -856,10 +839,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
-#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
-	/* psession is being called when the connection is freed - explicitly or implicitly */
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_helper_once);
-#endif
+
 	return SUCCESS;
 }
 /* }}} */
