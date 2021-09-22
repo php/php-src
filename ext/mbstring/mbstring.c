@@ -3253,16 +3253,6 @@ PHP_FUNCTION(mb_decode_numericentity)
 /* }}} */
 
 /* {{{ Sends an email message with MIME scheme */
-
-#define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
-	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 2;											\
-		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
-			pos++;											\
-		}												\
-		continue;											\
-	}
-
 static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
 {
 	const char *ps;
@@ -3567,15 +3557,20 @@ PHP_FUNCTION(mb_send_mail)
 			to_r[to_len - 1] = '\0';
 		}
 		for (i = 0; to_r[i]; i++) {
-		if (iscntrl((unsigned char) to_r[i])) {
-			/* According to RFC 822, section 3.1.1 long headers may be separated into
-			 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
-			 * To prevent these separators from being replaced with a space, we use the
-			 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
-			 */
-			SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
-			to_r[i] = ' ';
-		}
+			if (iscntrl((unsigned char) to_r[i])) {
+				/* According to RFC 822, section 3.1.1 long headers may be separated into
+				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
+				 * To prevent these separators from being replaced with a space, we skip over them. */
+				if (to_r[i] == '\r' && to_r[i + 1] == '\n' && (to_r[i + 2] == ' ' || to_r[i + 2] == '\t')) {
+					i += 2;
+					while (to_r[i + 1] == ' ' || to_r[i + 1] == '\t') {
+						i++;
+					}
+					continue;
+				}
+
+				to_r[i] = ' ';
+			}
 		}
 	} else {
 		to_r = to;
@@ -3694,7 +3689,6 @@ PHP_FUNCTION(mb_send_mail)
 	}
 }
 
-#undef SKIP_LONG_HEADER_SEP_MBSTRING
 #undef MAIL_ASCIIZ_CHECK_MBSTRING
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
 #undef PHP_MBSTR_MAIL_MIME_HEADER2
