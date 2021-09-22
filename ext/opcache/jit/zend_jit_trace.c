@@ -4485,6 +4485,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							} else {
 								CHECK_OP1_TRACE_TYPE();
 							}
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
+							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
 									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
@@ -4557,6 +4560,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							} else {
 								CHECK_OP1_TRACE_TYPE();
 							}
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
+							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
 									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
@@ -4623,6 +4629,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
+							}
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
 							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
@@ -5555,9 +5564,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 							} else {
 								CHECK_OP1_TRACE_TYPE();
-								if (!(op1_info & MAY_BE_OBJECT)) {
-									break;
-								}
+							}
+							if (!(op1_info & MAY_BE_OBJECT)) {
+								break;
 							}
 							if (ssa->var_info && ssa->ops) {
 								if (ssa_op->op1_use >= 0) {
