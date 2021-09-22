@@ -41,6 +41,11 @@ $strings = array (
   "ABCD\0abcdABCD",
   TRUE,
   FALSE,
+  /* Check for off-by-one errors in the SSE implementation */
+  "aaaaaaaaaaaaaaaaaaaa",
+  "zzzzzzzzzzzzzzzzzzzz",
+  "````````````````````",
+  "{{{{{{{{{{{{{{{{{{{{",
 );
 
 $count = 0;
@@ -218,6 +223,18 @@ string(1) "1"
 
 -- Iteration 7 --
 string(0) ""
+
+-- Iteration 8 --
+string(20) "AAAAAAAAAAAAAAAAAAAA"
+
+-- Iteration 9 --
+string(20) "ZZZZZZZZZZZZZZZZZZZZ"
+
+-- Iteration 10 --
+string(20) "````````````````````"
+
+-- Iteration 11 --
+string(20) "{{{{{{{{{{{{{{{{{{{{"
 
 *** Testing strtoupper() with two different case strings ***
 strings are same, with Case Insensitive
