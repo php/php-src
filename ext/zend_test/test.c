@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "zend_exceptions.h"
 #include "test_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -438,21 +439,21 @@ static ZEND_FUNCTION(zend_suppress_exception_internal_return_false)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETVAL_FALSE;
-	zend_throw_error(NULL, "Shouldn't be seen");
+	zend_throw_exception(NULL, "Shouldn't be seen", 0);
 }
 static ZEND_FUNCTION(zend_suppress_exception_internal_return_true)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETVAL_TRUE;
-	zend_throw_error(NULL, "Shouldn't be seen");
+	zend_throw_exception(NULL, "Shouldn't be seen", 0);
 }
 static ZEND_FUNCTION(zend_suppress_exception_internal_return_int)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETVAL_LONG(20);
-	zend_throw_error(NULL, "Shouldn't be seen");
+	zend_throw_exception(NULL, "Shouldn't be seen", 0);
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)

@@ -1,7 +1,7 @@
 --TEST--
 Suppresion operator internal functions can return things other than null: false
---SKIPIF--
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
@@ -19,5 +19,5 @@ echo 'Done', PHP_EOL;
 ?>
 --EXPECT--
 bool(false)
-Error: Shouldn't be seen
+Exception: Shouldn't be seen
 Done

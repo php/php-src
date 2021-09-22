@@ -7518,10 +7518,17 @@ ZEND_VM_HANDLER(203, ZEND_SILENCE_CATCH, ANY, ANY)
 		/* Set value to NULL */
 		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 			/* Make internal functions which set a return value early return false */
+			/*
 			if (UNEXPECTED(Z_TYPE_P(EX_VAR(opline->result.var)) != IS_UNDEF
 					&& Z_TYPE_P(EX_VAR(opline->result.var)) <= IS_TRUE)) {
 				ZVAL_FALSE(EX_VAR(opline->result.var));
 			} else {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			*/
+
+			/* Set return value to null, except when an internal function has set a return value */
+			if (EXPECTED(Z_TYPE_P(EX_VAR(opline->result.var)) == IS_UNDEF)) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
 		}
