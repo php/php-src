@@ -656,6 +656,12 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 		default:
 			zend_jit_illegal_offset();
 			undef_result_after_exception();
+			if ((EG(opline_before_exception)+1)->opcode == ZEND_OP_DATA
+			 && ((EG(opline_before_exception)+1)->op1_type & (IS_VAR|IS_TMP_VAR))) {
+				zend_execute_data *execute_data = EG(current_execute_data);
+
+				zval_ptr_dtor_nogc(EX_VAR((EG(opline_before_exception)+1)->op1.var));
+			}
 			return NULL;
 	}
 
