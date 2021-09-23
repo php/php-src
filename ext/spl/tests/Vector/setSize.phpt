@@ -2,24 +2,24 @@
 Vector setSize
 --FILE--
 <?php
-function show(Vector $it) {
-    printf("count=%d capacity=%d\n", $it->count(), $it->capacity());
-    var_dump($it->toArray());
+function show(Vector $vec) {
+    printf("count=%d\n", $vec->count());
+    var_dump($vec->toArray());
 }
 
-$it = new Vector();
-show($it);
-$it->setSize(2);
-$it[0] = new stdClass();
-show($it);
-$it->setSize(0);
-show($it);
+$vec = new Vector();
+show($vec);
+$vec->setSize(2);
+$vec[0] = new stdClass();
+show($vec);
+$vec->setSize(0);
+show($vec);
 ?>
 --EXPECT--
-count=0 capacity=0
+count=0
 array(0) {
 }
-count=2 capacity=2
+count=2
 array(2) {
   [0]=>
   object(stdClass)#2 (0) {
@@ -27,6 +27,6 @@ array(2) {
   [1]=>
   NULL
 }
-count=0 capacity=0
+count=0
 array(0) {
 }

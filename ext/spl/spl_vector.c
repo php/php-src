@@ -35,6 +35,10 @@
 
 #include <stdbool.h>
 
+/* Though rare, it is possible to have 64-bit zend_longs and a 32-bit size_t. */
+#define MAX_ZVAL_COUNT ((SIZE_MAX / sizeof(zval)) - 1)
+#define MAX_VALID_OFFSET ((size_t)(MAX_ZVAL_COUNT > ZEND_LONG_MAX ? ZEND_LONG_MAX : MAX_ZVAL_COUNT))
+
 /* Miscellaneous utility functions */
 static inline zval *spl_zval_copy_range(const zval *original, size_t n) {
 	const size_t bytes = n * sizeof(zval);
@@ -120,6 +124,15 @@ typedef struct _spl_vector_it {
 
 static void spl_vector_raise_capacity(spl_vector *intern, const size_t new_capacity);
 
+/*
+ * If a size this large is encountered, assume the allocation will likely fail or
+ * future changes to the capacity will overflow.
+ */
+static ZEND_COLD void spl_error_noreturn_max_vector_capacity()
+{
+	zend_error_noreturn(E_ERROR, "exceeded max valid Vector capacity");
+}
+
 static spl_vector *spl_vector_from_object(zend_object *obj)
 {
 	return (spl_vector*)((char*)(obj) - XtOffsetOf(spl_vector, std));
@@ -166,7 +179,6 @@ static bool spl_vector_entries_uninitialized(const spl_vector_entries *array)
 
 static void spl_vector_raise_capacity(spl_vector *intern, const size_t new_capacity) {
 	ZEND_ASSERT(new_capacity > intern->array.capacity);
-	ZEND_ASSERT(new_capacity <= MAX_VALID_OFFSET + 1);
 	if (intern->array.capacity == 0) {
 		intern->array.entries = safe_emalloc(new_capacity, sizeof(zval), 0);
 	} else {
@@ -205,82 +217,17 @@ static void spl_vector_entries_init_elems(spl_vector_entries *array, zend_long f
 }
 */
 
-static inline void spl_vector_entries_set_empty_list(spl_vector_entries *array) {
+static zend_always_inline void spl_vector_entries_set_empty_list(spl_vector_entries *array) {
 	array->size = 0;
 	array->capacity = 0;
 	array->entries = (zval *)empty_entry_list;
-}
-
-static void spl_vector_entries_init_from_array(spl_vector_entries *array, zend_array *values, bool preserve_keys)
-{
-	const uint32_t num_elements = zend_hash_num_elements(values);
-	if (num_elements <= 0) {
-		spl_vector_entries_set_empty_list(array);
-		return;
-	}
-
-	zval *val;
-	zval *entries;
-
-	array->size = 0; /* reset size in case emalloc() fails */
-	if (preserve_keys) {
-		zend_string *str_index;
-		zend_ulong num_index, max_index = 0;
-
-		ZEND_HASH_FOREACH_KEY(values, num_index, str_index) {
-			if (UNEXPECTED(str_index != NULL || (zend_long)num_index < 0)) {
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "array must contain only positive integer keys");
-				return;
-			}
-
-			if (num_index > max_index) {
-				max_index = num_index;
-			}
-		} ZEND_HASH_FOREACH_END();
-
-		if (UNEXPECTED(max_index > MAX_VALID_OFFSET)) {
-			zend_error_noreturn("exceeded max valid offset of Vector");
-			return;
-		}
-		const zend_ulong size = max_index + 1;
-		ZEND_ASSERT(size > 0);
-		array->entries = entries = safe_emalloc(size, sizeof(zval), 0);
-		array->size = size;
-		array->capacity = size;
-		/* Optimization: Don't need to null remaining elements if all elements from 0..num_elements-1 are set. */
-		ZEND_ASSERT(size >= num_elements);
-		if (size > num_elements) {
-			for (uint32_t i = 0; i < size; i++) {
-				ZVAL_NULL(&entries[i]);
-			}
-		}
-
-		ZEND_HASH_FOREACH_KEY_VAL(values, num_index, str_index, val) {
-			ZEND_ASSERT(num_index < size);
-			ZEND_ASSERT(!str_index);
-			/* should happen for non-corrupt array inputs */
-			ZEND_ASSERT(size == num_elements || Z_TYPE(entries[num_index]) == IS_NULL);
-			ZVAL_COPY_DEREF(&entries[num_index], val);
-		} ZEND_HASH_FOREACH_END();
-		return;
-	}
-
-	size_t i = 0;
-	array->entries = entries = safe_emalloc(num_elements, sizeof(zval), 0);
-	array->size = num_elements;
-	array->capacity = num_elements;
-	ZEND_HASH_FOREACH_VAL(values, val)  {
-		ZEND_ASSERT(i < num_elements);
-		ZVAL_COPY_DEREF(&entries[i], val);
-		i++;
-	} ZEND_HASH_FOREACH_END();
 }
 
 static void spl_vector_entries_init_from_traversable(spl_vector_entries *array, zend_object *obj)
 {
 	zend_class_entry *ce = obj->ce;
 	zend_object_iterator *iter;
-	zend_long size = 0, capacity = 0;
+	size_t size = 0, capacity = 0;
 	array->size = 0;
 	array->entries = NULL;
 	zval *entries = NULL;
@@ -317,6 +264,7 @@ static void spl_vector_entries_init_from_traversable(spl_vector_entries *array, 
 		if (size >= capacity) {
 			/* Not using Countable::count(), that would potentially have side effects or throw UnsupportedOperationException or be slow to compute */
 			if (entries) {
+				/* The safe_erealloc macro emits its own fatal error on integer overflow */
 				capacity *= 2;
 				entries = safe_erealloc(entries, capacity, sizeof(zval), 0);
 			} else {
@@ -520,7 +468,7 @@ PHP_METHOD(Vector, clear)
 	efree(old_entries);
 }
 
-/* Set size of this vector */
+/* Set size of this Vector */
 PHP_METHOD(Vector, setSize)
 {
 	zend_long size;
@@ -535,7 +483,8 @@ PHP_METHOD(Vector, setSize)
 		if (size < 0) {
 			zend_argument_value_error(1, "must be greater than or equal to 0");
 		} else {
-			zend_error_noreturn("exceeded max valid Teds\\Vector offset");
+			spl_error_noreturn_max_vector_capacity();
+			ZEND_UNREACHABLE();
 		}
 		RETURN_THROWS();
 	}
@@ -593,12 +542,10 @@ PHP_METHOD(Vector, __construct)
 {
 	zval *object = ZEND_THIS;
 	zval* iterable = NULL;
-	bool preserve_keys = true;
 
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ITERABLE(iterable)
-		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
 	spl_vector *intern = Z_VECTOR_P(object);
@@ -608,17 +555,39 @@ PHP_METHOD(Vector, __construct)
 		/* called __construct() twice, bail out */
 		RETURN_THROWS();
 	}
+	uint32_t num_elements;
+	HashTable *values;
 	if (!iterable) {
+set_empty_list:
 		spl_vector_entries_set_empty_list(&intern->array);
 		return;
 	}
 
 	switch (Z_TYPE_P(iterable)) {
 		case IS_ARRAY:
-			spl_vector_entries_init_from_array(&intern->array, Z_ARRVAL_P(iterable), preserve_keys);
+			values = Z_ARRVAL_P(iterable);
+			num_elements = zend_hash_num_elements(values);
+			if (num_elements == 0) {
+				goto set_empty_list;
+			}
+
+			zval *val;
+			zval *entries;
+			spl_vector_entries *array = &intern->array;
+
+			array->size = 0; /* reset size in case emalloc() fails */
+			size_t i = 0;
+			array->entries = entries = safe_emalloc(num_elements, sizeof(zval), 0);
+			array->size = num_elements;
+			array->capacity = num_elements;
+			ZEND_HASH_FOREACH_VAL(values, val)  {
+				ZEND_ASSERT(i < num_elements);
+				ZVAL_COPY_DEREF(&entries[i], val);
+				i++;
+			} ZEND_HASH_FOREACH_END();
 			return;
 		case IS_OBJECT:
-			spl_vector_entries_init_from_traversable(&intern->array, Z_OBJ_P(iterable), preserve_keys);
+			spl_vector_entries_init_from_traversable(&intern->array, Z_OBJ_P(iterable));
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -776,9 +745,7 @@ static void spl_vector_entries_init_from_array_values(spl_vector_entries *array,
 {
 	size_t num_entries = zend_hash_num_elements(raw_data);
 	if (num_entries == 0) {
-		array->size = 0;
-		array->capacity = 0;
-		array->entries = NULL;
+		spl_vector_entries_set_empty_list(array);
 		return;
 	}
 	zval *entries = safe_emalloc(num_entries, sizeof(zval), 0);
@@ -1184,7 +1151,7 @@ static zend_always_inline void spl_vector_push(spl_vector *intern, zval *value)
 
 	if (old_size >= old_capacity) {
 		ZEND_ASSERT(old_size == old_capacity);
-		spl_vector_raise_capacity(intern, old_size ? old_size * 2 : 4);
+		spl_vector_raise_capacity(intern, old_size > 2 ? old_size * 2 : 4);
 	}
 	ZVAL_COPY(&intern->array.entries[old_size], value);
 	intern->array.size++;
@@ -1208,18 +1175,13 @@ PHP_METHOD(Vector, push)
 	const size_t new_size = old_size + argc;
 	/* The compiler will type check but eliminate dead code on platforms where size_t is 32 bits (4 bytes) */
 	if (SIZEOF_SIZE_T < 8 && UNEXPECTED(new_size > MAX_VALID_OFFSET + 1 || new_size < old_size)) {
-		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "exceeded max valid offset");
-		RETURN_THROWS();
+		spl_error_noreturn_max_vector_capacity();
+		ZEND_UNREACHABLE();
 	}
 	const size_t old_capacity = intern->array.capacity;
 	if (new_size > old_capacity) {
-		size_t new_capacity = old_size ? old_size * 2 : 4;
-		if (UNEXPECTED(new_size > new_capacity)) {
-			new_capacity = new_size + (new_size >> 1);
-		}
-		if (SIZEOF_SIZE_T < 8 && UNEXPECTED(new_capacity > MAX_VALID_OFFSET + 1)) {
-			new_capacity = MAX_VALID_OFFSET + 1;
-		}
+		const size_t new_capacity = new_size >= 3 ? (new_size - 1) * 2 : 4;
+		ZEND_ASSERT(new_capacity >= new_size);
 		spl_vector_raise_capacity(intern, new_capacity);
 	}
 	zval *entries = intern->array.entries;

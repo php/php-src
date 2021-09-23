@@ -3,23 +3,23 @@ Vector can be serialized and unserialized
 --FILE--
 <?php
 
-$it = new Vector(['first' => new stdClass()], preserveKeys: false);
+$vec = new Vector([new stdClass()]);
 try {
-    $it->dynamicProp = 123;
+    $vec->dynamicProp = 123;
 } catch (Throwable $t) {
     printf("Caught %s: %s\n", $t::class, $t->getMessage());
 }
-$ser = serialize($it);
+$ser = serialize($vec);
 echo $ser, "\n";
 foreach (unserialize($ser) as $key => $value) {
     echo "Entry:\n";
     var_dump($key, $value);
 }
-var_dump($ser === serialize($it));
+var_dump($ser === serialize($vec));
 echo "Done\n";
 $x = 123;
-$it = new Vector([]);
-var_dump($it->__serialize());
+$vec = new Vector([]);
+var_dump($vec->__serialize());
 ?>
 --EXPECT--
 Caught Error: Cannot create dynamic property Vector::$dynamicProp

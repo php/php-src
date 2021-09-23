@@ -1,40 +1,40 @@
 --TEST--
-Vector pop() shrinks capacity
+Vector pop() reduces count
 --FILE--
 <?php
 // Use strtolower to create values that must be garbage collected
 $s = 'test 123 test test test test test test';
-$it = new Vector(explode(' ', $s));
-while (count($it) > 0) {
-    var_dump($it->pop());
-    printf("capacity=%d\n", $it->capacity());
+$vec = new Vector(explode(' ', $s));
+while (count($vec) > 0) {
+    var_dump($vec->pop());
+    printf("new count=%d\n", count($vec));
 }
-$it->shrinkToFit();
-printf("shrinkToFit capacity=%d\n", $it->capacity());
-printf("shrinkToFit capacity=%d\n", $it->capacity());
-$it->push(new stdClass());
-printf("it=%s count=%d capacity=%d\n", json_encode($it), count($it), $it->capacity());
-$it->shrinkToFit();
-printf("it=%s count=%d capacity=%d\n", json_encode($it), count($it), $it->capacity());
+$vec->shrinkToFit();
+printf("shrinkToFit\n");
+printf("shrinkToFit\n");
+$vec->push(new stdClass());
+printf("it=%s count=%d\n", json_encode($vec), count($vec));
+$vec->shrinkToFit();
+printf("it=%s count=%d\n", json_encode($vec), count($vec));
 ?>
 --EXPECT--
 string(4) "test"
-capacity=8
+new count=7
 string(4) "test"
-capacity=8
+new count=6
 string(4) "test"
-capacity=8
+new count=5
 string(4) "test"
-capacity=8
+new count=4
 string(4) "test"
-capacity=8
+new count=3
 string(4) "test"
-capacity=8
+new count=2
 string(3) "123"
-capacity=8
+new count=1
 string(4) "test"
-capacity=4
-shrinkToFit capacity=0
-shrinkToFit capacity=0
-it=[{}] count=1 capacity=4
-it=[{}] count=1 capacity=1
+new count=0
+shrinkToFit
+shrinkToFit
+it=[{}] count=1
+it=[{}] count=1

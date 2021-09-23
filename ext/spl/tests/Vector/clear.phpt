@@ -3,17 +3,15 @@ Vector clear
 --FILE--
 <?php
 
-$it = new Vector([new stdClass()]);
-var_dump($it->toArray());
-var_dump($it->count());
-var_dump($it->capacity());
-$it->clear();
-foreach ($it as $value) {
+$vec = new Vector([new stdClass()]);
+var_dump($vec->toArray());
+var_dump($vec->count());
+$vec->clear();
+foreach ($vec as $value) {
     echo "Not reached\n";
 }
-var_dump($it->toArray());
-var_dump($it->count());
-var_dump($it->capacity());
+var_dump($vec->toArray());
+var_dump($vec->count());
 ?>
 --EXPECT--
 array(1) {
@@ -22,8 +20,6 @@ array(1) {
   }
 }
 int(1)
-int(1)
 array(0) {
 }
-int(0)
 int(0)

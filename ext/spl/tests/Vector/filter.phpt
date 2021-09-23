@@ -3,7 +3,7 @@ Vector filter()
 --FILE--
 <?php
 function dump_vector(Vector $v) {
-    printf("count=%d capacity=%d\n", $v->count(), $v->capacity());
+    printf("count=%d\n", $v->count());
     foreach ($v as $i => $value) {
         printf("Value #%d: %s\n", $i, var_export($value, true));
     }
@@ -31,25 +31,25 @@ try {
 }
 ?>
 --EXPECT--
-count=0 capacity=0
-count=1 capacity=1
+count=0
+count=1
 Value #0: true
-count=3 capacity=3
+count=3
 Value #0: 'TEST'
 Value #1: true
 Value #2: (object) array(
 )
 Test functions
-count=0 capacity=0
-count=0 capacity=0
-count=2 capacity=2
+count=0
+count=0
+count=2
 Value #0: false
 Value #1: array (
 )
-count=0 capacity=0
-count=1 capacity=1
+count=0
+count=1
 Value #0: true
-count=3 capacity=3
+count=3
 Value #0: 'TEST'
 Value #1: true
 Value #2: (object) array(

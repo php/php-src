@@ -15,28 +15,26 @@ function yields_values() {
 }
 
 // Vector eagerly evaluates the passed in Traversable
-$it = new Vector(yields_values(), preserveKeys: false);
-foreach ($it as $key => $value) {
+$vec = new Vector(yields_values());
+foreach ($vec as $key => $value) {
     printf("Key: %s\nValue: %s\n", var_export($key, true), var_export($value, true));
 }
 echo "Rewind and iterate again starting from r0\n";
-foreach ($it as $key => $value) {
+foreach ($vec as $key => $value) {
     printf("Key: %s\nValue: %s\n", var_export($key, true), var_export($value, true));
 }
-unset($it);
+unset($vec);
 
-foreach ([false, true] as $preserveKeys) {
-    $emptyIt = new Vector(new ArrayObject(), $preserveKeys);
-    var_dump($emptyIt);
-    foreach ($emptyIt as $key => $value) {
-        echo "Unreachable\n";
-    }
-    foreach ($emptyIt as $key => $value) {
-        echo "Unreachable\n";
-    }
-    echo "Done\n";
-    unset($emptyIt);
+$emptyIt = new Vector(new ArrayObject());
+var_dump($emptyIt);
+foreach ($emptyIt as $key => $value) {
+    echo "Unreachable\n";
 }
+foreach ($emptyIt as $key => $value) {
+    echo "Unreachable\n";
+}
+echo "Done\n";
+unset($emptyIt);
 
 ?>
 --EXPECT--
@@ -98,9 +96,6 @@ Key: 11
 Value: 1
 Key: 12
 Value: 2
-object(Vector)#1 (0) {
-}
-Done
 object(Vector)#1 (0) {
 }
 Done

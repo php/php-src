@@ -3,35 +3,25 @@ Vector constructed from array
 --FILE--
 <?php
 // discards keys
-$it = new Vector(['first' => 'x', 'second' => new stdClass()], preserveKeys: false);
-foreach ($it as $key => $value) {
+$vec = new Vector(['first' => 'x', 'second' => new stdClass()]);
+foreach ($vec as $key => $value) {
     printf("Key: %s\nValue: %s\n", var_export($key, true), var_export($value, true));
 }
-var_dump($it);
-var_dump((array)$it);
+var_dump($vec);
+var_dump((array)$vec);
 
-$it = new Vector([]);
-var_dump($it);
-var_dump((array)$it);
-foreach ($it as $key => $value) {
+$vec = new Vector([]);
+var_dump($vec);
+var_dump((array)$vec);
+foreach ($vec as $key => $value) {
     echo "Unreachable\n";
 }
 
-// The default is to preserve keys
-$it = new Vector([2 => 'third', 0 => 'first']);
-var_dump($it);
+// Vector will always reindex keys in the order of iteration, like array_values() does.
+$vec = new Vector([2 => 'a', 0 => 'b']);
+var_dump($vec);
 
-try {
-    $it = new Vector([-1 => new stdClass()]);
-} catch (UnexpectedValueException $e) {
-    echo "Caught: {$e->getMessage()}\n";
-}
-
-try {
-    $it = new Vector(['0a' => new stdClass()]);
-} catch (UnexpectedValueException $e) {
-    echo "Caught: {$e->getMessage()}\n";
-}
+var_dump(new Vector([-1 => new stdClass()]));
 ?>
 --EXPECT--
 Key: 0
@@ -57,13 +47,14 @@ object(Vector)#3 (0) {
 }
 array(0) {
 }
-object(Vector)#1 (3) {
+object(Vector)#1 (2) {
   [0]=>
-  string(5) "first"
+  string(1) "a"
   [1]=>
-  NULL
-  [2]=>
-  string(5) "third"
+  string(1) "b"
 }
-Caught: array must contain only positive integer keys
-Caught: array must contain only positive integer keys
+object(Vector)#3 (1) {
+  [0]=>
+  object(stdClass)#4 (0) {
+  }
+}

@@ -8,13 +8,13 @@ function dump_repr($obj) {
 }
 dump_repr(Vector::__set_state([]));
 Vector::__set_state(['first' => 'x']);
-$it = Vector::__set_state([strtoupper('a literal'), ['first', 'x'], [(object)['key' => 'value'], null]]);
-foreach ($it as $key => $value) {
+$vec = Vector::__set_state([strtoupper('a literal'), ['first', 'x'], [(object)['key' => 'value'], null]]);
+foreach ($vec as $key => $value) {
     printf("key=%s value=%s\n", json_encode($key), json_encode($value));
 }
-dump_repr($it);
-var_dump($it);
-var_dump((array)$it);
+dump_repr($vec);
+var_dump($vec);
+var_dump((array)$vec);
 
 ?>
 --EXPECT--

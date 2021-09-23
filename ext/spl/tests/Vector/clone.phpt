@@ -3,9 +3,9 @@ Vector can be cloned
 --FILE--
 <?php
 
-$it = new Vector([new stdClass(), new ArrayObject()]);
-$it2 = clone $it;
-unset($it);
+$vec = new Vector([new stdClass(), new ArrayObject()]);
+$it2 = clone $vec;
+unset($vec);
 foreach ($it2 as $key => $value) {
     echo "Saw entry:\n";
     var_dump($key, $value);

@@ -3,13 +3,13 @@ Vector to array
 --FILE--
 <?php
 // discards keys
-$it = new Vector([strtoupper('test')]);
-var_dump((array)$it);
-$it[0] = strtoupper('test2');
-var_dump((array)$it);
-var_dump($it);
-$it->pop();
-var_dump($it);
+$vec = new Vector([strtoupper('test')]);
+var_dump((array)$vec);
+$vec[0] = strtoupper('test2');
+var_dump((array)$vec);
+var_dump($vec);
+$vec->pop();
+var_dump($vec);
 
 
 ?>
