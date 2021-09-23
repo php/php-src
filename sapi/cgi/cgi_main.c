@@ -504,11 +504,7 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes)
 	size_t read_bytes = 0;
 	int tmp_read_bytes;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
-	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	if (remaining < count_bytes) {
-		count_bytes = remaining;
-	}
 	while (read_bytes < count_bytes) {
 		size_t diff = count_bytes - read_bytes;
 		int to_read = (diff > INT_MAX) ? INT_MAX : (int)diff;
@@ -518,6 +514,10 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes)
 			break;
 		}
 		read_bytes += tmp_read_bytes;
+
+		if (fcgi_is_eof(request)) {
+			break;
+		}
 	}
 	return read_bytes;
 }
