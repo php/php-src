@@ -1229,6 +1229,7 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 			req->in_len = (hdr.contentLengthB1 << 8) | hdr.contentLengthB0;
 			req->in_pad = hdr.paddingLength;
 			if (req->in_len == 0) {
+				req->in_len = -1;
 				return n;
 			}
 		}
@@ -1317,6 +1318,11 @@ void fcgi_close(fcgi_request *req, int force, int destroy)
 int fcgi_is_closed(fcgi_request *req)
 {
 	return (req->fd < 0);
+}
+
+int fcgi_is_eof(fcgi_request *req)
+{
+	return (req->in_len == -1);
 }
 
 static int fcgi_is_allowed(void) {

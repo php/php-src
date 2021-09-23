@@ -88,6 +88,7 @@ void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_is_closed(fcgi_request *req);
 void fcgi_close(fcgi_request *req, int force, int destroy);
+int fcgi_is_eof(fcgi_request *req);
 int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
 int fcgi_listen(const char *path, int backlog);

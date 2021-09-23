@@ -589,7 +589,8 @@ class Tester
         string $successMessage = null,
         string $errorMessage = null,
         bool $connKeepAlive = false,
-        string $scriptFilename = null
+        string $scriptFilename = null,
+        $stdin = false
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -599,7 +600,7 @@ class Tester
 
         try {
             $this->response = new Response(
-                $this->getClient($address, $connKeepAlive)->request_data($params, false)
+                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin)
             );
             $this->message($successMessage);
         } catch (\Exception $exception) {

@@ -429,11 +429,6 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 {
 	uint32_t read_bytes = 0;
 	int tmp_read_bytes;
-	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
-
-	if (remaining < count_bytes) {
-		count_bytes = remaining;
-	}
 	while (read_bytes < count_bytes) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		if (request_body_fd == -1) {
@@ -450,6 +445,9 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes) /* {{{ */
 			}
 		}
 
+		if (fcgi_is_eof(request)) {
+			break;
+		}
 		/* If REQUEST_BODY_FILE variable not available - read post body from fastcgi stream */
 		if (request_body_fd < 0) {
 			tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
