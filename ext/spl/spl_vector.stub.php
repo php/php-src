@@ -17,11 +17,9 @@ final class Vector implements IteratorAggregate, Countable, JsonSerializable, Ar
     /**
      * Construct a Vector from an iterable.
      *
-     * When $preserveKeys is false, the values will be reindexed without gaps starting from 0
-     * When $preserveKeys is true, any gaps in the keys of the iterable will be filled in with null,
-     * and negative indices or non-integer indices will be rejected and cause an Exception.
+     * The keys will be ignored, and values will be reindexed without gaps starting from 0
      */
-    public function __construct(iterable $iterator = [], bool $preserveKeys = true) {}
+    public function __construct(iterable $iterator = []) {}
     /**
      * Returns an iterator that will return the indexes and values of iterable until index >= count()
      */

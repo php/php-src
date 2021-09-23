@@ -1,9 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 67a8a475004563eb10b9c117d32b864c94c13c38 */
+ * Stub hash: 92769a3b5fa4af0222ab47445b174406288c303d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Vector___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iterator, IS_ITERABLE, 0, "[]")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preserveKeys, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Vector_getIterator, 0, 0, InternalIterator, 0)
@@ -12,8 +11,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Vector_capacity arginfo_class_Vector_count
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_shrinkToFit, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
@@ -21,6 +18,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_setSize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, value, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector___serialize, 0, 0, IS_ARRAY, 0)
@@ -34,8 +32,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Vector___set_state, 0, 1, V
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_push, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_push, 0, 0, IS_VOID, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, values, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_pop, 0, 0, IS_MIXED, 0)
@@ -43,11 +41,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Vector_toArray arginfo_class_Vector___serialize
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_valueAt, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_get, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_setValueAt, 0, 2, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -69,7 +67,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_offsetUnset, 0, 1, 
 	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Vector_indexOf, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Vector_indexOf, 0, 1, IS_LONG, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -91,7 +89,6 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(Vector, __construct);
 ZEND_METHOD(Vector, getIterator);
 ZEND_METHOD(Vector, count);
-ZEND_METHOD(Vector, capacity);
 ZEND_METHOD(Vector, shrinkToFit);
 ZEND_METHOD(Vector, clear);
 ZEND_METHOD(Vector, setSize);
@@ -101,8 +98,8 @@ ZEND_METHOD(Vector, __set_state);
 ZEND_METHOD(Vector, push);
 ZEND_METHOD(Vector, pop);
 ZEND_METHOD(Vector, toArray);
-ZEND_METHOD(Vector, valueAt);
-ZEND_METHOD(Vector, setValueAt);
+ZEND_METHOD(Vector, get);
+ZEND_METHOD(Vector, set);
 ZEND_METHOD(Vector, offsetGet);
 ZEND_METHOD(Vector, offsetExists);
 ZEND_METHOD(Vector, offsetSet);
@@ -118,7 +115,6 @@ static const zend_function_entry class_Vector_methods[] = {
 	ZEND_ME(Vector, __construct, arginfo_class_Vector___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, getIterator, arginfo_class_Vector_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, count, arginfo_class_Vector_count, ZEND_ACC_PUBLIC)
-	ZEND_ME(Vector, capacity, arginfo_class_Vector_capacity, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, shrinkToFit, arginfo_class_Vector_shrinkToFit, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, clear, arginfo_class_Vector_clear, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, setSize, arginfo_class_Vector_setSize, ZEND_ACC_PUBLIC)
@@ -128,8 +124,8 @@ static const zend_function_entry class_Vector_methods[] = {
 	ZEND_ME(Vector, push, arginfo_class_Vector_push, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, pop, arginfo_class_Vector_pop, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, toArray, arginfo_class_Vector_toArray, ZEND_ACC_PUBLIC)
-	ZEND_ME(Vector, valueAt, arginfo_class_Vector_valueAt, ZEND_ACC_PUBLIC)
-	ZEND_ME(Vector, setValueAt, arginfo_class_Vector_setValueAt, ZEND_ACC_PUBLIC)
+	ZEND_ME(Vector, get, arginfo_class_Vector_get, ZEND_ACC_PUBLIC)
+	ZEND_ME(Vector, set, arginfo_class_Vector_set, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, offsetGet, arginfo_class_Vector_offsetGet, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, offsetExists, arginfo_class_Vector_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_ME(Vector, offsetSet, arginfo_class_Vector_offsetSet, ZEND_ACC_PUBLIC)
