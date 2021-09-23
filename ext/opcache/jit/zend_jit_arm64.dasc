@@ -8988,6 +8988,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (call_info && call_info->callee_func && !call_info->is_prototype) {
 			func = call_info->callee_func;
 		}
+		if ((op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->call
+		 && !JIT_G(current_frame)->call->func) {
+			call_info = NULL; func = NULL; /* megamorphic call from trait */
+		}
 	}
 	if (!func) {
 		/* resolve function at run time */
