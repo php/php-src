@@ -12832,10 +12832,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			}
 		}
 	}
-	if (op1_avoid_refcounting) {
-		SET_STACK_REG(JIT_G(current_frame)->stack,
-			EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
-	}
 	if (opline->opcode == ZEND_FETCH_OBJ_W) {
 		if (Z_REG(prop_addr) != ZREG_FCARG1 || Z_OFFSET(prop_addr) != 0) {
 			|	LOAD_ZVAL_ADDR FCARG1a, prop_addr
@@ -12881,6 +12877,10 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			} else {
+				if (op1_avoid_refcounting) {
+					SET_STACK_REG(JIT_G(current_frame)->stack,
+						EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
+				}
 				old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->result.var), ZREG_ZVAL_COPY_GPR0);
@@ -12926,6 +12926,11 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				return 0;
 			}
 		}
+	}
+
+	if (op1_avoid_refcounting) {
+		SET_STACK_REG(JIT_G(current_frame)->stack,
+			EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 	}
 
 	|.cold_code
