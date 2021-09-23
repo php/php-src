@@ -1866,7 +1866,8 @@ function run_test(string $php, $file, array $env): string
 
     static $skipCache;
     if (!$skipCache) {
-        $skipCache = new SkipCache($cfg['keep']['skip']);
+        $enableSkipCache = !($env['DISABLE_SKIP_CACHE'] ?? '0');
+        $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
     $temp_filenames = null;
@@ -3659,6 +3660,7 @@ class JUnit
 
 class SkipCache
 {
+    private bool $enable;
     private bool $keepFile;
 
     private array $skips = [];
@@ -3669,8 +3671,9 @@ class SkipCache
     private int $extHits = 0;
     private int $extMisses = 0;
 
-    public function __construct(bool $keepFile)
+    public function __construct(bool $enable, bool $keepFile)
     {
+        $this->enable = $enable;
         $this->keepFile = $keepFile;
     }
 
@@ -3691,10 +3694,10 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
-        if (strpos($result, 'nocache') !== 0) {
-            $this->skips[$key][$code] = $result;
-        } else {
+        if (strpos($result, 'nocache') === 0) {
             $result = '';
+        } else if ($this->enable) {
+            $this->skips[$key][$code] = $result;
         }
         $this->misses++;
 
