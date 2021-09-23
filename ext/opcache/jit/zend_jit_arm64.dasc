@@ -4472,8 +4472,17 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, uint32_t op1_i
 
 static int zend_jit_add_arrays(dasm_State **Dst, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, zend_jit_addr op2_addr, zend_jit_addr res_addr)
 {
-	|	GET_ZVAL_LVAL ZREG_FCARG1, op1_addr, TMP1
-	|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr, TMP1
+	if (Z_MODE(op2_addr) != IS_MEM_ZVAL || Z_REG(op2_addr) != ZREG_FCARG1) {
+		|	GET_ZVAL_LVAL ZREG_FCARG1, op1_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr, TMP1
+	} else if (Z_MODE(op1_addr) != IS_MEM_ZVAL || Z_REG(op1_addr) != ZREG_FCARG1) {
+		|	GET_ZVAL_LVAL ZREG_FCARG2, op2_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_FCARG1, op1_addr, TMP1
+	} else {
+		|	GET_ZVAL_LVAL ZREG_REG0, op2_addr, TMP1
+		|	GET_ZVAL_LVAL ZREG_FCARG1, op1_addr, TMP1
+		|	mov FCARG2x, REG0
+	}
 	|	EXT_CALL zend_jit_add_arrays_helper, REG0
 	|	SET_ZVAL_PTR res_addr, RETVALx, TMP1
 	|	SET_ZVAL_TYPE_INFO res_addr, IS_ARRAY_EX, TMP1w, TMP2
