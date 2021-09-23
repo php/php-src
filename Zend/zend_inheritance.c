@@ -2348,6 +2348,9 @@ static void load_delayed_classes() {
 
 	ZEND_HASH_FOREACH_STR_KEY(delayed_autoloads, name) {
 		zend_lookup_class(name);
+		if (EG(exception)) {
+			break;
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(delayed_autoloads);
