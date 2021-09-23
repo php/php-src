@@ -3,7 +3,7 @@ Bug #46665 (Triggering autoload with a variable classname causes truncated autol
 --FILE--
 <?php
 
-spl_autoload_register(function ($class) {
+autoload_register_class(function ($class) {
     var_dump($class);
     require __DIR__ .'/bug46665_autoload.inc';
 });

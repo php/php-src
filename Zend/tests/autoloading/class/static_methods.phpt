@@ -1,20 +1,17 @@
 --TEST--
-SPL: spl_autoload() with static methods
---INI--
-include_path=.
+Autoloader is a static method
 --FILE--
 <?php
 
 class MyAutoLoader {
-
-        static function autoLoad($className) {
-            echo __METHOD__ . "($className)\n";
-        }
+    static function autoLoad($className) {
+        echo __METHOD__ . "($className)\n";
+    }
 }
 
-spl_autoload_register('MyAutoLoader::autoLoad');
+autoload_register_class('MyAutoLoader::autoLoad');
 
-var_dump(spl_autoload_functions());
+var_dump(autoload_list_class());
 
 // check
 var_dump(class_exists("TestClass", true));

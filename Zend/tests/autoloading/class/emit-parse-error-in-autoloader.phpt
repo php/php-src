@@ -1,12 +1,12 @@
 --TEST--
-Bug #74372: autoloading file with syntax error uses next autoloader, may hide parse error
+Parse errors should be thrown if occuring from an autoloader
 --FILE--
 <?php
 
-spl_autoload_register(function($class) {
+autoload_register_class(function($class) {
     eval("ha ha ha");
 });
-spl_autoload_register(function($class) {
+autoload_register_class(function($class) {
     echo "Don't call me.\n";
 });
 

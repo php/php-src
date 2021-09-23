@@ -1,8 +1,8 @@
 --TEST--
-Bug #42798 (_autoload() not triggered for classes used in method signature)
+Bug #42798 (Autoloading not triggered for classes used in method signature)
 --FILE--
 <?php
-spl_autoload_register(function ($className) {
+autoload_register_class(function ($className) {
     print "$className\n";
     exit();
 });

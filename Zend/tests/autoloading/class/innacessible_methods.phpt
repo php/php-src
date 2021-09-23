@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_autoload() with inaccessible methods
+Autoloading inaccessible methods
 --INI--
 include_path=.
 --FILE--
@@ -42,7 +42,7 @@ foreach($funcs as $idx => $func)
     if ($idx) echo "\n";
     try {
         var_dump($func);
-        spl_autoload_register($func);
+        autoload_register_class($func);
         echo "ok\n";
     } catch(\TypeError $e) {
         echo $e->getMessage() . \PHP_EOL;
@@ -52,16 +52,16 @@ foreach($funcs as $idx => $func)
 ?>
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, class MyAutoLoader does not have a method "notExist"
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 string(22) "MyAutoLoader::noAccess"
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method MyAutoLoader::noAccess()
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, cannot access protected method MyAutoLoader::noAccess()
 
 string(22) "MyAutoLoader::autoLoad"
 ok
 
 string(22) "MyAutoLoader::dynaLoad"
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 
 array(2) {
   [0]=>
@@ -69,7 +69,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, class MyAutoLoader does not have a method "notExist"
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 array(2) {
   [0]=>
@@ -77,7 +77,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method MyAutoLoader::noAccess()
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, cannot access protected method MyAutoLoader::noAccess()
 
 array(2) {
   [0]=>
@@ -93,7 +93,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 
 array(2) {
   [0]=>
@@ -102,7 +102,7 @@ array(2) {
   [1]=>
   string(8) "notExist"
 }
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, class MyAutoLoader does not have a method "notExist"
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, class MyAutoLoader does not have a method "notExist"
 
 array(2) {
   [0]=>
@@ -111,7 +111,7 @@ array(2) {
   [1]=>
   string(8) "noAccess"
 }
-spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, cannot access protected method MyAutoLoader::noAccess()
+autoload_register_class(): Argument #1 ($callback) must be a valid callback, cannot access protected method MyAutoLoader::noAccess()
 
 array(2) {
   [0]=>

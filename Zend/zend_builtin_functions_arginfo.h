@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f87d92c002674c431827895a8d8b3a5da3b95482 */
+ * Stub hash: 1951be1dbb5831684167a8a9b6f84b6510d7a645 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -216,6 +216,21 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_status arginfo_func_get_args
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_register_class, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prepend, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_unregister_class, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_call_class, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_autoload_list_class arginfo_func_get_args
+
 
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -275,6 +290,10 @@ ZEND_FUNCTION(gc_enabled);
 ZEND_FUNCTION(gc_enable);
 ZEND_FUNCTION(gc_disable);
 ZEND_FUNCTION(gc_status);
+ZEND_FUNCTION(autoload_register_class);
+ZEND_FUNCTION(autoload_unregister_class);
+ZEND_FUNCTION(autoload_call_class);
+ZEND_FUNCTION(autoload_list_class);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -338,6 +357,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_enable, arginfo_gc_enable)
 	ZEND_FE(gc_disable, arginfo_gc_disable)
 	ZEND_FE(gc_status, arginfo_gc_status)
+	ZEND_FE(autoload_register_class, arginfo_autoload_register_class)
+	ZEND_FE(autoload_unregister_class, arginfo_autoload_unregister_class)
+	ZEND_FE(autoload_call_class, arginfo_autoload_call_class)
+	ZEND_FE(autoload_list_class, arginfo_autoload_list_class)
 	ZEND_FE_END
 };
 
