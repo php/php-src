@@ -7829,7 +7829,8 @@ static void zend_compile_enum_case(zend_ast *ast)
 		zend_eval_const_expr(&ast->child[1]);
 		case_value_ast = ast->child[1];
 		if (case_value_ast->kind != ZEND_AST_ZVAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum case value must be constant");
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "Enum case value must be compile-time evaluatable");
 		}
 
 		zval case_value_zv;
