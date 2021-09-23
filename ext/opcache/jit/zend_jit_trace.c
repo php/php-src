@@ -6235,7 +6235,6 @@ done:
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 		if (p->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
-			ZEND_ASSERT(!parent_trace);
 			if ((t->flags & ZEND_JIT_TRACE_USES_INITIAL_IP)
 			 && !zend_jit_set_ip(&dasm_state, p->opline)) {
 				goto jit_failure;
