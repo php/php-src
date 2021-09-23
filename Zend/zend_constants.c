@@ -276,6 +276,7 @@ ZEND_API bool zend_verify_const_access(zend_class_constant *c, zend_class_entry 
 }
 /* }}} */
 
+// TODO Add support for auto-loading?
 static zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {
 	zend_constant *c = zend_hash_str_find_ptr(EG(zend_constants), name, name_len);
@@ -302,6 +303,7 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 
 static zend_constant *zend_get_constant_impl(zend_string *name)
 {
+	// TODO Use lookup
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
 		return c;

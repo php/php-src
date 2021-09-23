@@ -4499,6 +4499,7 @@ static zend_always_inline zend_result _zend_quick_get_constant(
 	zend_constant *c = NULL;
 
 	/* null/true/false are resolved during compilation, so don't check for them here. */
+	// TODO Create a constant_lookup
 	zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
 	if (zv) {
 		c = (zend_constant*)Z_PTR_P(zv);
