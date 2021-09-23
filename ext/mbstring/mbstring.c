@@ -3370,9 +3370,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 							if (fld_name != NULL && fld_val != NULL) {
 								zval val;
-								/* FIXME: some locale free implementation is
-								 * really required here,,, */
-								php_strtoupper(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+								zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
 								ZVAL_STR(&val, fld_val);
 
 								zend_hash_update(ht, fld_name, &val);
@@ -3418,11 +3416,8 @@ out:
 		}
 		if (fld_name != NULL && fld_val != NULL) {
 			zval val;
-			/* FIXME: some locale free implementation is
-			 * really required here,,, */
-			php_strtoupper(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+			zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
 			ZVAL_STR(&val, fld_val);
-
 			zend_hash_update(ht, fld_name, &val);
 
 			zend_string_release_ex(fld_name, 0);
@@ -3508,7 +3503,7 @@ PHP_FUNCTION(mb_send_mail)
 		_php_mbstr_parse_mail_headers(&ht_headers, ZSTR_VAL(str_headers), ZSTR_LEN(str_headers));
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-type", sizeof("content-type") - 1))) {
 		char *tmp;
 		char *param_name;
 		char *charset = NULL;
@@ -3544,7 +3539,7 @@ PHP_FUNCTION(mb_send_mail)
 		suppressed_hdrs.cnt_type = 1;
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TRANSFER-ENCODING", sizeof("CONTENT-TRANSFER-ENCODING") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-transfer-encoding", sizeof("content-transfer-encoding") - 1))) {
 		const mbfl_encoding *_body_enc;
 
 		ZEND_ASSERT(Z_TYPE_P(s) == IS_STRING);
@@ -3640,7 +3635,7 @@ PHP_FUNCTION(mb_send_mail)
 		zend_string_release_ex(str_headers, 0);
 	}
 
-	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
+	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
 		mbfl_memory_device_strncat(&device, "\n", 1);
 	}
