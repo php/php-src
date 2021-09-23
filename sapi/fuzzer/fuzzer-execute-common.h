@@ -126,7 +126,18 @@ ZEND_ATTRIBUTE_UNUSED static void opcache_invalidate(void) {
 }
 
 ZEND_ATTRIBUTE_UNUSED char *get_opcache_path(void) {
-	// TODO: Make this more general.
-	char *opcache_path = "modules/opcache.so";
-	return realpath(opcache_path, NULL);
+	/* Try relative to cwd. */
+	char *p = realpath("modules/opcache.so", NULL);
+	if (p) {
+		return p;
+	}
+
+	/* Try relative to binary location. */
+	char path[MAXPATHLEN];
+	if (readlink("/proc/self/exe", path, sizeof(path)) < 0) {
+		ZEND_ASSERT(0 && "Failed to get binary path");
+		return NULL;
+	}
+	strlcat(path, "/modules/opcache.so", sizeof(path));
+	return realpath(path, NULL);
 }
