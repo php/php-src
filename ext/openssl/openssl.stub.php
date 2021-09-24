@@ -76,7 +76,7 @@ function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLC
 function openssl_csr_new(array $distinguished_names, &$private_key, ?array $options = null, ?array $extra_attributes = null): OpenSSLCertificateSigningRequest|false {}
 
 /**
- * @return array<int, string|array>|false
+ * @return array<string, string|array>|false
  * @refcount 1
  */
 function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): array|false {}

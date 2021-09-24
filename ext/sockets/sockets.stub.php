@@ -71,7 +71,7 @@ function socket_recvfrom(Socket $socket, &$data, int $length, int $flags, &$addr
 function socket_sendto(Socket $socket, string $data, int $length, int $flags, string $address, ?int $port = null): int|false {}
 
 /**
- * @return array<string, int>|int|false
+ * @return array<string, mixed>|int|false
  * @refcount 1
  */
 function socket_get_option(Socket $socket, int $level, int $option): array|int|false {}
