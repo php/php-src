@@ -73,12 +73,6 @@ struct _spl_heap_object {
 	zend_object         std;
 };
 
-/* define an overloaded iterator structure */
-struct _spl_heap_it {
-	zend_user_iterator  intern;
-	int                 flags;
-};
-
 typedef struct _spl_pqueue_elem {
 	zval data;
 	zval priority;
@@ -892,10 +886,8 @@ PHP_METHOD(SplMaxHeap, compare)
 
 static void spl_heap_it_dtor(zend_object_iterator *iter) /* {{{ */
 {
-	spl_heap_it *iterator = (spl_heap_it *)iter;
-
 	zend_user_it_invalidate_current(iter);
-	zval_ptr_dtor(&iterator->intern.it.data);
+	zval_ptr_dtor(&iter->data);
 }
 /* }}} */
 
@@ -1102,52 +1094,39 @@ static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 
 zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	spl_heap_it     *iterator;
-	spl_heap_object *heap_object = Z_SPLHEAP_P(object);
-
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 
-	iterator = emalloc(sizeof(spl_heap_it));
+	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
+	zend_iterator_init(&iterator->it);
 
-	zend_iterator_init(&iterator->intern.it);
+	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
+	iterator->it.funcs = &spl_heap_it_funcs;
+	iterator->ce       = ce;
+	ZVAL_UNDEF(&iterator->value);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
-	iterator->intern.it.funcs = &spl_heap_it_funcs;
-	iterator->intern.ce       = ce;
-	iterator->flags           = heap_object->flags;
-	ZVAL_UNDEF(&iterator->intern.value);
-
-	return &iterator->intern.it;
+	return &iterator->it;
 }
 /* }}} */
 
 zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	spl_heap_it     *iterator;
-	spl_heap_object *heap_object = Z_SPLHEAP_P(object);
-
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 
-	iterator = emalloc(sizeof(spl_heap_it));
+	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
+	zend_iterator_init(&iterator->it);
 
-	zend_iterator_init((zend_object_iterator*)iterator);
+	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
+	iterator->it.funcs = &spl_pqueue_it_funcs;
+	iterator->ce       = ce;
+	ZVAL_UNDEF(&iterator->value);
 
-	Z_ADDREF_P(object);
-	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
-	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
-	iterator->intern.ce       = ce;
-	iterator->flags           = heap_object->flags;
-
-	ZVAL_UNDEF(&iterator->intern.value);
-
-	return &iterator->intern.it;
+	return &iterator->it;
 }
 /* }}} */
 
