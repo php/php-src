@@ -34,7 +34,6 @@
 #include <sys/utsname.h>
 #endif
 #include "url.h"
-#include "php_string.h"
 
 #ifdef PHP_WIN32
 # include "winver.h"
@@ -135,7 +134,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 		if (!sapi_module.phpinfo_as_text) {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
-			php_strtolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
+			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
 			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);

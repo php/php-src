@@ -48,7 +48,6 @@
 #include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
@@ -1013,7 +1012,8 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
 		}
-		docref = php_strtolower(docref_buf, doclen);
+		zend_str_tolower(docref_buf, doclen);
+		docref = docref_buf;
 	}
 
 	/* we have a docref for a function AND
