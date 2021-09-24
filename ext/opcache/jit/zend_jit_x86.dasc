@@ -12637,6 +12637,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
 	uint32_t res_info = RES_INFO();
+	bool type_loaded = 0;
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
@@ -12725,6 +12726,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		|	mov edx, dword [FCARG1a + r0 + 8]
 		|	IF_UNDEF dl, >5
 		|	add FCARG1a, r0
+		type_loaded = 1;
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, 0);
 		if (opline->opcode == ZEND_FETCH_OBJ_W
 		 && (!ce ||	ce_is_instanceof || (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS))) {
@@ -12774,7 +12776,6 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, prop_info->offset);
-		|	mov edx, dword [FCARG1a + prop_info->offset + 8]
 		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 			if (opline->opcode == ZEND_FETCH_OBJ_W || !(res_info & MAY_BE_GUARD) || !JIT_G(current_frame)) {
 				/* perform IS_UNDEF check only after result type guard (during deoptimization) */
@@ -12784,12 +12785,20 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				if (!exit_addr) {
 					return 0;
 				}
+				type_loaded = 1;
+				|	mov edx, dword [FCARG1a + prop_info->offset + 8]
 				|	IF_UNDEF dl, &exit_addr
 			}
 		} else {
+			type_loaded = 1;
+			|	mov edx, dword [FCARG1a + prop_info->offset + 8]
 			|	IF_UNDEF dl, >5
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
+			if (!type_loaded) {
+				type_loaded = 1;
+				|	mov edx, dword [FCARG1a + prop_info->offset + 8]
+			}
 			|	IF_NOT_TYPE dl, IS_OBJECT, >4
 			|	GET_ZVAL_PTR r0, prop_addr
 			|	GC_ADDREF r0
@@ -12812,6 +12821,10 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				if ((ZEND_TYPE_FULL_MASK(prop_info->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+					if (!type_loaded) {
+						type_loaded = 1;
+						|	mov edx, dword [FCARG1a + prop_info->offset + 8]
+					}
 					|	cmp dl, IS_FALSE
 					|	jle >1
 					|.cold_code
@@ -12826,6 +12839,10 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 					|.code
 				}
 			} else if (flags == ZEND_FETCH_REF) {
+				if (!type_loaded) {
+					type_loaded = 1;
+					|	mov edx, dword [FCARG1a + prop_info->offset + 8]
+				}
 				|	IF_TYPE dl, IS_REFERENCE, >1
 				if (ce && ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 					|	LOAD_ADDR FCARG2a, prop_info
@@ -12895,6 +12912,8 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 			}
 
+			type = concrete_type(res_info);
+
 			if (prop_type != IS_UNKNOWN
 			 && prop_type != IS_UNDEF
 			 && prop_type != IS_REFERENCE
@@ -12916,19 +12935,32 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 					return 0;
 				}
 
+				if (!type_loaded) {
+					type_loaded = 1;
+					|	mov edx, dword [FCARG1a + prop_info->offset + 8]
+				}
 				|	// ZVAL_DEREF()
 				|	IF_NOT_TYPE dl, IS_REFERENCE, >1
 				|	GET_Z_PTR r0, r0
 				|	add r0, offsetof(zend_reference, val)
+				if (type >= IS_STRING) {
+					|	GET_ZVAL_TYPE_INFO edx, val_addr
+				}
 			}
 			res_info &= ~MAY_BE_GUARD;
 			ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
-			type = concrete_type(res_info);
 			if (type < IS_STRING) {
 				|1:
-				|	IF_NOT_ZVAL_TYPE val_addr, type, &exit_addr
+				if (type_loaded) {
+					|	IF_NOT_TYPE dl, type, &exit_addr
+				} else {
+					|	IF_NOT_ZVAL_TYPE val_addr, type, &exit_addr
+				}
 			} else {
-				|	GET_ZVAL_TYPE_INFO edx, val_addr
+				if (!type_loaded) {
+					type_loaded = 1;
+					|	GET_ZVAL_TYPE_INFO edx, val_addr
+				}
 				|1:
 				|	IF_NOT_TYPE dl, type, &exit_addr
 			}
