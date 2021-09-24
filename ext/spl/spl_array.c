@@ -925,7 +925,6 @@ static int spl_array_next(spl_array_object *intern) /* {{{ */
 
 static void spl_array_it_dtor(zend_object_iterator *iter) /* {{{ */
 {
-	zend_user_it_invalidate_current(iter);
 	zval_ptr_dtor(&iter->data);
 }
 /* }}} */
@@ -962,7 +961,6 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
 	HashTable *aht = spl_array_get_hash_table(object);
-	zend_user_it_invalidate_current(iter);
 	spl_array_next_ex(object, aht);
 }
 /* }}} */
@@ -983,8 +981,7 @@ static void spl_array_rewind(spl_array_object *intern) /* {{{ */
 static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
-		zend_user_it_invalidate_current(iter);
-		spl_array_rewind(object);
+	spl_array_rewind(object);
 }
 /* }}} */
 
@@ -1056,15 +1053,13 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
-	zend_iterator_init(&iterator->it);
+	zend_object_iterator *iterator = emalloc(sizeof(zend_object_iterator));
+	zend_iterator_init(iterator);
 
-	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
-	iterator->it.funcs = &spl_array_it_funcs;
-	iterator->ce = ce;
-	ZVAL_UNDEF(&iterator->value);
+	ZVAL_OBJ_COPY(&iterator->data, Z_OBJ_P(object));
+	iterator->funcs = &spl_array_it_funcs;
 
-	return &iterator->it;
+	return iterator;
 }
 /* }}} */
 
