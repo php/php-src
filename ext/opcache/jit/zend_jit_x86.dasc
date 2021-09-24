@@ -8822,7 +8822,7 @@ static int zend_jit_stack_check(dasm_State **Dst, const zend_op *opline, uint32_
 	return 1;
 }
 
-static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_function *func, bool is_closure, bool use_this, int checked_stack)
+static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_function *func, bool is_closure, bool delayed_fetch_this, int checked_stack)
 {
 	uint32_t used_stack;
 	bool stack_check = 1;
@@ -8965,7 +8965,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 		|	// Z_PTR(call->This) = obj;
 		|	mov r1, aword T1
 		|	mov aword EX:RX->This.value.ptr, r1
-	    if (opline->op1_type == IS_UNUSED || use_this) {
+	    if (opline->op1_type == IS_UNUSED || delayed_fetch_this) {
 			|	// call->call_info |= ZEND_CALL_HAS_THIS;
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				|	mov dword EX:RX->This.u1.type_info, ZEND_CALL_HAS_THIS
@@ -9252,12 +9252,13 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
                                      uint32_t              op1_info,
                                      zend_jit_addr         op1_addr,
                                      zend_class_entry     *ce,
-                                     bool             ce_is_instanceof,
-                                     bool             use_this,
+                                     bool                  ce_is_instanceof,
+                                     bool                  on_this,
+                                     bool                  delayed_fetch_this,
                                      zend_class_entry     *trace_ce,
                                      zend_jit_trace_rec   *trace,
                                      int                   checked_stack,
-                                     bool             polymorphic_side_trace)
+                                     bool                  polymorphic_side_trace)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);
 	zend_call_info *call_info = NULL;
@@ -9282,7 +9283,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	if (polymorphic_side_trace) {
 		/* function is passed in r0 from parent_trace */
 	} else {
-		if (opline->op1_type == IS_UNUSED || use_this) {
+		if (on_this) {
 			zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 
 			|	GET_ZVAL_PTR FCARG1a, this_addr
@@ -9320,7 +9321,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 						|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 					}
 					|	SET_EX_OPLINE opline, r0
-					if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+					if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this) {
 						|	EXT_CALL zend_jit_invalid_method_call_tmp, r0
 					} else {
 						|	EXT_CALL zend_jit_invalid_method_call, r0
@@ -9367,7 +9368,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|	push r0
 		|.endif
 		|	SET_EX_OPLINE opline, r0
-		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this) {
 			|	EXT_CALL zend_jit_find_method_tmp_helper, r0
 		} else {
 			|	EXT_CALL zend_jit_find_method_helper, r0
@@ -9450,7 +9451,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|	sub r4, 12
 		|	push opline->extended_value
 		|.endif
-		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !use_this) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this) {
 			|	EXT_CALL zend_jit_push_static_metod_call_frame_tmp, r0
 		} else {
 			|	EXT_CALL zend_jit_push_static_metod_call_frame, r0
@@ -9458,7 +9459,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
-		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR) && !use_this)) {
+		if ((opline->op1_type & (IS_VAR|IS_TMP_VAR) && !delayed_fetch_this)) {
 			|	test r0, r0
 			|	jz ->exception_handler
 		}
@@ -9471,7 +9472,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 	}
 
 	if (!func || (func->common.fn_flags & ZEND_ACC_STATIC) == 0) {
-		if (!zend_jit_push_call_frame(Dst, opline, NULL, func, 0, use_this, checked_stack)) {
+		if (!zend_jit_push_call_frame(Dst, opline, NULL, func, 0, delayed_fetch_this, checked_stack)) {
 			return 0;
 		}
 	}
@@ -12619,11 +12620,12 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
                               const zend_ssa_op    *ssa_op,
                               uint32_t              op1_info,
                               zend_jit_addr         op1_addr,
-                              bool             op1_indirect,
+                              bool                  op1_indirect,
                               zend_class_entry     *ce,
-                              bool             ce_is_instanceof,
-                              bool             use_this,
-                              bool             op1_avoid_refcounting,
+                              bool                  ce_is_instanceof,
+                              bool                  on_this,
+                              bool                  delayed_fetch_this,
+                              bool                  op1_avoid_refcounting,
                               zend_class_entry     *trace_ce,
                               uint8_t               prop_type,
                               int                   may_throw)
@@ -12641,9 +12643,9 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
-	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, Z_STR_P(member), on_this, op_array->filename);
 
-	if (opline->op1_type == IS_UNUSED || use_this) {
+	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (opline->op1_type == IS_VAR
@@ -12680,12 +12682,20 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(op_array, trace_ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, Z_STR_P(member), on_this, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
 			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
-				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+				if (on_this && JIT_G(current_frame)
+				 && TRACE_FRAME_IS_THIS_CLASS_CHECKED(JIT_G(current_frame))) {
+					ZEND_ASSERT(JIT_G(current_frame)->ce == ce);
+				} else if (zend_jit_class_guard(Dst, opline, ce)) {
+					if (on_this && JIT_G(current_frame)) {
+						JIT_G(current_frame)->ce = ce;
+						TRACE_FRAME_SET_THIS_CLASS_CHECKED(JIT_G(current_frame));
+					}
+				} else {
 					return 0;
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
@@ -12869,7 +12879,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
 
 			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
-			 && !use_this
+			 && !delayed_fetch_this
 			 && !op1_avoid_refcounting) {
 				flags = ZEND_JIT_EXIT_FREE_OP1;
 			}
@@ -13012,7 +13022,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	|.code;
 	|9: // END
-	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
 		if (opline->op1_type == IS_VAR
 		 && opline->opcode == ZEND_FETCH_OBJ_W
 		 && (op1_info & MAY_BE_RC1)) {
@@ -13053,10 +13063,11 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
                                const zend_ssa_op    *ssa_op,
                                uint32_t              op1_info,
                                zend_jit_addr         op1_addr,
-                               bool             op1_indirect,
+                               bool                  op1_indirect,
                                zend_class_entry     *ce,
-                               bool             ce_is_instanceof,
-                               bool             use_this,
+                               bool                  ce_is_instanceof,
+                               bool                  on_this,
+                               bool                  delayed_fetch_this,
                                zend_class_entry     *trace_ce,
                                uint8_t               prop_type,
                                int                   may_throw)
@@ -13080,9 +13091,9 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
-	if (opline->op1_type == IS_UNUSED || use_this) {
+	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (opline->op1_type == IS_VAR
@@ -13128,12 +13139,20 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, on_this, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
 			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
-				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+				if (on_this && JIT_G(current_frame)
+				 && TRACE_FRAME_IS_THIS_CLASS_CHECKED(JIT_G(current_frame))) {
+					ZEND_ASSERT(JIT_G(current_frame)->ce == ce);
+				} else if (zend_jit_class_guard(Dst, opline, ce)) {
+					if (on_this && JIT_G(current_frame)) {
+						JIT_G(current_frame)->ce = ce;
+						TRACE_FRAME_SET_THIS_CLASS_CHECKED(JIT_G(current_frame));
+					}
+				} else {
 					return 0;
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
@@ -13439,7 +13458,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	}
 
 	|9:
-	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 	}
 
@@ -13461,10 +13480,11 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
                                   zend_jit_addr         op1_addr,
                                   uint32_t              val_info,
                                   zend_ssa_range       *val_range,
-                                  bool             op1_indirect,
+                                  bool                  op1_indirect,
                                   zend_class_entry     *ce,
-                                  bool             ce_is_instanceof,
-                                  bool             use_this,
+                                  bool                  ce_is_instanceof,
+                                  bool                  on_this,
+                                  bool                  delayed_fetch_this,
                                   zend_class_entry     *trace_ce,
                                   uint8_t               prop_type,
                                   int                   may_throw)
@@ -13486,9 +13506,9 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
-	if (opline->op1_type == IS_UNUSED || use_this) {
+	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (opline->op1_type == IS_VAR
@@ -13543,12 +13563,20 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, on_this, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
 			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
-				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+				if (on_this && JIT_G(current_frame)
+				 && TRACE_FRAME_IS_THIS_CLASS_CHECKED(JIT_G(current_frame))) {
+					ZEND_ASSERT(JIT_G(current_frame)->ce == ce);
+				} else if (zend_jit_class_guard(Dst, opline, ce)) {
+					if (on_this && JIT_G(current_frame)) {
+						JIT_G(current_frame)->ce = ce;
+						TRACE_FRAME_SET_THIS_CLASS_CHECKED(JIT_G(current_frame));
+					}
+				} else {
 					return 0;
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
@@ -13792,7 +13820,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 	}
 
 	|9:
-	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 	}
 
@@ -13813,10 +13841,11 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
                                uint32_t              op1_info,
                                zend_jit_addr         op1_addr,
                                uint32_t              val_info,
-                               bool             op1_indirect,
+                               bool                  op1_indirect,
                                zend_class_entry     *ce,
-                               bool             ce_is_instanceof,
-                               bool             use_this,
+                               bool                  ce_is_instanceof,
+                               bool                  on_this,
+                               bool                  delayed_fetch_this,
                                zend_class_entry     *trace_ce,
                                uint8_t               prop_type,
                                int                   may_throw)
@@ -13840,9 +13869,9 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	member = RT_CONSTANT(opline, opline->op2);
 	ZEND_ASSERT(Z_TYPE_P(member) == IS_STRING && Z_STRVAL_P(member)[0] != '\0');
 	name = Z_STR_P(member);
-	prop_info = zend_get_known_property_info(op_array, ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+	prop_info = zend_get_known_property_info(op_array, ce, name, on_this, op_array->filename);
 
-	if (opline->op1_type == IS_UNUSED || use_this) {
+	if (on_this) {
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (opline->op1_type == IS_VAR
@@ -13896,12 +13925,20 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	}
 
 	if (!prop_info && trace_ce && (trace_ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		prop_info = zend_get_known_property_info(op_array, trace_ce, name, opline->op1_type == IS_UNUSED, op_array->filename);
+		prop_info = zend_get_known_property_info(op_array, trace_ce, name, on_this, op_array->filename);
 		if (prop_info) {
 			ce = trace_ce;
 			ce_is_instanceof = 0;
 			if (!(op1_info & MAY_BE_CLASS_GUARD)) {
-				if (!zend_jit_class_guard(Dst, opline, trace_ce)) {
+				if (on_this && JIT_G(current_frame)
+				 && TRACE_FRAME_IS_THIS_CLASS_CHECKED(JIT_G(current_frame))) {
+					ZEND_ASSERT(JIT_G(current_frame)->ce == ce);
+				} else if (zend_jit_class_guard(Dst, opline, ce)) {
+					if (on_this && JIT_G(current_frame)) {
+						JIT_G(current_frame)->ce = ce;
+						TRACE_FRAME_SET_THIS_CLASS_CHECKED(JIT_G(current_frame));
+					}
+				} else {
 					return 0;
 				}
 				if (ssa->var_info && ssa_op->op1_use >= 0) {
@@ -14110,7 +14147,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	}
 
 	|9:
-	if (opline->op1_type != IS_UNUSED && !use_this && !op1_indirect) {
+	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
 		|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 	}
 
