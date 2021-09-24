@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing).
     (cmb, Nikita)
 
+- Opcache:
+  . Fixed bug #81472 (Cannot support large linux major/minor device number when
+    read /proc/self/maps). (Lin Yang)
+
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
