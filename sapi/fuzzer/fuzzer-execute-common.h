@@ -138,6 +138,13 @@ ZEND_ATTRIBUTE_UNUSED char *get_opcache_path(void) {
 		ZEND_ASSERT(0 && "Failed to get binary path");
 		return NULL;
 	}
+
+	/* Get basename. */
+	char *last_sep = strrchr(path, '/');
+	if (last_sep) {
+		*last_sep = '\0';
+	}
+
 	strlcat(path, "/modules/opcache.so", sizeof(path));
 	return realpath(path, NULL);
 }

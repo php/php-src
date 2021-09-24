@@ -53,7 +53,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	char *opcache_path = get_opcache_path();
 	assert(opcache_path && "Failed to determine opcache path");
 
-	char ini_buf[256];
+	char ini_buf[512];
 	snprintf(ini_buf, sizeof(ini_buf),
 		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
