@@ -332,20 +332,23 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
 			return SUCCESS;
 		}
-		/* Otherwise get_iterator was inherited from the parent by default. */
-	}
 
-	if (class_type->parent && (class_type->parent->ce_flags & ZEND_ACC_REUSE_GET_ITERATOR)) {
-		/* Keep the inherited get_iterator handler. */
-		class_type->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
-	} else {
-		class_type->get_iterator = zend_user_it_get_iterator;
+		/* None of the Iterator methods have been overwritten, use inherited get_iterator(). */
+		if (zf_rewind->common.scope != class_type && zf_valid->common.scope != class_type &&
+				zf_key->common.scope != class_type && zf_current->common.scope != class_type &&
+				zf_next->common.scope != class_type) {
+			return SUCCESS;
+		}
+
+		/* One of the Iterator methods has been overwritten,
+		 * switch to zend_user_it_get_new_iterator. */
 	}
 
 	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
 	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
 		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
 		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+	class_type->get_iterator = zend_user_it_get_iterator;
 	class_type->iterator_funcs_ptr = funcs_ptr;
 
 	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
