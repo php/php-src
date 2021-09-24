@@ -706,21 +706,15 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 	spl_filesystem_object *intern;
 	zend_string *path;
 	int parsed;
-	zend_long flags;
+	zend_long flags = (ctor_flags & ~DIT_CTOR_FLAGS);
 	zend_error_handling error_handling;
 
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_FLAGS)) {
-		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
+		flags |= SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &path, &flags);
 	} else {
-		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
+		flags |= SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "P", &path);
-	}
-	if (SPL_HAS_FLAG(ctor_flags, SPL_FILE_DIR_SKIPDOTS)) {
-		flags |= SPL_FILE_DIR_SKIPDOTS;
-	}
-	if (SPL_HAS_FLAG(ctor_flags, SPL_FILE_DIR_UNIXPATHS)) {
-		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
 		RETURN_THROWS();
@@ -1763,11 +1757,12 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+	bool skip_dots = SPL_HAS_FLAG(object->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	object->u.dir.index++;
 	do {
 		spl_filesystem_dir_read(object);
-	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
+	} while (skip_dots && spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (object->file_name) {
 		zend_string_release(object->file_name);
 		object->file_name = NULL;
@@ -1784,6 +1779,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+	bool skip_dots = SPL_HAS_FLAG(object->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
@@ -1791,7 +1787,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter)
 	}
 	do {
 		spl_filesystem_dir_read(object);
-	} while (spl_filesystem_is_dot(object->u.dir.entry.d_name));
+	} while (skip_dots && spl_filesystem_is_dot(object->u.dir.entry.d_name));
 	if (!Z_ISUNDEF(iterator->current)) {
 		zval_ptr_dtor(&iterator->current);
 		ZVAL_UNDEF(&iterator->current);
