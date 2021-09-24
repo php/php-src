@@ -28,7 +28,6 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
-#include "ext/standard/php_string.h"
 #include "zend_smart_string.h"
 
 #ifndef DEBUG_FILE_UPLOAD
@@ -714,7 +713,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 		int content_type_len = (int)strlen(content_type_dup);
 		char *content_type_lcase = estrndup(content_type_dup, content_type_len);
 
-		php_strtolower(content_type_lcase, content_type_len);
+		zend_str_tolower(content_type_lcase, content_type_len);
 		boundary = strstr(content_type_lcase, "boundary");
 		if (boundary) {
 			boundary = content_type_dup + (boundary - content_type_lcase);

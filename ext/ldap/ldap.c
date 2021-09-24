@@ -45,7 +45,6 @@
 #define __STDC__ 1
 #endif
 
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
 #ifdef HAVE_LDAP_SASL
@@ -2012,7 +2011,8 @@ PHP_FUNCTION(ldap_get_entries)
 			ldap_value_free_len(ldap_value);
 
 			attr_len = strlen(attribute);
-			zend_hash_str_update(Z_ARRVAL(tmp1), php_strtolower(attribute, attr_len), attr_len, &tmp2);
+			zend_str_tolower(attribute, attr_len);
+			zend_hash_str_update(Z_ARRVAL(tmp1), attribute, attr_len, &tmp2);
 			add_index_string(&tmp1, num_attrib, attribute);
 
 			num_attrib++;

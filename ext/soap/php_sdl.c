@@ -1128,7 +1128,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						char *tmp = estrdup(function->functionName);
 						int  len = strlen(tmp);
 
-						if (zend_hash_str_add_ptr(&ctx.sdl->functions, php_strtolower(tmp, len), len, function) == NULL) {
+						zend_str_tolower(tmp, len);
+						if (zend_hash_str_add_ptr(&ctx.sdl->functions, tmp, len, function) == NULL) {
 							zend_hash_next_index_insert_ptr(&ctx.sdl->functions, function);
 						}
 						efree(tmp);
@@ -1139,7 +1140,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 							}
 							tmp = estrdup(function->requestName);
 							len = strlen(tmp);
-							zend_hash_str_add_ptr(ctx.sdl->requests, php_strtolower(tmp, len), len, function);
+							zend_str_tolower(tmp, len);
+							zend_hash_str_add_ptr(ctx.sdl->requests, tmp, len, function);
 							efree(tmp);
 						}
 					}

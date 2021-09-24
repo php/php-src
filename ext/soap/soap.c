@@ -4070,7 +4070,7 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name) /* {{{
 
 	int len = strlen(function_name);
 	char *str = estrndup(function_name,len);
-	php_strtolower(str,len);
+	zend_str_tolower(str,len);
 	if (sdl != NULL) {
 		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, str, len)) != NULL) {
 			efree(str);
