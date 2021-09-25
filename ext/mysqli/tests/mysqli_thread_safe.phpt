@@ -1,9 +1,7 @@
 --TEST--
 mysqli_thread_safe()
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
     if (!is_bool($tmp = mysqli_thread_safe()))

@@ -1,7 +1,7 @@
 --TEST--
 finfo_file(): Testing file names
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 
@@ -16,18 +16,12 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-try {
-    var_dump(finfo_file($fp, NULL));
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
 var_dump(finfo_file($fp, '.'));
 var_dump(finfo_file($fp, '&'));
 
 ?>
 --EXPECTF--
 finfo_file(): Argument #1 ($finfo) must not contain any null bytes
-finfo_file(): Argument #1 ($finfo) cannot be empty
 finfo_file(): Argument #1 ($finfo) cannot be empty
 string(9) "directory"
 

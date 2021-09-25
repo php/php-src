@@ -42,11 +42,11 @@ $arrays = array (
 
        // array with mixed keys
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-              133 => "int", 444.432 => "float",
+              133 => "int",
              @$unset_var => "unset", $heredoc => "heredoc")
 );
 
-// array to be passsed to $arr2 argument
+// array to be passed to $arr2 argument
 $arr2 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
               "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
               "pen\n" => 33,  133 => "int");

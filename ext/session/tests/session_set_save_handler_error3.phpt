@@ -4,6 +4,8 @@ Test session_set_save_handler() function : error functionality
 session.save_path=
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

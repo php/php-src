@@ -44,11 +44,11 @@ You can use the following macro to check the extension API version for compatibi
 
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..  */
-#define ZEND_EXTENSION_API_NO	420201009
+#define ZEND_EXTENSION_API_NO	420210903
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
-	char *build_id;
+	const char *build_id;
 } zend_extension_version_info;
 
 #define ZEND_EXTENSION_BUILD_ID "API" ZEND_TOSTR(ZEND_EXTENSION_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA

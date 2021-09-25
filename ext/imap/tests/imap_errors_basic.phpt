@@ -1,5 +1,7 @@
 --TEST--
 Test imap_errors() function : anonymous user not supported
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once __DIR__.'/setup/skipif.inc';

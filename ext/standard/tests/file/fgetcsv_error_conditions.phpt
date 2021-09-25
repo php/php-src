@@ -27,23 +27,23 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-echo 'fgetcsv() with delimiter as NULL' . \PHP_EOL;
+echo 'fgetcsv() with delimiter as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, NULL, $enclosure) );
+    var_dump( fgetcsv($file_handle, $length, '', $enclosure) );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-echo 'fgetcsv() with enclosure as NULL' . \PHP_EOL;
+echo 'fgetcsv() with enclosure as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, $delimiter, NULL) );
+    var_dump( fgetcsv($file_handle, $length, $delimiter, '') );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-echo 'fgetcsv() with delimiter & enclosure as NULL' . \PHP_EOL;
+echo 'fgetcsv() with delimiter & enclosure as empty string' . \PHP_EOL;
 try {
-    var_dump( fgetcsv($file_handle, $length, NULL, NULL) );
+    var_dump( fgetcsv($file_handle, $length, '', '') );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -53,9 +53,9 @@ fgetcsv() with negative length
 fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
-fgetcsv() with delimiter as NULL
+fgetcsv() with delimiter as empty string
 fgetcsv(): Argument #3 ($separator) must be a single character
-fgetcsv() with enclosure as NULL
+fgetcsv() with enclosure as empty string
 fgetcsv(): Argument #4 ($enclosure) must be a single character
-fgetcsv() with delimiter & enclosure as NULL
+fgetcsv() with delimiter & enclosure as empty string
 fgetcsv(): Argument #3 ($separator) must be a single character

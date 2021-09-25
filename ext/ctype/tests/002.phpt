@@ -1,7 +1,7 @@
 --TEST--
 ctype on strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ function ctype_test_002($function) {
     // test portable POSIX characters 0..127
     for ($a=0;$a<128;$a++) {
         $c = chr($a);
-        if($function($a)) $n1++;
+        if($function($c)) $n1++;
         if($function("$c$c$c")) $n2++;
         if($function("1-$c$c$c-x")) $n3++;
     }

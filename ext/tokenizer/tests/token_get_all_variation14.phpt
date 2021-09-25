@@ -1,7 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - invalid token values
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 /*

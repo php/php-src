@@ -1,8 +1,9 @@
 --TEST--
 References to result sets - mysqlnd (no copies but references)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 if (!$IS_MYSQLND)
@@ -55,7 +56,9 @@ array(1) refcount(%d){
   [0]=>
   array(4) refcount(%d){
     ["row_ref"]=>
-    &NULL
+    reference refcount(2) {
+      NULL
+    }
     ["row_copy"]=>
     array(2) refcount(1){
       ["id"]=>
@@ -64,7 +67,9 @@ array(1) refcount(%d){
       string(1) "a" interned
     }
     ["id_ref"]=>
-    string(1) "1" interned
+    reference refcount(1) {
+      string(1) "1" interned
+    }
     ["id_copy"]=>
     string(1) "1" interned
   }
@@ -73,7 +78,9 @@ array(2) refcount(%d){
   [0]=>
   array(4) refcount(%d){
     ["row_ref"]=>
-    &NULL
+    reference refcount(2) {
+      NULL
+    }
     ["row_copy"]=>
     array(2) refcount(%d){
       ["id"]=>
@@ -82,18 +89,24 @@ array(2) refcount(%d){
       string(1) "a" interned
     }
     ["id_ref"]=>
-    string(1) "1" interned
+    reference refcount(1) {
+      string(1) "1" interned
+    }
     ["id_copy"]=>
     string(1) "1" interned
   }
   [1]=>
   array(5) refcount(%d){
     ["row_ref"]=>
-    &array(2) refcount(%d){
-      ["id"]=>
-      &string(1) "2" interned
-      ["label"]=>
-      string(1) "b" interned
+    reference refcount(2) {
+      array(2) refcount(1){
+        ["id"]=>
+        reference refcount(2) {
+          string(1) "2" interned
+        }
+        ["label"]=>
+        string(1) "b" interned
+      }
     }
     ["row_copy"]=>
     array(2) refcount(%d){
@@ -103,7 +116,9 @@ array(2) refcount(%d){
       string(1) "b" interned
     }
     ["id_ref"]=>
-    &string(1) "2" interned
+    reference refcount(2) {
+      string(1) "2" interned
+    }
     ["id_copy"]=>
     string(1) "2" interned
     ["id_copy_mod"]=>

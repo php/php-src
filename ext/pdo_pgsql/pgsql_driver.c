@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -37,7 +37,7 @@
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	register int i = strlen(message)-1;
+	size_t i = strlen(message)-1;
 	char *tmp;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
@@ -308,7 +308,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	}
 	H->pgoid = PQoidValue(res);
 	if (qs == PGRES_COMMAND_OK) {
-		ZEND_ATOL(ret, PQcmdTuples(res));
+		ret = ZEND_ATOL(PQcmdTuples(res));
 	} else {
 		ret = Z_L(0);
 	}
@@ -724,8 +724,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 		PQclear(pgsql_result);
 		while ((buf = php_stream_get_line(stream, NULL, 0, &line_len)) != NULL) {
 			if (PQputCopyData(H->server, buf, line_len) != 1) {
-	                        efree(buf);
-        	                pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+				efree(buf);
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 				php_stream_close(stream);
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
@@ -1154,14 +1154,20 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 
 static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
-	bool bval = zval_get_long(val)? 1 : 0;
+	bool bval;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			H->emulate_prepares = bval;
 			return true;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			H->disable_prepares = bval;
 			return true;
 		default:

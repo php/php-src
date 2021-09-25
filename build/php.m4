@@ -257,8 +257,12 @@ dnl Choose the right compiler/flags/etc. for the source-file.
         *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $ac_inc $b_cxx_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_cxx_post" ;;
       esac
 
+dnl Generate Makefiles with dependencies
+      ac_comp="$ac_comp -MMD -MF $ac_bdir$ac_obj.dep -MT $ac_bdir[$]ac_obj.lo"
+
 dnl Create a rule for the object/source combo.
     cat >>Makefile.objects<<EOF
+-include $ac_bdir[$]ac_obj.dep
 $ac_bdir[$]ac_obj.lo: $ac_srcdir[$]ac_src
 	$ac_comp
 EOF
@@ -1473,7 +1477,15 @@ int main() {
 ], [
   cookie_io_functions_use_off64_t=no
 ], [
-  cookie_io_functions_use_off64_t=no
+  dnl Cross compilation.
+  case $host_alias in
+    *linux*)
+      cookie_io_functions_use_off64_t=yes
+      ;;
+    *)
+      cookie_io_functions_use_off64_t=no
+      ;;
+  esac
 ])
 
     else
@@ -1578,7 +1590,10 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[found=no])
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[
+      dnl Cross compilation.
+      found=yes
+    ])
     LIBS=$ac_libs
   fi
 
@@ -1870,6 +1885,30 @@ AC_DEFUN([PHP_PROG_RE2C],[
   esac
 
   PHP_SUBST(RE2C)
+])
+
+AC_DEFUN([PHP_PROG_PHP],[
+  AC_CHECK_PROG(PHP, php, php)
+
+  if test -n "$PHP"; then
+    AC_MSG_CHECKING([for php version])
+    php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2)
+    if test -z "$php_version"; then
+      php_version=0.0.0
+    fi
+    ac_IFS=$IFS; IFS="."
+    set $php_version
+    IFS=$ac_IFS
+    php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+    dnl Minimum supported version for gen_stubs.php is PHP 7.1.
+    if test "$php_version_num" -lt 70100; then
+      AC_MSG_RESULT([$php_version (too old)])
+      unset PHP
+    else
+      AC_MSG_RESULT([$php_version (ok)])
+    fi
+  fi
+  PHP_SUBST(PHP)
 ])
 
 dnl ----------------------------------------------------------------------------
@@ -2270,7 +2309,14 @@ int main()
     ],[
       ac_cv_write_stdout=no
     ],[
-      ac_cv_write_stdout=no
+      case $host_alias in
+        *linux*)
+          ac_cv_write_stdout=yes
+          ;;
+        *)
+          ac_cv_write_stdout=no
+          ;;
+      esac
     ])
   ])
   if test "$ac_cv_write_stdout" = "yes"; then

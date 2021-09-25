@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: driver supports SET ROWCOUNT and SELECT @@ROWCOUNT in batch statements
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 
 if (!driver_supports_batch_statements_without_select($db)) die('xfail test will fail with this version of FreeTDS');

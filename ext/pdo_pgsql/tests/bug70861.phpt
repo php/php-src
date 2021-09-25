@@ -1,8 +1,10 @@
 --TEST--
 Bug #70861 Segmentation fault in pdo_parse_params() during Drupal 8 test suite
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();

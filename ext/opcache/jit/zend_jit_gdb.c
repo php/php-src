@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -20,10 +20,10 @@
    +----------------------------------------------------------------------+
 */
 
+
 #define HAVE_GDB
 
-#ifdef HAVE_GDB
-
+#include "zend_jit_gdb.h"
 #include "zend_elf.h"
 #include "zend_gdb.h"
 
@@ -92,7 +92,10 @@ enum {
 	DW_REG_8, DW_REG_9, DW_REG_10, DW_REG_11,
 	DW_REG_12, DW_REG_13, DW_REG_14, DW_REG_15,
 	DW_REG_RA,
-	/* TODO: ARM supports? */
+#elif defined(__aarch64__)
+	DW_REG_SP = 31,
+	DW_REG_RA = 30,
+	DW_REG_X29 = 29,
 #else
 #error "Unsupported target architecture"
 #endif
@@ -160,6 +163,8 @@ static const zend_elf_header zend_elfhdr_template = {
 	.machine     = 3,
 #elif defined(__x86_64__)
 	.machine     = 62,
+#elif defined(__aarch64__)
+	.machine     = 183,
 #else
 # error "Unsupported target architecture"
 #endif
@@ -278,24 +283,28 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 	sym->info = ELFSYM_INFO(ELFSYM_BIND_GLOBAL, ELFSYM_TYPE_FUNC);
 }
 
+typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
+typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
+typedef ZEND_SET_ALIGNED(1, uintptr_t unaligned_uintptr_t);
+
 #define SECTALIGN(p, a) \
 	  ((p) = (uint8_t *)(((uintptr_t)(p) + ((a)-1)) & ~(uintptr_t)((a)-1)))
 
 /* Shortcuts to generate DWARF structures. */
 #define DB(x)       (*p++ = (x))
 #define DI8(x)      (*(int8_t *)p = (x), p++)
-#define DU16(x)     (*(uint16_t *)p = (x), p += 2)
-#define DU32(x)     (*(uint32_t *)p = (x), p += 4)
-#define DADDR(x)    (*(uintptr_t *)p = (x), p += sizeof(uintptr_t))
+#define DU16(x)     (*(unaligned_uint16_t *)p = (x), p += 2)
+#define DU32(x)     (*(unaligned_uint32_t *)p = (x), p += 4)
+#define DADDR(x)    (*(unaligned_uintptr_t *)p = (x), p += sizeof(uintptr_t))
 #define DUV(x)      (ctx->p = p, zend_gdbjit_uleb128(ctx, (x)), p = ctx->p)
 #define DSV(x)      (ctx->p = p, zend_gdbjit_sleb128(ctx, (x)), p = ctx->p)
 #define DSTR(str)   (ctx->p = p, zend_gdbjit_strz(ctx, (str)), p = ctx->p)
 #define DALIGNNOP(s)    while ((uintptr_t)p & ((s)-1)) *p++ = DW_CFA_nop
 #define DSECT(name, stmt) \
-	{ uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
+	{ unaligned_uint32_t *szp_##name = (uint32_t *)p; p += 4; stmt \
 		*szp_##name = (uint32_t)((p-(uint8_t *)szp_##name)-4); }
 
-static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
+static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx, uint32_t sp_offset, uint32_t sp_adjustment)
 {
 	uint8_t *p = ctx->p;
 	uint8_t *framep = p;
@@ -309,8 +318,12 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
 		DSV(-(int32_t)sizeof(uintptr_t));              /* Data alignment factor. */
 		DB(DW_REG_RA);                                 /* Return address register. */
 		DB(1); DB(DW_EH_PE_textrel|DW_EH_PE_udata4);   /* Augmentation data. */
+#if defined(__x86_64__) || defined(i386)
 		DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(sizeof(uintptr_t));
 		DB(DW_CFA_offset|DW_REG_RA); DUV(1);
+#elif defined(__aarch64__)
+		DB(DW_CFA_def_cfa); DUV(DW_REG_SP); DUV(0);
+#endif
 		DALIGNNOP(sizeof(uintptr_t));
 	)
 
@@ -320,16 +333,27 @@ static void zend_gdbjit_ehframe(zend_gdbjit_ctx *ctx)
 		DU32(0);                    /* Machine code offset relative to .text. */
 		DU32(ctx->szmcode);         /* Machine code length. */
 		DB(0);                      /* Augmentation data. */
-		DB(DW_CFA_def_cfa_offset); DUV(sizeof(uintptr_t));
-#if defined(__i386__)
-		DB(DW_CFA_advance_loc|3);            /* sub $0xc,%esp */
-		DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
-#elif defined(__x86_64__)
-		DB(DW_CFA_advance_loc|4);            /* sub $0x8,%rsp */
-		DB(DW_CFA_def_cfa_offset); DUV(16);  /* Aligned stack frame size. */
-#else
-# error "Unsupported target architecture"
+		DB(DW_CFA_def_cfa_offset); DUV(sp_offset);
+#if defined(__aarch64__)
+		if (sp_offset) {
+			if (sp_adjustment && sp_adjustment < sp_offset) {
+				DB(DW_CFA_offset|DW_REG_X29); DUV(sp_adjustment / sizeof(uintptr_t));
+				DB(DW_CFA_offset|DW_REG_RA); DUV((sp_adjustment / sizeof(uintptr_t)) - 1);
+			} else {
+				DB(DW_CFA_offset|DW_REG_X29); DUV(sp_offset / sizeof(uintptr_t));
+				DB(DW_CFA_offset|DW_REG_RA); DUV((sp_offset / sizeof(uintptr_t)) - 1);
+			}
+		}
 #endif
+		if (sp_adjustment && sp_adjustment > sp_offset) {
+			DB(DW_CFA_advance_loc|1); DB(DW_CFA_def_cfa_offset); DUV(sp_adjustment);
+#if defined(__aarch64__)
+			if (!sp_offset) {
+				DB(DW_CFA_offset|DW_REG_X29); DUV(sp_adjustment / sizeof(uintptr_t));
+				DB(DW_CFA_offset|DW_REG_RA); DUV((sp_adjustment / sizeof(uintptr_t)) - 1);
+			}
+#endif
+		}
 		DALIGNNOP(sizeof(uintptr_t));
 	)
 
@@ -426,15 +450,18 @@ static void zend_gdbjit_debugline(zend_gdbjit_ctx *ctx)
 
 typedef void (*zend_gdbjit_initf) (zend_gdbjit_ctx *ctx);
 
-static void zend_gdbjit_initsect(zend_gdbjit_ctx *ctx, int sect, zend_gdbjit_initf initf)
+static void zend_gdbjit_initsect(zend_gdbjit_ctx *ctx, int sect)
 {
 	ctx->startp = ctx->p;
 	ctx->obj.sect[sect].ofs = (uintptr_t)((char *)ctx->p - (char *)&ctx->obj);
-	initf(ctx);
+}
+
+static void zend_gdbjit_initsect_done(zend_gdbjit_ctx *ctx, int sect)
+{
 	ctx->obj.sect[sect].size = (uintptr_t)(ctx->p - ctx->startp);
 }
 
-static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx)
+static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx, uint32_t sp_offset, uint32_t sp_adjustment)
 {
 	zend_gdbjit_obj *obj = &ctx->obj;
 
@@ -445,22 +472,24 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx)
 
 	/* Initialize sections. */
 	ctx->p = obj->space;
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_shstrtab, zend_gdbjit_secthdr);
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_strtab, zend_gdbjit_symtab);
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_info, zend_gdbjit_debuginfo);
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_abbrev, zend_gdbjit_debugabbrev);
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_line, zend_gdbjit_debugline);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_shstrtab); zend_gdbjit_secthdr(ctx); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_shstrtab);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_strtab); zend_gdbjit_symtab(ctx); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_strtab);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_info); zend_gdbjit_debuginfo(ctx); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_debug_info);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_abbrev); zend_gdbjit_debugabbrev(ctx); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_debug_abbrev);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_debug_line); zend_gdbjit_debugline(ctx); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_debug_line);
 	SECTALIGN(ctx->p, sizeof(uintptr_t));
-	zend_gdbjit_initsect(ctx, GDBJIT_SECT_eh_frame, zend_gdbjit_ehframe);
+	zend_gdbjit_initsect(ctx, GDBJIT_SECT_eh_frame); zend_gdbjit_ehframe(ctx, sp_offset, sp_adjustment); zend_gdbjit_initsect_done(ctx, GDBJIT_SECT_eh_frame);
 	ctx->objsize = (size_t)((char *)ctx->p - (char *)obj);
 
 	ZEND_ASSERT(ctx->objsize < sizeof(zend_gdbjit_obj));
 }
 
-static int zend_jit_gdb_register(const char    *name,
-                                 const zend_op_array *op_array,
-                                 const void    *start,
-                                 size_t         size)
+int zend_jit_gdb_register(const char    *name,
+                          const zend_op_array *op_array,
+                          const void    *start,
+                          size_t         size,
+                          uint32_t       sp_offset,
+                          uint32_t       sp_adjustment)
 {
 	zend_gdbjit_ctx ctx;
 
@@ -470,18 +499,18 @@ static int zend_jit_gdb_register(const char    *name,
 	ctx.filename = op_array ? ZSTR_VAL(op_array->filename) : "unknown";
 	ctx.lineno = op_array ? op_array->line_start : 0;
 
-	zend_gdbjit_buildobj(&ctx);
+	zend_gdbjit_buildobj(&ctx, sp_offset, sp_adjustment);
 
 	return zend_gdb_register_code(&ctx.obj, ctx.objsize);
 }
 
-static int zend_jit_gdb_unregister(void)
+int zend_jit_gdb_unregister(void)
 {
 	zend_gdb_unregister_all();
 	return 1;
 }
 
-static void zend_jit_gdb_init(void)
+void zend_jit_gdb_init(void)
 {
 #if 0
 	/* This might enable registration of all JIT-ed code, but unfortunately,
@@ -491,5 +520,3 @@ static void zend_jit_gdb_init(void)
 	}
 #endif
 }
-
-#endif

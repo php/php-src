@@ -1,7 +1,7 @@
 --TEST--
 Bug #46048 (SimpleXML top-level @attributes not part of iterator)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml = '

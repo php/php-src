@@ -1,8 +1,9 @@
 --TEST--
 imagecreatefromtga() - basic functionality
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip ext/gd required');
 if (!(imagetypes() & IMG_TGA)) die('skip TGA support required');
 ?>
 --FILE--

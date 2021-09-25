@@ -4,8 +4,8 @@ Bug #72014 (Including a file with anonymous classes multiple times leads to fata
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 file_put_contents(__DIR__ . "/bug72014.annon.php", <<<PHP

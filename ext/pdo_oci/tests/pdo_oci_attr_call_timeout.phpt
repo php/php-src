@@ -1,9 +1,11 @@
 --TEST--
 PDO_OCI: Attribute: Setting and using call timeout
+--EXTENSIONS--
+pdo
+pdo_oci
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 if (strcasecmp(getenv('PDOTEST_USER'), "system") && strcasecmp(getenv('PDOTEST_USER'), "sys")) {

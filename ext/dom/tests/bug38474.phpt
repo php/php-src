@@ -1,8 +1,9 @@
 --TEST--
 Bug #38474 (getAttribute select attribute by order, even when prefixed) (OK to fail with libxml2 < 2.6.2x)
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (version_compare(LIBXML_DOTTED_VERSION, "2.6.20", "<")) {
     print "skip libxml version " . LIBXML_DOTTED_VERSION;
 }

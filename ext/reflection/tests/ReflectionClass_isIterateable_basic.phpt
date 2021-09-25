@@ -7,11 +7,11 @@ Felix De Vliegher <felix.devliegher@gmail.com>, Marc Veldman <marc@ibuildings.nl
 
 class IteratorClass implements Iterator {
     public function __construct() { }
-    public function key() {}
-    public function current() {}
-    function next()	{}
-    function valid() {}
-    function rewind() {}
+    public function key(): mixed {}
+    public function current(): mixed {}
+    function next(): void {}
+    function valid(): bool {}
+    function rewind(): void {}
 }
 class DerivedClass extends IteratorClass {}
 class NonIterator {}

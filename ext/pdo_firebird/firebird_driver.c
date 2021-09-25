@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -429,6 +429,8 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 					return 1;
 				}
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case ttWhite:
 		case ttComment:
@@ -624,8 +626,17 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 	if (result[0] == isc_info_sql_records) {
 		unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
 
+		if (result_size > sizeof(result)) {
+			ret = -1;
+			goto free_statement;
+		}
 		while (result[i] != isc_info_end && i < result_size) {
 			short len = (short)isc_vax_integer(&result[i+1],2);
+			/* bail out on bad len */
+			if (len != 1 && len != 2 && len != 4) {
+				ret = -1;
+				goto free_statement;
+			}
 			if (result[i] != isc_info_req_select_count) {
 				ret += isc_vax_integer(&result[i+3],len);
 			}
@@ -820,11 +831,14 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	bool bval;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			{
-				bool bval = zval_get_long(val)? 1 : 0;
+				if (!pdo_get_bool_param(&bval, val)) {
+					return false;
+				}
 
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
@@ -848,7 +862,10 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 			return true;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			H->fetch_table_names = zval_get_long(val)? 1 : 0;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->fetch_table_names = bval;
 			return true;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
@@ -897,14 +914,16 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 }
 /* }}} */
 
+#define INFO_BUF_LEN 512
+
 /* callback to used to report database server info */
 static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 {
 	if (arg) {
 		if (*(char*)arg) { /* second call */
-			strcat(arg, " ");
+			strlcat(arg, " ", INFO_BUF_LEN);
 		}
-		strcat(arg, s);
+		strlcat(arg, s, INFO_BUF_LEN);
 	}
 }
 /* }}} */
@@ -915,7 +934,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	switch (attr) {
-		char tmp[512];
+		char tmp[INFO_BUF_LEN];
 
 		case PDO_ATTR_AUTOCOMMIT:
 			ZVAL_LONG(val,dbh->auto_commit);
@@ -956,6 +975,8 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);

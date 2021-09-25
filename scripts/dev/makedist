@@ -57,7 +57,7 @@ EXAMPLES:
     scripts/dev/makedist php-7.4.0RC1
 
   Create release packages from a remote Git repository for the tag php-7.4.0:
-    scripts/dev/makedist --remote=git@git.php.net:php-src.git php-7.4.0
+    scripts/dev/makedist --remote=git@github.com:php/php-src.git php-7.4.0
 HELP
       exit
       ;;

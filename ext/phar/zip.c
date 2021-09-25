@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -851,10 +851,10 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 	PHAR_SET_16(perms.size, sizeof(perms) - 4);
 	PHAR_SET_16(perms.perms, entry->flags & PHAR_ENT_PERM_MASK);
 	{
-		uint32_t crc = (uint32_t) ~0;
+		uint32_t crc = (uint32_t) php_crc32_bulk_init();
 		CRC32(crc, perms.perms[0]);
 		CRC32(crc, perms.perms[1]);
-		PHAR_SET_32(perms.crc32, ~crc);
+		PHAR_SET_32(perms.crc32, php_crc32_bulk_end(crc));
 	}
 
 	if (entry->flags & PHAR_ENT_COMPRESSED_GZ) {
@@ -882,7 +882,6 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 
 	/* do extra field for perms later */
 	if (entry->is_modified) {
-		uint32_t loc;
 		php_stream_filter *filter;
 		php_stream *efp;
 
@@ -913,13 +912,11 @@ static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ 
 		}
 
 		efp = phar_get_efp(entry, 0);
-		newcrc32 = ~0;
+		newcrc32 = php_crc32_bulk_init();
 
-		for (loc = 0;loc < entry->uncompressed_filesize; ++loc) {
-			CRC32(newcrc32, php_stream_getc(efp));
-		}
+		php_crc32_stream_bulk_update(&newcrc32, efp, entry->uncompressed_filesize);
 
-		entry->crc32 = ~newcrc32;
+		entry->crc32 = php_crc32_bulk_end(newcrc32);
 		PHAR_SET_32(central.uncompsize, entry->uncompressed_filesize);
 		PHAR_SET_32(local.uncompsize, entry->uncompressed_filesize);
 
@@ -1423,7 +1420,7 @@ fperror:
 
 	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
-		phar->sig_flags = PHAR_SIG_SHA1;
+		phar->sig_flags = PHAR_SIG_SHA256;
 	}
 	if (phar->sig_flags) {
 		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest) + 1);

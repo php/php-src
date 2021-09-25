@@ -1,7 +1,7 @@
 --TEST--
 Combination of strip & sanitize filters
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $var = 'XYZ< script>alert(/ext/filter+bypass/);< /script>ABC';
@@ -14,6 +14,9 @@ script>alert(/ext/filter+bypass/);<
 $a = filter_var($var, FILTER_SANITIZE_STRING, array("flags" => FILTER_FLAG_STRIP_LOW));
 echo $a . "\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 XYZalert(/ext/filter+bypass/);ABC
+
+Deprecated: Constant FILTER_SANITIZE_STRING is deprecated in %s on line %d
 XYZalert(/ext/filter+bypass/);ABC

@@ -1,22 +1,28 @@
 --TEST--
 PDO Common: Bug #44159: SQLite variant
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) die('skip PDO SQLite not available');
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 $pdo = new PDO("sqlite:".__DIR__."/foo.db");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
-var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, NULL));
+try {
+    var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, NULL));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, 1));
-var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, 'nonsense'));
+try {
+    var_dump($pdo->setAttribute(PDO::NULL_TO_STRING, 'nonsense'));
+} catch (\TypeError $e) {
+    echo $e->getMessage(), \PHP_EOL;
+}
 
 @unlink(__DIR__."/foo.db");
 
 ?>
 --EXPECT--
+Attribute value must be of type int for selected attribute, null given
 bool(true)
-bool(true)
-bool(true)
+Attribute value must be of type int for selected attribute, string given

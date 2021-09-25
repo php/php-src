@@ -89,7 +89,7 @@ $filename = "$dirname/symlink_link_linkinfo_is_link_variation9.tmp";
 unlink($filename);
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking lstat() on soft link ***
 bool(true)
 linkinfo() returns integer !== -1: bool(true)

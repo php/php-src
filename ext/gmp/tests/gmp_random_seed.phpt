@@ -1,7 +1,8 @@
 --TEST--
 gmp_random_seed() basic tests
+--EXTENSIONS--
+gmp
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php

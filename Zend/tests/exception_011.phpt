@@ -7,7 +7,11 @@ assert.exception=1
 <?php
 
 define ("XXXXX", 1);
-assert(false);
+try {
+    assert(false);
+} catch (AssertionError $error) {
+    echo "Caught\n";
+}
 
 ?>
 --EXPECTHEADERS--

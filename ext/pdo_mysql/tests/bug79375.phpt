@@ -1,9 +1,11 @@
 --TEST--
 Bug #79375: mysqli_store_result does not report error from lock wait timeout
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>

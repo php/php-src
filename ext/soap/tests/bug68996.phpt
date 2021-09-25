@@ -1,5 +1,7 @@
 --TEST--
 Bug #68996 (Invalid free of CG(interned_empty_string))
+--EXTENSIONS--
+soap
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") !== "0")

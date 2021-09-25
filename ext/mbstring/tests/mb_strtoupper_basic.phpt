@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strtoupper() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

@@ -32,6 +32,6 @@ class dummy {
 new dummy();
 ?>
 --EXPECTF--
-#0  dummy->bar() called at [%sbug70156.php:%d]
-#1  dummy->foo1() called at [%sbug70156.php:%d]
-#2  dummy->__construct() called at [%sbug70156.php:%d]
+#0 %s(%d): dummy->bar()
+#1 %s(%d): dummy->foo1()
+#2 %s(%d): dummy->__construct()

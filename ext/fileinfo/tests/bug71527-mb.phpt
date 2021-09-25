@@ -1,9 +1,7 @@
 --TEST--
 Bug #71527 Buffer over-write in finfo_open with malformed magic file
---SKIPIF--
-<?php
-if (!class_exists('finfo'))
-    die('skip no fileinfo extension');
+--EXTENSIONS--
+fileinfo
 --ENV--
 USE_ZEND_ALLOC=0
 --FILE--

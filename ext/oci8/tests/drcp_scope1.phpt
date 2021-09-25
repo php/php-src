@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_new_connect() and oci_connect() with scope end when oci8.old_oci_close_semantics ON
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=1
 --FILE--
@@ -77,6 +77,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Deprecated: Directive oci8.old_oci_close_semantics is deprecated%s
 This is with a OCI_NEW_CONNECT
 resource(%d) of type (oci8 connection)
 Update done-- DEPT value has been set to NEWDEPT

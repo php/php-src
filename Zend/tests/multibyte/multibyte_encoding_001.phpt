@@ -1,11 +1,7 @@
 --TEST--
 Zend Multibyte and ShiftJIS
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) {
-  die("skip Requires mbstring extension");
-}
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 zend.multibyte=1
 internal_encoding=SJIS

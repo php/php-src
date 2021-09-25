@@ -1,7 +1,8 @@
 --TEST--
 Bug #76285 DOMDocument::formatOutput attribute sometimes ignored
+--EXTENSIONS--
+dom
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php if (!defined("LIBXML_HTML_NOIMPLIED")) die("skip libxml2 2.7.7 required"); ?>
 --FILE--
 <?php

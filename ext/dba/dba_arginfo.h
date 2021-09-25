@@ -94,4 +94,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dba_list, arginfo_dba_list)
 	ZEND_FE_END
 };
-

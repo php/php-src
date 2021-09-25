@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: national character set values are quoted correctly in queries
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--
@@ -23,5 +24,5 @@ Key: Name: [6] :value
 paramno=-1
 name=[6] ":value"
 is_param=1
-param_type=1073741827
+param_type=1073741826
 NULL

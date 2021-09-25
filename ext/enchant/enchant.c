@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 #include "../spl/spl_exceptions.h"
 #include <enchant.h>
@@ -188,23 +187,21 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
-	enchant_broker_ce->serialize = zend_class_serialize_deny;
-	enchant_broker_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
 	enchant_broker_handlers.free_obj = php_enchant_broker_free;
 	enchant_broker_handlers.clone_obj = NULL;
+	enchant_broker_handlers.compare = zend_objects_not_comparable;
 
 	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
-	enchant_dict_ce->serialize = zend_class_serialize_deny;
-	enchant_dict_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);
 	enchant_dict_handlers.free_obj = php_enchant_dict_free;
 	enchant_dict_handlers.clone_obj = NULL;
+	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL",  PHP_ENCHANT_ISPELL,  CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);

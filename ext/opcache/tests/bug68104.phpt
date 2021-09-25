@@ -6,8 +6,8 @@ manuel <manuel@mausz.at>
 opcache.enable=1
 opcache.enable_cli=1
 disable_functions=dl
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 var_dump(is_callable("dl"));

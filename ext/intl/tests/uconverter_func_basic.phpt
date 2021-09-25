@@ -1,7 +1,7 @@
 --TEST--
 Basic UConverter::transcode() usage
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump(UConverter::transcode("This is an ascii string", 'utf-8', 'latin1'));

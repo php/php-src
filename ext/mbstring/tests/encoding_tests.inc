@@ -15,14 +15,27 @@ function readConversionTable($path, &$from, &$to, $utf32 = false) {
             continue;
         if (sscanf($line, "0x%x\t0x%x", $char, $codepoint) == 2) {
             $codepoint = $utf32 ? pack('N', $codepoint) : pack('n', $codepoint);
-            if ($char <= 0xFF)
-                $char = chr($char); // hex codes must not have leading zero bytes
-            else if ($char <= 0xFFFF)
-                $char = pack('n', $char);
-            else if ($char <= 0xFFFFFF)
-                $char = chr($char >> 16) . pack('n', $char & 0xFFFF);
-            else
-                $char = pack('N', $char);
+            if ($char == PHP_INT_MAX) {
+                // We may be on a 32-bit machine and testing a text encoding with 4-byte codes
+                // (which can't be represented in a PHP integer)
+                $char = "";
+                for ($i = 2; $i < strlen($line); $i += 2) {
+                    $substr = substr($line, $i, 2);
+                    if (ctype_xdigit($substr))
+                        $char .= chr(hexdec($substr));
+                    else
+                        break;
+                }
+            } else {
+                if ($char <= 0xFF)
+                    $char = chr($char); // hex codes must not have leading zero bytes
+                else if ($char <= 0xFFFF)
+                    $char = pack('n', $char);
+                else if ($char <= 0xFFFFFF)
+                    $char = chr($char >> 16) . pack('n', $char & 0xFFFF);
+                else
+                    $char = pack('N', $char);
+            }
             $from[$char] = $codepoint;
             $to[$codepoint] = $char;
         }

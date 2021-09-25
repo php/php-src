@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -175,7 +175,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	}
 
 	/* little mini hack so that we can use this code from the dbh ctor */
-	if (!dbh->methods) {
+	if (!dbh->methods && status != OCI_SUCCESS_WITH_INFO) {
 		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
 	}
 
@@ -336,9 +336,13 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /* {{{ 
 	H->last_err = OCIStmtExecute(H->svc, stmt, H->err, 1, 0, NULL, NULL,
 			(dbh->auto_commit && !dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT);
 
-	if (H->last_err) {
+	sword last_err = H->last_err;
+
+	if (last_err) {
 		H->last_err = oci_drv_error("OCIStmtExecute");
-	} else {
+	}
+
+	if (!last_err || last_err == OCI_SUCCESS_WITH_INFO) {
 		/* return the number of affected rows */
 		H->last_err = OCIAttrGet(stmt, OCI_HTYPE_STMT, &rowcount, 0, OCI_ATTR_ROW_COUNT, H->err);
 		ret = rowcount;
@@ -377,7 +381,7 @@ static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquote
 		*c++ = '\'';			/* add second quote */
 	}
 
-    /* Copy remainder and add enclosing quote */
+	/* Copy remainder and add enclosing quote */
 	strncpy(c, l, quotedlen-(c-quoted)-1);
 	quoted[quotedlen-1] = '\'';
 	quoted[quotedlen]   = '\0';
@@ -425,12 +429,17 @@ static bool oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 
 static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
-	zend_long lval = zval_get_long(val);
+	zend_long lval;
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 		{
+			bool bval;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+
 			if (dbh->in_txn) {
 				/* Assume they want to commit whatever is outstanding */
 				H->last_err = OCITransCommit(H->svc, H->err, 0);
@@ -442,11 +451,15 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 				dbh->in_txn = false;
 			}
 
-			dbh->auto_commit = (unsigned int)lval? 1 : 0;
+			dbh->auto_commit = (unsigned int) bval;
 			return true;
 		}
 		case PDO_ATTR_PREFETCH:
 		{
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+
 			H->prefetch = pdo_oci_sanitize_prefetch(lval);
 			return true;
 		}
@@ -537,6 +550,9 @@ static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) 
 		case PDO_OCI_ATTR_CALL_TIMEOUT:
 		{
 #if (OCI_MAJOR_VERSION >= 18)
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
 			ub4 timeout = (ub4) lval;
 
 			H->last_err = OCIAttrSet(H->svc, OCI_HTYPE_SVCCTX,
@@ -819,7 +835,12 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	H->last_err = OCISessionBegin(H->svc, H->err, H->session, OCI_CRED_RDBMS, OCI_DEFAULT);
 	if (H->last_err) {
 		oci_drv_error("OCISessionBegin");
-		goto cleanup;
+		/* OCISessionBegin returns OCI_SUCCESS_WITH_INFO when
+		 * user's password has expired, but is still usable.
+		 */
+		if (H->last_err != OCI_SUCCESS_WITH_INFO) {
+			goto cleanup;
+		}
 	}
 
 	/* set the server handle into service handle */
@@ -830,11 +851,11 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	}
 
 	/* Get max character width */
- 	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
- 	if (H->last_err) {
- 		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
- 		goto cleanup;
- 	}
+	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
+	if (H->last_err) {
+		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
+		goto cleanup;
+	}
 
 	dbh->methods = &oci_methods;
 	dbh->alloc_own_columns = 1;

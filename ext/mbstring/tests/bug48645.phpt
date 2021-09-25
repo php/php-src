@@ -1,7 +1,7 @@
 --TEST--
 Bug #48645 (mb_convert_encoding() doesn't understand hexadecimal html-entities)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(bin2hex(mb_convert_encoding("&#x0;", "UTF-8", "HTML-ENTITIES")));

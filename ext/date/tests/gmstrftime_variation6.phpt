@@ -31,21 +31,41 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Hour as decimal by 24-hour format--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"
 
 --Hour as decimal by 12-hour format--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"
 
 --Minute as decimal number--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"
 
 --AM/PM format for a time--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "AM"
 
 --Second as decimal number--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"

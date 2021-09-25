@@ -8,7 +8,7 @@ function flatten(array $nestedArraysAndStrings){
     $iter = new RecursiveIteratorIterator(
         new RecursiveArrayIterator($nestedArraysAndStrings));
     foreach($iter as $leaf){ $flat[] = $leaf; }
-    return join(null, $flat);
+    return join('', $flat);
 }
 
 $noRefs = [[[['some']]],[' nested '],"items"];

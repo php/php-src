@@ -1,8 +1,9 @@
 --TEST--
 Bug #73072: Invalid path SNI_server_certs causes segfault
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

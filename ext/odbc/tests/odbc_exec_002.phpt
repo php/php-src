@@ -1,5 +1,7 @@
 --TEST--
 odbc_exec(): Getting data from query
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

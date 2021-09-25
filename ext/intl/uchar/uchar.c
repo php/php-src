@@ -583,7 +583,7 @@ IC_INT_METHOD_CHAR(charDigitValue)
 IC_METHOD(name) { \
 	UChar32 cp, ret; \
 	zend_string *string_codepoint; \
-		zend_long int_codepoint; \
+		zend_long int_codepoint = -1; \
 		ZEND_PARSE_PARAMETERS_START(1, 1) \
 			Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint) \
 		ZEND_PARSE_PARAMETERS_END(); \

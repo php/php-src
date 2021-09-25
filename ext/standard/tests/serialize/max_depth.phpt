@@ -1,5 +1,9 @@
 --TEST--
 Bug #78549: Stack overflow due to nested serialized input
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Different order of deprecation messages');
+?>
 --FILE--
 <?php
 
@@ -134,6 +138,8 @@ Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be ch
 
 Notice: unserialize(): Error at offset 2309 of 2574 bytes in %s on line %d
 bool(false)
+
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Nested unserialize combined depth limit:
 
 Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d
@@ -142,6 +148,8 @@ Notice: unserialize(): Error at offset 1157 of 1294 bytes in %s on line %d
 bool(false)
 bool(true)
 bool(true)
+
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Nested unserialize overridden depth limit:
 
 Warning: unserialize(): Maximum depth of 256 exceeded. The depth limit can be changed using the max_depth unserialize() option or the unserialize_max_depth ini setting in %s on line %d

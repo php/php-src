@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -275,7 +275,7 @@ static void char_ptr_dtor_p(zval *zv) /* {{{ */
 	pefree(Z_PTR_P(zv), 1);
 } /* }}} */
 
-static char *get_last_error() /* {{{ */
+static char *get_last_error(void) /* {{{ */
 {
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
@@ -1102,7 +1102,7 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 } /* }}} */
 
 #if HAVE_UNISTD_H
-static int php_cli_is_output_tty() /* {{{ */
+static int php_cli_is_output_tty(void) /* {{{ */
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
 		php_cli_output_is_tty = isatty(STDOUT_FILENO);
@@ -1169,7 +1169,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 	/* error */
 	if (append_error_message) {
 		spprintf(&error_buf, 0, " - %s in %s on line %d",
-			ZSTR_VAL(PG(last_error_message)), PG(last_error_file), PG(last_error_lineno));
+			ZSTR_VAL(PG(last_error_message)), ZSTR_VAL(PG(last_error_file)), PG(last_error_lineno));
 		if (!error_buf) {
 			efree(basic_buf);
 			if (message) {
@@ -1384,26 +1384,28 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
 	vpath = p;
-	if (request->vpath_len > 0 && request->vpath[0] != '/') {
-		*p++ = DEFAULT_SLASH;
-	}
-	q = request->vpath + request->vpath_len;
-	while (q > request->vpath) {
-		if (*q-- == '.') {
-			is_static_file = 1;
-			break;
+	if (request->vpath_len != 0) {
+		if (request->vpath[0] != '/') {
+			*p++ = DEFAULT_SLASH;
 		}
-	}
-	memmove(p, request->vpath, request->vpath_len);
+		q = request->vpath + request->vpath_len;
+		while (q > request->vpath) {
+			if (*q-- == '.') {
+				is_static_file = 1;
+				break;
+			}
+		}
+		memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
-	q = p + request->vpath_len;
-	do {
-		if (*q == '/') {
-			*q = '\\';
-		}
-	} while (q-- > p);
+		q = p + request->vpath_len;
+		do {
+			if (*q == '/') {
+				*q = '\\';
+			}
+		} while (q-- > p);
 #endif
-	p += request->vpath_len;
+		p += request->vpath_len;
+	}
 	*p = '\0';
 	q = p;
 	while (q > buf) {
@@ -1569,6 +1571,9 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 	{
 		char *vpath;
 		size_t vpath_len;
+		if (UNEXPECTED(client->request.vpath != NULL)) {
+			return 1;
+		}
 		normalize_vpath(&vpath, &vpath_len, at, length, 1);
 		client->request.vpath = vpath;
 		client->request.vpath_len = vpath_len;
@@ -1579,17 +1584,34 @@ static int php_cli_server_client_read_request_on_path(php_http_parser *parser, c
 static int php_cli_server_client_read_request_on_query_string(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.query_string = pestrndup(at, length, 1);
-	client->request.query_string_len = length;
+	if (EXPECTED(client->request.query_string == NULL)) {
+		client->request.query_string = pestrndup(at, length, 1);
+		client->request.query_string_len = length;
+	} else {
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.query_string = perealloc(client->request.query_string, client->request.query_string_len + length + 1, 1);
+		memcpy(client->request.query_string + client->request.query_string_len, at, length);
+		client->request.query_string_len += length;
+		client->request.query_string[client->request.query_string_len] = '\0';
+	}
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_url(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	client->request.request_method = parser->method;
-	client->request.request_uri = pestrndup(at, length, 1);
-	client->request.request_uri_len = length;
+	if (EXPECTED(client->request.request_uri == NULL)) {
+		client->request.request_method = parser->method;
+		client->request.request_uri = pestrndup(at, length, 1);
+		client->request.request_uri_len = length;
+	} else {
+		ZEND_ASSERT(client->request.request_method == parser->method);
+		ZEND_ASSERT(length <= PHP_HTTP_MAX_HEADER_SIZE && PHP_HTTP_MAX_HEADER_SIZE - length >= client->request.query_string_len);
+		client->request.request_uri = perealloc(client->request.request_uri, client->request.request_uri_len + length + 1, 1);
+		memcpy(client->request.request_uri + client->request.request_uri_len, at, length);
+		client->request.request_uri_len += length;
+		client->request.request_uri[client->request.request_uri_len] = '\0';
+	}
 	return 0;
 }
 
@@ -1627,7 +1649,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 	switch (client->last_header_element) {
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_NONE:
 		client->current_header_name = (char *)at;
 		client->current_header_name_len = length;
@@ -1692,7 +1714,7 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 		client->current_header_value = pemalloc(1, 1);
 		*client->current_header_value = '\0';
 		client->current_header_value_len = 0;
-		/* break missing intentionally */
+		ZEND_FALLTHROUGH;
 	case HEADER_VALUE:
 		php_cli_server_client_save_header(client);
 		break;
@@ -2015,9 +2037,11 @@ static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server
 	{
 		zend_file_handle zfd;
 		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
+		zfd.primary_script = 1;
 		zend_try {
 			php_execute_script(&zfd);
 		} zend_end_try();
+		zend_destroy_file_handle(&zfd);
 	}
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
@@ -2104,8 +2128,6 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup()) {
-		/* should never be happen */
-		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
 	PG(during_request_startup) = 0;
@@ -2136,6 +2158,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 	zend_stream_init_filename(&zfd, server->router);
+	zfd.primary_script = 1;
 
 	zend_try {
 		zval retval;
@@ -2148,6 +2171,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			}
 		}
 	} zend_end_try();
+
+	zend_destroy_file_handle(&zfd);
 
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));
@@ -2173,9 +2198,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 
 	if (server->router || !is_static_file) {
 		if (FAILURE == php_cli_server_request_startup(server, client)) {
-			SG(server_context) = NULL;
-			php_cli_server_close_connection(server, client);
-			destroy_request_info(&SG(request_info));
+			php_cli_server_request_shutdown(server, client);
 			return SUCCESS;
 		}
 	}
@@ -2357,7 +2380,7 @@ static void php_cli_server_startup_workers() {
 	}
 
 #if HAVE_FORK
-	ZEND_ATOL(php_cli_server_workers_max, workers);
+	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
 

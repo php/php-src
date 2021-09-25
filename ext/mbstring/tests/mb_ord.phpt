@@ -1,7 +1,7 @@
 --TEST--
 mb_ord()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(

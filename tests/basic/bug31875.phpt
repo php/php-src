@@ -8,7 +8,7 @@ disable_functions=dl
 <?php
 $disabled_function = 'dl';
 
-/* exclude_disabled parameters is harded to true */
+/* exclude_disabled parameters is hardcoded to true */
 
 $functions = get_defined_functions();
 var_dump(in_array($disabled_function, $functions['internal']));

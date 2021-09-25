@@ -1,7 +1,7 @@
 --TEST--
 Removing a block that has duplicate successors
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 function test($foo) {

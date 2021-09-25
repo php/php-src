@@ -128,6 +128,7 @@ echo "===AutoNA===\n";
 var_dump(unserialize('O:22:"autoload_not_available":0:{}'));
 ?>
 --EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 ===O1===
 TestOld::__sleep()
 string(18) "O:7:"TestOld":0:{}"
@@ -152,12 +153,16 @@ object(TestNAOld)#%d (0) {
 ===NANew===
 unserializer(TestNANew)
 
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
 Warning: Erroneous data format for unserializing 'TestNANew' in %s005.php on line %d
 
 Notice: unserialize(): Error at offset 19 of 20 bytes in %s005.php on line %d
 bool(false)
 ===NANew2===
 unserializer(TestNANew2)
+
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 TestNew::unserialize()
 object(TestNANew2)#%d (0) {
 }

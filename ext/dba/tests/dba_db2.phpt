@@ -1,5 +1,7 @@
 --TEST--
 DBA DB2 handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'db2';

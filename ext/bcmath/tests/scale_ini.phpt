@@ -1,9 +1,7 @@
 --TEST--
 BCMath functions return result with default scale
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
-?>
+--EXTENSIONS--
+bcmath
 --INI--
 bcmath.scale = 5
 --FILE--

@@ -1,8 +1,7 @@
 --TEST--
 Check that arguments are freed when calling a deprecated function
---SKIPIF--
-<?php
-if (!extension_loaded('zend_test')) die('skip zend_test extension not loaded');
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

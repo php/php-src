@@ -1,8 +1,7 @@
 --TEST--
 send/receive serialized message.
---SKIPIF--
-<?php
-if (!extension_loaded("sysvmsg")) print "skip"; ?>
+--EXTENSIONS--
+sysvmsg
 --FILE--
 <?php
 $key = ftok(__DIR__ . "/001.phpt", "p");

@@ -1,9 +1,7 @@
 --TEST--
 CURLOPT_PRIVATE
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) exit("skip curl extension not loaded");
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $curl = curl_init("foobar");

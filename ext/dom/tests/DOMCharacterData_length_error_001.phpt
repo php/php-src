@@ -3,12 +3,16 @@ Invalid State Error when getting length on DOMCharacterData out of content.
 --CREDITS--
 Jason Bouffard <jbouffard1@yahoo.com>
 # TestFest Atlanta 2009-05-14
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $character_data = new DOMCharacterData();
-print $character_data->length;
+try {
+    print $character_data->length;
+} catch (DOMException $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: main(): Invalid State Error in %s
+--EXPECT--
+Invalid State Error

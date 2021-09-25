@@ -58,7 +58,7 @@ Warning: Illegal string offset -1 in %s on line %d
 NULL
 string(0) ""
 Cannot access offset of type string on string
-string(1) "a"
+string(0) ""
 Error: [] operator not supported for strings
 string(0) ""
 Error: Cannot use assign-op operators with string offsets

@@ -15,21 +15,23 @@ various fgetcsv() functionality tests
         '"",""',
         '"\\"","aaa"',
         '"""""",',
-        '""""",aaa',
-        '"\\""",aaa',
-        'aaa,"\\"bbb,ccc',
+        '""""",aaa' . "\n",
+        '"\\""",aaa' . "\n",
+        'aaa,"\\"bbb,ccc' . "\n",
         'aaa,bbb   ',
         'aaa,"bbb   "',
         'aaa"aaa","bbb"bbb',
         'aaa"aaa""",bbb',
-        'aaa"\\"a","bbb"'
+        'aaa"\\"a","bbb"',
+        'aaa,"bbb' . "\n",
+        'aaa,"bbb',
     );
 
     $file = __DIR__ . '/fgetcsv.csv';
     @unlink($file);
     foreach ($list as $v) {
         $fp = fopen($file, "w");
-        fwrite($fp, $v . "\n");
+        fwrite($fp, $v);
         fclose($fp);
 
         var_dump(fgetcsv(fopen($file, "r"), 1024));
@@ -156,3 +158,11 @@ array(2) {
   [1]=>
   string(3) "bbb"
 }
+array(2) {
+  [0]=>
+  string(3) "aaa"
+  [1]=>
+  string(4) "bbb
+"
+}
+bool(false)

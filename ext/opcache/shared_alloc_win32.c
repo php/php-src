@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,14 +54,14 @@ static void zend_win_error_message(int type, char *msg, int err)
 	ev_msgs[0] = msg;
 	ev_msgs[1] = buf;
 	ReportEvent(h,				  // event log handle
-            EVENTLOG_ERROR_TYPE,  // event type
-            0,                    // category zero
-            err,				  // event identifier
-            NULL,                 // no user security identifier
-            2,                    // one substitution string
-            0,                    // no data
-            ev_msgs,              // pointer to string array
-            NULL);                // pointer to data
+	        EVENTLOG_ERROR_TYPE,  // event type
+	        0,                    // category zero
+	        err,				  // event identifier
+	        NULL,                 // no user security identifier
+	        2,                    // one substitution string
+	        0,                    // no data
+	        ev_msgs,              // pointer to string array
+	        NULL);                // pointer to data
 	DeregisterEventSource(h);
 
 	zend_accel_error(type, "%s", msg);
@@ -71,8 +71,19 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + 32 + 4 + 1 + 32 + 21];
-	snprintf(newname, sizeof(newname) - 1, "%s@%.32s@%.20s@%.32s", name, accel_uname_id, sapi_module.name, zend_system_id);
+	static char newname[MAXPATHLEN + 1 + 32 + 1 + 20 + 1 + 32 + 1];
+	char *p = newname;
+	p += strlcpy(newname, name, MAXPATHLEN + 1);
+	*(p++) = '@';
+	memcpy(p, accel_uname_id, 32);
+	p += 32;
+	*(p++) = '@';
+	p += strlcpy(p, sapi_module.name, 21);
+	*(p++) = '@';
+	memcpy(p, zend_system_id, 32);
+	p += 32;
+	*(p++) = '\0';
+	ZEND_ASSERT(p - newname <= sizeof(newname));
 
 	return newname;
 }
@@ -81,7 +92,7 @@ void zend_shared_alloc_create_lock(void)
 {
 	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
 	if (!memory_mutex) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex");
+		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex (error %u)", GetLastError());
 		return;
 	}
 	ReleaseMutex(memory_mutex);

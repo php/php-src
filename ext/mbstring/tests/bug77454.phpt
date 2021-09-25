@@ -1,7 +1,7 @@
 --TEST--
 Bug #77454: mb_scrub() silently truncates after a null byte
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $str = "before\0after";

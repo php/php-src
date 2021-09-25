@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7540039937587f05584660bc1a1a8a80aa5ccbd1 */
+ * Stub hash: ae39bfb89eba2a827a3e8eafe6771b753af95824 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -491,7 +491,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_set, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_BOOL|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ini_alter arginfo_ini_set
@@ -656,8 +656,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
+#endif
 
 #if HAVE_FTOK
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftok, 0, 2, IS_LONG, 0)
@@ -798,7 +800,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_assert, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, description, Throwable, MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_assert_options, 0, 1, MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_assert_options, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -831,7 +833,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\n\\r\\t\\v\\0\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 0, "\" \\n\\r\\t\\v\\x00\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_rtrim arginfo_trim
@@ -1098,12 +1100,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_getdir, 0, 1, Directory, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dir, 0, 1, Directory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
-
-#define arginfo_dir arginfo_getdir
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closedir, 0, 0, IS_VOID, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, dir_handle, "null")
@@ -1269,6 +1269,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_fflush arginfo_rewind
 
+#define arginfo_fsync arginfo_rewind
+
+#define arginfo_fdatasync arginfo_rewind
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fwrite, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -1332,6 +1336,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fputcsv, 0, 2, MAY_BE_LONG|MAY_B
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escape, IS_STRING, 0, "\"\\\\\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, eol, IS_STRING, 0, "\"\\n\"")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fgetcsv, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -1750,7 +1755,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_unpack, 0, 2, MAY_BE_ARRAY|MAY_B
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_get_info, 0, 1, IS_ARRAY, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_get_info, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -1841,7 +1846,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG
 	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(1, except, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 1)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, microseconds, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
@@ -2099,7 +2104,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_uniqid, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_url, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_parse_url, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
@@ -2401,7 +2406,9 @@ ZEND_FUNCTION(dns_get_record);
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_FUNCTION(dns_get_mx);
 #endif
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 ZEND_FUNCTION(net_get_interfaces);
+#endif
 #if HAVE_FTOK
 ZEND_FUNCTION(ftok);
 #endif
@@ -2517,7 +2524,7 @@ ZEND_FUNCTION(substr_compare);
 ZEND_FUNCTION(utf8_encode);
 ZEND_FUNCTION(utf8_decode);
 ZEND_FUNCTION(opendir);
-ZEND_FUNCTION(getdir);
+ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
@@ -2560,6 +2567,8 @@ ZEND_FUNCTION(fstat);
 ZEND_FUNCTION(fseek);
 ZEND_FUNCTION(ftell);
 ZEND_FUNCTION(fflush);
+ZEND_FUNCTION(fsync);
+ZEND_FUNCTION(fdatasync);
 ZEND_FUNCTION(fwrite);
 ZEND_FUNCTION(mkdir);
 ZEND_FUNCTION(rename);
@@ -3011,7 +3020,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(crc32, arginfo_crc32)
 	ZEND_FE(crypt, arginfo_crypt)
 #if HAVE_STRPTIME
-	ZEND_FE(strptime, arginfo_strptime)
+	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
 #if defined(HAVE_GETHOSTNAME)
 	ZEND_FE(gethostname, arginfo_gethostname)
@@ -3034,7 +3043,9 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 	ZEND_FALIAS(getmxrr, dns_get_mx, arginfo_getmxrr)
 #endif
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 	ZEND_FE(net_get_interfaces, arginfo_net_get_interfaces)
+#endif
 #if HAVE_FTOK
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
@@ -3153,8 +3164,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(utf8_encode, arginfo_utf8_encode)
 	ZEND_FE(utf8_decode, arginfo_utf8_decode)
 	ZEND_FE(opendir, arginfo_opendir)
-	ZEND_FE(getdir, arginfo_getdir)
-	ZEND_FALIAS(dir, getdir, arginfo_dir)
+	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
@@ -3197,6 +3207,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fseek, arginfo_fseek)
 	ZEND_FE(ftell, arginfo_ftell)
 	ZEND_FE(fflush, arginfo_fflush)
+	ZEND_FE(fsync, arginfo_fsync)
+	ZEND_FE(fdatasync, arginfo_fdatasync)
 	ZEND_FE(fwrite, arginfo_fwrite)
 	ZEND_FALIAS(fputs, fwrite, arginfo_fputs)
 	ZEND_FE(mkdir, arginfo_mkdir)
@@ -3488,3 +3500,34 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_AssertionError_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class___PHP_Incomplete_Class(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", class___PHP_Incomplete_Class_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_AssertionError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}

@@ -1,7 +1,7 @@
 --TEST--
 tidy_repair_*() and invalid parameters
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

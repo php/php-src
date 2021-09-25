@@ -30,25 +30,37 @@ Warning: Undefined variable $ref in %s on line %d
 
 Warning: Undefined variable $undef in %s on line %d
 
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Warning: Undefined variable $undef in %s on line %d
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Warning: Undefined variable $undef in %s on line %d
 
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Warning: Undefined variable $undef in %s on line %d
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Warning: Undefined variable $undef in %s on line %d
 
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
 Warning: Undefined variable $undef in %s on line %d
+
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Warning: Undefined variable $undef in %s on line %d
+
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Warning: Undefined variable $undef in %s on line %d
+
+Deprecated: chop(): Passing null to parameter #1 ($string) of type string is deprecated in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 ok

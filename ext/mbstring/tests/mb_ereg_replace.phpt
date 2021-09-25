@@ -1,8 +1,9 @@
 --TEST--
 mb_ereg_replace()
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
 ?>
 --FILE--

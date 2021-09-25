@@ -9,10 +9,6 @@ $str = "this is a string";
 var_dump( substr_count($str, "t", "5") );
 var_dump( substr_count($str, "t", "5", "10") );
 
-echo "\n-- 3rd or 4th arg as NULL --\n";
-var_dump( substr_count($str, "I", NULL) );
-var_dump( substr_count($str, "i", NULL, 10) );
-
 echo "\n-- overlapped substrings --\n";
 var_dump( substr_count("abcabcabcabcabc", "abca") );
 var_dump( substr_count("abcabcabcabcabc", "abca", 2) );
@@ -52,10 +48,6 @@ echo "Done\n";
 -- 3rd or 4th arg as string --
 int(1)
 int(1)
-
--- 3rd or 4th arg as NULL --
-int(0)
-int(2)
 
 -- overlapped substrings --
 int(2)

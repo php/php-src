@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller with weird SCRIPT_NAME
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/huh?
 REQUEST_URI=/huh?

@@ -1,7 +1,7 @@
 --TEST--
 Phar: Phar::setDefaultStub() with and without arg, zip-based phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

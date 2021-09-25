@@ -4,8 +4,8 @@ revalidate_path 01: OPCache must cache only resolved real paths when revalidate_
 opcache.enable=1
 opcache.enable_cli=1
 opcache.revalidate_path=1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --CONFLICTS--
 server
 --FILE--

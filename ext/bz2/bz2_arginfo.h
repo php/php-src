@@ -72,4 +72,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bzdecompress, arginfo_bzdecompress)
 	ZEND_FE_END
 };
-

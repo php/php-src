@@ -1,5 +1,7 @@
 --TEST--
 DBA QDBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'qdbm';

@@ -1,7 +1,7 @@
 --TEST--
 Bug #34704 (Infinite recursion due to corrupt JPEG)
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0

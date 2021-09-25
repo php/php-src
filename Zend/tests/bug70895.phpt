@@ -20,6 +20,6 @@ try {
 }
 ?>
 --EXPECT--
-array_map(): Argument #1 ($callback) must be a valid callback, function "%n" not found or invalid function name
-array_map(): Argument #1 ($callback) must be a valid callback, function "%n %i" not found or invalid function name
-array_map(): Argument #1 ($callback) must be a valid callback, function "%n %i aoeu %f aoeu %p" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "%n" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "%n %i" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "%n %i aoeu %f aoeu %p" not found or invalid function name

@@ -1,8 +1,9 @@
 --TEST--
 Testing mb_ereg_search() named capture groups
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 function_exists('mb_ereg_search') or die("skip mb_ereg_search() is not available in this build");
 version_compare(MB_ONIGURUMA_VERSION, '6.9.4', '<') or die("skip requires oniguruma < 6.9.4");
 ?>

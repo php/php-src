@@ -1,8 +1,9 @@
 --TEST--
 Bug #69151 (mb_ereg should reject ill-formed byte sequence)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

@@ -3,8 +3,8 @@ readline(): Basic test
 --CREDITS--
 Milwaukee PHP User Group
 #PHPTestFest2017
---SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); ?>
+--EXTENSIONS--
+readline
 --FILE--
 <?php
 

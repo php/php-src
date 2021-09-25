@@ -1,9 +1,7 @@
 --TEST--
 Bug #63447 (max_input_vars doesn't filter variables when mbstring.encoding_translation = On)
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 max_input_nesting_level=5
 max_input_vars=100

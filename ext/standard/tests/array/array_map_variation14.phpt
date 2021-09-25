@@ -118,7 +118,7 @@ array(2) {
   int(2)
 }
 -- with empty string --
-array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
 -- with empty array --
-array_map(): Argument #1 ($callback) must be a valid callback, array must have exactly two members
+array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 Done

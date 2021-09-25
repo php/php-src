@@ -1,8 +1,9 @@
 --TEST--
 mysqli_query() - unicode (cyrillic)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 require_once('table.inc');
@@ -81,6 +82,14 @@ mysqli_close($link);
     }
 
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once 'connect.inc';
+$link = new mysqli($host, $user, $passwd, $db, $port, $socket);
+$link->query('DROP PROCEDURE IF EXISTS процедурка');
+$link->query('DROP FUNCTION IF EXISTS функцийка');
+$link->close();
 ?>
 --EXPECTF--
 array(1) {

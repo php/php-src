@@ -8,10 +8,6 @@ Test strtr() function : usage variations - unexpected inputs for 'replace_pairs'
 
 echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
 
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 //defining a class
 class sample  {
   public function __toString() {
@@ -58,12 +54,6 @@ $replace_pairs_arr =  array (
 
   // resource
   $file_handle,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
 );
 
 // loop through with each element of the $replace_pairs array to test strtr() function
@@ -84,7 +74,7 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
@@ -127,9 +117,13 @@ strtr(): Argument #2 ($from) must be of type array, string given
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 14 --
+
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 15 --
+
+Deprecated: strtr(): Passing null to parameter #2 ($from) of type array|string is deprecated in %s on line %d
 strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 16 --
@@ -137,10 +131,4 @@ strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 17 --
 strtr(): Argument #2 ($from) must be of type array|string, resource given
-
--- Iteration 18 --
-strtr(): Argument #2 ($from) must be of type array, string given
-
--- Iteration 19 --
-strtr(): Argument #2 ($from) must be of type array, string given
 *** Done ***

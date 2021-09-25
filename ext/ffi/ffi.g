@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -35,7 +35,7 @@ php llk.php ffi.g
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -143,7 +143,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 
 specifier_qualifier_list(zend_ffi_dcl *dcl):
 	"__extension__"?
-	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text) || (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) == 0}
 		(	type_specifier(dcl)
 		|	type_qualifier(dcl)
 		|	attributes(dcl)

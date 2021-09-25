@@ -1,5 +1,7 @@
 --TEST--
 Test interoperability of password_hash('argon2id')
+--EXTENSIONS--
+sodium
 --SKIPIF--
 <?php
 if (!function_exists('sodium_crypto_pwhash_str_verify')) {

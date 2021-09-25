@@ -1,5 +1,7 @@
 --TEST--
 Set and get of connection attributes with errors.
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -20,6 +22,8 @@ if (!(isset($matches[0]) &&
 ?>
 --FILE--
 <?php
+
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
 $testpassword = 'testuser';

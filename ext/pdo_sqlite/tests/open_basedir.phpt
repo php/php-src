@@ -1,7 +1,7 @@
 --TEST--
 PDO SQLite open_basedir check
---SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) print 'skip not loaded'; ?>
+--EXTENSIONS--
+pdo_sqlite
 --INI--
 open_basedir=.
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 Test ResourceBundle array access and count - existing/missing keys
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
     include "resourcebundle.inc";

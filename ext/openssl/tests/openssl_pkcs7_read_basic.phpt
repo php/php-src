@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs7_read() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $infile = file_get_contents(__DIR__ . "/cert.p7b");

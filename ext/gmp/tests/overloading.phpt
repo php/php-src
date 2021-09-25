@@ -1,7 +1,7 @@
 --TEST--
 GMP operator overloading
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -282,7 +282,7 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-main(): Argument #2 must be of type GMP|string|int, stdClass given
+Number must be of type GMP|string|int, stdClass given
 object(GMP)#4 (1) {
   ["num"]=>
   string(2) "43"

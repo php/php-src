@@ -3,7 +3,7 @@ SPL: SplHeap: comparison callback
 --FILE--
 <?php
 class myHeap extends SplHeap {
-    public function compare($a, $b) {
+    public function compare($a, $b): int {
         if ($a > $b) {
             $result = 1;
         } else if ($a < $b) {

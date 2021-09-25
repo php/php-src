@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -305,16 +305,12 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 
-#define PS_CLASS_NAME "SessionHandler"
 extern PHPAPI zend_class_entry *php_session_class_entry;
 
-#define PS_IFACE_NAME "SessionHandlerInterface"
 extern PHPAPI zend_class_entry *php_session_iface_entry;
 
-#define PS_SID_IFACE_NAME "SessionIdInterface"
 extern PHPAPI zend_class_entry *php_session_id_iface_entry;
 
-#define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
 extern PHPAPI zend_class_entry *php_session_update_timestamp_iface_entry;
 
 extern PHP_METHOD(SessionHandler, open);

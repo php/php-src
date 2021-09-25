@@ -5,7 +5,7 @@ SPL: RecursiveIteratorIterator and beginChildren/endChildren
 
 class MyRecursiveArrayIterator extends RecursiveArrayIterator
 {
-    function valid()
+    function valid(): bool
     {
         if (!parent::valid())
         {
@@ -18,7 +18,7 @@ class MyRecursiveArrayIterator extends RecursiveArrayIterator
         }
     }
 
-    function getChildren()
+    function getChildren(): ?RecursiveArrayIterator
     {
         echo __METHOD__ . "\n";
         return parent::getChildren();
@@ -27,42 +27,42 @@ class MyRecursiveArrayIterator extends RecursiveArrayIterator
 
 class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
         parent::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         return parent::valid();
     }
 
-    function current()
+    function current(): mixed
     {
         echo __METHOD__ . "\n";
         return parent::current();
     }
 
-    function key()
+    function key(): mixed
     {
         echo __METHOD__ . "\n";
         return parent::key();
     }
 
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
         parent::next();
     }
 
-    function beginChildren()
+    function beginChildren(): void
     {
         echo __METHOD__ . "(".$this->getDepth().")\n";
     }
 
-    function endChildren()
+    function endChildren(): void
     {
         echo __METHOD__ . "(".$this->getDepth().")\n";
     }

@@ -1,8 +1,9 @@
 --TEST--
 Font charmap order is deterministic based on order in the font, use the selected encoding
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
     if(!function_exists('imagettftext')) die('skip imagettftext() not available');
   if(gd_info()['JIS-mapped Japanese Font Support']) die('skip JIS-mapped Japanese Font Support not supported');
 ?>

@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 base 015 (php/direct): echoStructArray
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 --FILE--

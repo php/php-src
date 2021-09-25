@@ -1,7 +1,7 @@
 --TEST--
 Bug #73907 nextSibling property not included in var_dump of DOMNode
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $xmlString = '<?xml version="1.0" encoding="utf-8" ?>

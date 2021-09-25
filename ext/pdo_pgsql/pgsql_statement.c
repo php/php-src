@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -240,13 +240,13 @@ stmt_retry:
 		return 0;
 	}
 
-	if (!stmt->executed && (!stmt->column_count || S->cols == NULL)) {
-		stmt->column_count = (int) PQnfields(S->result);
+	stmt->column_count = (int) PQnfields(S->result);
+	if (S->cols == NULL) {
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
 
 	if (status == PGRES_COMMAND_OK) {
-		ZEND_ATOL(stmt->row_count, PQcmdTuples(S->result));
+		stmt->row_count = ZEND_ATOL(PQcmdTuples(S->result));
 		H->pgoid = PQoidValue(S->result);
 	} else {
 		stmt->row_count = (zend_long)PQntuples(S->result);
@@ -272,14 +272,14 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (ZSTR_VAL(param->name)[0] == '$') {
-						ZEND_ATOL(param->paramno, ZSTR_VAL(param->name) + 1);
+						param->paramno = ZEND_ATOL(ZSTR_VAL(param->name) + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						zend_string *namevar;
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find_ptr(stmt->bound_param_map,
 								param->name)) != NULL) {
-							ZEND_ATOL(param->paramno, ZSTR_VAL(namevar) + 1);
+							param->paramno = ZEND_ATOL(ZSTR_VAL(namevar) + 1);
 							param->paramno--;
 						} else {
 							pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", ZSTR_VAL(param->name));
@@ -297,6 +297,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					pdo_pgsql_error_stmt_msg(stmt, 0, "HY093", "parameter was not defined");
 					return 0;
 				}
+				ZEND_FALLTHROUGH;
 			case PDO_PARAM_EVT_EXEC_POST:
 			case PDO_PARAM_EVT_FETCH_PRE:
 			case PDO_PARAM_EVT_FETCH_POST:
@@ -504,12 +505,8 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pd
 #if SIZEOF_ZEND_LONG >= 8
 			case INT8OID:
 #endif
-			{
-				zend_long intval;
-				ZEND_ATOL(intval, ptr);
-				ZVAL_LONG(result, intval);
+				ZVAL_LONG(result, ZEND_ATOL(ptr));
 				break;
-			}
 
 			case OIDOID: {
 				char *end_ptr;
@@ -677,12 +674,6 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
-	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-
-	if (S->cols != NULL){
-		efree(S->cols);
-		S->cols = NULL;
-	}
 	return 1;
 }
 

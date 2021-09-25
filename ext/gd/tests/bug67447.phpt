@@ -1,11 +1,7 @@
 --TEST--
 Bug #67447 (imagecrop() adds a black line when cropping)
---SKIPIF--
-<?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available\n");
-    }
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 // true color

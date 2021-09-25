@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -16,13 +16,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "zend_compile.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
 #include "zend_worklist.h"
 #include "zend_optimizer.h"
 #include "zend_optimizer_internal.h"
+#include "zend_sort.h"
 
 static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {
@@ -269,7 +269,7 @@ static void initialize_block(zend_basic_block *block) {
 		block_map[i]++; \
 	} while (0)
 
-ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -299,12 +299,13 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
+			case ZEND_EXIT:
 			case ZEND_THROW:
 				/* Don't treat THROW as terminator if it's used in expression context,
 				 * as we may lose live ranges when eliminating unreachable code. */
@@ -314,6 +315,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 				break;
 			case ZEND_INCLUDE_OR_EVAL:
 				flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
+				ZEND_FALLTHROUGH;
 			case ZEND_GENERATOR_CREATE:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
@@ -514,6 +516,7 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_EXIT:
 			case ZEND_THROW:
 			case ZEND_MATCH_ERROR:
+			case ZEND_VERIFY_NEVER_TYPE:
 				break;
 			case ZEND_JMP:
 				block->successors_count = 1;
@@ -594,12 +597,10 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 	/* Build CFG, Step 4, Mark Reachable Basic Blocks */
 	cfg->flags |= flags;
 	zend_mark_reachable_blocks(op_array, cfg, 0);
-
-	return SUCCESS;
 }
 /* }}} */
 
-ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 {
 	int j, s, edges;
 	zend_basic_block *b;
@@ -657,8 +658,6 @@ ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {
 			}
 		}
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
@@ -682,7 +681,7 @@ static void compute_postnum_recursive(
 
 /* Computes dominator tree using algorithm from "A Simple, Fast Dominance Algorithm" by
  * Cooper, Harvey and Kennedy. */
-ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	zend_basic_block *blocks = cfg->blocks;
 	int blocks_count = cfg->blocks_count;
@@ -769,11 +768,10 @@ ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zen
 	}
 
 	free_alloca(postnum, use_heap);
-	return SUCCESS;
 }
 /* }}} */
 
-static int dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
+static bool dominates(zend_basic_block *blocks, int a, int b) /* {{{ */
 {
 	while (blocks[b].level > blocks[a].level) {
 		b = blocks[b].idom;
@@ -795,7 +793,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 	*b = tmp;
 }
 
-ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
+ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	int i, j, k, n;
 	int time;
@@ -890,6 +888,10 @@ ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cf
 				j = blocks[j].loop_header;
 			}
 			if (j != i) {
+				if (blocks[j].idom < 0 && j != 0) {
+					/* Ignore blocks that are unreachable or only abnormally reachable. */
+					continue;
+				}
 				blocks[j].loop_header = i;
 				for (k = 0; k < blocks[j].predecessors_count; k++) {
 					zend_worklist_push(&work, cfg->predecessors[blocks[j].predecessor_offset + k]);
@@ -903,7 +905,5 @@ ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cf
 	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 
 	cfg->flags |= flag;
-
-	return SUCCESS;
 }
 /* }}} */

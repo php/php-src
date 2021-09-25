@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -1391,6 +1391,11 @@ static void php_hashcontext_dtor(zend_object *obj) {
 }
 /* }}} */
 
+static void php_hashcontext_free(zend_object *obj) {
+	php_hashcontext_dtor(obj);
+	zend_object_std_dtor(obj);
+}
+
 /* {{{ php_hashcontext_clone */
 static zend_object *php_hashcontext_clone(zend_object *zobj) {
 	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
@@ -1631,7 +1636,7 @@ PHP_MINIT_FUNCTION(hash)
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
 	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
-	php_hashcontext_handlers.dtor_obj = php_hashcontext_dtor;
+	php_hashcontext_handlers.free_obj = php_hashcontext_free;
 	php_hashcontext_handlers.clone_obj = php_hashcontext_clone;
 
 #ifdef PHP_MHASH_BC

@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::getErrorCode (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

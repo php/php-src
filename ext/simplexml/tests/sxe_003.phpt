@@ -1,10 +1,8 @@
 --TEST--
 SPL: SimpleXMLIterator and getChildren()
---SKIPIF--
-<?php
-if (!extension_loaded('simplexml')) print 'skip';
-if (!extension_loaded("libxml")) print "skip LibXML not present";
-?>
+--EXTENSIONS--
+simplexml
+libxml
 --FILE--
 <?php
 

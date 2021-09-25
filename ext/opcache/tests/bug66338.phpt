@@ -2,8 +2,8 @@
 Bug #66338 (Optimization binding of class constants is not safely opcacheable)
 --INI--
 opcache.enable=0
---SKIPIF--
-<?php if (!extension_loaded('Zend OPcache')) die("skip Zend OPcache extension not loaded"); ?>
+--EXTENSIONS--
+opcache
 --CONFLICTS--
 server
 --FILE--

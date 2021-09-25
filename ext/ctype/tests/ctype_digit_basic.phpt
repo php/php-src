@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_digit() function : basic functionality
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 echo "*** Testing ctype_digit() : basic functionality ***\n";

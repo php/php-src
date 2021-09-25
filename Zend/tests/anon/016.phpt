@@ -30,6 +30,5 @@ array(1) {
 }
 array(1) {
   [0]=>
-  object(stdClass)#2 (0) {
-  }
+  int(24)
 }

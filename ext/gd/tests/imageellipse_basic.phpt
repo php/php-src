@@ -3,10 +3,8 @@ Testing imageellipse() of GD library
 --CREDITS--
 Ivan Rosolen <contato [at] ivanrosolen [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

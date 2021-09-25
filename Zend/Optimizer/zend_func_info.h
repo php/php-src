@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -56,12 +56,14 @@ BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_func_info_rid;
 
+uint32_t zend_get_internal_func_info(
+	const zend_function *callee_func, const zend_call_info *call_info, const zend_ssa *ssa);
 ZEND_API uint32_t zend_get_func_info(
 	const zend_call_info *call_info, const zend_ssa *ssa,
 	zend_class_entry **ce, bool *ce_is_instanceof);
 
-int zend_func_info_startup(void);
-int zend_func_info_shutdown(void);
+zend_result zend_func_info_startup(void);
+zend_result zend_func_info_shutdown(void);
 
 END_EXTERN_C()
 

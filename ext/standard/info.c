@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -34,7 +34,6 @@
 #include <sys/utsname.h>
 #endif
 #include "url.h"
-#include "php_string.h"
 
 #ifdef PHP_WIN32
 # include "winver.h"
@@ -135,7 +134,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 		if (!sapi_module.phpinfo_as_text) {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
-			php_strtolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
+			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
 			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
@@ -173,7 +172,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find_deref(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -199,6 +198,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print(" => ");
 			}
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
 					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
@@ -775,7 +775,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -864,7 +864,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			} else {
 				descr = estrdup("disabled");
 			}
-            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			php_info_print_table_row(2, "Zend Multibyte Support", descr);
 			efree(descr);
 		}
 
@@ -961,7 +961,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
-        tsrm_env_unlock();
+		tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 
@@ -995,7 +995,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	}
 
 
-	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {
+	if (flag & PHP_INFO_CREDITS) {
 		php_info_print_hr();
 		php_print_credits(PHP_CREDITS_ALL & ~PHP_CREDITS_FULLPAGE);
 	}

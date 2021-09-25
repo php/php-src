@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_convert() and JSON/Array
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

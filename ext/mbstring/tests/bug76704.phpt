@@ -1,9 +1,7 @@
 --TEST--
 Bug #76704 (mb_detect_order return value varies based on argument type)
---SKIPIF--
-<?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 try {

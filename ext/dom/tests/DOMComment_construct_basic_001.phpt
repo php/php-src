@@ -3,8 +3,8 @@ DOMComment::__construct() with constructor called twice.
 --CREDITS--
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-25
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument('1.0', 'UTF-8');

@@ -10,10 +10,6 @@ echo "*** Testing join() : usage variations ***\n";
 // initialize all required variables
 $pieces = array("element1", "element2");
 
-// get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -62,18 +58,8 @@ $values =  array (
   "",
   '',
 
-  // null values
-  NULL,
-  null,
-
   // resource variable
   $fp,
-
-  // undefined variable
-  @$undefined_var,
-
-  // unset variable
-  @$unset_var
 );
 
 
@@ -143,13 +129,5 @@ string(16) "element1element2"
 -- Iteration 21 --
 string(16) "element1element2"
 -- Iteration 22 --
-string(16) "element1element2"
--- Iteration 23 --
-string(16) "element1element2"
--- Iteration 24 --
 join(): Argument #1 ($separator) must be of type array|string, resource given
--- Iteration 25 --
-string(16) "element1element2"
--- Iteration 26 --
-string(16) "element1element2"
 Done

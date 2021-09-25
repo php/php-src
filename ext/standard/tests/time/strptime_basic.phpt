@@ -5,8 +5,10 @@ Test strptime() function : basic functionality
 if (!function_exists('strptime')) {
     die("skip - strptime() function not available in this build");
 }
-if (PHP_OS == 'Darwin') die("skip - strptime() behaves differently on Darwin");
-if (!strftime('%Z')) die('skip strftime does not support %Z');
+if (PHP_OS_FAMILY == 'Darwin' || PHP_OS_FAMILY == 'BSD') {
+    die("skip strptime() behaves differently on Darwin/BSD");
+}
+if (!@strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--
 <?php
@@ -29,8 +31,12 @@ var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : basic functionality ***
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -51,6 +57,10 @@ array(9) {
   ["unparsed"]=>
   string(4) " GMT"
 }
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)
@@ -71,6 +81,10 @@ array(9) {
   ["unparsed"]=>
   string(0) ""
 }
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 array(9) {
   ["tm_sec"]=>
   int(0)

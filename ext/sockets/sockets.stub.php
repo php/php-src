@@ -1,11 +1,19 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Socket
 {
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class AddressInfo
 {
 }

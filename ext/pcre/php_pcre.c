@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -130,28 +130,28 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 
 static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{ */
 {
-    switch (error_code) {
-        case PHP_PCRE_NO_ERROR:
-            return "No error";
-        case PHP_PCRE_INTERNAL_ERROR:
-            return "Internal error";
-        case PHP_PCRE_BAD_UTF8_ERROR:
-            return "Malformed UTF-8 characters, possibly incorrectly encoded";
-        case PHP_PCRE_BAD_UTF8_OFFSET_ERROR:
-            return "The offset did not correspond to the beginning of a valid UTF-8 code point";
-        case PHP_PCRE_BACKTRACK_LIMIT_ERROR:
-            return "Backtrack limit exhausted";
-        case PHP_PCRE_RECURSION_LIMIT_ERROR:
-            return "Recursion limit exhausted";
+	switch (error_code) {
+		case PHP_PCRE_NO_ERROR:
+			return "No error";
+		case PHP_PCRE_INTERNAL_ERROR:
+			return "Internal error";
+		case PHP_PCRE_BAD_UTF8_ERROR:
+			return "Malformed UTF-8 characters, possibly incorrectly encoded";
+		case PHP_PCRE_BAD_UTF8_OFFSET_ERROR:
+			return "The offset did not correspond to the beginning of a valid UTF-8 code point";
+		case PHP_PCRE_BACKTRACK_LIMIT_ERROR:
+			return "Backtrack limit exhausted";
+		case PHP_PCRE_RECURSION_LIMIT_ERROR:
+			return "Recursion limit exhausted";
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-        case PHP_PCRE_JIT_STACKLIMIT_ERROR:
-            return "JIT stack limit exhausted";
+		case PHP_PCRE_JIT_STACKLIMIT_ERROR:
+			return "JIT stack limit exhausted";
 #endif
 
-        default:
-            return "Unknown error";
-    }
+		default:
+			return "Unknown error";
+	}
 }
 /* }}} */
 
@@ -595,7 +595,11 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, co
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
 	pcre2_code			*re = NULL;
+#if 10 == PCRE2_MAJOR && 37 == PCRE2_MINOR && !HAVE_BUNDLED_PCRE
+	uint32_t			 coptions = PCRE2_NO_START_OPTIMIZE;
+#else
 	uint32_t			 coptions = 0;
+#endif
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -732,8 +736,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
 			case 'u':	coptions |= PCRE2_UTF;
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
-       characters, even in UTF-8 mode. However, this can be changed by setting
-       the PCRE2_UCP option. */
+	   characters, even in UTF-8 mode. However, this can be changed by setting
+	   the PCRE2_UCP option. */
 #ifdef PCRE2_UCP
 						coptions |= PCRE2_UCP;
 #endif
@@ -790,8 +794,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			zend_hash_add_ptr(&char_tables, _k, (void *)tables);
 			zend_string_release(_k);
 		}
-		pcre2_set_character_tables(cctx, tables);
 	}
+	pcre2_set_character_tables(cctx, tables);
 
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
@@ -965,14 +969,14 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
-static void init_unmatched_null_pair() {
+static void init_unmatched_null_pair(void) {
 	zval val1, val2;
 	ZVAL_NULL(&val1);
 	ZVAL_LONG(&val2, -1);
 	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
 }
 
-static void init_unmatched_empty_pair() {
+static void init_unmatched_empty_pair(void) {
 	zval val1, val2;
 	ZVAL_EMPTY_STRING(&val1);
 	ZVAL_LONG(&val2, -1);
@@ -1500,8 +1504,8 @@ PHP_FUNCTION(preg_match_all)
 /* {{{ preg_get_backref */
 static int preg_get_backref(char **str, int *backref)
 {
-	register char in_brace = 0;
-	register char *walk = *str;
+	char in_brace = 0;
+	char *walk = *str;
 
 	if (walk[1] == 0)
 		return 0;
@@ -1712,7 +1716,7 @@ matched:
 			}
 
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, 0);
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -1798,14 +1802,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
@@ -1952,7 +1954,7 @@ matched:
 			ZEND_ASSERT(eval_result);
 			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, 0);
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -2009,14 +2011,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
@@ -2640,6 +2640,10 @@ matched:
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
 			if (start_offset == offsets[0]) {
+				/* Get next piece if no limit or limit not yet reached and something matched*/
+				if (limit_val != -1 && limit_val <= 1) {
+					break;
+				}
 				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {
@@ -2974,9 +2978,9 @@ PHP_FUNCTION(preg_last_error)
 /* {{{ Returns the error message of the last regexp execution. */
 PHP_FUNCTION(preg_last_error_msg)
 {
-    ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_NONE();
 
-    RETURN_STRING(php_pcre_get_error_msg(PCRE_G(error_code)));
+	RETURN_STRING(php_pcre_get_error_msg(PCRE_G(error_code)));
 }
 /* }}} */
 
@@ -2984,7 +2988,7 @@ PHP_FUNCTION(preg_last_error_msg)
 
 zend_module_entry pcre_module_entry = {
 	STANDARD_MODULE_HEADER,
-   "pcre",
+	"pcre",
 	ext_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),

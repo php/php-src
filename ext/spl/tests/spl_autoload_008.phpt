@@ -81,7 +81,7 @@ Exception: Bla
 int(0)
 ====2====
 string(22) "MyAutoLoader::dynaLoad"
-TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 int(0)
 ====3====
 array(2) {
@@ -101,7 +101,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback, non-static method MyAutoLoader::dynaLoad() cannot be called statically
+TypeError: spl_autoload_register(): Argument #1 ($callback) must be a valid callback or null, non-static method MyAutoLoader::dynaLoad() cannot be called statically
 int(0)
 ====5====
 array(2) {

@@ -1,8 +1,9 @@
 --TEST--
 gmp_divexact() tests
+--EXTENSIONS--
+gmp
 --SKIPIF--
 <?php
-if (!extension_loaded("gmp")) die ("skip");
 if (!defined('GMP_VERSION') || version_compare("4.2.1", GMP_VERSION, ">=")) {
     die("skip your GMP is too old and will crash");
 }

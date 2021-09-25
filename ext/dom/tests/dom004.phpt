@@ -1,8 +1,9 @@
 --TEST--
 Test 4: Streams Test
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 in_array('compress.zlib', stream_get_wrappers()) or die('skip compress.zlib wrapper is not available');
 ?>
 --FILE--

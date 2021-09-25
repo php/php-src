@@ -1,5 +1,7 @@
 --TEST--
 redefining SID should not cause warnings
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

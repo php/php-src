@@ -1,7 +1,7 @@
 --TEST--
 iconv_strlen()
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 function foo($str, $charset) {

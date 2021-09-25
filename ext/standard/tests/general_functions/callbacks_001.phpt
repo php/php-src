@@ -106,4 +106,4 @@ O
 $this|O::who
 O
 $this|B::who
-call_user_func(): Argument #1 ($function) must be a valid callback, class P is not a subclass of B
+call_user_func(): Argument #1 ($callback) must be a valid callback, class P is not a subclass of B

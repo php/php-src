@@ -1,11 +1,7 @@
 --TEST--
 Test xml_parse_into_struct() function : variation
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-    print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 echo "*** Testing xml_parse_into_struct() : variation ***\n";

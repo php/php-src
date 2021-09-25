@@ -85,13 +85,12 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
 			((ce->ce_flags & ZEND_ACC_USE_GUARDS) ? 0 : 1));
 }
 
-/* Allocates object type and zeros it, but not the properties.
+/* Allocates object type and zeros it, but not the standard zend_object and properties.
+ * Standard object MUST be initialized using zend_object_std_init().
  * Properties MUST be initialized using object_properties_init(). */
 static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
-	/* Subtraction of sizeof(zval) is necessary, because zend_object_properties_size() may be
-	 * -sizeof(zval), if the object has no properties. */
-	memset(obj, 0, obj_size - sizeof(zval));
+	memset(obj, 0, obj_size - sizeof(zend_object));
 	return obj;
 }
 

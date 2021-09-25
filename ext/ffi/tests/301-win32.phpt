@@ -1,7 +1,8 @@
 --TEST--
 FFI 301: FFI loading on Windows
+--EXTENSIONS--
+ffi
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php if (substr(PHP_OS, 0, 3) != 'WIN') die('skip for Windows only'); ?>
 --INI--
 ffi.enable=1

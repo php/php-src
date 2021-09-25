@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -236,7 +236,7 @@ static dba_handler handler[] = {
 	DBA_HND(cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_CDB_BUILTIN
-    DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
+	DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_DB1
 	DBA_HND(db1, DBA_LOCK_ALL) /* No lock in lib */
@@ -404,7 +404,7 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
+	STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -448,10 +448,10 @@ PHP_MINFO_FUNCTION(dba)
 	for(hptr = handler; hptr->name; hptr++) {
 		smart_str_appends(&handlers, hptr->name);
 		smart_str_appendc(&handlers, ' ');
- 	}
+	}
 
 	php_info_print_table_start();
- 	php_info_print_table_row(2, "DBA support", "enabled");
+	php_info_print_table_row(2, "DBA support", "enabled");
 	if (handlers.s) {
 		smart_str_0(&handlers);
 		php_info_print_table_row(2, "Supported handlers", ZSTR_VAL(handlers.s));
@@ -637,7 +637,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				lock_flag = (hptr->flags & DBA_LOCK_ALL);
 				break;
 			}
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
@@ -863,9 +863,9 @@ restart:
 				bool close_both;
 
 				close_both = (info->fp != info->lock.fp);
-				php_stream_close(info->lock.fp);
+				php_stream_free(info->lock.fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				if (close_both) {
-					php_stream_close(info->fp);
+					php_stream_free(info->fp, persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE);
 				}
 				info->fp = NULL;
 				info->lock.fp = NULL;
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(dba_handlers)
 		} else {
 			add_next_index_string(return_value, hptr->name);
 		}
- 	}
+	}
 }
 /* }}} */
 

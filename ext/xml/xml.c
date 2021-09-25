@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -26,7 +26,6 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h"
-#include "zend_interfaces.h"
 
 #ifdef HAVE_XML
 
@@ -125,10 +124,10 @@ typedef struct {
 
 
 enum php_xml_option {
-    PHP_XML_OPTION_CASE_FOLDING = 1,
-    PHP_XML_OPTION_TARGET_ENCODING,
-    PHP_XML_OPTION_SKIP_TAGSTART,
-    PHP_XML_OPTION_SKIP_WHITE
+	PHP_XML_OPTION_CASE_FOLDING = 1,
+	PHP_XML_OPTION_TARGET_ENCODING,
+	PHP_XML_OPTION_SKIP_TAGSTART,
+	PHP_XML_OPTION_SKIP_WHITE
 };
 
 /* {{{ dynamically loadable module stuff */
@@ -191,10 +190,10 @@ static const zend_module_dep xml_deps[] = {
 
 zend_module_entry xml_module_entry = {
 #ifdef LIBXML_EXPAT_COMPAT
-    STANDARD_MODULE_HEADER_EX, NULL,
+	STANDARD_MODULE_HEADER_EX, NULL,
 	xml_deps,
 #else
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 #endif
 	"xml",                /* extension name */
 	ext_functions,        /* extension function list */
@@ -203,11 +202,11 @@ zend_module_entry xml_module_entry = {
 	NULL,                 /* per-request startup function */
 	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
-    PHP_XML_VERSION,
-    PHP_MODULE_GLOBALS(xml), /* globals descriptor */
-    PHP_GINIT(xml),          /* globals ctor */
-    NULL,                    /* globals dtor */
-    NULL,                    /* post deactivate */
+	PHP_XML_VERSION,
+	PHP_MODULE_GLOBALS(xml), /* globals descriptor */
+	PHP_GINIT(xml),          /* globals ctor */
+	NULL,                    /* globals dtor */
+	NULL,                    /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -255,8 +254,6 @@ PHP_MINIT_FUNCTION(xml)
 {
 	xml_parser_ce = register_class_XMLParser();
 	xml_parser_ce->create_object = xml_parser_create_object;
-	xml_parser_ce->serialize = zend_class_serialize_deny;
-	xml_parser_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&xml_parser_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xml_parser_object_handlers.offset = XtOffsetOf(xml_parser, std);
@@ -264,6 +261,7 @@ PHP_MINIT_FUNCTION(xml)
 	xml_parser_object_handlers.get_gc = xml_parser_get_gc;
 	xml_parser_object_handlers.get_constructor = xml_parser_get_constructor;
 	xml_parser_object_handlers.clone_obj = NULL;
+	xml_parser_object_handlers.compare = zend_objects_not_comparable;
 
 	REGISTER_LONG_CONSTANT("XML_ERROR_NONE", XML_ERROR_NONE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ERROR_NO_MEMORY", XML_ERROR_NO_MEMORY, CONST_CS|CONST_PERSISTENT);
@@ -777,72 +775,77 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			zend_string *decoded_value;
 
 			decoded_value = xml_utf8_decode(s, len, parser->target_encoding);
-			for (i = 0; i < ZSTR_LEN(decoded_value); i++) {
-				switch (ZSTR_VAL(decoded_value)[i]) {
-					case ' ':
-					case '\t':
-					case '\n':
-						continue;
-					default:
-						doprint = 1;
+			if (parser->skipwhite) {
+				for (i = 0; i < ZSTR_LEN(decoded_value); i++) {
+					switch (ZSTR_VAL(decoded_value)[i]) {
+						case ' ':
+						case '\t':
+						case '\n':
+							continue;
+						default:
+							doprint = 1;
+							break;
+					}
+					if (doprint) {
 						break;
-				}
-				if (doprint) {
-					break;
+					}
 				}
 			}
-			if (doprint || (! parser->skipwhite)) {
-				if (parser->lastwasopen) {
-					zval *myval;
 
-					/* check if the current tag already has a value - if yes append to that! */
-					if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
-						int newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
-						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
-								ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-						zend_string_release_ex(decoded_value, 0);
-					} else {
-						add_assoc_str(parser->ctag, "value", decoded_value);
-					}
+			if (parser->lastwasopen) {
+				zval *myval;
 
+				/* check if the current tag already has a value - if yes append to that! */
+				if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
+					size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
+					Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+					strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
+							ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
+					zend_string_release_ex(decoded_value, 0);
 				} else {
-					zval tag;
-					zval *curtag, *mytype, *myval;
-
-					ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
-						if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
-							if (!strcmp(Z_STRVAL_P(mytype), "cdata")) {
-								if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
-									int newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
-									Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
-									strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
-											ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
-									zend_string_release_ex(decoded_value, 0);
-									return;
-								}
-							}
-						}
-						break;
-					} ZEND_HASH_FOREACH_END();
-
-					if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
-						array_init(&tag);
-
-						_xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
-
-						add_assoc_string(&tag, "tag", SKIP_TAGSTART(parser->ltags[parser->level-1]));
-						add_assoc_str(&tag, "value", decoded_value);
-						add_assoc_string(&tag, "type", "cdata");
-						add_assoc_long(&tag, "level", parser->level);
-
-						zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
-					} else if (parser->level == (XML_MAXLEVEL + 1)) {
-											php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
+					if (doprint || (! parser->skipwhite)) {
+						add_assoc_str(parser->ctag, "value", decoded_value);
+					} else {
+						zend_string_release_ex(decoded_value, 0);
 					}
 				}
+
 			} else {
-				zend_string_release_ex(decoded_value, 0);
+				zval tag;
+				zval *curtag, *mytype, *myval;
+
+				ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
+					if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
+						if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
+							if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
+								size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
+								Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
+								strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
+										ZSTR_VAL(decoded_value), ZSTR_LEN(decoded_value) + 1);
+								zend_string_release_ex(decoded_value, 0);
+								return;
+							}
+						}
+					}
+					break;
+				} ZEND_HASH_FOREACH_END();
+
+				if (parser->level <= XML_MAXLEVEL && parser->level > 0 && (doprint || (! parser->skipwhite))) {
+					array_init(&tag);
+
+					_xml_add_to_info(parser,SKIP_TAGSTART(parser->ltags[parser->level-1]));
+
+					add_assoc_string(&tag, "tag", SKIP_TAGSTART(parser->ltags[parser->level-1]));
+					add_assoc_str(&tag, "value", decoded_value);
+					add_assoc_string(&tag, "type", "cdata");
+					add_assoc_long(&tag, "level", parser->level);
+
+					zend_hash_next_index_insert(Z_ARRVAL(parser->data), &tag);
+				} else if (parser->level == (XML_MAXLEVEL + 1)) {
+										php_error_docref(NULL, E_WARNING, "Maximum depth exceeded - Results truncated");
+				} else {
+					zend_string_release_ex(decoded_value, 0);
+				}
 			}
 		}
 	}
@@ -1000,15 +1003,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	xml_parser *parser;
 	int auto_detect = 0;
 
-	char *encoding_param = NULL;
-	size_t encoding_param_len = 0;
+	zend_string *encoding_param = NULL;
 
 	char *ns_param = NULL;
 	size_t ns_param_len = 0;
 
 	XML_Char *encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|s!s": "|s!"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|S!s": "|S!"), &encoding_param, &ns_param, &ns_param_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1016,14 +1018,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (encoding_param_len == 0) {
+		if (ZSTR_LEN(encoding_param) == 0) {
 			encoding = XML(default_encoding);
 			auto_detect = 1;
-		} else if (strcasecmp(encoding_param, "ISO-8859-1") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "ISO-8859-1")) {
 			encoding = (XML_Char*)"ISO-8859-1";
-		} else if (strcasecmp(encoding_param, "UTF-8") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "UTF-8")) {
 			encoding = (XML_Char*)"UTF-8";
-		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
+		} else if (zend_string_equals_literal_ci(encoding_param, "US-ASCII")) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
 			zend_argument_value_error(1, "is not a supported source encoding");
@@ -1040,7 +1042,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	object_init_ex(return_value, xml_parser_ce);
 	parser = Z_XMLPARSER_P(return_value);
 	parser->parser = XML_ParserCreate_MM((auto_detect ? NULL : encoding),
-                                         &php_xml_mem_hdlrs, (XML_Char*)ns_param);
+	                                     &php_xml_mem_hdlrs, (XML_Char*)ns_param);
 
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
@@ -1253,6 +1255,10 @@ PHP_FUNCTION(xml_parse)
 	}
 
 	parser = Z_XMLPARSER_P(pind);
+	if (parser->isparsing) {
+		zend_throw_error(NULL, "Parser must not be called recursively");
+		RETURN_THROWS();
+	}
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, isFinal);
 	parser->isparsing = 0;
@@ -1300,6 +1306,10 @@ PHP_FUNCTION(xml_parse_into_struct)
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
+	if (parser->isparsing) {
+		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
+		RETURN_FALSE;
+	}
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, 1);
 	parser->isparsing = 0;
@@ -1397,7 +1407,7 @@ PHP_FUNCTION(xml_parser_free)
 
 	parser = Z_XMLPARSER_P(pind);
 	if (parser->isparsing == 1) {
-		php_error_docref(NULL, E_WARNING, "Parser cannot be freed while it is parsing.");
+		php_error_docref(NULL, E_WARNING, "Parser cannot be freed while it is parsing");
 		RETURN_FALSE;
 	}
 

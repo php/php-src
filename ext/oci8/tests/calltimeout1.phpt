@@ -1,9 +1,10 @@
 --TEST--
 oci_set_call_timeout: test timing out 
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {

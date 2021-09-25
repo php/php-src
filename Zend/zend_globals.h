@@ -61,7 +61,8 @@ END_EXTERN_C()
 
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
-
+typedef struct _zend_fiber_context zend_fiber_context;
+typedef struct _zend_fiber zend_fiber;
 
 struct _zend_compiler_globals {
 	zend_stack loop_var_stack;
@@ -95,6 +96,10 @@ struct _zend_compiler_globals {
 	bool skip_shebang;
 	bool increment_lineno;
 
+	bool variable_width_locale;   /* UTF-8, Shift-JIS, Big5, ISO 2022, EUC, etc */
+	bool ascii_compatible_locale; /* locale uses ASCII characters as singletons */
+	                              /* and don't use them as lead/trail units     */
+
 	zend_string *doc_comment;
 	uint32_t extra_fn_flags;
 
@@ -120,6 +125,7 @@ struct _zend_compiler_globals {
 	HashTable *memoized_exprs;
 	int memoize_mode;
 
+	void   *map_ptr_real_base;
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;
@@ -207,7 +213,7 @@ struct _zend_executor_globals {
 	/* timeout support */
 	zend_long timeout_seconds;
 
-	int lambda_count;
+	int capture_warnings_during_sccp;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
@@ -225,7 +231,7 @@ struct _zend_executor_globals {
 
 	zend_long assertions;
 
-	uint32_t           ht_iterators_count;     /* number of allocatd slots */
+	uint32_t           ht_iterators_count;     /* number of allocated slots */
 	uint32_t           ht_iterators_used;      /* number of used slots */
 	HashTableIterator *ht_iterators;
 	HashTableIterator  ht_iterators_slots[16];
@@ -244,6 +250,21 @@ struct _zend_executor_globals {
 	zend_long exception_string_param_max_len;
 
 	zend_get_gc_buffer get_gc_buffer;
+
+	zend_fiber_context *main_fiber_context;
+	zend_fiber_context *current_fiber_context;
+
+	/* Active instance of Fiber. */
+	zend_fiber *active_fiber;
+
+	/* Default fiber C stack size. */
+	zend_long fiber_stack_size;
+
+	/* If record_errors is enabled, all emitted diagnostics will be recorded,
+	 * in addition to being processed as usual. */
+	bool record_errors;
+	uint32_t num_errors;
+	zend_error_info **errors;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -266,7 +287,7 @@ struct _zend_ini_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 
-	char *filename;
+	zend_string *filename;
 	int lineno;
 
 	/* Modes are: ZEND_INI_SCANNER_NORMAL, ZEND_INI_SCANNER_RAW, ZEND_INI_SCANNER_TYPED */

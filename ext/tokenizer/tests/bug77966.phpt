@@ -1,5 +1,7 @@
 --TEST--
 Handling of "namespace as" in TOKEN_PARSE mode
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

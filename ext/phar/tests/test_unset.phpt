@@ -1,7 +1,7 @@
 --TEST--
 Phar: ensure unset() works properly on a non-flushed phar archive
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--
@@ -32,7 +32,6 @@ var_dump(file_exists($fname));
 
 ?>
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
 --EXPECTF--
 NULL

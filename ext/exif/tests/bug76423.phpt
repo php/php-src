@@ -1,9 +1,7 @@
 --TEST--
 Bug #76423 (Int Overflow lead to Heap OverFlow in exif_thumbnail_extract of exif.c)
---SKIPIF--
-<?php
-if (!extension_loaded('exif')) die('skip exif extension not available');
-?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 exif_read_data(__DIR__ . '/bug76423.jpg', 0, true, true);

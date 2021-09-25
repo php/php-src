@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -100,9 +100,9 @@ static inline void php_mt_initialize(uint32_t seed, uint32_t *state)
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
 
-	register uint32_t *s = state;
-	register uint32_t *r = state;
-	register int i = 1;
+	uint32_t *s = state;
+	uint32_t *r = state;
+	int i = 1;
 
 	*s++ = seed & 0xffffffffU;
 	for( ; i < N; ++i ) {
@@ -118,9 +118,9 @@ static inline void php_mt_reload(void)
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-	register uint32_t *state = BG(state);
-	register uint32_t *p = state;
-	register int i;
+	uint32_t *state = BG(state);
+	uint32_t *p = state;
+	int i;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		for (i = N - M; i--; ++p)
@@ -159,7 +159,7 @@ PHPAPI uint32_t php_mt_rand(void)
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
 
-	register uint32_t s1;
+	uint32_t s1;
 
 	if (UNEXPECTED(!BG(mt_rand_is_seeded))) {
 		zend_long bytes;
@@ -343,7 +343,7 @@ PHP_FUNCTION(mt_getrandmax)
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
+	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
 

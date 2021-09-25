@@ -8,24 +8,24 @@ class Spoofchecker
 
     /**
      * @param int $errorCode
-     * @return bool
+     * @tentative-return-type
      */
-    public function isSuspicious(string $string, &$errorCode = null) {}
+    public function isSuspicious(string $string, &$errorCode = null): bool {}
 
     /**
      * @param int $errorCode
-     * @return bool
+     * @tentative-return-type
      */
-    public function areConfusable(string $string1, string $string2, &$errorCode = null) {}
+    public function areConfusable(string $string1, string $string2, &$errorCode = null): bool {}
 
-    /** @return void */
-    public function setAllowedLocales(string $locales) {}
+    /** @tentative-return-type */
+    public function setAllowedLocales(string $locales): void {}
 
-    /** @return void */
-    public function setChecks(int $checks) {}
+    /** @tentative-return-type */
+    public function setChecks(int $checks): void {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-    /** @return void */
-    public function setRestrictionLevel(int $level) {}
+    /** @tentative-return-type */
+    public function setRestrictionLevel(int $level): void {}
 #endif
 }

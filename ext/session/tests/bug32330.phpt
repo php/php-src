@@ -1,5 +1,7 @@
 --TEST--
 Bug #32330 (session_destroy, "Failed to initialize storage module", custom session handler)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

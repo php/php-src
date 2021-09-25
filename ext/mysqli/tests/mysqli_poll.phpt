@@ -1,8 +1,9 @@
 --TEST--
 int mysqli_poll() simple
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('connect.inc');
 require_once('skipifconnectfailure.inc');
 

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -94,7 +94,11 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 				dbh->is_persistent);
 
 		} else {
-			einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+			if (S && S->stmt) {
+				einfo->errmsg = pestrdup(mysql_stmt_error(S->stmt), dbh->is_persistent);
+			} else {
+				einfo->errmsg = pestrdup(mysql_error(H->server), dbh->is_persistent);
+			}
 		}
 	} else { /* no error */
 		strcpy(*pdo_err, PDO_ERR_NONE);
@@ -171,7 +175,7 @@ static bool mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", ZSTR_LEN(sql), ZSTR_VAL(sql));
+	PDO_DBG_INF_FMT("sql=%.*s", (int) ZSTR_LEN(sql), ZSTR_VAL(sql));
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -289,7 +293,7 @@ static zend_string *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const zend_string *
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("pdo_mysql_last_insert_id");
-	PDO_DBG_RETURN(php_pdo_int64_to_str(mysql_insert_id(H->server)));
+	PDO_DBG_RETURN(zend_u64_to_str(mysql_insert_id(H->server)));
 }
 /* }}} */
 
@@ -402,13 +406,17 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh)
 /* {{{ pdo_mysql_set_attribute */
 static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
-	zend_long lval = zval_get_long(val);
-	bool bval = lval ? 1 : 0;
+	zend_long lval;
+	bool bval;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
+
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			/* ignore if the new value equals the old one */
 			if (dbh->auto_commit ^ bval) {
 				dbh->auto_commit = bval;
@@ -419,29 +427,44 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			PDO_DBG_RETURN(true);
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
+			if (!pdo_get_long_param(&lval, val)) {
+				PDO_DBG_RETURN(false);
+			}
 			((pdo_mysql_db_handle *)dbh->driver_data)->assume_national_character_set_strings = lval == PDO_PARAM_STR_NATL;
 			PDO_DBG_RETURN(true);
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
 			PDO_DBG_RETURN(true);
 
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
 			PDO_DBG_RETURN(true);
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
 			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
 			PDO_DBG_RETURN(true);
 
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
+			if (!pdo_get_long_param(&lval, val)) {
+				PDO_DBG_RETURN(false);
+			}
 			if (lval < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
- 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = lval;
@@ -463,7 +486,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 	PDO_DBG_ENTER("pdo_mysql_get_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, (char *)mysql_get_client_info());
@@ -520,6 +543,24 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_MYSQL_ATTR_LOCAL_INFILE:
 			ZVAL_BOOL(return_value, H->local_infile);
 			break;
+
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+		case PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY:
+		{
+			const char* local_infile_directory = NULL;
+#ifdef PDO_USE_MYSQLND
+			local_infile_directory = H->server->data->options->local_infile_directory;
+#else
+			mysql_get_option(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, &local_infile_directory);
+#endif
+			if (local_infile_directory) {
+				ZVAL_STRING(return_value, local_infile_directory);
+			} else {
+				ZVAL_NULL(return_value);
+			}
+			break;
+		}
+#endif
 
 		default:
 			PDO_DBG_RETURN(0);
@@ -724,6 +765,17 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		}
 
+#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+		zend_string *local_infile_directory = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, NULL);
+		if (local_infile_directory && !php_check_open_basedir(ZSTR_VAL(local_infile_directory))) {
+			if (mysql_options(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, (const char *)ZSTR_VAL(local_infile_directory))) {
+				zend_string_release(local_infile_directory);
+				pdo_mysql_error(dbh);
+				goto cleanup;
+			}
+			zend_string_release(local_infile_directory);
+		}
+#endif
 #ifdef MYSQL_OPT_RECONNECT
 		/* since 5.0.3, the default for this option is 0 if not specified.
 		 * we want the old behaviour

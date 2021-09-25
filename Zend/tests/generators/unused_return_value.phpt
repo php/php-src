@@ -1,5 +1,5 @@
 --TEST--
-There shouldn't be any leaks when the genertor's return value isn't used
+There shouldn't be any leaks when the generator's return value isn't used
 --FILE--
 <?php
 

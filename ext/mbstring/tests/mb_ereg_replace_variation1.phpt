@@ -2,9 +2,10 @@
 Test mb_ereg_replace() function : usage variations  - <type here specifics of this variation>
 --INI--
 error_reporting=E_ALL & ~E_NOTICE
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
 ?>
 --FILE--
@@ -15,10 +16,6 @@ echo "*** Testing mb_ereg_replace() : usage variations ***\n";
 $replacement = 'string_val';
 $string = 'string_val';
 $option = '';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -49,10 +46,6 @@ $inputs = array(
        12.3456789000E-10,
        .5,
 
-       // null data
-/*10*/ NULL,
-       null,
-
        // boolean data
 /*12*/ true,
        false,
@@ -70,12 +63,6 @@ $inputs = array(
 
        // object data
 /*21*/ new classA(),
-
-       // undefined data
-/*22*/ @$undefined_var,
-
-       // unset data
-/*23*/ @$unset_var,
 
 );
 
@@ -121,7 +108,7 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 10 --
-string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
+string(10) "string_val"
 
 -- Iteration 11 --
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
@@ -133,32 +120,20 @@ string(10) "string_val"
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 14 --
-string(10) "string_val"
+string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 15 --
 string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 
 -- Iteration 16 --
-string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
+string(10) "string_val"
 
 -- Iteration 17 --
-string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
+string(10) "string_val"
 
 -- Iteration 18 --
 string(10) "string_val"
 
 -- Iteration 19 --
 string(10) "string_val"
-
--- Iteration 20 --
-string(10) "string_val"
-
--- Iteration 21 --
-string(10) "string_val"
-
--- Iteration 22 --
-string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
-
--- Iteration 23 --
-string(120) "string_valsstring_valtstring_valrstring_valistring_valnstring_valgstring_val_string_valvstring_valastring_vallstring_val"
 Done

@@ -122,6 +122,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 }
 #endif
 
+/* Used to convert a string float to integer during an (int) cast */
 static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
@@ -132,6 +133,22 @@ static zend_always_inline zend_long zend_dval_to_lval_cap(double d)
 	return (zend_long)d;
 }
 /* }}} */
+
+static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
+	return (double)l == d;
+}
+
+ZEND_API void zend_incompatible_double_to_long_error(double d);
+ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+
+static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
+{
+	zend_long l = zend_dval_to_lval(d);
+	if (!zend_is_long_compatible(d, l)) {
+		zend_incompatible_double_to_long_error(d);
+	}
+	return l;
+}
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
@@ -205,7 +222,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 	}
 
 	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
-		if (*e == (const unsigned char)c) {
+		if (*e == (unsigned char)c) {
 			return (const void *)e;
 		}
 	}
@@ -267,13 +284,16 @@ ZEND_API void ZEND_FASTCALL convert_to_boolean(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
-ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
 
 static zend_always_inline zend_long zval_get_long(zval *op) {
-	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, false);
+}
+static zend_always_inline zend_long zval_get_long_ex(zval *op, bool is_strict) {
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, is_strict);
 }
 static zend_always_inline double zval_get_double(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);
@@ -423,8 +443,6 @@ ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, boo
 
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strcasecmp(zval *s1, zval *s2);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int ZEND_FASTCALL zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
@@ -450,16 +468,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 #define convert_to_object_ex(zv) convert_to_object(zv)
 #define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
-#if defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER)
-/* This performance improvement of tolower() on Windows gives 10-18% on bench.php */
-#define ZEND_USE_TOLOWER_L 1
-#endif
-
-#ifdef ZEND_USE_TOLOWER_L
 ZEND_API void zend_update_current_locale(void);
-#else
-#define zend_update_current_locale()
-#endif
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
@@ -789,11 +798,6 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #endif
 }
 
-static zend_always_inline zend_result fast_div_function(zval *result, zval *op1, zval *op2)
-{
-	return div_function(result, op1, op2);
-}
-
 static zend_always_inline bool zend_fast_equal_strings(zend_string *s1, zend_string *s2)
 {
 	if (s1 == s2) {
@@ -885,6 +889,10 @@ static zend_always_inline char *zend_print_long_to_buf(char *buf, zend_long num)
 }
 
 ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
+ZEND_API zend_string* ZEND_FASTCALL zend_ulong_to_str(zend_ulong num);
+ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num);
+ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num);
+ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num);
 
 static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 {

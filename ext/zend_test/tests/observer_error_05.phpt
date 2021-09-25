@@ -1,13 +1,11 @@
 --TEST--
 Observer: End handlers fire after a userland fatal error
---SKIPIF--
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
---XFAIL--
-This is unsafe and fails on macos
 --FILE--
 <?php
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {

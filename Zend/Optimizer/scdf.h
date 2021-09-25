@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -49,7 +49,7 @@ typedef struct _scdf_ctx {
 void scdf_init(zend_optimizer_ctx *ctx, scdf_ctx *scdf, zend_op_array *op_array, zend_ssa *ssa);
 void scdf_solve(scdf_ctx *scdf, const char *name);
 
-int scdf_remove_unreachable_blocks(scdf_ctx *scdf);
+uint32_t scdf_remove_unreachable_blocks(scdf_ctx *scdf);
 
 /* Add uses to worklist */
 static inline void scdf_add_to_worklist(scdf_ctx *scdf, int var_num) {

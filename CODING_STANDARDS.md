@@ -1,10 +1,9 @@
 # PHP coding standards
 
-This file lists several standards that any programmer adding or changing code in
-PHP should follow. Since this file was added at a very late stage of the
-development of PHP v3.0, the code base does not fully follow it, but new
-features are going in that general direction. Many sections have been recoded to
-use these rules.
+This file lists standards that any programmer adding or changing code in
+PHP should follow. The code base does not yet fully follow it, but new
+features are going in that general direction. Many sections have been
+rewritten to comply with these rules.
 
 ## Code implementation
 
@@ -12,8 +11,8 @@ use these rules.
 
 2. Functions that are given pointers to resources should not free them.
 
-    For instance, `function int mail(char *to, char *from)` should NOT free to
-    and/or from.
+    For instance, `function int mail(char *to, char *from)` should NOT free `to`
+    and/or `from`.
 
     Exceptions:
 
@@ -21,21 +20,20 @@ use these rules.
       `efree()`
 
     * The function is given a boolean argument, that controls whether or not the
-      function may free its arguments (if true - the function must free its
-      arguments, if false - it must not)
+      function may free its arguments (if true, the function must free its
+      arguments; if false, it must not)
 
     * Low-level parser routines, that are tightly integrated with the token
       cache and the bison code for minimum memory copying overhead.
 
 3. Functions that are tightly integrated with other functions within the same
-    module, and rely on each other non-trivial behavior, should be documented as
+    module, and rely on each other's non-trivial behavior, should be documented as
     such and declared `static`. They should be avoided if possible.
 
 4. Use definitions and macros whenever possible, so that constants have
-    meaningful names and can be easily manipulated. The only exceptions to this
-    rule are 0 and 1, when used as `false` and `true` (respectively). Any other
-    use of a numeric constant to specify different behavior or actions should be
-    done through a `#define`.
+    meaningful names and can be easily manipulated. Any use of a numeric
+    constant to specify different behavior or actions should be done through
+    a `#define`.
 
 5. When writing functions that deal with strings, be sure to remember that PHP
     holds the length property of each string, and that it shouldn't be
@@ -260,34 +258,17 @@ use these rules.
     ```
 
 4. When indenting, use the tab character. A tab is expected to represent four
-    spaces. It is important to maintain consistency in indenture so that
+    spaces. It is important to maintain consistency in indentation so that
     definitions, comments, and control structures line up correctly.
 
 5. Preprocessor statements (`#if` and such) MUST start at column one. To indent
     preprocessor directives you should put the `#` at the beginning of a line,
-    followed by any number of whitespace.
+    followed by any number of spaces.
 
 ## Testing
 
-1. Extensions should be well tested using `*.phpt` tests. Read about that at
+1. Extensions should be well tested using `*.phpt` tests. Read more at
     [qa.php.net](https://qa.php.net/write-test.php) documentation.
-
-## Folding hooks
-
-Use `{{{` symbols for the folding mode in Emacs and vim (`set fdm=marker`).
-Folding is very useful when dealing with large files because you can scroll
-through the file quickly and just unfold the function you wish to work on.
-The `}}}` at the end of each function marks the end of the fold, and should
-be on a separate line.
-
-```c
-/* {{{ Returns the absolute value of the number */
-PHP_FUNCTION(abs)
-{
-    ...
-}
-/* }}} */
-```
 
 ## New and experimental functions
 
@@ -302,8 +283,8 @@ The file labelled `EXPERIMENTAL` should include the following information:
 * Any authoring information (known bugs, future directions of the module).
 * Ongoing status notes which may not be appropriate for Git comments.
 
-In general new features should go to PECL or experimental branches until there
-are specific reasons for directly adding it to the core distribution.
+In general, new features should go to PECL or experimental branches until there
+are specific reasons for directly adding them to the core distribution.
 
 ## Aliases & legacy documentation
 

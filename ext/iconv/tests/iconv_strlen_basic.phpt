@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_strlen() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 /*

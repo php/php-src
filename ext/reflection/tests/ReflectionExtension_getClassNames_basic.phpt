@@ -7,14 +7,14 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 $standard = new ReflectionExtension('standard');
 var_dump($standard->getClassNames());
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
-  %s(22) "__PHP_Incomplete_Class"
+  string(22) "__PHP_Incomplete_Class"
   [1]=>
-  %s(15) "php_user_filter"
+  string(14) "AssertionError"
   [2]=>
-  %s(9) "Directory"
+  string(15) "php_user_filter"
   [3]=>
-  %s(14) "AssertionError"
+  string(9) "Directory"
 }

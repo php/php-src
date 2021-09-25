@@ -170,7 +170,7 @@ do {\
 } while(0)
 
 /* Finalize a hash. To match the original Murmur3_128x86 the total_length must be provided */
-void PMurHash128x86_Result(const uint32_t *ph, const uint32_t *pcarry, uint32_t total_length, uint32_t *out)
+void PMurHash128x86_Result(const uint32_t ph[4], const uint32_t pcarry[4], uint32_t total_length, uint32_t out[4])
 {
   uint32_t h1 = ph[0];
   uint32_t h2 = ph[1];
@@ -240,7 +240,7 @@ skiprot:
 
 /* Main hashing function. Initialise carry[4] to {0,0,0,0} and h[4] to an initial {seed,seed,seed,seed}
  * if wanted. Both ph and pcarry are required arguments. */
-void PMurHash128x86_Process(uint32_t * const ph, uint32_t * const pcarry, const void * const key, int len)
+void PMurHash128x86_Process(uint32_t ph[4], uint32_t pcarry[4], const void * const key, int len)
 {
   uint32_t h1 = ph[0];
   uint32_t h2 = ph[1];
@@ -480,8 +480,8 @@ do {\
 } while(0)
 
 /* Finalize a hash. To match the original Murmur3_128x64 the total_length must be provided */
-void PMurHash128x64_Result(const uint64_t * const ph, const uint64_t * const pcarry,
-                        const uint32_t total_length, uint64_t * const out)
+void PMurHash128x64_Result(const uint64_t ph[2], const uint64_t pcarry[2],
+                        const uint32_t total_length, uint64_t out[2])
 {
   uint64_t h1 = ph[0];
   uint64_t h2 = ph[1];
@@ -523,7 +523,7 @@ void PMurHash128x64_Result(const uint64_t * const ph, const uint64_t * const pca
 
 /* Main hashing function. Initialise carry[2] to {0,0} and h[2] to an initial {seed,seed}
  * if wanted. Both ph and pcarry are required arguments. */
-void PMurHash128x64_Process(uint64_t * const ph, uint64_t * const pcarry, const void * const key, int len)
+void PMurHash128x64_Process(uint64_t ph[2], uint64_t pcarry[2], const void * const key, int len)
 {
   uint64_t h1 = ph[0];
   uint64_t h2 = ph[1];

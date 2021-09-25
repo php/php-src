@@ -53,4 +53,3 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ctype_xdigit, arginfo_ctype_xdigit)
 	ZEND_FE_END
 };
-

@@ -19,16 +19,18 @@ class foo implements ArrayAccess {
     static function __callStatic($func, $args) {
         $GLOBALS["y"] = $func;
     }
-    function offsetGet($index) {
+    function offsetGet($index): mixed {
+        $GLOBALS["y"] = $index;
+        return null;
+    }
+    function offsetSet($index, $newval): void {
         $GLOBALS["y"] = $index;
     }
-    function offsetSet($index, $newval) {
+    function offsetExists($index): bool {
         $GLOBALS["y"] = $index;
+        return true;
     }
-    function offsetExists($index) {
-        $GLOBALS["y"] = $index;
-    }
-    function offsetUnset($index) {
+    function offsetUnset($index): void {
         $GLOBALS["y"] = $index;
     }
 }

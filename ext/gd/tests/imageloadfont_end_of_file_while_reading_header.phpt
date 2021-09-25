@@ -3,13 +3,11 @@ imageloadfont() "End of file while reading header"
 --CREDITS--
 Ike Devolder <ike.devolder@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
-$filename = __DIR__ .  '/font.gdf';
+$filename = __DIR__ .  '/imageloadfont_end_of_file_while_reading_header.gdf';
 
 // End of file while reading header
 $bin = "\x41\x41\x41\x41\x00\x00\x00\x00\x00\x00";
@@ -27,7 +25,7 @@ $font = imageloadfont($filename);
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__.'/font.gdf');
+unlink(__DIR__.'/imageloadfont_end_of_file_while_reading_header.gdf');
 ?>
 --EXPECTF--
 Warning: imageloadfont(): End of file while reading header in %s on line %d

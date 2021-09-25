@@ -1,8 +1,9 @@
 --TEST--
 Exhaustive test of Shift-JIS encoding verification and conversion
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
@@ -58,9 +59,22 @@ echo "Unicode -> SJIS conversion works on all valid characters\n";
 findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'Shift-JIS', '%');
 echo "Unicode -> SJIS conversion works on all invalid characters\n";
+
+testValidString("\xFF\x5E", "\x81\x60", 'UTF-16BE', 'SJIS', false);
+echo "Other mappings from Unicode -> SJIS are OK\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "Shift-JIS", "UTF-8");
+convertInvalidString("\x81\x20", "%", "Shift-JIS", "UTF-8");
+convertInvalidString("\xEA\xA9", "%", "Shift-JIS", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 SJIS verification and conversion works on all valid characters
 SJIS verification and conversion works on all invalid characters
 Unicode -> SJIS conversion works on all valid characters
 Unicode -> SJIS conversion works on all invalid characters
+Other mappings from Unicode -> SJIS are OK
+Done!

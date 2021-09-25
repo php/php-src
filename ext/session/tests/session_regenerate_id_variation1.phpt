@@ -1,5 +1,7 @@
 --TEST--
 Test session_regenerate_id() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

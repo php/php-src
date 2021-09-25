@@ -2,7 +2,10 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Generator implements Iterator
 {
     public function rewind(): void {}

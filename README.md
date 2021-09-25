@@ -14,7 +14,7 @@ web development. Fast, flexible and pragmatic, PHP powers everything from your
 blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
-[![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
+[![Build status](https://travis-ci.com/php/php-src.svg?branch=master)](https://travis-ci.com/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy/branch/master?svg=true)](https://ci.appveyor.com/project/php/php-src)
 [![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=master)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
@@ -103,10 +103,8 @@ Extension Community Library - [PECL](https://pecl.php.net).
 
 ## Contributing
 
-The PHP source code is located in the Git repository at
-[git.php.net](https://git.php.net). Contributions are most welcome by forking
-the [GitHub mirror repository](https://github.com/php/php-src) and sending a
-pull request.
+Contributions are most welcome by forking the
+[GitHub repository](https://github.com/php/php-src) and sending a pull request.
 
 Discussions are done on GitHub, but depending on the topic can also be relayed
 to the official PHP developer mailing list internals@lists.php.net.
@@ -127,9 +125,8 @@ ticket at [bugs.php.net](https://bugs.php.net) and reference the bug id using
     magic_quotes behavior and therefore should not raise a warning at any time.
     The patch removes this warning.
 
-Pull requests are not merged directly on GitHub. All PRs will be pulled and
-pushed through [git.php.net](https://git.php.net). See
-[Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details.
+See [Git workflow](https://wiki.php.net/vcs/gitworkflow) for more details on the
+pull request workflow.
 
 ### Guidelines for contributors
 

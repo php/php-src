@@ -411,7 +411,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 		Z_TRY_ADDREF_P(val);
 		add_assoc_zval(&pair, "value", val);
 
-		zend_hash_next_index_insert(ht, &pair);
+		zend_hash_next_index_insert_new(ht, &pair);
 	} ZEND_HASH_FOREACH_END();
 
 	return ht;
@@ -420,9 +420,13 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
-	*table = NULL;
-	*n = 0;
-	return &wm->ht;
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	zval *val;
+	ZEND_HASH_FOREACH_VAL(&wm->ht, val) {
+		zend_get_gc_buffer_add_zval(gc_buffer, val);
+	} ZEND_HASH_FOREACH_END();
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
 }
 
 static zend_object *zend_weakmap_clone_obj(zend_object *old_object)
@@ -597,15 +601,9 @@ ZEND_METHOD(WeakMap, getIterator)
 
 void zend_register_weakref_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "WeakReference", class_WeakReference_methods);
-	zend_ce_weakref = zend_register_internal_class(&ce);
-	zend_ce_weakref->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_ce_weakref = register_class_WeakReference();
 
 	zend_ce_weakref->create_object = zend_weakref_new;
-	zend_ce_weakref->serialize = zend_class_serialize_deny;
-	zend_ce_weakref->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
@@ -613,16 +611,10 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.free_obj = zend_weakref_free;
 	zend_weakref_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
-	zend_ce_weakmap = zend_register_internal_class(&ce);
-	zend_ce_weakmap->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
-	zend_class_implements(
-		zend_ce_weakmap, 3, zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
+	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
-	zend_ce_weakmap->serialize = zend_class_serialize_deny;
-	zend_ce_weakmap->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);

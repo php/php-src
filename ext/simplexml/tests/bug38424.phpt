@@ -1,7 +1,7 @@
 --TEST--
 Bug #38424 (Different attribute assignment if new or exists)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

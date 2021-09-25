@@ -18,7 +18,6 @@ $names_arr = array(
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
-  "NULL" => NULL,
   "\"\"" => "",
   "\" \"" => " ",
   "\\0" => "\0",
@@ -56,9 +55,6 @@ foreach($names_arr as $key =>$value) {
 9 bytes written to: '1'
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
-
--- Filename: NULL --
 ValueError: Path cannot be empty
 
 -- Filename: "" --

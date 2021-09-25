@@ -1,9 +1,7 @@
 --TEST--
 Test parse_url() function: Parse unterminated string
---SKIPIF--
-<?php
-if (!function_exists('zend_create_unterminated_string')) die('skip ext/test required');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

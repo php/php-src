@@ -1,9 +1,7 @@
 --TEST--
 #41033, enable signing with DSA keys
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip, openssl required");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $prv = 'file://' . __DIR__ . '/' . 'bug41033.pem';

@@ -1,7 +1,7 @@
 --TEST--
 Operations on uninitialized tidy object
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

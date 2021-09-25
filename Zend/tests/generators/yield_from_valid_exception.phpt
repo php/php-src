@@ -4,11 +4,11 @@ Exception from valid() during yield from
 <?php
 
 class FooBar implements Iterator {
-    function rewind() {}
-    function current() {}
-    function key() {}
-    function next() {}
-    function valid() {
+    function rewind(): void {}
+    function current(): mixed {}
+    function key(): mixed {}
+    function next(): void {}
+    function valid(): bool {
         throw new Exception("Exception from valid()");
     }
 }

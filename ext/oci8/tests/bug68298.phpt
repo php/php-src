@@ -1,8 +1,9 @@
 --TEST--
 Bug #68298 (OCI int overflow)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 ?>
 --FILE--

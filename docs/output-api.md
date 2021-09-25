@@ -108,7 +108,7 @@ for every output handler op.
 
 ## Output handler hooks
 
-The output handler can change its abilities at runtime. Eg. the gz handler can
+The output handler can change its abilities at runtime. For example, the gz handler can
 remove the CLEANABLE and REMOVABLE bits when the first output has passed through it;
 or handlers implemented in C to be used with ob_start() can contain a non-global
 context:

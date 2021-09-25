@@ -1,9 +1,7 @@
 --TEST--
 Bug #75774 imap_append HeapCorruction
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 
@@ -21,4 +19,4 @@ unlink($fn);
 
 ?>
 --EXPECT--
-imap_append(): Argument #1 ($imap) must be of type IMAPConnection, resource given
+imap_append(): Argument #1 ($imap) must be of type IMAP\Connection, resource given

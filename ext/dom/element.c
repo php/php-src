@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -117,7 +117,7 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
@@ -152,8 +152,8 @@ int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 
 static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ */
 {
-    int len;
-    const xmlChar *nqname;
+	int len;
+	const xmlChar *nqname;
 
 	nqname = xmlSplitQName3(name, &len);
 	if (nqname != NULL) {
@@ -570,9 +570,9 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /* {{{ */
 {
-    xmlNsPtr def;
-    xmlChar prefix[50];
-    int counter = 1;
+	xmlNsPtr def;
+	xmlChar prefix[50];
+	int counter = 1;
 
 	if ((tree == NULL) || (ns == NULL) || (ns->type != XML_NAMESPACE_DECL)) {
 		return NULL;
@@ -883,12 +883,12 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 		RETURN_FALSE;
 	}
 
-    nsp = attrp->ns;
-    if (nsp != NULL) {
-        existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
-    } else {
-        existattrp = xmlHasProp(nodep, attrp->name);
-    }
+	nsp = attrp->ns;
+	if (nsp != NULL) {
+		existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
+	} else {
+		existattrp = xmlHasProp(nodep, attrp->name);
+	}
 
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
@@ -1024,11 +1024,9 @@ static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id) /* {{{ */
 			xmlAddID(NULL, attrp->doc, id_val, attrp);
 			xmlFree(id_val);
 		}
-	} else {
-		if (attrp->atype == XML_ATTRIBUTE_ID) {
-			xmlRemoveID(attrp->doc, attrp);
-			attrp->atype = 0;
-		}
+	} else if (is_id == 0 && attrp->atype == XML_ATTRIBUTE_ID) {
+		xmlRemoveID(attrp->doc, attrp);
+		attrp->atype = 0;
 	}
 }
 /* }}} */

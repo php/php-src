@@ -87,6 +87,8 @@ Warning: sha1_file(12): Failed to open stream: No such file or directory in %s o
 bool(false)
 
 -- NULL as filename --
+
+Deprecated: sha1_file(): Passing null to parameter #1 ($filename) of type string is deprecated in %s on line %d
 Path cannot be empty
 
 -- Hexadecimal Output for Empty file as Argument --

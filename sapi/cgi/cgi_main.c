@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -155,7 +155,7 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
- 	{'T', 1, "timing"},
+	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -383,7 +383,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			char *s;
-			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
+			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s", SG(sapi_headers).http_status_line);
 			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
 				response_status = atoi((s + 1));
 			}
@@ -400,7 +400,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 				(s - SG(sapi_headers).http_status_line) >= 5 &&
 				strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0
 			) {
-				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
+				len = slprintf(buf, sizeof(buf), "Status:%s", s);
 				response_status = atoi((s + 1));
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
@@ -423,9 +423,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 						err++;
 					}
 					if (err->str) {
-						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->str);
+						len = slprintf(buf, sizeof(buf), "Status: %d %s", SG(sapi_headers).http_response_code, err->str);
 					} else {
-						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
+						len = slprintf(buf, sizeof(buf), "Status: %d", SG(sapi_headers).http_response_code);
 					}
 				}
 			}
@@ -433,6 +433,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 
 		if (!has_status) {
 			PHPWRITE_H(buf, len);
+			PHPWRITE_H("\r\n", 2);
 			ignore_status = 1;
 		}
 	}
@@ -663,7 +664,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
-			zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
+			zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV));
 		}
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
@@ -1083,7 +1084,7 @@ static int is_valid_path(const char *path)
 #define CGI_GETENV(name) \
 	((has_env) ? \
 		FCGI_GETENV(request, name) : \
-    	getenv(name))
+		getenv(name))
 
 #define CGI_PUTENV(name, value) \
 	((has_env) ? \
@@ -1228,8 +1229,8 @@ static void init_request_info(fcgi_request *request)
 			}
 
 			if (env_path_translated != NULL && env_redirect_url != NULL &&
- 			    env_path_translated != script_path_translated &&
- 			    strcmp(env_path_translated, script_path_translated) != 0) {
+			    env_path_translated != script_path_translated &&
+			    strcmp(env_path_translated, script_path_translated) != 0) {
 				/*
 				 * pretty much apache specific.  If we have a redirect_url
 				 * then our script_filename and script_name point to the
@@ -2011,7 +2012,7 @@ consult the installation file that came with this distribution, or visit \n\
 			int running = 0;
 			pid_t pid;
 
-			/* Create a process group for ourself & children */
+			/* Create a process group for us & children */
 			setsid();
 			pgroup = getpgrp();
 #ifdef DEBUG_FASTCGI
@@ -2450,17 +2451,6 @@ parent_loop_end:
 				}
 			} /* end !cgi && !fastcgi */
 
-			/*
-				we never take stdin if we're (f)cgi, always
-				rely on the web server giving us the info
-				we need in the environment.
-			*/
-			if (SG(request_info).path_translated || cgi || fastcgi) {
-				zend_stream_init_filename(&file_handle, SG(request_info).path_translated);
-			} else {
-				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
-			}
-
 			/* request startup only after we've done all we can to
 			 * get path_translated */
 			if (php_request_startup() == FAILURE) {
@@ -2520,6 +2510,10 @@ parent_loop_end:
 					free(bindpath);
 					return FAILURE;
 				}
+			} else {
+				/* we never take stdin if we're (f)cgi */
+				zend_stream_init_fp(&file_handle, stdin, "Standard input code");
+				file_handle.primary_script = 1;
 			}
 
 			if (CGIG(check_shebang_line)) {
@@ -2534,9 +2528,9 @@ parent_loop_end:
 					PG(during_request_startup) = 0;
 					exit_status = php_lint_script(&file_handle);
 					if (exit_status == SUCCESS) {
-						zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+						zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
 					} else {
-						zend_printf("Errors parsing %s\n", file_handle.filename);
+						zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
 					}
 					break;
 				case PHP_MODE_STRIP:
@@ -2557,22 +2551,22 @@ parent_loop_end:
 			}
 
 fastcgi_request_done:
-			{
-				if (SG(request_info).path_translated) {
-					efree(SG(request_info).path_translated);
-					SG(request_info).path_translated = NULL;
-				}
+			zend_destroy_file_handle(&file_handle);
 
-				php_request_shutdown((void *) 0);
+			if (SG(request_info).path_translated) {
+				efree(SG(request_info).path_translated);
+				SG(request_info).path_translated = NULL;
+			}
 
-				if (exit_status == 0) {
-					exit_status = EG(exit_status);
-				}
+			php_request_shutdown((void *) 0);
 
-				if (free_query_string && SG(request_info).query_string) {
-					free(SG(request_info).query_string);
-					SG(request_info).query_string = NULL;
-				}
+			if (exit_status == 0) {
+				exit_status = EG(exit_status);
+			}
+
+			if (free_query_string && SG(request_info).query_string) {
+				free(SG(request_info).query_string);
+				SG(request_info).query_string = NULL;
 			}
 
 			if (!fastcgi) {

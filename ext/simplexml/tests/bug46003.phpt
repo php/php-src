@@ -1,7 +1,7 @@
 --TEST--
 Bug #46003 (isset on nonexisting nodes return unexpected results)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<XML

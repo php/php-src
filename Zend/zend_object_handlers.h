@@ -225,6 +225,12 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
+ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
+
+/* Handler for objects that cannot be meaningfully compared.
+ * Only objects with the same identity will be considered equal. */
+ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);
+
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);

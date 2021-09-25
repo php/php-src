@@ -2,10 +2,8 @@
 DOMDocument::relaxNGValidateSource()
 --CREDITS--
 Knut Urdalen <knut@php.net>
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $rng = <<< RNG

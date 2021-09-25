@@ -1,5 +1,7 @@
 --TEST--
 DBA with array keys
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');

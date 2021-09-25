@@ -1,9 +1,7 @@
 --TEST--
 Bug #79749 (Converting FFI instances to bool fails)
---SKIPIF--
-<?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
-?>
+--EXTENSIONS--
+ffi
 --FILE--
 <?php
 $ffi = FFI::cdef('typedef int dummy;');

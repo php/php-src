@@ -1,5 +1,7 @@
 --TEST--
 Test imap_fetch_overview() function : usage variations - $msg_no argument
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');

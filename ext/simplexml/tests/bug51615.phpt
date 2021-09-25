@@ -1,9 +1,8 @@
 --TEST--
 Bug #51615 (PHP crash with wrong HTML in SimpleXML)
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip";
- if (!extension_loaded("dom")) print "skip";
-?>
+--EXTENSIONS--
+simplexml
+dom
 --FILE--
 <?php
 

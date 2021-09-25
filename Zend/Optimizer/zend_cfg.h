@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -116,11 +116,11 @@ typedef struct _zend_cfg {
 
 BEGIN_EXTERN_C()
 
-ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg);
+ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg);
 void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg);
-ZEND_API int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
-ZEND_API int zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
-ZEND_API int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg);
+ZEND_API void zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
+ZEND_API void zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
+ZEND_API void zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg);
 
 END_EXTERN_C()
 

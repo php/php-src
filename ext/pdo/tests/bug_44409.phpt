@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #44409 (PDO::FETCH_SERIALIZE calls __construct())
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -40,7 +41,10 @@ $stmt = $db->query("SELECT * FROM test");
 print_r($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE, "bug44409"));
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+
+Deprecated: PDOStatement::fetchAll(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 Method called: bug44409::unserialize('Data from DB')
 Array
 (

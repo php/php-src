@@ -97,6 +97,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 	if (destructor) {
 		zend_object *old_exception;
+		const zend_op *old_opline_before_exception;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -155,7 +156,13 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			if (EG(exception) == object) {
 				zend_error_noreturn(E_CORE_ERROR, "Attempt to destruct pending exception");
 			} else {
+				if (EG(current_execute_data)
+				 && EG(current_execute_data)->func
+				 && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+					zend_rethrow_exception(EG(current_execute_data));
+				}
 				old_exception = EG(exception);
+				old_opline_before_exception = EG(opline_before_exception);
 				EG(exception) = NULL;
 			}
 		}
@@ -163,6 +170,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		zend_call_known_instance_method_with_0_params(destructor, object, NULL);
 
 		if (old_exception) {
+			EG(opline_before_exception) = old_opline_before_exception;
 			if (EG(exception)) {
 				zend_exception_set_previous(EG(exception), old_exception);
 			} else {

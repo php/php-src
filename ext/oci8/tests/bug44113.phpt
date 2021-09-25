@@ -1,5 +1,7 @@
 --TEST--
 Bug #44113 (New collection creation can fail with OCI-22303)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

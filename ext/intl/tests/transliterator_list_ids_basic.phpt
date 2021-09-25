@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::listIDs (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

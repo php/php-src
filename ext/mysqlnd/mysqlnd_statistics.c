@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -216,8 +216,6 @@ mysqlnd_stats_init(MYSQLND_STATS ** stats, const size_t statistic_count, const b
 {
 	*stats = pecalloc(1, sizeof(MYSQLND_STATS), persistent);
 	(*stats)->values = pecalloc(statistic_count, sizeof(uint64_t), persistent);
-	(*stats)->triggers = pecalloc(statistic_count, sizeof(mysqlnd_stat_trigger), persistent);
-	(*stats)->in_trigger = FALSE;
 	(*stats)->count = statistic_count;
 #ifdef ZTS
 	(*stats)->LOCK_access = tsrm_mutex_alloc();
@@ -233,43 +231,9 @@ mysqlnd_stats_end(MYSQLND_STATS * stats, const bool persistent)
 #ifdef ZTS
 	tsrm_mutex_free(stats->LOCK_access);
 #endif
-	pefree(stats->triggers, persistent);
 	pefree(stats->values, persistent);
 	/* mnd_free will reference LOCK_access and crash...*/
 	pefree(stats, persistent);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stats_set_trigger */
-PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger)
-{
-	mysqlnd_stat_trigger ret = NULL;
-	DBG_ENTER("mysqlnd_stats_set_trigger");
-	if (stats) {
-		MYSQLND_STATS_LOCK(stats);
-		ret = stats->triggers[statistic];
-		stats->triggers[statistic] = trigger;
-		MYSQLND_STATS_UNLOCK(stats);
-	}
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_stats_set_handler */
-PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
-{
-	mysqlnd_stat_trigger ret = NULL;
-	DBG_ENTER("mysqlnd_stats_reset_trigger");
-	if (stats) {
-		MYSQLND_STATS_LOCK(stats);
-		memset(stats->triggers, 0, stats->count * sizeof(mysqlnd_stat_trigger));
-		MYSQLND_STATS_UNLOCK(stats);
-	}
-	DBG_RETURN(ret);
 }
 /* }}} */
 

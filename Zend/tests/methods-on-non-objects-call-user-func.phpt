@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-call_user_func(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
+call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object

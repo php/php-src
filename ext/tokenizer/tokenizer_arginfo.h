@@ -60,7 +60,7 @@ static const zend_function_entry class_PhpToken_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)
+static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)
 {
 	zend_class_entry ce, *class_entry;
 
@@ -94,4 +94,3 @@ zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringab
 
 	return class_entry;
 }
-

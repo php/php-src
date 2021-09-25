@@ -3,8 +3,8 @@ Phar front controller with cwd [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller34.php
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller34.php
 REQUEST_URI=/frontcontroller34.php/start/index.php

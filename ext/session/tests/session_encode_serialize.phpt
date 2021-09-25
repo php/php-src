@@ -1,5 +1,7 @@
 --TEST--
 Test session_encode() function : Numeric key raise error. bug65359
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

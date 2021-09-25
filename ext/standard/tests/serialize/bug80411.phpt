@@ -21,7 +21,8 @@ $recovered = unserialize($data);
 var_export($recovered);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 a:4:{i:0;N;i:1;N;i:2;s:6:"endcap";i:3;R:4;}
 array (
   0 => NULL,

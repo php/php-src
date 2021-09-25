@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,7 +19,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -31,7 +30,7 @@
 #include "zend_dump.h"
 
 /* Checks if a constant (like "true") may be replaced by its value */
-int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
+bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
@@ -221,7 +220,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						 * Float to string conversion may be affected by current
 						 * locale setting.
 						 */
-						int l, old_len;
+						size_t l, old_len;
 
 						if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
 							convert_to_string(&ZEND_OP1_LITERAL(opline));
@@ -328,7 +327,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			   ) {
 				zval *arg = &OPLINE_OP1_LITERAL(sv);
 				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
-				int flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
+				size_t flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
 				if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
 						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
 						  ) {
@@ -342,7 +341,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					}
 				} else if(flen == sizeof("constant")-1 && zend_binary_strcasecmp(fname, flen, "constant", sizeof("constant")-1) == 0) {
 					zval c;
-					if(zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 1 ELS_CC) != 0) {
+					if (zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 1 ELS_CC)) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -399,7 +398,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
 					break;
 				}
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 
 			case ZEND_IS_EQUAL:
 			case ZEND_IS_NOT_EQUAL:
@@ -713,7 +712,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					     src->opcode == ZEND_FAST_CONCAT) &&
 					    src->op2_type == IS_CONST) {
 						/* compress consecutive CONCATs */
-						int l, old_len;
+						size_t l, old_len;
 
 						if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 							convert_to_string(&ZEND_OP2_LITERAL(opline));
@@ -961,21 +960,12 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	zend_op *new_opcodes;
 	zend_op *opline;
 	uint32_t len = 0;
-	int n;
 
 	for (b = blocks; b < end; b++) {
 		if (b->len == 0) {
 			continue;
 		}
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
-			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-				/* Only keep the FREE for the loop var */
-				ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
-						|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
-				len += b->len = 1;
-				continue;
-			}
-
 			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
@@ -1037,7 +1027,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				break;
 			case ZEND_JMPZNZ:
 				opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[1]].start);
-				/* break missing intentionally */
+				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -1138,7 +1128,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 
 	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
-	for (n = 0; n < cfg->blocks_count; n++) {
+	for (int n = 0; n < cfg->blocks_count; n++) {
 		if (cfg->blocks[n].flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			cfg->map[cfg->blocks[n].start] = n;
 		}
@@ -1198,7 +1188,7 @@ static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, 
 
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline int in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
@@ -1458,7 +1448,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/*       is not used on the following path and             */
 					/*       should be used once on the branch path.           */
 					/*                                                         */
-					/*       The pattern works well only if jums processed in  */
+					/*       The pattern works well only if jumps processed in */
 					/*       direct order, otherwise it breaks JMPZ_EX         */
 					/*       sequences too early.                              */
 					last_op->result.var = target->result.var;
@@ -1651,7 +1641,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_BLOCK_PASS_VARS) {
-		int printed = 0;
+		bool printed = 0;
 		uint32_t i;
 
 		for (i = op_array->last_var; i< op_array->T; i++) {
@@ -1857,10 +1847,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, 0, &cfg) != SUCCESS) {
-		zend_arena_release(&ctx->arena, checkpoint);
-		return;
-	}
+	zend_build_cfg(&ctx->arena, op_array, 0, &cfg);
 
 	if (cfg.blocks_count * (op_array->last_var + op_array->T) > 64 * 1024 * 1024) {
 		zend_arena_release(&ctx->arena, checkpoint);

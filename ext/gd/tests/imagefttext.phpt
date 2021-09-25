@@ -1,10 +1,9 @@
 --TEST--
 imagefttext() function test
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available.");
-    }
     if (!function_exists("imagefttext")) {
         die("skip imagefttext() not available.");
     }

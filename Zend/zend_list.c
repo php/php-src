@@ -31,12 +31,13 @@ static HashTable list_destructors;
 
 ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
-	int index;
 	zval zv;
 
-	index = zend_hash_next_free_element(&EG(regular_list));
+	zend_long index = zend_hash_next_free_element(&EG(regular_list));
 	if (index == 0) {
 		index = 1;
+	} else if (index == ZEND_LONG_MAX) {
+		zend_error_noreturn(E_ERROR, "Resource ID space overflow");
 	}
 	ZVAL_NEW_RES(&zv, index, ptr, type);
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
@@ -213,13 +214,17 @@ void zend_init_rsrc_plist(void)
 
 void zend_close_rsrc_list(HashTable *ht)
 {
-	zend_resource *res;
-
-	ZEND_HASH_REVERSE_FOREACH_PTR(ht, res) {
-		if (res->type >= 0) {
-			zend_resource_dtor(res);
+	/* Reload ht->arData on each iteration, as it may be reallocated. */
+	uint32_t i = ht->nNumUsed;
+	while (i-- > 0) {
+		Bucket *p = &ht->arData[i];
+		if (Z_TYPE(p->val) != IS_UNDEF) {
+			zend_resource *res = Z_PTR(p->val);
+			if (res->type >= 0) {
+				zend_resource_dtor(res);
+			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
 }
 
 

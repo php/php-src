@@ -71,7 +71,7 @@ jobs:
       displayName: 'Configure Build'
     - script: |
         export PATH="/usr/local/opt/bison/bin:$PATH"
-        make -j$(sysctl -n hw.ncpu) >/dev/null
+        make -j$(sysctl -n hw.logicalcpu) >/dev/null
       displayName: 'Make Build'
     - script: |
         sudo make install

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 884e30d9f263c5873d15cec9c2d2f1fef5b75fe6 */
+ * Stub hash: 722e0701b4ded4747d71433c11b9575e41826be3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -81,9 +81,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorallocatealpha, 0, 5, M
 	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorresolvealpha arginfo_imagecolorallocatealpha
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorresolvealpha, 0, 5, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, alpha, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosestalpha arginfo_imagecolorallocatealpha
+#define arginfo_imagecolorclosestalpha arginfo_imagecolorresolvealpha
 
 #define arginfo_imagecolorexactalpha arginfo_imagecolorallocatealpha
 
@@ -137,6 +143,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromstring, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_AVIF)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromavif, 0, 1, GdImage, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgif, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -199,6 +211,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagexbm, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground_color, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_AVIF)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageavif, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, speed, IS_LONG, 0, "-1")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegif, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -276,18 +297,23 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorat, 0, 3, MAY_BE_LONG|
 	ZEND_ARG_TYPE_INFO(0, y, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosest arginfo_imagecolorallocate
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorclosest, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorclosesthwb arginfo_imagecolorallocate
+#define arginfo_imagecolorclosesthwb arginfo_imagecolorclosest
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolordeallocate, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_imagecolorresolve arginfo_imagecolorallocate
+#define arginfo_imagecolorresolve arginfo_imagecolorclosest
 
-#define arginfo_imagecolorexact arginfo_imagecolorallocate
+#define arginfo_imagecolorexact arginfo_imagecolorclosest
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, _IS_BOOL, 1)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -298,7 +324,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, _IS_BOOL, 1
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alpha, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorsforindex, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorsforindex, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -358,12 +384,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorstotal, 0, 1, IS_LONG,
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolortransparent, 0, 1, IS_LONG, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolortransparent, 0, 1, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, color, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageinterlace, 0, 1, IS_LONG, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageinterlace, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
@@ -441,8 +467,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetclip, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, x1, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, x2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, x2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y2, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -582,6 +608,9 @@ ZEND_FUNCTION(imagesetbrush);
 ZEND_FUNCTION(imagecreate);
 ZEND_FUNCTION(imagetypes);
 ZEND_FUNCTION(imagecreatefromstring);
+#if defined(HAVE_GD_AVIF)
+ZEND_FUNCTION(imagecreatefromavif);
+#endif
 ZEND_FUNCTION(imagecreatefromgif);
 #if defined(HAVE_GD_JPG)
 ZEND_FUNCTION(imagecreatefromjpeg);
@@ -607,6 +636,9 @@ ZEND_FUNCTION(imagecreatefrombmp);
 ZEND_FUNCTION(imagecreatefromtga);
 #endif
 ZEND_FUNCTION(imagexbm);
+#if defined(HAVE_GD_AVIF)
+ZEND_FUNCTION(imageavif);
+#endif
 ZEND_FUNCTION(imagegif);
 #if defined(HAVE_GD_PNG)
 ZEND_FUNCTION(imagepng);
@@ -717,6 +749,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreate, arginfo_imagecreate)
 	ZEND_FE(imagetypes, arginfo_imagetypes)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
+#if defined(HAVE_GD_AVIF)
+	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)
+#endif
 	ZEND_FE(imagecreatefromgif, arginfo_imagecreatefromgif)
 #if defined(HAVE_GD_JPG)
 	ZEND_FE(imagecreatefromjpeg, arginfo_imagecreatefromjpeg)
@@ -742,6 +777,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreatefromtga, arginfo_imagecreatefromtga)
 #endif
 	ZEND_FE(imagexbm, arginfo_imagexbm)
+#if defined(HAVE_GD_AVIF)
+	ZEND_FE(imageavif, arginfo_imageavif)
+#endif
 	ZEND_FE(imagegif, arginfo_imagegif)
 #if defined(HAVE_GD_PNG)
 	ZEND_FE(imagepng, arginfo_imagepng)
@@ -837,25 +875,24 @@ static const zend_function_entry class_GdFont_methods[] = {
 	ZEND_FE_END
 };
 
-zend_class_entry *register_class_GdImage()
+static zend_class_entry *register_class_GdImage(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "GdImage", class_GdImage_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
 
-zend_class_entry *register_class_GdFont()
+static zend_class_entry *register_class_GdFont(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
-

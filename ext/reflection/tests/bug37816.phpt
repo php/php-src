@@ -12,15 +12,8 @@ $o = new TestClass;
 
 $r = new ReflectionProperty($o, 'p');
 
-try
-{
-    $x = $r->getValue($o);
-}
-catch (Exception $e)
-{
-    echo 'Caught: ' . $e->getMessage() . "\n";
-}
+var_dump($r->getValue($o));
 
 ?>
 --EXPECT--
-Caught: Cannot access non-public property TestClass::$p
+int(2)

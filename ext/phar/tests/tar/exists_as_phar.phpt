@@ -1,7 +1,7 @@
 --TEST--
 Phar: phar-based phar named with ".tar" fails
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0

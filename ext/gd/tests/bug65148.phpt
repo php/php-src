@@ -1,9 +1,7 @@
 --TEST--
 Bug #65148 (imagerotate may alter image dimensions)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension is not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

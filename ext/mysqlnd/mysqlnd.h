@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -69,7 +69,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 #define mysqlnd_restart_psession(conn)	((conn)->data)->m->restart_psession((conn)->data)
 #define mysqlnd_end_psession(conn)		((conn)->data)->m->end_psession((conn)->data)
 PHPAPI void mysqlnd_minfo_print_hash(zval *values);
-#define mysqlnd_thread_safe()	TRUE
+#define mysqlnd_thread_safe()	true
 
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(const unsigned int charsetno);
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const charsetname);
@@ -107,8 +107,8 @@ PHPAPI void mysqlnd_debug(const char *mode);
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
-#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), MYSQLND_SEND_QUERY_EXPLICIT, NULL, NULL)
-#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data, MYSQLND_REAP_RESULT_EXPLICIT)
+#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), NULL, NULL)
+#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result))
 
 PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
@@ -177,16 +177,14 @@ PHPAPI void mysqlnd_free_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
 PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
-PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
-
 /* LOAD DATA LOCAL */
 PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode))
 #define mysqlnd_begin_transaction(conn,flags,name) ((conn)->data)->m->tx_begin((conn)->data, (flags), (name))
-#define mysqlnd_commit(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, TRUE, (flags), (name))
-#define mysqlnd_rollback(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, FALSE, (flags), (name))
+#define mysqlnd_commit(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, true, (flags), (name))
+#define mysqlnd_rollback(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, false, (flags), (name))
 #define mysqlnd_savepoint(conn, name)		((conn)->data)->m->tx_savepoint((conn)->data, (name))
 #define mysqlnd_release_savepoint(conn, name) ((conn)->data)->m->tx_savepoint_release((conn)->data, (name))
 #define mysqlnd_list_dbs(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW DATABASES LIKE %s":"SHOW DATABASES", (wild), NULL)
@@ -232,7 +230,6 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 #define mysqlnd_stmt_free_result_bind(stmt,bind)	(stmt)->m->free_result_bind((stmt), (bind))
 #define mysqlnd_stmt_bind_result(stmt,bind)			(stmt)->m->bind_result((stmt), (bind))
 #define mysqlnd_stmt_bind_one_result(s,no)			(s)->m->bind_one_result((s), (no))
-#define mysqlnd_stmt_param_metadata(stmt)			(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)			(stmt)->m->get_result_metadata((stmt))
 
 #define	mysqlnd_stmt_free_result(stmt)				(stmt)->m->free_result((stmt))

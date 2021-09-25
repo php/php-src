@@ -1715,7 +1715,7 @@ void gdImageFilledArc (gdImagePtr im, int cx, int cy, int w, int h, int s, int e
 void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
-	long aq,bq,dx,dy,r,rx,ry,a,b;
+	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 
 	a=w>>1;
 	b=h>>1;
@@ -1754,7 +1754,7 @@ void gdImageEllipse(gdImagePtr im, int mx, int my, int w, int h, int c)
 void gdImageFilledEllipse (gdImagePtr im, int mx, int my, int w, int h, int c)
 {
 	int x=0,mx1=0,mx2=0,my1=0,my2=0;
-	long aq,bq,dx,dy,r,rx,ry,a,b;
+	int64_t aq,bq,dx,dy,r,rx,ry,a,b;
 	int i;
 	int old_y2;
 
@@ -2612,7 +2612,6 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				green /= spixels;
 				blue /= spixels;
 				alpha /= spixels;
-				alpha += 0.5;
 			}
 			if ( alpha_sum != 0.0f) {
 				if( contrib_sum != 0.0f) {
@@ -2622,20 +2621,12 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				green /= alpha_sum;
 				blue /= alpha_sum;
 			}
-			/* Clamping to allow for rounding errors above */
-			if (red > 255.0f) {
-				red = 255.0f;
-			}
-			if (green > 255.0f) {
-				green = 255.0f;
-			}
-			if (blue > 255.0f) {
-				blue = 255.0f;
-			}
-			if (alpha > gdAlphaMax) {
-				alpha = gdAlphaMax;
-			}
-			gdImageSetPixel(dst, x, y, gdTrueColorAlpha ((int) red, (int) green, (int) blue, (int) alpha));
+			/* Round up closest next channel value and clamp to max channel value */
+			red = red >= 255.5 ? 255 : red+0.5;
+			blue = blue >= 255.5 ? 255 : blue+0.5;
+			green = green >= 255.5 ? 255 : green+0.5;
+			alpha = alpha >= gdAlphaMax+0.5 ? gdAlphaMax : alpha+0.5;
+			gdImageSetPixel(dst, x, y, gdTrueColorAlpha ((int)red, (int)green, (int)blue, (int)alpha));
 		}
 	}
 }

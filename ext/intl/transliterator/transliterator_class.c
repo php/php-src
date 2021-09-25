@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -114,7 +114,7 @@ static zend_object *Transliterator_object_create( zend_class_entry *ce )
 	intern = zend_object_alloc(sizeof(Transliterator_object), ce);
 
 	zend_object_std_init( &intern->zo, ce );
-    object_properties_init( &intern->zo, ce );
+	object_properties_init( &intern->zo, ce );
 	transliterator_object_init( intern );
 
 	intern->zo.handlers = &Transliterator_handlers;
@@ -189,19 +189,10 @@ err:
 /* {{{ get_property_ptr_ptr handler */
 static zval *Transliterator_get_property_ptr_ptr( zend_object *object, zend_string *name, int type, void **cache_slot )
 {
-	zval *retval;
-
-	if(zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 )
-	{
-		retval = NULL; /* fallback to read_property */
+	if (zend_string_equals_literal(name, "id")) {
+		return NULL; /* fallback to read_property */
 	}
-	else
-	{
-		retval = zend_std_get_property_ptr_ptr( object, name, type, cache_slot );
-	}
-
-	return retval;
+	return zend_std_get_property_ptr_ptr( object, name, type, cache_slot );
 }
 /* }}} */
 
@@ -210,15 +201,10 @@ static zval *Transliterator_read_property( zend_object *object, zend_string *nam
 {
 	zval *retval;
 
-	if( ( type != BP_VAR_R && type != BP_VAR_IS ) &&
-		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
-	{
+	if ((type != BP_VAR_R && type != BP_VAR_IS) && zend_string_equals_literal(name, "id")) {
 		zend_throw_error(NULL, "Transliterator::$id is read-only");
 		retval = &EG( uninitialized_zval );
-	}
-	else
-	{
+	} else {
 		retval = zend_std_read_property( object, name, type, cache_slot, rv );
 	}
 
@@ -238,14 +224,9 @@ static zval *Transliterator_write_property( zend_object *object, zend_string *na
 	} else {
 		scope = zend_get_executed_scope();
 	}
-	if( ( scope != Transliterator_ce_ptr ) &&
-		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		ZSTR_VAL( name ), ZSTR_LEN( name ) ) == 0 ) )
-	{
+	if ((scope != Transliterator_ce_ptr) && zend_string_equals_literal(name, "id")) {
 		zend_throw_error(NULL, "Transliterator::$id is read-only");
-	}
-	else
-	{
+	} else {
 		value = zend_std_write_property( object, name, value, cache_slot );
 	}
 
