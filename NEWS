@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
     (cmb, Nikita, Tyson Andre)
 
+- Standard:
+  . Fixed bug #69751 (Change Error message of sprintf/printf for missing/typo
+    position specifier). (Aliaksandr Bystry)
+
 - XML:
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
