@@ -132,7 +132,7 @@ PHP_COM_DOTNET_API bool php_com_safearray_get_elem(VARIANT *array, VARIANT *dest
 
 /* com_typeinfo.c */
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage);
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_string, int codepage);
 PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, int codepage);
 void php_com_typelibrary_dtor(zval *pDest);
 ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,

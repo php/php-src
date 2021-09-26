@@ -58,24 +58,26 @@ PHP_MSHUTDOWN_FUNCTION(com_typeinfo)
  * b) a CLSID, major, minor e.g. "{00000200-0000-0010-8000-00AA006D2EA4},2,0"
  * c) a Type Library name e.g. "Microsoft OLE DB ActiveX Data Objects 1.0 Library"
  */
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage)
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_string, int codepage)
 {
 	ITypeLib *TL = NULL;
 	char *strtok_buf, *major, *minor;
+	char *token = estrndup(ZSTR_VAL(search_string), ZSTR_LEN(search_string));
 	CLSID clsid;
 	OLECHAR *p;
 	HRESULT hr;
 
-	search_string = php_strtok_r(search_string, ",", &strtok_buf);
+	token = php_strtok_r(token, ",", &strtok_buf);
 
-	if (search_string == NULL) {
+	if (token == NULL) {
 		return NULL;
 	}
 
 	major = php_strtok_r(NULL, ",", &strtok_buf);
 	minor = php_strtok_r(NULL, ",", &strtok_buf);
+	efree(token);
 
-	p = php_com_string_to_olestring(search_string, strlen(search_string), codepage);
+	p = php_com_string_to_olestring(ZSTR_VAL(search_string), ZSTR_LEN(search_string), codepage);
 
 	if (SUCCEEDED(CLSIDFromString(p, &clsid))) {
 		WORD major_i = 1, minor_i = 0;
@@ -127,7 +129,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 
 				MaxSubKeyLength++; /* make room for NUL */
 				keyname = emalloc(MaxSubKeyLength);
-				libname = emalloc(strlen(search_string) + 1);
+				libname = emalloc(ZSTR_LEN(search_string) + 1);
 
 				for (i = 0; i < SubKeys && TL == NULL; i++) {
 					if (ERROR_SUCCESS == RegEnumKey(hkey, i, keyname, MaxSubKeyLength) &&
@@ -139,10 +141,10 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 									continue;
 								}
 								/* get the default value for this key and compare */
-								libnamelen = (long)strlen(search_string)+1;
+								libnamelen = (long)ZSTR_LEN(search_string)+1;
 								if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen)) {
-									if (0 == stricmp(libname, search_string)) {
-										char *str = NULL;
+									if (0 == stricmp(libname, ZSTR_VAL(search_string))) {
+										zend_string *str = NULL;
 										int major_tmp, minor_tmp;
 
 										/* fetch the GUID and add the version numbers */
@@ -150,11 +152,11 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 											major_tmp = 1;
 											minor_tmp = 0;
 										}
-										spprintf(&str, 0, "%s,%d,%d", keyname, major_tmp, minor_tmp);
+										str = zend_strpprintf(0, "%s,%d,%d", keyname, major_tmp, minor_tmp);
 										/* recurse */
 										TL = php_com_load_typelib(str, codepage);
 
-										efree(str);
+										zend_string_release(str);
 										break;
 									}
 								}
@@ -268,7 +270,6 @@ ITypeLib *php_com_cache_typelib(ITypeLib* TL, zend_string *cache_key) {
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage)
 {
 	ITypeLib *TL;
-	char *name_dup;
 	zend_string *key = zend_string_init(search_string, strlen(search_string), 1);
 
 #ifdef ZTS
@@ -282,9 +283,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_s
 		goto php_com_load_typelib_via_cache_return;
 	}
 
-	name_dup = estrndup(ZSTR_VAL(key), ZSTR_LEN(key));
-	TL = php_com_load_typelib(name_dup, codepage);
-	efree(name_dup);
+	TL = php_com_load_typelib(key, codepage);
 
 	if (TL) {
 		if (NULL != zend_hash_add_ptr(&php_com_typelibraries, key, TL)) {
@@ -358,7 +357,7 @@ ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_ob
 		}
 	} else if (type_lib_name) {
 		/* Fetch the typelibrary and use that to look things up */
-		typelib = php_com_load_typelib(ZSTR_VAL(type_lib_name), CP_THREAD_ACP);
+		typelib = php_com_load_typelib(type_lib_name, CP_THREAD_ACP);
 	}
 
 	if (!gotguid && dispatch_name && typelib) {
