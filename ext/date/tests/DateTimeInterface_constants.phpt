@@ -14,11 +14,13 @@ var_dump(
     DATE_RFC2822 === DateTimeInterface::RFC2822,
     DATE_RFC3339 === DateTimeInterface::RFC3339,
     DATE_RSS     === DateTimeInterface::RSS,
+    DATE_SQL     === DateTimeInterface::SQL,
     DATE_W3C     === DateTimeInterface::W3C
 );
 
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
 bool(true)

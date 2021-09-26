@@ -377,6 +377,15 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
  */
 #define DATE_FORMAT_COOKIE   "D, d-M-Y H:i:s T"
 
+/*
+ * Common datetime format for SQL:
+ * https://docs.microsoft.com/en-us/sql/t-sql/data-types/datetime-transact-sql
+ * https://dev.mysql.com/doc/refman/8.0/en/datetime.html
+ * https://www.postgresql.org/docs/9.1/datatype-datetime.html
+ * https://www.sqlite.org/lang_datefunc.html
+ */
+#define DATE_FORMAT_SQL   "Y-m-d H:i:s"
+
 #define SUNFUNCS_RET_TIMESTAMP 0
 #define SUNFUNCS_RET_STRING    1
 #define SUNFUNCS_RET_DOUBLE    2
@@ -411,6 +420,8 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_STRING_CONSTANT("DATE_SQL",     DATE_FORMAT_SQL, CONST_CS | CONST_PERSISTENT);
 
 /*
  * RSS 2.0 Specification: http://blogs.law.harvard.edu/tech/rss
@@ -1628,6 +1639,7 @@ static void date_register_classes(void) /* {{{ */
 	REGISTER_DATE_INTERFACE_CONST_STRING("RFC3339",          DATE_FORMAT_RFC3339);
 	REGISTER_DATE_INTERFACE_CONST_STRING("RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED);
 	REGISTER_DATE_INTERFACE_CONST_STRING("RSS",              DATE_FORMAT_RFC1123);
+	REGISTER_DATE_INTERFACE_CONST_STRING("SQL",              DATE_FORMAT_SQL);
 	REGISTER_DATE_INTERFACE_CONST_STRING("W3C",              DATE_FORMAT_RFC3339);
 
 	date_ce_date = register_class_DateTime(date_ce_interface);
