@@ -302,7 +302,8 @@ php_com_load_typelib_via_cache_return:
 	return TL;
 }
 
-ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink)
+ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,
+	zend_string *dispatch_name, bool sink)
 {
 	ITypeInfo *typeinfo = NULL;
 	ITypeLib *typelib = NULL;
@@ -310,7 +311,7 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 	GUID iid;
 
 	if (obj) {
-		if (dispname == NULL && sink) {
+		if (dispatch_name == NULL && sink) {
 			if (V_VT(&obj->v) == VT_DISPATCH) {
 				IProvideClassInfo2 *pci2;
 				IProvideClassInfo *pci;
@@ -326,7 +327,7 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 					IProvideClassInfo_Release(pci);
 				}
 			}
-		} else if (dispname == NULL) {
+		} else if (dispatch_name == NULL) {
 			if (obj->typeinfo) {
 				ITypeInfo_AddRef(obj->typeinfo);
 				return obj->typeinfo;
@@ -336,14 +337,14 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 					return typeinfo;
 				}
 			}
-		} else if (dispname && obj->typeinfo) {
+		} else if (dispatch_name && obj->typeinfo) {
 			unsigned int idx;
 			/* get the library from the object; the rest will be dealt with later */
 			ITypeInfo_GetContainingTypeLib(obj->typeinfo, &typelib, &idx);
-		} else if (typelibname == NULL) {
+		} else if (type_lib_name == NULL) {
 			if (V_VT(&obj->v) == VT_DISPATCH) {
 				IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &typeinfo);
-				if (dispname) {
+				if (dispatch_name) {
 					unsigned int idx;
 					/* get the library from the object; the rest will be dealt with later */
 					ITypeInfo_GetContainingTypeLib(typeinfo, &typelib, &idx);
@@ -355,15 +356,15 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 				}
 			}
 		}
-	} else if (typelibname) {
+	} else if (type_lib_name) {
 		/* Fetch the typelibrary and use that to look things up */
-		typelib = php_com_load_typelib(typelibname, CP_THREAD_ACP);
+		typelib = php_com_load_typelib(ZSTR_VAL(type_lib_name), CP_THREAD_ACP);
 	}
 
-	if (!gotguid && dispname && typelib) {
+	if (!gotguid && dispatch_name && typelib) {
 		unsigned short cfound;
 		MEMBERID memid;
-		OLECHAR *olename = php_com_string_to_olestring(dispname, strlen(dispname), CP_ACP);
+		OLECHAR *olename = php_com_string_to_olestring(ZSTR_VAL(dispatch_name), ZSTR_LEN(dispatch_name), CP_ACP);
 
 		cfound = 1;
 		if (FAILED(ITypeLib_FindName(typelib, olename, 0, &typeinfo, &memid, &cfound)) || cfound == 0) {

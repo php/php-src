@@ -135,7 +135,8 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_s
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
 PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, int codepage);
 void php_com_typelibrary_dtor(zval *pDest);
-ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink);
+ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,
+		zend_string *dispatch_name, bool sink);
 bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool printdef, GUID *guid, int codepage);
 ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
 PHP_MINIT_FUNCTION(com_typeinfo);

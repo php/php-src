@@ -677,7 +677,8 @@ PHP_FUNCTION(com_event_sink)
 	zval *object, *sinkobject;
 	zend_string *sink_str = NULL;
 	HashTable *sink_ht = NULL;
-	char *dispname = NULL, *typelibname = NULL;
+	zend_string *type_lib_name = NULL;
+	zend_string *dispatch_name = NULL;
 	php_com_dotnet_object *obj;
 	ITypeInfo *typeinfo = NULL;
 
@@ -698,14 +699,14 @@ PHP_FUNCTION(com_event_sink)
 		zval *tmp;
 
 		if ((tmp = zend_hash_index_find(sink_ht, 0)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
-			typelibname = Z_STRVAL_P(tmp);
+			type_lib_name = Z_STR_P(tmp);
 		if ((tmp = zend_hash_index_find(sink_ht, 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
-			dispname = Z_STRVAL_P(tmp);
+			dispatch_name = Z_STR_P(tmp);
 	} else if (sink_str) {
-		dispname = ZSTR_VAL(sink_str);
+		dispatch_name = sink_str;
 	}
 
-	typeinfo = php_com_locate_typeinfo(typelibname, obj, dispname, 1);
+	typeinfo = php_com_locate_typeinfo(type_lib_name, obj, dispatch_name, /* sink */ true);
 
 	if (typeinfo) {
 		HashTable *id_to_name;
@@ -737,29 +738,25 @@ PHP_FUNCTION(com_event_sink)
 PHP_FUNCTION(com_print_typeinfo)
 {
 	zend_object *object_zpp;
-	zend_string *typelib_name_zpp = NULL;
-	char *ifacename = NULL;
-	char *typelibname = NULL;
-	size_t ifacelen;
-	bool wantsink = 0;
+	zend_string *type_lib_name = NULL;
+	zend_string *interface_name = NULL;
+	bool want_sink = false;
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR(object_zpp, php_com_variant_class_entry, typelib_name_zpp)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object_zpp, php_com_variant_class_entry, type_lib_name)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(ifacename, ifacelen)
-		Z_PARAM_BOOL(wantsink)
+		Z_PARAM_STR_OR_NULL(interface_name)
+		Z_PARAM_BOOL(want_sink)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_com_initialize();
 	if (object_zpp) {
 		obj = (php_com_dotnet_object*)object_zpp;
-	} else {
-		typelibname = ZSTR_VAL(typelib_name_zpp);
 	}
 
-	typeinfo = php_com_locate_typeinfo(typelibname, obj, ifacename, wantsink ? 1 : 0);
+	typeinfo = php_com_locate_typeinfo(type_lib_name, obj, interface_name, want_sink);
 	if (typeinfo) {
 		php_com_process_typeinfo(typeinfo, NULL, 1, NULL, obj ? obj->code_page : COMG(code_page));
 		ITypeInfo_Release(typeinfo);
