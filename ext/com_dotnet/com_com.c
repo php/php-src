@@ -633,14 +633,14 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
 }
 
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg)
+zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool allow_noarg)
 {
 	DISPID dispid;
 	HRESULT hr;
 	char *msg = NULL;
 
-	hr = php_com_get_id_of_name(obj, name, namelen, &dispid);
+	hr = php_com_get_id_of_name(obj, ZSTR_VAL(name), ZSTR_LEN(name), &dispid);
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);

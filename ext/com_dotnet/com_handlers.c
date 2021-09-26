@@ -38,8 +38,8 @@ static zval *com_property_read(zend_object *object, zend_string *member, int typ
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		res = php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
+		res = php_com_do_invoke(obj, member, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
+			&v, 0, NULL, 1);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, obj->code_page);
@@ -67,7 +67,7 @@ static zval *com_property_write(zend_object *object, zend_string *member, zval *
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		if (SUCCESS == php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
+		if (SUCCESS == php_com_do_invoke(obj, member,
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
 		}
