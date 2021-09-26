@@ -190,7 +190,7 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (SUCCEEDED(php_com_get_id_of_name(obj, ZSTR_VAL(member), ZSTR_LEN(member), &dispid))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, member, &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -298,7 +298,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		return NULL;
 	}
 
-	if (FAILED(php_com_get_id_of_name(obj, name->val, name->len, &dummy))) {
+	if (FAILED(php_com_get_id_of_name(obj, name, &dummy))) {
 		return NULL;
 	}
 

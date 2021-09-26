@@ -93,8 +93,8 @@ PHP_METHOD(com, __construct);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg);
-HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		size_t namelen, DISPID *dispid);
+HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, zend_string *name,
+		DISPID *dispid);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg);
 zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,

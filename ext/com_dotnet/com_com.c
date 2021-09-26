@@ -408,23 +408,19 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 }
 
 /* map an ID to a name */
-HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		size_t namelen, DISPID *dispid)
+HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, zend_string *name,
+		DISPID *dispid)
 {
 	OLECHAR *olename;
 	HRESULT hr;
 	zval *tmp;
 
-	if (namelen == -1) {
-		namelen = strlen(name);
-	}
-
-	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
+	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_find(obj->id_of_name_cache, name))) {
 		*dispid = (DISPID)Z_LVAL_P(tmp);
 		return S_OK;
 	}
 
-	olename = php_com_string_to_olestring(name, namelen, obj->code_page);
+	olename = php_com_string_to_olestring(ZSTR_VAL(name), ZSTR_LEN(name), obj->code_page);
 
 	if (obj->typeinfo) {
 		hr = ITypeInfo_GetIDsOfNames(obj->typeinfo, &olename, 1, dispid);
@@ -451,7 +447,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
 		}
 		ZVAL_LONG(&tmp, *dispid);
-		zend_hash_str_update(obj->id_of_name_cache, name, namelen, &tmp);
+		zend_hash_update(obj->id_of_name_cache, name, &tmp);
 	}
 
 	return hr;
@@ -472,7 +468,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 		return FAILURE;
 	}
 
-	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid);
+	hr = php_com_get_id_of_name(obj, f->function_name, &dispid);
 
 	if (FAILED(hr)) {
 		char *msg = NULL;
@@ -640,7 +636,7 @@ zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
 	HRESULT hr;
 	char *msg = NULL;
 
-	hr = php_com_get_id_of_name(obj, ZSTR_VAL(name), ZSTR_LEN(name), &dispid);
+	hr = php_com_get_id_of_name(obj, name, &dispid);
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
