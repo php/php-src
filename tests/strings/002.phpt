@@ -1,4 +1,4 @@
-﻿--TEST--
+--TEST--
 Formatted print functions
 --FILE--
 <?php
