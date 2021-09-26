@@ -176,7 +176,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 }
 
 /* Given a type-library, merge it into the current engine state */
-PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepage)
+PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, int codepage)
 {
 	int i, j, interfaces;
 	TYPEKIND pTKind;
@@ -475,18 +475,17 @@ static zend_string *php_com_string_from_clsid(const CLSID *clsid, int codepage)
 }
 
 
-int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage)
+bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool printdef, GUID *guid, int codepage)
 {
 	TYPEATTR *attr;
 	FUNCDESC *func;
 	int i;
 	OLECHAR *olename;
 	zend_string *ansi_name = NULL;
-	int ret = 0;
 	DISPID lastid = 0;	/* for props */
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
-		return 0;
+		return false;
 	}
 
 	/* verify that it is suitable */
@@ -637,13 +636,11 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 		if (printdef) {
 			php_printf("}\n");
 		}
-
-		ret = 1;
 	} else {
 		zend_throw_error(NULL, "Type kind must be dispatchable, %08x given", attr->typekind);
 	}
 
 	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
 
-	return ret;
+	return true;
 }

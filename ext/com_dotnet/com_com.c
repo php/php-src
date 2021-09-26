@@ -331,7 +331,7 @@ PHP_FUNCTION(com_get_active_object)
 /* Performs an Invoke on the given com object.
  * returns a failure code and creates an exception if there was an error */
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg)
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, bool silent, bool allow_noarg)
 {
 	HRESULT hr;
 	unsigned int arg_err;
@@ -340,7 +340,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
 		&IID_NULL, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), flags, disp_params, v, &e, &arg_err);
 
-	if (silent == 0 && FAILED(hr)) {
+	if (!silent && FAILED(hr)) {
 		char *desc = NULL, *msg = NULL;
 
 		switch (hr) {
@@ -382,7 +382,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
-				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && (allow_noarg == 1)) {
+				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && allow_noarg) {
 					/* if getting a property and they are missing all parameters,
 					 * we want to create a proxy object for them; so lets not create an
 					 * exception here */
@@ -454,7 +454,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, zend_string *name,
 }
 
 /* the core of COM */
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
+zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
 		WORD flags,	VARIANT *v, int nargs, zval *args)
 {
 	DISPID dispid, altdispid;
@@ -582,8 +582,8 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 
 
-int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg)
+zend_result php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool silent, bool allow_noarg)
 {
 	DISPID altdispid;
 	DISPPARAMS disp_params;
@@ -718,7 +718,7 @@ PHP_FUNCTION(com_event_sink)
 			obj->sink_dispatch = php_com_wrapper_export_as_sink(sinkobject, &obj->sink_id, id_to_name);
 
 			/* Now hook it up to the source */
-			php_com_object_enable_event_sink(obj, TRUE);
+			php_com_object_enable_event_sink(obj, /* enable */ true);
 			RETVAL_TRUE;
 
 		} else {
