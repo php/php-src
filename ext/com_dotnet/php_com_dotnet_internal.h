@@ -80,8 +80,7 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 
 /* com_olechar.c */
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		size_t *string_len, int codepage);
+PHP_COM_DOTNET_API zend_string *php_com_olestring_to_string(OLECHAR *olestring, int codepage);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(const char *string,
 		size_t string_len, int codepage);
 BSTR php_com_string_to_bstr(zend_string *string, int codepage);

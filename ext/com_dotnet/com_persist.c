@@ -337,14 +337,9 @@ CPH_METHOD(GetCurFileName)
 		res = IPersistFile_GetCurFile(helper->ipf, &olename);
 
 		if (res == S_OK) {
-			size_t len;
-			char *str = php_com_olestring_to_string(olename,
-				   &len, helper->codepage);
-			RETVAL_STRINGL(str, len);
-			// TODO: avoid reallocarion???
-			efree(str);
+			zend_string *str = php_com_olestring_to_string(olename, helper->codepage);
 			CoTaskMemFree(olename);
-			return;
+			RETURN_STR(str);
 		} else if (res == S_FALSE) {
 			CoTaskMemFree(olename);
 			RETURN_FALSE;

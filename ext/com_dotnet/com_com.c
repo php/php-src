@@ -251,15 +251,15 @@ PHP_METHOD(com, __construct)
 			BSTR name;
 
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
-				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page);
+				zend_string *typelib_str = php_com_olestring_to_string(name, obj->code_page);
 
-				if (NULL != php_com_cache_typelib(TL, typelib_name, typelib_name_len)) {
+				if (NULL != php_com_cache_typelib(TL, ZSTR_VAL(typelib_str), ZSTR_LEN(typelib_str))) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
 				}
-				efree(typelib_name);
+				zend_string_release_ex(typelib_str, /* persistent */ false);
 			} else {
 				/* try it anyway */
 				php_com_import_typelib(TL, mode, obj->code_page);
@@ -341,39 +341,39 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		&IID_NULL, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), flags, disp_params, v, &e, &arg_err);
 
 	if (silent == 0 && FAILED(hr)) {
-		char *source = NULL, *desc = NULL, *msg = NULL;
-		size_t source_len, desc_len;
+		char *desc = NULL, *msg = NULL;
 
 		switch (hr) {
-			case DISP_E_EXCEPTION:
+			case DISP_E_EXCEPTION: {
+				zend_string *source = NULL, *desc_str = NULL;
 				if (e.bstrSource) {
-					source = php_com_olestring_to_string(e.bstrSource, &source_len, obj->code_page);
+					source = php_com_olestring_to_string(e.bstrSource, obj->code_page);
 					SysFreeString(e.bstrSource);
 				}
 				if (e.bstrDescription) {
-					desc = php_com_olestring_to_string(e.bstrDescription, &desc_len, obj->code_page);
+					desc_str = php_com_olestring_to_string(e.bstrDescription, obj->code_page);
 					SysFreeString(e.bstrDescription);
 				}
 				if (PG(html_errors)) {
 					spprintf(&msg, 0, "<b>Source:</b> %s<br/><b>Description:</b> %s",
-						source ? source : "Unknown",
-						desc ? desc : "Unknown");
+						source ? ZSTR_VAL(source) : "Unknown",
+						desc_str ? ZSTR_VAL(desc_str) : "Unknown");
 				} else {
 					spprintf(&msg, 0, "Source: %s\nDescription: %s",
-						source ? source : "Unknown",
-						desc ? desc : "Unknown");
+						source ? ZSTR_VAL(source) : "Unknown",
+						desc_str ? ZSTR_VAL(desc_str) : "Unknown");
 				}
-				if (desc) {
-					efree(desc);
+				if (desc_str) {
+					zend_string_release_ex(desc_str, /* persistent */ false);
 				}
 				if (source) {
-					efree(source);
+					zend_string_release_ex(source, /* persistent */ false);
 				}
 				if (e.bstrHelpFile) {
 					SysFreeString(e.bstrHelpFile);
 				}
 				break;
-
+			}
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
@@ -662,13 +662,7 @@ PHP_FUNCTION(com_create_guid)
 
 	php_com_initialize();
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
-		size_t len;
-		char *str;
-
-		str = php_com_olestring_to_string(guid_string, &len, CP_ACP);
-		RETVAL_STRINGL(str, len);
-		// TODO: avoid reallocation ???
-		efree(str);
+		RETVAL_STR(php_com_olestring_to_string(guid_string, CP_ACP));
 
 		CoTaskMemFree(guid_string);
 	} else {
