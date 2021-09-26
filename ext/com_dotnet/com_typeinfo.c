@@ -250,13 +250,13 @@ void php_com_typelibrary_dtor(zval *pDest)
 	ITypeLib_Release(Lib);
 }
 
-ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len) {
+ITypeLib *php_com_cache_typelib(ITypeLib* TL, zend_string *cache_key) {
 	ITypeLib* result;
 #ifdef ZTS
 	tsrm_mutex_lock(php_com_typelibraries_mutex);
 #endif
 
-	result = zend_hash_str_add_ptr(&php_com_typelibraries, cache_key, cache_key_len, TL);
+	result = zend_hash_add_ptr(&php_com_typelibraries, cache_key, TL);
 
 #ifdef ZTS
 	tsrm_mutex_unlock(php_com_typelibraries_mutex);
