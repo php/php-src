@@ -32,8 +32,9 @@ PHP_METHOD(com, __construct)
 	zend_string *server_name = NULL;
 	HashTable *server_params = NULL;
 	php_com_dotnet_object *obj;
-	char *module_name, *typelib_name = NULL;
-	size_t module_name_len = 0, typelib_name_len = 0;
+	char *module_name;
+	size_t module_name_len = 0;
+	zend_string *type_lib_name;
 	zend_string *user_name = NULL, *password = NULL, *domain_name = NULL;
 	OLECHAR *moniker;
 	CLSID clsid;
@@ -56,7 +57,7 @@ PHP_METHOD(com, __construct)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(server_params, server_name)
 		Z_PARAM_LONG(cp)
-		Z_PARAM_STRING(typelib_name, typelib_name_len)
+		Z_PARAM_STR(type_lib_name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_com_initialize();
@@ -229,9 +230,9 @@ PHP_METHOD(com, __construct)
 	/* we got the object and it lives ! */
 
 	/* see if it has TypeInfo available */
-	if (FAILED(IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), &obj->typeinfo)) && typelib_name) {
+	if (FAILED(IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), &obj->typeinfo)) && type_lib_name) {
 		/* load up the library from the named file */
-		TL = php_com_load_typelib_via_cache(typelib_name, obj->code_page);
+		TL = php_com_load_typelib_via_cache(type_lib_name, obj->code_page);
 
 		if (TL) {
 			if (COMG(autoreg_on)) {
@@ -798,13 +799,12 @@ PHP_FUNCTION(com_message_pump)
 /* {{{ Loads a Typelibrary and registers its constants */
 PHP_FUNCTION(com_load_typelib)
 {
-	char *name;
-	size_t namelen;
+	zend_string *name;
 	ITypeLib *pTL = NULL;
 	bool cs = TRUE;
 	int codepage = COMG(code_page);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &namelen, &cs)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &name, &cs)) {
 		RETURN_THROWS();
 	}
 

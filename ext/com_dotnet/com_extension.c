@@ -113,10 +113,12 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 			ptr--;
 		}
 
-		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page))) != NULL) {
+		zend_string *type_lib_name_str = zend_string_init(typelib_name, strlen(typelib_name), /* persistent */ false);
+		if ((pTL = php_com_load_typelib_via_cache(type_lib_name_str, COMG(code_page))) != NULL) {
 			php_com_import_typelib(pTL, mode, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
+		zend_string_release_ex(type_lib_name_str, /* persistent */ false);
 	}
 
 	efree(typelib_name_buffer);

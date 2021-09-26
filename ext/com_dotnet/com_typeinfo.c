@@ -267,10 +267,9 @@ ITypeLib *php_com_cache_typelib(ITypeLib* TL, zend_string *cache_key) {
 	return result;
 }
 
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage)
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(zend_string *key, int codepage)
 {
 	ITypeLib *TL;
-	zend_string *key = zend_string_init(search_string, strlen(search_string), 1);
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_com_typelibraries_mutex);
@@ -296,7 +295,6 @@ php_com_load_typelib_via_cache_return:
 #ifdef ZTS
 	tsrm_mutex_unlock(php_com_typelibraries_mutex);
 #endif
-	zend_string_release(key);
 
 	return TL;
 }
