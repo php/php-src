@@ -107,7 +107,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 
 /* com_persist.c */
-int php_com_persist_minit(INIT_FUNC_ARGS);
+void php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
 PHP_METHOD(variant, __construct);
