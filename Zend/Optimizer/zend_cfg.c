@@ -436,12 +436,11 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				flags |= ZEND_FUNC_HAS_EXTENDED_FCALL;
 				break;
 			case ZEND_FREE:
-				if (opline->extended_value == ZEND_FREE_SWITCH) {
+			case ZEND_FE_FREE:
+				if (zend_optimizer_is_loop_var_free(opline)) {
+					BB_START(i);
 					flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				}
-				break;
-			case ZEND_FE_FREE:
-				flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				break;
 		}
 	}
