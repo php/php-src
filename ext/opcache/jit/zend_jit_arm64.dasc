@@ -12748,15 +12748,19 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 				uint64_t val = 0x43e0000000000000;
 				|	LOAD_64BIT_VAL REG0, val
 				|	SET_ZVAL_LVAL_FROM_REG var_addr, REG0, TMP1
+				|	SET_ZVAL_TYPE_INFO var_addr, IS_DOUBLE, TMP1w, TMP2
 				if (opline->opcode == ZEND_PRE_INC_OBJ && opline->result_type != IS_UNUSED) {
 					|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, TMP1w, TMP2
 				}
 			} else {
 				uint64_t val = 0xc3e0000000000000;
 				|	LOAD_64BIT_VAL REG0, val
 				|	SET_ZVAL_LVAL_FROM_REG var_addr, REG0, TMP1
+				|	SET_ZVAL_TYPE_INFO var_addr, IS_DOUBLE, TMP1w, TMP2
 				if (opline->opcode == ZEND_PRE_DEC_OBJ && opline->result_type != IS_UNUSED) {
 					|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+					|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, TMP1w, TMP2
 				}
 			}
 			|	b >4
