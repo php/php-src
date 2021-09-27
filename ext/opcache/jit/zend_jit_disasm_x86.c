@@ -411,6 +411,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
 	REGISTER_HELPER(zend_jit_leave_func_helper);
 	REGISTER_HELPER(zend_jit_symtable_find);
+	REGISTER_HELPER(zend_jit_hash_index_lookup_rw_no_packed);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_rw);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_w);
 	REGISTER_HELPER(zend_jit_hash_lookup_rw);

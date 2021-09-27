@@ -5569,7 +5569,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 					|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 				}
 				|	SET_EX_OPLINE opline, r0
-				|	EXT_CALL zend_jit_hash_index_lookup_rw, r0
+				if (packed_loaded) {
+					|	EXT_CALL zend_jit_hash_index_lookup_rw_no_packed, r0
+				} else {
+					|	EXT_CALL zend_jit_hash_index_lookup_rw, r0
+				}
 				|	test r0, r0
 				|	jz >9
 				break;
