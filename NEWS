@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
     (cmb, Nikita, Tyson Andre)
+  . Fixed bug #81477 (LimitIterator + SplFileObject regression in 8.0.1). (cmb)
 
 - Standard:
   . Fixed bug #69751 (Change Error message of sprintf/printf for missing/typo
