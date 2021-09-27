@@ -3029,7 +3029,7 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 	return zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL;
 }
 
-zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
+ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
 	inheritance_status status;
 	zend_class_entry *proto = NULL;

@@ -791,8 +791,6 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);
 ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
 ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
-ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
-ZEND_API void zend_do_delayed_early_binding(zend_op_array *op_array, uint32_t first_early_binding_opline);
 
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 

@@ -1471,6 +1471,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 	orig_compiler_options = CG(compiler_options);
 	CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(new_persistent_script);
 	CG(compiler_options) = orig_compiler_options;
 
 	*from_shared_memory = 1;
@@ -1488,6 +1489,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	}
 	zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(new_persistent_script);
 	CG(compiler_options) = orig_compiler_options;
 
 	/* exclusive lock */
@@ -1810,10 +1812,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	new_persistent_script->script.main_op_array = *op_array;
 	zend_accel_move_user_functions(CG(function_table), CG(function_table)->nNumUsed - orig_functions_count, &new_persistent_script->script);
 	zend_accel_move_user_classes(CG(class_table), CG(class_table)->nNumUsed - orig_class_count, &new_persistent_script->script);
-	new_persistent_script->script.first_early_binding_opline =
-		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
-			zend_build_delayed_early_binding_list(op_array) :
-			(uint32_t)-1;
+	zend_accel_build_delayed_early_binding_list(new_persistent_script);
 	new_persistent_script->num_warnings = EG(num_errors);
 	new_persistent_script->warnings = EG(errors);
 	EG(num_errors) = 0;
@@ -3604,7 +3603,6 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 		zend_persistent_script *script;
 
 		script = create_persistent_script();
-		script->script.first_early_binding_opline = (uint32_t)-1;
 		script->script.filename = zend_string_copy(op_array->filename);
 		zend_string_hash_val(script->script.filename);
 		script->script.main_op_array = *op_array;
@@ -4023,8 +4021,9 @@ static void preload_link(void)
 		preload_remove_declares(op_array);
 
 		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
-			script->script.first_early_binding_opline = zend_build_delayed_early_binding_list(op_array);
-			if (script->script.first_early_binding_opline == (uint32_t)-1) {
+			zend_accel_free_delayed_early_binding_list(script);
+			zend_accel_build_delayed_early_binding_list(script);
+			if (!script->num_early_bindings) {
 				op_array->fn_flags &= ~ZEND_ACC_EARLY_BINDING;
 			}
 		}
@@ -4195,6 +4194,7 @@ static void preload_optimize(zend_persistent_script *script)
 	} ZEND_HASH_FOREACH_END();
 
 	zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(script);
 
 	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
 		preload_fix_trait_methods(ce);
@@ -4210,6 +4210,7 @@ static void preload_optimize(zend_persistent_script *script)
 
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 		zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+		zend_accel_finalize_delayed_early_binding_list(script);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -4521,8 +4522,6 @@ static int accel_preload(const char *config, bool in_child)
 
 		script->script.filename = CG(compiled_filename);
 		CG(compiled_filename) = NULL;
-
-		script->script.first_early_binding_opline = (uint32_t)-1;
 
 		preload_move_user_functions(CG(function_table), &script->script.function_table);
 		preload_move_user_classes(CG(class_table), &script->script.class_table);
