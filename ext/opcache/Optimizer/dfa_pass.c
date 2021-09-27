@@ -575,11 +575,19 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 
 		/* Also remove the corresponding phi node entries */
 		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
-			memmove(
-				phi->sources + old_pred_idx,
-				phi->sources + old_pred_idx + 1,
-				sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
-			);
+			if (phi->pi >= 0) {
+				if (phi->pi == old_pred) {
+					zend_ssa_rename_var_uses(
+						ssa, phi->ssa_var, phi->sources[0], /* update_types */ 0);
+					zend_ssa_remove_phi(ssa, phi);
+				}
+			} else {
+				memmove(
+					phi->sources + old_pred_idx,
+					phi->sources + old_pred_idx + 1,
+					sizeof(int) * (block->predecessors_count - old_pred_idx - 1)
+				);
+			}
 		}
 
 		block->predecessors_count--;
