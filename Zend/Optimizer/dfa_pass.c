@@ -235,17 +235,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 			}
 		}
 
-		/* update early binding list */
-		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
-			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
-
-			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
-			do {
-				*opline_num -= shiftlist[*opline_num];
-				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
-			} while (*opline_num != (uint32_t)-1);
-		}
-
 		/* update call graph */
 		if (func_info) {
 			zend_call_info *call_info = func_info->callee_info;

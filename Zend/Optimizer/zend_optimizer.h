@@ -86,7 +86,6 @@ typedef struct _zend_script {
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
-	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
 typedef void (*zend_optimizer_pass_t)(zend_script *, void *context);

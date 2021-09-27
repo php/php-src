@@ -109,6 +109,13 @@ typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
+typedef struct _zend_early_binding {
+	zend_string *lcname;
+	zend_string *rtd_key;
+	zend_string *lc_parent_name;
+	uint32_t cache_slot;
+} zend_early_binding;
+
 typedef struct _zend_persistent_script {
 	zend_script    script;
 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
@@ -118,7 +125,9 @@ typedef struct _zend_persistent_script {
 	bool      is_phar;
 	bool      empty;
 	uint32_t       num_warnings;
+	uint32_t       num_early_bindings;
 	zend_error_info **warnings;
+	zend_early_binding *early_bindings;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */

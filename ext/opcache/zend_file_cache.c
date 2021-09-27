@@ -889,6 +889,21 @@ static void zend_file_cache_serialize_warnings(
 	}
 }
 
+static void zend_file_cache_serialize_early_bindings(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->early_bindings) {
+		SERIALIZE_PTR(script->early_bindings);
+		zend_early_binding *early_bindings = script->early_bindings;
+		UNSERIALIZE_PTR(early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			SERIALIZE_STR(early_bindings[i].lcname);
+			SERIALIZE_STR(early_bindings[i].rtd_key);
+			SERIALIZE_STR(early_bindings[i].lc_parent_name);
+		}
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -911,6 +926,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
 	zend_file_cache_serialize_warnings(new_script, info, buf);
+	zend_file_cache_serialize_early_bindings(new_script, info, buf);
 
 	new_script->mem = NULL;
 }
@@ -1667,6 +1683,18 @@ static void zend_file_cache_unserialize_warnings(zend_persistent_script *script,
 	}
 }
 
+static void zend_file_cache_unserialize_early_bindings(zend_persistent_script *script, void *buf)
+{
+	if (script->early_bindings) {
+		UNSERIALIZE_PTR(script->early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			UNSERIALIZE_STR(script->early_bindings[i].lcname);
+			UNSERIALIZE_STR(script->early_bindings[i].rtd_key);
+			UNSERIALIZE_STR(script->early_bindings[i].lc_parent_name);
+		}
+	}
+}
+
 static void zend_file_cache_unserialize(zend_persistent_script  *script,
                                         void                    *buf)
 {
@@ -1680,6 +1708,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 	zend_file_cache_unserialize_warnings(script, buf);
+	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
