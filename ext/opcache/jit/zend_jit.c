@@ -3163,14 +3163,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
-							if (ssa->ops && ssa->vars) {
-								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
-								if (ssa_op->op1_use >= 0) {
-									if (ssa->vars[ssa_op->op1_use].definition >= 0) {
-										on_this = op_array->opcodes[ssa->vars[ssa_op->op1_use].definition].opcode == ZEND_FETCH_THIS;
-									}
-								}
-							}
 						}
 						if (!zend_jit_incdec_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr,
@@ -3220,14 +3212,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
-							if (ssa->ops && ssa->vars) {
-								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
-								if (ssa_op->op1_use >= 0) {
-									if (ssa->vars[ssa_op->op1_use].definition >= 0) {
-										on_this = op_array->opcodes[ssa->vars[ssa_op->op1_use].definition].opcode == ZEND_FETCH_THIS;
-									}
-								}
-							}
 						}
 						if (!zend_jit_assign_obj_op(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, OP1_DATA_INFO(), OP1_DATA_RANGE(),
@@ -3267,14 +3251,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									if (op1_ssa->ce && !op1_ssa->ce->create_object) {
 										ce = op1_ssa->ce;
 										ce_is_instanceof = op1_ssa->is_instanceof;
-									}
-								}
-							}
-							if (ssa->ops && ssa->vars) {
-								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
-								if (ssa_op->op1_use >= 0) {
-									if (ssa->vars[ssa_op->op1_use].definition >= 0) {
-										on_this = op_array->opcodes[ssa->vars[ssa_op->op1_use].definition].opcode == ZEND_FETCH_THIS;
 									}
 								}
 							}
@@ -3788,14 +3764,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									}
 								}
 							}
-							if (ssa->ops && ssa->vars) {
-								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
-								if (ssa_op->op1_use >= 0) {
-									if (ssa->vars[ssa_op->op1_use].definition >= 0) {
-										on_this = op_array->opcodes[ssa->vars[ssa_op->op1_use].definition].opcode == ZEND_FETCH_THIS;
-									}
-								}
-							}
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
@@ -3944,14 +3912,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 									if (op1_ssa->ce && !op1_ssa->ce->create_object) {
 										ce = op1_ssa->ce;
 										ce_is_instanceof = op1_ssa->is_instanceof;
-									}
-								}
-							}
-							if (ssa->ops && ssa->vars) {
-								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
-								if (ssa_op->op1_use >= 0) {
-									if (ssa->vars[ssa_op->op1_use].definition >= 0) {
-										on_this = op_array->opcodes[ssa->vars[ssa_op->op1_use].definition].opcode == ZEND_FETCH_THIS;
 									}
 								}
 							}
