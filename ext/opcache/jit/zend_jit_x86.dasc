@@ -5466,7 +5466,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	// hval = Z_LVAL_P(dim);
 						|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 					}
-					|	EXT_CALL _zend_hash_index_find, r0
+					if (packed_loaded) {
+						|	EXT_CALL _zend_hash_index_find, r0
+					} else {
+						|	EXT_CALL zend_hash_index_find, r0
+					}
 					|	test r0, r0
 					if (not_found_exit_addr) {
 						|	jz &not_found_exit_addr
@@ -5522,7 +5526,11 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 						|	// hval = Z_LVAL_P(dim);
 						|	GET_ZVAL_LVAL ZREG_FCARG2a, op2_addr
 					}
-					|	EXT_CALL _zend_hash_index_find, r0
+					if (packed_loaded) {
+						|	EXT_CALL _zend_hash_index_find, r0
+					} else {
+						|	EXT_CALL zend_hash_index_find, r0
+					}
 					|	test r0, r0
 					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
 						|	jz &exit_addr
