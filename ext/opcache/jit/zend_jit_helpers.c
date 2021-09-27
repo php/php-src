@@ -252,9 +252,19 @@ static zval* ZEND_FASTCALL zend_jit_symtable_find(HashTable *ht, zend_string *st
 	return zend_hash_find(ht, str);
 }
 
-static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_long idx)
+static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw_no_packed(HashTable *ht, zend_long idx)
 {
 	zval *retval = _zend_hash_index_find(ht, idx);
+
+	if (!retval) {
+		retval = zend_undefined_offset_write(ht, idx);
+	}
+	return retval;
+}
+
+static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_long idx)
+{
+	zval *retval = zend_hash_index_find(ht, idx);
 
 	if (!retval) {
 		retval = zend_undefined_offset_write(ht, idx);
