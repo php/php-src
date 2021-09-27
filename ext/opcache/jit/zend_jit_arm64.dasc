@@ -12246,7 +12246,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			if (type < IS_STRING) {
 				|1:
 				if (type_loaded) {
-					|	IF_NOT_TYPE TMP2w, type, &exit_addr
+					|	IF_NOT_TYPE REG2w, type, &exit_addr
 				} else {
 					|	IF_NOT_ZVAL_TYPE val_addr, type, &exit_addr, ZREG_TMP1
 				}
