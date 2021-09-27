@@ -12278,9 +12278,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				|	IF_NOT_TYPE TMP1w, IS_REFERENCE, >1
 				|	GET_Z_PTR REG0, REG0
 				|	add REG0, REG0, #offsetof(zend_reference, val)
-				if (type >= IS_STRING) {
-					|	GET_ZVAL_TYPE_INFO REG2w, val_addr, TMP1
-				}
+				|	GET_ZVAL_TYPE_INFO REG2w, val_addr, TMP1
 			}
 			res_info &= ~MAY_BE_GUARD;
 			ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
