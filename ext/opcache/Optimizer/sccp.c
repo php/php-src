@@ -1013,14 +1013,15 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 	switch (opline->opcode) {
 		case ZEND_ASSIGN:
 			/* The value of op1 is irrelevant here, because we are overwriting it
-			 * -- unless it can be a reference, in which case we propagate a BOT. */
+			 * -- unless it can be a reference, in which case we propagate a BOT.
+			 * The result is also BOT in this case, because it might be a typed reference. */
 			if (IS_BOT(op1) && (ctx->scdf.ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF)) {
 				SET_RESULT_BOT(op1);
+				SET_RESULT_BOT(result);
 			} else {
 				SET_RESULT(op1, op2);
+				SET_RESULT(result, op2);
 			}
-
-			SET_RESULT(result, op2);
 			return;
 		case ZEND_TYPE_CHECK:
 			/* We may be able to evaluate TYPE_CHECK based on type inference info,

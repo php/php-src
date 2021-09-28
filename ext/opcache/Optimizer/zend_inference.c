@@ -2879,7 +2879,12 @@ static zend_always_inline int _zend_update_type_info(
 				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp & ~MAY_BE_REF, ssa_op->result_def);
+				if (tmp & MAY_BE_REF) {
+					/* Assignment to typed reference may change type.
+					 * Be conservative and don't assume anything. */
+					tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->result_def);
 			}
 			break;
