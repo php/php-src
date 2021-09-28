@@ -6147,14 +6147,14 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 			var_addr = var_use_addr = ZEND_ADDR_MEM_ZVAL(ref_reg, 0);
 		}
 		|	// if (Z_ISREF_P(variable_ptr)) {
-		|	IF_NOT_Z_TYPE, Ra(ref_reg), IS_REFERENCE, >1
+		|	IF_NOT_Z_TYPE, Ra(ref_reg), IS_REFERENCE, >3
 		|	// if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(variable_ptr)))) {
 		|	GET_Z_PTR FCARG1a, Ra(ref_reg)
 		if (!zend_jit_assign_to_typed_ref(Dst, opline, val_type, val_addr, res_addr, check_exception)) {
 			return 0;
 		}
 		|	lea Ra(ref_reg), [FCARG1a + offsetof(zend_reference, val)]
-		|1:
+		|3:
 	}
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		if (RC_MAY_BE_1(var_info)) {
