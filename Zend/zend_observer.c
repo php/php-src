@@ -41,11 +41,11 @@ typedef struct _zend_observer_fcall_data {
 zend_llist zend_observers_fcall_list;
 zend_llist zend_observer_error_callbacks;
 
-int zend_observer_fcall_op_array_extension = -1;
+int zend_observer_fcall_op_array_extension;
 
-ZEND_TLS zend_arena *fcall_handlers_arena = NULL;
-ZEND_TLS zend_execute_data *first_observed_frame = NULL;
-ZEND_TLS zend_execute_data *current_observed_frame = NULL;
+ZEND_TLS zend_arena *fcall_handlers_arena;
+ZEND_TLS zend_execute_data *first_observed_frame;
+ZEND_TLS zend_execute_data *current_observed_frame;
 
 // Call during minit/startup ONLY
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
@@ -72,12 +72,18 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init init) {
 ZEND_API void zend_observer_startup(void) {
 	zend_llist_init(&zend_observers_fcall_list, sizeof(zend_observer_fcall_init), NULL, 1);
 	zend_llist_init(&zend_observer_error_callbacks, sizeof(zend_observer_error_cb), NULL, 1);
+
+	zend_observer_fcall_op_array_extension = -1;
 }
 
 ZEND_API void zend_observer_activate(void) {
 	if (ZEND_OBSERVER_ENABLED) {
 		fcall_handlers_arena = zend_arena_create(4096);
+	} else {
+		fcall_handlers_arena = NULL;
 	}
+	first_observed_frame = NULL;
+	current_observed_frame = NULL;
 }
 
 ZEND_API void zend_observer_deactivate(void) {
