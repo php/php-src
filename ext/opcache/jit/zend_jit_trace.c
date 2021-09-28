@@ -1786,6 +1786,11 @@ propagate_arg:
 							return_value_info.type &= ~MAY_BE_UNDEF;
 							return_value_info.type |= MAY_BE_NULL;
 						}
+						if (return_value_info.type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+							/* CVs are going to be destructed and the reference-counter
+							   of return value may be decremented to 1 */
+							return_value_info.type |= MAY_BE_RC1;
+						}
 						return_value_info.type &= ~MAY_BE_GUARD;
 					}
 					break;
