@@ -58,8 +58,7 @@
  * e) Otherwise the result is BOT.
  *
  * It is sometimes possible to determine a result even if one argument is TOP / BOT, e.g. for things
- * like BOT*0. Right now we don't bother with this -- the only thing that is done is evaluating
- * TYPE_CHECKS based on the type information.
+ * like BOT*0. Right now we don't bother with this.
  *
  * Feasible successors for conditional branches are determined as follows:
  * a) If we don't support the branch type or branch on BOT, all successors are feasible.
@@ -1002,24 +1001,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				SET_RESULT(result, op2);
 			}
 			return;
-		case ZEND_TYPE_CHECK:
-			/* We may be able to evaluate TYPE_CHECK based on type inference info,
-			 * even if we don't know the precise value. */
-			if (!value_known(op1)) {
-				uint32_t type = ctx->scdf.ssa->var_info[ssa_op->op1_use].type;
-				uint32_t expected_type_mask = opline->extended_value;
-				if (!(type & expected_type_mask) && !(type & MAY_BE_UNDEF)) {
-					ZVAL_FALSE(&zv);
-					SET_RESULT(result, &zv);
-					return;
-				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))
-						   && !(expected_type_mask & MAY_BE_RESOURCE)) {
-					ZVAL_TRUE(&zv);
-					SET_RESULT(result, &zv);
-					return;
-				}
-			}
-			break;
 		case ZEND_ASSIGN_DIM:
 		{
 			zval *data = get_op1_value(ctx, opline+1, ssa_op+1);
@@ -1855,6 +1836,45 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 	}
 }
 
+static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
+	zend_ssa *ssa = ctx->scdf.ssa;
+	zend_ssa_var_info *info = &ssa->var_info[var_num];
+
+	if (info->type & MAY_BE_UNDEF) {
+		return NULL;
+	}
+
+	if (!(info->type & MAY_BE_ANY)) {
+		/* This code must be unreachable. We could replace operands with NULL, but this doesn't
+		 * really make things better. It would be better to later remove this code entirely. */
+		return NULL;
+	}
+
+	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
+		ZVAL_NULL(tmp);
+		return tmp;
+	}
+	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_FALSE))) {
+		ZVAL_FALSE(tmp);
+		return tmp;
+	}
+	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_TRUE))) {
+		ZVAL_TRUE(tmp);
+		return tmp;
+	}
+
+	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))
+			&& info->has_range
+			&& !info->range.overflow && !info->range.underflow
+			&& info->range.min == info->range.max) {
+		ZVAL_LONG(tmp, info->range.min);
+		return tmp;
+	}
+
+	return NULL;
+}
+
+
 /* Returns whether there is a successor */
 static void sccp_mark_feasible_successors(
 		scdf_ctx *scdf,
@@ -1876,6 +1896,10 @@ static void sccp_mark_feasible_successors(
 	}
 
 	op1 = get_op1_value(ctx, opline, ssa_op);
+	if (IS_BOT(op1)) {
+		ZEND_ASSERT(ssa_op->op1_use >= 0);
+		op1 = value_from_type_and_range(ctx, ssa_op->op1_use, &zv);
+	}
 
 	/* Branch target can be either one */
 	if (!op1 || IS_BOT(op1)) {
@@ -2111,44 +2135,6 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 	}
 }
 
-static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
-	zend_ssa *ssa = ctx->scdf.ssa;
-	zend_ssa_var_info *info = &ssa->var_info[var_num];
-
-	if (info->type & MAY_BE_UNDEF) {
-		return NULL;
-	}
-
-	if (!(info->type & MAY_BE_ANY)) {
-		/* This code must be unreachable. We could replace operands with NULL, but this doesn't
-		 * really make things better. It would be better to later remove this code entirely. */
-		return NULL;
-	}
-
-	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
-		ZVAL_NULL(tmp);
-		return tmp;
-	}
-	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_FALSE))) {
-		ZVAL_FALSE(tmp);
-		return tmp;
-	}
-	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_TRUE))) {
-		ZVAL_TRUE(tmp);
-		return tmp;
-	}
-
-	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))
-			&& info->has_range
-			&& !info->range.overflow && !info->range.underflow
-			&& info->range.min == info->range.max) {
-		ZVAL_LONG(tmp, info->range.min);
-		return tmp;
-	}
-
-	return NULL;
-}
-
 /* Call instruction -> remove opcodes that are part of the call */
 static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 {
@@ -2256,15 +2242,6 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				zend_ssa_remove_result_def(ssa, ssa_op);
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
-				} else if (opline->opcode == ZEND_TYPE_CHECK
-						&& (opline->op1_type & (IS_VAR|IS_TMP_VAR))
-						&& !value_known(&ctx->values[ssa_op->op1_use])) {
-					/* For TYPE_CHECK we may compute the result value without knowing the
-					 * operand, based on type inference information. Make sure the operand is
-					 * freed and leave further cleanup to DCE. */
-					opline->opcode = ZEND_FREE;
-					opline->result_type = IS_UNUSED;
-					removed_ops++;
 				} else {
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;

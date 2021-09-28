@@ -3594,7 +3594,24 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_GET_TYPE:
 			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			break;
-		case ZEND_TYPE_CHECK:
+		case ZEND_TYPE_CHECK: {
+			uint32_t expected_type_mask = opline->extended_value;
+			if (t1 & MAY_BE_UNDEF) {
+				t1 |= MAY_BE_NULL;
+			}
+			tmp = 0;
+			if (t1 & expected_type_mask) {
+				tmp |= MAY_BE_TRUE;
+				if ((t1 & expected_type_mask) & MAY_BE_RESOURCE) {
+					tmp |= MAY_BE_FALSE;
+				}
+			}
+			if (t1 & (MAY_BE_ANY - expected_type_mask)) {
+				tmp |= MAY_BE_FALSE;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			break;
+		}
 		case ZEND_DEFINED:
 			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_op->result_def);
 			break;
