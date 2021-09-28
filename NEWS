@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC4
 
-
+- Core:
+  . Fixed bug #75941 (Fix compile failure on Solaris with clang). (Jaromír
+    Doleček)
 
 30 Sep 2021, PHP 8.1.0RC3
 
