@@ -2751,31 +2751,17 @@ static zend_always_inline int _zend_update_type_info(
 				if (t1 & MAY_BE_STRING) {
 					tmp |= MAY_BE_STRING;
 				}
-				if (t1 & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_STRING)) {
+				if (t1 & (MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL|MAY_BE_UNDEF)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
 
 					if (OP1_DATA_INFO() & MAY_BE_UNDEF) {
 						tmp |= MAY_BE_NULL;
 					}
-					if (opline->op2_type == IS_UNUSED) {
-						/* When appending to an array and the LONG_MAX key is already used
-						 * null will be returned. */
-						tmp |= MAY_BE_NULL;
-					}
-					if (t2 & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
-						/* Arrays and objects cannot be used as keys. */
-						tmp |= MAY_BE_NULL;
-					}
-					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
-						/* undef, null and false are implicitly converted to array, anything else
-						 * results in a null return value. */
-						tmp |= MAY_BE_NULL;
-					}
 				}
-				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_REF;
 				}
+				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
 			if ((ssa_op+1)->op1_def >= 0) {
