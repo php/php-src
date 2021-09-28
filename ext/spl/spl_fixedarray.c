@@ -156,10 +156,14 @@ static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zen
  */
 static void spl_fixedarray_dtor(spl_fixedarray *array)
 {
-	zend_long size = array->size;
 	if (!spl_fixedarray_empty(array)) {
-		spl_fixedarray_dtor_range(array, 0, size);
-		efree(array->elements);
+		zval *begin = array->elements, *end = array->elements + array->size;
+		array->elements = NULL;
+		array->size = 0;
+		while (begin != end) {
+			zval_ptr_dtor(--end);
+		}
+		efree(begin);
 	}
 }
 

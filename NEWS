@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     ReflectionClass). (Nikita)
   . Fixed bug #81474 (Make ReflectionEnum and related class non-final). (Nikita)
 
+- SPL:
+  . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
+    (cmb, Nikita, Tyson Andre)
+
 - XML:
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
