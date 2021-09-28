@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81435 (Observer current_observed_frame may point to an old
     (overwritten) frame). (Bob)
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
 - DOM:
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
