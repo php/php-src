@@ -42,7 +42,15 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 
 			if (b->len != 0) {
 				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
-				if (b->successors_count == 1) {
+				if (opcode == ZEND_MATCH) {
+					succ->flags |= ZEND_BB_TARGET;
+				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
+					if (i == b->successors_count - 1) {
+						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
+					} else {
+						succ->flags |= ZEND_BB_TARGET;
+					}
+				} else if (b->successors_count == 1) {
 					if (opcode == ZEND_JMP) {
 						succ->flags |= ZEND_BB_TARGET;
 					} else {
@@ -66,22 +74,12 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 							}
 						}
 					}
-				} else if (b->successors_count == 2) {
+				} else {
+					ZEND_ASSERT(b->successors_count == 2);
 					if (i == 0 || opcode == ZEND_JMPZNZ) {
 						succ->flags |= ZEND_BB_TARGET;
 					} else {
 						succ->flags |= ZEND_BB_FOLLOW;
-					}
-				} else {
-					ZEND_ASSERT(
-						opcode == ZEND_SWITCH_LONG
-						|| opcode == ZEND_SWITCH_STRING
-						|| opcode == ZEND_MATCH
-					);
-					if (i == b->successors_count - 1) {
-						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
-					} else {
-						succ->flags |= ZEND_BB_TARGET;
 					}
 				}
 			} else {
