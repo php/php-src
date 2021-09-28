@@ -8076,8 +8076,9 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 				} else {
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
-					|	bvs &exit_addr
+					|	bvs >1
 					|	beq &exit_addr
+					|1:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
 				}
 			} else if (false_label != (uint32_t)-1) { // JMPZ_EX
@@ -8116,8 +8117,9 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					|	bne &exit_addr
 					|1:
 				} else {
-					|	bvs &exit_addr
+					|	bvs >1
 					|	beq &exit_addr
+					|1:
 				}
 			} else {
 				ZEND_ASSERT(true_label != (uint32_t)-1 || false_label != (uint32_t)-1);
