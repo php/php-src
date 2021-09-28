@@ -140,10 +140,10 @@ struct _zend_op {
 	znode_op result;
 	uint32_t extended_value;
 	uint32_t lineno;
-	zend_uchar opcode;
-	zend_uchar op1_type;
-	zend_uchar op2_type;
-	zend_uchar result_type;
+	zend_uchar opcode;       /* Opcodes defined in Zend/zend_vm_opcodes.h */
+	zend_uchar op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	zend_uchar op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+	zend_uchar result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 };
 
 
