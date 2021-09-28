@@ -1410,6 +1410,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		fbc = get_static_method_fallback(ce, function_name);
 	}
 
+	if (UNEXPECTED(!key)) {
+		zend_string_release_ex(lc_function_name, 0);
+	}
+
 	if (EXPECTED(fbc)) {
 		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			zend_abstract_method_call(fbc);
@@ -1419,11 +1423,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				"Calling static trait method %s::%s is deprecated, "
 				"it should only be called on a class using the trait",
 				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			if (EG(exception)) {
+				return NULL;
+			}
 		}
-	}
-
-	if (UNEXPECTED(!key)) {
-		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	return fbc;
