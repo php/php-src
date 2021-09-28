@@ -12923,12 +12923,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				} else {
 					|	EXT_CALL zend_jit_invalid_property_assign, REG0
 				}
+				may_throw = 1;
 				if (((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))
 				 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-					may_throw = 1;
 					|	b >8
 				} else {
-					|	b ->exception_handler
+					|	b >9
 				}
 				|.code
 			}
@@ -13296,7 +13296,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 				 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 					|	b >7
 				} else {
-					|	b ->exception_handler
+					|	b >9
 				}
 				|.code
 			}
