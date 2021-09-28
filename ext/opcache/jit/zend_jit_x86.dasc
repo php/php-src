@@ -8790,6 +8790,9 @@ static int zend_jit_qm_assign(dasm_State **Dst, const zend_op *opline, uint32_t 
 	if (!zend_jit_store_var_if_necessary(Dst, opline->result.var, res_addr, res_info)) {
 		return 0;
 	}
+	if (op1_info & MAY_BE_UNDEF) {
+		zend_jit_check_exception(Dst);
+	}
 	return 1;
 }
 
