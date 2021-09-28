@@ -30,13 +30,17 @@ static bool bailed_out = false;
  * we can assume that we don't use global registers / hybrid VM. */
 typedef int (ZEND_FASTCALL *opcode_handler_t)(zend_execute_data *);
 
+static zend_always_inline void fuzzer_bailout(void) {
+	bailed_out = true;
+	zend_bailout();
+}
+
 static zend_always_inline void fuzzer_step(void) {
 	if (--steps_left == 0) {
 		/* Reset steps before bailing out, so code running after bailout (e.g. in
 		 * destructors) will get another MAX_STEPS, rather than UINT32_MAX steps. */
 		steps_left = MAX_STEPS;
-		bailed_out = true;
-		zend_bailout();
+		fuzzer_bailout();
 	}
 }
 
@@ -61,7 +65,7 @@ static zend_op_array *(*orig_compile_string)(zend_string *source_string, const c
 static zend_op_array *fuzzer_compile_string(zend_string *str, const char *filename) {
 	if (ZSTR_LEN(str) > MAX_SIZE) {
 		/* Avoid compiling huge inputs via eval(). */
-		zend_bailout();
+		fuzzer_bailout();
 	}
 
 	return orig_compile_string(str, filename);
@@ -78,7 +82,7 @@ static void fuzzer_execute_internal(zend_execute_data *execute_data, zval *retur
 		 * Limit the maximum size of string inputs. */
 		zval *arg = ZEND_CALL_VAR_NUM(execute_data, i);
 		if (Z_TYPE_P(arg) == IS_STRING && Z_STRLEN_P(arg) > MAX_SIZE) {
-			zend_bailout();
+			fuzzer_bailout();
 		}
 	}
 
