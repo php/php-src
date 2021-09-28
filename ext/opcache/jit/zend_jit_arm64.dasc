@@ -12701,10 +12701,6 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			if (var_info & (MAY_BE_ANY - MAY_BE_LONG)) {
 				|	IF_NOT_ZVAL_TYPE var_addr, IS_LONG, >2, ZREG_TMP1
 			}
-			if (Z_REG(var_addr) != ZREG_FCARG1 || Z_OFFSET(var_addr) != 0) {
-				var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, 0);
-				|	LOAD_ZVAL_ADDR FCARG1x, prop_addr
-			}
 			if (opline->opcode == ZEND_POST_INC_OBJ || opline->opcode == ZEND_POST_DEC_OBJ) {
 				if (opline->result_type != IS_UNUSED) {
 					|	ZVAL_COPY_VALUE res_addr, -1, var_addr, MAY_BE_LONG, ZREG_REG1, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
@@ -12729,6 +12725,10 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			}
 			if (var_info & MAY_BE_LONG) {
 				|2:
+			}
+			if (Z_REG(var_addr) != ZREG_FCARG1 || Z_OFFSET(var_addr) != 0) {
+				var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, 0);
+				|	LOAD_ZVAL_ADDR FCARG1x, prop_addr
 			}
 			if (opline->opcode == ZEND_POST_INC_OBJ || opline->opcode == ZEND_POST_DEC_OBJ) {
 				|	ZVAL_COPY_VALUE res_addr, -1, var_addr, MAY_BE_ANY, ZREG_REG0, ZREG_REG2, ZREG_TMP1, ZREG_TMP2, ZREG_FPR0
