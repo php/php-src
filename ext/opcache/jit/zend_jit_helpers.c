@@ -581,7 +581,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			goto str_index;
 		case IS_UNDEF:
 			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
-				undef_result_after_exception();
+				if (EG(exception)) {
+					undef_result_after_exception();
+				}
 				return NULL;
 			}
 			ZEND_FALLTHROUGH;
@@ -645,7 +647,9 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			goto str_index;
 		case IS_UNDEF:
 			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
-				undef_result_after_exception();
+				if (EG(exception)) {
+					undef_result_after_exception();
+				}
 				return NULL;
 			}
 			ZEND_FALLTHROUGH;
