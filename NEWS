@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
     (cmb, Nikita, Tyson Andre)
+  . Fixed bug #81477 (LimitIterator + SplFileObject regression in 8.0.1). (cmb)
 
 - XML:
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
