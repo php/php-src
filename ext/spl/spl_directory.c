@@ -2724,7 +2724,9 @@ PHP_METHOD(SplFileObject, seek)
 	}
 	if (line_pos > 0) {
 		intern->u.file.current_line_num++;
-		spl_filesystem_file_free_line(intern);
+		if (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
+			spl_filesystem_file_free_line(intern);
+		}
 	}
 } /* }}} */
 
