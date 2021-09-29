@@ -22,10 +22,7 @@ class B extends A {
 Y
 Q
 
-Warning: Uncaught Error: Class "Q" not found in %s:%d
+Fatal error: During inheritance of B, while autoloading Y: Uncaught Error: Class "Q" not found in %s:%d
 Stack trace:
 #0 %s(%d): {closure}('Y')
-#1 {main}
-  thrown in %s on line %d
-
-Fatal error: Could not check compatibility between B::method(): Y and A::method(): X, because class Y is not available in %s on line %d
+#1 {main} in %s on line %d
