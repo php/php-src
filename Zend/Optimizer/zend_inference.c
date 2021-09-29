@@ -2107,6 +2107,41 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int w
 	return tmp;
 }
 
+static uint32_t assign_dim_array_result_type(
+		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_uchar dim_op_type) {
+	uint32_t tmp = 0;
+	/* Only add key type if we have a value type. We want to maintain the invariant that a
+	 * key type exists iff a value type exists even in dead code that may use empty types. */
+	if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
+		if (value_type & MAY_BE_UNDEF) {
+			value_type |= MAY_BE_NULL;
+		}
+		if (dim_op_type == IS_UNUSED) {
+			tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+		} else {
+			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
+				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+			}
+			if (dim_type & MAY_BE_STRING) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+				if (dim_op_type != IS_CONST) {
+					// FIXME: numeric string
+					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+				}
+			}
+			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+			}
+		}
+	}
+	/* Only add value type if we have a key type. It might be that the key type is illegal
+	 * for arrays. */
+	if (tmp & MAY_BE_ARRAY_KEY_ANY) {
+		tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
+	}
+	return tmp;
+}
+
 static uint32_t assign_dim_result_type(
 		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_uchar dim_op_type) {
 	uint32_t tmp = arr_type & ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -2122,35 +2157,7 @@ static uint32_t assign_dim_result_type(
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	if (tmp & MAY_BE_ARRAY) {
-		/* Only add key type if we have a value type. We want to maintain the invariant that a
-		 * key type exists iff a value type exists even in dead code that may use empty types. */
-		if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
-			if (value_type & MAY_BE_UNDEF) {
-				value_type |= MAY_BE_NULL;
-			}
-			if (dim_op_type == IS_UNUSED) {
-				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-			} else {
-				if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-				}
-				if (dim_type & MAY_BE_STRING) {
-					tmp |= MAY_BE_ARRAY_KEY_STRING;
-					if (dim_op_type != IS_CONST) {
-						// FIXME: numeric string
-						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-					}
-				}
-				if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-					tmp |= MAY_BE_ARRAY_KEY_STRING;
-				}
-			}
-		}
-		/* Only add value type if we have a key type. It might be that the key type is illegal
-		 * for arrays. */
-		if (tmp & MAY_BE_ARRAY_KEY_ANY) {
-			tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
-		}
+		tmp |= assign_dim_array_result_type(arr_type, dim_type, value_type, dim_op_type);
 	}
 	return tmp;
 }
@@ -3203,40 +3210,16 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			if (ssa_op->result_def >= 0) {
 				uint32_t arr_type;
-
 				if (opline->opcode == ZEND_INIT_ARRAY) {
 					arr_type = 0;
 				} else {
 					arr_type = RES_USE_INFO();
 				}
-				tmp = MAY_BE_RC1|MAY_BE_ARRAY;
-				if (ssa_op->result_use >= 0) {
-					tmp |= ssa_var_info[ssa_op->result_use].type;
-				}
+				tmp = MAY_BE_RC1|MAY_BE_ARRAY|arr_type;
 				if (opline->op1_type != IS_UNUSED) {
-					tmp |= (t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
-					if (t1 & MAY_BE_UNDEF) {
-						tmp |= MAY_BE_ARRAY_OF_NULL;
-					}
+					tmp |= assign_dim_array_result_type(arr_type, t2, t1, opline->op2_type);
 					if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 						tmp |= MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-					}
-					if (opline->op2_type == IS_UNUSED) {
-						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-					} else {
-						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
-							tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-						}
-						if (t2 & (MAY_BE_STRING)) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
-							if (opline->op2_type != IS_CONST) {
-								// FIXME: numeric string
-								tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-							}
-						}
-						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
-						}
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
