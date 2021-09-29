@@ -1362,6 +1362,9 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	unsigned char *c;
 	const unsigned char *e;
 
+	if (EXPECTED(!BG(ctype_string))) {
+		return zend_string_toupper(s);
+	}
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
 
