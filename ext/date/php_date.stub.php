@@ -198,7 +198,7 @@ interface DateTimeInterface
     public function getOffset(): int;
 
     /** @tentative-return-type */
-    public function getTimestamp(): int|false;
+    public function getTimestamp(): int;
 
     /** @tentative-return-type */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
