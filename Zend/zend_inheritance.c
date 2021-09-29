@@ -2485,7 +2485,7 @@ static int check_variance_obligation(zval *zv) {
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static void load_delayed_classes(void) {
+static void load_delayed_classes(zend_class_entry *ce) {
 	HashTable *delayed_autoloads = CG(delayed_autoloads);
 	zend_string *name;
 
@@ -2499,7 +2499,9 @@ static void load_delayed_classes(void) {
 	ZEND_HASH_FOREACH_STR_KEY(delayed_autoloads, name) {
 		zend_lookup_class(name);
 		if (EG(exception)) {
-			break;
+			zend_exception_uncaught_error(
+				"During inheritance of %s, while autoloading %s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2908,7 +2910,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (CG(current_linking_class)) {
 			ce->ce_flags |= ZEND_ACC_CACHEABLE;
 		}
-		load_delayed_classes();
+		load_delayed_classes(ce);
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
