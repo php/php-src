@@ -603,7 +603,7 @@ function str_ends_with(string $haystack, string $needle): bool {}
 
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
-function substr(string $string, int $offset, ?int $length = null): string {}
+function substr(string $string, int $offset, int|false|null $length = null): string {}
 
 function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
 
