@@ -39,4 +39,4 @@ try {
 Serialization of 'DOMDocument' is not allowed
 Serialization of 'DOMElement' is not allowed
 Serialization of 'DOMXPath' is not allowed
-Serialization of 'DOMNameSpaceNode' is not allowed
+Serialization of 'DOMNamespaceNode' is not allowed

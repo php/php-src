@@ -157,7 +157,7 @@ class DOMNode
 }
 
 /** @not-serializable */
-class DOMNameSpaceNode
+class DOMNamespaceNode
 {
     /** @readonly */
     public string $nodeName;
@@ -232,7 +232,7 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @return DOMNode|DOMNameSpaceNode|null */
+    /** @return DOMNode|DOMNamespaceNode|null */
     public function item(int $index) {}
 }
 
@@ -329,10 +329,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
 
-    /** @return DOMAttr|DOMNameSpaceNode|false */
+    /** @return DOMAttr|DOMNamespaceNode|false */
     public function getAttributeNode(string $qualifiedName) {}
 
-    /** @return DOMAttr|DOMNameSpaceNode|null */
+    /** @return DOMAttr|DOMNamespaceNode|null */
     public function getAttributeNodeNS(?string $namespace, string $localName) {}
 
     /** @tentative-return-type */

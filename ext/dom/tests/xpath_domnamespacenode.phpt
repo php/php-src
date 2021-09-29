@@ -1,5 +1,5 @@
 --TEST--
-DOMXPath::query() can return DOMNodeList with DOMNameSpaceNode items
+DOMXPath::query() can return DOMNodeList with DOMNamespaceNode items
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ var_dump($nodes->item(0));
 
 ?>
 --EXPECT--
-object(DOMNameSpaceNode)#3 (8) {
+object(DOMNamespaceNode)#3 (8) {
   ["nodeName"]=>
   string(9) "xmlns:xml"
   ["nodeValue"]=>

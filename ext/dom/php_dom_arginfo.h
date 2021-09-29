@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 74698bea9c5e0635cf91345e8512b9677489510c */
+ * Stub hash: 88ec0ab55b76261639b828b8db6f9af75e86570c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -693,7 +693,7 @@ static const zend_function_entry class_DOMNode_methods[] = {
 };
 
 
-static const zend_function_entry class_DOMNameSpaceNode_methods[] = {
+static const zend_function_entry class_DOMNamespaceNode_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1098,11 +1098,11 @@ static zend_class_entry *register_class_DOMNode(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOMNameSpaceNode(void)
+static zend_class_entry *register_class_DOMNamespaceNode(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DOMNameSpaceNode", class_DOMNameSpaceNode_methods);
+	INIT_CLASS_ENTRY(ce, "DOMNamespaceNode", class_DOMNamespaceNode_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
