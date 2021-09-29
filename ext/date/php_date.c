@@ -3901,7 +3901,7 @@ PHP_METHOD(DateInterval, __construct)
 }
 /* }}} */
 
-static int php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
+static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
 	(*intobj)->diff = timelib_rel_time_ctor();
 
@@ -3986,8 +3986,6 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		}
 	}
 	(*intobj)->initialized = 1;
-
-	return 0;
 } /* }}} */
 
 /* {{{ */
