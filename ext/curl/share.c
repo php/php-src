@@ -53,7 +53,6 @@ PHP_FUNCTION(curl_share_close)
 }
 /* }}} */
 
-/* Returns true on failure, false on success */
 static bool _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLSHcode error = CURLSHE_OK;
@@ -72,7 +71,7 @@ static bool _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalu
 
 	SAVE_CURLSH_ERROR(sh, error);
 
-	return error != CURLSHE_OK;
+	return error == CURLSHE_OK;
 }
 /* }}} */
 
@@ -91,7 +90,7 @@ PHP_FUNCTION(curl_share_setopt)
 
 	sh = Z_CURL_SHARE_P(z_sh);
 
-	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
+	if (_php_curl_share_setopt(sh, options, zvalue, return_value)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
