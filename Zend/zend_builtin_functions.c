@@ -1820,7 +1820,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 
 skip_frame:
-		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) != 0)
+		if (UNEXPECTED(ZEND_CALL_KIND(call) == ZEND_CALL_TOP_FUNCTION)
 		 && !fake_frame
 		 && prev
 		 && prev->func
