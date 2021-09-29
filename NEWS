@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75941 (Fix compile failure on Solaris with clang). (Jaromír
     Doleček)
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
 30 Sep 2021, PHP 8.1.0RC3
 
