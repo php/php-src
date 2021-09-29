@@ -4,6 +4,7 @@ bug_debug_backtrace.phpt with replaced zend_execute_ex
 zend_test
 --INI--
 zend_test.replace_zend_execute_ex=1
+opcache.jit=disable
 --FILE--
 <?php
 function foo() {
