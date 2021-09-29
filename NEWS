@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     Doleček)
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
+- Streams:
+  . Fixed bug #81475 (stream_isatty emits warning with attached stream wrapper).
+    (cmb)
+
 30 Sep 2021, PHP 8.1.0RC3
 
 - Filter:
