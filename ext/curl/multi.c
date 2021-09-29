@@ -428,7 +428,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 #endif
 
-/* Returns true on failure, false on success */
 static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
@@ -466,9 +465,9 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			}
 
 			ZVAL_COPY(&mh->handlers.server_push->func_name, zvalue);
-			error = curl_multi_setopt(mh->multi, option, _php_server_push_callback);
+			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHFUNCTION, _php_server_push_callback);
 			if (error != CURLM_OK) {
-				return 0;
+				return false;
 			}
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
 			break;
@@ -481,7 +480,7 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 
 	SAVE_CURLM_ERROR(mh, error);
 
-	return error != CURLM_OK;
+	return error == CURLM_OK;
 }
 /* }}} */
 
@@ -500,7 +499,7 @@ PHP_FUNCTION(curl_multi_setopt)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
+	if (_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
