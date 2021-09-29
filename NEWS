@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha1
 
+- Core:
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
