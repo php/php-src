@@ -5729,7 +5729,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								break;
 							}
 						}
-						if (!zend_jit_strlen(&dasm_state, opline, op1_info, op1_addr)) {
+						if (!zend_jit_strlen(&dasm_state, opline, op1_info, op1_addr, RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
@@ -5751,7 +5751,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								break;
 							}
 						}
-						if (!zend_jit_count(&dasm_state, opline, op1_info, op1_addr, zend_may_throw(opline, ssa_op, op_array, ssa))) {
+						if (!zend_jit_count(&dasm_state, opline, op1_info, op1_addr, RES_REG_ADDR(), zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
