@@ -7752,6 +7752,16 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 		}
 	}
 
+	if (repeat_last_opline) {
+		EX(opline) = t->exit_info[exit_num].opline - 1;
+		if ((EX(opline)->op1_type & (IS_VAR|IS_TMP_VAR))
+		 && !(t->exit_info[exit_num].flags & ZEND_JIT_EXIT_FREE_OP1)
+		 && EX(opline)->opcode != ZEND_FETCH_LIST_R) {
+			Z_TRY_ADDREF_P(EX_VAR(EX(opline)->op1.var));
+		}
+		return 1;
+	}
+
 	opline = t->exit_info[exit_num].opline;
 
 	if (opline) {
@@ -7814,11 +7824,6 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 				ZSTR_VAL(EX(func)->op_array.function_name) : "$main",
 			ZSTR_VAL(EX(func)->op_array.filename),
 			EX(opline)->lineno);
-	}
-
-	if (repeat_last_opline) {
-		EX(opline) = t->exit_info[exit_num].opline - 1;
-		return 1;
 	}
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_TO_VM) {
