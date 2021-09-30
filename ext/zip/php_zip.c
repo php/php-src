@@ -167,6 +167,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	path_cleaned_len = strlen(path_cleaned);
 
 	if (path_cleaned_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 
@@ -201,8 +202,8 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
 				zend_string_release_ex(file_basename, 0);
-				CWD_STATE_FREE(new_state.cwd);
 			}
+			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
 	}
