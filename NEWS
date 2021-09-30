@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #81475 (stream_isatty emits warning with attached stream wrapper).
     (cmb)
 
+- Zip:
+  . Fixed bug #81490 (ZipArchive::extractTo() may leak memory). (cmb, Remi)
+
 30 Sep 2021, PHP 8.1.0RC3
 
 - Filter:
