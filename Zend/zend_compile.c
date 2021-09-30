@@ -1255,7 +1255,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 	if (type_mask & MAY_BE_NULL) {
 		bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
-		if (!is_union) {
+		if (!is_union && !zend_string_equals_literal(str, "false")) {
 			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
 			zend_string_release(str);
 			return nullable_str;
@@ -6186,11 +6186,11 @@ static bool zend_type_contains_traversable(zend_type type) {
 static zend_type zend_compile_typename(
 		zend_ast *ast, bool force_allow_null) /* {{{ */
 {
-	bool allow_null = force_allow_null;
+	bool is_marked_nullable = false;
 	zend_ast_attr orig_ast_attr = ast->attr;
 	zend_type type = ZEND_TYPE_INIT_NONE(0);
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
-		allow_null = 1;
+		is_marked_nullable = true;
 		ast->attr &= ~ZEND_TYPE_NULLABLE;
 	}
 
@@ -6314,10 +6314,6 @@ static zend_type zend_compile_typename(
 		type = zend_compile_single_typename(ast);
 	}
 
-	if (allow_null) {
-		ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
-	}
-
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 	if ((type_mask & (MAY_BE_ARRAY|MAY_BE_ITERABLE)) == (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
 		zend_string *type_str = zend_type_to_string(type);
@@ -6332,7 +6328,7 @@ static zend_type zend_compile_typename(
 			ZSTR_VAL(type_str));
 	}
 
-	if (type_mask == MAY_BE_ANY && (orig_ast_attr & ZEND_TYPE_NULLABLE)) {
+	if (type_mask == MAY_BE_ANY && is_marked_nullable) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be marked as nullable since mixed already includes null");
 	}
 
@@ -6343,21 +6339,29 @@ static zend_type zend_compile_typename(
 			ZSTR_VAL(type_str));
 	}
 
+	if ((type_mask & MAY_BE_NULL) && is_marked_nullable) {
+		zend_error_noreturn(E_COMPILE_ERROR, "null cannot be marked as nullable");
+	}
+
+	if ((type_mask & MAY_BE_FALSE) && !ZEND_TYPE_IS_COMPLEX(type) && !(type_mask & ~MAY_BE_FALSE)) {
+		if (is_marked_nullable) {
+			zend_error_noreturn(E_COMPILE_ERROR, "false cannot be marked as nullable since false is not a standalone type");
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "false cannot be used as a standalone type");
+		}
+	}
+
+	if (is_marked_nullable || force_allow_null) {
+		ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
+		type_mask = ZEND_TYPE_PURE_MASK(type);
+	}
+
 	if ((type_mask & MAY_BE_VOID) && (ZEND_TYPE_IS_COMPLEX(type) || type_mask != MAY_BE_VOID)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Void can only be used as a standalone type");
 	}
 
 	if ((type_mask & MAY_BE_NEVER) && (ZEND_TYPE_IS_COMPLEX(type) || type_mask != MAY_BE_NEVER)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "never can only be used as a standalone type");
-	}
-
-	if ((type_mask & (MAY_BE_NULL|MAY_BE_FALSE))
-			&& !ZEND_TYPE_IS_COMPLEX(type) && !(type_mask & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
-		if (type_mask == MAY_BE_NULL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Null cannot be used as a standalone type");
-		} else {
-			zend_error_noreturn(E_COMPILE_ERROR, "False cannot be used as a standalone type");
-		}
 	}
 
 	ast->attr = orig_ast_attr;
