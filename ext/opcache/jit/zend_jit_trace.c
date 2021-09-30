@@ -4957,6 +4957,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_CHECK_UNDEF_ARGS:
+						if (JIT_G(current_frame)
+						 && JIT_G(current_frame)->call) {
+							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
+						}
 						if (!zend_jit_check_undef_args(&dasm_state, opline)) {
 							goto jit_failure;
 						}
