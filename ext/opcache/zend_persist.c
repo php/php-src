@@ -847,13 +847,14 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 	Bucket *p;
 	zend_class_entry *ce = orig_ce;
 
+	/* The same zend_class_entry may be reused by class_alias */
+	zend_class_entry *new_ce = zend_shared_alloc_get_xlat_entry(ce);
+	if (new_ce) {
+		return new_ce;
+	}
+
 	if (ce->type == ZEND_USER_CLASS) {
-		/* The same zend_class_entry may be reused by class_alias */
-		zend_class_entry *new_ce = zend_shared_alloc_get_xlat_entry(ce);
-		if (new_ce) {
-			return new_ce;
-		}
-		ce = zend_shared_memdup_put(ce, sizeof(zend_class_entry));
+		ce = zend_shared_memdup_put_free(ce, sizeof(zend_class_entry));
 		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
 			ce->ce_flags |= ZEND_ACC_IMMUTABLE;
 			if ((ce->ce_flags & ZEND_ACC_LINKED)
@@ -900,11 +901,12 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			int i;
 			ce->default_static_members_table = zend_shared_memdup_free(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
 
-			/* Persist only static properties in this class.
+			/* Persist only non-INDIRECT static properties in this class.
 			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) ? ce->parent->default_static_members_count : 0;
-			for (; i < ce->default_static_members_count; i++) {
-				zend_persist_zval(&ce->default_static_members_table[i]);
+			for (i = 0; i < ce->default_static_members_count; i++) {
+				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
+					zend_persist_zval(&ce->default_static_members_table[i]);
+				}
 			}
 			if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				if (ce->ce_flags & ZEND_ACC_LINKED) {
@@ -1067,12 +1069,9 @@ void zend_update_parent_ce(zend_class_entry *ce)
 			int i, end;
 			zend_class_entry *parent = ce->parent;
 
-			if (parent->type == ZEND_USER_CLASS) {
-				zend_class_entry *p = zend_shared_alloc_get_xlat_entry(parent);
-
-				if (p) {
-					ce->parent = parent = p;
-				}
+			zend_class_entry *p = zend_shared_alloc_get_xlat_entry(parent);
+			if (p) {
+				ce->parent = parent = p;
 			}
 
 			/* Create indirections to static properties from parent classes */
@@ -1093,11 +1092,9 @@ void zend_update_parent_ce(zend_class_entry *ce)
 
 			ce->interfaces = zend_shared_memdup_free(ce->interfaces, sizeof(zend_class_entry*) * ce->num_interfaces);
 			for (i = 0; i < ce->num_interfaces; i++) {
-				if (ce->interfaces[i]->type == ZEND_USER_CLASS) {
-					zend_class_entry *tmp = zend_shared_alloc_get_xlat_entry(ce->interfaces[i]);
-					if (tmp != NULL) {
-						ce->interfaces[i] = tmp;
-					}
+				zend_class_entry *tmp = zend_shared_alloc_get_xlat_entry(ce->interfaces[i]);
+				if (tmp != NULL) {
+					ce->interfaces[i] = tmp;
 				}
 			}
 		}

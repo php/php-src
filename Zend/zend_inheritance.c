@@ -2582,7 +2582,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	zend_class_entry *ce;
 	Bucket *p, *end;
 
-	ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
+	ce = emalloc(sizeof(zend_class_entry));
 	memcpy(ce, pce, sizeof(zend_class_entry));
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;

@@ -7551,7 +7551,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *enum_backing_type_ast = decl->child[4];
 	zend_string *name, *lcname;
-	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
+	zend_class_entry *ce = emalloc(sizeof(zend_class_entry));
 	zend_op *opline;
 
 	zend_class_entry *original_ce = CG(active_class_entry);

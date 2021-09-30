@@ -395,6 +395,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
 			}
+			efree(ce);
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->backed_enum_table) {
