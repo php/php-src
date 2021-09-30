@@ -46,6 +46,9 @@ PHP                                                                        NEWS
   . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
     (Aliaksandr Bystry, cmb)
 
+- Zip:
+  . Fixed bug #81490 (ZipArchive::extractTo() may leak memory). (cmb, Remi)
+
 23 Sep 2021, PHP 8.0.11
 
 - Core:
