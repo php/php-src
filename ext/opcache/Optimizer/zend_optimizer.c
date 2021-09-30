@@ -451,10 +451,15 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_PRE_DEC_OBJ:
 		case ZEND_POST_INC_OBJ:
 		case ZEND_POST_DEC_OBJ:
-		case ZEND_ASSIGN_OBJ_OP:
 			TO_STRING_NOWARN(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			opline->extended_value = alloc_cache_slots(op_array, 3);
+			break;
+		case ZEND_ASSIGN_OBJ_OP:
+			TO_STRING_NOWARN(val);
+			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
+			ZEND_ASSERT((opline + 1)->opcode == ZEND_OP_DATA);
+			(opline + 1)->extended_value = alloc_cache_slots(op_array, 3);
 			break;
 		case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			TO_STRING_NOWARN(val);
