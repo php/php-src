@@ -632,7 +632,7 @@ static void zend_ffi_bit_field_to_zval(void *ptr, zend_ffi_field *field, zval *r
 }
 /* }}} */
 
-static int zend_ffi_zval_to_bit_field(void *ptr, zend_ffi_field *field, zval *value) /* {{{ */
+static void zend_ffi_zval_to_bit_field(void *ptr, zend_ffi_field *field, zval *value) /* {{{ */
 {
 	uint64_t val = zval_get_long(value);
 	size_t bit = field->first_bit;
@@ -646,7 +646,7 @@ static int zend_ffi_zval_to_bit_field(void *ptr, zend_ffi_field *field, zval *va
 	if (p == last_p) {
 		mask = ((1U << field->bits) - 1U) << pos;
 		*p = (*p & ~mask) | ((val << pos) & mask);
-		return SUCCESS;
+		return;
 	}
 
 	/* Write partial prefix byte */
@@ -670,8 +670,6 @@ static int zend_ffi_zval_to_bit_field(void *ptr, zend_ffi_field *field, zval *va
 		mask = (1U << num_bits) - 1U;
 		*p = (*p & ~mask) | (val & mask);
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
