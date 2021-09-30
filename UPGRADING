@@ -590,11 +590,6 @@ PHP 8.1 UPGRADE NOTES
 - SNMP:
   . add SHA256 and SHA512 for security protocol.
 
-- Standard:
-  . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
-    an alternative libargon2 location should now be specified using
-    PKG_CONFIG_PATH.
-
 ========================================
 10. New Global Constants
 ========================================
