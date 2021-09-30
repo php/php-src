@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     Doleček)
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
+- Standard:
+  . Fixed bug #81491 (Incorrectly using libsodium for argon2 hashing).
+    (Dan Pock)
+
 - Streams:
   . Fixed bug #81475 (stream_isatty emits warning with attached stream wrapper).
     (cmb)
