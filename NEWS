@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #81491 (Incorrectly using libsodium for argon2 hashing).
     (Dan Pock)
+  . Fixed bug #66588 (SplFileObject::fgetcsv incorrectly returns a row on
+    premature EOF). (Aliaksandr Bystry)
 
 - Streams:
   . Fixed bug #81475 (stream_isatty emits warning with attached stream wrapper).

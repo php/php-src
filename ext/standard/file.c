@@ -2144,12 +2144,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
 									 * last element */
-									if ((size_t)temp_len > (size_t)(limit - buf)) {
-										goto quit_loop_2;
-									}
-									zend_array_destroy(Z_ARR_P(return_value));
-									RETVAL_FALSE;
-									goto out;
+									goto quit_loop_2;
 								}
 
 								temp_len += new_len;
@@ -2300,7 +2295,6 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 		add_next_index_stringl(return_value, temp, comp_end - temp);
 	} while (inc_len > 0);
 
-out:
 	efree(temp);
 	if (stream) {
 		efree(buf);
