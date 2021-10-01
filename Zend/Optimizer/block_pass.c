@@ -503,6 +503,19 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								MAKE_NOP(opline);
 								++(*opt_count);
 								break;
+							case ZEND_TYPE_CHECK:
+								if (opline->opcode == ZEND_BOOL_NOT) {
+									if (src->extended_value == MAY_BE_RESOURCE || src->extended_value == (MAY_BE_ANY - MAY_BE_RESOURCE)) {
+										/* is_resource() is a special case - it returns false if the resource is closed. Don't convert to/from it. */
+										break;
+									}
+									src->extended_value = MAY_BE_ANY - src->extended_value;
+								}
+								COPY_NODE(src->result, opline->result);
+								SET_VAR_SOURCE(src);
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
 									zend_uchar tmp_type;
@@ -545,7 +558,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 							case ZEND_ISSET_ISEMPTY_STATIC_PROP:
 							case ZEND_INSTANCEOF:
-							case ZEND_TYPE_CHECK:
 							case ZEND_DEFINED:
 							case ZEND_IN_ARRAY:
 							case ZEND_ARRAY_KEY_EXISTS:
