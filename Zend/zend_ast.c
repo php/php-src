@@ -1947,7 +1947,20 @@ simple_list:
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			break;
 		case ZEND_AST_CLASS_NAME:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			if (ast->child[0] == NULL) {
+				/* The const expr representation stores the fetch type instead. */
+				switch (ast->attr) {
+					case ZEND_FETCH_CLASS_SELF:
+						smart_str_appends(str, "self");
+						break;
+					case ZEND_FETCH_CLASS_PARENT:
+						smart_str_appends(str, "parent");
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+			} else {
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			}
 			smart_str_appends(str, "::class");
 			break;
 		case ZEND_AST_ASSIGN:            BINARY_OP(" = ",   90, 91, 90);
