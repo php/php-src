@@ -868,9 +868,6 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ce->inheritance_cache = NULL;
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
-			if (ZSTR_HAS_CE_CACHE(ce->name)) {
-				ZSTR_SET_CE_CACHE(ce->name, NULL);
-			}
 			zend_accel_store_interned_string(ce->name);
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
 			 && !ZCG(current_persistent_script)->corrupted) {
