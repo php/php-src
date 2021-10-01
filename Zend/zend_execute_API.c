@@ -1101,7 +1101,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			}
 			return NULL;
 		}
-		if (ZSTR_HAS_CE_CACHE(name)) {
+		/* Don't populate CE_CACHE during compilation. The class may be freed while persisting. */
+		if (ZSTR_HAS_CE_CACHE(name) && !CG(in_compilation)) {
 			ZSTR_SET_CE_CACHE(name, ce);
 		}
 		return ce;
@@ -1157,7 +1158,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		zend_string_release_ex(lc_name, 0);
 	}
 	if (ce) {
-		if (ZSTR_HAS_CE_CACHE(name)) {
+		/* Don't populate CE_CACHE during compilation. The class may be freed while persisting. */
+		if (ZSTR_HAS_CE_CACHE(name) && !CG(in_compilation)) {
 			ZSTR_SET_CE_CACHE(name, ce);
 		}
 	}
