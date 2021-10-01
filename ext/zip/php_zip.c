@@ -150,15 +150,35 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	size_t path_cleaned_len;
 	cwd_state new_state;
 	zend_string *file_basename;
+#ifdef PHP_WIN32
+	char *file_orig = file;
+#endif
 
 	new_state.cwd = CWD_STATE_ALLOC(1);
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
 
+#ifdef PHP_WIN32
+	if (strpbrk(file, "<|>*?\":")) {
+		/* mangle unsupported characters in 7-zip style */
+		file = estrdup(file_orig);
+		char *p = file;
+		while ((p = strpbrk(p, "<|>*?\":")) != NULL) {
+			*p++ = '_';
+		}
+	}
+#endif
+
 	/* Clean/normlize the path and then transform any path (absolute or relative)
 		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
 	 */
 	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
+#ifdef PHP_WIN32
+	if (file != file_orig) {
+		efree(file);
+		file = file_orig;
+	}
+#endif
 	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
 	if(!path_cleaned) {
 		CWD_STATE_FREE(new_state.cwd);
