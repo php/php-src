@@ -165,4 +165,9 @@ array(2) {
   string(4) "bbb
 "
 }
-bool(false)
+array(2) {
+  [0]=>
+  string(3) "aaa"
+  [1]=>
+  string(3) "bbb"
+}
