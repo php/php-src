@@ -2913,16 +2913,16 @@ static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void 
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-	|	cbnz REG0, ->exception_handler
+	|	MEM_LOAD_64_ZTS ldr, TMP2, executor_globals, exception, TMP1
+	|	cbnz TMP2, ->exception_handler
 	return 1;
 }
 
 static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op *opline)
 {
 	if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbnz REG0, ->exception_handler_undef
+		|	MEM_LOAD_64_ZTS ldr, TMP2, executor_globals, exception, TMP1
+		|	cbnz TMP2, ->exception_handler_undef
 		return 1;
 	}
 	return zend_jit_check_exception(Dst);
@@ -7366,10 +7366,10 @@ static int zend_jit_cmp(dasm_State    **Dst,
 				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 			}
 			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
-			if (may_throw) {
-				zend_jit_check_exception_undef_result(Dst, opline);
-			}
 			|	ldr RETVALw, T1 // restore
+		}
+		if (may_throw) {
+			zend_jit_check_exception_undef_result(Dst, opline);
 		}
 		if (!zend_jit_cmp_slow(Dst, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 			return 0;

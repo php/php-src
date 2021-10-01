@@ -7901,10 +7901,10 @@ static int zend_jit_cmp(dasm_State    **Dst,
 				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
 			}
 			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-			if (may_throw) {
-				zend_jit_check_exception_undef_result(Dst, opline);
-			}
 			|	mov eax, dword T1 // restore
+		}
+		if (may_throw) {
+			zend_jit_check_exception_undef_result(Dst, opline);
 		}
 		if (!zend_jit_cmp_slow(Dst, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 			return 0;
