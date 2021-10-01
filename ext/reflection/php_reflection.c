@@ -610,24 +610,16 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 }
 
 static int format_default_value(smart_str *str, zval *value, zend_class_entry *scope) {
-	zval zv;
-	ZVAL_COPY(&zv, value);
-	if (UNEXPECTED(zval_update_constant_ex(&zv, scope) == FAILURE)) {
-		zval_ptr_dtor(&zv);
-		return FAILURE;
-	}
-
-	if (Z_TYPE(zv) <= IS_STRING) {
-		smart_str_append_scalar(str, &zv, 15);
-	} else if (Z_TYPE(zv) == IS_ARRAY) {
+	if (Z_TYPE_P(value) <= IS_STRING) {
+		smart_str_append_scalar(str, value, 15);
+	} else if (Z_TYPE_P(value) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else {
-		zend_string *tmp_zv_str;
-		zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
-		smart_str_append(str, zv_str);
-		zend_tmp_string_release(tmp_zv_str);
+		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
+		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
+		smart_str_append(str, ast_str);
+		zend_string_release(ast_str);
 	}
-	zval_ptr_dtor(&zv);
 	return SUCCESS;
 }
 
@@ -6404,26 +6396,18 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 		smart_str_append_printf(&str, "  - Arguments [%d] {\n", attr->data->argc);
 
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
-			zval tmp;
-			if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
-				smart_str_free(&str);
-				RETURN_THROWS();
-			}
-
 			smart_str_append_printf(&str, "    Argument #%d [ ", i);
 			if (attr->data->args[i].name != NULL) {
 				smart_str_append(&str, attr->data->args[i].name);
 				smart_str_appends(&str, " = ");
 			}
 
-			if (format_default_value(&str, &tmp, NULL) == FAILURE) {
-				zval_ptr_dtor(&tmp);
+			if (format_default_value(&str, &attr->data->args[i].value, NULL) == FAILURE) {
 				smart_str_free(&str);
 				RETURN_THROWS();
 			}
 
 			smart_str_appends(&str, " ]\n");
-			zval_ptr_dtor(&tmp);
 		}
 		smart_str_appends(&str, "  }\n");
 
