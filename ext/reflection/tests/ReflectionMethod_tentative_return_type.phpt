@@ -49,7 +49,7 @@ string(%d) "Method [ <user, overwrites DateTimeZone, prototype DateTimeZone> sta
   @@ %s
 
   - Parameters [2] {
-    Parameter #0 [ <optional> int $timezoneGroup = %d ]
+    Parameter #0 [ <optional> int $timezoneGroup = DateTimeZone::ALL ]
     Parameter #1 [ <optional> ?string $countryCode = NULL ]
   }
   - Return [ string ]

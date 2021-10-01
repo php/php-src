@@ -51,7 +51,7 @@ Class [ <user> class C extends A ] {
         Parameter #0 [ <required> A $a ]
         Parameter #1 [ <required> $b ]
         Parameter #2 [ <optional> ?C $c = NULL ]
-        Parameter #3 [ <optional> $d = '16 chars long -...' ]
+        Parameter #3 [ <optional> $d = K ]
         Parameter #4 [ <optional> $e = '15 chars long -' ]
         Parameter #5 [ <optional> $f = NULL ]
         Parameter #6 [ <optional> $g = false ]
