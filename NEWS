@@ -1,6 +1,52 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC2
+?? ??? ????, PHP 8.1.0RC4
+
+- Core:
+  . Fixed bug #75941 (Fix compile failure on Solaris with clang). (Jaromír
+    Doleček)
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+
+- Streams:
+  . Fixed bug #81475 (stream_isatty emits warning with attached stream wrapper).
+    (cmb)
+
+- Zip:
+  . Fixed bug #81490 (ZipArchive::extractTo() may leak memory). (cmb, Remi)
+
+30 Sep 2021, PHP 8.1.0RC3
+
+- Filter:
+  . Fixed bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing).
+    (cmb, Nikita)
+
+- Reflection:
+  . Fixed bug #81457 (Enum: ReflectionMethod->getDeclaringClass() return a
+    ReflectionClass). (Nikita)
+  . Fixed bug #81474 (Make ReflectionEnum and related class non-final). (Nikita)
+
+- SPL:
+  . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
+    (cmb, Nikita, Tyson Andre)
+  . Fixed bug #81477 (LimitIterator + SplFileObject regression in 8.0.1). (cmb)
+
+- XML:
+  . Fixed bug #70962 (XML_OPTION_SKIP_WHITE strips embedded whitespace).
+    (Aliaksandr Bystry, cmb)
+
+- Zip:
+  . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination).
+    (CVE-2021-21706) (cmb)
+
+16 Sep 2021, PHP 8.1.0RC2
+
+- DOM:
+  . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
+    (Viktor Volkov)
+
+- FFI:
+  . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
+    defined). (Dmitry)
 
 - Shmop:
   . Fixed bug #81407 (shmop_open won't attach and causes php to crash). (cmb)
@@ -8,6 +54,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81409 (Incorrect JIT code for ADD with a reference to array).
     (Dmitry)
+
+- PCRE:
+  . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
 - Zip:
   . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)

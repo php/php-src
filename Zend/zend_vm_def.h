@@ -5145,6 +5145,9 @@ ZEND_VM_C_LABEL(send_again):
 						break;
 					}
 
+					ZVAL_DEREF(arg);
+					Z_TRY_ADDREF_P(arg);
+
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
@@ -5153,9 +5156,11 @@ ZEND_VM_C_LABEL(send_again):
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
+						ZVAL_NEW_REF(top, arg);
+					} else {
+						ZVAL_COPY_VALUE(top, arg);
 					}
 
-					ZVAL_COPY_DEREF(top, arg);
 					zend_string_release(name);
 				} else {
 					if (have_named_params) {
@@ -5164,6 +5169,11 @@ ZEND_VM_C_LABEL(send_again):
 						break;
 					}
 
+					zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1);
+					top = ZEND_CALL_ARG(EX(call), arg_num);
+					ZVAL_DEREF(arg);
+					Z_TRY_ADDREF_P(arg);
+
 					if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						zend_error(
 							E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
@@ -5172,12 +5182,11 @@ ZEND_VM_C_LABEL(send_again):
 							EX(call)->func->common.scope ? "::" : "",
 							ZSTR_VAL(EX(call)->func->common.function_name)
 						);
+						ZVAL_NEW_REF(top, arg);
+					} else {
+						ZVAL_COPY_VALUE(top, arg);
 					}
 
-
-					zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1);
-					top = ZEND_CALL_ARG(EX(call), arg_num);
-					ZVAL_COPY_DEREF(top, arg);
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 				}
 
@@ -5358,13 +5367,16 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
-	}
-
 	arg = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
+	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		Z_TRY_ADDREF_P(arg);
+		ZVAL_NEW_REF(param, arg);
+	} else {
+		ZVAL_COPY(param, arg);
+	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -6060,6 +6072,7 @@ ZEND_VM_C_LABEL(add_unpack_again):
 					zend_hash_update(result_ht, Z_STR(key), val);
 					zval_ptr_dtor_str(&key);
 				} else {
+					zval_ptr_dtor(&key);
 					if (!zend_hash_next_index_insert(result_ht, val)) {
 						zend_cannot_add_element();
 						zval_ptr_dtor_nogc(val);
@@ -8704,9 +8717,9 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
+	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_BIND_REF) {
 		if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
-			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
 				HANDLE_EXCEPTION();
 			}
@@ -8731,7 +8744,7 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, UNUSED, REF)
 		ZVAL_COPY(variable_ptr, value);
 	}
 
-	ZEND_VM_NEXT_OPCODE();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HOT_HANDLER(184, ZEND_FETCH_THIS, UNUSED, UNUSED)

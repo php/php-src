@@ -23,6 +23,9 @@ try {
 }
 var_dump(error_reporting());
 
+// Exit also unwinds and thus has the same basic problem.
+new stdClass(exit);
+
 ?>
 --EXPECT--
 Caught

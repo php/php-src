@@ -411,6 +411,15 @@ static void accel_interned_strings_restore_state(void)
 	n = 0;
 	if (EXPECTED(s < top)) {
 		do {
+			if (ZSTR_HAS_CE_CACHE(s)) {
+				/* Discard non-global CE_CACHE slots on reset. */
+				uintptr_t idx = (GC_REFCOUNT(s) - 1) / sizeof(void *);
+				if (idx >= ZCSG(map_ptr_last)) {
+					GC_SET_REFCOUNT(s, 2);
+					GC_DEL_FLAGS(s, IS_STR_CLASS_NAME_MAP_PTR);
+				}
+			}
+
 			hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), ZSTR_H(s));
 			STRTAB_COLLISION(s) = *hash_slot;
 			*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
@@ -3002,11 +3011,11 @@ static void accel_move_code_to_huge_pages(void)
 	f = fopen("/proc/self/maps", "r");
 	if (f) {
 		long unsigned int  start, end, offset, inode;
-		char perm[5], dev[6], name[MAXPATHLEN];
+		char perm[5], dev[10], name[MAXPATHLEN];
 		int ret;
 
 		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			ret = fscanf(f, "%lx-%lx %4s %lx %9s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
 			if (ret == 7) {
 				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);

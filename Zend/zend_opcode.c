@@ -829,13 +829,13 @@ static bool keeps_op1_alive(zend_op *opline) {
 	if (opline->opcode == ZEND_CASE
 	 || opline->opcode == ZEND_CASE_STRICT
 	 || opline->opcode == ZEND_SWITCH_LONG
+	 || opline->opcode == ZEND_SWITCH_STRING
 	 || opline->opcode == ZEND_MATCH
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
 	}
-	ZEND_ASSERT(opline->opcode != ZEND_SWITCH_STRING
-		&& opline->opcode != ZEND_FE_FETCH_R
+	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
 		&& opline->opcode != ZEND_FETCH_LIST_W
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE

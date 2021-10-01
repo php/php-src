@@ -318,7 +318,10 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_trace_c
 	if (UNEXPECTED(*(ZEND_OP_TRACE_INFO(opline, offset)->counter) <= 0)) {
 		*(ZEND_OP_TRACE_INFO(opline, offset)->counter) = ZEND_JIT_COUNTER_INIT;
 		if (UNEXPECTED(zend_jit_trace_hot_root(execute_data, opline) < 0)) {
-#ifndef HAVE_GCC_GLOBAL_REGS
+#ifdef HAVE_GCC_GLOBAL_REGS
+			opline = NULL;
+			return;
+#else
 			return -1;
 #endif
 		}
@@ -357,7 +360,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	trace_buffer[idx].info = _op | (_info); \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
+	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 2) { \
 		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
 		break; \
 	}
@@ -369,7 +372,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	trace_buffer[idx].op3_type = _op3_type; \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 1) { \
+	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 2) { \
 		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
 		break; \
 	}
@@ -724,6 +727,104 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 
 		if (ce2) {
 			TRACE_RECORD(ZEND_JIT_TRACE_OP2_TYPE, 0, ce2);
+		}
+
+		switch (opline->opcode) {
+			case ZEND_FETCH_DIM_R:
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_DIM_RW:
+			case ZEND_FETCH_DIM_IS:
+			case ZEND_FETCH_DIM_FUNC_ARG:
+			case ZEND_FETCH_DIM_UNSET:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
+			case ZEND_ASSIGN_DIM:
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_UNSET_DIM:
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				if (opline->op1_type == IS_CONST) {
+					zval *arr = RT_CONSTANT(opline, opline->op1);
+					op1_type = Z_TYPE_P(arr);
+				}
+				if ((op1_type & IS_TRACE_TYPE_MASK) == IS_ARRAY
+				 && opline->op2_type != IS_UNDEF) {
+					zval *arr, *dim, *val;
+					uint8_t val_type = IS_UNDEF;
+
+					if (opline->op2_type == IS_CONST) {
+						dim	= RT_CONSTANT(opline, opline->op2);
+					} else {
+						dim = EX_VAR(opline->op2.var);
+					}
+
+					if (Z_TYPE_P(dim) == IS_LONG || Z_TYPE_P(dim) == IS_STRING) {
+						if (opline->op1_type == IS_CONST) {
+							arr = RT_CONSTANT(opline, opline->op1);
+						} else {
+							arr = EX_VAR(opline->op1.var);
+						}
+						if (Z_TYPE_P(arr) == IS_INDIRECT) {
+							arr = Z_INDIRECT_P(arr);
+						}
+						if (Z_TYPE_P(arr) == IS_REFERENCE) {
+							arr = Z_REFVAL_P(arr);
+						}
+						ZEND_ASSERT(Z_TYPE_P(arr) == IS_ARRAY);
+						if (Z_TYPE_P(dim) == IS_LONG) {
+							val = zend_hash_index_find(Z_ARRVAL_P(arr), Z_LVAL_P(dim));
+						} else /*if Z_TYPE_P(dim) == IS_STRING)*/ {
+							val = zend_symtable_find(Z_ARRVAL_P(arr), Z_STR_P(dim));
+						}
+						if (val) {
+							val_type = Z_TYPE_P(val);
+						}
+						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, val_type, 0, 0);
+					}
+				}
+				break;
+			case ZEND_FETCH_OBJ_R:
+			case ZEND_FETCH_OBJ_W:
+			case ZEND_FETCH_OBJ_RW:
+			case ZEND_FETCH_OBJ_IS:
+			case ZEND_FETCH_OBJ_FUNC_ARG:
+			case ZEND_FETCH_OBJ_UNSET:
+			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_OP:
+			case ZEND_ASSIGN_OBJ_REF:
+			case ZEND_UNSET_OBJ:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			case ZEND_PRE_INC_OBJ:
+			case ZEND_PRE_DEC_OBJ:
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ:
+				if (opline->op1_type != IS_CONST
+				 && opline->op2_type == IS_CONST
+				 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING
+				 && Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] != '\0') {
+					zval *obj, *val;
+					zend_string *prop_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+					zend_property_info *prop_info;
+
+					if (opline->op1_type == IS_UNUSED) {
+						obj = &EX(This);
+					} else {
+						obj = EX_VAR(opline->op1.var);
+					}
+					if (Z_TYPE_P(obj) != IS_OBJECT
+					 || Z_OBJ_P(obj)->handlers != &std_object_handlers) {
+						break;
+					}
+					prop_info = zend_get_property_info(Z_OBJCE_P(obj), prop_name, 1);
+					if (prop_info
+					 && prop_info != ZEND_WRONG_PROPERTY_INFO
+					 && !(prop_info->flags & ZEND_ACC_STATIC)) {
+						val = OBJ_PROP(Z_OBJ_P(obj), prop_info->offset);
+						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, Z_TYPE_P(val), 0, 0);
+					}
+				}
+				break;
+			default:
+				break;
 		}
 
 		if (opline->opcode == ZEND_DO_FCALL

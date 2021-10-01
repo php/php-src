@@ -42,7 +42,15 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 
 			if (b->len != 0) {
 				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
-				if (b->successors_count == 1) {
+				if (opcode == ZEND_MATCH) {
+					succ->flags |= ZEND_BB_TARGET;
+				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
+					if (i == b->successors_count - 1) {
+						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
+					} else {
+						succ->flags |= ZEND_BB_TARGET;
+					}
+				} else if (b->successors_count == 1) {
 					if (opcode == ZEND_JMP) {
 						succ->flags |= ZEND_BB_TARGET;
 					} else {
@@ -66,22 +74,12 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 							}
 						}
 					}
-				} else if (b->successors_count == 2) {
+				} else {
+					ZEND_ASSERT(b->successors_count == 2);
 					if (i == 0 || opcode == ZEND_JMPZNZ) {
 						succ->flags |= ZEND_BB_TARGET;
 					} else {
 						succ->flags |= ZEND_BB_FOLLOW;
-					}
-				} else {
-					ZEND_ASSERT(
-						opcode == ZEND_SWITCH_LONG
-						|| opcode == ZEND_SWITCH_STRING
-						|| opcode == ZEND_MATCH
-					);
-					if (i == b->successors_count - 1) {
-						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
-					} else {
-						succ->flags |= ZEND_BB_TARGET;
 					}
 				}
 			} else {
@@ -299,13 +297,13 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_MATCH_ERROR:
 			case ZEND_VERIFY_NEVER_TYPE:
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
+			case ZEND_EXIT:
 			case ZEND_THROW:
 				/* Don't treat THROW as terminator if it's used in expression context,
 				 * as we may lose live ranges when eliminating unreachable code. */
@@ -436,12 +434,11 @@ ZEND_API int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, u
 				flags |= ZEND_FUNC_HAS_EXTENDED_FCALL;
 				break;
 			case ZEND_FREE:
-				if (opline->extended_value == ZEND_FREE_SWITCH) {
+			case ZEND_FE_FREE:
+				if (zend_optimizer_is_loop_var_free(opline)) {
+					BB_START(i);
 					flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				}
-				break;
-			case ZEND_FE_FREE:
-				flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				break;
 		}
 	}

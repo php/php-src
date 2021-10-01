@@ -143,7 +143,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 
 specifier_qualifier_list(zend_ffi_dcl *dcl):
 	"__extension__"?
-	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)}
+	(	?{sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text) || (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) == 0}
 		(	type_specifier(dcl)
 		|	type_qualifier(dcl)
 		|	attributes(dcl)

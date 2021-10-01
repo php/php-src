@@ -292,7 +292,7 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	return 0;
 }
 
-static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, zend_jit_trace_rec *trace)
+static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	int skip;
 
@@ -368,7 +368,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (!skip) {
 				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
@@ -435,14 +435,15 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	} else {
 		const zend_op *end = call_info->caller_call_opline;
 
-		if (end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
+		/* end may be null if an opcode like EXIT is part of the argument list. */
+		if (!end || end - op_array->opcodes >= ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len) {
 			/* INIT_FCALL and DO_FCALL in different BasicBlocks */
 			return 1;
 		}
 
 		opline++;
 		ssa_op++;
-		skip = 1;
+		skip = (call_level == 1);
 		while (opline != end) {
 			if (skip) {
 				switch (opline->opcode) {
@@ -2692,6 +2693,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
 	zend_class_entry *ce;
 	bool ce_is_instanceof;
+	bool on_this;
 
 	if (JIT_G(bisect_limit)) {
 		jit_bisect_pos++;
@@ -3120,7 +3122,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_assign_dim_op(&dasm_state, opline,
 								OP1_INFO(), OP1_DEF_INFO(), OP1_REG_ADDR(), OP2_INFO(),
-								OP1_DATA_INFO(), OP1_DATA_RANGE(),
+								OP1_DATA_INFO(), OP1_DATA_RANGE(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3133,7 +3135,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (!zend_jit_assign_dim(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), OP1_DATA_INFO(),
+								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), OP1_DATA_INFO(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3152,11 +3154,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						ce = NULL;
 						ce_is_instanceof = 0;
+						on_this = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
 							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
 							op1_addr = 0;
+							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -3176,8 +3180,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_incdec_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr,
-								0, ce, ce_is_instanceof, 0, NULL,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								0, ce, ce_is_instanceof, on_this, 0, NULL, IS_UNKNOWN)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3199,11 +3202,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						ce = NULL;
 						ce_is_instanceof = 0;
+						on_this = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
 							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
 							op1_addr = 0;
+							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -3223,8 +3228,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_assign_obj_op(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, OP1_DATA_INFO(), OP1_DATA_RANGE(),
-								0, ce, ce_is_instanceof, 0, NULL,
-								zend_may_throw(opline, ssa_op, op_array, ssa))) {
+								0, ce, ce_is_instanceof, on_this, 0, NULL, IS_UNKNOWN)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3239,11 +3243,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						ce = NULL;
 						ce_is_instanceof = 0;
+						on_this = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
 							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
 							op1_addr = 0;
+							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -3263,7 +3269,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_assign_obj(&dasm_state, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, OP1_DATA_INFO(),
-								0, ce, ce_is_instanceof, 0, NULL,
+								0, ce, ce_is_instanceof, on_this, 0, NULL, IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3683,7 +3689,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(), RES_INFO(), RES_REG_ADDR(),
+								OP2_INFO(), RES_INFO(), RES_REG_ADDR(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3699,7 +3705,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (!zend_jit_fetch_dim(&dasm_state, opline,
-								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_REG_ADDR(),
+								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), RES_REG_ADDR(), IS_UNKNOWN,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, OP1_INFO(),
 								OP2_INFO()))) {
 							goto jit_failure;
@@ -3730,7 +3736,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(),
+								OP2_INFO(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
@@ -3747,11 +3753,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						ce = NULL;
 						ce_is_instanceof = 0;
+						on_this = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
 							ce = op_array->scope;
 							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -3770,7 +3778,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_fetch_obj(&dasm_state, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, 0, ce, ce_is_instanceof, 0, 0, NULL,
+								op1_info, op1_addr, 0, ce, ce_is_instanceof, on_this, 0, 0, NULL,
+								IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -3818,7 +3827,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
 							break;
 						}
-						if (!zend_jit_strlen(&dasm_state, opline, op1_info, OP1_REG_ADDR())) {
+						if (!zend_jit_strlen(&dasm_state, opline, op1_info, OP1_REG_ADDR(), RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3827,7 +3836,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
 							break;
 						}
-						if (!zend_jit_count(&dasm_state, opline, op1_info, OP1_REG_ADDR(), zend_may_throw(opline, ssa_op, op_array, ssa))) {
+						if (!zend_jit_count(&dasm_state, opline, op1_info, OP1_REG_ADDR(), RES_REG_ADDR(), zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -3866,7 +3875,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_FE_RESET_R:
 						op1_info = OP1_INFO();
-						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_ARRAY) {
+						if ((op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) != MAY_BE_ARRAY) {
 							break;
 						}
 						if (!zend_jit_fe_reset(&dasm_state, opline, op1_info)) {
@@ -3895,11 +3904,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						ce = NULL;
 						ce_is_instanceof = 0;
+						on_this = 0;
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
 							ce = op_array->scope;
 							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
 							if (!(op1_info & MAY_BE_OBJECT)) {
@@ -3918,7 +3929,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_init_method_call(&dasm_state, opline, b, op_array, ssa, ssa_op, call_level,
-								op1_info, op1_addr, ce, ce_is_instanceof, 0, NULL,
+								op1_info, op1_addr, ce, ce_is_instanceof, on_this, 0, NULL,
 								NULL, 0, 0)) {
 							goto jit_failure;
 						}
@@ -4390,6 +4401,9 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 
 	jit_extension = (zend_jit_op_array_hot_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_hot_extension) + (op_array->last - 1) * sizeof(void*));
+	if (!jit_extension) {
+		return FAILURE;
+	}
 	memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 	jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_HOT_COUNTERS;
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
@@ -4431,6 +4445,9 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 			}
 		}
 		jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+		if (!jit_extension) {
+			return FAILURE;
+		}
 		memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 		jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_FIRST_EXEC;
 		jit_extension->orig_handler = (void*)opline->handler;
@@ -4457,6 +4474,9 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 				}
 			}
 			jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension));
+			if (!jit_extension) {
+				return FAILURE;
+			}
 			memset(&jit_extension->func_info, 0, sizeof(zend_func_info));
 			jit_extension->func_info.flags = ZEND_FUNC_JIT_ON_PROF_REQUEST;
 			jit_extension->orig_handler = (void*)opline->handler;

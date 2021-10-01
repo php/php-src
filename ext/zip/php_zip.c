@@ -90,8 +90,8 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return NULL;
 	}
 
-	if (IS_SLASH(path[0])) {
-		return path + 1;
+	if (IS_ABSOLUTE_PATH(path, path_len)) {
+		return path + COPY_WHEN_ABSOLUTE(path) + 1;
 	}
 
 	i = path_len;
@@ -149,11 +149,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
 	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
 	if(!path_cleaned) {
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 	path_cleaned_len = strlen(path_cleaned);
 
 	if (path_cleaned_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 
@@ -188,8 +190,8 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
 				zend_string_release_ex(file_basename, 0);
-				CWD_STATE_FREE(new_state.cwd);
 			}
+			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
 	}

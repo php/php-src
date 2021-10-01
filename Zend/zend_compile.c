@@ -1130,6 +1130,7 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 
 	ce = zend_do_link_class(ce, lc_parent_name, Z_STR_P(lcname));
 	if (ce) {
+		ZEND_ASSERT(!EG(exception));
 		return ce;
 	}
 
@@ -7829,7 +7830,8 @@ static void zend_compile_enum_case(zend_ast *ast)
 		zend_eval_const_expr(&ast->child[1]);
 		case_value_ast = ast->child[1];
 		if (case_value_ast->kind != ZEND_AST_ZVAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Enum case value must be constant");
+			zend_error_noreturn(
+				E_COMPILE_ERROR, "Enum case value must be compile-time evaluatable");
 		}
 
 		zval case_value_zv;
@@ -9045,17 +9047,21 @@ static void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
 
 	if (expr_ast) {
-		znode expr_node;
 		zend_compile_expr(&expr_node, expr_ast);
-		zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
 	} else {
-		zend_emit_op(NULL, ZEND_EXIT, NULL, NULL);
+		expr_node.op_type = IS_UNUSED;
 	}
 
-	result->op_type = IS_CONST;
-	ZVAL_TRUE(&result->u.constant);
+	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
+	if (result) {
+		/* Mark this as an "expression throw" for opcache. */
+		opline->extended_value = ZEND_THROW_IS_EXPR;
+		result->op_type = IS_CONST;
+		ZVAL_TRUE(&result->u.constant);
+	}
 }
 /* }}} */
 
@@ -9999,6 +10005,7 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_halt_compiler(ast);
 			break;
 		case ZEND_AST_THROW:
+		case ZEND_AST_EXIT:
 			zend_compile_expr(NULL, ast);
 			break;
 		default:

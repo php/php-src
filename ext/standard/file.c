@@ -490,7 +490,7 @@ PHP_FUNCTION(get_meta_tags)
 		} else if (tok == TOK_CLOSETAG) {
 			if (have_name) {
 				/* For BC */
-				php_strtolower(name, strlen(name));
+				zend_str_tolower(name, strlen(name));
 				if (have_content) {
 					add_assoc_string(return_value, name, value);
 				} else {

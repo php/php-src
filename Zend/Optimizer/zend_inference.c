@@ -2085,6 +2085,41 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int w
 	return tmp;
 }
 
+static uint32_t assign_dim_array_result_type(
+		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_uchar dim_op_type) {
+	uint32_t tmp = 0;
+	/* Only add key type if we have a value type. We want to maintain the invariant that a
+	 * key type exists iff a value type exists even in dead code that may use empty types. */
+	if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
+		if (value_type & MAY_BE_UNDEF) {
+			value_type |= MAY_BE_NULL;
+		}
+		if (dim_op_type == IS_UNUSED) {
+			tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+		} else {
+			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
+				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+			}
+			if (dim_type & MAY_BE_STRING) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+				if (dim_op_type != IS_CONST) {
+					// FIXME: numeric string
+					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+				}
+			}
+			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+				tmp |= MAY_BE_ARRAY_KEY_STRING;
+			}
+		}
+	}
+	/* Only add value type if we have a key type. It might be that the key type is illegal
+	 * for arrays. */
+	if (tmp & MAY_BE_ARRAY_KEY_ANY) {
+		tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
+	}
+	return tmp;
+}
+
 static uint32_t assign_dim_result_type(
 		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_uchar dim_op_type) {
 	uint32_t tmp = arr_type & ~(MAY_BE_RC1|MAY_BE_RCN);
@@ -2100,35 +2135,7 @@ static uint32_t assign_dim_result_type(
 		tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 	}
 	if (tmp & MAY_BE_ARRAY) {
-		/* Only add key type if we have a value type. We want to maintain the invariant that a
-		 * key type exists iff a value type exists even in dead code that may use empty types. */
-		if (value_type & (MAY_BE_ANY|MAY_BE_UNDEF)) {
-			if (value_type & MAY_BE_UNDEF) {
-				tmp |= MAY_BE_ARRAY_OF_NULL;
-			}
-			if (dim_op_type == IS_UNUSED) {
-				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-			} else {
-				if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
-					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-				}
-				if (dim_type & MAY_BE_STRING) {
-					tmp |= MAY_BE_ARRAY_KEY_STRING;
-					if (dim_op_type != IS_CONST) {
-						// FIXME: numeric string
-						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-					}
-				}
-				if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
-					tmp |= MAY_BE_ARRAY_KEY_STRING;
-				}
-			}
-		}
-		/* Only add value type if we have a key type. It might be that the key type is illegal
-		 * for arrays. */
-		if (tmp & MAY_BE_ARRAY_KEY_ANY) {
-			tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
-		}
+		tmp |= assign_dim_array_result_type(arr_type, dim_type, value_type, dim_op_type);
 	}
 	return tmp;
 }
@@ -2788,28 +2795,21 @@ static zend_always_inline int _zend_update_type_info(
 				if (t1 & MAY_BE_STRING) {
 					tmp |= MAY_BE_STRING;
 				}
-				if (t1 & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_STRING)) {
+				if (t1 & (MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL|MAY_BE_UNDEF)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
 
-					if (opline->op2_type == IS_UNUSED) {
-						/* When appending to an array and the LONG_MAX key is already used
-						 * null will be returned. */
+					if (OP1_DATA_INFO() & MAY_BE_UNDEF) {
 						tmp |= MAY_BE_NULL;
 					}
-					if (t2 & (MAY_BE_ARRAY | MAY_BE_OBJECT)) {
-						/* Arrays and objects cannot be used as keys. */
-						tmp |= MAY_BE_NULL;
-					}
-					if (t1 & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY))) {
-						/* undef, null and false are implicitly converted to array, anything else
-						 * results in a null return value. */
-						tmp |= MAY_BE_NULL;
+					if (t1 & MAY_BE_ARRAY_OF_REF) {
+						/* A scalar type conversion may occur when assigning to a typed reference. */
+						tmp |= MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING;
 					}
 				}
-				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_REF;
 				}
+				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
 			if ((ssa_op+1)->op1_def >= 0) {
@@ -2913,7 +2913,12 @@ static zend_always_inline int _zend_update_type_info(
 				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
-				UPDATE_SSA_TYPE(tmp & ~MAY_BE_REF, ssa_op->result_def);
+				if (tmp & MAY_BE_REF) {
+					/* A scalar type conversion may occur when assigning to a typed reference. */
+					tmp &= ~MAY_BE_REF;
+					tmp |= MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->result_def);
 			}
 			break;
@@ -2972,6 +2977,9 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_REF:
+			if (ssa_op->result_def >= 0) {
+				UPDATE_SSA_TYPE(MAY_BE_REF, ssa_op->result_def);
+			}
 			if ((opline+1)->op1_type == IS_CV) {
 				opline++;
 				ssa_op++;
@@ -3180,40 +3188,16 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			if (ssa_op->result_def >= 0) {
 				uint32_t arr_type;
-
 				if (opline->opcode == ZEND_INIT_ARRAY) {
 					arr_type = 0;
 				} else {
 					arr_type = RES_USE_INFO();
 				}
-				tmp = MAY_BE_RC1|MAY_BE_ARRAY;
-				if (ssa_op->result_use >= 0) {
-					tmp |= ssa_var_info[ssa_op->result_use].type;
-				}
+				tmp = MAY_BE_RC1|MAY_BE_ARRAY|arr_type;
 				if (opline->op1_type != IS_UNUSED) {
-					tmp |= (t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
-					if (t1 & MAY_BE_UNDEF) {
-						tmp |= MAY_BE_ARRAY_OF_NULL;
-					}
+					tmp |= assign_dim_array_result_type(arr_type, t2, t1, opline->op2_type);
 					if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 						tmp |= MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-					}
-					if (opline->op2_type == IS_UNUSED) {
-						tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-					} else {
-						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_RESOURCE)) {
-							tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-						}
-						if (t2 & (MAY_BE_STRING)) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
-							if (opline->op2_type != IS_CONST) {
-								// FIXME: numeric string
-								tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
-							}
-						}
-						if (t2 & (MAY_BE_UNDEF | MAY_BE_NULL)) {
-							tmp |= MAY_BE_ARRAY_KEY_STRING;
-						}
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -3501,6 +3485,10 @@ static zend_always_inline int _zend_update_type_info(
 						if (ce && !ce->create_object && !ce->__get) {
 							tmp &= ~MAY_BE_RC1;
 						}
+					}
+					if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+						/* IS check may return null for uninitialized typed property. */
+						tmp |= MAY_BE_NULL;
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -4764,9 +4752,17 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 				return 1;
 			}
 			ZEND_FALLTHROUGH;
-		case ZEND_BIND_STATIC:
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
+		case ZEND_BIND_STATIC:
+			if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
+				/* Destructor may throw. */
+				return 1;
+			} else {
+				zval *value = (zval*)((char*)op_array->static_variables->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
+				/* May throw if initializer is CONSTANT_AST. */
+				return Z_TYPE_P(value) == IS_CONSTANT_AST;
+			}
 		case ZEND_ASSIGN_DIM:
 			if ((opline+1)->op1_type == IS_CV) {
 				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {
@@ -4776,8 +4772,13 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_TRUE|MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_DOUBLE)) || opline->op2_type == IS_UNUSED ||
 				(t2 & (MAY_BE_UNDEF|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_ASSIGN_OBJ:
-			if (t1 & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_OBJECT))) {
+			if (t1 & (MAY_BE_ANY-MAY_BE_OBJECT)) {
 				return 1;
+			}
+			if ((opline+1)->op1_type == IS_CV) {
+				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {
+					return 1;
+				}
 			}
 			if (ssa_op->op1_use) {
 				zend_ssa_var_info *var_info = ssa->var_info + ssa_op->op1_use;
@@ -4788,24 +4789,21 @@ ZEND_API int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op,
 					return 1;
 				}
 
-				if (op_array->scope != ce && ce->default_properties_count) {
-					zend_property_info *prop_info;
+				if (opline->op2_type != IS_CONST) {
+					return 1;
+				}
 
-					if (opline->op2_type == IS_CONST) {
-						prop_info = zend_hash_find_ptr(&ce->properties_info,
-							Z_STR_P(CRT_CONSTANT(opline->op2)));
-						if (prop_info && !(prop_info->flags & ZEND_ACC_PUBLIC)) {
-							return 1;
-						}
-					} else {
-						if (t2 & (MAY_BE_ANY-MAY_BE_STRING)) {
-							return 1;
-						}
-						ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-							if (!(prop_info->flags & ZEND_ACC_PUBLIC)) {
-								return 1;
-							}
-						} ZEND_HASH_FOREACH_END();
+				zend_string *prop_name = Z_STR_P(CRT_CONSTANT(opline->op2));
+				if (ZSTR_LEN(prop_name) > 0 && ZSTR_VAL(prop_name)[0] == '\0') {
+					return 1;
+				}
+
+				if (op_array->scope != ce && ce->default_properties_count) {
+					zend_property_info *prop_info =
+						zend_hash_find_ptr(&ce->properties_info, prop_name);
+					if (prop_info && (!(prop_info->flags & ZEND_ACC_PUBLIC)
+								|| ZEND_TYPE_IS_SET(prop_info->type))) {
+						return 1;
 					}
 				}
 				return 0;

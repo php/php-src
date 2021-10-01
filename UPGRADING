@@ -109,7 +109,7 @@ PHP 8.1 UPGRADE NOTES
   . mysqli::connect() will now return true instead of null on success.
 
 - MySQLnd:
-  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
+  . The mysqlnd.fetch_data_copy ini setting has been removed. However, this
     should not result in user-visible behavior changes.
 
 - OpenSSL:
@@ -569,6 +569,9 @@ PHP 8.1 UPGRADE NOTES
   imagewebp() can do lossless WebP encoding by passing IMG_WEBP_LOSSLESS as
   quality. This constant is only defined, if a libgd is used which supports
   lossless WebP encoding.
+
+- Mbstring:
+  . Unicode data tables have been updated to Unicode 14.
 
 - MySQLi:
   . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
