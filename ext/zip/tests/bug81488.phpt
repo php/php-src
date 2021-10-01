@@ -3,6 +3,7 @@ Bug #81488 (ext/zip doesn't extract files with special names)
 --SKIPIF--
 <?php
 if (!extension_loaded("zip")) die("skip zip extension not available");
+if (PHP_OS_FAMILY !== "Windows") die("skip for Windows only");
 ?>
 --FILE--
 <?php
