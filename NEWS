@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
+- Reflection:
+  . ReflectionAttribute is no longer final. (sasezaki)
+
 - SPL:
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
     (cmb, Nikita, Tyson Andre)

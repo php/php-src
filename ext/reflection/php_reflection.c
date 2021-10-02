@@ -6618,7 +6618,6 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionAttribute", class_ReflectionAttribute_methods);
 	reflection_init_class_handlers(&_reflection_entry);
-	_reflection_entry.ce_flags |= ZEND_ACC_FINAL;
 	reflection_attribute_ptr = zend_register_internal_class(&_reflection_entry);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(attribute, "IS_INSTANCEOF", REFLECTION_ATTRIBUTE_IS_INSTANCEOF);

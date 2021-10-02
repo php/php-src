@@ -653,7 +653,7 @@ final class ReflectionReference
     private function __construct() {}
 }
 
-final class ReflectionAttribute
+class ReflectionAttribute
 {
     public function getName(): string {}
     public function getTarget(): int {}
