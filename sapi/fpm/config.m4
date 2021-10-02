@@ -37,6 +37,18 @@ AC_DEFUN([AC_FPM_PROCCTL],
   ])
 ])
 
+AC_DEFUN([AC_FPM_SETPFLAGS],
+[
+  AC_MSG_CHECKING([for setpflags])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
+    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -507,6 +519,7 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
   AC_FPM_PROCCTL
+  AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
