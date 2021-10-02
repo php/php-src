@@ -1,7 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.32
+?? ??? ????, PHP 7.3.33
 
+
+28 Okt 2021, PHP 7.3.32
+
+- FPM:
+  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
+    escalation). (CVE-2021-21703) (Jakub Zelenka)
 
 23 Sep 2021, PHP 7.3.31
 
