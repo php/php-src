@@ -598,7 +598,7 @@ PHP_FUNCTION(phpdbg_end_oplog)
 	}
 
 	if (!PHPDBG_G(oplog_list)) {
-		zend_error(E_WARNING, "Can not end an oplog without starting it");
+		zend_error(E_WARNING, "Cannot end an oplog without starting it");
 		return;
 	}
 

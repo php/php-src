@@ -7,4 +7,4 @@ function test(): ?false {}
 
 ?>
 --EXPECTF--
-Fatal error: False can not be used as a standalone type in %s on line %d
+Fatal error: False cannot be used as a standalone type in %s on line %d

@@ -6328,9 +6328,9 @@ static zend_type zend_compile_typename(
 	if ((type_mask & (MAY_BE_NULL|MAY_BE_FALSE))
 			&& !ZEND_TYPE_IS_COMPLEX(type) && !(type_mask & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
 		if (type_mask == MAY_BE_NULL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Null can not be used as a standalone type");
+			zend_error_noreturn(E_COMPILE_ERROR, "Null cannot be used as a standalone type");
 		} else {
-			zend_error_noreturn(E_COMPILE_ERROR, "False can not be used as a standalone type");
+			zend_error_noreturn(E_COMPILE_ERROR, "False cannot be used as a standalone type");
 		}
 	}
 
