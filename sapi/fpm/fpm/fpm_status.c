@@ -472,10 +472,10 @@ int fpm_status_handle_request(void) /* {{{ */
 
 			first = 1;
 			for (i=0; i<scoreboard_p->nprocs; i++) {
-				if (!scoreboard_p->procs[i] || !scoreboard_p->procs[i]->used) {
+				if (!scoreboard_p->procs[i].used) {
 					continue;
 				}
-				proc = *scoreboard_p->procs[i];
+				proc = scoreboard_p->procs[i];
 
 				if (first) {
 					first = 0;

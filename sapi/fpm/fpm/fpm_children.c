@@ -246,7 +246,7 @@ void fpm_children_bury() /* {{{ */
 
 			fpm_child_unlink(child);
 
-			fpm_scoreboard_proc_free(wp->scoreboard, child->scoreboard_i);
+			fpm_scoreboard_proc_free(child);
 
 			fpm_clock_get(&tv1);
 
@@ -256,9 +256,9 @@ void fpm_children_bury() /* {{{ */
 				if (!fpm_pctl_can_spawn_children()) {
 					severity = ZLOG_DEBUG;
 				}
-				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -324,7 +324,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 		return 0;
 	}
 
-	if (0 > fpm_scoreboard_proc_alloc(wp->scoreboard, &c->scoreboard_i)) {
+	if (0 > fpm_scoreboard_proc_alloc(c)) {
 		fpm_stdio_discard_pipes(c);
 		fpm_child_free(c);
 		return 0;
@@ -336,7 +336,7 @@ static struct fpm_child_s *fpm_resources_prepare(struct fpm_worker_pool_s *wp) /
 
 static void fpm_resources_discard(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_scoreboard_proc_free(child->wp->scoreboard, child->scoreboard_i);
+	fpm_scoreboard_proc_free(child);
 	fpm_stdio_discard_pipes(child);
 	fpm_child_free(child);
 }
@@ -349,10 +349,10 @@ static void fpm_child_resources_use(struct fpm_child_s *child) /* {{{ */
 		if (wp == child->wp || wp == child->wp->shared) {
 			continue;
 		}
-		fpm_scoreboard_free(wp->scoreboard);
+		fpm_scoreboard_free(wp);
 	}
 
-	fpm_scoreboard_child_use(child->wp->scoreboard, child->scoreboard_i, getpid());
+	fpm_scoreboard_child_use(child, getpid());
 	fpm_stdio_child_use_pipes(child);
 	fpm_child_free(child);
 }
