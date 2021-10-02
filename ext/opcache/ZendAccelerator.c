@@ -3214,7 +3214,7 @@ static zend_result accel_post_startup(void)
 				break;
 			case FAILED_REATTACHED:
 				accel_startup_ok = 0;
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - cannot reattach to exiting shared memory.");
 				return SUCCESS;
 				break;
 #if ENABLE_FILE_CACHE_FALLBACK
