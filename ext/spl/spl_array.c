@@ -1082,11 +1082,10 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 	} else {
 		zend_user_it_invalidate_current(iter);
 		if (!(object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT)) {
-			uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, object);
-
 			if (spl_array_is_object(object)) {
 				spl_array_skip_protected(object, aht);
 			} else {
+				uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, object);
 				zend_hash_has_more_elements_ex(aht, pos_ptr);
 			}
 		}
