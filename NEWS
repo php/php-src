@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.12
 
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+
 - Core:
   . Fixed bug #81435 (Observer current_observed_frame may point to an old
     (overwritten) frame). (Bob)
