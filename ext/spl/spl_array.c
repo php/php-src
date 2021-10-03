@@ -957,7 +957,8 @@ static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key) 
 }
 /* }}} */
 
-static void sql_check_update_iterator(HashTable *ht) /* {{{ */
+static int sql_check_update_iterator(HashTable *ht) /* {{{ */
+{
 	int result = FAILURE;
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end = iter + EG(ht_iterators_used);
@@ -970,6 +971,8 @@ static void sql_check_update_iterator(HashTable *ht) /* {{{ */
 		}
 		iter++;
 	}
+
+	return result;
 }
 /* }}} */
 
