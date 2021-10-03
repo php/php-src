@@ -1080,6 +1080,7 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 			spl_array_next_ex(object, aht);
 		}
 	} else {
+		/* execute the common part. */
 		zend_user_it_invalidate_current(iter);
 		if (!(object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT)) {
 			if (spl_array_is_object(object)) {
