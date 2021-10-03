@@ -1079,6 +1079,17 @@ static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 			zend_user_it_invalidate_current(iter);
 			spl_array_next_ex(object, aht);
 		}
+	} else {
+		zend_user_it_invalidate_current(iter);
+		if (!(object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT)) {
+			uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, object);
+
+			if (spl_array_is_object(object)) {
+				spl_array_skip_protected(object, aht);
+			} else {
+				zend_hash_has_more_elements_ex(aht, pos_ptr);
+			}
+		}
 	}
 }
 /* }}} */
