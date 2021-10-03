@@ -966,7 +966,7 @@ static int sql_check_update_iterator(HashTable *ht) /* {{{ */
 	while (iter != end) {
 		if (iter->ht == ht && iter->has_updated_iterator == 1) {
 			/* The iterator has updated position, so the current position is valid. */
-			iter->has_updated_iterator == 0;
+			iter->has_updated_iterator = 0;
 			result = SUCCESS;
 		}
 		iter++;
