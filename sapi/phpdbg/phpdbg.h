@@ -247,6 +247,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
 #endif
+#ifdef HAVE_USERFAULTFD_WRITEFAULT
+    int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
+    pthread_t watch_userfault_thread;            /* thread for watch fault handling */
+#endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watch_elements;                    /* user defined watch elements */
