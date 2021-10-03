@@ -80,10 +80,9 @@ object(ArrayObject)#%d (1) {
   }
 }
 1=>2
-object(ArrayObject)#%d (1) {
-  %s"storage"%s"ArrayObject":private]=>
-  array(1) {
-    [3]=>
-    int(4)
+3=>4
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
   }
 }
