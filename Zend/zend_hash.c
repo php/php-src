@@ -618,6 +618,7 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 
 	while (iter != end) {
 		if (iter->ht == ht && iter->pos == from) {
+			iter->has_updated_iterator = 1;
 			iter->pos = to;
 		}
 		iter++;
