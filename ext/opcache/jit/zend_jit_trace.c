@@ -5403,20 +5403,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
 								op1_info, op1_addr, avoid_refcounting,
-								op2_info, res_info, RES_REG_ADDR(), val_type,
-								(
-									(op1_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
-									(op2_info & (MAY_BE_ANY - (MAY_BE_LONG|MAY_BE_STRING))) != 0 ||
-									((op1_info & MAY_BE_UNDEF) != 0 &&
-										opline->opcode != ZEND_FETCH_DIM_IS) ||
-									(opline->opcode != ZEND_FETCH_LIST_R &&
-										(opline->op1_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
-										(op1_info & MAY_BE_RC1) &&
-										(op1_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0) ||
-									(op2_info & MAY_BE_UNDEF) != 0 ||
-									((opline->op2_type & (IS_TMP_VAR|IS_VAR)) != 0 &&
-										(op2_info & MAY_BE_RC1) &&
-										(op2_info & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) != 0)))) {
+								op2_info, res_info, RES_REG_ADDR(), val_type)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -5459,14 +5446,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP2_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_fetch_dim(&dasm_state, opline,
-								op1_info, op1_addr, op2_info, RES_REG_ADDR(), val_type,
-								(opline->opcode == ZEND_FETCH_DIM_RW
-								 || opline->op2_type == IS_UNUSED
-								 || (op1_info & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
-								 || (op2_info & (MAY_BE_UNDEF|MAY_BE_RESOURCE|MAY_BE_ARRAY|MAY_BE_OBJECT))
-								 || (opline->op1_type == IS_VAR
-								  && (op1_info & MAY_BE_UNDEF)
-								  && !ssa->var_info[ssa_op->op1_use].indirect_reference)))) {
+								op1_info, op1_addr, op2_info, RES_REG_ADDR(), val_type)) {
 							goto jit_failure;
 						}
 						if (ssa_op->result_def > 0

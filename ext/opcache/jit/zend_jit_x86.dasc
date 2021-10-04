@@ -11631,8 +11631,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
                                    uint32_t            op2_info,
                                    uint32_t            res_info,
                                    zend_jit_addr       res_addr,
-                                   uint8_t             dim_type,
-                                   int                 may_throw)
+                                   uint8_t             dim_type)
 {
 	zend_jit_addr orig_op1_addr, op2_addr;
 	const void *exit_addr = NULL;
@@ -11640,6 +11639,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 	const void *res_exit_addr = NULL;
 	bool result_avoid_refcounting = 0;
 	uint32_t may_be_string = (opline->opcode != ZEND_FETCH_LIST_R) ? MAY_BE_STRING : 0;
+	int may_throw = 0;
 
 	orig_op1_addr = OP1_ADDR();
 	op2_addr = OP2_ADDR();
@@ -11733,6 +11733,10 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			}
 		}
 		|	GET_ZVAL_LVAL ZREG_FCARG1, op1_addr
+		if ((op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) ||
+		    (opline->opcode != ZEND_FETCH_DIM_IS && JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE)) {
+			may_throw = 1;
+		}
 		if (!zend_jit_fetch_dimension_address_inner(Dst, opline, (opline->opcode != ZEND_FETCH_DIM_IS) ? BP_VAR_R : BP_VAR_IS, op1_info, op2_info, dim_type, res_exit_addr, not_found_exit_addr, exit_addr)) {
 			return 0;
 		}
@@ -11745,6 +11749,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		}
 
 		if (opline->opcode != ZEND_FETCH_LIST_R && (op1_info & MAY_BE_STRING)) {
+			may_throw = 1;
 			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_STRING))) {
 				if (exit_addr && !(op1_info & MAY_BE_OBJECT)) {
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_STRING, &exit_addr
@@ -11785,6 +11790,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		}
 
 		if (op1_info & MAY_BE_OBJECT) {
+			may_throw = 1;
 			if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string))) {
 				if (exit_addr) {
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_OBJECT, &exit_addr
@@ -11826,6 +11832,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		if ((opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF)) {
 			|	SET_EX_OPLINE opline, r0
 			if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
+				may_throw = 1;
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
 				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
@@ -11834,6 +11841,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			}
 
 			if (op2_info & MAY_BE_UNDEF) {
+				may_throw = 1;
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1
 				|	mov FCARG1d, opline->op2.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -11844,6 +11852,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))
 		 && (!exit_addr || !(op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_STRING)))) {
 			if (opline->opcode != ZEND_FETCH_DIM_IS && opline->opcode != ZEND_FETCH_LIST_R) {
+				may_throw = 1;
 				if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 					|	LOAD_ZVAL_ADDR FCARG1a, orig_op1_addr
 				} else {
@@ -11954,9 +11963,19 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 	}
 #endif
 
-	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+    if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+		if ((op2_info & MAY_HAVE_DTOR) && (op2_info & MAY_BE_RC1)) {
+			may_throw = 1;
+		}
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+	}
 	if (opline->opcode != ZEND_FETCH_LIST_R && !op1_avoid_refcounting) {
-		|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+		if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+			if ((op1_info & MAY_HAVE_DTOR) && (op1_info & MAY_BE_RC1)) {
+				may_throw = 1;
+			}
+			|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+		}
 	}
 
 	if (may_throw) {
@@ -11974,14 +11993,15 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
                               zend_jit_addr   op1_addr,
                               uint32_t        op2_info,
                               zend_jit_addr   res_addr,
-                              uint8_t         dim_type,
-                              int             may_throw)
+                              uint8_t         dim_type)
 {
 	zend_jit_addr op2_addr;
+	int may_throw = 0;
 
 	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
 
 	if (op1_info & MAY_BE_REF) {
+		may_throw = 1;
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		|	IF_NOT_Z_TYPE FCARG1a, IS_REFERENCE, >1
 		|	GET_Z_PTR FCARG2a, FCARG1a
@@ -12022,6 +12042,7 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 		}
 		if ((op1_info & MAY_BE_UNDEF)
 		 && opline->opcode == ZEND_FETCH_DIM_RW) {
+			may_throw = 1;
 			if (op1_info & MAY_BE_NULL) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
 			}
@@ -12048,6 +12069,7 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_ARRAY)) {
 		|6:
 		if (opline->op2_type == IS_UNUSED) {
+			may_throw = 1;
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
 			|	EXT_CALL zend_hash_next_index_insert, r0
@@ -12073,6 +12095,7 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 					type = BP_VAR_W;
 					break;
 				case ZEND_FETCH_DIM_RW:
+					may_throw = 1;
 					type = BP_VAR_RW;
 					break;
 				case ZEND_FETCH_DIM_UNSET:
@@ -12082,6 +12105,9 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 					ZEND_UNREACHABLE();
 			}
 
+			if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_STRING))) {
+				may_throw = 1;
+			}
 			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, type, op1_info, op2_info, dim_type, NULL, NULL, NULL)) {
 				return 0;
 			}
@@ -12101,6 +12127,7 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 	}
 
 	if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_ARRAY))) {
+		may_throw = 1;
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_ARRAY)) {
 			|.cold_code
 			|7:
@@ -12155,6 +12182,11 @@ static int zend_jit_fetch_dim(dasm_State    **Dst,
 	}
 #endif
 
+	if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
+	 && (op2_info & MAY_HAVE_DTOR)
+	 && (op2_info & MAY_BE_RC1)) {
+		may_throw = 1;
+	}
 	|8:
 	|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
 
