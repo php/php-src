@@ -11,8 +11,23 @@ foreach ($ao as $key => $value) {
     }
 }
 echo json_encode($ao), "\n";
+
+$ao = new ArrayObject([true, false, false, true]);
+
+foreach ($ao as $key => $value) {
+    echo $key, "\n";
+    if (!$value) {
+        unset($ao[$key]);
+    }
+}
+echo json_encode($ao), "\n";
 ?>
 --EXPECT--
+0
+1
+2
+3
+{"0":true,"3":true}
 0
 1
 2
