@@ -4869,8 +4869,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
-		|	FREE_OP op1_type, op1, op1_info, 0, opline
-		|	FREE_OP op2_type, op2, op2_info, 0, opline
+		|	FREE_OP op1_type, op1, op1_info, 0, NULL
+		|	FREE_OP op2_type, op2, op2_info, 0, NULL
 		if (may_throw) {
 			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
 				zend_jit_check_exception_undef_result(Dst, opline);
@@ -5243,8 +5243,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
-		|	FREE_OP op1_type, op1, op1_info, 0, opline
-		|	FREE_OP op2_type, op2, op2_info, 0, opline
+		|	FREE_OP op1_type, op1, op1_info, 0, NULL
+		|	FREE_OP op2_type, op2, op2_info, 0, NULL
 		if (may_throw) {
 			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
 				zend_jit_check_exception_undef_result(Dst, opline);
@@ -5370,8 +5370,8 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		/* concatination with empty string may increase refcount */
 		op1_info |= MAY_BE_RCN;
 		op2_info |= MAY_BE_RCN;
-		|	FREE_OP op1_type, op1, op1_info, 0, opline
-		|	FREE_OP op2_type, op2, op2_info, 0, opline
+		|	FREE_OP op1_type, op1, op1_info, 0, NULL
+		|	FREE_OP op2_type, op2, op2_info, 0, NULL
 		if (may_throw) {
 			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
 				zend_jit_check_exception_undef_result(Dst, opline);
@@ -6522,7 +6522,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, uint32_t
 			}
 #endif
 
-			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline
+			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, NULL
 		}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_ARRAY)) {
@@ -6770,8 +6770,8 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 		|.endif
 
 		|9:
-		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, opline
-		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, op1_data_info, 0, NULL
+		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, NULL
 		if (may_throw) {
 			zend_jit_check_exception(Dst);
 		}
@@ -7898,9 +7898,9 @@ static int zend_jit_cmp(dasm_State    **Dst,
 		     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
 			|	mov dword T1, eax // save
 			if (opline->opcode != ZEND_CASE) {
-				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, NULL
 			}
-			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, NULL
 			if (may_throw) {
 				zend_jit_check_exception_undef_result(Dst, opline);
 			}
@@ -8099,7 +8099,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 		     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
 		    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
 		     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
-			|	SET_EX_OPLINE opline, r0
 			if (opline->opcode != ZEND_CASE_STRICT) {
 				|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 			}
@@ -8180,7 +8179,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 		if (smart_branch_opcode) {
 			if (opline->op2_type == IS_VAR && (op2_info & MAY_BE_REF)) {
 				|	jne >8
-				|	SET_EX_OPLINE opline, r0
 				|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
 				if (may_throw) {
 					zend_jit_check_exception_undef_result(Dst, opline);
@@ -8212,7 +8210,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 		}
 		if ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
 		    (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
-			|	SET_EX_OPLINE opline, r0
 			|	FREE_OP opline->op2_type, opline->op2, op2_info, 1, opline
 			if (may_throw) {
 				zend_jit_check_exception_undef_result(Dst, opline);
@@ -8233,7 +8230,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 			if (opline->opcode != ZEND_CASE_STRICT
 			 && opline->op1_type == IS_VAR && (op1_info & MAY_BE_REF)) {
 				|	jne >8
-				|	SET_EX_OPLINE opline, r0
 				|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 				if (may_throw) {
 					zend_jit_check_exception_undef_result(Dst, opline);
@@ -8266,7 +8262,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 		if (opline->opcode != ZEND_CASE_STRICT
 		 && (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 		    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
-			|	SET_EX_OPLINE opline, r0
 			|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 			if (may_throw) {
 				zend_jit_check_exception_undef_result(Dst, opline);
@@ -8295,7 +8290,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 			    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
 			     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
 				|	mov aword T1, r0 // save
-				|	SET_EX_OPLINE opline, r0
 				if (opline->opcode != ZEND_CASE_STRICT) {
 					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, opline
 				}
@@ -13820,7 +13814,7 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				info |= MAY_BE_RC1|MAY_BE_RCN;
 			}
 
-			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, info, 0, opline
+			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, info, 0, NULL
 		}
 	}
 
@@ -14248,7 +14242,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 				info |= MAY_BE_RC1|MAY_BE_RCN;
 			}
 
-			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, info, 0, opline
+			|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, info, 0, NULL
 		}
 	}
 
