@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed bug #81490 (ZipArchive::extractTo() may leak memory). (cmb, Remi)
+  . Fixed bug #77978 (Dirname ending in colon unzips to wrong dir). (cmb)
 
 23 Sep 2021, PHP 8.0.11
 
