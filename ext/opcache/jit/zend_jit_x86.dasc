@@ -7549,7 +7549,7 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, z
 
 static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	|	LONG_OP_WITH_CONST cmp, res_addr, Z_L(0)
+	|	test, eax, eax
 	if (smart_branch_opcode) {
 		if (smart_branch_opcode == ZEND_JMPZ_EX ||
 		    smart_branch_opcode == ZEND_JMPNZ_EX) {
@@ -7868,54 +7868,59 @@ static int zend_jit_cmp(dasm_State    **Dst,
 			}
 			op2_addr = real_addr;
 		}
-		|	LOAD_ZVAL_ADDR FCARG2a, op1_addr
+		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
 		if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-			|	IF_NOT_Z_TYPE FCARG2a, IS_UNDEF, >1
+			|	IF_NOT_Z_TYPE FCARG1a, IS_UNDEF, >1
 			|	mov FCARG1a, opline->op1.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
+			|	LOAD_ADDR_ZTS FCARG1a, executor_globals, uninitialized_zval
 			|1:
 		}
 		if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
 			|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1
-			|	mov T1, FCARG2a // save
+			|	mov T1, FCARG1a // save
 			|	mov FCARG1a, opline->op2.var
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
-			|	mov FCARG2a, T1 // restore
-			|.if X64
-				|	LOAD_ADDR_ZTS CARG3, executor_globals, uninitialized_zval
-			|.else
-				|	sub r4, 12
-				|	PUSH_ADDR_ZTS executor_globals, uninitialized_zval, r0
-			|.endif
+			|	mov FCARG1a, T1 // restore
+			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
 			|	jmp >2
 			|1:
-			|.if X64
-				|	LOAD_ZVAL_ADDR CARG3, op2_addr
-			|.else
-				|	sub r4, 12
-				|	PUSH_ZVAL_ADDR op2_addr, r0
-			|.endif
+			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 			|2:
 		} else {
-			|.if X64
-				|	LOAD_ZVAL_ADDR CARG3, op2_addr
-			|.else
-				|	sub r4, 12
-				|	PUSH_ZVAL_ADDR op2_addr, r0
-			|.endif
+			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 		}
-		|	LOAD_ZVAL_ADDR FCARG1a, res_addr
-		|	EXT_CALL compare_function, r0
-		|.if not(X64)
-		|	add r4, 12
-		|.endif
-		if (opline->opcode != ZEND_CASE) {
-			|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
-		}
-		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
-		if (may_throw) {
+		|	EXT_CALL zend_compare, r0
+		if ((opline->opcode != ZEND_CASE &&
+		     (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
+		    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
+			|	mov dword T1, eax // save
+			if (opline->opcode != ZEND_CASE) {
+				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline
+			}
+			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline
+			if (may_throw) {
+				zend_jit_check_exception_undef_result(Dst, opline);
+			}
+			|	mov eax, dword T1 // restore
+		} else if (may_throw) {
+#if ZTS
+			|	mov dword T1, eax // save
+#else
+			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
+				|	mov dword T1, eax // save
+			}
+#endif
 			zend_jit_check_exception_undef_result(Dst, opline);
+#if ZTS
+			|	mov eax, dword T1 // restore
+#else
+			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
+				|	mov eax, dword T1 // restore
+			}
+#endif
 		}
 		if (!zend_jit_cmp_slow(Dst, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 			return 0;

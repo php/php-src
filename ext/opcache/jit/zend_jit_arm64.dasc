@@ -2913,16 +2913,16 @@ static int zend_jit_trace_end_loop(dasm_State **Dst, int loop_label, const void 
 
 static int zend_jit_check_exception(dasm_State **Dst)
 {
-	|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-	|	cbnz REG0, ->exception_handler
+	|	MEM_LOAD_64_ZTS ldr, TMP2, executor_globals, exception, TMP1
+	|	cbnz TMP2, ->exception_handler
 	return 1;
 }
 
 static int zend_jit_check_exception_undef_result(dasm_State **Dst, const zend_op *opline)
 {
 	if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
-		|	cbnz REG0, ->exception_handler_undef
+		|	MEM_LOAD_64_ZTS ldr, TMP2, executor_globals, exception, TMP1
+		|	cbnz TMP2, ->exception_handler_undef
 		return 1;
 	}
 	return zend_jit_check_exception(Dst);
@@ -7016,7 +7016,7 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, z
 
 static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_addr res_addr, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2, const void *exit_addr)
 {
-	|	LONG_CMP_WITH_CONST res_addr, Z_L(0), TMP1, TMP2
+	|	tst RETVALw, RETVALw
 	if (smart_branch_opcode) {
 		if (smart_branch_opcode == ZEND_JMPZ_EX ||
 		    smart_branch_opcode == ZEND_JMPNZ_EX) {
@@ -7333,34 +7333,41 @@ static int zend_jit_cmp(dasm_State    **Dst,
 			}
 			op2_addr = real_addr;
 		}
-		|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+		|	LOAD_ZVAL_ADDR FCARG1x, op1_addr
 		if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
-			|	IF_NOT_Z_TYPE FCARG2x, IS_UNDEF, >1, TMP1w
+			|	IF_NOT_Z_TYPE FCARG1x, IS_UNDEF, >1, TMP1w
 			|	LOAD_32BIT_VAL FCARG1x, opline->op1.var
 			|	EXT_CALL zend_jit_undefined_op_helper, REG0
-			|	LOAD_ADDR_ZTS FCARG2x, executor_globals, uninitialized_zval
+			|	LOAD_ADDR_ZTS FCARG1x, executor_globals, uninitialized_zval
 			|1:
 		}
 		if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
 			|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1, ZREG_TMP1
-			|	str FCARG2x, T1 // save
+			|	str FCARG1x, T1 // save
 			|	LOAD_32BIT_VAL FCARG1x, opline->op2.var
 			|	EXT_CALL zend_jit_undefined_op_helper, REG0
-			|	ldr FCARG2x, T1 // restore
-			|	LOAD_ADDR_ZTS CARG3, executor_globals, uninitialized_zval
+			|	ldr FCARG1x, T1 // restore
+			|	LOAD_ADDR_ZTS FCARG2x, executor_globals, uninitialized_zval
 			|	b >2
 			|1:
-			|	LOAD_ZVAL_ADDR CARG3, op2_addr
+			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
 			|2:
 		} else {
-			|	LOAD_ZVAL_ADDR CARG3, op2_addr
+			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
 		}
-		|	LOAD_ZVAL_ADDR FCARG1x, res_addr
-		|	EXT_CALL compare_function, REG0
-		if (opline->opcode != ZEND_CASE) {
-			|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	EXT_CALL zend_compare, REG0
+		if ((opline->opcode != ZEND_CASE &&
+		     (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) ||
+		    ((opline->op2_type & (IS_VAR|IS_TMP_VAR)) &&
+		     (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)))) {
+			|	str RETVALw, T1 // save
+			if (opline->opcode != ZEND_CASE) {
+				|	FREE_OP opline->op1_type, opline->op1, op1_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+			}
+			|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+			|	ldr RETVALw, T1 // restore
 		}
-		|	FREE_OP opline->op2_type, opline->op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
 			zend_jit_check_exception_undef_result(Dst, opline);
 		}
