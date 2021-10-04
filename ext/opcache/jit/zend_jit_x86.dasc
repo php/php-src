@@ -7906,13 +7906,21 @@ static int zend_jit_cmp(dasm_State    **Dst,
 			}
 			|	mov eax, dword T1 // restore
 		} else if (may_throw) {
-			|	.if ZTS
-			|		mov dword T1, eax // save
-			|	.endif
+#if ZTS
+			|	mov dword T1, eax // save
+#else
+			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
+				|	mov dword T1, eax // save
+			}
+#endif
 			zend_jit_check_exception_undef_result(Dst, opline);
-			|	.if ZTS
-			|		mov eax, dword T1 // restore
-			|	.endif
+#if ZTS
+			|	mov eax, dword T1 // restore
+#else
+			if ((sizeof(void*) == 8 && !IS_SIGNED_32BIT(&EG(exception)))) {
+				|	mov eax, dword T1 // restore
+			}
+#endif
 		}
 		if (!zend_jit_cmp_slow(Dst, opline, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
 			return 0;
