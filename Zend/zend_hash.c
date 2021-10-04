@@ -2886,3 +2886,28 @@ convert:
 		return new_ht;
 	}
 }
+
+ZEND_API int ZEND_FASTCALL zend_hash_check_updated_iterator(spl_array_object *object)
+{
+	HashTable *ht = spl_array_get_hash_table(intern);
+	return _zend_hash_check_updated_iterator_ex(ht);
+}
+
+ZEND_API int ZEND_FASTCALL _zend_hash_check_updated_iterator_ex(HashTable *ht)
+{
+	int result = FAILURE;
+	HashTableIterator *iter = EG(ht_iterators);
+	HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+	while (iter != end) {
+		/* The iterator has updated position, so the current position is valid. */
+		if (iter->ht == ht && iter->has_updated_iterator == 1) {
+			result = SUCCESS;
+			iter->has_updated_iterator = 0;
+		}
+		iter++;
+	}
+
+	return result;
+}
+
