@@ -522,7 +522,7 @@ class Tester
     }
 
     /**
-     * Get request params array.
+     * Execute request.
      *
      * @param string $query
      * @param array $headers
@@ -531,13 +531,20 @@ class Tester
      * @param string|null $successMessage
      * @param string|null $errorMessage
      * @param bool $connKeepAlive
-     * @return array
+     * @return Response
      */
-    private function getRequestParams(
+    public function request(
         string $query = '',
         array $headers = [],
-        string $uri = null
+        string $uri = null,
+        string $address = null,
+        string $successMessage = null,
+        string $errorMessage = null,
+        bool $connKeepAlive = false
     ) {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
         if (is_null($uri)) {
             $uri = $this->makeSourceFile();
         }
@@ -564,38 +571,9 @@ class Tester
             ],
             $headers
         );
-
-        return array_filter($params, function($value) {
+        $params = array_filter($params, function($value) {
             return !is_null($value);
         });
-    }
-
-    /**
-     * Execute request.
-     *
-     * @param string $query
-     * @param array $headers
-     * @param string|null $uri
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessage
-     * @param bool $connKeepAlive
-     * @return Response
-     */
-    public function request(
-        string $query = '',
-        array $headers = [],
-        string $uri = null,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
-        bool $connKeepAlive = false
-    ) {
-        if ($this->hasError()) {
-            return new Response(null, true);
-        }
-
-        $params = $this->getRequestParams($query, $headers, $uri);
 
         try {
             $this->response = new Response(
@@ -614,66 +592,6 @@ class Tester
             $this->response->debugOutput();
         }
         return $this->response;
-    }
-
-    /**
-     * Execute multiple requests in parallel.
-     *
-     * @param array|int $requests
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessage
-     * @param bool $connKeepAlive
-     * @return Response[]
-     * @throws \Exception
-     */
-    public function multiRequest(
-        $requests,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
-        bool $connKeepAlive = false
-    ) {
-        if ($this->hasError()) {
-            return new Response(null, true);
-        }
-
-        if (is_numeric($requests)) {
-            $requests = array_fill(0, $requests, []);
-        } elseif (!is_array($requests)) {
-            throw new \Exception('Requests can be either numeric or array');
-        }
-
-        try {
-            $connections = array_map(function ($requestData) use ($address, $connKeepAlive) {
-                $client = $this->getClient($address, $connKeepAlive);
-                $params = $this->getRequestParams(
-                    $requestData['query'] ?? '',
-                    $requestData['headers'] ?? [],
-                    $requestData['uri'] ?? null
-                );
-                return [
-                    'client' => $client,
-                    'requestId' => $client->async_request($params, false),
-                ];
-            }, $requests);
-
-            $responses = array_map(function ($conn) {
-                $response = new Response($conn['client']->wait_for_response_data($conn['requestId']));
-                if ($this->debug) {
-                    $response->debugOutput();
-                }
-                return $response;
-            }, $connections);
-            $this->message($successMessage);
-            return $responses;
-        } catch (\Exception $exception) {
-            if ($errorMessage === null) {
-                $this->error("Request failed", $exception);
-            } else {
-                $this->message($errorMessage);
-            }
-        }
     }
 
     /**
