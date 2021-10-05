@@ -1602,6 +1602,26 @@ PHP_METHOD(ZipArchive, count)
 }
 /* }}} */
 
+/* {{{ clear the internal status */
+PHP_METHOD(ZipArchive, clearError)
+{
+	zval *self = ZEND_THIS;
+	ze_zip_object *ze_obj;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	ze_obj = Z_ZIP_P(self); /* not ZIP_FROM_OBJECT as we can use saved error after close */
+	if (ze_obj->za) {
+		zip_error_clear(ze_obj->za);
+	} else {
+		ze_obj->err_zip = 0;
+		ze_obj->err_sys = 0;
+	}
+}
+/* }}} */
+
 /* {{{ Returns the status error message, system and/or zip messages */
 PHP_METHOD(ZipArchive, getStatusString)
 {
@@ -2880,32 +2900,54 @@ PHP_METHOD(ZipArchive, getFromIndex)
 }
 /* }}} */
 
-/* {{{ get a stream for an entry using its name */
-PHP_METHOD(ZipArchive, getStream)
+static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
+	zend_long index;
+	zend_long flags = 0;
 	struct zip_stat sb;
 	char *mode = "rb";
 	zend_string *filename;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
-		RETURN_THROWS();
+	if (type) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &index, &flags) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zip_stat(intern, ZSTR_VAL(filename), 0, &sb) != 0) {
-		RETURN_FALSE;
+	if (type) {
+		PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(filename), ZSTR_LEN(filename), flags, sb);
+	} else {
+		PHP_ZIP_STAT_INDEX(intern, index, flags, sb);
 	}
 
-	stream = php_stream_zip_open(intern, ZSTR_VAL(filename), mode STREAMS_CC);
+	stream = php_stream_zip_open(intern, &sb, mode, flags STREAMS_CC);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+/* {{{ get a stream for an entry using its name */
+PHP_METHOD(ZipArchive, getStreamName)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ get a stream for an entry using its index */
+PHP_METHOD(ZipArchive, getStreamIndex)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
