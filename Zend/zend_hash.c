@@ -1310,6 +1310,21 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 	}
 }
 
+static zend_always_inline void zend_hash_set_is_delete(HashTable *ht, HashPosition from, HashPosition to)
+{
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+		while (iter != end) {
+			if (iter->ht == ht && iter->pos == from) {
+				iter->is_delete = 1;
+			}
+			iter++;
+		}
+	}
+}
+
 static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx, Bucket *p, Bucket *prev)
 {
 	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED)) {
@@ -1336,8 +1351,8 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 		if (ht->nInternalPointer == idx) {
 			ht->nInternalPointer = new_idx;
 		}
-		/* I don't want to use function zend_hash_iterators_update() to set iter->is_delete
-		 * because zend_hash_iterators_update() was used in many place. */
+		/* I don't want to use function zend_hash_iterators_update() to set iter->is_delete = 1
+		 * because zend_hash_iterators_update() was used in many place and will cause some unknown errors.*/
 		zend_hash_set_is_delete(ht, idx, new_idx);
 		zend_hash_iterators_update(ht, idx, new_idx);
 	}
@@ -2882,21 +2897,6 @@ convert:
 		} ZEND_HASH_FOREACH_END();
 
 		return new_ht;
-	}
-}
-
-ZEND_API void ZEND_FASTCALL zend_hash_set_is_delete(HashTable *ht, HashPosition from, HashPosition to)
-{
-	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		HashTableIterator *iter = EG(ht_iterators);
-		HashTableIterator *end  = iter + EG(ht_iterators_used);
-
-		while (iter != end) {
-			if (iter->ht == ht && iter->pos == from) {
-				iter->is_delete = 1;
-			}
-			iter++;
-		}
 	}
 }
 
