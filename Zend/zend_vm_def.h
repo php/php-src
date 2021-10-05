@@ -1202,9 +1202,8 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 			}
 		}
 
-		dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 			if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -1216,6 +1215,7 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 			ZVAL_ARR(container, zend_new_array(8));
 			ZEND_VM_C_GOTO(assign_dim_op_new_array);
 		} else {
+			dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 ZEND_VM_C_LABEL(assign_dim_op_ret_null):
 			FREE_OP_DATA();
