@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     Doleček)
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
+- PCRE:
+  . Unfixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
+
 - Standard:
   . Fixed bug #81491 (Incorrectly using libsodium for argon2 hashing).
     (Dan Pock)
