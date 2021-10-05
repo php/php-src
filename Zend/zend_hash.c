@@ -2883,7 +2883,7 @@ convert:
 	}
 }
 
-static zend_always_inline void zend_hash_set_is_delete(HashTable *ht, HashPosition from, HashPosition to)
+ZEND_API void ZEND_FASTCALL zend_hash_set_is_delete(HashTable *ht, HashPosition from, HashPosition to)
 {
 	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 		HashTableIterator *iter = EG(ht_iterators);
@@ -2913,7 +2913,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_remove_is_delete(HashTable *ht)
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_hash_check_if_delete(HashTable *ht) /* {{{ */
+ZEND_API zend_result ZEND_FASTCALL zend_hash_check_if_delete(HashTable *ht) /* {{{ */
 {
 	int result = FAILURE;
 
