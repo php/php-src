@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Unfixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
+- PgSQL:
+  . Fixed bug #81509 (pg_end_copy still expects a resource). (Matteo)
+
 - Standard:
   . Fixed bug #81491 (Incorrectly using libsodium for argon2 hashing).
     (Dan Pock)
