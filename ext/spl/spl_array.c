@@ -964,7 +964,7 @@ static int spl_array_check_if_delete(HashTable *ht) /* {{{ */
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
 
 	while (iter != end) {
-		/* The iterator has updated position, so the current position is valid. */
+		/* The iterator has unset value in foreach, so the current position is valid. */
 		if (iter->ht == ht && iter->is_delete == 1) {
 			result = SUCCESS;
 			iter->is_delete = 0;
