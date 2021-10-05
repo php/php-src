@@ -1464,6 +1464,7 @@ PHP_METHOD(ArrayIterator, next)
 		RETURN_THROWS();
 	}
 
+	zend_hash_remove_is_delete(aht);
 	spl_array_next_ex(intern, aht);
 }
 /* }}} */
