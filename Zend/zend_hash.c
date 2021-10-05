@@ -617,13 +617,8 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
 
 	while (iter != end) {
-		if (iter->ht == ht) {
-			if (iter->pos == from) {
-				iter->has_updated_iterator = 1;
-				iter->pos = to;
-			} else {
-				iter->has_updated_iterator = 0;
-			}
+		if (iter->ht == ht && iter->pos == from) {
+			iter->pos = to;
 		}
 		iter++;
 	}
@@ -1341,6 +1336,7 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 		if (ht->nInternalPointer == idx) {
 			ht->nInternalPointer = new_idx;
 		}
+		zend_hash_set_is_delete(ht, idx, new_idx);
 		zend_hash_iterators_update(ht, idx, new_idx);
 	}
 	if (ht->nNumUsed - 1 == idx) {
@@ -2885,4 +2881,55 @@ convert:
 
 		return new_ht;
 	}
+}
+
+static zend_always_inline void zend_hash_set_is_delete(HashTable *ht, HashPosition from, HashPosition to)
+{
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+		while (iter != end) {
+			if (iter->ht == ht && iter->pos == from) {
+				iter->is_delete = 1;
+			}
+			iter++;
+		}
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_remove_is_delete(HashTable *ht)
+{
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+		while (iter != end) {
+			if (iter->ht == ht) {
+				iter->is_delete = 0;
+			}
+			iter++;
+		}
+	}
+}
+
+ZEND_API int ZEND_FASTCALL zend_hash_check_if_delete(HashTable *ht) /* {{{ */
+{
+	int result = FAILURE;
+
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+		while (iter != end) {
+			/* The iterator has updated position, so the current position is valid. */
+			if (iter->ht == ht && iter->is_delete == 1) {
+				result = SUCCESS;
+				iter->is_delete = 0;
+			}
+			iter++;
+		}
+	}
+
+	return result;
 }
