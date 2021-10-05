@@ -1,5 +1,5 @@
 --TEST--
-Bug #74093 (Maximum execution time of n+2 seconds exceed not written in error_log)
+Bug #74093 (Maximum execution time exceeded not written in error_log)
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -12,9 +12,9 @@ max_execution_time=1
 hard_timeout=1
 --FILE--
 <?php
-$a1 = range(1, 1000000);
-$a2 = range(100000, 1999999);
-array_intersect($a1, $a2);
+$start = time();
+while (time() - $start < 5);
+die("Failed to interrupt execution");
 ?>
 --EXPECTF--
-Fatal error: Maximum execution time of 1+1 seconds exceeded %s
+Fatal error: Maximum execution time of 1 second exceeded in %s
