@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     Doleček)
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
+- Date:
+  . Fixed bug #81504 (Incorrect timezone transition details for POSIX data).
+    (Derick)
+
 - PCRE:
   . Unfixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 

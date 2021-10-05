@@ -3620,6 +3620,15 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
+#define add_by_index(i,ts) \
+		array_init(&element); \
+		add_assoc_long(&element, "ts",     ts); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[i].offset); \
+		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[i].isdst); \
+		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
+		add_next_index_zval(return_value, &element);
+
 #define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
@@ -3685,7 +3694,7 @@ PHP_FUNCTION(timezone_transitions_get)
 					if (transitions.times[j] > timestamp_end) {
 						return;
 					}
-					add(transitions.types[j], transitions.times[j]);
+					add_by_index(transitions.types[j], transitions.times[j]);
 				}
 			}
 		}
