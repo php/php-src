@@ -1336,6 +1336,8 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 		if (ht->nInternalPointer == idx) {
 			ht->nInternalPointer = new_idx;
 		}
+		/* I don't want to use function zend_hash_iterators_update() to set iter->is_delete
+		 * because zend_hash_iterators_update() was used in many place. */
 		zend_hash_set_is_delete(ht, idx, new_idx);
 		zend_hash_iterators_update(ht, idx, new_idx);
 	}
@@ -2915,7 +2917,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_remove_is_delete(HashTable *ht)
 
 ZEND_API zend_result ZEND_FASTCALL zend_hash_check_if_delete(HashTable *ht) /* {{{ */
 {
-	int result = FAILURE;
+	zend_result result = FAILURE;
 
 	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 		HashTableIterator *iter = EG(ht_iterators);
