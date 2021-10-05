@@ -957,12 +957,31 @@ static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key) 
 }
 /* }}} */
 
+static int spl_array_check_if_delete(HashTable *ht) /* {{{ */
+{
+	int result = FAILURE;
+	HashTableIterator *iter = EG(ht_iterators);
+	HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+	while (iter != end) {
+		/* The iterator has updated position, so the current position is valid. */
+		if (iter->ht == ht && iter->is_delete == 1) {
+			result = SUCCESS;
+			iter->is_delete = 0;
+		}
+		iter++;
+	}
+
+	return result;
+}
+/* }}} */
+
 static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
 	HashTable *aht = spl_array_get_hash_table(object);
 
-	if (zend_hash_check_if_delete(aht) != SUCCESS) {
+	if (spl_array_check_if_delete(aht) != SUCCESS) {
 		spl_array_next_ex(object, aht);
 	} else {
 		/* execute the common part */

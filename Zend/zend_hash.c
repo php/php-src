@@ -2914,24 +2914,3 @@ ZEND_API void ZEND_FASTCALL zend_hash_remove_is_delete(HashTable *ht)
 		}
 	}
 }
-
-ZEND_API zend_result ZEND_FASTCALL zend_hash_check_if_delete(HashTable *ht) /* {{{ */
-{
-	zend_result result = FAILURE;
-
-	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		HashTableIterator *iter = EG(ht_iterators);
-		HashTableIterator *end  = iter + EG(ht_iterators_used);
-
-		while (iter != end) {
-			/* The iterator has updated position, so the current position is valid. */
-			if (iter->ht == ht && iter->is_delete == 1) {
-				result = SUCCESS;
-				iter->is_delete = 0;
-			}
-			iter++;
-		}
-	}
-
-	return result;
-}
