@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0RC4
 
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+
 - Core:
   . Fixed bug #75941 (Fix compile failure on Solaris with clang). (Jaromír
     Doleček)
