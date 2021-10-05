@@ -29,9 +29,6 @@ PHP                                                                        NEWS
   . Fixed bug #81472 (Cannot support large linux major/minor device number when
     read /proc/self/maps). (Lin Yang)
 
-- PCRE:
-  . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
-
 - Reflection:
   . ReflectionAttribute is no longer final. (sasezaki)
 
