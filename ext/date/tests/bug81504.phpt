@@ -1,5 +1,7 @@
 --TEST--
 Bug #81504: Incorrect timezone transition details for POSIX data
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 
