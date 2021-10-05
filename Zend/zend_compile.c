@@ -8510,7 +8510,20 @@ void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	zend_emit_op_tmp(result, ZEND_COALESCE, &var_node_is, NULL);
 
 	CG(memoize_mode) = ZEND_MEMOIZE_NONE;
-	zend_compile_expr(&default_node, default_ast);
+	if (var_ast->kind == ZEND_AST_DIM
+	 && zend_is_assign_to_self(var_ast, default_ast)
+	 && !is_this_fetch(default_ast)) {
+		/* $a[0] = $a should evaluate the right $a first */
+		znode cv_node;
+
+		if (zend_try_compile_cv(&cv_node, default_ast) == FAILURE) {
+			zend_compile_simple_var_no_cv(&default_node, default_ast, BP_VAR_R, 0);
+		} else {
+			zend_emit_op_tmp(&default_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+		}
+	} else {
+		zend_compile_expr(&default_node, default_ast);
+	}
 
 	CG(memoize_mode) = ZEND_MEMOIZE_FETCH;
 	zend_compile_var(&var_node_w, var_ast, BP_VAR_W, 0);
