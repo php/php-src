@@ -12505,6 +12505,7 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 	bool needs_slow_path = 0;
 	bool use_prop_guard = 0;
 	bool may_throw = 0;
+	uint32_t res_info = (opline->result_type != IS_UNDEF) ? RES_INFO() : 0;
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
 	ZEND_ASSERT(op1_info & MAY_BE_OBJECT);
@@ -12820,9 +12821,21 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, TMP1w, TMP2
 				}
 			}
-			|	b >4
-			|.code
-			|4:
+			if (opline->result_type != IS_UNUSED
+			 && (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ)
+			 && (res_info & MAY_BE_GUARD)
+			 && (res_info & MAY_BE_LONG)) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+				ssa->var_info[ssa_op->result_def].type = res_info & ~MAY_BE_GUARD;
+				|	b &exit_addr
+				|.code
+			} else {
+				|	b >4
+				|.code
+				|4:
+			}
 		}
 	}
 
