@@ -73,7 +73,7 @@ typedef struct _zend_optimizer_ctx {
 
 static inline bool zend_optimizer_is_loop_var_free(const zend_op *opline) {
 	return (opline->opcode == ZEND_FE_FREE && opline->extended_value != ZEND_FREE_ON_RETURN)
-		|| (opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH);
+		|| (opline->opcode == ZEND_FREE && opline->extended_value & (ZEND_FREE_SWITCH|ZEND_FREE_MATCH));
 }
 
 int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);

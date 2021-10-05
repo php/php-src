@@ -5728,7 +5728,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
-		opline->extended_value = ZEND_FREE_SWITCH;
+		opline->extended_value = ZEND_FREE_MATCH;
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_ptr_dtor_nogc(&expr_node.u.constant);
 	}

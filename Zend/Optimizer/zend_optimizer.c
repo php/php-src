@@ -619,7 +619,7 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 								opline->op1.constant = zend_optimizer_add_literal(op_array, &v);
 								opline->op1_type = IS_CONST;
 							} else if (opline->opcode == ZEND_FREE) {
-								if (opline->extended_value == ZEND_FREE_SWITCH) {
+								if (opline->extended_value & (ZEND_FREE_SWITCH|ZEND_FREE_MATCH)) {
 									/* We found the end of the switch. */
 									MAKE_NOP(opline);
 									break;
