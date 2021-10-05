@@ -1317,8 +1317,12 @@ static zend_always_inline void zend_hash_set_is_delete(HashTable *ht, HashPositi
 		HashTableIterator *end  = iter + EG(ht_iterators_used);
 
 		while (iter != end) {
-			if (iter->ht == ht && iter->pos == from) {
-				iter->is_delete = 1;
+			if (iter->ht == ht) {
+				if (iter->pos == from) {
+					iter->is_delete = 1;
+				} else {
+					iter->is_delete = 0;
+				}
 			}
 			iter++;
 		}
