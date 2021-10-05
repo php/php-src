@@ -14973,29 +14973,33 @@ static bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *opline,
 			needs_slow_check = 0;
 		} else if (is_power_of_two(type_mask)) {
 			uint32_t type_code = concrete_type(type_mask);
-			|	IF_NOT_ZVAL_TYPE op1_addr, type_code, >7
+			|	IF_NOT_ZVAL_TYPE op1_addr, type_code, >6
 		} else {
 			|	mov edx, 1
 			|	GET_ZVAL_TYPE cl, op1_addr
 			|	shl edx, cl
 			|	test edx, type_mask
-			|	je >7
+			|	je >6
 		}
 	}
 	if (needs_slow_check) {
 		if (slow_check_in_cold) {
 			|.cold_code
-			|7:
+			|6:
 		}
 		|	SET_EX_OPLINE opline, r1
 		if (op1_info & MAY_BE_UNDEF) {
-			|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >8
+			|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >7
 			|	mov FCARG1a, opline->op1.var
 			|	EXT_CALL zend_jit_undefined_op_helper, FCARG2a
-			|	LOAD_ADDR_ZTS r0, executor_globals, uninitialized_zval
+			|	test r0, r0
+			|	jz ->exception_handler
+			|	LOAD_ADDR_ZTS FCARG1a, executor_globals, uninitialized_zval
+			|	jmp >8
 		}
-		|8:
+		|7:
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
+		|8:
 		|	mov FCARG2a, EX->func
 		|.if X64
 			|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
