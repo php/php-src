@@ -1542,7 +1542,8 @@ try_again:
 ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
-	const zend_op *opline = EG(current_execute_data)->opline;
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
 	uint32_t var;
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
