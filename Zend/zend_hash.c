@@ -2903,18 +2903,3 @@ convert:
 		return new_ht;
 	}
 }
-
-ZEND_API void ZEND_FASTCALL zend_hash_remove_is_delete(HashTable *ht)
-{
-	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		HashTableIterator *iter = EG(ht_iterators);
-		HashTableIterator *end  = iter + EG(ht_iterators_used);
-
-		while (iter != end) {
-			if (iter->ht == ht) {
-				iter->is_delete = 0;
-			}
-			iter++;
-		}
-	}
-}
