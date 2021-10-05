@@ -363,9 +363,7 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 				case ZEND_PRE_INC_OBJ:
-				case ZEND_POST_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
-				case ZEND_POST_DEC_OBJ:
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
 				case ZEND_DO_FCALL_BY_NAME:
