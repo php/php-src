@@ -22427,9 +22427,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = RT_CONSTANT(opline, opline->op2);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -22444,6 +22443,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = RT_CONSTANT(opline, opline->op2);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -24980,9 +24980,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -24997,6 +24996,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -27171,9 +27171,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = NULL;
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = NULL;
 			if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -27188,6 +27187,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = NULL;
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -28910,9 +28910,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 			if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -28927,6 +28926,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -39516,9 +39516,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = RT_CONSTANT(opline, opline->op2);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -39533,6 +39532,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = RT_CONSTANT(opline, opline->op2);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -43148,9 +43148,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -43165,6 +43164,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -45915,9 +45915,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = NULL;
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = NULL;
 			if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -45932,6 +45931,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = NULL;
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -48183,9 +48183,8 @@ assign_dim_op_new_array:
 			}
 		}
 
-		dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 			if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
@@ -48200,6 +48199,7 @@ assign_dim_op_new_array:
 			ZVAL_ARR(container, zend_new_array(8));
 			goto assign_dim_op_new_array;
 		} else {
+			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
 assign_dim_op_ret_null:
 			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
