@@ -1892,6 +1892,15 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 		/* Eliminate NOPs */
 		for (b = blocks; b < end; b++) {
+			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
+				/* In unreachable_free blocks only preserve loop var frees. */
+				for (uint32_t i = b->start; i < b->start + b->len; i++) {
+					zend_op *opline = &op_array->opcodes[i];
+					if (!zend_optimizer_is_loop_var_free(opline)) {
+						MAKE_NOP(opline);
+					}
+				}
+			}
 			if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 				strip_nops(op_array, b);
 			}
