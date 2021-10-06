@@ -90,15 +90,15 @@ Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 B
 C|parent::who
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["C", "parent::who"] are deprecated in %s on line %d
 B
 B|parent::who
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["B", "parent::who"] are deprecated in %s on line %d
 A
 E|parent::who
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["E", "parent::who"] are deprecated in %s on line %d
 D
 A|who
 A
@@ -113,11 +113,11 @@ Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 O
 P|parent::who
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["P", "parent::who"] are deprecated in %s on line %d
 O
 $this|O::who
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["P", "O::who"] are deprecated in %s on line %d
 O
 $this|B::who
 call_user_func(): Argument #1 ($callback) must be a valid callback, class P is not a subclass of B

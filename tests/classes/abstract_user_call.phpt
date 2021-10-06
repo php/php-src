@@ -30,5 +30,5 @@ try {
 --EXPECTF--
 test::func()
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["test", "test_base::func"] are deprecated in %s on line %d
 call_user_func(): Argument #1 ($callback) must be a valid callback, cannot call abstract method test_base::func()

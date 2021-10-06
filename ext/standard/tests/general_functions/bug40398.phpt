@@ -74,10 +74,10 @@ new Derived_6('6');
 
 ?>
 --EXPECTF--
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["Derived_1", "Base::__construct"] are deprecated in %s on line %d
 Base::__construct(1)
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["Derived_2", "parent::__construct"] are deprecated in %s on line %d
 Base::__construct(2)
 Base::__construct(3)
 

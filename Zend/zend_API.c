@@ -3494,7 +3494,8 @@ static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval
 		}
 		if (ce_org && error) {
 			zend_error(E_DEPRECATED,
-				"Callables of the form [\"C1\", \"C2::method\"] are deprecated");
+				"Callables of the form [\"%s\", \"%s\"] are deprecated",
+				ZSTR_VAL(ce_org->name), Z_STRVAL_P(callable));
 		}
 		mname = zend_string_init(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
 	} else if (ce_org) {

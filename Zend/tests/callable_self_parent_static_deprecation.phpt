@@ -54,13 +54,13 @@ Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 
 Deprecated: Use of "static" in callables is deprecated in %s on line %d
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["B", "self::foo"] are deprecated in %s on line %d
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["B", "parent::foo"] are deprecated in %s on line %d
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["B", "static::foo"] are deprecated in %s on line %d
 
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["B", "A::foo"] are deprecated in %s on line %d
 Test array_map()
 
 Deprecated: Use of "self" in callables is deprecated in %s on line %d

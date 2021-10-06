@@ -31,5 +31,5 @@ $c->callFuncInParent('Which function will be called??');
 
 ?>
 --EXPECTF--
-Deprecated: Callables of the form ["C1", "C2::method"] are deprecated in %s on line %d
+Deprecated: Callables of the form ["C", "parent::func"] are deprecated in %s on line %d
 B::func called
