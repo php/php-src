@@ -26,7 +26,7 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	if (Size > 7 * 1024) {
+	if (Size > 6 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance and may cause stack overflows,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
