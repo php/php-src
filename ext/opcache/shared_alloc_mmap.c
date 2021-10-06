@@ -156,6 +156,15 @@ static void *find_prefered_mmap_base(size_t requested_size)
 
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
+#ifdef MADV_HUGEPAGE
+	/**
+	 * Enable transparent huge pages (MADV_HUGEPAGE)?  This flag
+	 * is cleared when regular huge pages (MAP_HUGETLB) have been
+	 * allocated successfully.
+	 */
+	bool thp = true;
+#endif
+
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
 	void *p;
@@ -220,6 +229,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
+#ifdef MADV_HUGEPAGE
+				thp = false;
+#endif
 				goto success;
 			} else {
 				p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
@@ -231,6 +243,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 # endif
 		p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, fd, 0);
 		if (p != MAP_FAILED) {
+#ifdef MADV_HUGEPAGE
+			thp = false;
+#endif
 			goto success;
 		}
 	}
@@ -248,6 +263,13 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	}
 
 success: ZEND_ATTRIBUTE_UNUSED;
+
+#ifdef MADV_HUGEPAGE
+	if (thp) {
+		madvise(p, requested_size, MADV_HUGEPAGE);
+	}
+#endif
+
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment) + sizeof(void *));
 	if (!*shared_segments_p) {
