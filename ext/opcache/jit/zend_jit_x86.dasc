@@ -5924,6 +5924,9 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|.cold_code
 					|1:
 				}
+				if (Z_REG(val_addr) == ZREG_R2) {
+					|	mov aword T1, r2 // save
+				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 				|	GET_ZVAL_PTR r2, val_addr
 				|	GC_DELREF r2
@@ -5947,6 +5950,9 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|	IF_NOT_REFCOUNTED dh, >2
 					|	GC_ADDREF Ra(tmp_reg)
 					|2:
+				}
+				if (Z_REG(val_addr) == ZREG_R2) {
+					|	mov r2, aword T1 // restore
 				}
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
