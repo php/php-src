@@ -12823,6 +12823,8 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			}
 			if (opline->result_type != IS_UNUSED
 			 && (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ)
+			 && prop_info
+			 && !ZEND_TYPE_IS_SET(prop_info->type)
 			 && (res_info & MAY_BE_GUARD)
 			 && (res_info & MAY_BE_LONG)) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
