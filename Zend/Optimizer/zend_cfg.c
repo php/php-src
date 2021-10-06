@@ -437,9 +437,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_FE_FREE:
 				if (zend_optimizer_is_loop_var_free(opline)) {
 					BB_START(i);
-					if (i + 1 < op_array->last) {
-						BB_START(i + 1);
-					}
 					flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				}
 				break;
