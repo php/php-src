@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81472 (Cannot support large linux major/minor device number when
     read /proc/self/maps). (Lin Yang)
+  . Fixed bug #81512 (Unexpected behavior with arrays and JIT). (Dmitry)
 
 - Reflection:
   . ReflectionAttribute is no longer final. (sasezaki)
