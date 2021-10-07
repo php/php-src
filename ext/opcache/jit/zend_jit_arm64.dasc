@@ -5461,6 +5461,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL && Z_REG(val_addr) == ZREG_FP);
 			|	LOAD_32BIT_VAL FCARG1w, Z_OFFSET(val_addr)
 			|	EXT_CALL zend_jit_undefined_op_helper, REG0
+			|	cbz RETVALx, ->exception_handler_undef
 			if (save_r1) {
 				|	ldr FCARG1x, T1	// restore
 			}
