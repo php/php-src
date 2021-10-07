@@ -5949,6 +5949,8 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL && Z_REG(val_addr) == ZREG_FP);
 			|	mov FCARG1d, Z_OFFSET(val_addr)
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
+			|	test r0, r0
+			|	jz ->exception_handler_undef
 			if (save_r1) {
 				|	mov FCARG1a, aword T1 // restore
 			}
