@@ -288,7 +288,7 @@ PHPAPI uint32_t php_mt_rand(void)
 /* }}} */
 
 /* {{{ php_random_bytes */
-PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
+PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
@@ -398,7 +398,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 /* }}} */
 
 /* {{{ php_random_int */
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
+PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw)
 {
 	zend_ulong umax;
 	zend_ulong trial;
