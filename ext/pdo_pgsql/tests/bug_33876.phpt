@@ -45,7 +45,7 @@ else
 # Expected to fail; unless told otherwise, PDO assumes string inputs
 # false -> "" as string, which pgsql doesn't like
 if (!$res->execute(array(false)))
-	print_r($res->errorInfo());
+    print_r(normalizeErrorInfo($res->errorInfo()));
 else
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
 
@@ -81,13 +81,18 @@ else
 # Expected to fail; unless told otherwise, PDO assumes string inputs
 # false -> "" as string, which pgsql doesn't like
 if (!$res->execute(array(false))) {
-	$err = $res->errorInfo();
-	// Strip additional lines outputted by recent PgSQL versions
-	$err[2] = trim(current(explode("\n", $err[2])));
-	print_r($err);
+    print_r(normalizeErrorInfo($res->errorInfo()));
 } else {
 	print_r($res->fetchAll(PDO::FETCH_ASSOC));
 }
+
+function normalizeErrorInfo(array $err): array {
+    // Strip additional lines outputted by recent PgSQL versions
+    $err[2] = trim(current(explode("\n", $err[2])));
+    return $err;
+}
+
+?>
 --EXPECTF--
 Array
 (
