@@ -1536,7 +1536,7 @@ PHP_FUNCTION(pg_last_notice)
 			zend_argument_value_error(2, "must be one of PGSQL_NOTICE_LAST, PGSQL_NOTICE_ALL, or PGSQL_NOTICE_CLEAR");
 			RETURN_THROWS();
 	}
-	RETURN_FALSE;
+	ZEND_UNREACHABLE();
 }
 
 static inline bool is_valid_oid_string(zend_string *oid, Oid *return_oid)
