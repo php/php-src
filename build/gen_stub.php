@@ -458,6 +458,10 @@ class ArgInfo {
                 return "&{$this->defaultValue};";
         }
 
+        if (preg_match("/^\s*['\"].*['\"]\s*$/", $this->defaultValue)) {
+            return str_replace('\\\\', '\\', $this->defaultValue);
+        }
+
         return $this->defaultValue;
     }
 }
