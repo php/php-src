@@ -77,7 +77,7 @@ function socket_sendto(Socket $socket, string $data, int $length, int $flags, st
 function socket_get_option(Socket $socket, int $level, int $option): array|int|false {}
 
 /**
- * @return array<string, int>|int|false
+ * @return array<string, mixed>|int|false
  * @alias socket_get_option
  */
 function socket_getopt(Socket $socket, int $level, int $option): array|int|false {}
