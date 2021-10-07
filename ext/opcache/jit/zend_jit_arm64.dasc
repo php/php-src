@@ -11608,6 +11608,7 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 				if (op2_info & MAY_BE_ANY) {
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1, ZREG_TMP1
 				}
+				|	SET_EX_OPLINE opline, REG0
 				|	LOAD_32BIT_VAL FCARG1w, opline->op2.var
 				|	EXT_CALL zend_jit_undefined_op_helper, REG0
 				|1:
