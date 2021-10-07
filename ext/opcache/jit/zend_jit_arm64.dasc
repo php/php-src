@@ -14765,10 +14765,20 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			op1_info = OP1_INFO();
 			return (opline->op1_type & (IS_CV|IS_CONST))
 				&& (op1_info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) == MAY_BE_ARRAY;
-		case ZEND_BOOL:
-		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
+			if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE) {
+				if (!ssa->cfg.map) {
+					return 0;
+				}
+				if (opline > op_array->opcodes + ssa->cfg.blocks[ssa->cfg.map[opline-op_array->opcodes]].start &&
+				    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+					return 0;
+				}
+			}
+			ZEND_FALLTHROUGH;
+		case ZEND_BOOL:
+		case ZEND_BOOL_NOT:
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:

@@ -1769,13 +1769,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
-					if (/*opline > op_array->opcodes + ssa->cfg.blocks[b].start && ??? */
-					    opline->op1_type == IS_TMP_VAR &&
-					    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-						/* smart branch */
-						break;
-					}
-					ZEND_FALLTHROUGH;
 				case ZEND_JMPZNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
@@ -5211,13 +5204,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
-						if (/*opline > op_array->opcodes + ssa->cfg.blocks[b].start && ??? */
-						    opline->op1_type == IS_TMP_VAR &&
-						    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
-							/* smart branch */
-							break;
-						}
-						ZEND_FALLTHROUGH;
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
