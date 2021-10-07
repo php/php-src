@@ -2367,12 +2367,14 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 
 static void ZEND_FASTCALL zend_jit_pre_inc_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
+	ZVAL_DEREF(var_ptr);
 	zend_jit_inc_typed_prop(var_ptr, prop_info);
 	ZVAL_COPY(result, var_ptr);
 }
 
 static void ZEND_FASTCALL zend_jit_pre_dec_typed_prop(zval *var_ptr, zend_property_info *prop_info, zval *result)
 {
+	ZVAL_DEREF(var_ptr);
 	zend_jit_dec_typed_prop(var_ptr, prop_info);
 	ZVAL_COPY(result, var_ptr);
 }
