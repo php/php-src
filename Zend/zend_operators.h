@@ -222,7 +222,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 	}
 
 	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
-		if (*e == (const unsigned char)c) {
+		if (*e == (unsigned char)c) {
 			return (const void *)e;
 		}
 	}
@@ -433,18 +433,28 @@ ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
 
+ZEND_API extern const unsigned char zend_tolower_map[256];
+ZEND_API extern const unsigned char zend_toupper_map[256];
+
+#define zend_tolower_ascii(c) (zend_tolower_map[(unsigned char)(c)])
+#define zend_toupper_ascii(c) (zend_toupper_map[(unsigned char)(c)])
+
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
+ZEND_API void         ZEND_FASTCALL zend_str_toupper(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_copy(char *dest, const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup(const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_dup(const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, size_t length);
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent);
+ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, bool persistent);
 
 #define zend_string_tolower(str) zend_string_tolower_ex(str, 0)
+#define zend_string_toupper(str) zend_string_toupper_ex(str, 0)
 
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strcasecmp(zval *s1, zval *s2);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int ZEND_FASTCALL zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);

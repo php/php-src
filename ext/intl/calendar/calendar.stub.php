@@ -220,6 +220,7 @@ class IntlCalendar
     /**
      * @param int|bool $value
      * @alias intlcal_roll
+     * @tentative-return-type
      */
     public function roll(int $field, $value): bool {}
 

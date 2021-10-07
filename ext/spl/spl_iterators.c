@@ -460,20 +460,18 @@ static const zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 
 static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce, zval *zobject, int by_ref)
 {
-	spl_recursive_it_iterator *iterator;
-	spl_recursive_it_object *object;
-
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
-	iterator = emalloc(sizeof(spl_recursive_it_iterator));
-	object   = Z_SPLRECURSIVE_IT_P(zobject);
+
+	spl_recursive_it_object *object = Z_SPLRECURSIVE_IT_P(zobject);
 	if (object->iterators == NULL) {
 		zend_throw_error(NULL, "Object is not initialized");
 		return NULL;
 	}
 
+	spl_recursive_it_iterator *iterator = emalloc(sizeof(spl_recursive_it_iterator));
 	zend_iterator_init((zend_object_iterator*)iterator);
 
 	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(zobject));

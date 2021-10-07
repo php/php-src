@@ -73,7 +73,7 @@ static zend_always_inline void union_find_unite(int *parent, int *size, int i, i
 }
 /* }}} */
 
-static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+static zend_result zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -147,7 +147,7 @@ static int zend_build_equi_escape_sets(int *parent, zend_op_array *op_array, zen
 }
 /* }}} */
 
-static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
 	zend_ssa_op *ssa_op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
@@ -212,7 +212,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 }
 /* }}} */
 
-static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
+static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var, const zend_script *script) /* {{{ */
 {
 	zend_ssa_op *op = ssa->ops + def;
 	zend_op *opline = op_array->opcodes + def;
@@ -256,7 +256,7 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 }
 /* }}} */
 
-static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var) /* {{{ */
+static bool is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int var) /* {{{ */
 {
 	zend_ssa_op *ssa_op = ssa->ops + use;
 	zend_op *opline = op_array->opcodes + use;
@@ -367,7 +367,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 }
 /* }}} */
 
-int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars = ssa->vars;
 	int ssa_vars_count = ssa->vars_count;
@@ -401,7 +401,7 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 		return FAILURE;
 	}
 
-	if (zend_build_equi_escape_sets(ees, op_array, ssa) != SUCCESS) {
+	if (zend_build_equi_escape_sets(ees, op_array, ssa) == FAILURE) {
 		return FAILURE;
 	}
 

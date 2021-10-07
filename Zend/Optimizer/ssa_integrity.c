@@ -108,10 +108,11 @@ static inline bool is_var_type(zend_uchar type) {
 #define INSTR(i) \
 	(i), (zend_get_opcode_name(op_array->opcodes[i].opcode))
 
-int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *extra) {
+void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *extra) {
 	zend_cfg *cfg = &ssa->cfg;
 	zend_ssa_phi *phi;
-	int i, status = SUCCESS;
+	int i;
+	zend_result status = SUCCESS;
 
 	/* Vars */
 	for (i = 0; i < ssa->vars_count; i++) {
@@ -146,7 +147,7 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 		FOREACH_USE(var, use) {
 			if (++c > 10000) {
 				FAIL("cycle in uses of " VARFMT "\n", VAR(i));
-				return status;
+				goto finish;
 			}
 			if (!is_used_by_op(ssa, use, i)) {
 				fprintf(stderr, "var " VARFMT " not in uses of op %d\n", VAR(i), use);
@@ -157,7 +158,7 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 		FOREACH_PHI_USE(var, phi) {
 			if (++c > 10000) {
 				FAIL("cycle in phi uses of " VARFMT "\n", VAR(i));
-				return status;
+				goto finish;
 			}
 			if (!is_in_phi_sources(ssa, phi, i)) {
 				FAIL("var " VARFMT " not in phi sources of %d\n", VAR(i), phi->ssa_var);
@@ -374,5 +375,9 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 		}
 	}
 
-	return status;
+finish:
+	if (status == FAILURE) {
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "at SSA integrity verification", ssa);
+		ZEND_ASSERT(0 && "SSA integrity verification failed");
+	}
 }

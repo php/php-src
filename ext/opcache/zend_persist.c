@@ -1278,6 +1278,20 @@ zend_error_info **zend_persist_warnings(uint32_t num_warnings, zend_error_info *
 	return warnings;
 }
 
+static zend_early_binding *zend_persist_early_bindings(
+		uint32_t num_early_bindings, zend_early_binding *early_bindings) {
+	if (early_bindings) {
+		early_bindings = zend_shared_memdup_free(
+			early_bindings, num_early_bindings * sizeof(zend_early_binding));
+		for (uint32_t i = 0; i < num_early_bindings; i++) {
+			zend_accel_store_interned_string(early_bindings[i].lcname);
+			zend_accel_store_interned_string(early_bindings[i].rtd_key);
+			zend_accel_store_interned_string(early_bindings[i].lc_parent_name);
+		}
+	}
+	return early_bindings;
+}
+
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
 {
 	Bucket *p;
@@ -1332,6 +1346,8 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #endif
 	}
 	script->warnings = zend_persist_warnings(script->num_warnings, script->warnings);
+	script->early_bindings = zend_persist_early_bindings(
+		script->num_early_bindings, script->early_bindings);
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);

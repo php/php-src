@@ -88,7 +88,7 @@ class Status
         if ($startTimeTimestamp && $fields['start time'][0] === '\\') {
             $fields['start time'] = '\d+';
         }
-        $pattern = '|' . $header;
+        $pattern = '(' . $header;
         foreach ($fields as $name => $value) {
             if ($nameTransformer) {
                 $name = call_user_func($nameTransformer, $name);
@@ -103,7 +103,7 @@ class Status
             }
         }
         $pattern = rtrim($pattern, $rowPattern[strlen($rowPattern) - 1]);
-        $pattern .= $footer . '|';
+        $pattern .= $footer . ')';
 
         if (!preg_match($pattern, $body)) {
             echo "ERROR: Expected body does not match pattern\n";
@@ -206,7 +206,7 @@ class Status
      */
     protected function checkStatusOpenmetrics(string $body, array $fields)
     {
-        $pattern = "|# HELP phpfpm_up Could pool " . $fields['pool'] . " using a " . $fields['process manager'] . " PM on PHP-FPM be reached\?\n" .
+        $pattern = "(# HELP phpfpm_up Could pool " . $fields['pool'] . " using a " . $fields['process manager'] . " PM on PHP-FPM be reached\?\n" .
             "# TYPE phpfpm_up gauge\n" .
             "phpfpm_up 1\n" .
             "# HELP phpfpm_start_since The number of seconds since FPM has started\.\n" .
@@ -241,7 +241,7 @@ class Status
             "phpfpm_max_children_reached " . $fields['max children reached'] . "\n" .
             "# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value\.\n" .
             "# TYPE phpfpm_slow_requests counter\n" .
-            "phpfpm_slow_requests " . $fields['slow requests'] . "|";
+            "phpfpm_slow_requests " . $fields['slow requests'] . ")";
 
         if (!preg_match($pattern, $body)) {
             echo "ERROR: Expected body does not match pattern\n";

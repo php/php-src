@@ -8,6 +8,8 @@ opcache.opt_debug_level=0x20000
 opcache.preload=
 --EXTENSIONS--
 opcache
+--XFAIL--
+Return types cannot be inferred through prototypes
 --FILE--
 <?php
 

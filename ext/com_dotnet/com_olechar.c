@@ -67,36 +67,31 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(const char *string, size
 	return olestring;
 }
 
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t *string_len, int codepage)
+PHP_COM_DOTNET_API zend_string *php_com_olestring_to_string(OLECHAR *olestring, int codepage)
 {
-	char *string;
+	zend_string *string;
 	uint32_t length = 0;
-	BOOL ok;
 
 	length = WideCharToMultiByte(codepage, 0, olestring, -1, NULL, 0, NULL, NULL);
 
 	if (length) {
-		string = (char*)safe_emalloc(length, sizeof(char), 0);
-		length = WideCharToMultiByte(codepage, 0, olestring, -1, string, length, NULL, NULL);
-		ok = length > 0;
+		/* We remove 1 from the length as it takes into account the terminating null byte
+		 * which zend_string alloc already takes into consideration */
+		/* TODO Should use safe alloc? */
+		string = zend_string_alloc(length - 1, /* persistent */ false);
+		length = WideCharToMultiByte(codepage, 0, olestring, -1, ZSTR_VAL(string), length, NULL, NULL);
 	} else {
-		string = (char*)emalloc(sizeof(char));
-		*string = '\0';
-		ok = FALSE;
-		length = 0;
+		string = ZSTR_EMPTY_ALLOC();
 	}
 
-	if (!ok) {
+	/* Failure to determine length of WideChar */
+	if (length == 0) {
 		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);
 
 		php_win32_error_msg_free(msg);
-	}
-
-	if (string_len) {
-		*string_len = length-1;
 	}
 
 	return string;

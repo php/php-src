@@ -38,6 +38,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_observe_all;
 	int observer_observe_includes;
 	int observer_observe_functions;
+	zend_array *observer_observe_function_names;
 	int observer_show_return_type;
 	int observer_show_return_value;
 	int observer_show_init_backtrace;

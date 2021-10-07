@@ -696,7 +696,7 @@ final class ReflectionReference
 }
 
 /** @not-serializable */
-final class ReflectionAttribute implements Reflector
+class ReflectionAttribute implements Reflector
 {
     public function getName(): string {}
     public function getTarget(): int {}
@@ -711,7 +711,7 @@ final class ReflectionAttribute implements Reflector
     private function __construct() {}
 }
 
-final class ReflectionEnum extends ReflectionClass
+class ReflectionEnum extends ReflectionClass
 {
     public function __construct(object|string $objectOrClass) {}
 
@@ -739,7 +739,7 @@ class ReflectionEnumUnitCase extends ReflectionClassConstant
     public function getValue(): UnitEnum {}
 }
 
-final class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
+class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
 {
     public function __construct(object|string $class, string $constant) {}
 

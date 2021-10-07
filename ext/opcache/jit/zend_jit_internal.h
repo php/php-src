@@ -438,6 +438,7 @@ typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_VM,
 	ZEND_JIT_TRACE_OP1_TYPE,
 	ZEND_JIT_TRACE_OP2_TYPE,
+	ZEND_JIT_TRACE_VAL_INFO,
 	ZEND_JIT_TRACE_INIT_CALL,
 	ZEND_JIT_TRACE_DO_ICALL,
 	ZEND_JIT_TRACE_ENTER,
@@ -450,6 +451,8 @@ typedef enum _zend_jit_trace_op {
 #define IS_TRACE_PACKED    (1<<4)
 #define IS_TRACE_REFERENCE (1<<5)
 #define IS_TRACE_INDIRECT  (1<<6)
+
+#define IS_TRACE_TYPE_MASK 0xf
 
 #define ZEND_JIT_TRACE_FAKE_INIT_CALL    0x00000100
 #define ZEND_JIT_TRACE_RETURN_VALUE_USED 0x00000100
@@ -590,6 +593,7 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
 	const zend_op              *call_opline;
+	zend_class_entry           *ce;          /* $this */
 	uint32_t                    call_level;
 	uint32_t                    _info;
 	int                         used_stack;
@@ -608,6 +612,7 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_THIS_CHECKED         0x00000020
 #define TRACE_FRAME_MASK_UNKNOWN_RETURN       0x00000040
 #define TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS 0x00000080
+#define TRACE_FRAME_MASK_THIS_CLASS_CHECKED   0x00000100
 
 
 #define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \
@@ -641,6 +646,8 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_UNKNOWN_RETURN)
 #define TRACE_FRAME_NO_NEED_RELEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS)
+#define TRACE_FRAME_IS_THIS_CLASS_CHECKED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_THIS_CLASS_CHECKED)
 
 #define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
 		(frame)->_info |= (0xffffu << TRACE_FRAME_SHIFT_NUM_ARGS); \
@@ -673,6 +680,9 @@ struct _zend_jit_trace_stack_frame {
 	} while (0)
 #define TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(frame) do { \
 		(frame)->_info |= TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS; \
+	} while (0)
+#define TRACE_FRAME_SET_THIS_CLASS_CHECKED(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_THIS_CLASS_CHECKED; \
 	} while (0)
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_trace_helper(ZEND_OPCODE_HANDLER_ARGS);

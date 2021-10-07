@@ -118,8 +118,6 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_charset_max
 };
 
-typedef enum mbfl_no_encoding mbfl_encoding_id;
-
 struct _mbfl_convert_filter;
 struct mbfl_convert_vtbl {
 	enum mbfl_no_encoding from;

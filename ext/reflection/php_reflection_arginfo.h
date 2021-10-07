@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2316b7245c77ca2a5dd8baef53002c890eab162e */
+ * Stub hash: 0b5887f75bd4ff4935aaa5bbdbe1c18f970525c2 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1452,7 +1452,7 @@ static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *cl
 
 	INIT_CLASS_ENTRY(ce, "ReflectionAttribute", class_ReflectionAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	return class_entry;
@@ -1464,7 +1464,6 @@ static zend_class_entry *register_class_ReflectionEnum(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnum", class_ReflectionEnum_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionClass);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }
@@ -1485,7 +1484,6 @@ static zend_class_entry *register_class_ReflectionEnumBackedCase(zend_class_entr
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnumBackedCase", class_ReflectionEnumBackedCase_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionEnumUnitCase);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }

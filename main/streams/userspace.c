@@ -639,6 +639,7 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	}
 
 	if (!try_convert_to_string(&retval)) {
+		zval_ptr_dtor(&retval);
 		return -1;
 	}
 

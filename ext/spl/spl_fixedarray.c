@@ -156,10 +156,14 @@ static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zen
  */
 static void spl_fixedarray_dtor(spl_fixedarray *array)
 {
-	zend_long size = array->size;
 	if (!spl_fixedarray_empty(array)) {
-		spl_fixedarray_dtor_range(array, 0, size);
-		efree(array->elements);
+		zval *begin = array->elements, *end = array->elements + array->size;
+		array->elements = NULL;
+		array->size = 0;
+		while (begin != end) {
+			zval_ptr_dtor(--end);
+		}
+		efree(begin);
 	}
 }
 
@@ -414,8 +418,12 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		zval_ptr_dtor(&(intern->array.elements[index]));
-		ZVAL_COPY_DEREF(&intern->array.elements[index], value);
+		/* Fix #81429 */
+		zval *ptr = &(intern->array.elements[index]);
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, ptr);
+		ZVAL_COPY_DEREF(ptr, value);
+		zval_ptr_dtor(&tmp);
 	}
 }
 
@@ -883,7 +891,6 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 		zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_countable, php_json_serializable_ce);
 	spl_ce_SplFixedArray->create_object = spl_fixedarray_new;
 	spl_ce_SplFixedArray->get_iterator = spl_fixedarray_get_iterator;
-	spl_ce_SplFixedArray->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
 	memcpy(&spl_handler_SplFixedArray, &std_object_handlers, sizeof(zend_object_handlers));
 

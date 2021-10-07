@@ -270,7 +270,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
-	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename);
+	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
 	HashTable file_sources;
 
 	zend_arena *oplog_arena;                     /* arena for storing oplog */

@@ -251,15 +251,15 @@ PHP_METHOD(com, __construct)
 			BSTR name;
 
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
-				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page);
+				zend_string *typelib_str = php_com_olestring_to_string(name, obj->code_page);
 
-				if (NULL != php_com_cache_typelib(TL, typelib_name, typelib_name_len)) {
+				if (NULL != php_com_cache_typelib(TL, ZSTR_VAL(typelib_str), ZSTR_LEN(typelib_str))) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
 				}
-				efree(typelib_name);
+				zend_string_release_ex(typelib_str, /* persistent */ false);
 			} else {
 				/* try it anyway */
 				php_com_import_typelib(TL, mode, obj->code_page);
@@ -331,7 +331,7 @@ PHP_FUNCTION(com_get_active_object)
 /* Performs an Invoke on the given com object.
  * returns a failure code and creates an exception if there was an error */
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg)
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, bool silent, bool allow_noarg)
 {
 	HRESULT hr;
 	unsigned int arg_err;
@@ -340,40 +340,40 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
 		&IID_NULL, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), flags, disp_params, v, &e, &arg_err);
 
-	if (silent == 0 && FAILED(hr)) {
-		char *source = NULL, *desc = NULL, *msg = NULL;
-		size_t source_len, desc_len;
+	if (!silent && FAILED(hr)) {
+		char *desc = NULL, *msg = NULL;
 
 		switch (hr) {
-			case DISP_E_EXCEPTION:
+			case DISP_E_EXCEPTION: {
+				zend_string *source = NULL, *desc_str = NULL;
 				if (e.bstrSource) {
-					source = php_com_olestring_to_string(e.bstrSource, &source_len, obj->code_page);
+					source = php_com_olestring_to_string(e.bstrSource, obj->code_page);
 					SysFreeString(e.bstrSource);
 				}
 				if (e.bstrDescription) {
-					desc = php_com_olestring_to_string(e.bstrDescription, &desc_len, obj->code_page);
+					desc_str = php_com_olestring_to_string(e.bstrDescription, obj->code_page);
 					SysFreeString(e.bstrDescription);
 				}
 				if (PG(html_errors)) {
 					spprintf(&msg, 0, "<b>Source:</b> %s<br/><b>Description:</b> %s",
-						source ? source : "Unknown",
-						desc ? desc : "Unknown");
+						source ? ZSTR_VAL(source) : "Unknown",
+						desc_str ? ZSTR_VAL(desc_str) : "Unknown");
 				} else {
 					spprintf(&msg, 0, "Source: %s\nDescription: %s",
-						source ? source : "Unknown",
-						desc ? desc : "Unknown");
+						source ? ZSTR_VAL(source) : "Unknown",
+						desc_str ? ZSTR_VAL(desc_str) : "Unknown");
 				}
-				if (desc) {
-					efree(desc);
+				if (desc_str) {
+					zend_string_release_ex(desc_str, /* persistent */ false);
 				}
 				if (source) {
-					efree(source);
+					zend_string_release_ex(source, /* persistent */ false);
 				}
 				if (e.bstrHelpFile) {
 					SysFreeString(e.bstrHelpFile);
 				}
 				break;
-
+			}
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
@@ -382,7 +382,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
-				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && (allow_noarg == 1)) {
+				if ((disp_params->cArgs + disp_params->cNamedArgs == 0) && allow_noarg) {
 					/* if getting a property and they are missing all parameters,
 					 * we want to create a proxy object for them; so lets not create an
 					 * exception here */
@@ -408,23 +408,19 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 }
 
 /* map an ID to a name */
-HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		size_t namelen, DISPID *dispid)
+HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, zend_string *name,
+		DISPID *dispid)
 {
 	OLECHAR *olename;
 	HRESULT hr;
 	zval *tmp;
 
-	if (namelen == -1) {
-		namelen = strlen(name);
-	}
-
-	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
+	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_find(obj->id_of_name_cache, name))) {
 		*dispid = (DISPID)Z_LVAL_P(tmp);
 		return S_OK;
 	}
 
-	olename = php_com_string_to_olestring(name, namelen, obj->code_page);
+	olename = php_com_string_to_olestring(ZSTR_VAL(name), ZSTR_LEN(name), obj->code_page);
 
 	if (obj->typeinfo) {
 		hr = ITypeInfo_GetIDsOfNames(obj->typeinfo, &olename, 1, dispid);
@@ -451,14 +447,14 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
 		}
 		ZVAL_LONG(&tmp, *dispid);
-		zend_hash_str_update(obj->id_of_name_cache, name, namelen, &tmp);
+		zend_hash_update(obj->id_of_name_cache, name, &tmp);
 	}
 
 	return hr;
 }
 
 /* the core of COM */
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
+zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
 		WORD flags,	VARIANT *v, int nargs, zval *args)
 {
 	DISPID dispid, altdispid;
@@ -472,7 +468,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 		return FAILURE;
 	}
 
-	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid);
+	hr = php_com_get_id_of_name(obj, f->function_name, &dispid);
 
 	if (FAILED(hr)) {
 		char *msg = NULL;
@@ -586,8 +582,8 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 
 
-int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg)
+zend_result php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool silent, bool allow_noarg)
 {
 	DISPID altdispid;
 	DISPPARAMS disp_params;
@@ -633,14 +629,14 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
 }
 
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg)
+zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool allow_noarg)
 {
 	DISPID dispid;
 	HRESULT hr;
 	char *msg = NULL;
 
-	hr = php_com_get_id_of_name(obj, name, namelen, &dispid);
+	hr = php_com_get_id_of_name(obj, name, &dispid);
 
 	if (FAILED(hr)) {
 		char *winerr = php_win32_error_to_msg(hr);
@@ -666,13 +662,7 @@ PHP_FUNCTION(com_create_guid)
 
 	php_com_initialize();
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
-		size_t len;
-		char *str;
-
-		str = php_com_olestring_to_string(guid_string, &len, CP_ACP);
-		RETVAL_STRINGL(str, len);
-		// TODO: avoid reallocation ???
-		efree(str);
+		RETVAL_STR(php_com_olestring_to_string(guid_string, CP_ACP));
 
 		CoTaskMemFree(guid_string);
 	} else {
@@ -687,7 +677,8 @@ PHP_FUNCTION(com_event_sink)
 	zval *object, *sinkobject;
 	zend_string *sink_str = NULL;
 	HashTable *sink_ht = NULL;
-	char *dispname = NULL, *typelibname = NULL;
+	zend_string *type_lib_name = NULL;
+	zend_string *dispatch_name = NULL;
 	php_com_dotnet_object *obj;
 	ITypeInfo *typeinfo = NULL;
 
@@ -708,14 +699,14 @@ PHP_FUNCTION(com_event_sink)
 		zval *tmp;
 
 		if ((tmp = zend_hash_index_find(sink_ht, 0)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
-			typelibname = Z_STRVAL_P(tmp);
+			type_lib_name = Z_STR_P(tmp);
 		if ((tmp = zend_hash_index_find(sink_ht, 1)) != NULL && Z_TYPE_P(tmp) == IS_STRING)
-			dispname = Z_STRVAL_P(tmp);
+			dispatch_name = Z_STR_P(tmp);
 	} else if (sink_str) {
-		dispname = ZSTR_VAL(sink_str);
+		dispatch_name = sink_str;
 	}
 
-	typeinfo = php_com_locate_typeinfo(typelibname, obj, dispname, 1);
+	typeinfo = php_com_locate_typeinfo(type_lib_name, obj, dispatch_name, /* sink */ true);
 
 	if (typeinfo) {
 		HashTable *id_to_name;
@@ -728,7 +719,7 @@ PHP_FUNCTION(com_event_sink)
 			obj->sink_dispatch = php_com_wrapper_export_as_sink(sinkobject, &obj->sink_id, id_to_name);
 
 			/* Now hook it up to the source */
-			php_com_object_enable_event_sink(obj, TRUE);
+			php_com_object_enable_event_sink(obj, /* enable */ true);
 			RETVAL_TRUE;
 
 		} else {
@@ -747,29 +738,25 @@ PHP_FUNCTION(com_event_sink)
 PHP_FUNCTION(com_print_typeinfo)
 {
 	zend_object *object_zpp;
-	zend_string *typelib_name_zpp = NULL;
-	char *ifacename = NULL;
-	char *typelibname = NULL;
-	size_t ifacelen;
-	bool wantsink = 0;
+	zend_string *type_lib_name = NULL;
+	zend_string *interface_name = NULL;
+	bool want_sink = false;
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_OBJ_OF_CLASS_OR_STR(object_zpp, php_com_variant_class_entry, typelib_name_zpp)
+		Z_PARAM_OBJ_OF_CLASS_OR_STR(object_zpp, php_com_variant_class_entry, type_lib_name)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(ifacename, ifacelen)
-		Z_PARAM_BOOL(wantsink)
+		Z_PARAM_STR_OR_NULL(interface_name)
+		Z_PARAM_BOOL(want_sink)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_com_initialize();
 	if (object_zpp) {
 		obj = (php_com_dotnet_object*)object_zpp;
-	} else {
-		typelibname = ZSTR_VAL(typelib_name_zpp);
 	}
 
-	typeinfo = php_com_locate_typeinfo(typelibname, obj, ifacename, wantsink ? 1 : 0);
+	typeinfo = php_com_locate_typeinfo(type_lib_name, obj, interface_name, want_sink);
 	if (typeinfo) {
 		php_com_process_typeinfo(typeinfo, NULL, 1, NULL, obj ? obj->code_page : COMG(code_page));
 		ITypeInfo_Release(typeinfo);

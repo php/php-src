@@ -1528,10 +1528,11 @@ try_again:
 	return offset;
 }
 
-static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
+ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
-	const zend_op *opline = EX(opline);
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
 	uint32_t var;
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2172,7 +2173,7 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
-			zend_wrong_string_offset(EXECUTE_DATA_C);
+			zend_wrong_string_offset_error();
 		}
 	} else {
 		zend_use_scalar_as_array();
@@ -2368,7 +2369,7 @@ fetch_from_array:
 			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
-			zend_wrong_string_offset(EXECUTE_DATA_C);
+			zend_wrong_string_offset_error();
 		}
 		ZVAL_UNDEF(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -4394,7 +4395,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code");
-				new_op_array = zend_compile_string(inc_filename, eval_desc);
+				new_op_array = zend_compile_string(inc_filename, eval_desc, ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 				efree(eval_desc);
 			}
 			break;

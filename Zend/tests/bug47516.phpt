@@ -1,5 +1,5 @@
 --TEST--
-Bug #47516 (nowdoc can not be embed in heredoc but can be embed in double quote)
+Bug #47516 (nowdoc cannot be embedded in heredoc but can be embedded in double quote)
 --FILE--
 <?php
 $s='substr';

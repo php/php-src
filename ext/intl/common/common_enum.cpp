@@ -133,7 +133,8 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	NULL,
 	string_enum_current_move_forward,
 	string_enum_rewind,
-	zoi_with_current_invalidate_current
+	zoi_with_current_invalidate_current,
+	NULL, /* get_gc */
 };
 
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)

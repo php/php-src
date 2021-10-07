@@ -149,6 +149,10 @@ php_stream_filter_status_t userfilter_filter(
 		return ret;
 	}
 
+	/* Make sure the stream is not closed while the filter callback executes. */
+	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
 	if (stream_prop) {
 		/* Give the userfilter class a hook back to the stream */
@@ -221,6 +225,9 @@ php_stream_filter_status_t userfilter_filter(
 	zval_ptr_dtor(&args[2]);
 	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
+
+	stream->flags &= ~PHP_STREAM_FLAG_NO_FCLOSE;
+	stream->flags |= orig_no_fclose;
 
 	return ret;
 }

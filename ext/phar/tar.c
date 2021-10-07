@@ -497,7 +497,7 @@ bail:
 
 		entry.link = NULL;
 		/* link field is null-terminated unless it has 100 non-null chars.
-		 * Thus we can not use strlen. */
+		 * Thus we cannot use strlen. */
 		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
 			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, linkname_len)) {

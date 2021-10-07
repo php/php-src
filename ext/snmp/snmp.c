@@ -432,7 +432,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	}
 
 	if ((st & SNMP_CMD_SET) && objid_query->count > objid_query->step) {
-		php_snmp_error(getThis(), PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES, "Can not fit all OIDs for SET query into one packet, using multiple queries");
+		php_snmp_error(getThis(), PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES, "Cannot fit all OIDs for SET query into one packet, using multiple queries");
 	}
 
 	while (keepwalking) {
