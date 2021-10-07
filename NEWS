@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.26
 
+- Streams:
+  . Fixed bug #54340 (Memory corruption with user_filter). (Nikita)
 
 21 Oct 2021, PHP 7.4.25
 
