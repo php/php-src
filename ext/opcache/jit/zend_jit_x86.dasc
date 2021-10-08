@@ -13263,6 +13263,9 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
 	 && prop_info
+	 && (opline->opcode != ZEND_FETCH_OBJ_W ||
+	     !(opline->extended_value & ZEND_FETCH_OBJ_FLAGS) ||
+	     !ZEND_TYPE_IS_SET(prop_info->type))
 	 && opline->op1_type != IS_VAR
 	 && opline->op1_type != IS_TMP_VAR) {
 		may_throw = 0;
