@@ -4753,6 +4753,7 @@ static int accel_finish_startup(void)
 			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;
 			}
+			preload_flush(NULL);
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;
