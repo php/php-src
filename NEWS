@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #75941 (Fix compile failure on Solaris with clang). (Jaromír
     Doleček)
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+  . Fixed bug #81514 (Using Enum as key in WeakMap triggers GC + SegFault).
+    (Nikita)
 
 - Date:
   . Fixed bug #81504 (Incorrect timezone transition details for POSIX data).

@@ -1286,7 +1286,9 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		uint32_t _t = Z_TYPE_INFO_P(_z2);								\
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);							\
 		if (Z_TYPE_INFO_REFCOUNTED(_t)) {								\
-			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
+			/* Objects reuse PERSISTENT as WEAKLY_REFERENCED */			\
+			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT)				\
+					|| GC_TYPE(_gc) == IS_OBJECT)) {					\
 				GC_ADDREF(_gc);											\
 			} else {													\
 				zval_copy_ctor_func(_z1);								\
