@@ -970,7 +970,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {
-		php_error_docref(NULL, E_WARNING, "Error while reading a row");
 		RETVAL_FALSE;
 		DBG_VOID_RETURN;
 	} else if (fetched_anything == FALSE) {

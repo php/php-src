@@ -1062,6 +1062,17 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	}
 #else
 	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
+	/* TODO: We don't have access to the connection object at this point, so we use low-level
+	 * mysqlnd APIs to access the error information. We should try to pass through the connection
+	 * object instead. */
+	if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+		MYSQLND_CONN_DATA *conn = result->conn;
+		unsigned error_no = conn->m->get_error_no(conn);
+		if (error_no) {
+			php_mysqli_report_error(
+				conn->m->get_sqlstate(conn), error_no, conn->m->get_error_str(conn));
+		}
+	}
 #endif
 }
 /* }}} */
