@@ -3059,7 +3059,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 		while (phi) {
 			if (intervals[phi->ssa_var]) {
-				if (intervals[phi->sources[1]]) {
+				if (intervals[phi->sources[1]]
+				 && (ssa->var_info[phi->sources[1]].type & MAY_BE_ANY) ==
+						(ssa->var_info[phi->ssa_var].type & MAY_BE_ANY)) {
 					intervals[phi->sources[1]]->hint = intervals[phi->ssa_var];
 				}
 			}
