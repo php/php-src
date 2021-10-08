@@ -236,7 +236,7 @@ function openssl_digest(string $data, string $digest_algo, bool $binary = false)
 /** @param string $tag */
 function openssl_encrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", &$tag = null, string $aad = "", int $tag_length = 16): string|false {}
 
-function openssl_decrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", string $tag = "", string $aad = ""): string|false {}
+function openssl_decrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", ?string $tag = null, string $aad = ""): string|false {}
 
 function openssl_cipher_iv_length(string $cipher_algo): int|false {}
 

@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - PgSQL:
   . Fixed bug #81509 (pg_end_copy still expects a resource). (Matteo)
 
+- OpenSSL:
+  . Fixed bug #81502 ($tag argument of openssl_decrypt() should accept
+    null/empty string). (Nikita)
+
 - Standard:
   . Fixed bug #81491 (Incorrectly using libsodium for argon2 hashing).
     (Dan Pock)
