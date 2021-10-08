@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.26
 
+- MySQLi:
+  . Fixed bug #81494 (Stopped unbuffered query does not throw error). (Nikita)
+
 - Streams:
   . Fixed bug #54340 (Memory corruption with user_filter). (Nikita)
 
