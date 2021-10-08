@@ -23,6 +23,18 @@ if test "$PHP_OPCACHE" != "no"; then
   dnl Always build as shared extension
   ext_shared=yes
 
+  if test "$pthreads_working" = "yes"; then
+    AC_CHECK_FUNC(pthread_mutexattr_setpshared, [
+      AC_DEFINE(HAVE_PTHREAD_PROCESS_SHARED, 1, [Define to use pthread_mutexattr_setpshared(PTHREAD_PROCESS_SHARED)])
+      if test -n "$ac_cv_pthreads_lib"; then
+        PHP_EVAL_LIBLINE(-l$ac_cv_pthreads_lib, OPCACHE_SHARED_LIBADD)
+      fi
+      if test -n "$ac_cv_pthreads_cflags"; then
+        PHP_EVAL_INCLINE($ac_cv_pthreads_cflags)
+      fi
+    ], [])
+  fi
+
   if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
     AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
   fi
