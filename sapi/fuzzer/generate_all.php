@@ -14,3 +14,7 @@ generate_corpus_from_phpt(
     __DIR__ . '/corpus/function-jit',
     ["$baseDir/Zend/tests", "$baseDir/ext/opcache/tests/jit"]
 );
+generate_corpus_from_phpt(
+    __DIR__ . '/corpus/tracing-jit',
+    ["$baseDir/Zend/tests", "$baseDir/ext/opcache/tests/jit"]
+);
