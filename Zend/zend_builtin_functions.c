@@ -19,6 +19,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_attributes.h"
 #include "zend_gc.h"
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
@@ -33,9 +34,11 @@
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
-	zend_standard_class_def = register_class_stdClass();
-
 	zend_register_default_classes();
+
+	zend_standard_class_def = register_class_stdClass();
+	zend_add_class_attribute(zend_standard_class_def, zend_ce_allow_dynamic_properties->name, 0);
+	zend_standard_class_def->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	return SUCCESS;
 }
