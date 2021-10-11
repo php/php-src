@@ -13559,9 +13559,15 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			 && !ZEND_TYPE_IS_SET(prop_info->type)
 			 && (res_info & MAY_BE_GUARD)
 			 && (res_info & MAY_BE_LONG)) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
-				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
+				uint32_t old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
+				int32_t exit_point;
+				const void *exit_addr;
 
+				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
+				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 				ssa->var_info[ssa_op->result_def].type = res_info & ~MAY_BE_GUARD;
 				|	jmp &exit_addr
 				|.code
