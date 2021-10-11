@@ -19,6 +19,9 @@ function test2() {
 function test3() {
     foreach (range(0, $undef) as $v) { }
 }
+function test4() {
+    var_dump(range(0, ~$u));
+}
 
 ?>
 ===DONE===
