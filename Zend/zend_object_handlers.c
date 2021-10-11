@@ -277,6 +277,12 @@ static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
+static ZEND_COLD zend_never_inline void zend_deprecated_dynamic_property(
+		zend_class_entry *ce, zend_string *member) {
+	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
+		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+}
+
 static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
 		zend_class_entry *ce, zend_string *member, zend_class_entry *scope, const char *operation) {
 	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
@@ -874,6 +880,9 @@ write_std_property:
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+				zend_deprecated_dynamic_property(zobj->ce, name);
+			}
 
 			Z_TRY_ADDREF_P(value);
 			if (!zobj->properties) {
@@ -1049,6 +1058,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
 				zend_forbidden_dynamic_property(zobj->ce, name);
 				return &EG(error_zval);
+			}
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+				zend_deprecated_dynamic_property(zobj->ce, name);
 			}
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);

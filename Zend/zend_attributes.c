@@ -25,6 +25,7 @@
 
 ZEND_API zend_class_entry *zend_ce_attribute;
 ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
+ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 
 static HashTable internal_attributes;
 
@@ -56,6 +57,18 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	}
 }
 
+static void validate_allow_dynamic_properties(
+		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait");
+	}
+	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface");
+	}
+	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -69,6 +82,11 @@ ZEND_METHOD(Attribute, __construct)
 }
 
 ZEND_METHOD(ReturnTypeWillChange, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(AllowDynamicProperties, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 }
@@ -288,6 +306,10 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
 	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
+
+	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
+	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr->validator = validate_allow_dynamic_properties;
 }
 
 void zend_attributes_shutdown(void)

@@ -3,6 +3,7 @@ SPL: ArrayObject::exchangeArray($this)
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class ArrayIteratorEx extends ArrayIterator
 {
     public    $pub2 = 1;
@@ -31,6 +32,7 @@ class ArrayIteratorEx extends ArrayIterator
     }
 }
 
+#[AllowDynamicProperties]
 class ArrayObjectEx extends ArrayObject
 {
     public    $pub1 = 1;

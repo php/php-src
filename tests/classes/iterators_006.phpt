@@ -6,6 +6,8 @@ ZE2 iterators and array wrapping
 class ai implements Iterator {
 
     private $array;
+    private $key;
+    private $current;
 
     function __construct() {
         $this->array = array('foo', 'bar', 'baz');

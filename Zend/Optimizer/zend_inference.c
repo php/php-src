@@ -4842,15 +4842,17 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 					return 1;
 				}
 
-				if (op_array->scope != ce && ce->default_properties_count) {
-					zend_property_info *prop_info =
-						zend_hash_find_ptr(&ce->properties_info, prop_name);
-					if (prop_info && (!(prop_info->flags & ZEND_ACC_PUBLIC)
-								|| ZEND_TYPE_IS_SET(prop_info->type))) {
+				zend_property_info *prop_info =
+					zend_hash_find_ptr(&ce->properties_info, prop_name);
+				if (prop_info) {
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
 						return 1;
 					}
+					return !(prop_info->flags & ZEND_ACC_PUBLIC)
+						&& prop_info->ce != op_array->scope;
+				} else {
+					return !(ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 				}
-				return 0;
 			}
 			return 1;
 		case ZEND_ROPE_INIT:

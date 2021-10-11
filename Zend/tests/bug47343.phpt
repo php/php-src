@@ -4,6 +4,7 @@ Bug #47343 (gc_collect_cycles causes a segfault when called within a destructor 
 <?php
 class A
 {
+    public $data = [];
     public function __destruct()
     {
         gc_collect_cycles();
@@ -20,10 +21,7 @@ class A
 
 class B
 {
-    public function __construct($A)
-    {
-        $this->A = $A;
-    }
+    public function __construct(public $A) {}
 
     public function __destruct()
     {

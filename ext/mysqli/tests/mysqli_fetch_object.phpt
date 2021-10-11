@@ -24,7 +24,8 @@ require_once('skipifconnectfailure.inc');
     }
 
     class mysqli_fetch_object_test {
-
+        public $ID;
+        public $label;
         public $a = null;
         public $b = null;
 

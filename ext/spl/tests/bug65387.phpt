@@ -14,6 +14,7 @@ $it2 = new CallbackFilterIterator($it, function($elem) use(&$it2) {
 
 // Callback object
 new class {
+    private $it;
     public function __construct() {
         $it = new ArrayIterator([1, 2, 3]);
         $this->it = new CallbackFilterIterator($it, function($elem) {

@@ -1101,7 +1101,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 				/* Don't try to propagate assignments to (potentially) typed properties. We would
 				 * need to deal with errors and type conversions first. */
-				if (!var_info->ce || (var_info->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				// TODO: Distinguish dynamic and declared property assignments here?
+				if (!var_info->ce || (var_info->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) ||
+						!(var_info->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					SET_RESULT_BOT(result);
 					SET_RESULT_BOT(op1);
 					return;

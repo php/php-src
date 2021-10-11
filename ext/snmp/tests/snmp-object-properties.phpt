@@ -158,6 +158,8 @@ object(SNMP)#%d (%d) {
 bool(true)
 bool(true)
 bool(false)
+
+Deprecated: Creation of dynamic property SNMP::$123 is deprecated in %s on line %d
 object(SNMP)#%d (%d) {
   ["info"]=>
   array(3) {

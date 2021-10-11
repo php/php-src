@@ -3,6 +3,7 @@ Test ReflectionProperty::isInitialized()
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class A {
     public static ?string $ssv = null;
     public static ?string $ss;
