@@ -2518,7 +2518,7 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= MAY_BE_RCN;
 				}
 			}
-			if (opline->opcode != ZEND_QM_ASSIGN) {
+			if (opline->opcode == ZEND_COALESCE || opline->opcode == ZEND_JMP_SET) {
 				/* COALESCE and JMP_SET result can't be null */
 				tmp &= ~MAY_BE_NULL;
 				if (opline->opcode == ZEND_JMP_SET) {
