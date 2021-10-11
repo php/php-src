@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 52bdaaa00be290a14461737675d5ca18ebf9174b */
+ * Stub hash: c45bd3923e6c65a869b39822f574bde363a3499f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -91,7 +91,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecolorclosestalpha arginfo_imagecolorresolvealpha
 
-#define arginfo_imagecolorexactalpha arginfo_imagecolorallocatealpha
+#define arginfo_imagecolorexactalpha arginfo_imagecolorresolvealpha
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
