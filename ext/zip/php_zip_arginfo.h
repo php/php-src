@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 214a5d606d5535032251a41d4fa18f47d93ec42e */
+ * Stub hash: 1c1e7e6e4a9790706f2330f5e4e7e263dc5440e3 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -214,9 +214,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_getStreamName, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_getStream, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ZipArchive_getStream arginfo_class_ZipArchive_getStreamName
 
 #if defined(ZIP_OPSYS_DEFAULT)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setExternalAttributesName, 0, 3, _IS_BOOL, 0)
