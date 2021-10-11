@@ -2614,6 +2614,10 @@ static zend_always_inline int _zend_update_type_info(
 						 * results in a null return value. */
 						tmp |= MAY_BE_NULL;
 					}
+					if (tmp & MAY_BE_REF) {
+						/* Typed reference may cause auto conversion */
+						tmp |= MAY_BE_ANY;
+					}
 				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
@@ -2623,6 +2627,11 @@ static zend_always_inline int _zend_update_type_info(
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
 						tmp &= zend_fetch_prop_type(script, prop_info, NULL);
+					}
+				} else {
+					if (tmp & MAY_BE_REF) {
+						/* Typed reference may cause auto conversion */
+						tmp |= MAY_BE_ANY;
 					}
 				}
 				tmp &= ~MAY_BE_REF;
