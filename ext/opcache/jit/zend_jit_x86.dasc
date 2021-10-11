@@ -1383,7 +1383,8 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_DTOR_FUNC, var_info, opline // arg1 must be in FCARG1a
 ||	do {
-||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
+||		if (!((var_info) & MAY_BE_GUARD)
+||		 && has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
 |				EXT_CALL _efree, r0
@@ -15325,6 +15326,7 @@ static zend_bool zend_jit_fetch_reference(dasm_State **Dst, const zend_op *oplin
 		var_info &= ~MAY_BE_REF;
 		*var_info_ptr = var_info;
 	}
+	*var_info_ptr |= MAY_BE_GUARD; /* prevent generation of specialized zval dtor */
 
 	return 1;
 }
