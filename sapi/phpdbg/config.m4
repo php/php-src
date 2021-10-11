@@ -45,26 +45,34 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
     AC_MSG_RESULT([disabled])
   fi
 
-  AC_CACHE_CHECK([for userfaultfd faulting on write-protected memory support], ac_phpdbg_userfaultfd_writefault, AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK([for userfaultfd faulting on write-protected memory support], ac_cv_phpdbg_userfaultfd_writefault, AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
     #include <linux/userfaultfd.h>
     #ifndef UFFDIO_WRITEPROTECT_MODE_WP
     # error userfaults on write-protected memory not supported
     #endif
-  ]])], [ac_phpdbg_userfaultfd_writefault=yes], [ac_phpdbg_userfaultfd_writefault=no]))
-  if test "$ac_phpdbg_userfaultfd_writefault" = "yes"; then
+  ]])], [ac_cv_phpdbg_userfaultfd_writefault=yes], [ac_cv_phpdbg_userfaultfd_writefault=no]))
+  if test "$ac_cv_phpdbg_userfaultfd_writefault" = "yes"; then
     if test "$enable_zts" != "yes"; then
-      dnl Add pthreads linker and compiler flags for userfaultfd background thread
-      if test -n "$ac_cv_pthreads_lib"; then
-        LIBS="$LIBS -l$ac_cv_pthreads_lib"
-      fi
-      if test -n "$ac_cv_pthreads_cflags"; then
-        CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
+      CFLAGS_SAVE="$CFLAGS"
+      LIBS_SAVE="$LIBS"
+
+      PTHREADS_CHECK
+      AC_MSG_CHECKING([working pthreads]);
+
+      if test "$pthreads_working" = "yes"; then
+      	AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib]);
+      	PHP_PHPDBG_CFLAGS="$PHP_PHPDBG_CFLAGS $ac_cv_pthreads_cflags"
+      	PHPDBG_EXTRA_LIBS="$PHPDBG_EXTRA_LIBS -l$ac_cv_pthreads_lib"
+      	AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
+      else
+        AC_MSG_WARN([pthreads not available])
       fi
 
-      PTHREADS_FLAGS
+      CFLAGS="$CLFAGS_SAVE"
+      LIBS="$LIBS_SAVE"
+    else
+      AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
     fi
-
-    AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
   fi
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
