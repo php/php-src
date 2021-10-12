@@ -9465,7 +9465,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 		}
 		name = zval_try_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(!name)) {
+			if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
 
+			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
@@ -17315,7 +17317,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 		}
 		name = zval_try_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(!name)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
+				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
@@ -45659,7 +45663,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 		}
 		name = zval_try_get_tmp_string(varname, &tmp_name);
 		if (UNEXPECTED(!name)) {
+			if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
 
+			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
