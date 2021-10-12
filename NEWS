@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #81494 (Stopped unbuffered query does not throw error). (Nikita)
 
+- PCRE:
+  . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
+
 - Streams:
   . Fixed bug #54340 (Memory corruption with user_filter). (Nikita)
 
