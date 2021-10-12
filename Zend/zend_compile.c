@@ -3006,8 +3006,9 @@ static bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
 static bool list_is_keyed(zend_ast_list *list)
 {
 	for (uint32_t i = 0; i < list->children; i++) {
-		if (list->child[i]) {
-			return list->child[i]->child[1] != NULL;
+		zend_ast *child = list->child[i];
+		if (child) {
+			return child->kind == ZEND_AST_ARRAY_ELEM && child->child[1] != NULL;
 		}
 	}
 	return false;
