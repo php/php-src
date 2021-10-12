@@ -5219,6 +5219,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
 						if ((p+1)->op == ZEND_JIT_TRACE_VM || (p+1)->op == ZEND_JIT_TRACE_END) {
 							const zend_op *exit_opline = NULL;
 							uint32_t exit_point;
@@ -5251,19 +5253,28 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (ra) {
 								zend_jit_trace_clenup_stack(stack, opline, ssa_op, ssa, ra);
 							}
-							if (opline->result_type == IS_TMP_VAR) {
+							if (!(op1_info & MAY_BE_GUARD)
+							 && has_concrete_type(op1_info)
+							 && concrete_type(op1_info) <= IS_TRUE) {
+								/* unconditional branch */
+								exit_addr = NULL;
+							} else if (opline->result_type == IS_TMP_VAR) {
 								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 								exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
 								SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_info);
+								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								if (!exit_addr) {
+									goto jit_failure;
+								}
 							} else {
 								exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
-							}
-							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-							if (!exit_addr) {
-								goto jit_failure;
+								exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+								if (!exit_addr) {
+									goto jit_failure;
+								}
 							}
 						} else  {
 							ZEND_UNREACHABLE();
@@ -5273,8 +5284,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						} else {
 							res_addr = RES_REG_ADDR();
 						}
-						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline,
 								op1_info, OP1_REG_ADDR(), res_addr,
 								-1, -1,
