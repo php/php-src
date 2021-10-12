@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
+- XMLReader:
+  . Fixed bug #81521 (XMLReader::getParserProperty may throw with a valid
+    property). (Nikita)
+
 21 Oct 2021, PHP 8.0.12
 
 - CLI:
