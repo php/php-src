@@ -1061,7 +1061,7 @@ function get_binary(string $php, string $sapi, string $sapi_path): ?string
     if (file_exists("$dir/../../$sapi_path")) {
         return realpath("$dir/../../$sapi_path");
     }
-    // Installation tre, preserve command prefix/suffix
+    // Installation tree, preserve command prefix/suffix
     $inst = str_replace('php', $sapi, basename($php));
     if (file_exists("$dir/$inst")) {
         return realpath("$dir/$inst");
