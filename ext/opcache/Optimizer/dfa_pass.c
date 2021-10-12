@@ -1010,7 +1010,8 @@ static int zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa
 		 && op_array->opcodes[use].opcode != ZEND_FREE
 		 && op_array->opcodes[use].opcode != ZEND_SEND_VAL
 		 && op_array->opcodes[use].opcode != ZEND_SEND_VAL_EX
-		 && op_array->opcodes[use].opcode != ZEND_VERIFY_RETURN_TYPE) {
+		 && op_array->opcodes[use].opcode != ZEND_VERIFY_RETURN_TYPE
+		 && op_array->opcodes[use].opcode != ZEND_YIELD) {
 			if (use > def) {
 				int i = use;
 				const zend_op *opline = &op_array->opcodes[use];
