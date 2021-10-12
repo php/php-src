@@ -1057,11 +1057,14 @@ function get_binary(string $php, string $sapi, string $sapi_path): ?string
     if (IS_WINDOWS && file_exists("$dir/$sapi.exe")) {
         return realpath("$dir/$sapi.exe");
     }
+    // Sources tree
     if (file_exists("$dir/../../$sapi_path")) {
         return realpath("$dir/../../$sapi_path");
     }
-    if (file_exists("$dir/$sapi")) {
-        return realpath("$dir/$sapi");
+    // Installation tre, preserve command prefix/suffix
+    $inst = str_replace('php', $sapi, basename($php));
+    if (file_exists("$dir/$inst")) {
+        return realpath("$dir/$inst");
     }
     return null;
 }
