@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC4
+?? ??? ????, PHP 8.1.0RC5
+
+
+
+14 Oct 2021, PHP 8.1.0RC4
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
