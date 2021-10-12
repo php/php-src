@@ -2900,7 +2900,7 @@ PHP_METHOD(ZipArchive, getFromIndex)
 }
 /* }}} */
 
-static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type, bool accept_flags) /* {{{ */
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
@@ -2912,10 +2912,17 @@ static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	php_stream *stream;
 
 	if (type) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
-			RETURN_THROWS();
+		if (accept_flags) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
+				RETURN_THROWS();
+			}
+		} else {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+				RETURN_THROWS();
+			}
 		}
 	} else {
+		ZEND_ASSERT(accept_flags);
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &index, &flags) == FAILURE) {
 			RETURN_THROWS();
 		}
@@ -2940,16 +2947,21 @@ static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* {{{ get a stream for an entry using its name */
 PHP_METHOD(ZipArchive, getStreamName)
 {
-	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, /* accept_flags */ true);
 }
 /* }}} */
 
 /* {{{ get a stream for an entry using its index */
 PHP_METHOD(ZipArchive, getStreamIndex)
 {
-	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, /* accept_flags */ true);
 }
 /* }}} */
+
+PHP_METHOD(ZipArchive, getStream)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, /* accept_flags */ false);
+}
 
 #ifdef HAVE_PROGRESS_CALLBACK
 static void _php_zip_progress_callback(zip_t *arch, double state, void *ptr)
