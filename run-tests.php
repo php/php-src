@@ -1062,7 +1062,14 @@ function get_binary(string $php, string $sapi, string $sapi_path): ?string
         return realpath("$dir/../../$sapi_path");
     }
     // Installation tree
-    $inst = str_replace('php', $sapi, basename($php));
+    $inst = basename($php);
+    if (preg_match('/.php$/', $inst)) {       // Preserve command prefix
+        $inst = preg_replace('/php$/', $sapi, $inst);
+    } else if (preg_match('/^php./', $inst)) {// Preserve command suffix
+        $inst = preg_replace('/^php/', $sapi, $inst);
+    } else {
+        $inst = $sapi;
+    }
     if (file_exists("$dir/$inst")) {
         return realpath("$dir/$inst");
     }
