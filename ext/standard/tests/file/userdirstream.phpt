@@ -4,6 +4,7 @@ Directory Streams
 <?php
 class test {
     public $idx = 0;
+    public $context;
 
     function dir_opendir($path, $options) {
         print "Opening\n";

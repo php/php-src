@@ -4,6 +4,7 @@ Exception in stream wrapper + __call
 <?php
 
 class Loader {
+    public $context;
     function stream_open() {
         return true;
     }

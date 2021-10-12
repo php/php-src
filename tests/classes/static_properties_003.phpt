@@ -2,7 +2,7 @@
 Attempting to access static properties using instance property syntax
 --FILE--
 <?php
-class C {
+#[AllowDynamicProperties] class C {
     public static $x = 'C::$x';
     protected static $y = 'C::$y';
 }

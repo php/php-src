@@ -6,6 +6,7 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 <?php
 
 class test_wrapper {
+  public $context;
 
   function stream_open($path, $mode, $openedpath) {
     return true;

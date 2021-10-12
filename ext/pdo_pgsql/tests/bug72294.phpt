@@ -70,6 +70,8 @@ class PHPUnit_Framework_TestFailure
 
 class PHPUnit_Framework_TestResult
 {
+    private $errors;
+
     public function run( $test)
     {
         $error      = false;
