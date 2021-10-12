@@ -867,7 +867,7 @@ function parse_str(string $string, &$result): void {}
  * @return array<int, string|null>
  * @refcount 1
  */
-function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = '\\'): array {}
+function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
 
 /** @refcount 1 */
 function str_repeat(string $string, int $times): string {}
