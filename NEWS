@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
   . Fixed bug #81514 (Using Enum as key in WeakMap triggers GC + SegFault).
     (Nikita)
+  . Fixed Bug #81520 (TEST_PHP_CGI_EXECUTABLE badly set in run-tests.php).
+    (Remi)
 
 - Date:
   . Fixed bug #81504 (Incorrect timezone transition details for POSIX data).
