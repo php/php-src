@@ -1249,10 +1249,13 @@ SLJIT_ASSERT(*cc == OP_ONCE || *cc == OP_BRA || *cc == OP_CBRA);
 SLJIT_ASSERT(*cc != OP_CBRA || common->optimized_cbracket[GET2(cc, 1 + LINK_SIZE)] != 0);
 SLJIT_ASSERT(start < EARLY_FAIL_ENHANCE_MAX);
 
+next_alt = cc + GET(cc, 1);
+if (*next_alt == OP_ALT)
+  fast_forward_allowed = FALSE;
+
 do
   {
   count = start;
-  next_alt = cc + GET(cc, 1);
   cc += 1 + LINK_SIZE + ((*cc == OP_CBRA) ? IMM2_SIZE : 0);
 
   while (TRUE)
@@ -1521,7 +1524,7 @@ do
         {
         count++;
 
-        if (fast_forward_allowed && *next_alt == OP_KET)
+        if (fast_forward_allowed)
           {
           common->fast_forward_bc_ptr = accelerated_start;
           common->private_data_ptrs[(accelerated_start + 1) - common->start] = ((*private_data_start) << 3) | type_skip;
@@ -1569,8 +1572,8 @@ do
   else if (result < count)
     result = count;
 
-  fast_forward_allowed = FALSE;
   cc = next_alt;
+  next_alt = cc + GET(cc, 1);
   }
 while (*cc == OP_ALT);
 
@@ -11152,7 +11155,7 @@ early_fail_type = (early_fail_ptr & 0x7);
 early_fail_ptr >>= 3;
 
 /* During recursion, these optimizations are disabled. */
-if (common->early_fail_start_ptr == 0)
+if (common->early_fail_start_ptr == 0 && common->fast_forward_bc_ptr == NULL)
   {
   early_fail_ptr = 0;
   early_fail_type = type_skip;
