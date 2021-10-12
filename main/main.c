@@ -635,7 +635,6 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
  */
 static PHP_INI_MH(OnUpdateDefaultMimeTye)
 {
-	char *s = ZSTR_VAL(new_value), *e = s + ZSTR_LEN(new_value);
 	if (memchr(ZSTR_VAL(new_value), '\0', ZSTR_LEN(new_value))
 		|| strpbrk(ZSTR_VAL(new_value), "\r\n")) {
 		return FAILURE;
