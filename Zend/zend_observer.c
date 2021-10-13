@@ -101,7 +101,9 @@ ZEND_API void zend_observer_deactivate(void) {
 ZEND_API void zend_observer_shutdown(void) {
 	zend_llist_destroy(&zend_observers_fcall_list);
 	zend_llist_destroy(&zend_observer_error_callbacks);
+	zend_llist_destroy(&zend_observer_fiber_init);
 	zend_llist_destroy(&zend_observer_fiber_switch);
+	zend_llist_destroy(&zend_observer_fiber_destroy);
 }
 
 static void zend_observer_fcall_install(zend_execute_data *execute_data) {
