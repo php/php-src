@@ -6,8 +6,8 @@ if [ -z "$ARM64" ]; then export JOBS=$(nproc); else export JOBS=1; fi
 
 export SKIP_IO_CAPTURE_TESTS=1
 ./sapi/cli/php run-tests.php -P \
-    -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 \
-    --set-timeout 120 -j$JOBS \
+    -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP,PASS" --offline --show-diff --show-slow 1000 \
+    --set-timeout 120 \
     -d extension=`pwd`/modules/zend_test.so \
     -d zend_extension=`pwd`/modules/opcache.so \
     -d opcache.enable_cli=1 \
