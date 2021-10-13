@@ -12,7 +12,7 @@ PATH_INFO=/a1.phps/extra/stuff
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECT--
 string(42) "/frontcontroller25.php/a1.phps/extra/stuff"
 string(12) "/extra/stuff"

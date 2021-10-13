@@ -38,7 +38,7 @@ Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 
 <br />
 <b>Fatal error</b>:  Uncaught Error: Call to undefined function non_exists_function() in %ssyntax_error.php:%d

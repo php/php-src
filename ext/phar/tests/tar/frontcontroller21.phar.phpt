@@ -13,7 +13,7 @@ QUERY_STRING=test=hi
 --FILE_EXTERNAL--
 files/frontcontroller12.phar.tar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 string(10) "/index.php"
 string(10) "/index.php"

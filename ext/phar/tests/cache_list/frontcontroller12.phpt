@@ -12,7 +12,7 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller6.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught PharException: Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed in %sfrontcontroller12.php:2
 Stack trace:

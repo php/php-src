@@ -346,9 +346,9 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 {
 	uint32_t len;
 
-	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
+	default_header->header = get_default_content_type(sizeof("Content-Type: ")-1, &len);
 	default_header->header_len = len;
-	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: ") - 1);
+	memcpy(default_header->header, "Content-Type: ", sizeof("Content-Type: ") - 1);
 }
 
 /*
@@ -773,9 +773,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				}
 
 				if (newlen != 0) {
-					newlen += sizeof("Content-type: ");
+					newlen += sizeof("Content-Type: ");
 					newheader = emalloc(newlen);
-					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
+					PHP_STRLCPY(newheader, "Content-Type: ", newlen, sizeof("Content-Type: ")-1);
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
 					sapi_header.header_len = (uint32_t)(newlen - 1);
@@ -784,7 +784,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
 			} else if (!strcasecmp(header_line, "Content-Length")) {
-				/* Script is setting Content-length. The script cannot reasonably
+				/* Script is setting Content-Length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
 				 * do disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
@@ -846,11 +846,11 @@ SAPI_API int sapi_send_headers(void)
 
 			SG(sapi_headers).mimetype = default_mimetype;
 
-			default_header.header_len = sizeof("Content-type: ") - 1 + len;
+			default_header.header_len = sizeof("Content-Type: ") - 1 + len;
 			default_header.header = emalloc(default_header.header_len + 1);
 
-			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			memcpy(default_header.header, "Content-Type: ", sizeof("Content-Type: ") - 1);
+			memcpy(default_header.header + sizeof("Content-Type: ") - 1, SG(sapi_headers).mimetype, len + 1);
 
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {

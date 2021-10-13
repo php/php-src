@@ -12,7 +12,7 @@ PATH_INFO=/a.phps
 --FILE_EXTERNAL--
 files/frontcontroller.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECT--
 <code><span style="color: #000000">
 <span style="color: #0000BB">&lt;?php&nbsp;</span><span style="color: #007700">function&nbsp;</span><span style="color: #0000BB">hio</span><span style="color: #007700">(){}</span>

@@ -40,7 +40,7 @@ Date: %s
 Connection: close
 X-Powered-By: %s
 Bar-Foo: Foo
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 
 array(2) {
   ["Host"]=>
@@ -59,6 +59,6 @@ array(3) {
   string(%d) "P%s"
   ["Bar-Foo"]=>
   string(3) "Foo"
-  ["Content-type"]=>
+  ["Content-Type"]=>
   string(24) "text/html; charset=UTF-8"
 }

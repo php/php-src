@@ -13,7 +13,7 @@ PATH_INFO=/index.php
 --FILE_EXTERNAL--
 files/pear2coverage.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 Deprecated: __autoload() is deprecated, use spl_autoload_register() instead in %s on line %d
 string(9) "\Web\View"

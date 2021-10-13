@@ -12,7 +12,7 @@ PATH_INFO=/hi
 --FILE_EXTERNAL--
 files/frontcontroller4.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 Status: 403 Access Denied
 --EXPECT--
 <html>

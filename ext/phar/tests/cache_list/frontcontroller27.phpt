@@ -12,6 +12,6 @@ PATH_INFO=/noext
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/plain;charset=UTF-8
+Content-Type: text/plain;charset=UTF-8
 --EXPECT--
 hi

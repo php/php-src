@@ -13,6 +13,6 @@ PATH_INFO=/a.php
 --FILE_EXTERNAL--
 files/frontcontroller5.phar.zip
 --EXPECTHEADERS--
-Content-type: text/html
+Content-Type: text/html
 --EXPECT--
 hio

@@ -9,6 +9,6 @@ PATH_INFO=/unknown.ext
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: application/octet-stream
+Content-Type: application/octet-stream
 --EXPECT--
 <?php var_dump("hi");

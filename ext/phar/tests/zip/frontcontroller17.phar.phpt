@@ -12,7 +12,7 @@ PATH_INFO=/fronk.gronk
 --FILE_EXTERNAL--
 files/frontcontroller8.phar.zip
 --EXPECTHEADERS--
-Content-type: application/octet-stream
-Content-length: 4
+Content-Type: application/octet-stream
+Content-Length: 4
 --EXPECT--
 hio3

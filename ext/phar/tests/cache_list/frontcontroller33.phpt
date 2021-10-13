@@ -9,7 +9,7 @@ phar
 SCRIPT_NAME=/frontcontroller33.php
 REQUEST_URI=/frontcontroller33.php
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller18.phar
 --EXPECT--

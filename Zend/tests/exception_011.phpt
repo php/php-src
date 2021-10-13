@@ -15,7 +15,7 @@ try {
 
 ?>
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught AssertionError: assert(false) in %sexception_011.php:%d
 Stack trace:

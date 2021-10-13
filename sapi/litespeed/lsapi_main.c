@@ -485,7 +485,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 
             hd = sapi_get_default_content_type();
             len = snprintf( headerBuf, SAPI_LSAPI_MAX_HEADER_LENGTH - 1,
-                            "Content-type: %s", hd );
+                            "Content-Type: %s", hd );
             efree(hd);
 
             LSAPI_AppendRespHeader( headerBuf, len );

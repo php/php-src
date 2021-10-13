@@ -36,7 +36,7 @@ Host: %s
 Date: %s
 Connection: close
 X-Powered-By: PHP/%s
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 
 string(19) "HTTP_HOST:localhost"
 string(21) "HTTP_USER_AGENT:dummy"

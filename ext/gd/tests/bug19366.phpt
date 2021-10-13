@@ -33,7 +33,7 @@ echo "Alive: ImageString\n";
 ImageString($ImHandle,4,40,75,"Czech Republic",$MyWhite);
 
 echo "Alive: Send to browser\n";
-//Header("Content-type: image/PNG");
+//Header("Content-Type: image/PNG");
 //ImagePNG($ImHandle);
 
 echo "Alive: Free resources\n";

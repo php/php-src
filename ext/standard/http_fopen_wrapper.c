@@ -634,7 +634,7 @@ finish:
 		}
 		if (!(have_header & HTTP_HEADER_TYPE)) {
 			smart_str_appends(&req_buf, "Content-Type: application/x-www-form-urlencoded\r\n");
-			php_error_docref(NULL, E_NOTICE, "Content-type not specified assuming application/x-www-form-urlencoded");
+			php_error_docref(NULL, E_NOTICE, "Content-Type not specified assuming application/x-www-form-urlencoded");
 		}
 		smart_str_appends(&req_buf, "\r\n");
 		smart_str_appendl(&req_buf, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));

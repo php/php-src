@@ -11,6 +11,6 @@ PATH_INFO=/unknown/file
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECT--
 My 404 is rawesome

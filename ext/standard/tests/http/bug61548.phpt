@@ -32,12 +32,12 @@ function do_test($header) {
     http_server_kill($pid);
 }
 
-do_test("First:1\nSecond:2\nContent-type: text/plain");
-do_test("First:1\nSecond:2\nContent-type: text/plain\n");
-do_test("First:1\nSecond:2\nContent-type: text/plain\nThird:");
-do_test("First:1\nContent-type:text/plain\nSecond:2");
-do_test("First:1\nContent-type:text/plain\nSecond:2\n");
-do_test("First:1\nContent-type:text/plain\nSecond:2\nThird:");
+do_test("First:1\nSecond:2\nContent-Type: text/plain");
+do_test("First:1\nSecond:2\nContent-Type: text/plain\n");
+do_test("First:1\nSecond:2\nContent-Type: text/plain\nThird:");
+do_test("First:1\nContent-Type:text/plain\nSecond:2");
+do_test("First:1\nContent-Type:text/plain\nSecond:2\n");
+do_test("First:1\nContent-Type:text/plain\nSecond:2\nThird:");
 
 ?>
 Done
@@ -47,7 +47,7 @@ Host: %s:%d
 Connection: close
 First:1
 Second:2
-Content-type: text/plain
+Content-Type: text/plain
 
 GET /foo HTTP/1.1
 Host: %s:%d
@@ -61,7 +61,7 @@ Host: %s:%d
 Connection: close
 First:1
 Second:2
-Content-type: text/plain
+Content-Type: text/plain
 
 GET /foo HTTP/1.1
 Host: %s:%d
@@ -75,7 +75,7 @@ Host: %s:%d
 Connection: close
 First:1
 Second:2
-Content-type: text/plain
+Content-Type: text/plain
 Third:
 
 GET /foo HTTP/1.1
@@ -89,7 +89,7 @@ POST / HTTP/1.1
 Host: %s:%d
 Connection: close
 First:1
-Content-type:text/plain
+Content-Type:text/plain
 Second:2
 
 GET /foo HTTP/1.1
@@ -102,7 +102,7 @@ POST / HTTP/1.1
 Host: %s:%d
 Connection: close
 First:1
-Content-type:text/plain
+Content-Type:text/plain
 Second:2
 
 GET /foo HTTP/1.1
@@ -115,7 +115,7 @@ POST / HTTP/1.1
 Host: %s:%d
 Connection: close
 First:1
-Content-type:text/plain
+Content-Type:text/plain
 Second:2
 Third:
 

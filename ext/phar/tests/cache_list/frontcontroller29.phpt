@@ -12,7 +12,7 @@ PATH_INFO=/fatalerror.phps
 --FILE_EXTERNAL--
 files/frontcontroller8.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught Error: Call to undefined function oopsie_daisy() in phar://%sfatalerror.phps:1
 Stack trace:

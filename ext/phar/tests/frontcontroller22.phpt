@@ -11,7 +11,7 @@ PATH_INFO=/index.php
 --FILE_EXTERNAL--
 files/frontcontroller13.phar
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --EXPECTF--
 string(4) "test"
 string(12) "oof/test.php"

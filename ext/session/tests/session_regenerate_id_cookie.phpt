@@ -65,7 +65,7 @@ Expires: %s
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
 Set-Cookie: PHPSESSID=%s; path=/
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 
 bool(true)
 Set-Cookie: PHPSESSID=%s; path=/

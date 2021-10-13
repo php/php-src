@@ -14,7 +14,7 @@ SCRIPT_NAME=/front.phar.php
 REQUEST_URI=/front.phar.php/index.php
 PATH_INFO=/index.php
 --EXPECTHEADERS--
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/blog.phar
 --EXPECTF--

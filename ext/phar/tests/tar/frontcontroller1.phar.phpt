@@ -9,7 +9,7 @@ PATH_INFO=/a.jpg
 --FILE_EXTERNAL--
 files/frontcontroller.phar.tar
 --EXPECTHEADERS--
-Content-type: image/jpeg
-Content-length: 3
+Content-Type: image/jpeg
+Content-Length: 3
 --EXPECT--
 hio

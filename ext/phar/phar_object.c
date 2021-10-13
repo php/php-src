@@ -168,10 +168,10 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 		case PHAR_MIME_OTHER:
 			/* send headers, output file contents */
 			efree(basename);
-			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-type: %s", mime_type);
+			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-Type: %s", mime_type);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			efree((void *) ctr.line);
-			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-length: %u", info->uncompressed_filesize);
+			ctr.line_len = spprintf((char **) &(ctr.line), 0, "Content-Length: %u", info->uncompressed_filesize);
 			sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			efree((void *) ctr.line);
 

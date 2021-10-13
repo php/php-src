@@ -35,4 +35,4 @@ Host: %s
 Date: %s
 Connection: close
 X-Powered-By: %s
-Content-type: text/html; charset=UTF-8
+Content-Type: text/html; charset=UTF-8

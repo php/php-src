@@ -3,7 +3,7 @@ move_uploaded_file() function
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --POST_RAW--
-Content-type: multipart/form-data, boundary=AaB03x
+Content-Type: multipart/form-data, boundary=AaB03x
 
 --AaB03x
 content-disposition: form-data; name="field1"
