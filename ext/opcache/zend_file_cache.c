@@ -1256,17 +1256,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		}
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
-				zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
-			ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-		}
-		if (op_array != &script->script.main_op_array) {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
-			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
-		}
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	/* Check whether this op_array has already been unserialized. */
@@ -1663,11 +1654,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
-		if (ce->default_static_members_count) {
-			ZEND_MAP_PTR_INIT(ce->static_members_table,
-				zend_arena_alloc(&CG(arena), sizeof(zval *)));
-			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-		}
+		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
 }
 

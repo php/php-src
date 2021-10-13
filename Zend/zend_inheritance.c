@@ -1525,10 +1525,6 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			if (ce->type == ZEND_INTERNAL_CLASS &&
 					ce->info.internal.module->type == MODULE_PERSISTENT) {
 				ZEND_MAP_PTR_NEW(ce->static_members_table);
-			} else {
-				ZEND_MAP_PTR_INIT(ce->static_members_table,
-					zend_arena_alloc(&CG(arena), sizeof(zval *)));
-				ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 			}
 		}
 	}
@@ -2615,30 +2611,18 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		end = p + ce->function_table.nNumUsed;
 		for (; p != end; p++) {
 			zend_op_array *op_array, *new_op_array;
-			void ***run_time_cache_ptr;
-			size_t alloc_size;
 
 			op_array = Z_PTR(p->val);
 			ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 			ZEND_ASSERT(op_array->scope == pce);
 			ZEND_ASSERT(op_array->prototype == NULL);
-			alloc_size = sizeof(zend_op_array) + sizeof(void *);
-			if (op_array->static_variables) {
-				alloc_size += sizeof(HashTable *);
-			}
-			new_op_array = zend_arena_alloc(&CG(arena), alloc_size);
+			new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 			Z_PTR(p->val) = new_op_array;
 			memcpy(new_op_array, op_array, sizeof(zend_op_array));
-			run_time_cache_ptr = (void***)(new_op_array + 1);
-			*run_time_cache_ptr = NULL;
 			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 			new_op_array->scope = ce;
-			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, run_time_cache_ptr);
-			if (op_array->static_variables) {
-				HashTable **static_variables_ptr = (HashTable **) (run_time_cache_ptr + 1);
-				*static_variables_ptr = NULL;
-				ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, static_variables_ptr);
-			}
+			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, NULL);
+			ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, NULL);
 
 			zend_update_inherited_handler(constructor);
 			zend_update_inherited_handler(destructor);
@@ -2667,8 +2651,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZVAL_COPY_VALUE(dst, src);
 		}
 	}
-	ZEND_MAP_PTR_INIT(ce->static_members_table, zend_arena_alloc(&CG(arena), sizeof(zval *)));
-	ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 
 	/* properties_info */
 	if (!(HT_FLAGS(&ce->properties_info) & HASH_FLAG_UNINITIALIZED)) {

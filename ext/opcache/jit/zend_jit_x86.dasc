@@ -9854,6 +9854,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	mov EX:RX->run_time_cache, r2
 				}
 			} else {
+// Always defined as ZEND_MAP_PTR_KIND_PTR_OR_OFFSET. See Zend/zend_map_ptr.h.
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				if (func) {
 					|	mov r0, EX:RX->func
@@ -9882,8 +9883,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						|	test r2, 1
 						|	jz >1
 						|	MEM_LOAD_OP_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
-						|1:
 						|	mov r2, aword [r2]
+						|1:
 					}
 				} else {
 					if (func) {
@@ -9893,8 +9894,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 					|	test r2, 1
 					|	jz >1
 					|	MEM_LOAD_OP_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
-					|1:
 					|	mov r2, aword [r2]
+					|1:
 				}
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"

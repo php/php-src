@@ -164,10 +164,8 @@ ZEND_METHOD(Closure, call)
 			void *ptr;
 
 			my_function.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-			ptr = emalloc(sizeof(void*) + my_function.op_array.cache_size);
+			ptr = emalloc(my_function.op_array.cache_size);
 			ZEND_MAP_PTR_INIT(my_function.op_array.run_time_cache, ptr);
-			ptr = (char*)ptr + sizeof(void*);
-			ZEND_MAP_PTR_SET(my_function.op_array.run_time_cache, ptr);
 			memset(ptr, 0, my_function.op_array.cache_size);
 		}
 	}
@@ -487,6 +485,7 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		/* We don't own the static variables of fake closures. */
 		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			zend_destroy_static_vars(&closure->func.op_array);
+			closure->func.op_array.static_variables = NULL;
 		}
 		destroy_op_array(&closure->func.op_array);
 	} else if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
@@ -696,7 +695,15 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 					zend_array_dup(closure->func.op_array.static_variables);
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				&closure->func.op_array.static_variables);
+				closure->func.op_array.static_variables);
+		} else if (func->op_array.static_variables) {
+			HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+
+			if (!ht) {
+				ht = zend_array_dup(func->op_array.static_variables);
+				ZEND_MAP_PTR_SET(func->op_array.static_variables_ptr, ht);
+			}
+			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr, ht);
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
@@ -722,10 +729,8 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
 				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-				ptr = emalloc(sizeof(void*) + func->op_array.cache_size);
+				ptr = emalloc(func->op_array.cache_size);
 				ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
-				ptr = (char*)ptr + sizeof(void*);
-				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			}
 			memset(ptr, 0, func->op_array.cache_size);
 		}

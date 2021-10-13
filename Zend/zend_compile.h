@@ -801,7 +801,6 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline);
 
 ZEND_API void function_add_ref(zend_function *function);
-void zend_init_static_variables_map_ptr(zend_op_array *op_array);
 zend_string *zval_make_interned_string(zval *zv);
 
 #define INITIAL_OP_ARRAY_SIZE 64
