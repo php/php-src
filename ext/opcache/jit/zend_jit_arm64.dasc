@@ -12147,7 +12147,11 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|1:
 			|	ldr TMP1w, [FCARG2x, #offsetof(zend_property_info, flags)]
 			|	tst TMP1w, #ZEND_ACC_READONLY
-			|	beq >3
+			if (flags) {
+				|	beq >3
+			} else {
+				|	beq >4
+			}
 			|	IF_NOT_TYPE REG2w, IS_OBJECT_EX, >2
 			|	GET_Z_PTR REG2, FCARG1x
 			|	GC_ADDREF REG2, TMP1w
@@ -12173,6 +12177,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				ZEND_ASSERT(flags == 0);
 			}
 			|.code
+			|4:
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, prop_info->offset);
