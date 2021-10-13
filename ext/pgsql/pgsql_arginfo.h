@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b996f10e06a18f0995a9614bd05340987beda8ea */
+ * Stub hash: 72a1beeb327cd6fdb135ed8de8c6fc1372f76303 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -374,7 +374,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_prepare, 0, 3, MAY_BE_LO
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_send_execute arginfo_pg_send_query_params
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_execute, 0, 3, MAY_BE_LONG|MAY_BE_BOOL)
+	ZEND_ARG_INFO(0, connection)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_get_result, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection)

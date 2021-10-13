@@ -464,7 +464,7 @@ function pg_send_query_params($connection, string $query, array $params): int|bo
 function pg_send_prepare($connection, string $statement_name, string $query): int|bool {}
 
 /** @param resource $connection */
-function pg_send_execute($connection, string $query, array $params): int|bool {}
+function pg_send_execute($connection, string $statement_name, array $params): int|bool {}
 
 /**
  * @param resource $connection
