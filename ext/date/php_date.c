@@ -4331,7 +4331,12 @@ static zval *date_interval_write_property(zval *object, zval *member, zval *valu
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
 		if (strcmp(Z_STRVAL_P(member), "f") == 0) {
-			obj->diff->us = zval_get_double(value) * 1000000;
+			double val = zval_get_double(value) * 1000000;
+			if (val > -1000000 && val < 1000000) {
+				obj->diff->us = val;
+			} else {
+				obj->diff->us = -1000000;
+			}
 			break;
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
@@ -4471,7 +4476,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		(*intobj)->diff->us = -1000000;
 		if (z_arg) {
 			double val = zval_get_double(z_arg) * 1000000;
-			if (val >= 0 && val < 1000000) {
+			if (val > -1000000 && val < 1000000) {
 				(*intobj)->diff->us = val;
 			}
 		}
