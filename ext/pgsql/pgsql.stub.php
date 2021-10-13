@@ -461,7 +461,7 @@ namespace {
 
     function pg_send_prepare(PgSql\Connection $connection, string $statement_name, string $query): int|bool {}
 
-    function pg_send_execute(PgSql\Connection $connection, string $query, array $params): int|bool {}
+    function pg_send_execute(PgSql\Connection $connection, string $statement_name, array $params): int|bool {}
 
     /** @refcount 1 */
     function pg_get_result(PgSql\Connection $connection): PgSql\Result|false {}
