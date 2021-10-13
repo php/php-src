@@ -12839,7 +12839,11 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			|.cold_code
 			|1:
 			|	test dword [FCARG2a + offsetof(zend_property_info, flags)], ZEND_ACC_READONLY
-			|	jz >3
+			if (flags) {
+				|	jz >3
+			} else {
+				|	jz >4
+			}
 			|	IF_NOT_Z_TYPE FCARG1a, IS_OBJECT, >2
 			|	GET_Z_PTR r0, FCARG1a
 			|	GC_ADDREF r0
@@ -12873,6 +12877,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 				ZEND_ASSERT(flags == 0);
 			}
 			|.code
+			|4:
 		}
 	} else {
 		prop_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, prop_info->offset);
