@@ -3489,6 +3489,20 @@ static int zend_jit_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t
 	return 1;
 }
 
+static int zend_jit_scalar_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t var)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+	if (!exit_addr) {
+		return 0;
+	}
+	|	cmp byte [FP+var+offsetof(zval, u1.v.type)], IS_STRING
+	|	jae &exit_addr
+
+	return 1;
+}
+
 static int zend_jit_packed_guard(dasm_State **Dst, const zend_op *opline, uint32_t var, uint32_t op_info)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
