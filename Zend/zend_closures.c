@@ -672,6 +672,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
 {
 	zend_closure *closure;
+	void *ptr;
 
 	object_init_ex(res, zend_ce_closure);
 
@@ -707,13 +708,12 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
-		if (!ZEND_MAP_PTR_GET(closure->func.op_array.run_time_cache)
+		ptr = ZEND_MAP_PTR_GET(func->op_array.run_time_cache);
+		if (!ptr
 			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 		) {
-			void *ptr;
-
-			if (!ZEND_MAP_PTR_GET(func->op_array.run_time_cache)
+			if (!ptr
 			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
 			 && (func->common.scope == scope ||
 			     !(func->common.fn_flags & ZEND_ACC_IMMUTABLE))) {
@@ -725,15 +725,15 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
-				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
 				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 				ptr = emalloc(func->op_array.cache_size);
-				ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
 			}
 			memset(ptr, 0, func->op_array.cache_size);
 		}
+		ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
+
 		zend_string_addref(closure->func.op_array.function_name);
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
