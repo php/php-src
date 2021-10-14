@@ -3879,88 +3879,87 @@ static void preload_link(void)
 			ce = Z_PTR_P(zv);
 			ZEND_ASSERT(ce->type != ZEND_INTERNAL_CLASS);
 
-			if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
-			 && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-				zend_string *lcname = zend_string_tolower(ce->name);
+			if (!(ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
+					|| (ce->ce_flags & ZEND_ACC_LINKED)) {
+				continue;
+			}
 
-				if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-					if (zend_hash_exists(EG(class_table), lcname)) {
-						zend_string_release(lcname);
-						continue;
-					}
-				}
-
-				preload_error error_info;
-				if (preload_resolve_deps(&error_info, ce) == FAILURE) {
+			zend_string *lcname = zend_string_tolower(ce->name);
+			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+				if (zend_hash_exists(EG(class_table), lcname)) {
 					zend_string_release(lcname);
 					continue;
 				}
+			}
 
-				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
+			preload_error error_info;
+			if (preload_resolve_deps(&error_info, ce) == FAILURE) {
+				zend_string_release(lcname);
+				continue;
+			}
 
-				if (EXPECTED(zv)) {
-					/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
-					 * prevent freeing of interface names. */
-					void *checkpoint = zend_arena_checkpoint(CG(arena));
-					zend_class_entry *orig_ce = ce;
-					uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
-					ce->ce_flags |= temporary_flags;
-					if (ce->parent_name) {
-						zend_string_addref(ce->parent_name);
-					}
+			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
+			ZEND_ASSERT(zv && "We already checked above that the class doesn't exist yet");
 
-					/* Record and suppress errors during inheritance. */
-					orig_error_cb = zend_error_cb;
-					zend_error_cb = preload_error_cb;
-					zend_begin_record_errors();
+			/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
+			 * prevent freeing of interface names. */
+			void *checkpoint = zend_arena_checkpoint(CG(arena));
+			zend_class_entry *orig_ce = ce;
+			uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
+			ce->ce_flags |= temporary_flags;
+			if (ce->parent_name) {
+				zend_string_addref(ce->parent_name);
+			}
 
-					/* Set filename & lineno information for inheritance errors */
-					CG(in_compilation) = 1;
-					CG(compiled_filename) = ce->info.user.filename;
-					CG(zend_lineno) = ce->info.user.line_start;
-					zend_try {
-						ce = zend_do_link_class(ce, NULL, lcname);
-						if (!ce) {
-							ZEND_ASSERT(0 && "Class linking failed?");
-						}
-						ce->ce_flags &= ~temporary_flags;
-						changed = true;
+			/* Record and suppress errors during inheritance. */
+			orig_error_cb = zend_error_cb;
+			zend_error_cb = preload_error_cb;
+			zend_begin_record_errors();
 
-						/* Inheritance successful, print out any warnings. */
-						zend_error_cb = orig_error_cb;
-						EG(record_errors) = false;
-						for (uint32_t i = 0; i < EG(num_errors); i++) {
-							zend_error_info *error = EG(errors)[i];
-							zend_error_zstr_at(
-								error->type, error->filename, error->lineno, error->message);
-						}
-					} zend_catch {
-						/* Clear variance obligations that were left behind on bailout. */
-						if (CG(delayed_variance_obligations)) {
-							zend_hash_index_del(
-								CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
-						}
+			/* Set filename & lineno information for inheritance errors */
+			CG(in_compilation) = 1;
+			CG(compiled_filename) = ce->info.user.filename;
+			CG(zend_lineno) = ce->info.user.line_start;
+			zend_try {
+				ce = zend_do_link_class(ce, NULL, lcname);
+				if (!ce) {
+					ZEND_ASSERT(0 && "Class linking failed?");
+				}
+				ce->ce_flags &= ~temporary_flags;
+				changed = true;
 
-						/* Restore the original class. */
-						zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
-						Z_CE_P(zv) = orig_ce;
-						orig_ce->ce_flags &= ~temporary_flags;
-						zend_arena_release(&CG(arena), checkpoint);
-
-						/* Remember the last error. */
-						zend_error_cb = orig_error_cb;
-						EG(record_errors) = false;
-						ZEND_ASSERT(EG(num_errors) > 0);
-						zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
-						EG(num_errors)--;
-					} zend_end_try();
-					CG(in_compilation) = 0;
-					CG(compiled_filename) = NULL;
-					zend_free_recorded_errors();
+				/* Inheritance successful, print out any warnings. */
+				zend_error_cb = orig_error_cb;
+				EG(record_errors) = false;
+				for (uint32_t i = 0; i < EG(num_errors); i++) {
+					zend_error_info *error = EG(errors)[i];
+					zend_error_zstr_at(
+						error->type, error->filename, error->lineno, error->message);
+				}
+			} zend_catch {
+				/* Clear variance obligations that were left behind on bailout. */
+				if (CG(delayed_variance_obligations)) {
+					zend_hash_index_del(
+						CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
 				}
 
-				zend_string_release(lcname);
-			}
+				/* Restore the original class. */
+				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
+				Z_CE_P(zv) = orig_ce;
+				orig_ce->ce_flags &= ~temporary_flags;
+				zend_arena_release(&CG(arena), checkpoint);
+
+				/* Remember the last error. */
+				zend_error_cb = orig_error_cb;
+				EG(record_errors) = false;
+				ZEND_ASSERT(EG(num_errors) > 0);
+				zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
+				EG(num_errors)--;
+			} zend_end_try();
+			CG(in_compilation) = 0;
+			CG(compiled_filename) = NULL;
+			zend_free_recorded_errors();
+			zend_string_release(lcname);
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
 
