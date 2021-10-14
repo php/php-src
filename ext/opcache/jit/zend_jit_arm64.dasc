@@ -9225,8 +9225,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 						 JIT_G(current_frame)->call &&
 						 TRACE_FRAME_IS_CLOSURE_CALL(JIT_G(current_frame)->call))) {
 					/* Closures always use direct pointers */
+					|	ldr REG0, EX:RX->func
 					|	ldr REG2, [REG0, #offsetof(zend_op_array, run_time_cache__ptr)]
-					|	ldr REG2, [REG2]
 				} else {
 					if (func) {
 						|	ldr REG0, EX:RX->func
