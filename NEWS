@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.13
 
+- Core:
+  . Fixed bug #81518 (Header injection via default_mimetype / default_charset).
+    (cmb)
+
 - Opcache:
   . Fixed bug #81512 (Unexpected behavior with arrays and JIT). (Dmitry)
 
