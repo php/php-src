@@ -4054,10 +4054,6 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 			if (ce->type == ZEND_INTERNAL_CLASS &&
 					ce->info.internal.module->type == MODULE_PERSISTENT) {
 				ZEND_MAP_PTR_NEW(ce->static_members_table);
-			} else {
-				ZEND_MAP_PTR_INIT(ce->static_members_table,
-					zend_arena_alloc(&CG(arena), sizeof(zval **)));
-				ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 			}
 		}
 	} else {

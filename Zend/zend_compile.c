@@ -1037,15 +1037,6 @@ static uint32_t zend_add_try_element(uint32_t try_op) /* {{{ */
 }
 /* }}} */
 
-void zend_init_static_variables_map_ptr(zend_op_array *op_array)
-{
-	if (op_array->static_variables) {
-		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
-			zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
-		ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-	}
-}
-
 ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 {
 	if (function->type == ZEND_USER_FUNCTION) {
@@ -1054,10 +1045,8 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			(*op_array->refcount)++;
 		}
 
-		ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void *)));
-		ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
-
-		zend_init_static_variables_map_ptr(op_array);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 	}
 
 	if (function->common.function_name) {
@@ -7093,9 +7082,6 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		op_array->fn_flags |= ZEND_ACC_PRELOADED;
 	}
 
-	ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void *)));
-	ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
-
 	op_array->fn_flags |= (orig_op_array->fn_flags & ZEND_ACC_STRICT_TYPES);
 	op_array->fn_flags |= decl->flags;
 	op_array->line_start = decl->start_lineno;
@@ -7181,7 +7167,6 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_do_extended_stmt();
 	zend_emit_final_return(0);
 
-	zend_init_static_variables_map_ptr(op_array);
 	pass_two(CG(active_op_array));
 	zend_oparray_context_end(&orig_oparray_context);
 
