@@ -4756,8 +4756,18 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
-						CHECK_OP1_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
+						if (op1_type != IS_UNKNOWN && (op1_info & MAY_BE_GUARD)) {
+							if (op1_type < IS_STRING
+							 && (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (op1_def_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
+								if (!zend_jit_scalar_type_guard(&dasm_state, opline, opline->op1.var)) {
+									goto jit_failure;
+								}
+								op1_info &= ~(MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF|MAY_BE_GUARD);
+							} else {
+								CHECK_OP1_TRACE_TYPE();
+							}
+						}
 						op1_addr = OP1_REG_ADDR();
 						op1_def_addr = OP1_DEF_REG_ADDR();
 						if (orig_op1_type != IS_UNKNOWN) {

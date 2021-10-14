@@ -3145,6 +3145,20 @@ static int zend_jit_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t
 	return 1;
 }
 
+static int zend_jit_scalar_type_guard(dasm_State **Dst, const zend_op *opline, uint32_t var)
+{
+	int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+	const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+	if (!exit_addr) {
+		return 0;
+	}
+	|	MEM_ACCESS_8_WITH_UOFFSET ldrb, TMP1w, FP, var+offsetof(zval, u1.v.type), TMP1
+	|	cmp TMP1w, #IS_STRING
+	|	bhs &exit_addr
+
+	return 1;
+}
 static int zend_jit_packed_guard(dasm_State **Dst, const zend_op *opline, uint32_t var, uint32_t op_info)
 {
 	int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_PACKED_GUARD);
