@@ -10,6 +10,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+* Removed zend_binary_zval_str(n)casecmp() APIs. These were thin wrappers
+  around zend_binary_str(n)casecmp_l() -- rather than
+  zend_binary_str(n)casecmp() as one would expect. Call the appropriate
+  wrapped function directly instead.
+
 ========================
 2. Build system changes
 ========================

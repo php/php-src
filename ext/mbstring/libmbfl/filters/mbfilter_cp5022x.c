@@ -322,7 +322,7 @@ static int mbfl_filt_conv_cp5022x_wchar_flush(mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 {
-	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
+	int mode = MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE;
 	bool consumed = false;
 
 	if (filter->cache) {
@@ -342,7 +342,7 @@ static int mbfl_filt_conv_wchar_cp50220(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_cp50220_flush(mbfl_convert_filter *filter)
 {
-	int mode = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
+	int mode = MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE;
 
 	if (filter->cache) {
 		int s = mbfl_convert_kana(filter->cache, 0, NULL, NULL, mode);

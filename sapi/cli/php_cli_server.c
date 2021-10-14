@@ -1152,7 +1152,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 #endif
 
 	/* basic */
-	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, SG(request_info).request_method, client->request.request_uri);
+	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, php_http_method_str(client->request.request_method), client->request.request_uri);
 	if (!basic_buf) {
 		return;
 	}
@@ -1384,26 +1384,28 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
 	vpath = p;
-	if (request->vpath_len > 0 && request->vpath[0] != '/') {
-		*p++ = DEFAULT_SLASH;
-	}
-	q = request->vpath + request->vpath_len;
-	while (q > request->vpath) {
-		if (*q-- == '.') {
-			is_static_file = 1;
-			break;
+	if (request->vpath_len != 0) {
+		if (request->vpath[0] != '/') {
+			*p++ = DEFAULT_SLASH;
 		}
-	}
-	memmove(p, request->vpath, request->vpath_len);
+		q = request->vpath + request->vpath_len;
+		while (q > request->vpath) {
+			if (*q-- == '.') {
+				is_static_file = 1;
+				break;
+			}
+		}
+		memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
-	q = p + request->vpath_len;
-	do {
-		if (*q == '/') {
-			*q = '\\';
-		}
-	} while (q-- > p);
+		q = p + request->vpath_len;
+		do {
+			if (*q == '/') {
+				*q = '\\';
+			}
+		} while (q-- > p);
 #endif
-	p += request->vpath_len;
+		p += request->vpath_len;
+	}
 	*p = '\0';
 	q = p;
 	while (q > buf) {

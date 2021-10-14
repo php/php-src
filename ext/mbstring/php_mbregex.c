@@ -721,7 +721,7 @@ static inline void mb_regex_substitute(
 	eos = replace + replace_len;
 
 	while (p < eos) {
-		clen = (int) php_mb_mbchar_bytes_ex(p, enc);
+		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
 			smart_str_appendl(pbuf, p, clen);
@@ -729,7 +729,7 @@ static inline void mb_regex_substitute(
 			continue;
 		}
 		sp = p; /* save position */
-		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+		clen = (int) php_mb_mbchar_bytes(++p, enc);
 		if (clen != 1 || p == eos) {
 			/* skip backslash followed by multibyte char */
 			smart_str_appendl(pbuf, sp, p - sp);
@@ -759,7 +759,7 @@ static inline void mb_regex_substitute(
 				break;
 			case 'k':
 			{
-				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+				clen = (int) php_mb_mbchar_bytes(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
 					p += clen;
@@ -772,7 +772,7 @@ static inline void mb_regex_substitute(
 				char maybe_num = 1;
 				name_end = name = p + 1;
 				while (name_end < eos) {
-					clen = (int) php_mb_mbchar_bytes_ex(name_end, enc);
+					clen = (int) php_mb_mbchar_bytes(name_end, enc);
 					if (clen != 1) {
 						name_end += clen;
 						maybe_num = 0;

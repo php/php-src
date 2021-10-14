@@ -2403,7 +2403,7 @@ function gen_vm($def, $skel) {
     // Load definition file
     $in = @file($def);
     if (!$in) {
-        die("ERROR: Can not open definition file '$def'\n");
+        die("ERROR: Cannot open definition file '$def'\n");
     }
     // We need absolute path to definition file to use it in #line directives
     $definition_file = realpath($def);
@@ -2411,7 +2411,7 @@ function gen_vm($def, $skel) {
     // Load skeleton file
     $skl = @file($skel);
     if (!$skl) {
-        die("ERROR: Can not open skeleton file '$skel'\n");
+        die("ERROR: Cannot open skeleton file '$skel'\n");
     }
     // We need absolute path to skeleton file to use it in #line directives
     $skeleton_file = realpath($skel);

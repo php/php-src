@@ -25,6 +25,11 @@ $encrypted = openssl_encrypt($padded_data, $method, $password, OPENSSL_RAW_DATA|
 $output = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv);
 var_dump(rtrim($output));
 
+$output2 = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv, tag: '');
+var_dump($output2 === $output);
+$output3 = openssl_decrypt($encrypted, $method, $password, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv, tag: null);
+var_dump($output3 === $output);
+
 if (in_array("bf-ecb", openssl_get_cipher_methods())) {
     // if we want to prefer variable length cipher setting
     $encrypted = openssl_encrypt($data, "bf-ecb", $password, OPENSSL_DONT_ZERO_PAD_KEY);
@@ -44,5 +49,7 @@ var_dump($tag);
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
 string(45) "openssl_encrypt() and openssl_decrypt() tests"
+bool(true)
+bool(true)
 bool(true)
 NULL

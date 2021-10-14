@@ -34,8 +34,6 @@ $s = $euc_jp;
 $s = mb_detect_encoding($s, 'JIS,EUC-JP');
 print("EUC-JP: $s\n");
 
-
-
 // Using Encoding List Array
 echo "== ARRAY ENCODING LIST ==\n";
 
@@ -53,6 +51,15 @@ $s = $sjis;
 $s = mb_detect_encoding($s, $a);
 print("SJIS: $s\n");
 
+$test = "CHARSET=windows-1252:Do\xeb;John";
+$encodings = ['UTF-8', 'SJIS', 'GB2312',
+         'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4',
+         'ISO-8859-5', 'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9',
+         'ISO-8859-10', 'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16',
+         'WINDOWS-1252', 'WINDOWS-1251', 'EUC-JP', 'EUC-TW', 'KOI8-R', 'BIG-5',
+         'ISO-2022-KR', 'ISO-2022-JP', 'UTF-16'
+];
+echo mb_detect_encoding($test, $encodings), "\n";
 
 // Using Detect Order
 echo "== DETECT ORDER ==\n";
@@ -100,6 +107,7 @@ EUC-JP: EUC-JP
 JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
+ISO-8859-1
 == DETECT ORDER ==
 JIS: JIS
 EUC-JP: EUC-JP

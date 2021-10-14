@@ -53,7 +53,7 @@ void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char
 	*sub_str = NULL;
 
 	if(str_len > INT32_MAX) {
-		/* We can not return long strings from ICU functions, so we won't here too */
+		/* We cannot return long strings from ICU functions, so we won't here too */
 		return;
 	}
 

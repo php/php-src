@@ -783,17 +783,22 @@ static void emit_live_range(
 			 * "null" branch, and another from the start of the "non-null" branch to the
 			 * FREE opcode. */
 			uint32_t rt_var_num = EX_NUM_TO_VAR(op_array->last_var + var_num);
-			zend_op *block_start_op = use_opline;
-
 			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
 				return;
 			}
 
+			kind = ZEND_LIVE_TMPVAR;
+			if (use_opline->opcode != ZEND_FREE) {
+				/* This can happen if one branch of the coalesce has been optimized away.
+				 * In this case we should emit a normal live-range instead. */
+				break;
+			}
+
+			zend_op *block_start_op = use_opline;
 			while ((block_start_op-1)->opcode == ZEND_FREE) {
 				block_start_op--;
 			}
 
-			kind = ZEND_LIVE_TMPVAR;
 			start = block_start_op - op_array->opcodes;
 			if (start != end) {
 				emit_live_range_raw(op_array, var_num, kind, start, end);

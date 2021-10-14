@@ -719,6 +719,9 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 	}
 
 	if (EG(exception)) {
+		if (fci_cache) {
+			zend_release_fcall_info_cache(fci_cache);
+		}
 		return SUCCESS; /* we would result in an instable executor otherwise */
 	}
 
@@ -1101,7 +1104,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 			}
 			return NULL;
 		}
-		if (ZSTR_HAS_CE_CACHE(name)) {
+		/* Don't populate CE_CACHE for mutable classes during compilation.
+		 * The class may be freed while persisting. */
+		if (ZSTR_HAS_CE_CACHE(name) &&
+				(!CG(in_compilation) || (ce->ce_flags & ZEND_ACC_IMMUTABLE))) {
 			ZSTR_SET_CE_CACHE(name, ce);
 		}
 		return ce;
@@ -1157,6 +1163,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		zend_string_release_ex(lc_name, 0);
 	}
 	if (ce) {
+		ZEND_ASSERT(!CG(in_compilation));
 		if (ZSTR_HAS_CE_CACHE(name)) {
 			ZSTR_SET_CE_CACHE(name, ce);
 		}
@@ -1223,7 +1230,7 @@ ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *re
 
 	original_compiler_options = CG(compiler_options);
 	CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
-	new_op_array = zend_compile_string(code_str, string_name);
+	new_op_array = zend_compile_string(code_str, string_name, ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 	CG(compiler_options) = original_compiler_options;
 
 	if (new_op_array) {

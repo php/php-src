@@ -2708,6 +2708,12 @@ ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
 
+static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
+{
+	fprintf(stderr, "Out of memory\n");
+	exit(1);
+}
+
 #if ZEND_MM_CUSTOM
 static zend_always_inline void tracked_add(zend_mm_heap *heap, void *ptr, size_t size) {
 	zval size_zv;
@@ -2743,7 +2749,11 @@ static void *tracked_malloc(size_t size)
 	zend_mm_heap *heap = AG(mm_heap);
 	tracked_check_limit(heap, size);
 
-	void *ptr = __zend_malloc(size);
+	void *ptr = malloc(size);
+	if (!ptr) {
+		zend_out_of_memory();
+	}
+
 	tracked_add(heap, ptr, size);
 	heap->size += size;
 	return ptr;
@@ -3030,12 +3040,6 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #else
 	return NULL;
 #endif
-}
-
-static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
-{
-	fprintf(stderr, "Out of memory\n");
-	exit(1);
 }
 
 ZEND_API void * __zend_malloc(size_t len)

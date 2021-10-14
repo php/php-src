@@ -610,24 +610,16 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 }
 
 static int format_default_value(smart_str *str, zval *value, zend_class_entry *scope) {
-	zval zv;
-	ZVAL_COPY(&zv, value);
-	if (UNEXPECTED(zval_update_constant_ex(&zv, scope) == FAILURE)) {
-		zval_ptr_dtor(&zv);
-		return FAILURE;
-	}
-
-	if (Z_TYPE(zv) <= IS_STRING) {
-		smart_str_append_scalar(str, &zv, 15);
-	} else if (Z_TYPE(zv) == IS_ARRAY) {
+	if (Z_TYPE_P(value) <= IS_STRING) {
+		smart_str_append_scalar(str, value, 15);
+	} else if (Z_TYPE_P(value) == IS_ARRAY) {
 		smart_str_appends(str, "Array");
 	} else {
-		zend_string *tmp_zv_str;
-		zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
-		smart_str_append(str, zv_str);
-		zend_tmp_string_release(tmp_zv_str);
+		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
+		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
+		smart_str_append(str, ast_str);
+		zend_string_release(ast_str);
 	}
-	zval_ptr_dtor(&zv);
 	return SUCCESS;
 }
 
@@ -1231,7 +1223,9 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 {
 	reflection_object *intern;
 
-	reflection_instantiate(reflection_class_ptr, object);
+	zend_class_entry *reflection_ce =
+		ce->ce_flags & ZEND_ACC_ENUM ? reflection_enum_ptr : reflection_class_ptr;
+	reflection_instantiate(reflection_ce, object);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1239,18 +1233,6 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 	ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
 }
 /* }}} */
-
-static void zend_reflection_enum_factory(zend_class_entry *ce, zval *object)
-{
-	reflection_object *intern;
-
-	reflection_instantiate(reflection_enum_ptr, object);
-	intern = Z_REFLECTION_P(object);
-	intern->ptr = ce;
-	intern->ref_type = REF_TYPE_OTHER;
-	intern->ce = ce;
-	ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
-}
 
 /* {{{ reflection_extension_factory */
 static void reflection_extension_factory(zval *object, const char *name_str)
@@ -6414,26 +6396,18 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 		smart_str_append_printf(&str, "  - Arguments [%d] {\n", attr->data->argc);
 
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
-			zval tmp;
-			if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
-				smart_str_free(&str);
-				RETURN_THROWS();
-			}
-
 			smart_str_append_printf(&str, "    Argument #%d [ ", i);
 			if (attr->data->args[i].name != NULL) {
 				smart_str_append(&str, attr->data->args[i].name);
 				smart_str_appends(&str, " = ");
 			}
 
-			if (format_default_value(&str, &tmp, NULL) == FAILURE) {
-				zval_ptr_dtor(&tmp);
+			if (format_default_value(&str, &attr->data->args[i].value, NULL) == FAILURE) {
 				smart_str_free(&str);
 				RETURN_THROWS();
 			}
 
 			smart_str_appends(&str, " ]\n");
-			zval_ptr_dtor(&tmp);
 		}
 		smart_str_appends(&str, "  }\n");
 
@@ -6849,7 +6823,7 @@ ZEND_METHOD(ReflectionEnumUnitCase, getEnum)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	zend_reflection_enum_factory(ref->ce, return_value);
+	zend_reflection_class_factory(ref->ce, return_value);
 }
 
 ZEND_METHOD(ReflectionEnumBackedCase, __construct)

@@ -199,6 +199,41 @@ static ZEND_FUNCTION(zend_string_or_stdclass)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_compile_string)
+{
+	zend_string *source_string = NULL;
+	zend_string *filename = NULL;
+	zend_long position = ZEND_COMPILE_POSITION_AT_OPEN_TAG;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(source_string)
+		Z_PARAM_STR(filename)
+		Z_PARAM_LONG(position)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_op_array *op_array = NULL;
+
+	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
+
+	if (op_array) {
+		zval retval;
+
+		zend_try {
+			ZVAL_UNDEF(&retval);
+			zend_execute(op_array, &retval);
+		} zend_catch {
+			destroy_op_array(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
+			zend_bailout();
+		} zend_end_try();
+
+		destroy_op_array(op_array);
+		efree_size(op_array, sizeof(zend_op_array));
+	}
+
+	return;
+}
+
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 {

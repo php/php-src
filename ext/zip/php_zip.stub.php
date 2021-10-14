@@ -94,6 +94,8 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function getStatusString(): string {}
 
+    public function clearError(): void {}
+
     /** @tentative-return-type */
     public function addEmptyDir(string $dirname, int $flags = 0): bool {}
 
@@ -184,6 +186,12 @@ class ZipArchive implements Countable
     public function getFromIndex(int $index, int $len = 0, int $flags = 0): string|false {}
 
     /** @return resource|false */
+    public function getStreamIndex(int $index, int $flags = 0) {}
+
+    /** @return resource|false */
+    public function getStreamName(string $name, int $flags = 0) {}
+
+	/** @return resource|false */
     public function getStream(string $name) {}
 
 #ifdef ZIP_OPSYS_DEFAULT

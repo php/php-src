@@ -152,12 +152,14 @@ function sodium_crypto_secretbox_open(string $ciphertext, string $nonce, string 
 #ifdef crypto_secretstream_xchacha20poly1305_ABYTES
 function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {}
 
+/** @return array<int, string> */
 function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): array {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $message, string $additional_data = "", int $tag = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $header, string $key): string {}
 
+/** @return array<int, int|string>|false */
 function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $ciphertext, string $additional_data = ""): array|false {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void {}

@@ -2485,7 +2485,7 @@ static int check_variance_obligation(zval *zv) {
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static void load_delayed_classes(void) {
+static void load_delayed_classes(zend_class_entry *ce) {
 	HashTable *delayed_autoloads = CG(delayed_autoloads);
 	zend_string *name;
 
@@ -2498,6 +2498,11 @@ static void load_delayed_classes(void) {
 
 	ZEND_HASH_FOREACH_STR_KEY(delayed_autoloads, name) {
 		zend_lookup_class(name);
+		if (EG(exception)) {
+			zend_exception_uncaught_error(
+				"During inheritance of %s, while autoloading %s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(delayed_autoloads);
@@ -2905,7 +2910,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (CG(current_linking_class)) {
 			ce->ce_flags |= ZEND_ACC_CACHEABLE;
 		}
-		load_delayed_classes();
+		load_delayed_classes(ce);
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
@@ -3024,7 +3029,7 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 	return zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL;
 }
 
-zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
+ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
 	inheritance_status status;
 	zend_class_entry *proto = NULL;

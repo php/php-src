@@ -302,6 +302,7 @@ static const func_info_t func_infos[] = {
     FN("oci_new_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("oci_error", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     FN("oci_parse", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_get_implicit_resultset", MAY_BE_RESOURCE|MAY_BE_FALSE),
     FN("oci_password_change", MAY_BE_RESOURCE|MAY_BE_BOOL),
@@ -333,6 +334,15 @@ static const func_info_t func_infos[] = {
 #endif
     F1("opcache_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
     F1("opcache_get_configuration", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
+    F1("openssl_x509_parse", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("openssl_csr_get_subject", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("openssl_pkey_get_details", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
+    F1("openssl_get_md_methods", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+    F1("openssl_get_cipher_methods", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+#if defined(HAVE_EVP_PKEY_EC)
+    F1("openssl_get_curve_names", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+#endif
+    F1("openssl_get_cert_locations", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
     FN("pcntl_signal_get_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_LONG),
     FN("preg_replace", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
     FN("preg_filter", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
@@ -406,10 +416,19 @@ static const func_info_t func_infos[] = {
     F1("session_encode", MAY_BE_STRING|MAY_BE_FALSE),
     F1("session_get_cookie_params", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
     F1("session_cache_limiter", MAY_BE_STRING|MAY_BE_FALSE),
+    F1("socket_get_option", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_LONG|MAY_BE_FALSE),
     FN("socket_export_stream", MAY_BE_RESOURCE|MAY_BE_FALSE),
+    F1("socket_addrinfo_lookup", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_FALSE),
+    F1("socket_addrinfo_explain", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY),
     FN("sodium_crypto_kx_client_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     FN("sodium_crypto_kx_server_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
     F0("sodium_crypto_generichash_update", MAY_BE_TRUE),
+#if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
+    FN("sodium_crypto_secretstream_xchacha20poly1305_init_push", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+#endif
+#if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
+    FN("sodium_crypto_secretstream_xchacha20poly1305_pull", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+#endif
     F1("class_implements", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("class_parents", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("class_uses", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),

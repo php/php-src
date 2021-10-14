@@ -43,7 +43,7 @@ static void zend_op_array_collect(zend_op_array *op_array, void *context)
 	call_graph->op_arrays_count++;
 }
 
-ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
+ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_op_array *op_array, zend_func_info *func_info)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -150,14 +150,13 @@ ZEND_API int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_
 		opline++;
 	}
 	free_alloca(call_stack, use_heap);
-	return SUCCESS;
 }
 
-static int zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
+static bool zend_is_indirectly_recursive(zend_op_array *root, zend_op_array *op_array, zend_bitset visited)
 {
 	zend_func_info *func_info;
 	zend_call_info *call_info;
-	int ret = 0;
+	bool ret = 0;
 
 	if (op_array == root) {
 		return 1;
@@ -222,7 +221,7 @@ static void zend_sort_op_arrays(zend_call_graph *call_graph)
 	// TODO: perform topological sort of cyclic call graph
 }
 
-ZEND_API int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
+ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
 {
 	call_graph->op_arrays_count = 0;
 	zend_foreach_op_array(script, zend_op_array_calc, call_graph);
@@ -231,8 +230,6 @@ ZEND_API int zend_build_call_graph(zend_arena **arena, zend_script *script, zend
 	call_graph->func_infos = (zend_func_info*)zend_arena_calloc(arena, call_graph->op_arrays_count, sizeof(zend_func_info));
 	call_graph->op_arrays_count = 0;
 	zend_foreach_op_array(script, zend_op_array_collect, call_graph);
-
-	return SUCCESS;
 }
 /* }}} */
 

@@ -365,7 +365,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		} else {
 #if !defined(WINDOWS)
 /* On Windows, we expect regular chgrp to fail silently by default */
-			php_error_docref(NULL, E_WARNING, "Can not call chgrp() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chgrp() for a non-standard stream");
 #endif
 			RETURN_FALSE;
 		}
@@ -491,7 +491,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		} else {
 #if !defined(WINDOWS)
 /* On Windows, we expect regular chown to fail silently by default */
-			php_error_docref(NULL, E_WARNING, "Can not call chown() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chown() for a non-standard stream");
 #endif
 			RETURN_FALSE;
 		}
@@ -574,7 +574,7 @@ PHP_FUNCTION(chmod)
 				RETURN_FALSE;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can not call chmod() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chmod() for a non-standard stream");
 			RETURN_FALSE;
 		}
 	}
@@ -643,7 +643,7 @@ PHP_FUNCTION(touch)
 		} else {
 			php_stream *stream;
 			if(!filetime_is_null || !fileatime_is_null) {
-				php_error_docref(NULL, E_WARNING, "Can not call touch() for a non-standard stream");
+				php_error_docref(NULL, E_WARNING, "Cannot call touch() for a non-standard stream");
 				RETURN_FALSE;
 			}
 			stream = php_stream_open_wrapper_ex(filename, "c", REPORT_ERRORS, NULL, NULL);

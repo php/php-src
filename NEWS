@@ -2,4 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha1
 
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+
+- Core:
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+
+- Zip:
+  . add ZipArchive::clearError() method
+  . add ZipArchive::getStreamName() method
+  . add ZipArchive::getStreamIndex() method
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

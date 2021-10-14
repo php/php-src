@@ -30,7 +30,8 @@ When running `make` it creates these binaries in `sapi/fuzzer/`:
 * `php-fuzz-exif`: Fuzzing `exif_read_data()` function (requires --enable-exif)
 * `php-fuzz-mbstring`: Fuzzing `mb_ereg[i]()` (requires --enable-mbstring)
 * `php-fuzz-execute`: Fuzzing the executor
-* `php-fuzz-jit`: Fuzzing the function JIT (requires --enable-opcache)
+* `php-fuzz-function-jit`: Fuzzing the function JIT (requires --enable-opcache)
+* `php-fuzz-tracing-jit`: Fuzzing the tracing JIT (requires --enable-opcache)
 
 Some fuzzers have a seed corpus in `sapi/fuzzer/corpus`. You can use it as follows:
 
@@ -62,6 +63,13 @@ sapi/cli/php sapi/fuzzer/generate_parser_corpus.php
 mkdir ./my-parser-corpus
 sapi/fuzzer/php-fuzz-parser -merge=1 ./my-parser-corpus sapi/fuzzer/corpus/parser
 sapi/fuzzer/php-fuzz-parser -only_ascii=1 ./my-parser-corpus
+```
+
+For the execute, function-jit and tracing-jit fuzzers, a corpus may be generated from any set of test files:
+
+```sh
+sapi/cli/php sapi/fuzzer/generate_execute_corpus.php ./execute-corpus Zend/tests ext/opcache/tests/jit
+sapi/fuzzer/php-fuzzer-function-jit ./execute-corpus
 ```
 
 For the mbstring fuzzer, you may want to build the libonig dependency with instrumentation. At this time, libonig is not clean under ubsan, so only the fuzzer and address sanitizers may be used.

@@ -568,6 +568,18 @@ void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warning
 	}
 }
 
+static void zend_persist_early_bindings_calc(
+	uint32_t num_early_bindings, zend_early_binding *early_bindings)
+{
+	ADD_SIZE(sizeof(zend_early_binding) * num_early_bindings);
+	for (uint32_t i = 0; i < num_early_bindings; i++) {
+		zend_early_binding *early_binding = &early_bindings[i];
+		ADD_INTERNED_STRING(early_binding->lcname);
+		ADD_INTERNED_STRING(early_binding->rtd_key);
+		ADD_INTERNED_STRING(early_binding->lc_parent_name);
+	}
+}
+
 uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
 {
 	Bucket *p;
@@ -606,6 +618,8 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 	zend_persist_warnings_calc(
 		new_persistent_script->num_warnings, new_persistent_script->warnings);
+	zend_persist_early_bindings_calc(
+		new_persistent_script->num_early_bindings, new_persistent_script->early_bindings);
 
 	new_persistent_script->corrupted = 0;
 
