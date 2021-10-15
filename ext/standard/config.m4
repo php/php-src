@@ -53,7 +53,6 @@ fi
 
 PHP_CHECK_FUNC(crypt, crypt)
 PHP_CHECK_FUNC(crypt_r, crypt)
-AC_CHECK_HEADERS(crypt.h)
 if test "$ac_cv_func_crypt_r" = "yes"; then
   PHP_CRYPT_R_STYLE
 fi
