@@ -27,6 +27,13 @@ PHP 8.2 UPGRADE NOTES
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
 
+- PCRE:
+  . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
+    `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are
+    capturing. This only affects which groups are capturing, it is still
+    possible to use numbered subpattern references, and the matches array will
+    still contain numbered results.
+
 ========================================
 3. Changes in SAPI modules
 ========================================

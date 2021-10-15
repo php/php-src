@@ -734,6 +734,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE2_CASELESS;		break;
 			case 'm':	coptions |= PCRE2_MULTILINE;		break;
+			case 'n':	coptions |= PCRE2_NO_AUTO_CAPTURE;	break;
 			case 's':	coptions |= PCRE2_DOTALL;		break;
 			case 'x':	coptions |= PCRE2_EXTENDED;		break;
 
