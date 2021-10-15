@@ -1,5 +1,5 @@
 --TEST--
-abusing preg_match()
+testing /n modifier in preg_match()
 --FILE--
 <?php
 
