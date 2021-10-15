@@ -5416,6 +5416,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (opline->op1_type == IS_CV
 							 && ssa->vars[ssa_op->op1_use].alias == NO_ALIAS) {
 								ssa->var_info[ssa_op->op1_use].guarded_reference = 1;
+								if (ssa_op->op1_def >= 0) {
+									ssa->var_info[ssa_op->op1_def].guarded_reference = 1;
+								}
 							}
 						} else {
 							CHECK_OP1_TRACE_TYPE();
@@ -5436,14 +5439,23 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							op1_info |= MAY_BE_PACKED_GUARD;
 							if (orig_op1_type & IS_TRACE_PACKED) {
 								op1_info &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+								if (op1_type != IS_UNKNOWN) {
+									ssa->var_info[ssa_op->op1_use].type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+								}
 							} else {
 								op1_info &= ~MAY_BE_ARRAY_PACKED;
+								if (op1_type != IS_UNKNOWN) {
+									ssa->var_info[ssa_op->op1_use].type &= ~MAY_BE_ARRAY_PACKED;
+								}
 							}
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, ssa, ssa_op,
 								op1_info, op1_addr, avoid_refcounting,
 								op2_info, res_info, RES_REG_ADDR(), val_type)) {
 							goto jit_failure;
+						}
+						if (ssa_op->op1_def >= 0 && op1_type != IS_UNKNOWN) {
+							ssa->var_info[ssa_op->op1_def].type = ssa->var_info[ssa_op->op1_use].type;
 						}
 						goto done;
 					case ZEND_FETCH_DIM_W:
