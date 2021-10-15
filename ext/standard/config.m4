@@ -53,6 +53,7 @@ fi
 
 PHP_CHECK_FUNC(crypt, crypt)
 PHP_CHECK_FUNC(crypt_r, crypt)
+AC_CHECK_HEADERS(crypt.h)
 if test "$ac_cv_func_crypt_r" = "yes"; then
   PHP_CRYPT_R_STYLE
 fi
@@ -270,8 +271,7 @@ int main() {
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
-dnl TODO This is currently always enabled
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || true; then
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes"; then
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
