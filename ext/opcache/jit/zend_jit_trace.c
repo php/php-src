@@ -1563,6 +1563,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
 	idx = 0;
 	level = 0;
+	opline = NULL;
 	for (;;p++) {
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			uint8_t orig_op1_type, orig_op2_type, op1_type, op2_type, op3_type;
@@ -2375,6 +2376,25 @@ propagate_arg:
 			if (call) {
 				top = call;
 				frame->call = call->prev;
+			}
+
+			if (idx > 0
+			 && ssa_ops[idx-1].result_def >= 0
+			 && (p->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
+			 && !(p->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+				ZEND_ASSERT(ssa_opcodes[idx-1] == opline);
+				ZEND_ASSERT(opline->opcode == ZEND_DO_ICALL ||
+					opline->opcode == ZEND_DO_FCALL ||
+					opline->opcode == ZEND_DO_FCALL_BY_NAME);
+
+				if (opline->result_type != IS_UNDEF) {
+					zend_class_entry *ce;
+					const zend_function *func = p->func;
+					zend_arg_info *ret_info = func->common.arg_info - 1;
+					uint32_t ret_type = zend_fetch_arg_info_type(NULL, ret_info, &ce);
+
+					ssa_var_info[ssa_ops[idx-1].result_def].type &= ret_type;
+				}
 			}
 		} else if (p->op == ZEND_JIT_TRACE_END) {
 			break;
