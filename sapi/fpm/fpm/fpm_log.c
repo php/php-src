@@ -217,7 +217,7 @@ int fpm_log_write(char *log_format) /* {{{ */
 					/* microseconds */
 					} else if (!strcasecmp(format, "microseconds") || !strcasecmp(format, "micro")) {
 						if (!test) {
-							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", proc.duration.tv_sec * 1000000UL + proc.duration.tv_usec);
+							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%lu", (unsigned long)(proc.duration.tv_sec * 1000000UL + proc.duration.tv_usec));
 						}
 
 					} else {
