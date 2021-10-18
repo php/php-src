@@ -55,6 +55,16 @@ PHP 8.2 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
 
+- Mbstring:
+  . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
+    deprecated for all Mbstring functions. Unlike all the other text
+    encodings supported by Mbstring, these do not encode a sequence of
+    Unicode codepoints, but rather a sequence of raw bytes. It is not
+    clear what the correct return values for most Mbstring functions should
+    be when one of these non-encodings is specified. Further, PHP has
+    separate, built-in implementations of all of them; for example, UUencoded
+    data can be handled using convert_uuencode/convert_uudecode.
+
 ========================================
 5. Changed Functions
 ========================================
