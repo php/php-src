@@ -94,6 +94,7 @@ jobs:
         configurationParameters: >-
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
+        timeoutInMinutes: 90
     - template: azure/coverage_job.yml
       parameters:
         configurationName: COVERAGE_DEBUG_ZTS
