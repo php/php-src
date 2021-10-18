@@ -61,6 +61,7 @@ echo mb_detect_encoding($test, ['UTF-8', 'UTF-16']), "\n";
 
 // We once had a problem where all kind of strings would be detected as 'UUENCODE'
 echo mb_detect_encoding('abc', ['UUENCODE', 'UTF-8']), "\n";
+echo mb_detect_encoding('abc', ['UUENCODE', 'QPrint', 'HTML-ENTITIES', 'Base64', '7bit', '8bit', 'SJIS']), "\n";
 
 echo "== DETECT ORDER ==\n";
 
@@ -242,6 +243,7 @@ ISO-8859-1
 UTF-8
 UTF-8
 UTF-8
+SJIS
 == DETECT ORDER ==
 JIS: JIS
 EUC-JP: EUC-JP
