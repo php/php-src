@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-07 Oct 2021, PHP 7.4.25RC1
+?? ??? ????, PHP 7.4.25
 
 - DOM:
   . Fixed bug #81433 (DOMElement::setIdAttribute() called twice may remove ID).
@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing).
     (cmb, Nikita)
+
+- FPM:
+  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
+    escalation) (CVE-2021-21703). (Jakub Zelenka)
 
 - SPL:
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
@@ -41,7 +45,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug #73122 (Integer Overflow when concatenating strings). (cmb)
 
--GD:
+- GD:
   . Fixed bug #53580 (During resize gdImageCopyResampled cause colors change).
     (cmb)
 
