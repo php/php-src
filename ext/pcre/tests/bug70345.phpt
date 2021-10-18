@@ -1,5 +1,11 @@
 --TEST--
 Bug #70345 (Multiple vulnerabilities related to PCRE functions)
+--SKIPIF--
+<?php
+if (version_compare(PCRE_VERSION, '10.38', '>=')) {
+    die("skip only for libpcre2 < 10.38");
+}
+?>
 --FILE--
 <?php
 $regex = '/(?=xyz\K)/';
