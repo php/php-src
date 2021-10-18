@@ -4273,7 +4273,7 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 {
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 
-	if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
+	if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) && (res_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 		if (op1_info & (MAY_BE_ANY-MAY_BE_LONG)) {
 			if (op1_info & MAY_BE_DOUBLE) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >3, ZREG_TMP1
@@ -4334,7 +4334,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		}
 	} else if ((op1_info & MAY_BE_DOUBLE) &&
 	           !(op1_info & MAY_BE_LONG) &&
-	           (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+	           (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+	           (res_info & MAY_BE_DOUBLE)) {
 		if (op1_info & (MAY_BE_ANY-MAY_BE_DOUBLE)) {
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_DOUBLE, >6, ZREG_TMP1
 		}
@@ -4368,7 +4369,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 		}
 	} else if ((op2_info & MAY_BE_DOUBLE) &&
 	           !(op2_info & MAY_BE_LONG) &&
-	           (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+	           (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+	           (res_info & MAY_BE_DOUBLE)) {
 		if (op2_info & (MAY_BE_ANY-MAY_BE_DOUBLE)) {
 			|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >6, ZREG_TMP1
 		}
@@ -4407,7 +4409,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 	if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) ||
 		(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 		if ((op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+		    (res_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 			|.cold_code
 		}
 		|6:
@@ -4478,7 +4481,8 @@ static int zend_jit_math_helper(dasm_State    **Dst,
 			}
 		}
 		if ((op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
-		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+		    (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
+		    (res_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 			|	b <5
 			|.code
 		}
