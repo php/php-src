@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #81500 (Interval serialization regression since 7.3.14 / 7.4.2).
     (cmb)
 
+- JSON:
+  . Fixed bug #81532 (Change of $depth behaviour in json_encode() on PHP 8.1).
+    (Nikita)
+
 14 Oct 2021, PHP 8.1.0RC4
 
 - CLI:
