@@ -1464,7 +1464,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |.macro ZVAL_DTOR_FUNC, var_info, opline, tmp_reg
 ||	do {
 ||		if (!((var_info) & MAY_BE_GUARD)
-||		 && has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
+||		 && has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
 |				EXT_CALL _efree, tmp_reg
@@ -1495,8 +1495,8 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro ZVAL_PTR_DTOR, addr, op_info, gc, cold, opline, tmp_reg1, tmp_reg2
-||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF|MAY_BE_GUARD)) {
+||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 |			// if (Z_REFCOUNTED_P(cv)) {
 ||			if (cold) {
 |				IF_ZVAL_REFCOUNTED addr, >1, tmp_reg1, tmp_reg2
@@ -1509,9 +1509,9 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |		// if (!Z_DELREF_P(cv)) {
 |		GET_ZVAL_PTR FCARG1x, addr, Rx(tmp_reg2)
 |		GC_DELREF FCARG1x, Rw(tmp_reg1)
-||		if (RC_MAY_BE_1(op_info)) {
-||			if (RC_MAY_BE_N(op_info)) {
-||				if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+||		if (((op_info) & MAY_BE_GUARD) || RC_MAY_BE_1(op_info)) {
+||			if (((op_info) & MAY_BE_GUARD) || RC_MAY_BE_N(op_info)) {
+||				if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
 |					bne >3
 ||				} else {
 |					bne >4
@@ -1519,13 +1519,13 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 ||			}
 |			// zval_dtor_func(r);
 |			ZVAL_DTOR_FUNC op_info, opline, Rx(tmp_reg1)
-||			if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+||			if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
 |				b >4
 ||			}
 |3:
 ||		}
-||		if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
-||			if ((op_info) & MAY_BE_REF) {
+||		if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
+||			if ((op_info) & (MAY_BE_REF|MAY_BE_GUARD)) {
 ||				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1, offsetof(zend_reference, val));
 |				IF_NOT_ZVAL_TYPE addr, IS_REFERENCE, >1, tmp_reg1
 |				IF_NOT_ZVAL_COLLECTABLE ref_addr, >4, tmp_reg1, tmp_reg2
@@ -1536,7 +1536,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |			// gc_possible_root(Z_COUNTED_P(z))
 |			EXT_CALL gc_possible_root, Rx(tmp_reg1)
 ||		}
-||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
+||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
 |			b >4
 |.code
 ||		}
