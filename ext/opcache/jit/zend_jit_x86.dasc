@@ -1384,7 +1384,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro ZVAL_DTOR_FUNC, var_info, opline // arg1 must be in FCARG1a
 ||	do {
 ||		if (!((var_info) & MAY_BE_GUARD)
-||		 && has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_INDIRECT))) {
+||		 && has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
 |				EXT_CALL _efree, r0
@@ -1415,8 +1415,8 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro ZVAL_PTR_DTOR, addr, op_info, gc, cold, opline
-||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+||	if ((op_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF|MAY_BE_GUARD)) {
+||		if ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 |			// if (Z_REFCOUNTED_P(cv)) {
 ||			if (cold) {
 |				IF_ZVAL_REFCOUNTED addr, >1
@@ -1429,9 +1429,9 @@ static void* dasm_labels[zend_lb_MAX];
 |		// if (!Z_DELREF_P(cv)) {
 |		GET_ZVAL_PTR FCARG1a, addr
 |		GC_DELREF FCARG1a
-||		if (RC_MAY_BE_1(op_info)) {
-||			if (RC_MAY_BE_N(op_info)) {
-||				if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+||		if (((op_info) & MAY_BE_GUARD) || RC_MAY_BE_1(op_info)) {
+||			if (((op_info) & MAY_BE_GUARD) || RC_MAY_BE_N(op_info)) {
+||				if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
 |					jnz >3
 ||				} else {
 |					jnz >4
@@ -1439,13 +1439,13 @@ static void* dasm_labels[zend_lb_MAX];
 ||			}
 |			// zval_dtor_func(r);
 |			ZVAL_DTOR_FUNC op_info, opline
-||			if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+||			if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
 |				jmp >4
 ||			}
 |3:
 ||		}
-||		if (gc && RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
-||			if ((op_info) & MAY_BE_REF) {
+||		if (gc && (((op_info) & MAY_BE_GUARD) || (RC_MAY_BE_N(op_info) && ((op_info) & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0))) {
+||			if ((op_info) & (MAY_BE_REF|MAY_BE_GUARD)) {
 ||				zend_jit_addr ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, offsetof(zend_reference, val));
 |				IF_NOT_ZVAL_TYPE addr, IS_REFERENCE, >1
 |				IF_NOT_ZVAL_COLLECTABLE ref_addr, >4
@@ -1456,7 +1456,7 @@ static void* dasm_labels[zend_lb_MAX];
 |			// gc_possible_root(Z_COUNTED_P(z))
 |			EXT_CALL gc_possible_root, r0
 ||		}
-||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
+||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_INDIRECT|MAY_BE_GUARD)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
 |			jmp >4
 |.code
 ||		}
