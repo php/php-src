@@ -26,11 +26,20 @@ struct _php_json_encoder {
 	int depth;
 	int max_depth;
 	php_json_error_code error_code;
+	HashTable recursive;
 };
 
 static inline void php_json_encode_init(php_json_encoder *encoder)
 {
-	memset(encoder, 0, sizeof(php_json_encoder));
+	encoder->depth = 0;
+	encoder->max_depth = 0;
+	encoder->error_code = 0;
+	zend_hash_init(&encoder->recursive, 0, NULL, NULL, 0);
+}
+
+static inline void php_json_encode_destroy(php_json_encoder *encoder)
+{
+	zend_hash_destroy(&encoder->recursive);
 }
 
 int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);

@@ -152,6 +152,7 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 	return_code = php_json_encode_zval(buf, val, options, &encoder);
 	JSON_G(error_code) = encoder.error_code;
 
+	php_json_encode_destroy(&encoder);
 	return return_code;
 }
 /* }}} */
@@ -235,6 +236,7 @@ PHP_FUNCTION(json_encode)
 	php_json_encode_init(&encoder);
 	encoder.max_depth = (int)depth;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
+	php_json_encode_destroy(&encoder);
 
 	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		JSON_G(error_code) = encoder.error_code;
