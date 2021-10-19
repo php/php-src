@@ -1,9 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.13
-
-
-07 Oct 2021, PHP 8.0.12RC1
+21 Oct 2021, PHP 8.0.12
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
@@ -20,6 +17,10 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79576 ("TYPE *" shows unhelpful message when type is not
     defined). (Dmitry)
+
+- FPM:
+  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
+    escalation) (CVE-2021-21703). (Jakub Zelenka)
 
 - Fileinfo:
   . Fixed bug #78987 (High memory usage during encoding detection). (Anatol)
