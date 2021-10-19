@@ -23,6 +23,10 @@ PHP 8.2 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Curl:
+  . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
+    HTTP method in curl_getinfo() return value.
+
 ========================================
 3. Changes in SAPI modules
 ========================================

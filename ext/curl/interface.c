@@ -552,6 +552,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_SSL_VERIFYRESULT);
 	REGISTER_CURL_CONSTANT(CURLINFO_STARTTRANSFER_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_TOTAL_TIME);
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_EFFECTIVE_METHOD);
+#endif
 
 	/* Other */
 	REGISTER_CURL_CONSTANT(CURLMSG_DONE);
@@ -3257,6 +3260,11 @@ PHP_FUNCTION(curl_getinfo)
 		if (ch->header.str) {
 			CAASTR("request_header", ch->header.str);
 		}
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+		if (curl_easy_getinfo(ch->cp, CURLINFO_EFFECTIVE_METHOD, &s_code) == CURLE_OK) {
+			CAAS("effective_method", s_code);
+		}
+#endif
 	} else {
 		switch (option) {
 			case CURLINFO_HEADER_OUT:
