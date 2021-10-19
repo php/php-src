@@ -718,12 +718,11 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         $op1_get_obj_zval_ptr_deref, $op2_get_obj_zval_ptr_deref,
         $op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
         $op1_get_obj_zval_ptr_ptr_undef, $op2_get_obj_zval_ptr_ptr_undef,
-        $op1_free_unfetched, $op2_free_unfetched,
         $op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
         $op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
         $op_data_type, $op_data_get_zval_ptr,
         $op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
-        $op_data_free_op, $op_data_free_op_var_ptr, $op_data_free_unfetched;
+        $op_data_free_op, $op_data_free_op_var_ptr;
 
     // Specializing
     $specialized_replacements = array(
