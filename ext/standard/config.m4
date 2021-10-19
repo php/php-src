@@ -267,14 +267,25 @@ int main() {
 ])])
 
 
+PHP_ARG_WITH([external-libcrypt],
+  [for external libcrypt or libxcrypt],
+  [AS_HELP_STRING([--with-external-libcrypt],
+    [Use external libcrypt or libxcrypt])],
+  [no],
+  [no])
+
 dnl
 dnl If one of them is missing, use our own implementation, portable code is then possible
 dnl
-dnl TODO This is currently always enabled
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || true; then
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
+dnl This is currently enabled by default
+if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || test "$PHP_EXTERNAL_LIBCRYPT" = "no"; then
+  if test "$PHP_EXTERNAL_LIBCRYPT" = "no"; then
+    AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r])
 
-  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
+    PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
+   else
+    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
+   fi
 else
   AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
