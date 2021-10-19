@@ -281,6 +281,14 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->opcode = ZEND_SEND_VAL;
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			break;
+		case ZEND_CASE:
+			opline->opcode = ZEND_IS_EQUAL;
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			break;
+		case ZEND_CASE_STRICT:
+			opline->opcode = ZEND_IS_IDENTICAL;
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			break;
 		case ZEND_SEPARATE:
 		case ZEND_SEND_VAR_NO_REF:
 		case ZEND_SEND_VAR_NO_REF_EX:
@@ -289,9 +297,6 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			/* This would require a non-local change.
 			 * zend_optimizer_replace_by_const() supports this. */
 			return 0;
-		case ZEND_CASE:
-		case ZEND_CASE_STRICT:
-		case ZEND_FETCH_LIST_R:
 		case ZEND_COPY_TMP:
 		case ZEND_FETCH_CLASS_NAME:
 			return 0;
@@ -562,72 +567,38 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE[_STRICT] and ZEND_FETCH_LIST_R are exceptions, they keeps operand
-				 * unchanged, and allows its reuse. these instructions
-				 * usually terminated by ZEND_FREE that finally kills the value.
+				 * However, there are some exception which keep the operand alive. In that case
+				 * we want to try to replace all uses of the temporary.
 				 */
-				case ZEND_FETCH_LIST_R: {
-					zend_op *m = opline;
-
-					do {
-						if (m->opcode == ZEND_FETCH_LIST_R &&
-							m->op1_type == type &&
-							m->op1.var == var) {
-							zval v;
-							ZVAL_COPY(&v, val);
-							if (Z_TYPE(v) == IS_STRING) {
-								zend_string_hash_val(Z_STR(v));
-							}
-							m->op1.constant = zend_optimizer_add_literal(op_array, &v);
-							m->op1_type = IS_CONST;
-						}
-						m++;
-					} while (m->opcode != ZEND_FREE || m->op1_type != type || m->op1.var != var);
-
-					ZEND_ASSERT(m->opcode == ZEND_FREE && m->op1_type == type && m->op1.var == var);
-					MAKE_NOP(m);
-					zval_ptr_dtor_nogc(val);
-					return 1;
-				}
+				case ZEND_FETCH_LIST_R:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT:
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
 				case ZEND_MATCH:
-				case ZEND_CASE:
-				case ZEND_CASE_STRICT: {
+				case ZEND_JMP_NULL: {
 					zend_op *end = op_array->opcodes + op_array->last;
 					while (opline < end) {
 						if (opline->op1_type == type && opline->op1.var == var) {
-							if (
-								opline->opcode == ZEND_CASE
-								|| opline->opcode == ZEND_CASE_STRICT
-								|| opline->opcode == ZEND_SWITCH_LONG
-								|| opline->opcode == ZEND_SWITCH_STRING
-								|| opline->opcode == ZEND_MATCH
-							) {
-								zval v;
+							/* If this opcode doesn't keep the operand alive, we're done. Check
+							 * this early, because op replacement may modify the opline. */
+							bool is_last = opline->opcode != ZEND_FETCH_LIST_R
+								&& opline->opcode != ZEND_CASE
+								&& opline->opcode != ZEND_CASE_STRICT
+								&& opline->opcode != ZEND_SWITCH_LONG
+								&& opline->opcode != ZEND_SWITCH_STRING
+								&& opline->opcode != ZEND_MATCH
+								&& opline->opcode != ZEND_JMP_NULL
+								&& (opline->opcode != ZEND_FREE
+									|| opline->extended_value != ZEND_FREE_ON_RETURN);
 
-								if (opline->opcode == ZEND_CASE) {
-									opline->opcode = ZEND_IS_EQUAL;
-								} else if (opline->opcode == ZEND_CASE_STRICT) {
-									opline->opcode = ZEND_IS_IDENTICAL;
-								}
-								ZVAL_COPY(&v, val);
-								if (Z_TYPE(v) == IS_STRING) {
-									zend_string_hash_val(Z_STR(v));
-								}
-								opline->op1.constant = zend_optimizer_add_literal(op_array, &v);
-								opline->op1_type = IS_CONST;
-							} else if (opline->opcode == ZEND_FREE) {
-								if (opline->extended_value == ZEND_FREE_SWITCH) {
-									/* We found the end of the switch. */
-									MAKE_NOP(opline);
-									break;
-								}
-
-								ZEND_ASSERT(opline->extended_value == ZEND_FREE_ON_RETURN);
-								MAKE_NOP(opline);
-							} else {
-								ZEND_UNREACHABLE();
+							Z_TRY_ADDREF_P(val);
+							if (!zend_optimizer_update_op1_const(op_array, opline, val)) {
+								zval_ptr_dtor(val);
+								return 0;
+							}
+							if (is_last) {
+								break;
 							}
 						}
 						opline++;
