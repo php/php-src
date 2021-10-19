@@ -1494,6 +1494,7 @@ SPL_METHOD(FilesystemIterator, setFlags)
 
 	intern->flags &= ~(SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK|SPL_FILE_DIR_OTHERS_MASK);
 	intern->flags |= ((SPL_FILE_DIR_KEY_MODE_MASK|SPL_FILE_DIR_CURRENT_MODE_MASK|SPL_FILE_DIR_OTHERS_MASK) & flags);
+	intern->flags |= SPL_FILE_DIR_SKIPDOTS;
 } /* }}} */
 
 /* {{{ proto bool RecursiveDirectoryIterator::hasChildren([bool $allow_links = false])
