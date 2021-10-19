@@ -3757,8 +3757,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2, ZREG_TMP1
 				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	LOAD_32BIT_VAL FCARG1w, opline->op1.var
-				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
 				|	EXT_CALL zend_jit_undefined_op_helper, REG0
+				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL, TMP1w, TMP2
 				op1_info |= MAY_BE_NULL;
 			}
 			|2:
