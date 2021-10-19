@@ -594,6 +594,8 @@ PHP 8.1 UPGRADE NOTES
   . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
     an alternative libargon2 location should now be specified using
     PKG_CONFIG_PATH.
+  . --with-external-libcrypt now allows to use system libcrypt/libxcrypt
+    instead in PHP own implementation.
 
 ========================================
 10. New Global Constants
