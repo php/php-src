@@ -10,7 +10,7 @@ list(&$a[$i++]) = $v;
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot create references to/from string offsets in %s:%d
+Fatal error: Uncaught Error: Cannot indirectly modify string offset in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

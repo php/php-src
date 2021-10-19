@@ -8,7 +8,7 @@ $b = "f";
 echo $a;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot create references to/from string offsets in %sbug49866.php:3
+Fatal error: Uncaught Error: Cannot indirectly modify string offset in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug49866.php on line 3

@@ -10,7 +10,7 @@ echo "Done\n";
 --EXPECTF--
 Warning: Illegal string offset "2x" in %s on line %d
 
-Fatal error: Uncaught Error: Cannot use string offset as an array in %soffset_assign.php:%d
+Fatal error: Uncaught Error: Cannot indirectly modify string offset in %s:%d
 Stack trace:
 #0 {main}
   thrown in %soffset_assign.php on line %d

@@ -63,5 +63,5 @@ Error: [] operator not supported for strings
 string(0) ""
 Error: Cannot use assign-op operators with string offsets
 string(0) ""
-Error: Cannot use string offset as an array
+Error: Cannot indirectly modify string offset
 string(0) ""

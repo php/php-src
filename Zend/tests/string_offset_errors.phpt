@@ -23,5 +23,5 @@ try {
 
 ?>
 --EXPECT--
-Cannot return string offsets by reference
-Cannot create references to/from string offsets
+Cannot indirectly modify string offset
+Cannot indirectly modify string offset

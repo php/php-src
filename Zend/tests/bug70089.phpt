@@ -29,7 +29,7 @@ try {
 }
 ?>
 --EXPECT--
-string(36) "Cannot use string offset as an array"
+string(38) "Cannot indirectly modify string offset"
 string(27) "Cannot unset string offsets"
-string(41) "Only variables can be passed by reference"
-string(41) "Cannot increment/decrement string offsets"
+string(38) "Cannot indirectly modify string offset"
+string(38) "Cannot indirectly modify string offset"
