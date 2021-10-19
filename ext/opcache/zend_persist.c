@@ -345,7 +345,7 @@ static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
 	return ptr;
 }
 
-static void zend_persist_type(zend_type *type, zend_class_entry *scope) {
+static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {
@@ -627,7 +627,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (arg_info[i].name) {
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
-			zend_persist_type(&arg_info[i].type, op_array->scope);
+			zend_persist_type(&arg_info[i].type);
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
@@ -798,7 +798,7 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	if (prop->attributes) {
 		prop->attributes = zend_persist_attributes(prop->attributes);
 	}
-	zend_persist_type(&prop->type, ce);
+	zend_persist_type(&prop->type);
 	return prop;
 }
 
