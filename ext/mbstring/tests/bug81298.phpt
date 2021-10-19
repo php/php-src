@@ -16,5 +16,5 @@ var_dump(mb_detect_encoding("foobar.", "ascii,html"));
 bool(false)
 string(5) "ASCII"
 string(5) "ASCII"
-string(13) "HTML-ENTITIES"
+bool(false)
 string(5) "ASCII"
