@@ -157,17 +157,12 @@ void zend_weakrefs_notify(zend_object *object) {
 	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
 #endif
 	if (tagged_ptr) {
-		zend_hash_index_del(&EG(weakrefs), obj_addr);
 		zend_weakref_unref(obj_addr, tagged_ptr);
+		zend_hash_index_del(&EG(weakrefs), obj_addr);
 	}
 }
 
 void zend_weakrefs_shutdown(void) {
-	zend_ulong obj_addr;
-	void *tagged_ptr;
-	ZEND_HASH_FOREACH_NUM_KEY_PTR(&EG(weakrefs), obj_addr, tagged_ptr) {
-		zend_weakref_unref(obj_addr, tagged_ptr);
-	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&EG(weakrefs));
 }
 
