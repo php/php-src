@@ -21210,8 +21210,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -21279,8 +21279,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -21349,8 +21349,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -21397,8 +21397,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -37303,8 +37303,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -37371,8 +37371,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -37440,8 +37440,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -37487,8 +37487,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {

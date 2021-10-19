@@ -1470,8 +1470,8 @@ ZEND_VM_HELPER(zend_pre_inc_helper, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -1521,8 +1521,8 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -1573,8 +1573,8 @@ ZEND_VM_HELPER(zend_post_inc_helper, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
@@ -1621,8 +1621,8 @@ ZEND_VM_HELPER(zend_post_dec_helper, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
 	}
 
 	do {
