@@ -1562,6 +1562,11 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_ASSIGN_OBJ:
 					case ZEND_ASSIGN_OBJ_OP:
 					case ZEND_ASSIGN_OBJ_REF:
+					case ZEND_PRE_INC_OBJ:
+					case ZEND_PRE_DEC_OBJ:
+					case ZEND_POST_INC_OBJ:
+					case ZEND_POST_DEC_OBJ:
+					case ZEND_UNSET_OBJ:
 						msg = "Cannot use string offset as an object";
 						break;
 					case ZEND_FETCH_DIM_W:
@@ -1577,10 +1582,6 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_ASSIGN_OP:
 						msg = "Cannot use assign-op operators with string offsets";
 						break;
-					case ZEND_PRE_INC_OBJ:
-					case ZEND_PRE_DEC_OBJ:
-					case ZEND_POST_INC_OBJ:
-					case ZEND_POST_DEC_OBJ:
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
 					case ZEND_POST_INC:
@@ -1598,7 +1599,6 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 						msg = "Cannot return string offsets by reference";
 						break;
 					case ZEND_UNSET_DIM:
-					case ZEND_UNSET_OBJ:
 						msg = "Cannot unset string offsets";
 						break;
 					case ZEND_YIELD:
