@@ -1573,6 +1573,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_FETCH_LIST_W:
 					case ZEND_ASSIGN_DIM:
 					case ZEND_ASSIGN_DIM_OP:
+					case ZEND_UNSET_DIM:
 						msg = "Cannot use string offset as an array";
 						break;
 					case ZEND_PRE_INC:
@@ -1593,9 +1594,6 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_SEND_FUNC_ARG:
 					case ZEND_FE_RESET_RW:
 						msg = "Cannot create references to/from string offsets";
-						break;
-					case ZEND_UNSET_DIM:
-						msg = "Cannot unset string offsets";
 						break;
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}
