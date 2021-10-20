@@ -491,7 +491,7 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		 && ((ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
 		  || func->common.scope)) {
 			func = NULL;
-			ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_MEGAMORPHIC);
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_MEGAMORPHIC);
 		}
 		TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, ZEND_JIT_TRACE_FAKE_INFO(init_level), func);
 	} while (0);
