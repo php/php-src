@@ -1537,10 +1537,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 	}
 
 	switch (opline->opcode) {
-		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
-		case ZEND_ASSIGN_OBJ_OP:
-		case ZEND_ASSIGN_STATIC_PROP_OP:
 			msg = "Cannot use assign-op operators with string offsets";
 			break;
 		case ZEND_FETCH_DIM_W:
@@ -1577,10 +1574,6 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_ASSIGN_DIM:
 					case ZEND_ASSIGN_DIM_OP:
 						msg = "Cannot use string offset as an array";
-						break;
-					case ZEND_ASSIGN_STATIC_PROP_OP:
-					case ZEND_ASSIGN_OP:
-						msg = "Cannot use assign-op operators with string offsets";
 						break;
 					case ZEND_PRE_INC:
 					case ZEND_PRE_DEC:
