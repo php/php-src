@@ -1585,25 +1585,17 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 					case ZEND_ADD_ARRAY_ELEMENT:
 					case ZEND_INIT_ARRAY:
 					case ZEND_MAKE_REF:
-						msg = "Cannot create references to/from string offsets";
-						break;
 					case ZEND_RETURN_BY_REF:
 					case ZEND_VERIFY_RETURN_TYPE:
-						msg = "Cannot return string offsets by reference";
-						break;
-					case ZEND_UNSET_DIM:
-						msg = "Cannot unset string offsets";
-						break;
 					case ZEND_YIELD:
-						msg = "Cannot yield string offsets by reference";
-						break;
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_FUNC_ARG:
-						msg = "Only variables can be passed by reference";
-						break;
 					case ZEND_FE_RESET_RW:
-						msg = "Cannot iterate on string offsets by reference";
+						msg = "Cannot create references to/from string offsets";
+						break;
+					case ZEND_UNSET_DIM:
+						msg = "Cannot unset string offsets";
 						break;
 					EMPTY_SWITCH_DEFAULT_CASE();
 				}
