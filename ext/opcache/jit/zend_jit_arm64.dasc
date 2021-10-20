@@ -4970,6 +4970,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 	if (op2_info & MAY_BE_LONG) {
 		bool op2_loaded = 0;
 		bool packed_loaded = 0;
+		bool bad_packed_key = 0;
 
 		if (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG)) {
 			|	// if (EXPECTED(Z_TYPE_P(dim) == IS_LONG))
@@ -5004,6 +5005,8 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				val = Z_LVAL_P(Z_ZV(op2_addr));
 				if (val >= 0 && val < HT_MAX_SIZE) {
 					packed_loaded = 1;
+				} else {
+					bad_packed_key = 1;
 				}
 			} else {
 				if (!op2_loaded) {
@@ -5217,7 +5220,7 @@ static int zend_jit_fetch_dimension_address_inner(dasm_State **Dst, const zend_o
 				if (packed_loaded) {
 					|	IF_NOT_Z_TYPE REG0, IS_UNDEF, >8, TMP1w
 				}
-				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || dim_type == IS_UNDEF) {
+				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || bad_packed_key || dim_type == IS_UNDEF) {
 					|2:
 					|4:
 					if (!op2_loaded) {
