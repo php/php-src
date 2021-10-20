@@ -806,7 +806,7 @@ echo "Done";
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
-  string(3) "a:/"
+  string(4) "/a:/"
 }
 
 --> file:///ab:/: array(2) {
@@ -820,14 +820,14 @@ echo "Done";
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
-  string(3) "a:/"
+  string(4) "/a:/"
 }
 
 --> file:///@:/: array(2) {
   ["scheme"]=>
   string(4) "file"
   ["path"]=>
-  string(3) "@:/"
+  string(4) "/@:/"
 }
 
 --> file:///:80/: array(2) {
