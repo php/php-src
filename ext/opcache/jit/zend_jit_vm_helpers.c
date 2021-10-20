@@ -439,7 +439,14 @@ static uint8_t zend_jit_trace_bad_stop_event(const zend_op *opline, int count)
 	return 0;
 }
 
-static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic, uint32_t *megamorphic, uint32_t level, uint32_t init_level, uint32_t *call_level)
+/* Workaround for PHP-8.0 */
+#ifndef ZEND_CALL_JIT_RESERVED
+# define ZEND_CALL_JIT_RESERVED (1<<29)
+#endif
+
+#define ZEND_CALL_MEGAMORPHIC ZEND_CALL_JIT_RESERVED
+
+static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic, uint32_t init_level)
 {
 	zend_jit_trace_stop stop ZEND_ATTRIBUTE_UNUSED = ZEND_JIT_TRACE_STOP_ERROR;
 
@@ -448,7 +455,7 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		zend_jit_op_array_trace_extension *jit_extension;
 
 		if (call->prev_execute_data) {
-			idx = zend_jit_trace_record_fake_init_call_ex(call->prev_execute_data, trace_buffer, idx, is_megamorphic, megamorphic, level, init_level + 1, call_level);
+			idx = zend_jit_trace_record_fake_init_call_ex(call->prev_execute_data, trace_buffer, idx, is_megamorphic, init_level + 1);
 			if (idx < 0) {
 				return idx;
 			}
@@ -479,32 +486,16 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		 && ((ZEND_CALL_INFO(call) & ZEND_CALL_DYNAMIC)
 		  || func->common.scope)) {
 			func = NULL;
-			*megamorphic |= (1 << (level + *call_level));
-		} else {
-			*megamorphic &= ~(1 << (level + *call_level));
+			ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_MEGAMORPHIC);
 		}
-		(*call_level)++;
 		TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, ZEND_JIT_TRACE_FAKE_INFO(init_level), func);
 	} while (0);
 	return idx;
 }
 
-static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic, uint32_t *megamorphic, uint32_t level)
+static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_jit_trace_rec *trace_buffer, int idx, uint32_t is_megamorphic)
 {
-	uint32_t call_level = 0;
-
-	return zend_jit_trace_record_fake_init_call_ex(call, trace_buffer, idx, is_megamorphic, megamorphic, level, 0, &call_level);
-}
-
-static int zend_jit_trace_call_level(const zend_execute_data *call)
-{
-	int call_level = 0;
-
-	while (call->prev_execute_data) {
-		call_level++;
-		call = call->prev_execute_data;
-	}
-	return call_level;
+	return zend_jit_trace_record_fake_init_call_ex(call, trace_buffer, idx, is_megamorphic, 0);
 }
 
 static int zend_jit_trace_subtrace(zend_jit_trace_rec *trace_buffer, int start, int end, uint8_t event, const zend_op_array *op_array, const zend_op *opline)
@@ -558,7 +549,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	zend_jit_trace_stop halt = 0;
 	int level = 0;
 	int ret_level = 0;
-	int call_level;
 	zend_vm_opcode_handler_t handler;
 	const zend_op_array *op_array;
 	zend_jit_op_array_trace_extension *jit_extension;
@@ -575,7 +565,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	int last_loop = -1;
 	int last_loop_level = -1;
 	const zend_op *last_loop_opline = NULL;
-	uint32_t megamorphic = 0;
 	const zend_op_array *unrolled_calls[ZEND_JIT_TRACE_MAX_CALL_DEPTH + ZEND_JIT_TRACE_MAX_RET_DEPTH];
 #ifdef HAVE_GCC_GLOBAL_REGS
 	zend_execute_data *prev_execute_data = ex;
@@ -613,7 +602,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	}
 
 	if (prev_call) {
-		int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, is_megamorphic, &megamorphic, ret_level + level);
+		int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, is_megamorphic);
 		if (ret < 0) {
 			TRACE_END(ZEND_JIT_TRACE_END, ZEND_JIT_TRACE_STOP_BAD_FUNC, opline);
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -723,8 +712,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		 || opline->opcode == ZEND_DO_ICALL
 		 || opline->opcode == ZEND_DO_UCALL
 		 ||	opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-			call_level = zend_jit_trace_call_level(EX(call));
-			if (megamorphic & (1 << (ret_level + level + call_level))) {
+			if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_MEGAMORPHIC) {
 				stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 				break;
 			}
@@ -852,7 +840,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						last_loop_opline = NULL;
 
 						if (prev_call) {
-							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0, &megamorphic, ret_level + level);
+							int ret = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx, 0);
 							if (ret < 0) {
 								stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
 								break;
@@ -935,12 +923,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 						&& trace_buffer[1].opline == opline - 1) {
 					func = NULL;
 				}
-				call_level = zend_jit_trace_call_level(EX(call));
-				ZEND_ASSERT(ret_level + level + call_level < 32);
-				if (func) {
-					megamorphic &= ~(1 << (ret_level + level + call_level));
-				} else {
-					megamorphic |= (1 << (ret_level + level + call_level));
+				if (!func) {
+					ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_MEGAMORPHIC);
 				}
 				TRACE_RECORD(ZEND_JIT_TRACE_INIT_CALL, 0, func);
 			}
