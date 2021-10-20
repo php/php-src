@@ -2723,7 +2723,7 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 }
 /* }}} */
 
-static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type, bool by_ref)
 {
 	if (ast->attr == ZEND_DIM_ALTERNATIVE_SYNTAX) {
 		zend_error(E_COMPILE_ERROR, "Array and string offset access syntax with curly braces is no longer supported");
@@ -2751,8 +2751,15 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	} else {
 		zend_short_circuiting_mark_inner(var_ast);
 		opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
-		if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
-			opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+		if (opline) {
+			if (type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
+				opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+			} else if (opline->opcode == ZEND_FETCH_DIM_W
+					|| opline->opcode == ZEND_FETCH_DIM_RW
+					|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+					|| opline->opcode == ZEND_FETCH_DIM_UNSET) {
+				opline->extended_value = ZEND_FETCH_DIM_DIM;
+			}
 		}
 	}
 
@@ -2772,18 +2779,20 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
 	zend_adjust_for_fetch_type(opline, result, type);
+	if (by_ref) {
+		opline->extended_value = ZEND_FETCH_DIM_REF;
+	}
 
 	if (dim_node.op_type == IS_CONST) {
 		zend_handle_numeric_dim(opline, &dim_node);
 	}
 	return opline;
 }
-/* }}} */
 
-static zend_op *zend_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static zend_op *zend_compile_dim(znode *result, zend_ast *ast, uint32_t type, bool by_ref) /* {{{ */
 {
 	uint32_t offset = zend_delayed_compile_begin();
-	zend_delayed_compile_dim(result, ast, type);
+	zend_delayed_compile_dim(result, ast, type, by_ref);
 	return zend_delayed_compile_end(offset);
 }
 /* }}} */
@@ -2810,6 +2819,13 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		if (opline && (opline->opcode == ZEND_FETCH_DIM_W
+				|| opline->opcode == ZEND_FETCH_DIM_RW
+				|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+				|| opline->opcode == ZEND_FETCH_DIM_UNSET)) {
+			opline->extended_value = ZEND_FETCH_DIM_OBJ;
+		}
+
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 		if (nullsafe) {
 			/* We will push to the short_circuiting_opnums stack in zend_delayed_compile_end(). */
@@ -3113,7 +3129,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_dim(result, var_ast, BP_VAR_W);
+			zend_delayed_compile_dim(result, var_ast, BP_VAR_W, /* by_ref */ false);
 
 			if (zend_is_assign_to_self(var_ast, expr_ast)
 			 && !is_this_fetch(expr_ast)) {
@@ -3296,7 +3312,7 @@ static void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
-			zend_delayed_compile_dim(result, var_ast, BP_VAR_RW);
+			zend_delayed_compile_dim(result, var_ast, BP_VAR_RW, /* by_ref */ false);
 			zend_compile_expr(&expr_node, expr_ast);
 
 			opline = zend_delayed_compile_end(offset);
@@ -4709,7 +4725,7 @@ static void zend_compile_unset(zend_ast *ast) /* {{{ */
 			}
 			return;
 		case ZEND_AST_DIM:
-			opline = zend_compile_dim(NULL, var_ast, BP_VAR_UNSET);
+			opline = zend_compile_dim(NULL, var_ast, BP_VAR_UNSET, /* by_ref */ false);
 			opline->opcode = ZEND_UNSET_DIM;
 			return;
 		case ZEND_AST_PROP:
@@ -8681,7 +8697,10 @@ static void zend_compile_post_incdec(znode *result, zend_ast *ast) /* {{{ */
 		zend_make_tmp_result(result, opline);
 	} else {
 		znode var_node;
-		zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
+			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
+		}
 		zend_emit_op_tmp(result, ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC : ZEND_POST_DEC,
 			&var_node, NULL);
 	}
@@ -8707,7 +8726,10 @@ static void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 		result->op_type = IS_TMP_VAR;
 	} else {
 		znode var_node;
-		zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		zend_op *opline = zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
+		if (opline && opline->opcode == ZEND_FETCH_DIM_RW) {
+			opline->extended_value = ZEND_FETCH_DIM_INCDEC;
+		}
 		zend_emit_op_tmp(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
 			&var_node, NULL);
 	}
@@ -9154,7 +9176,7 @@ static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case ZEND_AST_DIM:
-			opline = zend_compile_dim(result, var_ast, BP_VAR_IS);
+			opline = zend_compile_dim(result, var_ast, BP_VAR_IS, /* by_ref */ false);
 			opline->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
 			break;
 		case ZEND_AST_PROP:
@@ -10114,7 +10136,7 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 		case ZEND_AST_VAR:
 			return zend_compile_simple_var(result, ast, type, 0);
 		case ZEND_AST_DIM:
-			return zend_compile_dim(result, ast, type);
+			return zend_compile_dim(result, ast, type, by_ref);
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 			return zend_compile_prop(result, ast, type, by_ref);
@@ -10158,7 +10180,7 @@ static zend_op *zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t 
 		case ZEND_AST_VAR:
 			return zend_compile_simple_var(result, ast, type, 1);
 		case ZEND_AST_DIM:
-			return zend_delayed_compile_dim(result, ast, type);
+			return zend_delayed_compile_dim(result, ast, type, by_ref);
 		case ZEND_AST_PROP:
 		case ZEND_AST_NULLSAFE_PROP:
 		{

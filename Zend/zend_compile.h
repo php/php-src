@@ -961,6 +961,13 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_DIM_WRITE	2
 #define ZEND_FETCH_OBJ_FLAGS	3
 
+/* Used to mark what kind of operation a writing FETCH_DIM is used in,
+ * to produce a more precise error on incorrect string offset use. */
+#define ZEND_FETCH_DIM_REF 1
+#define ZEND_FETCH_DIM_DIM 2
+#define ZEND_FETCH_DIM_OBJ 3
+#define ZEND_FETCH_DIM_INCDEC 4
+
 #define ZEND_ISEMPTY			(1<<0)
 
 #define ZEND_LAST_CATCH			(1<<0)
