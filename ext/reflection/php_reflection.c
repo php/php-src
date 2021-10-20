@@ -611,9 +611,33 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 
 static int format_default_value(smart_str *str, zval *value) {
 	if (Z_TYPE_P(value) <= IS_STRING) {
-		smart_str_append_scalar(str, value, 15);
+		smart_str_append_scalar(str, value, SIZE_MAX);
 	} else if (Z_TYPE_P(value) == IS_ARRAY) {
-		smart_str_appends(str, "Array");
+		zend_string *str_key;
+		zend_long num_key;
+		zval *zv;
+		bool is_list = zend_array_is_list(Z_ARRVAL_P(value));
+		bool first = true;
+		smart_str_appendc(str, '[');
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(value), num_key, str_key, zv) {
+			if (!first) {
+				smart_str_appends(str, ", ");
+			}
+			first = false;
+
+			if (!is_list) {
+				if (str_key) {
+					smart_str_appendc(str, '\'');
+					smart_str_append_escaped(str, ZSTR_VAL(str_key), ZSTR_LEN(str_key));
+					smart_str_appendc(str, '\'');
+				} else {
+					smart_str_append_long(str, num_key);
+				}
+				smart_str_appends(str, " => ");
+			}
+			format_default_value(str, zv);
+		} ZEND_HASH_FOREACH_END();
+		smart_str_appendc(str, ']');
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
