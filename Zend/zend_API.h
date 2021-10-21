@@ -472,10 +472,8 @@ ZEND_API const char *zend_get_type_by_const(int type);
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
-#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
 #define ZEND_NUM_ARGS()						EX_NUM_ARGS()
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(); return; }
-#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
