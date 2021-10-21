@@ -169,7 +169,13 @@ static void php_pcre_free(void *block, void *data)
 	pefree(block, 1);
 }/*}}}*/
 
+#ifdef PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+	/* pcre 10.38 needs PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, disabled by default */
+#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS (PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL|PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
+#else
 #define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
+#endif
+
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
