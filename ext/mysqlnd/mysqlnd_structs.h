@@ -1087,7 +1087,7 @@ typedef struct st_mysqlnd_read_buffer {
 
 typedef void				(*func_mysqlnd_pfc__init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info);
 typedef void				(*func_mysqlnd_pfc__dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
-typedef enum_func_status	(*func_mysqlnd_pfc__reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
+typedef void				(*func_mysqlnd_pfc__reset)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info);
 typedef enum_func_status	(*func_mysqlnd_pfc__set_client_option)(MYSQLND_PFC * const pfc, enum_mysqlnd_client_option option, const char * const value);
 typedef enum_func_status	(*func_mysqlnd_pfc__decode)(zend_uchar * uncompressed_data, const size_t uncompressed_data_len, const zend_uchar * const compressed_data, const size_t compressed_data_len);
 typedef enum_func_status	(*func_mysqlnd_pfc__encode)(zend_uchar * compress_buffer, size_t * compress_buffer_len, const zend_uchar * const uncompressed_data, const size_t uncompressed_data_len);

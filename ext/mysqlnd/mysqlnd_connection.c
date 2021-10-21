@@ -503,9 +503,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 
-	if (PASS == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info) &&
-		PASS == conn->protocol_frame_codec->data->m.reset(conn->protocol_frame_codec, conn->stats, conn->error_info))
-	{
+	if (PASS == conn->vio->data->m.connect(conn->vio, *scheme, conn->persistent, conn->stats, conn->error_info)) {
+		conn->protocol_frame_codec->data->m.reset(conn->protocol_frame_codec, conn->stats, conn->error_info);
 		size_t client_flags = mysql_flags;
 
 		ret = conn->command->handshake(conn, *username, *password, *database, client_flags);
