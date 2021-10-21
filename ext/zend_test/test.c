@@ -27,6 +27,7 @@
 #include "zend_attributes.h"
 #include "zend_observer.h"
 #include "zend_smart_str.h"
+#include "zend_weakrefs.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_enabled;
@@ -41,6 +42,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_show_opcode;
 	int observer_nesting_depth;
 	int replace_zend_execute_ex;
+	HashTable global_weakmap;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -224,6 +226,40 @@ static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 	}
 }
 /* }}} */
+
+static ZEND_FUNCTION(zend_weakmap_attach)
+{
+	zval *value;
+	zend_object *obj;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_OBJ(obj)
+			Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_weakrefs_hash_add(&ZT_G(global_weakmap), obj, value)) {
+		Z_TRY_ADDREF_P(value);
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static ZEND_FUNCTION(zend_weakmap_remove)
+{
+	zend_object *obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_weakrefs_hash_del(&ZT_G(global_weakmap), obj) == SUCCESS);
+}
+
+static ZEND_FUNCTION(zend_weakmap_dump)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_ARR(zend_array_dup(&ZT_G(global_weakmap)));
+}
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
 static ZEND_FUNCTION(zend_iterable)
@@ -622,11 +658,17 @@ static zend_observer_fcall_handlers observer_fcall_init(zend_execute_data *execu
 
 PHP_RINIT_FUNCTION(zend_test)
 {
+	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
+	zend_ulong objptr;
+	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), objptr) {
+		zend_weakrefs_hash_del(&ZT_G(global_weakmap), (zend_object *)(uintptr_t)objptr);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&ZT_G(global_weakmap));
 	return SUCCESS;
 }
 
