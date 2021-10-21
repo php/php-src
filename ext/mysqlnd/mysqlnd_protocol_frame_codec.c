@@ -438,7 +438,7 @@ MYSQLND_METHOD(mysqlnd_pfc, free_contents)(MYSQLND_PFC * pfc)
 
 
 /* {{{ mysqlnd_pfc::init */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int buf_size;
@@ -447,7 +447,7 @@ MYSQLND_METHOD(mysqlnd_pfc, init)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
 	pfc->data->m.set_client_option(pfc, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size);
 
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 

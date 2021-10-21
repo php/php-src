@@ -230,10 +230,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const bool persistent, MYSQLND_S
 		pfc->persistent = pfc->data->persistent = persistent;
 		pfc->data->m = *mysqlnd_pfc_get_methods();
 
-		if (PASS != pfc->data->m.init(pfc, stats, error_info)) {
-			pfc->data->m.dtor(pfc, stats, error_info);
-			pfc = NULL;
-		}
+		pfc->data->m.init(pfc, stats, error_info);
 	}
 	DBG_RETURN(pfc);
 }
@@ -255,10 +252,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const bool persistent, MYSQLND_S
 		vio->persistent = vio->data->persistent = persistent;
 		vio->data->m = *mysqlnd_vio_get_methods();
 
-		if (PASS != vio->data->m.init(vio, stats, error_info)) {
-			vio->data->m.dtor(vio, stats, error_info);
-			vio = NULL;
-		}
+		vio->data->m.init(vio, stats, error_info);
 	}
 	DBG_RETURN(vio);
 }
