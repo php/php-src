@@ -374,7 +374,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 
 
 /* {{{ mysqlnd_conn_data::end_psession */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::end_psession");
@@ -385,7 +385,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, end_psession)(MYSQLND_CONN_DATA * conn)
 	}
 	mysqlnd_set_string(&conn->last_message, NULL, 0);
 	conn->error_info = &conn->error_info_impl;
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
