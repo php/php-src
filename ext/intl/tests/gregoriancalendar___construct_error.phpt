@@ -12,18 +12,18 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump(intlgregcal_create_instance(1,2,3,4,5,6,7,8));
-} catch (ArgumentCountError $e) {
+    var_dump(new IntlGregorianCalendar(null, 1));
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump(intlgregcal_create_instance(1,2,3,4));
-} catch (ArgumentCountError $e) {
+    var_dump(new IntlGregorianCalendar(1, null));
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump(new IntlGregorianCalendar(1,2,NULL,4));
-} catch (ArgumentCountError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
@@ -40,9 +40,9 @@ try {
 }
 ?>
 --EXPECT--
-Too many arguments
-Too many arguments
-No variant with 4 arguments (excluding trailing NULLs)
-No variant with 4 arguments (excluding trailing NULLs)
+intlgregcal_create_instance() expects at most 6 arguments, 7 given
+IntlGregorianCalendar::__construct(): Argument #2 ($localeOrMonth) must be ?string if argument 1 is a timezone
+IntlGregorianCalendar::__construct(): Argument #2 ($localeOrMonth) must be int if argument 1 is an int
+IntlGregorianCalendar::__construct(): Argument #3 ($day) must be provided
 IntlGregorianCalendar::__construct(): Argument #6 ($second) must be of type int, array given
 IntlGregorianCalendar object is already constructed

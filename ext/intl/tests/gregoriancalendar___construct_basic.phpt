@@ -25,7 +25,7 @@ $intlcal = new IntlGregorianCalendar('Europe/Lisbon', 'pt_PT');
 var_dump($intlcal->getTimeZone()->getId());
 var_dump($intlcal->getLocale(1));
 
-$intlcal = new IntlGregorianCalendar('Europe/Paris', 'fr_CA', NULL, NULL, NULL, NULL);
+$intlcal = new IntlGregorianCalendar('Europe/Paris', 'fr_CA');
 var_dump($intlcal->getTimeZone()->getId());
 var_dump($intlcal->getLocale(1));
 

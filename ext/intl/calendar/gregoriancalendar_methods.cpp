@@ -43,48 +43,32 @@ static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 	return (GregorianCalendar*)co->ucal;
 }
 
-static void _php_intlgregcal_constructor_body(
-    INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
+static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zval		*tz_object	= NULL;
-	zval		args_a[6],
-				*args		= &args_a[0];
-	char		*locale		= NULL;
-	size_t			locale_len;
-	zend_long		largs[6];
-	UErrorCode	status		= U_ZERO_ERROR;
-	int			variant;
+	UErrorCode status = U_ZERO_ERROR;
+	zval *timezone_or_year = NULL;
+	zend_string *locale = NULL;
+	zend_long month;
+	bool is_month_null = true;
+	zend_long day_of_month = 0;
+	bool is_dom_null = true;
+	zend_long hour = 0;
+	zend_long minutes = 0;
+	zend_long seconds = 0;
+
+	ZEND_PARSE_PARAMETERS_START(0, 6)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(timezone_or_year)
+		Z_PARAM_STR_OR_LONG_OR_NULL(locale, month, is_month_null)
+		Z_PARAM_LONG_OR_NULL(day_of_month, is_dom_null)
+		Z_PARAM_LONG(hour)
+		Z_PARAM_LONG(minutes)
+		Z_PARAM_LONG(seconds)
+	ZEND_PARSE_PARAMETERS_END();
+
 	intl_error_reset(NULL);
 
-	// parameter number validation / variant determination
-	if (ZEND_NUM_ARGS() > 6 ||
-			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		zend_argument_count_error("Too many arguments");
-		RETURN_THROWS();
-	}
-
-	for (variant = ZEND_NUM_ARGS();
-		variant > 0 && Z_TYPE(args[variant - 1]) == IS_NULL;
-		variant--) {}
-	if (variant == 4) {
-		zend_argument_count_error("No variant with 4 arguments (excluding trailing NULLs)");
-		RETURN_THROWS();
-	}
-
-	// argument parsing
-	if (variant <= 2) {
-		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
-				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-			RETURN_THROWS();
-		}
-	}
-	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
-			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
-			&largs[5]) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	// instantion of ICU object
+	// instantiation of ICU object
 	Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
 	GregorianCalendar *gcal = NULL;
 
@@ -93,9 +77,13 @@ static void _php_intlgregcal_constructor_body(
 		RETURN_THROWS();
 	}
 
-	if (variant <= 2) {
-		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL,
+	if (!timezone_or_year || Z_TYPE_P(timezone_or_year) != IS_LONG) {
+		if (!locale && !is_month_null) {
+			zend_argument_value_error(2, "must be ?string if argument 1 is a timezone");
+			RETURN_THROWS();
+		}
+
+		TimeZone *tz = timezone_process_timezone_argument(timezone_or_year, NULL,
 			"intlgregcal_create_instance");
 		if (tz == NULL) {
 			if (!EG(exception)) {
@@ -103,17 +91,19 @@ static void _php_intlgregcal_constructor_body(
 			}
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
-				RETVAL_NULL();
+				RETURN_NULL();
 			}
-			return;
+			RETURN_THROWS();
 		}
-		if (!locale) {
-			locale = const_cast<char*>(intl_locale_get_default());
+		char *intl_locale;
+		if (locale) {
+			intl_locale = ZSTR_VAL(locale);
+		} else {
+			intl_locale = const_cast<char*>(intl_locale_get_default());
 		}
 
-		gcal = new GregorianCalendar(tz, Locale::createFromName(locale),
-			status);
-			// Should this throw?
+		gcal = new GregorianCalendar(tz, Locale::createFromName(intl_locale), status);
+		// Should this always throw?
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "intlgregcal_create_instance: error "
 				"creating ICU GregorianCalendar from time zone and locale", 0);
@@ -123,31 +113,50 @@ static void _php_intlgregcal_constructor_body(
 			delete tz;
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
-				RETVAL_NULL();
+				RETURN_NULL();
 			}
-			return;
+			RETURN_THROWS();
 		}
 	} else {
-		// From date/time (3, 5 or 6 arguments)
-		for (int i = 0; i < variant; i++) {
-			if (largs[i] < INT32_MIN || largs[i] > INT32_MAX) {
-				zend_argument_value_error(getThis() ? (i-1) : i,
-					"must be between %d and %d", INT32_MIN, INT32_MAX);
-				RETURN_THROWS();
-			}
+		ZEND_ASSERT(Z_TYPE_P(timezone_or_year) == IS_LONG);
+		if (locale || is_month_null) {
+			zend_argument_value_error(2, "must be int if argument 1 is an int");
+			RETURN_THROWS();
+		}
+		if (is_dom_null) {
+			zend_argument_value_error(3, "must be provided");
+			RETURN_THROWS();
 		}
 
-		if (variant == 3) {
-			gcal = new GregorianCalendar((int32_t)largs[0], (int32_t)largs[1],
-				(int32_t)largs[2], status);
-		} else if (variant == 5) {
-			gcal = new GregorianCalendar((int32_t)largs[0], (int32_t)largs[1],
-				(int32_t)largs[2], (int32_t)largs[3], (int32_t)largs[4], status);
-		} else if (variant == 6) {
-			gcal = new GregorianCalendar((int32_t)largs[0], (int32_t)largs[1],
-				(int32_t)largs[2], (int32_t)largs[3], (int32_t)largs[4], (int32_t)largs[5],
-				status);
+		zend_long year = Z_LVAL_P(timezone_or_year);
+		if (year < INT32_MIN || year > INT32_MAX) {
+			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
 		}
+		if (month < INT32_MIN || month > INT32_MAX) {
+			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		if (day_of_month < INT32_MIN || day_of_month > INT32_MAX) {
+			zend_argument_value_error(3, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		if (hour < INT32_MIN || hour > INT32_MAX) {
+			zend_argument_value_error(4, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		if (minutes < INT32_MIN || minutes > INT32_MAX) {
+			zend_argument_value_error(5, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+		if (seconds < INT32_MIN || seconds > INT32_MAX) {
+			zend_argument_value_error(6, "must be between %d and %d", INT32_MIN, INT32_MAX);
+			RETURN_THROWS();
+		}
+
+		gcal = new GregorianCalendar((int32_t)year, (int32_t)month, (int32_t)day_of_month,
+			(int32_t)hour, (int32_t)minutes, (int32_t)seconds, status);
+
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "intlgregcal_create_instance: error "
 				"creating ICU GregorianCalendar from date", 0);
@@ -156,9 +165,9 @@ static void _php_intlgregcal_constructor_body(
 			}
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
-				RETVAL_NULL();
+				RETURN_NULL();
 			}
-			return;
+			RETURN_THROWS();
 		}
 
 		timelib_tzinfo *tzinfo = get_timezone_info();
@@ -171,9 +180,9 @@ static void _php_intlgregcal_constructor_body(
 			delete gcal;
 			if (!is_constructor) {
 				zval_ptr_dtor(return_value);
-				RETVAL_NULL();
+				RETURN_NULL();
 			}
-			return;
+			RETURN_THROWS();
 		}
 
 		TimeZone *tz = TimeZone::createTimeZone(tzstr);

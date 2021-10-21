@@ -284,13 +284,8 @@ class IntlGregorianCalendar extends IntlCalendar
 {
     /**
      * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
-     * @param string|int|null $localeOrMonth
-     * @param int $day
-     * @param int $hour
-     * @param int $minute
-     * @param int $second
      */
-    public function __construct($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN) {}
+    public function __construct($timezoneOrYear = null, string|int|null $localeOrMonth = null, ?int $day = null, int $hour = 0, int $minute = 0, int $second = 0) {}
 
     /**
      * @tentative-return-type
