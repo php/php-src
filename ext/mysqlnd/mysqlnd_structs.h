@@ -632,7 +632,7 @@ typedef void 				(*func_mysqlnd_res__fetch_into)(MYSQLND_RES *result, const unsi
 typedef MYSQLND_ROW_C 		(*func_mysqlnd_res__fetch_row_c)(MYSQLND_RES *result);
 typedef uint64_t			(*func_mysqlnd_res__num_rows)(const MYSQLND_RES * const result);
 typedef unsigned int		(*func_mysqlnd_res__num_fields)(const MYSQLND_RES * const result);
-typedef enum_func_status	(*func_mysqlnd_res__skip_result)(MYSQLND_RES * const result);
+typedef void				(*func_mysqlnd_res__skip_result)(MYSQLND_RES * const result);
 typedef enum_func_status	(*func_mysqlnd_res__seek_data)(MYSQLND_RES * const result, const uint64_t row);
 typedef MYSQLND_FIELD_OFFSET (*func_mysqlnd_res__seek_field)(MYSQLND_RES * const result, const MYSQLND_FIELD_OFFSET field_offset);
 typedef MYSQLND_FIELD_OFFSET (*func_mysqlnd_res__field_tell)(const MYSQLND_RES * const result);
