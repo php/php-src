@@ -152,11 +152,12 @@ ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pDa
 }
 
 ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
-	zend_result result = zend_hash_index_del(ht, (zend_ulong) key);
-	if (result == SUCCESS) {
+	zval *zv = zend_hash_index_find(ht, (zend_ulong) key);
+	if (zv) {
 		zend_weakref_unregister(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_MAP));
+		return SUCCESS;
 	}
-	return result;
+	return FAILURE;
 }
 
 void zend_weakrefs_init(void) {
