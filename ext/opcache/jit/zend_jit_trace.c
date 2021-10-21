@@ -5783,6 +5783,19 @@ done:
 				SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 			}
 
+			if (opline->opcode == ZEND_ROPE_INIT) {
+				/* clear stack slots used by rope */
+				uint32_t var = EX_VAR_TO_NUM(opline->result.var);
+				uint32_t count =
+					((opline->extended_value * sizeof(void*)) + (sizeof(zval)-1)) / sizeof(zval);
+
+				do {
+					SET_STACK_TYPE(stack, var, IS_UNKNOWN, 1);
+					var++;
+					count--;
+				} while (count);
+			}
+
 			if (ssa_op) {
 				zend_ssa_range tmp;
 
