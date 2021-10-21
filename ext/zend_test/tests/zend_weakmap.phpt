@@ -33,13 +33,13 @@ bool(true)
 bool(false)
 bool(true)
 array(2) {
-  [%d]=>
+  [%s]=>
   int(1)
-  [%d]=>
+  [%s]=>
   int(2)
 }
 array(1) {
-  [%d]=>
+  [%s]=>
   int(2)
 }
 bool(true)
@@ -48,7 +48,7 @@ array(0) {
 }
 bool(true)
 array(1) {
-  [%d]=>
+  [%s]=>
   object(stdClass)#2 (0) {
   }
 }
