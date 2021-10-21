@@ -87,6 +87,10 @@ namespace {
 
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
+    function zend_weakmap_attach(object $object, mixed $value): bool {}
+    function zend_weakmap_remove(object $object): bool {}
+    function zend_weakmap_dump(): array {}
+
     function zend_get_unit_enum(): ZendTestUnitEnum {}
 }
 
