@@ -3456,6 +3456,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 								/* This can occur if a DIM_FETCH_FUNC_ARG with UNUSED op2 is left
 								 * behind, because it can't be converted to DIM_FETCH_R. */
 								break;
+							case ZEND_FREE:
+								/* This may happen if the using opcode is DCEd.  */
+								break;
 							EMPTY_SWITCH_DEFAULT_CASE()
 						}
 						j = zend_ssa_next_use(ssa->ops, ssa_op->result_def, j);
