@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
     escalation) (CVE-2021-21703). (Jakub Zelenka)
 
+- MBString:
+  . Fixed bug #76167 (mbstring may use pointer from some previous request).
+    (cmb, cataphract)
+
 - MySQLi:
   . Fixed bug #81494 (Stopped unbuffered query does not throw error). (Nikita)
 

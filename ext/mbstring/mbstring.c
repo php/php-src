@@ -5208,10 +5208,6 @@ static void php_mb_populate_current_detect_order_list(void)
 	const mbfl_encoding **entry = 0;
 	size_t nentries;
 
-	if (MBSTRG(current_detect_order_list)) {
-		return;
-	}
-
 	if (MBSTRG(detect_order_list) && MBSTRG(detect_order_list_size)) {
 		nentries = MBSTRG(detect_order_list_size);
 		entry = (const mbfl_encoding **)safe_emalloc(nentries, sizeof(mbfl_encoding*), 0);
