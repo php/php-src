@@ -193,6 +193,13 @@ static void php_pcre_efree(void *block, void *data)
 	efree(block);
 }
 
+#ifdef PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+	/* pcre 10.38 needs PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, disabled by default */
+#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+#else
+#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS 0
+#endif
+
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
@@ -212,6 +219,8 @@ static void php_pcre_init_pcre2(uint8_t jit)
 			return;
 		}
 	}
+
+	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
 
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
