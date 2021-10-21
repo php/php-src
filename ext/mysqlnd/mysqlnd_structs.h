@@ -486,7 +486,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_do_request)(MYSQLND_CONN_DATA * const conn, const enum php_mysqlnd_server_command command, const zend_uchar * const arg, const size_t arg_len, const bool silent, const bool ignore_upsert_status);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_command_handle_response)(MYSQLND_CONN_DATA * const conn, const enum mysqlnd_packet_type ok_packet, const bool silent, const enum php_mysqlnd_server_command command, const bool ignore_upsert_status);
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
+typedef void				(*func_mysqlnd_conn_data__restart_psession)(MYSQLND_CONN_DATA * conn);
 typedef void				(*func_mysqlnd_conn_data__end_psession)(MYSQLND_CONN_DATA * conn);
 typedef enum_func_status	(*func_mysqlnd_conn_data__send_close)(MYSQLND_CONN_DATA * conn);
 

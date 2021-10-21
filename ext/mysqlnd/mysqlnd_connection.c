@@ -361,14 +361,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 
 
 /* {{{ mysqlnd_conn_data::restart_psession */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_conn_data, restart_psession)(MYSQLND_CONN_DATA * conn)
 {
 	DBG_ENTER("mysqlnd_conn_data::restart_psession");
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CONNECT_REUSED);
 	conn->current_result = NULL;
 	conn->last_message.s = NULL;
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
