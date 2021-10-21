@@ -54,6 +54,18 @@ void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
+extern ZEND_API ZEND_METHOD(Fiber, __construct);
+extern ZEND_API ZEND_METHOD(Fiber, start);
+extern ZEND_API ZEND_METHOD(Fiber, suspend);
+extern ZEND_API ZEND_METHOD(Fiber, resume);
+extern ZEND_API ZEND_METHOD(Fiber, throw);
+extern ZEND_API ZEND_METHOD(Fiber, isStarted);
+extern ZEND_API ZEND_METHOD(Fiber, isSuspended);
+extern ZEND_API ZEND_METHOD(Fiber, isRunning);
+extern ZEND_API ZEND_METHOD(Fiber, isTerminated);
+extern ZEND_API ZEND_METHOD(Fiber, getReturn);
+extern ZEND_API ZEND_METHOD(Fiber, getCurrent);
+
 typedef struct _zend_fiber_stack zend_fiber_stack;
 
 /* Encapsulates data needed for a context switch. */
