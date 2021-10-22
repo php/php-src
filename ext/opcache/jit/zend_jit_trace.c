@@ -4564,6 +4564,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
+						if (ssa->vars[ssa_op->op1_use].no_val) {
+							if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG
+							 || (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_DOUBLE) {
+								if (STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) != IS_LONG
+								 && STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) != IS_DOUBLE) {
+									/* type may be not set */
+									op1_info |= MAY_BE_NULL;
+							    }
+							}
+						}
 						CHECK_OP1_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
 						op1_addr = OP1_REG_ADDR();
@@ -5887,7 +5897,8 @@ done:
 						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var));
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
-						(type == IS_UNKNOWN || !ra || !ra[ssa_op->op1_def]));
+						(type == IS_UNKNOWN || !ra ||
+							(!ra[ssa_op->op1_def] && !ssa->vars[ssa_op->op1_def].no_val)));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
@@ -5930,7 +5941,8 @@ done:
 						type = STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var));
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), type,
-						(type == IS_UNKNOWN || !ra || !ra[ssa_op->op2_def]));
+						(type == IS_UNKNOWN || !ra ||
+							(!ra[ssa_op->op2_def] && !ssa->vars[ssa_op->op2_def].no_val)));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
