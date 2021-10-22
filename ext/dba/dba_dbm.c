@@ -50,11 +50,7 @@ typedef struct {
 DBA_OPEN_FUNC(dbm)
 {
 	int fd;
-	int filemode = 0644;
-
-	if(info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
+	int filemode = info->file_permission;
 
 	if(info->mode == DBA_TRUNC) {
 		char buf[MAXPATHLEN];

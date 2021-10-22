@@ -39,7 +39,7 @@ DBA_OPEN_FUNC(db2)
 	DB *dbp;
 	DBTYPE type;
 	int gmode = 0;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
@@ -59,10 +59,6 @@ DBA_OPEN_FUNC(db2)
 
 	if (gmode == -1) {
 		return FAILURE;/* not possible */
-	}
-
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	if (db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {

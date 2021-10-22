@@ -2,23 +2,11 @@
 
 /** @generate-class-entries */
 
-/**
- * @param string $path
- * @param string $mode
- * @param string $handler
- * @param string $handler_params
- * @return resource|false
- */
-function dba_popen($path, $mode, $handler = UNKNOWN, ...$handler_params) {}
+/** @return resource|false */
+function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0) {}
 
-/**
- * @param string $path
- * @param string $mode
- * @param string $handler
- * @param string $handler_params
- * @return resource|false
- */
-function dba_open($path, $mode, $handler = UNKNOWN, ...$handler_params) {}
+/** @return resource|false */
+function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0) {}
 
 /** @param resource $dba */
 function dba_close($dba): void {}

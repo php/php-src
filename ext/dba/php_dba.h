@@ -43,9 +43,8 @@ typedef struct dba_info {
 	dba_mode_t mode;
 	php_stream *fp;  /* this is the database stream for builtin handlers */
 	int fd;
-	/* arg[cv] are only available when the dba_open handler is called! */
-	int argc;
-	zval *argv;
+	int file_permission;
+	zend_long map_size;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;
