@@ -89,13 +89,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(dba)
 #endif
 
-/* {{{ macromania */
-
-#define DBA_ID_PARS 											\
-	zval *id; 													\
-	dba_info *info = NULL; 										\
-	int ac = ZEND_NUM_ARGS()
-
 /* these are used to get the standard arguments */
 
 /* {{{ php_dba_myke_key */
@@ -914,7 +907,9 @@ PHP_FUNCTION(dba_close)
 /* {{{ Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
-	DBA_ID_PARS;
+	zval *id;
+	dba_info *info = NULL;
+	int ac = ZEND_NUM_ARGS();
 	DBA_GET2;
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
@@ -932,7 +927,9 @@ PHP_FUNCTION(dba_fetch)
 {
 	char *val;
 	size_t len = 0;
-	DBA_ID_PARS;
+	zval *id;
+	dba_info *info = NULL;
+	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *key_str, *key_free;
 	size_t key_len;
@@ -1078,7 +1075,9 @@ PHP_FUNCTION(dba_nextkey)
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
 {
-	DBA_ID_PARS;
+	zval *id;
+	dba_info *info = NULL;
+	int ac = ZEND_NUM_ARGS();
 	DBA_GET2;
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
