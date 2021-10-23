@@ -423,13 +423,12 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *val;
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zsr", &key, &val, &val_len, &id) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -896,12 +895,11 @@ PHP_FUNCTION(dba_exists)
 {
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
@@ -925,20 +923,19 @@ PHP_FUNCTION(dba_fetch)
 	size_t len = 0;
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *key_str, *key_free;
 	size_t key_len;
 	zend_long skip = 0;
 
-	switch(ac) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
-			if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		case 3:
-			if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zlr", &key, &skip, &id) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
@@ -951,7 +948,7 @@ PHP_FUNCTION(dba_fetch)
 
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
-	if (ac==3) {
+	if (ZEND_NUM_ARGS() == 3) {
 		if (!strcmp(info->hnd->name, "cdb")) {
 			if (skip < 0) {
 				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
@@ -1073,12 +1070,11 @@ PHP_FUNCTION(dba_delete)
 {
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
