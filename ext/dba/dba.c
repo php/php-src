@@ -108,8 +108,9 @@ static zend_string* php_dba_make_key(HashTable *key)
 	// TODO: Use zval_try_get_string() or try_convert_to_string() instead?
 	convert_to_string(group);
 	convert_to_string(name);
+	// TODO: Check ZSTR_LEN(name) != 0
 	if (Z_STRLEN_P(group) == 0) {
-		return Z_STR_P(name);
+		return zend_string_copy(Z_STR_P(name));
 	}
 	return zend_strpprintf(0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
 }
