@@ -89,8 +89,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(dba)
 #endif
 
-/* these are used to get the standard arguments */
-
 /* {{{ php_dba_myke_key */
 static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 {
@@ -133,17 +131,6 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 	}
 }
 /* }}} */
-
-#define DBA_GET2 												\
-	zval *key;													\
-	char *key_str, *key_free;									\
-	size_t key_len; 											\
-	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { 	\
-		RETURN_THROWS();										\
-	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
-		RETURN_FALSE;											\
-	}
 
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
@@ -910,7 +897,16 @@ PHP_FUNCTION(dba_exists)
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
-	DBA_GET2;
+	zval *key;
+	char *key_str, *key_free;
+	size_t key_len;
+
+	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
+		RETURN_FALSE;
+	}
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	if(info->hnd->exists(info, key_str, key_len) == SUCCESS) {
@@ -1078,7 +1074,16 @@ PHP_FUNCTION(dba_delete)
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
-	DBA_GET2;
+	zval *key;
+	char *key_str, *key_free;
+	size_t key_len;
+
+	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
+		RETURN_FALSE;
+	}
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	DBA_WRITE_CHECK_WITH_ID;
