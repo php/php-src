@@ -90,61 +90,45 @@ ZEND_GET_MODULE(dba)
 #endif
 
 /* {{{ php_dba_myke_key */
-static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
+static zend_string* php_dba_make_key(HashTable *key)
 {
-	if (Z_TYPE_P(key) == IS_ARRAY) {
-		zval *group, *name;
-		HashPosition pos;
-		size_t len;
+	zval *group, *name;
+	HashPosition pos;
 
-		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
-			zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
-			return 0;
-		}
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
-		group = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
-		zend_hash_move_forward_ex(Z_ARRVAL_P(key), &pos);
-		name = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
-		convert_to_string(group);
-		convert_to_string(name);
-		if (Z_STRLEN_P(group) == 0) {
-			*key_str = Z_STRVAL_P(name);
-			*key_free = NULL;
-			return Z_STRLEN_P(name);
-		}
-		len = spprintf(key_str, 0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
-		*key_free = *key_str;
-		return len;
-	} else {
-		zval tmp;
-		size_t len;
-
-		ZVAL_COPY(&tmp, key);
-		convert_to_string(&tmp);
-
-		len = Z_STRLEN(tmp);
-		if (len) {
-			*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
-		}
-		zval_ptr_dtor(&tmp);
-		return len;
+	if (zend_hash_num_elements(key) != 2) {
+		zend_argument_error(NULL, 1, "must have exactly two elements: \"key\" and \"name\"");
+		return NULL;
 	}
+
+	// TODO: Use ZEND_HASH_FOREACH_VAL() API?
+	zend_hash_internal_pointer_reset_ex(key, &pos);
+	group = zend_hash_get_current_data_ex(key, &pos);
+	zend_hash_move_forward_ex(key, &pos);
+	name = zend_hash_get_current_data_ex(key, &pos);
+	// TODO: Use zval_try_get_string() or try_convert_to_string() instead?
+	convert_to_string(group);
+	convert_to_string(name);
+	if (Z_STRLEN_P(group) == 0) {
+		return Z_STR_P(name);
+	}
+	return zend_strpprintf(0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
 }
 /* }}} */
+
+#define DBA_RELEASE_HT_KEY_CREATION() if (key_ht) {zend_string_release_ex(key_str, false);}
 
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
 		RETURN_THROWS(); \
 	}
 
-#define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
-	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
-		DBA_ID_DONE; \
-		RETURN_THROWS(); \
+/* check whether the user has write access */
+#define DBA_WRITE_CHECK(info) \
+	if((info)->mode != DBA_WRITER && (info)->mode != DBA_TRUNC && (info)->mode != DBA_CREAT) { \
+		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		RETURN_FALSE; \
 	}
 
-#define DBA_ID_DONE												\
-	if (key_free) efree(key_free)
 /* a DBA handler must have specific routines */
 
 #define DBA_NAMED_HND(alias, name, flags) \
@@ -155,21 +139,6 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 },
 
 #define DBA_HND(name, flags) DBA_NAMED_HND(name, name, flags)
-
-/* check whether the user has write access */
-#define DBA_WRITE_CHECK \
-	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
-		RETURN_FALSE; \
-	}
-
-/* the same check, but with a call to DBA_ID_DONE before returning */
-#define DBA_WRITE_CHECK_WITH_ID \
-	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
-		DBA_ID_DONE; \
-		RETURN_FALSE; \
-	}
 
 /* }}} */
 
@@ -420,33 +389,32 @@ PHP_MINFO_FUNCTION(dba)
 /* {{{ php_dba_update */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
-	zval *key;
-	char *val;
-	char *key_str, *key_free;
-	size_t key_len;
+	HashTable *key_ht = NULL;
+	zend_string *key_str = NULL;
+	zend_string *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zsr", &key, &val, &val_len, &id) == FAILURE) {
-		RETURN_THROWS();
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ARRAY_HT_OR_STR(key_ht, key_str)
+		Z_PARAM_STR(value)
+		Z_PARAM_RESOURCE(id);
+	ZEND_PARSE_PARAMETERS_END();
+
+	DBA_FETCH_RESOURCE(info, id);
+	DBA_WRITE_CHECK(info);
+
+	if (key_ht) {
+		key_str = php_dba_make_key(key_ht);
+		if (!key_str) {
+			// TODO ValueError?
+			RETURN_FALSE;
+		}
 	}
 
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
-		RETURN_FALSE;
-	}
-
-	DBA_FETCH_RESOURCE_WITH_ID(info, id);
-
-	DBA_WRITE_CHECK_WITH_ID;
-
-	if (info->hnd->update(info, key_str, key_len, val, val_len, mode) == SUCCESS) {
-		DBA_ID_DONE;
-		RETURN_TRUE;
-	}
-
-	DBA_ID_DONE;
-	RETURN_FALSE;
+	RETVAL_BOOL(info->hnd->update(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str),
+		ZSTR_VAL(value), ZSTR_LEN(value), mode) == SUCCESS);
+	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */
 
@@ -895,61 +863,68 @@ PHP_FUNCTION(dba_exists)
 {
 	zval *id;
 	dba_info *info = NULL;
-	zval *key;
-	char *key_str, *key_free;
-	size_t key_len;
+	HashTable *key_ht = NULL;
+	zend_string *key_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
-		RETURN_THROWS();
-	}
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
-		RETURN_FALSE;
-	}
-	DBA_FETCH_RESOURCE_WITH_ID(info, id);
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT_OR_STR(key_ht, key_str)
+		Z_PARAM_RESOURCE(id);
+	ZEND_PARSE_PARAMETERS_END();
 
-	if(info->hnd->exists(info, key_str, key_len) == SUCCESS) {
-		DBA_ID_DONE;
-		RETURN_TRUE;
+	DBA_FETCH_RESOURCE(info, id);
+
+	if (key_ht) {
+		key_str = php_dba_make_key(key_ht);
+		if (!key_str) {
+			// TODO ValueError?
+			RETURN_FALSE;
+		}
 	}
-	DBA_ID_DONE;
-	RETURN_FALSE;
+
+	RETVAL_BOOL(info->hnd->exists(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str)) == SUCCESS);
+	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */
 
 /* {{{ Fetches the data associated with key */
 PHP_FUNCTION(dba_fetch)
 {
-	char *val;
-	size_t len = 0;
 	zval *id;
 	dba_info *info = NULL;
-	zval *key;
-	char *key_str, *key_free;
-	size_t key_len;
+	HashTable *key_ht = NULL;
+	zend_string *key_str = NULL;
 	zend_long skip = 0;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		case 3:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zlr", &key, &skip, &id) == FAILURE) {
-				RETURN_THROWS();
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-	}
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
-		RETURN_FALSE;
-	}
-
-	DBA_FETCH_RESOURCE_WITH_ID(info, id);
-
+	/* Check for legacy signature */
 	if (ZEND_NUM_ARGS() == 3) {
+		ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_QUIET, 3, 3)
+			Z_PARAM_ARRAY_HT_OR_STR(key_ht, key_str)
+			Z_PARAM_LONG(skip)
+			Z_PARAM_RESOURCE(id);
+		ZEND_PARSE_PARAMETERS_END_EX(goto standard;);
+	} else {
+		standard:
+		ZEND_PARSE_PARAMETERS_START(2, 3)
+			Z_PARAM_ARRAY_HT_OR_STR(key_ht, key_str)
+			Z_PARAM_RESOURCE(id);
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(skip)
+		ZEND_PARSE_PARAMETERS_END();
+	}
+
+	DBA_FETCH_RESOURCE(info, id);
+
+	if (key_ht) {
+		key_str = php_dba_make_key(key_ht);
+		if (!key_str) {
+			// TODO ValueError?
+			RETURN_FALSE;
+		}
+	}
+
+	if (skip != 0) {
 		if (!strcmp(info->hnd->name, "cdb")) {
+			// TODO ValueError?
 			if (skip < 0) {
 				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
 				skip = 0;
@@ -962,6 +937,7 @@ PHP_FUNCTION(dba_fetch)
 			 * value to 0 ensures the first value.
 			 */
 			if (skip < -1) {
+				// TODO ValueError?
 				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
 				skip = 0;
 			}
@@ -969,17 +945,17 @@ PHP_FUNCTION(dba_fetch)
 			php_error_docref(NULL, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
 			skip = 0;
 		}
-	} else {
-		skip = 0;
 	}
-	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len)) != NULL) {
-		DBA_ID_DONE;
-		RETVAL_STRINGL(val, len);
-		efree(val);
-		return;
+
+	char *val;
+	size_t len = 0;
+	if ((val = info->hnd->fetch(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str), skip, &len)) == NULL) {
+		DBA_RELEASE_HT_KEY_CREATION();
+		RETURN_FALSE;
 	}
-	DBA_ID_DONE;
-	RETURN_FALSE;
+	DBA_RELEASE_HT_KEY_CREATION();
+	RETVAL_STRINGL(val, len);
+	efree(val);
 }
 /* }}} */
 
@@ -1070,27 +1046,27 @@ PHP_FUNCTION(dba_delete)
 {
 	zval *id;
 	dba_info *info = NULL;
-	zval *key;
-	char *key_str, *key_free;
-	size_t key_len;
+	HashTable *key_ht = NULL;
+	zend_string *key_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zr", &key, &id) == FAILURE) {
-		RETURN_THROWS();
-	}
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
-		RETURN_FALSE;
-	}
-	DBA_FETCH_RESOURCE_WITH_ID(info, id);
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY_HT_OR_STR(key_ht, key_str)
+		Z_PARAM_RESOURCE(id);
+	ZEND_PARSE_PARAMETERS_END();
 
-	DBA_WRITE_CHECK_WITH_ID;
+	DBA_FETCH_RESOURCE(info, id);
+	DBA_WRITE_CHECK(info);
 
-	if(info->hnd->delete(info, key_str, key_len) == SUCCESS)
-	{
-		DBA_ID_DONE;
-		RETURN_TRUE;
+	if (key_ht) {
+		key_str = php_dba_make_key(key_ht);
+		if (!key_str) {
+			// TODO ValueError?
+			RETURN_FALSE;
+		}
 	}
-	DBA_ID_DONE;
-	RETURN_FALSE;
+
+	RETVAL_BOOL(info->hnd->delete(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str)) == SUCCESS);
+	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */
 
@@ -1121,8 +1097,7 @@ PHP_FUNCTION(dba_optimize)
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
-
-	DBA_WRITE_CHECK;
+	DBA_WRITE_CHECK(info);
 
 	if (info->hnd->optimize(info) == SUCCESS) {
 		RETURN_TRUE;
