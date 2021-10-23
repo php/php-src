@@ -152,30 +152,6 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		RETURN_FALSE;											\
 	}
 
-#define DBA_GET2_3												\
-	zval *key;													\
-	char *key_str, *key_free;									\
-	size_t key_len; 											\
-	zend_long skip = 0;  											\
-	switch(ac) {												\
-	case 2: 													\
-		if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { \
-			RETURN_THROWS();									\
-		} 														\
-		break;  												\
-	case 3: 													\
-		if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) { \
-			RETURN_THROWS();									\
-		} 														\
-		break;  												\
-	default:													\
-		WRONG_PARAM_COUNT; 										\
-	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
-		RETURN_FALSE;											\
-	}
-
-
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
 		RETURN_THROWS(); \
@@ -957,7 +933,29 @@ PHP_FUNCTION(dba_fetch)
 	char *val;
 	size_t len = 0;
 	DBA_ID_PARS;
-	DBA_GET2_3;
+	zval *key;
+	char *key_str, *key_free;
+	size_t key_len;
+	zend_long skip = 0;
+
+	switch(ac) {
+		case 2:
+			if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		case 3:
+			if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) {
+				RETURN_THROWS();
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+	}
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
+		RETURN_FALSE;
+	}
+
 	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	if (ac==3) {
