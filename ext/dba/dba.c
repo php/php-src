@@ -187,9 +187,6 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		RETURN_THROWS(); \
 	}
 
-#define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
-#define DBA_ID_GET2_3 DBA_ID_PARS; DBA_GET2_3; DBA_FETCH_RESOURCE_WITH_ID(info, id)
-
 #define DBA_ID_DONE												\
 	if (key_free) efree(key_free)
 /* a DBA handler must have specific routines */
@@ -941,7 +938,9 @@ PHP_FUNCTION(dba_close)
 /* {{{ Checks, if the specified key exists */
 PHP_FUNCTION(dba_exists)
 {
-	DBA_ID_GET2;
+	DBA_ID_PARS;
+	DBA_GET2;
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	if(info->hnd->exists(info, key_str, key_len) == SUCCESS) {
 		DBA_ID_DONE;
@@ -957,7 +956,9 @@ PHP_FUNCTION(dba_fetch)
 {
 	char *val;
 	size_t len = 0;
-	DBA_ID_GET2_3;
+	DBA_ID_PARS;
+	DBA_GET2_3;
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	if (ac==3) {
 		if (!strcmp(info->hnd->name, "cdb")) {
@@ -1079,7 +1080,9 @@ PHP_FUNCTION(dba_nextkey)
    If inifile: remove all other key lines */
 PHP_FUNCTION(dba_delete)
 {
-	DBA_ID_GET2;
+	DBA_ID_PARS;
+	DBA_GET2;
+	DBA_FETCH_RESOURCE_WITH_ID(info, id);
 
 	DBA_WRITE_CHECK_WITH_ID;
 
