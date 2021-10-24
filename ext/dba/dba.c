@@ -89,10 +89,11 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(dba)
 #endif
 
-/* {{{ php_dba_myke_key */
+/* {{{ php_dba_make_key */
 static zend_string* php_dba_make_key(HashTable *key)
 {
 	zval *group, *name;
+	zend_string *group_str, *name_str;
 	HashPosition pos;
 
 	if (zend_hash_num_elements(key) != 2) {
@@ -103,16 +104,29 @@ static zend_string* php_dba_make_key(HashTable *key)
 	// TODO: Use ZEND_HASH_FOREACH_VAL() API?
 	zend_hash_internal_pointer_reset_ex(key, &pos);
 	group = zend_hash_get_current_data_ex(key, &pos);
+	group_str = zval_try_get_string(group);
+	if (!group_str) {
+		return NULL;
+	}
+
 	zend_hash_move_forward_ex(key, &pos);
 	name = zend_hash_get_current_data_ex(key, &pos);
-	// TODO: Use zval_try_get_string() or try_convert_to_string() instead?
-	convert_to_string(group);
-	convert_to_string(name);
-	// TODO: Check ZSTR_LEN(name) != 0
-	if (Z_STRLEN_P(group) == 0) {
-		return zend_string_copy(Z_STR_P(name));
+	name_str = zval_try_get_string(name);
+	if (!name_str) {
+		zend_string_release_ex(group_str, false);
+		return NULL;
 	}
-	return zend_strpprintf(0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
+
+	// TODO: Check ZSTR_LEN(name) != 0
+	if (ZSTR_LEN(group_str) == 0) {
+		zend_string_release_ex(group_str, false);
+		return name_str;
+	}
+
+	zend_string *key_str = zend_strpprintf(0, "[%s]%s", ZSTR_VAL(group_str), ZSTR_VAL(name_str));
+	zend_string_release_ex(group_str, false);
+	zend_string_release_ex(name_str, false);
+	return key_str;
 }
 /* }}} */
 
