@@ -10,10 +10,6 @@ PHP                                                                        NEWS
   . Fixed bug #81500 (Interval serialization regression since 7.3.14 / 7.4.2).
     (cmb)
 
-- FPM:
-  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
-    escalation) (CVE-2021-21703). (Jakub Zelenka)
-
 - MBString:
   . Fixed bug #76167 (mbstring may use pointer from some previous request).
     (cmb, cataphract)
@@ -43,6 +39,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing).
     (cmb, Nikita)
+
+- FPM:
+  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
+    escalation) (CVE-2021-21703). (Jakub Zelenka)
 
 - SPL:
   . Fixed bug #80663 (Recursive SplFixedArray::setSize() may cause double-free).
