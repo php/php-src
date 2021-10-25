@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #81532 (Change of $depth behaviour in json_encode() on PHP 8.1).
     (Nikita)
 
+- MBString:
+  . Fixed bug #76167 (mbstring may use pointer from some previous request).
+    (cmb, cataphract)
+
 14 Oct 2021, PHP 8.1.0RC4
 
 - CLI:
