@@ -457,30 +457,94 @@ PHP_METHOD(variant, __construct)
 		/* If already an array and VT_ARRAY is passed then:
 			- if only VT_ARRAY passed then do not perform a conversion
 			- if VT_ARRAY plus other type passed then perform conversion
-			  but will probably fail (original behavior)
 		*/
-		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
-			zend_long orig_vt = vt;
 
-			vt &= ~VT_ARRAY;
-			if (vt) {
-				vt = orig_vt;
+		res = S_OK;
+		SAFEARRAYBOUND  Bound;
+
+		if (!(V_VT(&obj->v) & VT_BYREF) && //not supported
+			(vt & ~VT_ARRAY) && //new variant have some type except VT_ARRAY
+			(V_VT(&obj->v) & VT_ARRAY) &&	//old variant is array
+			SafeArrayGetDim(V_ARRAY(&obj->v)) == 1 &&	//old array have one dimension
+			SUCCEEDED(res = SafeArrayGetLBound(V_ARRAY(&obj->v), 1, &Bound.lLbound)) &&
+			SUCCEEDED(res = SafeArrayGetUBound(V_ARRAY(&obj->v), 1, &Bound.cElements)))
+		{
+
+			zend_long need_vt = vt & ~VT_ARRAY;
+			zend_long old_vt = V_VT(&obj->v) & ~VT_ARRAY;
+
+			Bound.cElements -= Bound.lLbound - 1;
+			SAFEARRAY * newArray = SafeArrayCreate(need_vt, 1, &Bound);
+
+			if (newArray) {
+
+				for (LONG i = Bound.lLbound; i < Bound.lLbound + Bound.cElements; i++) {
+					VARIANT temp;
+					VariantInit(&temp);
+					if (old_vt != VT_VARIANT)
+						V_VT(&temp) = old_vt;
+
+					switch (old_vt) {
+					case VT_VARIANT:
+						res = SafeArrayGetElement(V_ARRAY(&obj->v), &i, &temp); break;
+					default:
+						res = SafeArrayGetElement(V_ARRAY(&obj->v), &i, &V_I8(&temp)); break;
+					}
+
+					if (FAILED(res))
+						break;
+
+					if (FAILED(res = VariantChangeType(&temp, &temp, 0, (VARTYPE)need_vt))) {
+						VariantClear(&temp);
+						break;
+					}
+
+					switch (need_vt) {
+					case VT_VARIANT:
+						res = SafeArrayPutElement(newArray, &i, &temp); break;
+					case VT_DISPATCH:
+					case VT_UNKNOWN:
+					case VT_BSTR:
+						res = SafeArrayPutElement(newArray, &i, V_DISPATCH(&temp)); break;
+					default:
+						res = SafeArrayPutElement(newArray, &i, &V_I8(&temp));
+						break;
+					}
+
+					VariantClear(&temp);
+					if (FAILED(res))
+						break;
+				}
+
+				if (SUCCEEDED(res)) {
+					SafeArrayDestroy(V_ARRAY(&obj->v));
+					V_ARRAY(&obj->v) = newArray;
+					V_VT(&obj->v) = vt | VT_ARRAY; //Set VT_ARRAY automatically
+					vt = VT_EMPTY;//No need change type any more
+				}
+				else
+					SafeArrayDestroy(newArray);
 			}
 		}
 
-		if (vt) {
-			res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
+		/** Try to system conversion function if our array conversion
+		 *  function don't do conversion before (vt is not VT_EMPTY)
+		 *  and wasn't tried it (SUCCEEDED(res))
+		 */
 
-			if (FAILED(res)) {
-				char *werr, *msg;
+		if (SUCCEEDED(res) && vt) {
+			res = VariantChangeType(&obj->v, &obj->v, 0, (VARTYPE)vt);
+		}
+
+		if (FAILED(res)) {
+			char *werr, *msg;
 
 				werr = php_win32_error_to_msg(res);
 				spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 				php_win32_error_msg_free(werr);
 
-				php_com_throw_exception(res, msg);
-				efree(msg);
-			}
+			php_com_throw_exception(res, msg);
+			efree(msg);
 		}
 	}
 
