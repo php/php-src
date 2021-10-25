@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #81500 (Interval serialization regression since 7.3.14 / 7.4.2).
     (cmb)
 
+- MBString:
+  . Fixed bug #76167 (mbstring may use pointer from some previous request).
+    (cmb, cataphract)
+
 - Opcache:
   . Fixed bug #81512 (Unexpected behavior with arrays and JIT). (Dmitry)
 
