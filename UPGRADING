@@ -108,6 +108,9 @@ PHP 8.2 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- COM_DOTNET:
+  . LOCALE_NEUTRAL
+
 ========================================
 11. Changes to INI File Handling
 ========================================
@@ -115,6 +118,10 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Core:
+  . Windows specific error messages are no longer localized, but instead in
+    English to better match PHP error messages.
 
 ========================================
 13. Other Changes

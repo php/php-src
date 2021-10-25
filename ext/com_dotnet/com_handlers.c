@@ -326,7 +326,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 
 			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
 				olename = php_com_string_to_olestring(name->val, name->len, obj->code_page);
-				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
+				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_NEUTRAL, olename);
 
 				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
 					switch (kind) {
@@ -410,7 +410,7 @@ static int com_objects_compare(zval *object1, zval *object2)
 	obja = CDNO_FETCH(object1);
 	objb = CDNO_FETCH(object2);
 
-	switch (VarCmp(&obja->v, &objb->v, LOCALE_SYSTEM_DEFAULT, 0)) {
+	switch (VarCmp(&obja->v, &objb->v, LOCALE_NEUTRAL, 0)) {
 		case VARCMP_LT:
 			ret = -1;
 			break;
