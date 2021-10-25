@@ -29,12 +29,6 @@
 #include DB2_INCLUDE_FILE
 #endif
 
-#define DB2_DATA dba_db2_data *dba = info->dbf
-#define DB2_GKEY \
-	DBT gkey = {0}; \
-	gkey.data = (char *) key; \
-	gkey.size = keylen
-
 typedef struct {
 	DB *dbp;
 	DBC *cursor;
@@ -83,7 +77,7 @@ DBA_OPEN_FUNC(db2)
 
 DBA_CLOSE_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	if (dba->cursor)
 		dba->cursor->c_close(dba->cursor);
@@ -93,9 +87,12 @@ DBA_CLOSE_FUNC(db2)
 
 DBA_FETCH_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return NULL;
@@ -107,9 +104,12 @@ DBA_FETCH_FUNC(db2)
 
 DBA_UPDATE_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	gval.data = (char *) val;
 	gval.size = vallen;
@@ -123,9 +123,12 @@ DBA_UPDATE_FUNC(db2)
 
 DBA_EXISTS_FUNC(db2)
 {
+	dba_db2_data *dba = info->dbf;
 	DBT gval = {0};
-	DB2_DATA;
-	DB2_GKEY;
+	DBT gkey = {0};
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return FAILURE;
@@ -135,15 +138,18 @@ DBA_EXISTS_FUNC(db2)
 
 DBA_DELETE_FUNC(db2)
 {
-	DB2_DATA;
-	DB2_GKEY;
+	dba_db2_data *dba = info->dbf;
+	DBT gkey = {0};
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	return dba->dbp->del(dba->dbp, NULL, &gkey, 0) ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	if (dba->cursor) {
 		dba->cursor->c_close(dba->cursor);
@@ -164,7 +170,7 @@ DBA_FIRSTKEY_FUNC(db2)
 
 DBA_NEXTKEY_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 	DBT gkey = {0}, gval = {0};
 
 	if (dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT)
@@ -182,7 +188,7 @@ DBA_OPTIMIZE_FUNC(db2)
 
 DBA_SYNC_FUNC(db2)
 {
-	DB2_DATA;
+	dba_db2_data *dba = info->dbf;
 
 	return dba->dbp->sync(dba->dbp, 0) ? FAILURE : SUCCESS;
 }

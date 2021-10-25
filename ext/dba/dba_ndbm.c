@@ -28,8 +28,6 @@
 #include NDBM_INCLUDE_FILE
 #endif
 
-#define NDBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
-
 DBA_OPEN_FUNC(ndbm)
 {
 	DBM *dbf;
@@ -73,8 +71,10 @@ DBA_FETCH_FUNC(ndbm)
 {
 	datum gval;
 	char *new = NULL;
+	datum gkey;
 
-	NDBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval = dbm_fetch(info->dbf, gkey);
 	if(gval.dptr) {
 		if(newlen) *newlen = gval.dsize;
@@ -86,8 +86,10 @@ DBA_FETCH_FUNC(ndbm)
 DBA_UPDATE_FUNC(ndbm)
 {
 	datum gval;
+	datum gkey;
 
-	NDBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 
@@ -99,7 +101,10 @@ DBA_UPDATE_FUNC(ndbm)
 DBA_EXISTS_FUNC(ndbm)
 {
 	datum gval;
-	NDBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval = dbm_fetch(info->dbf, gkey);
 	if(gval.dptr) {
 		return SUCCESS;
@@ -109,7 +114,10 @@ DBA_EXISTS_FUNC(ndbm)
 
 DBA_DELETE_FUNC(ndbm)
 {
-	NDBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	return(dbm_delete(info->dbf, gkey) == -1 ? FAILURE : SUCCESS);
 }
 

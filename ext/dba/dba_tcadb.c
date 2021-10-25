@@ -27,8 +27,6 @@
 #include TCADB_INCLUDE_FILE
 #endif
 
-#define TCADB_DATA dba_tcadb_data *dba = info->dbf
-
 typedef struct {
 	TCADB *tcadb;
 } dba_tcadb_data;
@@ -76,7 +74,7 @@ DBA_OPEN_FUNC(tcadb)
 
 DBA_CLOSE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 	tcadbclose(dba->tcadb);
 	pefree(dba, info->flags & DBA_PERSISTENT);
@@ -84,7 +82,7 @@ DBA_CLOSE_FUNC(tcadb)
 
 DBA_FETCH_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	char *value, *new = NULL;
 	int value_size;
 
@@ -102,7 +100,7 @@ DBA_FETCH_FUNC(tcadb)
 
 DBA_UPDATE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int result;
 
 	if (mode == 1) {
@@ -124,7 +122,7 @@ DBA_UPDATE_FUNC(tcadb)
 
 DBA_EXISTS_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	char *value;
 	int value_len;
 
@@ -139,14 +137,14 @@ DBA_EXISTS_FUNC(tcadb)
 
 DBA_DELETE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 	return tcadbout(dba->tcadb, key, keylen) ? SUCCESS : FAILURE;
 }
 
 DBA_FIRSTKEY_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int value_size;
 	char *value, *new = NULL;
 
@@ -166,7 +164,7 @@ DBA_FIRSTKEY_FUNC(tcadb)
 
 DBA_NEXTKEY_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 	int value_size;
 	char *value, *new = NULL;
 
@@ -184,7 +182,7 @@ DBA_NEXTKEY_FUNC(tcadb)
 
 DBA_OPTIMIZE_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 #if _TC_LIBVER >= 811
 	return tcadboptimize(dba->tcadb, NULL) ? SUCCESS : FAILURE;
@@ -195,7 +193,7 @@ DBA_OPTIMIZE_FUNC(tcadb)
 
 DBA_SYNC_FUNC(tcadb)
 {
-	TCADB_DATA;
+	dba_tcadb_data *dba = info->dbf;
 
 	return tcadbsync(dba->tcadb) ? SUCCESS : FAILURE;
 }

@@ -41,12 +41,6 @@ static void php_dba_db3_errcall_fcn(
 	php_error_docref(NULL, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 
-#define DB3_DATA dba_db3_data *dba = info->dbf
-#define DB3_GKEY \
-	DBT gkey; \
-	memset(&gkey, 0, sizeof(gkey)); \
-	gkey.data = (char *) key; gkey.size = keylen
-
 typedef struct {
 	DB *dbp;
 	DBC *cursor;
@@ -116,7 +110,7 @@ DBA_OPEN_FUNC(db3)
 
 DBA_CLOSE_FUNC(db3)
 {
-	DB3_DATA;
+	dba_db3_data *dba = info->dbf;
 
 	if (dba->cursor) dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
@@ -125,10 +119,13 @@ DBA_CLOSE_FUNC(db3)
 
 DBA_FETCH_FUNC(db3)
 {
+	dba_db3_data *dba = info->dbf;
 	DBT gval;
 	char *new = NULL;
-	DB3_DATA;
-	DB3_GKEY;
+	DBT gkey;
+
+	memset(&gkey, 0, sizeof(gkey));
+	gkey.data = (char *) key; gkey.size = keylen;
 
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
@@ -140,9 +137,12 @@ DBA_FETCH_FUNC(db3)
 
 DBA_UPDATE_FUNC(db3)
 {
+	dba_db3_data *dba = info->dbf;
 	DBT gval;
-	DB3_DATA;
-	DB3_GKEY;
+	DBT gkey;
+
+	memset(&gkey, 0, sizeof(gkey));
+	gkey.data = (char *) key; gkey.size = keylen;
 
 	memset(&gval, 0, sizeof(gval));
 	gval.data = (char *) val;
@@ -157,9 +157,12 @@ DBA_UPDATE_FUNC(db3)
 
 DBA_EXISTS_FUNC(db3)
 {
+	dba_db3_data *dba = info->dbf;
 	DBT gval;
-	DB3_DATA;
-	DB3_GKEY;
+	DBT gkey;
+
+	memset(&gkey, 0, sizeof(gkey));
+	gkey.data = (char *) key; gkey.size = keylen;
 
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
@@ -170,15 +173,18 @@ DBA_EXISTS_FUNC(db3)
 
 DBA_DELETE_FUNC(db3)
 {
-	DB3_DATA;
-	DB3_GKEY;
+	dba_db3_data *dba = info->dbf;
+	DBT gkey;
+
+	memset(&gkey, 0, sizeof(gkey));
+	gkey.data = (char *) key; gkey.size = keylen;
 
 	return dba->dbp->del(dba->dbp, NULL, &gkey, 0) ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(db3)
 {
-	DB3_DATA;
+	dba_db3_data *dba = info->dbf;
 
 	if (dba->cursor) {
 		dba->cursor->c_close(dba->cursor);
@@ -195,7 +201,7 @@ DBA_FIRSTKEY_FUNC(db3)
 
 DBA_NEXTKEY_FUNC(db3)
 {
-	DB3_DATA;
+	dba_db3_data *dba = info->dbf;
 	DBT gkey, gval;
 	char *nkey = NULL;
 
@@ -219,7 +225,7 @@ DBA_OPTIMIZE_FUNC(db3)
 
 DBA_SYNC_FUNC(db3)
 {
-	DB3_DATA;
+	dba_db3_data *dba = info->dbf;
 
 	return dba->dbp->sync(dba->dbp, 0) ? FAILURE : SUCCESS;
 }
