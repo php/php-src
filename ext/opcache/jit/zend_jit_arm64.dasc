@@ -10670,9 +10670,11 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 				return 0;
 		    }
 		}
-		|	// if (call_info & ZEND_CALL_RELEASE_THIS)
-		|	TST_32_WITH_CONST FCARG1w, ZEND_CALL_RELEASE_THIS, TMP1w
-		|	beq >4
+		if (!JIT_G(current_frame) || !TRACE_FRAME_ALWAYS_RELEASE_THIS(JIT_G(current_frame))) {
+			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
+			|	TST_32_WITH_CONST FCARG1w, ZEND_CALL_RELEASE_THIS, TMP1w
+			|	beq >4
+		}
 		|	// zend_object *object = Z_OBJ(execute_data->This);
 		|	ldr FCARG1x, EX->This.value.obj
 		|	// OBJ_RELEASE(object);

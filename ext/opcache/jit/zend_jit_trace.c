@@ -6498,16 +6498,25 @@ done:
 					TRACE_FRAME_SET_CLOSURE_CALL(call);
 				}
 			}
-			if (init_opline
-			 && init_opline->opcode != ZEND_NEW
-			 && (init_opline->opcode != ZEND_INIT_METHOD_CALL
-			  || init_opline->op1_type == IS_UNDEF)
-			 && (init_opline->opcode != ZEND_INIT_USER_CALL
-			  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
-			 && (init_opline->opcode != ZEND_INIT_DYNAMIC_CALL
-			  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
-			) {
-				TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(call);
+			if (init_opline) {
+				if (init_opline->opcode != ZEND_NEW
+				 && (init_opline->opcode != ZEND_INIT_METHOD_CALL
+				  || init_opline->op1_type == IS_UNDEF
+				  || (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)
+				   && (ssa_op-1)->op1_use >=0
+				   && ssa->var_info[(ssa_op-1)->op1_use].delayed_fetch_this))
+				 && (init_opline->opcode != ZEND_INIT_USER_CALL
+				  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
+				 && (init_opline->opcode != ZEND_INIT_DYNAMIC_CALL
+				  || (p->func && (!p->func->common.scope || (p->func->common.fn_flags & ZEND_ACC_STATIC))))
+				) {
+					TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(call);
+				} else if (init_opline->opcode == ZEND_NEW
+				 || (init_opline->opcode == ZEND_INIT_METHOD_CALL
+				  && init_opline->op1_type != IS_UNDEF
+				  && p->func && p->func->common.scope && !(p->func->common.fn_flags & ZEND_ACC_STATIC))) {
+					TRACE_FRAME_SET_ALWAYS_RELEASE_THIS(call);
+				}
 			}
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
