@@ -3470,12 +3470,20 @@ static int zend_jit_spill_store(dasm_State **Dst, zend_jit_addr src, zend_jit_ad
 
 	if ((info & MAY_BE_ANY) == MAY_BE_LONG) {
 		|	SET_ZVAL_LVAL_FROM_REG dst, Rx(Z_REG(src)), TMP1
-		if (set_type) {
+		if (set_type &&
+		    (Z_REG(dst) != ZREG_FP ||
+		     !JIT_G(current_frame) ||
+		     !JIT_G(current_frame)->stack ||
+		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_LONG)) {
 			|	SET_ZVAL_TYPE_INFO dst, IS_LONG, TMP1w, TMP2
 		}
 	} else if ((info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 		|	SET_ZVAL_DVAL dst, Z_REG(src), ZREG_TMP1
-		if (set_type) {
+		if (set_type &&
+		    (Z_REG(dst) != ZREG_FP ||
+		     !JIT_G(current_frame) ||
+		     !JIT_G(current_frame)->stack ||
+		     STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(dst))) != IS_DOUBLE)) {
 			|	SET_ZVAL_TYPE_INFO dst, IS_DOUBLE, TMP1w, TMP2
 		}
 	} else {
