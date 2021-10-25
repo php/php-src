@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #81500 (Interval serialization regression since 7.3.14 / 7.4.2).
     (cmb)
 
+- FPM:
+  . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
+    escalation) (CVE-2021-21703). (Jakub Zelenka)
+
 - JSON:
   . Fixed bug #81532 (Change of $depth behaviour in json_encode() on PHP 8.1).
     (Nikita)
