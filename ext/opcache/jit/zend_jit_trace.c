@@ -6382,10 +6382,10 @@ done:
 			}
 			zend_jit_trace_link_to_root(&dasm_state, &zend_jit_traces[t->link], timeout_exit_addr);
 		} else {
-			zend_jit_trace_return(&dasm_state, 0);
+			zend_jit_trace_return(&dasm_state, 0, NULL);
 		}
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_RETURN) {
-		zend_jit_trace_return(&dasm_state, 0);
+		zend_jit_trace_return(&dasm_state, 0, NULL);
 	} else {
 		// TODO: not implemented ???
 		ZEND_ASSERT(0 && p->stop);
@@ -6525,7 +6525,7 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 		zend_jit_set_ip_ex(&dasm_state, opline, original_handler);
 	}
 
-	zend_jit_trace_return(&dasm_state, original_handler);
+	zend_jit_trace_return(&dasm_state, original_handler, opline);
 
 	handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, name, ZEND_JIT_TRACE_NUM);
 
