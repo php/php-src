@@ -3089,7 +3089,7 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 	return 1;
 }
 
-static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
+static int zend_jit_trace_return(dasm_State **Dst, bool original_handler, const zend_op *opline)
 {
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	ADD_HYBRID_SPAD
@@ -3124,7 +3124,15 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler)
 		}
 		|	ldp FP, RX, T2                // retore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
-		|	mov RETVALx, #2               // ZEND_VM_LEAVE
+		if (!original_handler || !opline ||
+		    (opline->opcode != ZEND_RETURN
+		  && opline->opcode != ZEND_RETURN_BY_REF
+		  && opline->opcode != ZEND_GENERATOR_RETURN
+		  && opline->opcode != ZEND_GENERATOR_CREATE
+		  && opline->opcode != ZEND_YIELD
+		  && opline->opcode != ZEND_YIELD_FROM)) {
+			|	mov RETVALx, #2               // ZEND_VM_LEAVE
+		}
 		|	ret
 	}
 	return 1;
