@@ -17,7 +17,7 @@ var_dump(mb_convert_encoding("ABC", "8bit", "7bit"));
 echo "7bit done\n";
 
 // "8bit"
-var_dump(mb_convert_encoding("\x01\x00", "8bit", "UTF-16BE")); // codepoints over 0xFF are illegal for '8-bit'
+var_dump(mb_convert_encoding("\x01\x00", "8bit", "UTF-16BE")); // codepoints over 0xFF are illegal or '8-bit'
 echo "8bit done\n";
 
 ?>

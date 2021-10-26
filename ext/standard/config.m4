@@ -51,14 +51,23 @@ if test "$ac_cv_flush_io" = "yes"; then
   AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
 fi
 
-PHP_CHECK_FUNC(crypt, crypt)
-PHP_CHECK_FUNC(crypt_r, crypt)
-if test "$ac_cv_func_crypt_r" = "yes"; then
-  PHP_CRYPT_R_STYLE
-fi
+PHP_ARG_WITH([external-libcrypt],
+  [for external libcrypt or libxcrypt],
+  [AS_HELP_STRING([--with-external-libcrypt],
+    [Use external libcrypt or libxcrypt])],
+  [no],
+  [no])
 
-AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
+  PHP_CHECK_FUNC(crypt, crypt)
+  PHP_CHECK_FUNC(crypt_r, crypt)
+  AC_CHECK_HEADERS(crypt.h)
+  if test "$ac_cv_func_crypt_r" = "yes"; then
+    PHP_CRYPT_R_STYLE
+  fi
+
+  AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -87,8 +96,8 @@ int main() {
   ac_cv_crypt_des=yes
 ])])
 
-AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -110,15 +119,15 @@ int main() {
 	return 1;
 #endif
 }]])],[
-  ac_cv_crypt_ext_des=yes
-],[
-  ac_cv_crypt_ext_des=no
-],[
-  ac_cv_crypt_ext_des=no
-])])
+    ac_cv_crypt_ext_des=yes
+  ],[
+    ac_cv_crypt_ext_des=no
+  ],[
+    ac_cv_crypt_ext_des=no
+  ])])
 
-AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -150,15 +159,15 @@ int main() {
 	return 1;
 #endif
 }]])],[
-  ac_cv_crypt_md5=yes
-],[
-  ac_cv_crypt_md5=no
-],[
-  ac_cv_crypt_md5=no
-])])
+    ac_cv_crypt_md5=yes
+  ],[
+    ac_cv_crypt_md5=no
+  ],[
+    ac_cv_crypt_md5=no
+  ])])
 
-AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -187,15 +196,15 @@ int main() {
 	return 1;
 #endif
 }]])],[
-  ac_cv_crypt_blowfish=yes
-],[
-  ac_cv_crypt_blowfish=no
-],[
-  ac_cv_crypt_blowfish=no
-])])
+    ac_cv_crypt_blowfish=yes
+  ],[
+    ac_cv_crypt_blowfish=no
+  ],[
+    ac_cv_crypt_blowfish=no
+  ])])
 
-AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -222,16 +231,16 @@ int main() {
 #else
 	return 1;
 #endif
-}]])],[
-  ac_cv_crypt_sha512=yes
-],[
-  ac_cv_crypt_sha512=no
-],[
-  ac_cv_crypt_sha512=no
-])])
+  }]])],[
+    ac_cv_crypt_sha512=yes
+  ],[
+    ac_cv_crypt_sha512=no
+  ],[
+    ac_cv_crypt_sha512=no
+  ])])
 
-AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <string.h>
 
 #if HAVE_UNISTD_H
@@ -259,24 +268,23 @@ int main() {
 	return 1;
 #endif
 }]])],[
-  ac_cv_crypt_sha256=yes
-],[
-  ac_cv_crypt_sha256=no
-],[
-  ac_cv_crypt_sha256=no
-])])
+    ac_cv_crypt_sha256=yes
+  ],[
+    ac_cv_crypt_sha256=no
+  ],[
+    ac_cv_crypt_sha256=no
+  ])])
 
 
-dnl
-dnl If one of them is missing, use our own implementation, portable code is then possible
-dnl
-dnl TODO This is currently always enabled
-if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes" || true; then
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r for blowfish, des, ext des and md5])
+  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes"; then
+    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
+  fi
+
+  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r])
+else
+  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r])
 
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
-else
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r for blowfish, des and ext des])
 fi
 
 dnl
@@ -407,6 +415,8 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PKG_CHECK_MODULES([ARGON2], [libargon2])
   PHP_EVAL_INCLINE($ARGON2_CFLAGS)
   PHP_EVAL_LIBLINE($ARGON2_LIBS)
+
+  AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
 fi
 
 dnl

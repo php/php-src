@@ -1470,10 +1470,8 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 
 	orig_compiler_options = CG(compiler_options);
 	CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
-		CG(compiler_options) = orig_compiler_options;
-		return new_persistent_script;
-	}
+	zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(new_persistent_script);
 	CG(compiler_options) = orig_compiler_options;
 
 	*from_shared_memory = 1;
@@ -1490,10 +1488,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	if (ZCG(accel_directives).file_cache) {
 		CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	}
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
-		CG(compiler_options) = orig_compiler_options;
-		return new_persistent_script;
-	}
+	zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(new_persistent_script);
 	CG(compiler_options) = orig_compiler_options;
 
 	/* exclusive lock */
@@ -1816,10 +1812,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	new_persistent_script->script.main_op_array = *op_array;
 	zend_accel_move_user_functions(CG(function_table), CG(function_table)->nNumUsed - orig_functions_count, &new_persistent_script->script);
 	zend_accel_move_user_classes(CG(class_table), CG(class_table)->nNumUsed - orig_class_count, &new_persistent_script->script);
-	new_persistent_script->script.first_early_binding_opline =
-		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
-			zend_build_delayed_early_binding_list(op_array) :
-			(uint32_t)-1;
+	zend_accel_build_delayed_early_binding_list(new_persistent_script);
 	new_persistent_script->num_warnings = EG(num_errors);
 	new_persistent_script->warnings = EG(errors);
 	EG(num_errors) = 0;
@@ -3012,11 +3005,11 @@ static void accel_move_code_to_huge_pages(void)
 	f = fopen("/proc/self/maps", "r");
 	if (f) {
 		long unsigned int  start, end, offset, inode;
-		char perm[5], dev[6], name[MAXPATHLEN];
+		char perm[5], dev[10], name[MAXPATHLEN];
 		int ret;
 
 		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %5s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			ret = fscanf(f, "%lx-%lx %4s %lx %9s %ld %s\n", &start, &end, perm, &offset, dev, &inode, name);
 			if (ret == 7) {
 				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
@@ -3221,7 +3214,7 @@ static zend_result accel_post_startup(void)
 				break;
 			case FAILED_REATTACHED:
 				accel_startup_ok = 0;
-				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - can not reattach to exiting shared memory.");
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Failure to initialize shared memory structures - cannot reattach to exiting shared memory.");
 				return SUCCESS;
 				break;
 #if ENABLE_FILE_CACHE_FALLBACK
@@ -3610,7 +3603,6 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 		zend_persistent_script *script;
 
 		script = create_persistent_script();
-		script->script.first_early_binding_opline = (uint32_t)-1;
 		script->script.filename = zend_string_copy(op_array->filename);
 		zend_string_hash_val(script->script.filename);
 		script->script.main_op_array = *op_array;
@@ -3887,88 +3879,87 @@ static void preload_link(void)
 			ce = Z_PTR_P(zv);
 			ZEND_ASSERT(ce->type != ZEND_INTERNAL_CLASS);
 
-			if ((ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
-			 && !(ce->ce_flags & ZEND_ACC_LINKED)) {
-				zend_string *lcname = zend_string_tolower(ce->name);
+			if (!(ce->ce_flags & (ZEND_ACC_TOP_LEVEL|ZEND_ACC_ANON_CLASS))
+					|| (ce->ce_flags & ZEND_ACC_LINKED)) {
+				continue;
+			}
 
-				if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-					if (zend_hash_exists(EG(class_table), lcname)) {
-						zend_string_release(lcname);
-						continue;
-					}
-				}
-
-				preload_error error_info;
-				if (preload_resolve_deps(&error_info, ce) == FAILURE) {
+			zend_string *lcname = zend_string_tolower(ce->name);
+			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+				if (zend_hash_exists(EG(class_table), lcname)) {
 					zend_string_release(lcname);
 					continue;
 				}
+			}
 
-				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
+			preload_error error_info;
+			if (preload_resolve_deps(&error_info, ce) == FAILURE) {
+				zend_string_release(lcname);
+				continue;
+			}
 
-				if (EXPECTED(zv)) {
-					/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
-					 * prevent freeing of interface names. */
-					void *checkpoint = zend_arena_checkpoint(CG(arena));
-					zend_class_entry *orig_ce = ce;
-					uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
-					ce->ce_flags |= temporary_flags;
-					if (ce->parent_name) {
-						zend_string_addref(ce->parent_name);
-					}
+			zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, lcname);
+			ZEND_ASSERT(zv && "We already checked above that the class doesn't exist yet");
 
-					/* Record and suppress errors during inheritance. */
-					orig_error_cb = zend_error_cb;
-					zend_error_cb = preload_error_cb;
-					zend_begin_record_errors();
+			/* Set the FILE_CACHED flag to force a lazy load, and the CACHED flag to
+			 * prevent freeing of interface names. */
+			void *checkpoint = zend_arena_checkpoint(CG(arena));
+			zend_class_entry *orig_ce = ce;
+			uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
+			ce->ce_flags |= temporary_flags;
+			if (ce->parent_name) {
+				zend_string_addref(ce->parent_name);
+			}
 
-					/* Set filename & lineno information for inheritance errors */
-					CG(in_compilation) = 1;
-					CG(compiled_filename) = ce->info.user.filename;
-					CG(zend_lineno) = ce->info.user.line_start;
-					zend_try {
-						ce = zend_do_link_class(ce, NULL, lcname);
-						if (!ce) {
-							ZEND_ASSERT(0 && "Class linking failed?");
-						}
-						ce->ce_flags &= ~temporary_flags;
-						changed = true;
+			/* Record and suppress errors during inheritance. */
+			orig_error_cb = zend_error_cb;
+			zend_error_cb = preload_error_cb;
+			zend_begin_record_errors();
 
-						/* Inheritance successful, print out any warnings. */
-						zend_error_cb = orig_error_cb;
-						EG(record_errors) = false;
-						for (uint32_t i = 0; i < EG(num_errors); i++) {
-							zend_error_info *error = EG(errors)[i];
-							zend_error_zstr_at(
-								error->type, error->filename, error->lineno, error->message);
-						}
-					} zend_catch {
-						/* Clear variance obligations that were left behind on bailout. */
-						if (CG(delayed_variance_obligations)) {
-							zend_hash_index_del(
-								CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
-						}
+			/* Set filename & lineno information for inheritance errors */
+			CG(in_compilation) = 1;
+			CG(compiled_filename) = ce->info.user.filename;
+			CG(zend_lineno) = ce->info.user.line_start;
+			zend_try {
+				ce = zend_do_link_class(ce, NULL, lcname);
+				if (!ce) {
+					ZEND_ASSERT(0 && "Class linking failed?");
+				}
+				ce->ce_flags &= ~temporary_flags;
+				changed = true;
 
-						/* Restore the original class. */
-						zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
-						Z_CE_P(zv) = orig_ce;
-						orig_ce->ce_flags &= ~temporary_flags;
-						zend_arena_release(&CG(arena), checkpoint);
-
-						/* Remember the last error. */
-						zend_error_cb = orig_error_cb;
-						EG(record_errors) = false;
-						ZEND_ASSERT(EG(num_errors) > 0);
-						zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
-						EG(num_errors)--;
-					} zend_end_try();
-					CG(in_compilation) = 0;
-					CG(compiled_filename) = NULL;
-					zend_free_recorded_errors();
+				/* Inheritance successful, print out any warnings. */
+				zend_error_cb = orig_error_cb;
+				EG(record_errors) = false;
+				for (uint32_t i = 0; i < EG(num_errors); i++) {
+					zend_error_info *error = EG(errors)[i];
+					zend_error_zstr_at(
+						error->type, error->filename, error->lineno, error->message);
+				}
+			} zend_catch {
+				/* Clear variance obligations that were left behind on bailout. */
+				if (CG(delayed_variance_obligations)) {
+					zend_hash_index_del(
+						CG(delayed_variance_obligations), (uintptr_t) Z_CE_P(zv));
 				}
 
-				zend_string_release(lcname);
-			}
+				/* Restore the original class. */
+				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
+				Z_CE_P(zv) = orig_ce;
+				orig_ce->ce_flags &= ~temporary_flags;
+				zend_arena_release(&CG(arena), checkpoint);
+
+				/* Remember the last error. */
+				zend_error_cb = orig_error_cb;
+				EG(record_errors) = false;
+				ZEND_ASSERT(EG(num_errors) > 0);
+				zend_hash_update_ptr(&errors, key, EG(errors)[EG(num_errors)-1]);
+				EG(num_errors)--;
+			} zend_end_try();
+			CG(in_compilation) = 0;
+			CG(compiled_filename) = NULL;
+			zend_free_recorded_errors();
+			zend_string_release(lcname);
 		} ZEND_HASH_FOREACH_END();
 	} while (changed);
 
@@ -4029,8 +4020,9 @@ static void preload_link(void)
 		preload_remove_declares(op_array);
 
 		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
-			script->script.first_early_binding_opline = zend_build_delayed_early_binding_list(op_array);
-			if (script->script.first_early_binding_opline == (uint32_t)-1) {
+			zend_accel_free_delayed_early_binding_list(script);
+			zend_accel_build_delayed_early_binding_list(script);
+			if (!script->num_early_bindings) {
 				op_array->fn_flags &= ~ZEND_ACC_EARLY_BINDING;
 			}
 		}
@@ -4179,7 +4171,7 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static int preload_optimize(zend_persistent_script *script)
+static void preload_optimize(zend_persistent_script *script)
 {
 	zend_class_entry *ce;
 	zend_persistent_script *tmp_script;
@@ -4200,9 +4192,8 @@ static int preload_optimize(zend_persistent_script *script)
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
-	if (!zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
-		return FAILURE;
-	}
+	zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+	zend_accel_finalize_delayed_early_binding_list(script);
 
 	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
 		preload_fix_trait_methods(ce);
@@ -4217,11 +4208,9 @@ static int preload_optimize(zend_persistent_script *script)
 	zend_shared_alloc_destroy_xlat_table();
 
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
-		if (!zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
-			return FAILURE;
-		}
+		zend_optimize_script(&script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
+		zend_accel_finalize_delayed_early_binding_list(script);
 	} ZEND_HASH_FOREACH_END();
-	return SUCCESS;
 }
 
 static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_script *new_persistent_script)
@@ -4533,17 +4522,12 @@ static int accel_preload(const char *config, bool in_child)
 		script->script.filename = CG(compiled_filename);
 		CG(compiled_filename) = NULL;
 
-		script->script.first_early_binding_opline = (uint32_t)-1;
-
 		preload_move_user_functions(CG(function_table), &script->script.function_table);
 		preload_move_user_classes(CG(class_table), &script->script.class_table);
 
 		zend_hash_sort_ex(&script->script.class_table, preload_sort_classes, NULL, 0);
 
-		if (preload_optimize(script) != SUCCESS) {
-			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Optimization error during preloading!");
-			return FAILURE;
-		}
+		preload_optimize(script);
 
 		zend_shared_alloc_init_xlat_table();
 
@@ -4768,6 +4752,7 @@ static int accel_finish_startup(void)
 			if (accel_preload(ZCG(accel_directives).preload, in_child) != SUCCESS) {
 				ret = FAILURE;
 			}
+			preload_flush(NULL);
 
 			orig_report_memleaks = PG(report_memleaks);
 			PG(report_memleaks) = 0;

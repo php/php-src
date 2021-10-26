@@ -1824,7 +1824,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, protocol, n))) {
 			char *tmp = estrndup(protocol, n);
 
-			php_strtolower(tmp, n);
+			zend_str_tolower(tmp, n);
 			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, tmp, n))) {
 				char wrapper_name[32];
 

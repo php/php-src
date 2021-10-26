@@ -31,9 +31,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define DB1_DATA dba_db1_data *dba = info->dbf
-#define DB1_GKEY DBT gkey; gkey.data = (char *) key; gkey.size = keylen
-
 typedef struct {
 	DB  *dbp;
 } dba_db1_data;
@@ -84,16 +81,19 @@ DBA_OPEN_FUNC(db1)
 
 DBA_CLOSE_FUNC(db1)
 {
-	DB1_DATA;
+	dba_db1_data *dba = info->dbf;
 	dba->dbp->close(dba->dbp);
 	pefree(info->dbf, info->flags&DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	memset(&gval, 0, sizeof(gval));
 	if (dba->dbp->get(dba->dbp, &gkey, &gval, 0) == RET_SUCCESS) {
@@ -105,9 +105,12 @@ DBA_FETCH_FUNC(db1)
 
 DBA_UPDATE_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	gval.data = (char *) val;
 	gval.size = vallen;
@@ -117,26 +120,32 @@ DBA_UPDATE_FUNC(db1)
 
 DBA_EXISTS_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	return dba->dbp->get(dba->dbp, &gkey, &gval, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
 
 DBA_DELETE_FUNC(db1)
 {
-	DB1_DATA;
-	DB1_GKEY;
+	dba_db1_data *dba = info->dbf;
+	DBT gkey;
+
+	gkey.data = (char *) key;
+	gkey.size = keylen;
 
 	return dba->dbp->del(dba->dbp, &gkey, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gkey;
 	DBT gval;
-	DB1_DATA;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
@@ -150,9 +159,9 @@ DBA_FIRSTKEY_FUNC(db1)
 
 DBA_NEXTKEY_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gkey;
 	DBT gval;
-	DB1_DATA;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));

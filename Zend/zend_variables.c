@@ -129,5 +129,7 @@ ZEND_API void ZEND_FASTCALL zval_copy_ctor_func(zval *zvalue)
 		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zvalue)));
 		CHECK_ZVAL_STRING(Z_STR_P(zvalue));
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
+	} else {
+		ZEND_UNREACHABLE();
 	}
 }

@@ -363,9 +363,7 @@ static bool try_remove_var_def(context *ctx, int free_var, int use_chain, zend_o
 				case ZEND_PRE_INC:
 				case ZEND_PRE_DEC:
 				case ZEND_PRE_INC_OBJ:
-				case ZEND_POST_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
-				case ZEND_POST_DEC_OBJ:
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
 				case ZEND_DO_FCALL_BY_NAME:
@@ -464,13 +462,19 @@ static inline int get_common_phi_source(zend_ssa *ssa, zend_ssa_phi *phi) {
 	int common_source = -1;
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
+		if (source == phi->ssa_var) {
+			continue;
+		}
 		if (common_source == -1) {
 			common_source = source;
-		} else if (common_source != source && source != phi->ssa_var) {
+		} else if (common_source != source) {
 			return -1;
 		}
 	} FOREACH_PHI_SOURCE_END();
-	ZEND_ASSERT(common_source != -1);
+
+	/* If all sources are phi->ssa_var this phi must be in an unreachable cycle.
+	 * We can't easily drop the phi in that case, as we don't have something to replace it with.
+	 * Ideally SCCP would eliminate the whole cycle. */
 	return common_source;
 }
 

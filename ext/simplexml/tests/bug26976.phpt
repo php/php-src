@@ -1,5 +1,5 @@
 --TEST--
-Bug #26976 (Can not access array elements using array indices)
+Bug #26976 (Cannot access array elements using array indices)
 --EXTENSIONS--
 simplexml
 --FILE--

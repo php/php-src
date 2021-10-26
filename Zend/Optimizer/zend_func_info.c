@@ -33,7 +33,7 @@ typedef uint32_t (*info_func_t)(const zend_call_info *call_info, const zend_ssa 
 
 typedef struct _func_info_t {
 	const char *name;
-	int         name_len;
+	unsigned    name_len;
 	uint32_t    info;
 	info_func_t info_func;
 } func_info_t;
@@ -61,7 +61,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
 			&ssa->ops[call_info->arg_info[1].opline - op_array->opcodes]);
 		uint32_t t3 = 0;
-		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_PACKED;
+		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY;
 
 		if (call_info->num_args == 3) {
 			t3 = _ssa_op1_info(op_array, ssa, call_info->arg_info[2].opline,
@@ -75,10 +75,14 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 				|| (t3 & (MAY_BE_DOUBLE|MAY_BE_STRING))) {
 			tmp |= MAY_BE_ARRAY_OF_DOUBLE;
 		}
-		if ((t1 & (MAY_BE_ANY-(MAY_BE_STRING|MAY_BE_DOUBLE))) && (t2 & (MAY_BE_ANY-(MAY_BE_STRING|MAY_BE_DOUBLE)))) {
+		if ((t1 & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_STRING|MAY_BE_DOUBLE)))
+				&& (t2 & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_STRING|MAY_BE_DOUBLE)))) {
 			if ((t3 & MAY_BE_ANY) != MAY_BE_DOUBLE) {
 				tmp |= MAY_BE_ARRAY_OF_LONG;
 			}
+		}
+		if (tmp & MAY_BE_ARRAY_OF_ANY) {
+			tmp |= MAY_BE_ARRAY_PACKED;
 		}
 		return tmp;
 	} else {
@@ -179,6 +183,10 @@ ZEND_API uint32_t zend_get_func_info(
 		if (!ret) {
 			ret = zend_get_return_info_from_signature_only(
 				callee_func, /* TODO: script */ NULL, ce, ce_is_instanceof, /* use_tentative_return_info */ !call_info->is_prototype);
+			/* It's allowed to override a method that return non-reference with a method that returns a reference */
+			if (call_info->is_prototype && (ret & ~MAY_BE_REF)) {
+				ret |= MAY_BE_REF;
+			}
 		}
 	}
 	return ret;
@@ -197,7 +205,7 @@ static void zend_func_info_add(const func_info_t *func_infos, size_t n)
 	}
 }
 
-int zend_func_info_startup(void)
+zend_result zend_func_info_startup(void)
 {
 	if (zend_func_info_rid == -1) {
 		zend_func_info_rid = zend_get_resource_handle("Zend Optimizer");
@@ -214,7 +222,7 @@ int zend_func_info_startup(void)
 	return SUCCESS;
 }
 
-int zend_func_info_shutdown(void)
+zend_result zend_func_info_shutdown(void)
 {
 	if (zend_func_info_rid != -1) {
 		zend_hash_destroy(&func_info);

@@ -38,8 +38,8 @@ static zval *com_property_read(zend_object *object, zend_string *member, int typ
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		res = php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
+		res = php_com_do_invoke(obj, member, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
+			&v, 0, NULL, 1);
 
 		if (res == SUCCESS) {
 			php_com_zval_from_variant(rv, &v, obj->code_page);
@@ -67,7 +67,7 @@ static zval *com_property_write(zend_object *object, zend_string *member, zval *
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		VariantInit(&v);
 
-		if (SUCCESS == php_com_do_invoke(obj, ZSTR_VAL(member), ZSTR_LEN(member),
+		if (SUCCESS == php_com_do_invoke(obj, member,
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
 		}
@@ -190,7 +190,7 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 	obj = (php_com_dotnet_object*) object;
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
-		if (SUCCEEDED(php_com_get_id_of_name(obj, ZSTR_VAL(member), ZSTR_LEN(member), &dispid))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, member, &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -254,7 +254,7 @@ static PHP_FUNCTION(com_method_handler)
 	php_com_dotnet_object *obj = CDNO_FETCH(object);
 	int nargs;
 	VARIANT v;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
 		goto exit;
@@ -270,8 +270,7 @@ static PHP_FUNCTION(com_method_handler)
 	VariantInit(&v);
 
 	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args)) {
-		php_com_zval_from_variant(return_value, &v, obj->code_page);
-		ret = SUCCESS;
+		ret = php_com_zval_from_variant(return_value, &v, obj->code_page);
 		VariantClear(&v);
 	}
 
@@ -298,7 +297,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		return NULL;
 	}
 
-	if (FAILED(php_com_get_id_of_name(obj, name->val, name->len, &dummy))) {
+	if (FAILED(php_com_get_id_of_name(obj, name, &dummy))) {
 		return NULL;
 	}
 
@@ -534,7 +533,7 @@ zend_object_handlers php_com_object_handlers = {
 	NULL,									/* get_properties_for */
 };
 
-void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)
+void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable)
 {
 	if (obj->sink_dispatch) {
 		IConnectionPointContainer *cont;
@@ -568,7 +567,7 @@ void php_com_object_free_storage(zend_object *object)
 	}
 
 	if (obj->sink_dispatch) {
-		php_com_object_enable_event_sink(obj, FALSE);
+		php_com_object_enable_event_sink(obj, /* enable */ false);
 		IDispatch_Release(obj->sink_dispatch);
 		obj->sink_dispatch = NULL;
 	}

@@ -23,6 +23,10 @@ PHP 8.2 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Curl:
+  . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
+    HTTP method in curl_getinfo() return value.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -31,9 +35,37 @@ PHP 8.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Callables that are not accepted by the $callable() syntax (but are accepted
+    by call_user_func) are deprecated. In particular:
+
+        "self::method"
+        "parent::method"
+        "static::method"
+        ["self", "method"]
+        ["parent", "method"]
+        ["static", "method"]
+        ["Foo", "Bar::method"]
+        [new Foo, "Bar::method"]
+
+    This does not affect normal method callables like "A::method" or
+    ["A", "method"]. A deprecation notice is only emitted on call. Both
+    is_callable() and the callable type will silently accept these callables
+    until support for them is removed entirely.
+
+    RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+
 ========================================
 5. Changed Functions
 ========================================
+
+- DBA
+  . dba_fetch()'s optional skip argument is now at the end in line with
+    PHP userland semantics its signature now is:
+    dba_fetch(string|array $key, $dba, int $skip = 0): string|false
+    The overloaded signature
+    dba_fetch(string|array $key, $skip, $dba): string|false
+    is still accepted, but it is recommended to use the new standard variant.
 
 ========================================
 6. New Functions
@@ -50,6 +82,10 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- Zip:
+  . extension updated to 1.20.0 with new methods:
+    ZipArchive::cleaError, getStreamName and getStreamIndex
 
 ========================================
 10. New Global Constants

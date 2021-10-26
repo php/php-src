@@ -27,9 +27,6 @@
 #include GDBM_INCLUDE_FILE
 #endif
 
-#define GDBM_DATA dba_gdbm_data *dba = info->dbf
-#define GDBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
-
 typedef struct {
 	GDBM_FILE dbf;
 	datum nextkey;
@@ -67,7 +64,7 @@ DBA_OPEN_FUNC(gdbm)
 
 DBA_CLOSE_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
 
 	if(dba->nextkey.dptr) free(dba->nextkey.dptr);
 	gdbm_close(dba->dbf);
@@ -76,11 +73,13 @@ DBA_CLOSE_FUNC(gdbm)
 
 DBA_FETCH_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
 	datum gval;
 	char *new = NULL;
+	datum gkey;
 
-	GDBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval = gdbm_fetch(dba->dbf, gkey);
 	if(gval.dptr) {
 		if(newlen) *newlen = gval.dsize;
@@ -92,10 +91,12 @@ DBA_FETCH_FUNC(gdbm)
 
 DBA_UPDATE_FUNC(gdbm)
 {
+	dba_gdbm_data *dba = info->dbf;
 	datum gval;
-	GDBM_DATA;
+	datum gkey;
 
-	GDBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 
@@ -115,23 +116,29 @@ DBA_UPDATE_FUNC(gdbm)
 
 DBA_EXISTS_FUNC(gdbm)
 {
-	GDBM_DATA;
-	GDBM_GKEY;
+	dba_gdbm_data *dba = info->dbf;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 
 	return gdbm_exists(dba->dbf, gkey) ? SUCCESS : FAILURE;
 }
 
 DBA_DELETE_FUNC(gdbm)
 {
-	GDBM_DATA;
-	GDBM_GKEY;
+	dba_gdbm_data *dba = info->dbf;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 
 	return gdbm_delete(dba->dbf, gkey) == -1 ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
 	datum gkey;
 	char *key = NULL;
 
@@ -152,7 +159,7 @@ DBA_FIRSTKEY_FUNC(gdbm)
 
 DBA_NEXTKEY_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
 	char *nkey = NULL;
 	datum gkey;
 
@@ -172,14 +179,15 @@ DBA_NEXTKEY_FUNC(gdbm)
 
 DBA_OPTIMIZE_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
+
 	gdbm_reorganize(dba->dbf);
 	return SUCCESS;
 }
 
 DBA_SYNC_FUNC(gdbm)
 {
-	GDBM_DATA;
+	dba_gdbm_data *dba = info->dbf;
 
 	gdbm_sync(dba->dbf);
 	return SUCCESS;

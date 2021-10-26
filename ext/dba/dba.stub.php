@@ -23,18 +23,14 @@ function dba_open($path, $mode, $handler = UNKNOWN, ...$handler_params) {}
 /** @param resource $dba */
 function dba_close($dba): void {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_exists($key, $dba): bool {}
+/** @param resource $dba */
+function dba_exists(string|array $key, $dba): bool {}
 
 /**
- * @param string|array $key
- * @param int|resource $skip actually this parameter is optional, not $dba
- * @param resource $dba
+ * @param resource|int $dba overloaded legacy signature has params flipped
+ * @param resource|int $skip overloaded legacy signature has params flipped
  */
-function dba_fetch($key, $skip, $dba = UNKNOWN): string|false {}
+function dba_fetch(string|array $key, $dba, $skip = 0): string|false {}
 
 function dba_key_split(string|false|null $key): array|false {}
 
@@ -44,23 +40,14 @@ function dba_firstkey($dba): string|false {}
 /** @param resource $dba */
 function dba_nextkey($dba): string|false {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_delete($key, $dba): bool {}
+/** @param resource $dba */
+function dba_delete(string|array $key, $dba): bool {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_insert($key, string $value, $dba): bool {}
+/** @param resource $dba */
+function dba_insert(string|array $key, string $value, $dba): bool {}
 
-/**
- * @param string|array $key
- * @param resource $dba
- */
-function dba_replace($key, string $value, $dba): bool {}
+/** @param resource $dba */
+function dba_replace(string|array $key, string $value, $dba): bool {}
 
 /** @param resource $dba */
 function dba_optimize($dba): bool {}

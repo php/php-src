@@ -609,25 +609,41 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 	return RT_CONSTANT(recv, recv->op2);
 }
 
-static int format_default_value(smart_str *str, zval *value, zend_class_entry *scope) {
-	zval zv;
-	ZVAL_COPY(&zv, value);
-	if (UNEXPECTED(zval_update_constant_ex(&zv, scope) == FAILURE)) {
-		zval_ptr_dtor(&zv);
-		return FAILURE;
-	}
+static int format_default_value(smart_str *str, zval *value) {
+	if (Z_TYPE_P(value) <= IS_STRING) {
+		smart_str_append_scalar(str, value, SIZE_MAX);
+	} else if (Z_TYPE_P(value) == IS_ARRAY) {
+		zend_string *str_key;
+		zend_long num_key;
+		zval *zv;
+		bool is_list = zend_array_is_list(Z_ARRVAL_P(value));
+		bool first = true;
+		smart_str_appendc(str, '[');
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(value), num_key, str_key, zv) {
+			if (!first) {
+				smart_str_appends(str, ", ");
+			}
+			first = false;
 
-	if (Z_TYPE(zv) <= IS_STRING) {
-		smart_str_append_scalar(str, &zv, 15);
-	} else if (Z_TYPE(zv) == IS_ARRAY) {
-		smart_str_appends(str, "Array");
+			if (!is_list) {
+				if (str_key) {
+					smart_str_appendc(str, '\'');
+					smart_str_append_escaped(str, ZSTR_VAL(str_key), ZSTR_LEN(str_key));
+					smart_str_appendc(str, '\'');
+				} else {
+					smart_str_append_long(str, num_key);
+				}
+				smart_str_appends(str, " => ");
+			}
+			format_default_value(str, zv);
+		} ZEND_HASH_FOREACH_END();
+		smart_str_appendc(str, ']');
 	} else {
-		zend_string *tmp_zv_str;
-		zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
-		smart_str_append(str, zv_str);
-		zend_tmp_string_release(tmp_zv_str);
+		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
+		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
+		smart_str_append(str, ast_str);
+		zend_string_release(ast_str);
 	}
-	zval_ptr_dtor(&zv);
 	return SUCCESS;
 }
 
@@ -675,7 +691,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset);
 			if (default_value) {
 				smart_str_appends(str, " = ");
-				if (format_default_value(str, default_value, fptr->common.scope) == FAILURE) {
+				if (format_default_value(str, default_value) == FAILURE) {
 					return;
 				}
 			}
@@ -898,7 +914,7 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		zval *default_value = property_get_default(prop);
 		if (!Z_ISUNDEF_P(default_value)) {
 			smart_str_appends(str, " = ");
-			if (format_default_value(str, default_value, prop->ce) == FAILURE) {
+			if (format_default_value(str, default_value) == FAILURE) {
 				return;
 			}
 		}
@@ -6404,26 +6420,18 @@ ZEND_METHOD(ReflectionAttribute, __toString)
 		smart_str_append_printf(&str, "  - Arguments [%d] {\n", attr->data->argc);
 
 		for (uint32_t i = 0; i < attr->data->argc; i++) {
-			zval tmp;
-			if (FAILURE == zend_get_attribute_value(&tmp, attr->data, i, attr->scope)) {
-				smart_str_free(&str);
-				RETURN_THROWS();
-			}
-
 			smart_str_append_printf(&str, "    Argument #%d [ ", i);
 			if (attr->data->args[i].name != NULL) {
 				smart_str_append(&str, attr->data->args[i].name);
 				smart_str_appends(&str, " = ");
 			}
 
-			if (format_default_value(&str, &tmp, NULL) == FAILURE) {
-				zval_ptr_dtor(&tmp);
+			if (format_default_value(&str, &attr->data->args[i].value) == FAILURE) {
 				smart_str_free(&str);
 				RETURN_THROWS();
 			}
 
 			smart_str_appends(&str, " ]\n");
-			zval_ptr_dtor(&tmp);
 		}
 		smart_str_appends(&str, "  }\n");
 

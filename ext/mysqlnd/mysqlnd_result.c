@@ -781,7 +781,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 
 /* {{{ mysqlnd_res::skip_result */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
 	bool fetched_anything;
@@ -806,7 +806,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 					? STAT_ROWS_SKIPPED_NORMAL : STAT_ROWS_SKIPPED_PS);
 		}
 	}
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
@@ -970,7 +970,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {
-		php_error_docref(NULL, E_WARNING, "Error while reading a row");
 		RETVAL_FALSE;
 		DBG_VOID_RETURN;
 	} else if (fetched_anything == FALSE) {

@@ -47,7 +47,7 @@ const char HARDCODED_INI[] =
 	"open_basedir=/tmp\n"
 	"disable_functions=dl,mail,mb_send_mail"
 	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
-	",chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
+	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
 	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
 	/* Networking code likes to wait and wait. */
 	",fsockopen,pfsockopen"

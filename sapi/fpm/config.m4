@@ -25,6 +25,18 @@ AC_DEFUN([AC_FPM_PRCTL],
   ])
 ])
 
+AC_DEFUN([AC_FPM_PROCCTL],
+[
+  AC_MSG_CHECKING([for procctl])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
+    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -494,6 +506,7 @@ if test "$PHP_FPM" != "no"; then
 
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
+  AC_FPM_PROCCTL
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC

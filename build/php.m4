@@ -2258,7 +2258,6 @@ struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
 ]])],[php_cv_crypt_r_style=struct_crypt_data_gnu_source],[])
     fi
-    ])
 
     if test "$php_cv_crypt_r_style" = "none"; then
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[

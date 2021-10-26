@@ -14,6 +14,8 @@
  * which should be displayed as double-width.
  */
 
+#define FIRST_DOUBLEWIDTH_CODEPOINT 0x1100
+
 static const struct {
 	int begin;
 	int end;

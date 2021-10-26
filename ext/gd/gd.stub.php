@@ -53,7 +53,7 @@ function imagecolorresolvealpha(GdImage $image, int $red, int $green, int $blue,
 
 function imagecolorclosestalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
-function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int|false {}
+function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, int $alpha): int {}
 
 function imagecopyresampled(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): bool {}
 

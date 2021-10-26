@@ -31,7 +31,7 @@
 #include "zend_vm.h"
 
 /* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
-static zend_always_inline int in_hitlist(zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
+static zend_always_inline bool in_hitlist(zend_op *target, zend_op **jmp_hitlist, int jmp_hitlist_count)
 {
 	int i;
 
@@ -94,6 +94,10 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(opline));
 						opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
+					/* Jump addresses may be encoded as offsets, recompute them. */
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(target));
+					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline,
+						ZEND_OFFSET_TO_OPLINE(target, target->extended_value));
 					goto optimize_jmpznz;
 				} else if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||

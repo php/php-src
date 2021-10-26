@@ -91,7 +91,7 @@ struct _spl_dllist_object {
 
 /* define an overloaded iterator structure */
 struct _spl_dllist_it {
-	zend_user_iterator     intern;
+	zend_object_iterator   intern;
 	spl_ptr_llist_element *traverse_pointer;
 	int                    traverse_position;
 	int                    flags;
@@ -817,8 +817,7 @@ static void spl_dllist_it_dtor(zend_object_iterator *iter) /* {{{ */
 
 	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer);
 
-	zend_user_it_invalidate_current(iter);
-	zval_ptr_dtor(&iterator->intern.it.data);
+	zval_ptr_dtor(&iterator->intern.data);
 }
 /* }}} */
 
@@ -916,8 +915,6 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 	spl_dllist_object *object = Z_SPLDLLIST_P(&iter->data);
-
-	zend_user_it_invalidate_current(iter);
 
 	spl_dllist_it_helper_move_forward(&iterator->traverse_pointer, &iterator->traverse_position, object->llist, iterator->flags);
 }
@@ -1237,7 +1234,6 @@ static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	spl_dllist_it *iterator;
 	spl_dllist_object *dllist_object = Z_SPLDLLIST_P(object);
 
 	if (by_ref) {
@@ -1245,21 +1241,19 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 		return NULL;
 	}
 
-	iterator = emalloc(sizeof(spl_dllist_it));
+	spl_dllist_it *iterator = emalloc(sizeof(spl_dllist_it));
 
-	zend_iterator_init((zend_object_iterator*)iterator);
+	zend_iterator_init(&iterator->intern);
 
-	ZVAL_OBJ_COPY(&iterator->intern.it.data, Z_OBJ_P(object));
-	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
-	iterator->intern.ce          = ce;
+	ZVAL_OBJ_COPY(&iterator->intern.data, Z_OBJ_P(object));
+	iterator->intern.funcs       = &spl_dllist_it_funcs;
 	iterator->traverse_position  = dllist_object->traverse_position;
 	iterator->traverse_pointer   = dllist_object->traverse_pointer;
 	iterator->flags              = dllist_object->flags & SPL_DLLIST_IT_MASK;
-	ZVAL_UNDEF(&iterator->intern.value);
 
 	SPL_LLIST_CHECK_ADDREF(iterator->traverse_pointer);
 
-	return &iterator->intern.it;
+	return &iterator->intern;
 }
 /* }}} */
 

@@ -62,6 +62,8 @@ namespace {
 
     function zend_test_void_return(): void {}
 
+    function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
+
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
 
@@ -84,6 +86,10 @@ namespace {
     function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
 
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
+
+    function zend_weakmap_attach(object $object, mixed $value): bool {}
+    function zend_weakmap_remove(object $object): bool {}
+    function zend_weakmap_dump(): array {}
 
     function zend_get_unit_enum(): ZendTestUnitEnum {}
 }

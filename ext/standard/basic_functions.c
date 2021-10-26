@@ -1665,20 +1665,36 @@ PHP_FUNCTION(forward_static_call_array)
 }
 /* }}} */
 
+static void fci_addref(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+{
+	Z_TRY_ADDREF(fci->function_name);
+	if (fci_cache->object) {
+		GC_ADDREF(fci_cache->object);
+	}
+}
+
+static void fci_release(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+{
+	zval_ptr_dtor(&fci->function_name);
+	if (fci_cache->object) {
+		zend_object_release(fci_cache->object);
+	}
+}
+
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 
-	zval_ptr_dtor(&shutdown_function_entry->fci.function_name);
 	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
+	fci_release(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
 	efree(shutdown_function_entry);
 }
 /* }}} */
 
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
-	zval_ptr_dtor(&tick_function_entry->fci.function_name);
 	zend_fcall_info_args_clear(&tick_function_entry->fci, true);
+	fci_release(&tick_function_entry->fci, &tick_function_entry->fci_cache);
 }
 /* }}} */
 
@@ -1784,7 +1800,7 @@ PHP_FUNCTION(register_shutdown_function)
 		RETURN_THROWS();
 	}
 
-	Z_TRY_ADDREF(entry.fci.function_name);
+	fci_addref(&entry.fci, &entry.fci_cache);
 	zend_fcall_info_argp(&entry.fci, param_count, params);
 
 	status = append_user_shutdown_function(&entry);
@@ -2353,7 +2369,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	tick_fe.calling = false;
-	Z_TRY_ADDREF(tick_fe.fci.function_name);
+	fci_addref(&tick_fe.fci, &tick_fe.fci_cache);
 	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
 
 	if (!BG(user_tick_functions)) {

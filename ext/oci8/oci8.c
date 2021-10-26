@@ -1045,7 +1045,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
-	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
 		bool found = 0;
@@ -2163,7 +2163,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	/* Session Pool Hash Key : oci8spool***username**edition**hashedpassword**dbname**charset */
 
 	smart_str_0(&spool_hashed_details);
-	php_strtolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
 	/* }}} */
 
 	spool_out_zv = zend_hash_find(&EG(persistent_list), spool_hashed_details.s);

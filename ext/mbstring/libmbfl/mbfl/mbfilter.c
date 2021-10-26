@@ -95,6 +95,7 @@
 #include "filters/mbfilter_utf8.h"
 
 #include "eaw_table.h"
+#include "rare_cp_bitvec.h"
 
 /* hex character table "0123456789ABCDEF" */
 static char mbfl_hexchar_table[] = {
@@ -236,26 +237,52 @@ size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 /*
  * encoding detector
  */
-static int mbfl_estimate_encoding_likelihood(int c, void *void_data)
+static int mbfl_estimate_encoding_likelihood(int input_cp, void *void_data)
 {
 	mbfl_encoding_detector_data *data = void_data;
+	unsigned int c = input_cp;
 
-	/* Receive wchars decoded from test string using candidate encoding
-	 * If the test string was invalid in the candidate encoding, we assume
-	 * it's the wrong one. */
+	/* Receive wchars decoded from input string using candidate encoding.
+	 * If the string was invalid in the candidate encoding, we assume
+	 * it's the wrong one. Otherwise, give the candidate many 'demerits'
+	 * for each 'rare' codepoint found, a smaller number for each ASCII
+	 * punctuation character, and 1 for all other codepoints.
+	 *
+	 * The 'common' codepoints should cover the vast majority of
+	 * codepoints we are likely to see in practice, while only covering
+	 * a small minority of the entire Unicode encoding space. Why?
+	 * Well, if the test string happens to be valid in an incorrect
+	 * candidate encoding, the bogus codepoints which it decodes to will
+	 * be more or less random. By treating the majority of codepoints as
+	 * 'rare', we ensure that in almost all such cases, the bogus
+	 * codepoints will include plenty of 'rares', thus giving the
+	 * incorrect candidate encoding lots of demerits. See
+	 * common_codepoints.txt for the actual list used.
+	 *
+	 * So, why give extra demerits for ASCII punctuation characters? It's
+	 * because there are some text encodings, like UTF-7, HZ, and ISO-2022,
+	 * which deliberately only use bytes in the ASCII range. When
+	 * misinterpreted as ASCII/UTF-8, strings in these encodings will
+	 * have an unusually high number of ASCII punctuation characters.
+	 * So giving extra demerits for such characters will improve
+	 * detection accuracy for UTF-7 and similar encodings.
+	 *
+	 * Finally, why 1 demerit for all other characters? That penalizes
+	 * long strings, meaning we will tend to choose a candidate encoding
+	 * in which the test string decodes to a smaller number of
+	 * codepoints. That prevents single-byte encodings in which almost
+	 * every possible input byte decodes to a 'common' codepoint from
+	 * being favored too much. */
 	if (c == MBFL_BAD_INPUT) {
 		data->num_illegalchars++;
-	} else if (c < 0x9 || (c >= 0xE && c <= 0x1F) || (c >= 0xE000 && c <= 0xF8FF) || c >= 0xF0000) {
-		/* Otherwise, count how many control characters and 'private use'
-		 * codepoints we see. Those are rarely used and may indicate that
-		 * the candidate encoding is not the right one. */
-		data->score += 10;
-	} else if ((c >= 0x21 && c <= 0x2F) || (c >= 0x3A && c <= 0x40) || (c >= 0x5B && c <= 0x60)) {
-		/* Punctuation is also less common than letters/digits; further, if
-		 * text in ISO-2022 or similar encodings is mistakenly identified as
-		 * ASCII or UTF-8, the misinterpreted string will tend to have an
-		 * unusually high density of ASCII punctuation characters. */
-		data->score++;
+	} else if (c > 0xFFFF) {
+		data->score += 40;
+	} else if (c >= 0x21 && c <= 0x2F) {
+		data->score += 6;
+	} else if ((rare_codepoint_bitvec[c >> 5] >> (c & 0x1F)) & 1) {
+		data->score += 30;
+	} else {
+		data->score += 1;
 	}
 	return 0;
 }
@@ -461,9 +488,7 @@ mbfl_strlen(const mbfl_string *string)
 		  string->encoding,
 		  &mbfl_encoding_wchar,
 		  filter_count_output, 0, &len);
-		if (filter == NULL) {
-			return (size_t) -1;
-		}
+		ZEND_ASSERT(filter);
 		/* count */
 		n = string->len;
 		p = string->val;
@@ -694,9 +719,7 @@ mbfl_substr_count(
 	  needle->encoding,
 	  &mbfl_encoding_wchar,
 	  mbfl_wchar_device_output, 0, &pc.needle);
-	if (filter == NULL) {
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	mbfl_convert_filter_feed_string(filter, needle->val, needle->len);
 	mbfl_convert_filter_flush(filter);
 	mbfl_convert_filter_delete(filter);
@@ -713,10 +736,7 @@ mbfl_substr_count(
 	  haystack->encoding,
 	  &mbfl_encoding_wchar,
 	  collector_strpos, 0, &pc);
-	if (filter == NULL) {
-		mbfl_wchar_device_clear(&pc.needle);
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	pc.start = 0;
 	pc.output = 0;
 	pc.needle_pos = 0;
@@ -1210,31 +1230,33 @@ mbfl_strcut(
 	return result;
 }
 
-
-/*
- *  strwidth
- */
-static size_t is_fullwidth(int c)
+/* Some East Asian characters, when printed at a terminal (or the like), require double
+ * the usual amount of horizontal space. We call these "fullwidth" characters. */
+static size_t character_width(int c)
 {
-	int i;
-
-	if (c < mbfl_eaw_table[0].begin) {
-		return 0;
+	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
+		return 1;
 	}
 
-	for (i = 0; i < sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]); i++) {
-		if (mbfl_eaw_table[i].begin <= c && c <= mbfl_eaw_table[i].end) {
-			return 1;
+	/* Do a binary search to see if we fall in any of the fullwidth ranges */
+	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	while (lo < hi) {
+		int probe = (lo + hi) / 2;
+		if (c < mbfl_eaw_table[probe].begin) {
+			hi = probe;
+		} else if (c > mbfl_eaw_table[probe].end) {
+			lo = probe + 1;
+		} else {
+			return 2;
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
-static int
-filter_count_width(int c, void* data)
+static int filter_count_width(int c, void* data)
 {
-	(*(size_t *)data) += (is_fullwidth(c) ? 2: 1);
+	(*(size_t *)data) += character_width(c);
 	return 0;
 }
 
@@ -1252,10 +1274,7 @@ mbfl_strwidth(mbfl_string *string)
 		    string->encoding,
 		    &mbfl_encoding_wchar,
 		    filter_count_width, 0, &len);
-		if (filter == NULL) {
-			mbfl_convert_filter_delete(filter);
-			return -1;
-		}
+		ZEND_ASSERT(filter);
 
 		/* feed data */
 		p = string->val;
@@ -1299,7 +1318,7 @@ collector_strimwidth(int c, void* data)
 		break;
 	default:
 		if (pc->outchar >= pc->from) {
-			pc->outwidth += (is_fullwidth(c) ? 2: 1);
+			pc->outwidth += character_width(c);
 
 			if (pc->outwidth > pc->width) {
 				if (pc->status == 0) {

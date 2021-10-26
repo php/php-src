@@ -683,20 +683,20 @@ function headers_list(): array {}
 /* {{{ html.c */
 
 /** @refcount 1 */
-function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
-function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE): string {}
+function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
 
-function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null): string {}
+function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
 
 /** @refcount 1 */
-function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, ?string $encoding = null, bool $double_encode = true): string {}
+function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
 /**
  * @return array<string, string>
  * @refcount 1
  */
-function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE, string $encoding = "UTF-8"): array {}
+function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, string $encoding = "UTF-8"): array {}
 
 /* }}} */
 
@@ -867,7 +867,7 @@ function parse_str(string $string, &$result): void {}
  * @return array<int, string|null>
  * @refcount 1
  */
-function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = '\\'): array {}
+function str_getcsv(string $string, string $separator = ",", string $enclosure = "\"", string $escape = "\\"): array {}
 
 /** @refcount 1 */
 function str_repeat(string $string, int $times): string {}

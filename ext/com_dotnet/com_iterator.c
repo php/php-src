@@ -108,7 +108,7 @@ static void com_iter_move_forwards(zend_object_iterator *iter)
 			return;
 		}
 		I->key++;
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key) == 0) {
+		if (!php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key)) {
 			I->key = (zend_ulong)-1;
 			return;
 		}

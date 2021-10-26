@@ -904,6 +904,21 @@ static void zend_file_cache_serialize_warnings(
 	}
 }
 
+static void zend_file_cache_serialize_early_bindings(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->early_bindings) {
+		SERIALIZE_PTR(script->early_bindings);
+		zend_early_binding *early_bindings = script->early_bindings;
+		UNSERIALIZE_PTR(early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			SERIALIZE_STR(early_bindings[i].lcname);
+			SERIALIZE_STR(early_bindings[i].rtd_key);
+			SERIALIZE_STR(early_bindings[i].lc_parent_name);
+		}
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -926,6 +941,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
 	zend_file_cache_serialize_warnings(new_script, info, buf);
+	zend_file_cache_serialize_early_bindings(new_script, info, buf);
 
 	new_script->mem = NULL;
 }
@@ -1268,17 +1284,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		}
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
-				zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
-			ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-		}
-		if (op_array != &script->script.main_op_array) {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
-			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
-		}
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	/* Check whether this op_array has already been unserialized. */
@@ -1675,11 +1682,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
-		if (ce->default_static_members_count) {
-			ZEND_MAP_PTR_INIT(ce->static_members_table,
-				zend_arena_alloc(&CG(arena), sizeof(zval *)));
-			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-		}
+		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
 }
 
@@ -1691,6 +1694,18 @@ static void zend_file_cache_unserialize_warnings(zend_persistent_script *script,
 			UNSERIALIZE_PTR(script->warnings[i]);
 			UNSERIALIZE_STR(script->warnings[i]->filename);
 			UNSERIALIZE_STR(script->warnings[i]->message);
+		}
+	}
+}
+
+static void zend_file_cache_unserialize_early_bindings(zend_persistent_script *script, void *buf)
+{
+	if (script->early_bindings) {
+		UNSERIALIZE_PTR(script->early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			UNSERIALIZE_STR(script->early_bindings[i].lcname);
+			UNSERIALIZE_STR(script->early_bindings[i].rtd_key);
+			UNSERIALIZE_STR(script->early_bindings[i].lc_parent_name);
 		}
 	}
 }
@@ -1708,6 +1723,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 	zend_file_cache_unserialize_warnings(script, buf);
+	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)

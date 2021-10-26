@@ -47,7 +47,7 @@ class FinalClass
 {
   private $var4;
   final function finalMethod() {
-    echo 'This can not be overloaded';
+    echo 'This cannot be overloaded';
   }
 }
 

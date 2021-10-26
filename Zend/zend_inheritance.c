@@ -1525,10 +1525,6 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			if (ce->type == ZEND_INTERNAL_CLASS &&
 					ce->info.internal.module->type == MODULE_PERSISTENT) {
 				ZEND_MAP_PTR_NEW(ce->static_members_table);
-			} else {
-				ZEND_MAP_PTR_INIT(ce->static_members_table,
-					zend_arena_alloc(&CG(arena), sizeof(zval *)));
-				ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
 			}
 		}
 	}
@@ -2485,7 +2481,7 @@ static int check_variance_obligation(zval *zv) {
 	return ZEND_HASH_APPLY_REMOVE;
 }
 
-static void load_delayed_classes(void) {
+static void load_delayed_classes(zend_class_entry *ce) {
 	HashTable *delayed_autoloads = CG(delayed_autoloads);
 	zend_string *name;
 
@@ -2498,6 +2494,11 @@ static void load_delayed_classes(void) {
 
 	ZEND_HASH_FOREACH_STR_KEY(delayed_autoloads, name) {
 		zend_lookup_class(name);
+		if (EG(exception)) {
+			zend_exception_uncaught_error(
+				"During inheritance of %s, while autoloading %s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(name));
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(delayed_autoloads);
@@ -2610,30 +2611,18 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 		end = p + ce->function_table.nNumUsed;
 		for (; p != end; p++) {
 			zend_op_array *op_array, *new_op_array;
-			void ***run_time_cache_ptr;
-			size_t alloc_size;
 
 			op_array = Z_PTR(p->val);
 			ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
 			ZEND_ASSERT(op_array->scope == pce);
 			ZEND_ASSERT(op_array->prototype == NULL);
-			alloc_size = sizeof(zend_op_array) + sizeof(void *);
-			if (op_array->static_variables) {
-				alloc_size += sizeof(HashTable *);
-			}
-			new_op_array = zend_arena_alloc(&CG(arena), alloc_size);
+			new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 			Z_PTR(p->val) = new_op_array;
 			memcpy(new_op_array, op_array, sizeof(zend_op_array));
-			run_time_cache_ptr = (void***)(new_op_array + 1);
-			*run_time_cache_ptr = NULL;
 			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 			new_op_array->scope = ce;
-			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, run_time_cache_ptr);
-			if (op_array->static_variables) {
-				HashTable **static_variables_ptr = (HashTable **) (run_time_cache_ptr + 1);
-				*static_variables_ptr = NULL;
-				ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, static_variables_ptr);
-			}
+			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, NULL);
+			ZEND_MAP_PTR_INIT(new_op_array->static_variables_ptr, NULL);
 
 			zend_update_inherited_handler(constructor);
 			zend_update_inherited_handler(destructor);
@@ -2662,8 +2651,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZVAL_COPY_VALUE(dst, src);
 		}
 	}
-	ZEND_MAP_PTR_INIT(ce->static_members_table, zend_arena_alloc(&CG(arena), sizeof(zval *)));
-	ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 
 	/* properties_info */
 	if (!(HT_FLAGS(&ce->properties_info) & HASH_FLAG_UNINITIALIZED)) {
@@ -2905,7 +2893,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		if (CG(current_linking_class)) {
 			ce->ce_flags |= ZEND_ACC_CACHEABLE;
 		}
-		load_delayed_classes();
+		load_delayed_classes(ce);
 		if (ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE) {
 			resolve_delayed_variance_obligations(ce);
 			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
@@ -3024,7 +3012,7 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 	return zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL;
 }
 
-zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
+ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding) /* {{{ */
 {
 	inheritance_status status;
 	zend_class_entry *proto = NULL;

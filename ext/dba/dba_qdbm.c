@@ -27,8 +27,6 @@
 #include QDBM_INCLUDE_FILE
 #endif
 
-#define QDBM_DATA dba_qdbm_data *dba = info->dbf
-
 typedef struct {
 	DEPOT *dbf;
 } dba_qdbm_data;
@@ -67,7 +65,7 @@ DBA_OPEN_FUNC(qdbm)
 
 DBA_CLOSE_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 
 	dpclose(dba->dbf);
 	pefree(dba, info->flags & DBA_PERSISTENT);
@@ -75,7 +73,7 @@ DBA_CLOSE_FUNC(qdbm)
 
 DBA_FETCH_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 	char *value, *new = NULL;
 	int value_size;
 
@@ -91,7 +89,7 @@ DBA_FETCH_FUNC(qdbm)
 
 DBA_UPDATE_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 
 	if (dpput(dba->dbf, key, keylen, val, vallen, mode == 1 ? DP_DKEEP : DP_DOVER)) {
 		return SUCCESS;
@@ -106,7 +104,7 @@ DBA_UPDATE_FUNC(qdbm)
 
 DBA_EXISTS_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 	char *value;
 
 	value = dpget(dba->dbf, key, keylen, 0, -1, NULL);
@@ -120,14 +118,14 @@ DBA_EXISTS_FUNC(qdbm)
 
 DBA_DELETE_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 
 	return dpout(dba->dbf, key, keylen) ? SUCCESS : FAILURE;
 }
 
 DBA_FIRSTKEY_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 	int value_size;
 	char *value, *new = NULL;
 
@@ -145,7 +143,7 @@ DBA_FIRSTKEY_FUNC(qdbm)
 
 DBA_NEXTKEY_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 	int value_size;
 	char *value, *new = NULL;
 
@@ -161,7 +159,7 @@ DBA_NEXTKEY_FUNC(qdbm)
 
 DBA_OPTIMIZE_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 
 	dpoptimize(dba->dbf, 0);
 	return SUCCESS;
@@ -169,7 +167,7 @@ DBA_OPTIMIZE_FUNC(qdbm)
 
 DBA_SYNC_FUNC(qdbm)
 {
-	QDBM_DATA;
+	dba_qdbm_data *dba = info->dbf;
 
 	dpsync(dba->dbf);
 	return SUCCESS;

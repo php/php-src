@@ -63,8 +63,7 @@ static inline void zend_weakref_unref_single(
 		wr->referent = NULL;
 	} else {
 		ZEND_ASSERT(tag == ZEND_WEAKREF_TAG_MAP);
-		zend_weakmap *wm = ptr;
-		zend_hash_index_del(&wm->ht, obj_addr);
+		zend_hash_index_del((HashTable *) ptr, obj_addr);
 	}
 }
 
@@ -144,6 +143,23 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 		ZEND_WEAKREF_GET_PTR(payload), ZEND_WEAKREF_GET_TAG(payload), obj_addr);
 }
 
+ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pData) {
+	zval *zv = zend_hash_index_add(ht, (zend_ulong) key, pData);
+	if (zv) {
+		zend_weakref_register(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_MAP));
+	}
+	return zv;
+}
+
+ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
+	zval *zv = zend_hash_index_find(ht, (zend_ulong) key);
+	if (zv) {
+		zend_weakref_unregister(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_MAP));
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
 void zend_weakrefs_init(void) {
 	zend_hash_init(&EG(weakrefs), 8, NULL, NULL, 0);
 }
@@ -163,11 +179,6 @@ void zend_weakrefs_notify(zend_object *object) {
 }
 
 void zend_weakrefs_shutdown(void) {
-	zend_ulong obj_addr;
-	void *tagged_ptr;
-	ZEND_HASH_FOREACH_NUM_KEY_PTR(&EG(weakrefs), obj_addr, tagged_ptr) {
-		zend_weakref_unref(obj_addr, tagged_ptr);
-	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&EG(weakrefs));
 }
 
@@ -281,7 +292,7 @@ static void zend_weakmap_free_obj(zend_object *object)
 	zend_ulong obj_addr;
 	ZEND_HASH_FOREACH_NUM_KEY(&wm->ht, obj_addr) {
 		zend_weakref_unregister(
-			(zend_object *) obj_addr, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
+			(zend_object *) obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&wm->ht);
 	zend_object_std_dtor(&wm->std);
@@ -340,7 +351,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 		return;
 	}
 
-	zend_weakref_register(obj_key, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
+	zend_weakref_register(obj_key, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
 	zend_hash_index_add_new(&wm->ht, (zend_ulong) obj_key, value);
 }
 
@@ -378,7 +389,7 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 		return;
 	}
 
-	zend_weakref_unregister(obj_key, ZEND_WEAKREF_ENCODE(wm, ZEND_WEAKREF_TAG_MAP));
+	zend_weakref_unregister(obj_key, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
 }
 
 static int zend_weakmap_count_elements(zend_object *object, zend_long *count)

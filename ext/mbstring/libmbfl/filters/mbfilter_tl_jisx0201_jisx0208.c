@@ -46,21 +46,21 @@
  */
 int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 {
-	if ((mode & MBFL_FILT_TL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7d && c != '"' && c != '\'' && c != '\\') {
+	if ((mode & MBFL_HAN2ZEN_ALL) && c >= 0x21 && c <= 0x7d && c != '"' && c != '\'' && c != '\\') {
 		return c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_ALPHA) && ((c >= 0x41 && c <= 0x5a) || (c >= 0x61 && c <= 0x7a))) { /* alphabetic */
+	} else if ((mode & MBFL_HAN2ZEN_ALPHA) && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) {
 		return c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_NUMERIC) && c >= 0x30 && c <= 0x39) { /* num */
+	} else if ((mode & MBFL_HAN2ZEN_NUMERIC) && c >= '0' && c <= '9') {
 		return c + 0xfee0;
-	} else if ((mode & MBFL_FILT_TL_HAN2ZEN_SPACE) && c == 0x20) { /* space */
+	} else if ((mode & MBFL_HAN2ZEN_SPACE) && c == ' ') {
 		return 0x3000;
 	}
 
-	if (mode & (MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_HIRAGANA)) {
+	if (mode & (MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_HIRAGANA)) {
 		/* Convert Hankaku kana to Zenkaku kana
 		 * Either all Hankaku kana (including katakana and hiragana) will be converted
 		 * to Zenkaku katakana, or to Zenkaku hiragana */
-		if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) && (mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
+		if ((mode & MBFL_HAN2ZEN_KATAKANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
 			if (c >= 0xff61 && c <= 0xff9f) {
 				int n = c - 0xff60;
 				if (next >= 0xff61 && next <= 0xff9f) {
@@ -78,7 +78,7 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 
 				return 0x3000 + hankana2zenkana_table[n];
 			}
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) && (mode & MBFL_FILT_TL_HAN2ZEN_GLUE)) {
+		} else if ((mode & MBFL_HAN2ZEN_HIRAGANA) && (mode & MBFL_HAN2ZEN_GLUE)) {
 			if (c >= 0xff61 && c <= 0xff9f) {
 				int n = c - 0xff60;
 				if (next >= 0xff61 && next <= 0xff9f) {
@@ -93,14 +93,14 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 
 				return 0x3000 + hankana2zenhira_table[n];
 			}
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_KATAKANA) && c >= 0xff61 && c <= 0xff9f) {
+		} else if ((mode & MBFL_HAN2ZEN_KATAKANA) && c >= 0xff61 && c <= 0xff9f) {
 			return 0x3000 + hankana2zenkana_table[c - 0xff60];
-		} else if ((mode & MBFL_FILT_TL_HAN2ZEN_HIRAGANA) && c >= 0xff61 && c <= 0xff9f) {
+		} else if ((mode & MBFL_HAN2ZEN_HIRAGANA) && c >= 0xff61 && c <= 0xff9f) {
 			return 0x3000 + hankana2zenhira_table[c - 0xff60];
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_HAN2ZEN_COMPAT1) { /* special ascii to symbol */
+	if (mode & MBFL_HAN2ZEN_SPECIAL) { /* special ascii to symbol */
 		if (c == 0x5c) {
 			return 0xffe5; /* FULLWIDTH YEN SIGN */
 		} else if (c == 0xa5) { /* YEN SIGN */
@@ -116,32 +116,32 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 		}
 	}
 
-	if (mode & (MBFL_FILT_TL_ZEN2HAN_ALL | MBFL_FILT_TL_ZEN2HAN_ALPHA | MBFL_FILT_TL_ZEN2HAN_NUMERIC | MBFL_FILT_TL_ZEN2HAN_SPACE)) {
+	if (mode & (MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC | MBFL_ZEN2HAN_SPACE)) {
 		/* Zenkaku to Hankaku */
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_ALL) && c >= 0xff01 && c <= 0xff5d && c != 0xff02 && c != 0xff07 && c!= 0xff3c) {
+		if ((mode & MBFL_ZEN2HAN_ALL) && c >= 0xff01 && c <= 0xff5d && c != 0xff02 && c != 0xff07 && c != 0xff3c) {
 			/* all except " ' \ ~ */
 			return c - 0xfee0;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_ALPHA) && ((c >= 0xff21 && c <= 0xff3a) || (c >= 0xff41 && c <= 0xff5a))) {
+		} else if ((mode & MBFL_ZEN2HAN_ALPHA) && ((c >= 0xff21 && c <= 0xff3a) || (c >= 0xff41 && c <= 0xff5a))) {
 			return c - 0xfee0;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_NUMERIC) && (c >= 0xff10 && c <= 0xff19)) {
+		} else if ((mode & MBFL_ZEN2HAN_NUMERIC) && (c >= 0xff10 && c <= 0xff19)) {
 			return c - 0xfee0;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_SPACE) && (c == 0x3000)) {
+		} else if ((mode & MBFL_ZEN2HAN_SPACE) && (c == 0x3000)) {
 			return 0x20;
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
+		} else if ((mode & MBFL_ZEN2HAN_ALL) && (c == 0x2212)) { /* MINUS SIGN */
 			return 0x2d;
 		}
 	}
 
-	if (mode & (MBFL_FILT_TL_ZEN2HAN_KATAKANA | MBFL_FILT_TL_ZEN2HAN_HIRAGANA)) {
+	if (mode & (MBFL_ZEN2HAN_KATAKANA | MBFL_ZEN2HAN_HIRAGANA)) {
 		/* Zenkaku kana to hankaku kana */
-		if ((mode & MBFL_FILT_TL_ZEN2HAN_KATAKANA) && c >= 0x30a1 && c <= 0x30f4) {
+		if ((mode & MBFL_ZEN2HAN_KATAKANA) && c >= 0x30a1 && c <= 0x30f4) {
 			/* Zenkaku katakana to hankaku kana */
 			int n = c - 0x30a1;
 			if (zenkana2hankana_table[n][1]) {
 				*second = 0xff00 + zenkana2hankana_table[n][1];
 			}
 			return 0xff00 + zenkana2hankana_table[n][0];
-		} else if ((mode & MBFL_FILT_TL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
+		} else if ((mode & MBFL_ZEN2HAN_HIRAGANA) && c >= 0x3041 && c <= 0x3093) {
 			/* Zenkaku hiragana to hankaku kana */
 			int n = c - 0x3041;
 			if (zenkana2hankana_table[n][1]) {
@@ -165,17 +165,17 @@ int mbfl_convert_kana(int c, int next, bool *consumed, int *second, int mode)
 		} else if (c == 0x30fb) {
 			return 0xff65; /* HALFWIDTH KATAKANA MIDDLE DOT */
 		}
-	} else if (mode & (MBFL_FILT_TL_ZENKAKU_HIRA2KANA | MBFL_FILT_TL_ZENKAKU_KANA2HIRA)) {
-		if ((mode & MBFL_FILT_TL_ZENKAKU_HIRA2KANA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
+	} else if (mode & (MBFL_ZENKAKU_HIRA2KATA | MBFL_ZENKAKU_KATA2HIRA)) {
+		if ((mode & MBFL_ZENKAKU_HIRA2KATA) && ((c >= 0x3041 && c <= 0x3093) || c == 0x309d || c == 0x309e)) {
 			/* Zenkaku hiragana to Zenkaku katakana */
 			return c + 0x60;
-		} else if ((mode & MBFL_FILT_TL_ZENKAKU_KANA2HIRA) && ((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
+		} else if ((mode & MBFL_ZENKAKU_KATA2HIRA) && ((c >= 0x30a1 && c <= 0x30f3) || c == 0x30fd || c == 0x30fe)) {
 			/* Zenkaku katakana to Zenkaku hiragana */
 			return c - 0x60;
 		}
 	}
 
-	if (mode & MBFL_FILT_TL_ZEN2HAN_COMPAT1) { /* special symbol to ascii */
+	if (mode & MBFL_ZEN2HAN_SPECIAL) { /* special symbol to ascii */
 		if (c == 0xffe5) { /* FULLWIDTH YEN SIGN */
 			return 0x5c;
 		} else if (c == 0xff3c) { /* FULLWIDTH REVERSE SOLIDUS */

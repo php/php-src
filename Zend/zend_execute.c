@@ -168,9 +168,6 @@ ZEND_API const zend_internal_function zend_pass_function = {
 		zval_ptr_dtor_nogc(EX_VAR(var)); \
 	}
 
-#define FREE_OP_VAR_PTR(type, var) \
-	FREE_OP(type, var)
-
 #define CV_DEF_OF(i) (EX(func)->op_array.vars[i])
 
 #define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
@@ -1528,100 +1525,41 @@ try_again:
 	return offset;
 }
 
-static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
+ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
-	const zend_op *opline = EX(opline);
-	uint32_t var;
+	const zend_execute_data *execute_data = EG(current_execute_data);
+	const zend_op *opline = execute_data->opline;
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		return;
 	}
 
 	switch (opline->opcode) {
-		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
-		case ZEND_ASSIGN_OBJ_OP:
-		case ZEND_ASSIGN_STATIC_PROP_OP:
 			msg = "Cannot use assign-op operators with string offsets";
+			break;
+		case ZEND_FETCH_LIST_W:
+			msg = "Cannot create references to/from string offsets";
 			break;
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
-		case ZEND_FETCH_LIST_W:
-			/* TODO: Encode the "reason" into opline->extended_value??? */
-			var = opline->result.var;
-			opline++;
-			ZEND_ASSERT(opline < execute_data->func->op_array.opcodes +
-				execute_data->func->op_array.last);
-			if (opline->op1_type == IS_VAR && opline->op1.var == var) {
-				switch (opline->opcode) {
-					case ZEND_FETCH_OBJ_W:
-					case ZEND_FETCH_OBJ_RW:
-					case ZEND_FETCH_OBJ_FUNC_ARG:
-					case ZEND_FETCH_OBJ_UNSET:
-					case ZEND_ASSIGN_OBJ:
-					case ZEND_ASSIGN_OBJ_OP:
-					case ZEND_ASSIGN_OBJ_REF:
-						msg = "Cannot use string offset as an object";
-						break;
-					case ZEND_FETCH_DIM_W:
-					case ZEND_FETCH_DIM_RW:
-					case ZEND_FETCH_DIM_FUNC_ARG:
-					case ZEND_FETCH_DIM_UNSET:
-					case ZEND_FETCH_LIST_W:
-					case ZEND_ASSIGN_DIM:
-					case ZEND_ASSIGN_DIM_OP:
-						msg = "Cannot use string offset as an array";
-						break;
-					case ZEND_ASSIGN_STATIC_PROP_OP:
-					case ZEND_ASSIGN_OP:
-						msg = "Cannot use assign-op operators with string offsets";
-						break;
-					case ZEND_PRE_INC_OBJ:
-					case ZEND_PRE_DEC_OBJ:
-					case ZEND_POST_INC_OBJ:
-					case ZEND_POST_DEC_OBJ:
-					case ZEND_PRE_INC:
-					case ZEND_PRE_DEC:
-					case ZEND_POST_INC:
-					case ZEND_POST_DEC:
-						msg = "Cannot increment/decrement string offsets";
-						break;
-					case ZEND_ASSIGN_REF:
-					case ZEND_ADD_ARRAY_ELEMENT:
-					case ZEND_INIT_ARRAY:
-					case ZEND_MAKE_REF:
-						msg = "Cannot create references to/from string offsets";
-						break;
-					case ZEND_RETURN_BY_REF:
-					case ZEND_VERIFY_RETURN_TYPE:
-						msg = "Cannot return string offsets by reference";
-						break;
-					case ZEND_UNSET_DIM:
-					case ZEND_UNSET_OBJ:
-						msg = "Cannot unset string offsets";
-						break;
-					case ZEND_YIELD:
-						msg = "Cannot yield string offsets by reference";
-						break;
-					case ZEND_SEND_REF:
-					case ZEND_SEND_VAR_EX:
-					case ZEND_SEND_FUNC_ARG:
-						msg = "Only variables can be passed by reference";
-						break;
-					case ZEND_FE_RESET_RW:
-						msg = "Cannot iterate on string offsets by reference";
-						break;
-					EMPTY_SWITCH_DEFAULT_CASE();
-				}
-				break;
-			}
-			if (opline->op2_type == IS_VAR && opline->op2.var == var) {
-				ZEND_ASSERT(opline->opcode == ZEND_ASSIGN_REF);
-				msg = "Cannot create references to/from string offsets";
-				break;
+			switch (opline->extended_value) {
+				case ZEND_FETCH_DIM_REF:
+					msg = "Cannot create references to/from string offsets";
+					break;
+				case ZEND_FETCH_DIM_DIM:
+					msg = "Cannot use string offset as an array";
+					break;
+				case ZEND_FETCH_DIM_OBJ:
+					msg = "Cannot use string offset as an object";
+					break;
+				case ZEND_FETCH_DIM_INCDEC:
+					msg = "Cannot increment/decrement string offsets";
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -2172,7 +2110,7 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
-			zend_wrong_string_offset(EXECUTE_DATA_C);
+			zend_wrong_string_offset_error();
 		}
 	} else {
 		zend_use_scalar_as_array();
@@ -2368,7 +2306,7 @@ fetch_from_array:
 			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
-			zend_wrong_string_offset(EXECUTE_DATA_C);
+			zend_wrong_string_offset_error();
 		}
 		ZVAL_UNDEF(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -3778,10 +3716,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 		void *ptr;
 
 		ZEND_ASSERT(op_array->fn_flags & ZEND_ACC_HEAP_RT_CACHE);
-		ptr = emalloc(op_array->cache_size + sizeof(void*));
+		ptr = emalloc(op_array->cache_size);
 		ZEND_MAP_PTR_INIT(op_array->run_time_cache, ptr);
-		ptr = (char*)ptr + sizeof(void*);
-		ZEND_MAP_PTR_SET(op_array->run_time_cache, ptr);
 		memset(ptr, 0, op_array->cache_size);
 	}
 	EX(run_time_cache) = RUN_TIME_CACHE(op_array);
@@ -4394,7 +4330,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code");
-				new_op_array = zend_compile_string(inc_filename, eval_desc);
+				new_op_array = zend_compile_string(inc_filename, eval_desc, ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 				efree(eval_desc);
 			}
 			break;

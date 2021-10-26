@@ -14,7 +14,11 @@ st::e ();
 st::e2 ();
 stch::g ();
 ?>
---EXPECT--
+--EXPECTF--
 EHLO
+
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 EHLO
+
+Deprecated: Use of "parent" in callables is deprecated in %s on line %d
 EHLO

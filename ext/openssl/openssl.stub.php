@@ -39,6 +39,10 @@ function openssl_x509_check_private_key(OpenSSLCertificate|string $certificate, 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $public_key */
 function openssl_x509_verify(OpenSSLCertificate|string $certificate, $public_key): int {}
 
+/**
+ * @return array<string, int|string|array>|false
+ * @refcount 1
+ */
 function openssl_x509_parse(OpenSSLCertificate|string $certificate, bool $short_names = true): array|false {}
 
 function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $purpose, array $ca_info = [], ?string $untrusted_certificates_file = null): bool|int {}
@@ -71,6 +75,10 @@ function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLC
 /** @param OpenSSLAsymmetricKey $private_key */
 function openssl_csr_new(array $distinguished_names, &$private_key, ?array $options = null, ?array $extra_attributes = null): OpenSSLCertificateSigningRequest|false {}
 
+/**
+ * @return array<string, string|array>|false
+ * @refcount 1
+ */
 function openssl_csr_get_subject(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): array|false {}
 
 function openssl_csr_get_public_key(OpenSSLCertificateSigningRequest|string $csr, bool $short_names = true): OpenSSLAsymmetricKey|false {}
@@ -113,6 +121,10 @@ function openssl_pkey_get_private($private_key, ?string $passphrase = null): Ope
  */
 function openssl_get_privatekey($private_key, ?string $passphrase = null): OpenSSLAsymmetricKey|false {}
 
+/**
+ * @return array<string, int|string|array>|false
+ * @refcount 1
+ */
 function openssl_pkey_get_details(OpenSSLAsymmetricKey $key): array|false {}
 
 function openssl_pbkdf2(string $password, string $salt, int $key_length, int $iterations, string $digest_algo = "sha1"): string|false {}
@@ -199,11 +211,23 @@ function openssl_seal(string $data, &$sealed_data, &$encrypted_keys, array $publ
  */
 function openssl_open(string $data, &$output, string $encrypted_key, $private_key, string $cipher_algo, ?string $iv = null): bool {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function openssl_get_md_methods(bool $aliases = false): array {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function openssl_get_cipher_methods(bool $aliases = false): array {}
 
 #ifdef HAVE_EVP_PKEY_EC
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function openssl_get_curve_names(): array|false {}
 #endif
 
@@ -212,7 +236,7 @@ function openssl_digest(string $data, string $digest_algo, bool $binary = false)
 /** @param string $tag */
 function openssl_encrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", &$tag = null, string $aad = "", int $tag_length = 16): string|false {}
 
-function openssl_decrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", string $tag = "", string $aad = ""): string|false {}
+function openssl_decrypt(string $data, string $cipher_algo, string $passphrase, int $options = 0, string $iv = "", ?string $tag = null, string $aad = ""): string|false {}
 
 function openssl_cipher_iv_length(string $cipher_algo): int|false {}
 
@@ -235,4 +259,8 @@ function openssl_spki_export(string $spki): string|false {}
 
 function openssl_spki_export_challenge(string $spki): string|false {}
 
+/**
+ * @return array<string, string>
+ * @refcount 1
+ */
 function openssl_get_cert_locations(): array {}

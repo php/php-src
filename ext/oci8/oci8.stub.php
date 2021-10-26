@@ -326,11 +326,16 @@ function oci_pconnect(string $username, string $password, ?string $connection_st
  */
 function ociplogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
-/** @param resource|null $connection_or_statement */
+/**
+ * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function oci_error($connection_or_statement = null): array|false {}
 
 /**
  * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
  * @alias oci_error
  * @deprecated
  */

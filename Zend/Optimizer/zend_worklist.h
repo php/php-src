@@ -37,15 +37,13 @@ typedef struct _zend_worklist_stack {
 #define ZEND_WORKLIST_STACK_FREE_ALLOCA(s, use_heap) \
 	free_alloca((s)->buf, use_heap)
 
-static inline int zend_worklist_stack_prepare(zend_arena **arena, zend_worklist_stack *stack, int len)
+static inline void zend_worklist_stack_prepare(zend_arena **arena, zend_worklist_stack *stack, int len)
 {
 	ZEND_ASSERT(len >= 0);
 
 	stack->buf = (int*)zend_arena_calloc(arena, sizeof(*stack->buf), len);
 	stack->len = 0;
 	stack->capacity = len;
-
-	return SUCCESS;
 }
 
 static inline void zend_worklist_stack_push(zend_worklist_stack *stack, int i)
@@ -82,11 +80,11 @@ typedef struct _zend_worklist {
 #define ZEND_WORKLIST_FREE_ALLOCA(w, use_heap) \
 	free_alloca((w)->stack.buf, use_heap)
 
-static inline int zend_worklist_prepare(zend_arena **arena, zend_worklist *worklist, int len)
+static inline void zend_worklist_prepare(zend_arena **arena, zend_worklist *worklist, int len)
 {
 	ZEND_ASSERT(len >= 0);
 	worklist->visited = (zend_bitset)zend_arena_calloc(arena, sizeof(zend_ulong), zend_bitset_len(len));
-	return zend_worklist_stack_prepare(arena, &worklist->stack, len);
+	zend_worklist_stack_prepare(arena, &worklist->stack, len);
 }
 
 static inline int zend_worklist_len(zend_worklist *worklist)
@@ -94,7 +92,7 @@ static inline int zend_worklist_len(zend_worklist *worklist)
 	return worklist->stack.len;
 }
 
-static inline int zend_worklist_push(zend_worklist *worklist, int i)
+static inline bool zend_worklist_push(zend_worklist *worklist, int i)
 {
 	ZEND_ASSERT(i >= 0 && i < worklist->stack.capacity);
 
