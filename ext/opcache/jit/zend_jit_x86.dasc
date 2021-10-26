@@ -11302,11 +11302,6 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 			|	// if (call_info & ZEND_CALL_RELEASE_THIS)
 			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
 			|	je >4
-		} else {
-			|	test FCARG1d, ZEND_CALL_RELEASE_THIS
-			|	jne >1
-			|	int3
-			|1:
 		}
 		|	// zend_object *object = Z_OBJ(execute_data->This);
 		|	mov FCARG1a, EX->This.value.obj
