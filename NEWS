@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.33
 
 
-28 Okt 2021, PHP 7.3.32
+28 Oct 2021, PHP 7.3.32
 
 - FPM:
   . Fixed bug #81026 (PHP-FPM oob R/W in root process leading to privilege
