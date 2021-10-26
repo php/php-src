@@ -2188,15 +2188,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_copy(HashTable *target, HashTable *source,
 			zval *zv = source->arPacked + idx;
 			if (UNEXPECTED(Z_TYPE_P(zv) == IS_UNDEF)) continue;
 
-			/* INDIRECT element may point to UNDEF-ined slots */
-			data = zv;
-			if (Z_TYPE_P(data) == IS_INDIRECT) {
-				data = Z_INDIRECT_P(data);
-				if (UNEXPECTED(Z_TYPE_P(data) == IS_UNDEF)) {
-					continue;
-				}
-			}
-			new_entry = zend_hash_index_update(target, idx, data);
+			new_entry = zend_hash_index_update(target, idx, zv);
 			if (pCopyConstructor) {
 				pCopyConstructor(new_entry);
 			}
