@@ -101,54 +101,28 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		}
 
 		idx = 0;
-		if (HT_IS_PACKED(ht)) {
-			while (idx < ht->nNumUsed) {
-				z = &ht->arPacked[idx];
-				if (Z_TYPE_P(z) != IS_UNDEF) {
-					break;
-				}
-				idx++;
+		while (idx < ht->nNumUsed) {
+			z = &ht->arData[idx].val;
+			if (Z_TYPE_P(z) != IS_UNDEF) {
+				break;
 			}
-			if (idx >= ht->nNumUsed || !valid_format(z)) {
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"datefmt_format_object: bad format; the date format (first "
-						"element of the array) is not valid", 0);
-				RETURN_FALSE;
-			}
-			dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
-
 			idx++;
-			while (idx < ht->nNumUsed) {
-				z = &ht->arPacked[idx];
-				if (Z_TYPE_P(z) != IS_UNDEF) {
-					break;
-				}
-				idx++;
-			}
-		} else {
-			while (idx < ht->nNumUsed) {
-				z = &ht->arData[idx].val;
-				if (Z_TYPE_P(z) != IS_UNDEF) {
-					break;
-				}
-				idx++;
-			}
-			if (idx >= ht->nNumUsed || !valid_format(z)) {
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-						"datefmt_format_object: bad format; the date format (first "
-						"element of the array) is not valid", 0);
-				RETURN_FALSE;
-			}
-			dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
+		}
+		if (idx >= ht->nNumUsed || !valid_format(z)) {
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+					"datefmt_format_object: bad format; the date format (first "
+					"element of the array) is not valid", 0);
+			RETURN_FALSE;
+		}
+		dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 
-			idx++;
-			while (idx < ht->nNumUsed) {
-				z = &ht->arData[idx].val;
-				if (Z_TYPE_P(z) != IS_UNDEF) {
-					break;
-				}
-				idx++;
+		idx++;
+		while (idx < ht->nNumUsed) {
+			z = &ht->arData[idx].val;
+			if (Z_TYPE_P(z) != IS_UNDEF) {
+				break;
 			}
+			idx++;
 		}
 		if (idx >= ht->nNumUsed || !valid_format(z)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
