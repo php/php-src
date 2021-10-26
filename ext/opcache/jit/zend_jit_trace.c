@@ -6514,6 +6514,7 @@ done:
 				} else if (init_opline->opcode == ZEND_NEW
 				 || (init_opline->opcode == ZEND_INIT_METHOD_CALL
 				  && init_opline->op1_type != IS_UNDEF
+				  && !(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)
 				  && p->func && p->func->common.scope && !(p->func->common.fn_flags & ZEND_ACC_STATIC))) {
 					TRACE_FRAME_SET_ALWAYS_RELEASE_THIS(call);
 				}
