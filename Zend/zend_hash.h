@@ -982,8 +982,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 				__h = _idx; \
 				_idx++; \
 			} else { \
-			    _p = (Bucket*)__z; \
-			    __z = &(_p + 1)->val; \
+				_p = (Bucket*)__z; \
+				__z = &(_p + 1)->val; \
 				__h = _p->h; \
 				__key = _p->key; \
 				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
