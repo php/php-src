@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC5
+28 Oct 2021, PHP 8.1.0RC5
 
 - Core:
   . Fixed bug #81518 (Header injection via default_mimetype / default_charset).
