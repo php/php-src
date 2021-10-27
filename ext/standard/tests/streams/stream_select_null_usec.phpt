@@ -27,7 +27,6 @@ array(1) {
   resource(%d) of type (stream)
 }
 
-8192 stream_select(): Argument #5 ($microseconds) should be null instead of 0 when argument #4 ($seconds) is null
 
 Fatal error: Uncaught ValueError: stream_select(): Argument #5 ($microseconds) must be null when argument #4 ($seconds) is null in %s
 Stack trace:
