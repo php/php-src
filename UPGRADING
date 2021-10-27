@@ -85,7 +85,7 @@ PHP 8.2 UPGRADE NOTES
 
 - Zip:
   . extension updated to 1.20.0 with new methods:
-    ZipArchive::cleaError, getStreamName and getStreamIndex
+    ZipArchive::clearError, getStreamName and getStreamIndex
 
 ========================================
 10. New Global Constants
