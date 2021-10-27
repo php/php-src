@@ -113,7 +113,7 @@ static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
 	zval *trace = zend_read_property(zend_get_exception_base(obj), obj, "trace", sizeof("trace")-1, 0, &rv);
 	if (trace && Z_TYPE_P(trace) == IS_ARRAY) {
 		zval *frame;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(trace), frame) {
+		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(trace), frame) {
 			if (Z_TYPE_P(frame) == IS_ARRAY) {
 				zval *args = zend_hash_str_find(Z_ARRVAL_P(frame), "args", sizeof("args")-1);
 				if (args) {
@@ -121,7 +121,7 @@ static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
 					ZVAL_EMPTY_ARRAY(args);
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 }
 

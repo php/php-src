@@ -265,7 +265,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			if (fn->responseParameters) {
 				res_count = zend_hash_num_elements(fn->responseParameters);
-				ZEND_HASH_FOREACH_PTR(fn->responseParameters, param) {
+				ZEND_ARRAY_FOREACH_PTR(fn->responseParameters, param) {
 					if (fnb->style == SOAP_DOCUMENT) {
 						if (param->element) {
 							name = param->element->name;
@@ -329,7 +329,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 					add_assoc_zval(return_value, param->paramName, &tmp);
 
 					param_count++;
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 			}
 		} else {
 		  /* Function has no WSDL description */

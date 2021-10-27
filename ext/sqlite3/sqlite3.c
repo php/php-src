@@ -1493,7 +1493,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 	int return_code;
 
 	if (stmt_obj->bound_params) {
-		ZEND_HASH_FOREACH_PTR(stmt_obj->bound_params, param) {
+		ZEND_ARRAY_FOREACH_PTR(stmt_obj->bound_params, param) {
 			zval *parameter;
 			/* parameter must be a reference? */
 			if (Z_ISREF(param->parameter)) {
@@ -1586,7 +1586,7 @@ static int php_sqlite3_bind_params(php_sqlite3_stmt *stmt_obj) /* {{{ */
 					php_sqlite3_error(stmt_obj->db_obj, "Unknown parameter type: %pd for parameter %pd", param->type, param->param_number);
 					return FAILURE;
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	return SUCCESS;

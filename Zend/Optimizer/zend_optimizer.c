@@ -676,9 +676,9 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
-			ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+			ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
 				Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			break;
 		}
@@ -722,9 +722,9 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
-			ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+			ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
 				Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))]);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
 			break;
 		}

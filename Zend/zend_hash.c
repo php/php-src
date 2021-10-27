@@ -3187,7 +3187,7 @@ convert:
 	{
 		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
-		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
 			if (!str_key) {
 				str_key = zend_long_to_str(num_key);
 				zend_string_delref(str_key);
@@ -3204,7 +3204,7 @@ convert:
 				}
 			} while (0);
 			zend_hash_update(new_ht, str_key, zv);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		return new_ht;
 	}
@@ -3220,16 +3220,18 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool
 	zend_string *str_key;
 	zval *zv;
 
-	ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
-		/* The `str_key &&` here might seem redundant: property tables should
-		 * only have string keys. Unfortunately, this isn't true, at the very
-		 * least because of ArrayObject, which stores a symtable where the
-		 * property table should be.
-		 */
-		if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
-			goto convert;
-		}
-	} ZEND_HASH_FOREACH_END();
+	if (!HT_IS_PACKED(ht)) {
+		ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
+			/* The `str_key &&` here might seem redundant: property tables should
+			 * only have string keys. Unfortunately, this isn't true, at the very
+			 * least because of ArrayObject, which stores a symtable where the
+			 * property table should be.
+			 */
+			if (str_key && ZEND_HANDLE_NUMERIC(str_key, num_key)) {
+				goto convert;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	if (always_duplicate) {
 		return zend_array_dup(ht);

@@ -2134,7 +2134,7 @@ send_again:
 			bool separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
-			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
+			ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (UNEXPECTED(name)) {
 					void *cache_slot[2] = {NULL, NULL};
 					tmp_arg_num = zend_get_arg_offset_by_name(
@@ -2145,14 +2145,14 @@ send_again:
 					break;
 				}
 				tmp_arg_num++;
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			if (separate) {
 				SEPARATE_ARRAY(args);
 				ht = Z_ARRVAL_P(args);
 			}
 		}
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
 			if (UNEXPECTED(name)) {
 				void *cache_slot[2] = {NULL, NULL};
 				have_named_params = 1;
@@ -2190,7 +2190,7 @@ send_again:
 			}
 
 			arg_num++;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 	} else if (EXPECTED(Z_TYPE_P(args) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(args);
@@ -2379,7 +2379,7 @@ send_array:
 				zend_vm_stack_extend_call_frame(&EX(call), 0, len);
 				arg_num = 1;
 				param = ZEND_CALL_ARG(EX(call), 1);
-				ZEND_HASH_FOREACH_VAL(ht, arg) {
+				ZEND_ARRAY_FOREACH_VAL(ht, arg) {
 					bool must_wrap = 0;
 					if (skip > 0) {
 						skip--;
@@ -2411,7 +2411,7 @@ send_array:
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 					arg_num++;
 					param++;
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 			}
 			FREE_OP(opline->op2_type, opline->op2.var);
 		} else {
@@ -2421,7 +2421,7 @@ send_array:
 			arg_num = 1;
 			param = ZEND_CALL_ARG(EX(call), 1);
 			have_named_params = 0;
-			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
+			ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (name) {
 					void *cache_slot[2] = {NULL, NULL};
 					have_named_params = 1;
@@ -2466,7 +2466,7 @@ send_array:
 					arg_num++;
 					param++;
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -2543,7 +2543,7 @@ add_unpack_again:
 		zval *val;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
 				val = Z_REFVAL_P(val);
 			}
@@ -2557,7 +2557,7 @@ add_unpack_again:
 					break;
 				}
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(op1);
 		zend_object_iterator *iter;

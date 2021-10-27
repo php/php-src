@@ -171,10 +171,10 @@ static void zend_generator_remove_child(zend_generator_node *node, zend_generato
 		zend_hash_index_del(ht, (zend_ulong) child);
 		if (node->children == 2) {
 			zend_generator *other_child;
-			ZEND_HASH_FOREACH_PTR(ht, other_child) {
+			ZEND_ARRAY_FOREACH_PTR(ht, other_child) {
 				node->child.single = other_child;
 				break;
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			zend_hash_destroy(ht);
 			efree(ht);
 		}

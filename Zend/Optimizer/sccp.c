@@ -587,7 +587,7 @@ static inline zend_result ct_eval_add_array_unpack(zval *result, zval *array) {
 	}
 
 	SEPARATE_ARRAY(result);
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
+	ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), key, value) {
 		if (key) {
 			value = zend_hash_update(Z_ARR_P(result), key, value);
 		} else {
@@ -597,7 +597,7 @@ static inline zend_result ct_eval_add_array_unpack(zval *result, zval *array) {
 			return FAILURE;
 		}
 		Z_TRY_ADDREF_P(value);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	return SUCCESS;
 }
 
@@ -2009,7 +2009,7 @@ static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
 	zend_string *key;
 	zval *val1, *val2;
 
-	ZEND_HASH_FOREACH_KEY_VAL(ht1, index, key, val1) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(ht1, index, key, val1) {
 		if (key) {
 			val2 = zend_hash_find(ht2, key);
 		} else {
@@ -2023,7 +2023,7 @@ static void join_hash_tables(HashTable *ret, HashTable *ht1, HashTable *ht2)
 			}
 			Z_TRY_ADDREF_P(val1);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 }
 
 static zend_result join_partial_arrays(zval *a, zval *b)

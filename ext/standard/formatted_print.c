@@ -744,10 +744,10 @@ static zval *php_formatted_print_get_array(zend_array *array, int *argc)
 	n = zend_hash_num_elements(array);
 	args = (zval *)safe_emalloc(n, sizeof(zval), 0);
 	n = 0;
-	ZEND_HASH_FOREACH_VAL(array, zv) {
+	ZEND_ARRAY_FOREACH_VAL(array, zv) {
 		ZVAL_COPY_VALUE(&args[n], zv);
 		n++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	*argc = n;
 	return args;

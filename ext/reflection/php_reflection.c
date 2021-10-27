@@ -619,7 +619,7 @@ static int format_default_value(smart_str *str, zval *value) {
 		bool is_list = zend_array_is_list(Z_ARRVAL_P(value));
 		bool first = true;
 		smart_str_appendc(str, '[');
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(value), num_key, str_key, zv) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(value), num_key, str_key, zv) {
 			if (!first) {
 				smart_str_appends(str, ", ");
 			}
@@ -636,7 +636,7 @@ static int format_default_value(smart_str *str, zval *value) {
 				smart_str_appends(str, " => ");
 			}
 			format_default_value(str, zv);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
@@ -1125,18 +1125,18 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 		// Name based filtering using lowercased key.
 		zend_string *filter = zend_string_tolower(name);
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_ARRAY_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
 				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
 				add_next_index_zval(ret, &tmp);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		zend_string_release(filter);
 		return SUCCESS;
 	}
 
-	ZEND_HASH_FOREACH_PTR(attributes, attr) {
+	ZEND_ARRAY_FOREACH_PTR(attributes, attr) {
 		if (attr->offset != offset) {
 			continue;
 		}
@@ -1161,7 +1161,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
 		add_next_index_zval(ret, &tmp);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return SUCCESS;
 }

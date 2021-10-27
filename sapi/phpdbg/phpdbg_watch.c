@@ -628,9 +628,9 @@ void phpdbg_recurse_watch_element(phpdbg_watch_element *element) {
 		zend_long idx;
 
 		ZEND_ASSERT(element->watch->type == WATCH_ON_HASHTABLE);
-		ZEND_HASH_FOREACH_KEY_VAL(HT_WATCH_HT(element->watch), idx, str, zv) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(HT_WATCH_HT(element->watch), idx, str, zv) {
 			phpdbg_add_recursive_watch_from_ht(element, idx, str, zv);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 }
 
@@ -1017,7 +1017,7 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 				phpdbg_btree_result *res = phpdbg_btree_find(&PHPDBG_G(watch_HashTables), (zend_ulong) HT_WATCH_HT(watch));
 				phpdbg_watch_ht_info *hti = res ? res->ptr : NULL;
 
-				ZEND_HASH_REVERSE_FOREACH_KEY_VAL(HT_WATCH_HT(watch), idx, str, zv) {
+				ZEND_ARRAY_REVERSE_FOREACH_KEY_VAL(HT_WATCH_HT(watch), idx, str, zv) {
 					if (!str) {
 						str = zend_long_to_str(idx); // TODO: hack, use proper int handling for name in parent
 					} else {
@@ -1035,7 +1035,7 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 					phpdbg_notice("Element %.*s has been added to watchpoint", (int) ZSTR_LEN(str), ZSTR_VAL(str));
 					zend_string_release(str);
 					PHPDBG_G(watchpoint_hit) = 1;
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 
 				break;
 			}

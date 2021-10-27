@@ -2197,10 +2197,10 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 			if (model->max_occurs != 1) {
 				sdlContentModelPtr tmp;
 
-				ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+				ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 					tmp->min_occurs = 0;
 					tmp->max_occurs = model->max_occurs;
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 
 				model->kind = XSD_CONTENT_ALL;
 				model->min_occurs = 1;
@@ -2212,9 +2212,9 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 		case XSD_CONTENT_ALL: {
 			sdlContentModelPtr tmp;
 
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				schema_content_model_fixup(ctx, tmp);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			break;
 		}
 		default:
@@ -2253,9 +2253,9 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 		type->ref = NULL;
 	}
 	if (type->elements) {
-		ZEND_HASH_FOREACH_PTR(type->elements, tmp) {
+		ZEND_ARRAY_FOREACH_PTR(type->elements, tmp) {
 			schema_type_fixup(ctx, tmp);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (type->model) {
 		schema_content_model_fixup(ctx, type->model);
@@ -2264,14 +2264,14 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 		zend_string *str_key;
 		zend_ulong index;
 
-		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
+		ZEND_ARRAY_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
 			if (str_key) {
 				schema_attribute_fixup(ctx, attr);
 			} else {
 				schema_attributegroup_fixup(ctx, attr, type->attributes);
 				zend_hash_index_del(type->attributes, index);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 }
 
@@ -2302,9 +2302,9 @@ void schema_pass2(sdlCtx *ctx)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (sdl->types) {
-		ZEND_HASH_FOREACH_PTR(sdl->types, type) {
+		ZEND_ARRAY_FOREACH_PTR(sdl->types, type) {
 			schema_type_fixup(ctx, type);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (ctx->attributes) {
 		zend_hash_destroy(ctx->attributes);

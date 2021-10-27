@@ -810,7 +810,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 					zend_string **strings = emalloc(sizeof(zend_string *) * zend_hash_num_elements(dictionary));
 					zend_string **end, **ptr = strings - 1;
 
-					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
+					ZEND_ARRAY_FOREACH_VAL(dictionary, cur) {
 						size_t i;
 
 						*++ptr = zval_get_string(cur);
@@ -839,7 +839,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 						}
 
 						*dictlen += ZSTR_LEN(*ptr) + 1;
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_ARRAY_FOREACH_END();
 
 					dictptr = *dict = emalloc(*dictlen);
 					ptr = strings;

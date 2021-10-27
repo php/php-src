@@ -676,9 +676,9 @@ PHP_MINFO_FUNCTION(spl)
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
 		spl_build_class_list_string(zv, &strg);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));
 	php_info_print_table_row(2, "Interfaces", strg + 2);
 	efree(strg);
@@ -686,9 +686,9 @@ PHP_MINFO_FUNCTION(spl)
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, -1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(&list), zv) {
 		spl_build_class_list_string(zv, &strg);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	zend_array_destroy(Z_ARR(list));
 	php_info_print_table_row(2, "Classes", strg + 2);
 	efree(strg);

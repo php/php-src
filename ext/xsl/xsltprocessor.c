@@ -681,7 +681,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 			RETURN_THROWS();
 		}
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(array_value, string_key, entry) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(array_value, string_key, entry) {
 			zval tmp;
 			zend_string *str;
 
@@ -695,7 +695,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 			}
 			ZVAL_STR(&tmp, str);
 			zend_hash_update(intern->parameter, string_key, &tmp);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		RETURN_TRUE;
 	} else {
 		if (!value) {
@@ -771,7 +771,7 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 	intern = Z_XSL_P(id);
 
 	if (restrict_ht) {
-		ZEND_HASH_FOREACH_VAL(restrict_ht, entry) {
+		ZEND_ARRAY_FOREACH_VAL(restrict_ht, entry) {
 			zend_string *str = zval_try_get_string(entry);
 			if (UNEXPECTED(!str)) {
 				return;
@@ -779,7 +779,7 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 			ZVAL_LONG(&new_string, 1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_string_release(str);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		intern->registerPhpFunctions = 2;
 	} else if (restrict_str) {

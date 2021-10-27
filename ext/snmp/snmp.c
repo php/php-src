@@ -695,7 +695,7 @@ static bool php_snmp_parse_oid(
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
 		objid_query->array_output = (st & SNMP_CMD_SET) == 0;
-		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
+		ZEND_ARRAY_FOREACH_VAL(oid_ht, tmp_oid) {
 			convert_to_string(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
@@ -769,7 +769,7 @@ static bool php_snmp_parse_oid(
 				}
 			}
 			objid_query->count++;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	/* now parse all OIDs */

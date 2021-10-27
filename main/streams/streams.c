@@ -91,9 +91,9 @@ PHP_RSHUTDOWN_FUNCTION(streams)
 {
 	zval *el;
 
-	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), el) {
+	ZEND_ARRAY_FOREACH_VAL(&EG(persistent_list), el) {
 		forget_persistent_resource_id_numbers(el);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	return SUCCESS;
 }
 
@@ -119,13 +119,13 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 				 * regular list; allowing the same resource in several entries in the
 				 * regular list causes trouble (see bug #54623) */
 				*stream = (php_stream*)le->ptr;
-				ZEND_HASH_FOREACH_PTR(&EG(regular_list), regentry) {
+				ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), regentry) {
 					if (regentry->ptr == le->ptr) {
 						GC_ADDREF(regentry);
 						(*stream)->res = regentry;
 						return PHP_STREAM_PERSISTENT_SUCCESS;
 					}
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 				GC_ADDREF(le);
 				(*stream)->res = zend_register_resource(*stream, le_pstream);
 			}

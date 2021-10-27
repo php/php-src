@@ -2017,7 +2017,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 	}
 #endif
 
-	ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
 		zend_string *postval, *tmp_postval;
 		/* Pretend we have a string_key here */
 		if (!string_key) {
@@ -2212,7 +2212,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 #endif
 		zend_tmp_string_release(tmp_postval);
 		zend_string_release_ex(string_key, 0);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	SAVE_CURL_ERROR(ch, error);
 	if (error != CURLE_OK) {
@@ -2753,7 +2753,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			}
 
 			ph = Z_ARRVAL_P(zvalue);
-			ZEND_HASH_FOREACH_VAL(ph, current) {
+			ZEND_ARRAY_FOREACH_VAL(ph, current) {
 				ZVAL_DEREF(current);
 				val = zval_get_tmp_string(current, &tmp_val);
 				slist = curl_slist_append(slist, ZSTR_VAL(val));
@@ -2762,7 +2762,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					php_error_docref(NULL, E_WARNING, "Could not build curl_slist");
 					return FAILURE;
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 
 			if (slist) {
 				if ((*ch->clone) == 1) {
@@ -3015,7 +3015,7 @@ PHP_FUNCTION(curl_setopt_array)
 
 	ch = Z_CURL_P(zid);
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(arr), option, string_key, entry) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(arr), option, string_key, entry) {
 		if (string_key) {
 			zend_argument_value_error(2, "contains an invalid cURL option");
 			RETURN_THROWS();
@@ -3025,7 +3025,7 @@ PHP_FUNCTION(curl_setopt_array)
 		if (_php_curl_setopt(ch, (zend_long) option, entry, 1) == FAILURE) {
 			RETURN_FALSE;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	RETURN_TRUE;
 }

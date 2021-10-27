@@ -823,7 +823,7 @@ try_again:
 		/* Send cookies along with request */
 		cookies = Z_CLIENT_COOKIES_P(this_ptr);
 		ZEND_ASSERT(Z_TYPE_P(cookies) == IS_ARRAY);
-		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0) {
+		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0 && !HT_IS_PACKED(Z_ARRVAL_P(cookies))) {
 			zval *data;
 			zend_string *key;
 			has_cookies = 1;

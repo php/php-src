@@ -131,7 +131,7 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 	zend_string *tmp_key;
 	zval *tmp_val;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
+	ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
 		if (tmp_key) {
 			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
 			break;
@@ -141,7 +141,7 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 			break;
 		}
 		php_mail_build_headers_elem(s, key, tmp_val);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 }
 
 
@@ -152,7 +152,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 	zval *val;
 	smart_str s = {0};
 
-	ZEND_HASH_FOREACH_KEY_VAL(headers, idx, key, val) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(headers, idx, key, val) {
 		if (!key) {
 			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
 			break;
@@ -188,7 +188,7 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 			smart_str_free(&s);
 			return NULL;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* Remove the last \r\n */
 	if (s.s) s.s->len -= 2;

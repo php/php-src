@@ -566,13 +566,13 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 			zend_string *name;
 			zval *arg;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
+			ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
 				if (name) {
 					smart_str_append(str, name);
 					smart_str_appends(str, ": ");
 				}
 				_build_trace_args(arg, str);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 
 			if (last_len != ZSTR_LEN(str->s)) {
 				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
@@ -591,14 +591,14 @@ ZEND_API zend_string *zend_trace_to_string(HashTable *trace, bool include_main) 
 	uint32_t num = 0;
 	smart_str str = {0};
 
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(trace, index, frame) {
+	ZEND_ARRAY_FOREACH_NUM_KEY_VAL(trace, index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
 			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
 			continue;
 		}
 
 		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	if (include_main) {
 		smart_str_appendc(&str, '#');

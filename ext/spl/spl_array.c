@@ -1259,13 +1259,13 @@ static zend_long spl_array_object_count_elements_helper(spl_array_object *intern
 		zend_string *key;
 		zval *val;
 		/* Count public/dynamic properties */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(aht, key, val) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(aht, key, val) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				if (Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF) continue;
 				if (key && ZSTR_VAL(key)[0] == '\0') continue;
 			}
 			count++;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		return count;
 	} else {
 		return zend_hash_num_elements(aht);

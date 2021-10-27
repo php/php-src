@@ -1156,9 +1156,9 @@ PHP_METHOD(SplDoublyLinkedList, __unserialize) {
 
 	intern->flags = (int) Z_LVAL_P(flags_zv);
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
 		spl_ptr_llist_push(intern->llist, elem);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */

@@ -151,14 +151,14 @@ static void _close_odbc_conn(zend_resource *rsrc)
 
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 
-	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
+	ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
 				zend_list_close(p);
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (!(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
@@ -178,14 +178,14 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 	odbc_result *res;
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 
-	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
+	ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
 				zend_list_close(p);
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (!(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
@@ -822,14 +822,14 @@ PHP_FUNCTION(odbc_close_all)
 	}
 
 	/* Loop through list and close all statements */
-	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
+	ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr && (p->type == le_result)) {
 			zend_list_close(p);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* Second loop through list, now close all connections */
-	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
+	ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr) {
 			if (p->type == le_conn){
 				zend_list_close(p);
@@ -840,7 +840,7 @@ PHP_FUNCTION(odbc_close_all)
 					(apply_func_arg_t) _close_pconn_with_res, (void *)p);
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 }
 /* }}} */
 
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(odbc_execute)
 		}
 
 		i = 1;
-		ZEND_HASH_FOREACH_VAL(pv_param_ht, tmp) {
+		ZEND_ARRAY_FOREACH_VAL(pv_param_ht, tmp) {
 			unsigned char otype = Z_TYPE_P(tmp);
 			zend_string *tmpstr = zval_try_get_string(tmp);
 			if (!tmpstr) {
@@ -1084,7 +1084,7 @@ PHP_FUNCTION(odbc_execute)
 				RETURN_FALSE;
 			}
 			if (++i > result->numparams) break;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	/* Close cursor, needed for doing multiple selects */
 	rc = SQLFreeStmt(result->stmt, SQL_CLOSE);
@@ -2351,14 +2351,14 @@ PHP_FUNCTION(odbc_close)
 		is_pconn = 1;
 	}
 
-	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {
+	ZEND_ARRAY_FOREACH_PTR(&EG(regular_list), p) {
 		if (p->ptr && (p->type == le_result)) {
 			res = (odbc_result *)p->ptr;
 			if (res->conn_ptr == conn) {
 				zend_list_close(p);
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	zend_list_close(Z_RES_P(pv_conn));
 

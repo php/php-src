@@ -99,20 +99,22 @@ static ZEND_COLD void php_info_print_stream_hash(const char *name, HashTable *ht
 				php_info_printf("\nRegistered %s => ", name);
 			}
 
-			ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-				if (key) {
-					if (first) {
-						first = 0;
-					} else {
-						php_info_print(", ");
+			if (!HT_IS_PACKED(ht)) {
+				ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+					if (key) {
+						if (first) {
+							first = 0;
+						} else {
+							php_info_print(", ");
+						}
+						if (!sapi_module.phpinfo_as_text) {
+							php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
+						} else {
+							php_info_print(ZSTR_VAL(key));
+						}
 					}
-					if (!sapi_module.phpinfo_as_text) {
-						php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
-					} else {
-						php_info_print(ZSTR_VAL(key));
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -173,7 +175,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 	zend_is_auto_global(key);
 
 	if ((data = zend_hash_find_deref(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
 				php_info_print("<td class=\"e\">");
@@ -230,7 +232,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			} else {
 				php_info_print("\n");
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	zend_string_efree(key);
 }

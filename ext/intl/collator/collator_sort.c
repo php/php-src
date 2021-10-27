@@ -384,7 +384,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	utf16_buf      = eumalloc( utf16_buf_size );
 
 	/* Iterate through input hash and create a sort key for each value. */
-	ZEND_HASH_FOREACH_VAL(hash, hashData) {
+	ZEND_ARRAY_FOREACH_VAL(hash, hashData) {
 		/* Convert current hash item from UTF-8 to UTF-16LE and save the result to utf16_buf. */
 
 		utf16_len = utf16_buf_size;
@@ -457,7 +457,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		sortKeyBufOffset += sortKeyLen;
 		++sortKeyCount;
 
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* update ptrs to point to valid keys. */
 	for( j = 0; j < sortKeyCount; j++ )

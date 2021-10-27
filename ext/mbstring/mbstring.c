@@ -350,7 +350,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 	bool included_auto = 0;
 	size_t n = 0;
 	zval *hash_entry;
-	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+	ZEND_ARRAY_FOREACH_VAL(target_hash, hash_entry) {
 		zend_string *encoding_str = zval_try_get_string(hash_entry);
 		if (UNEXPECTED(!encoding_str)) {
 			efree(ZEND_VOIDP(list));
@@ -382,7 +382,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 			}
 		}
 		zend_string_release(encoding_str);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	*return_list = list;
 	*return_size = n;
 	return SUCCESS;
@@ -2429,7 +2429,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	}
 	GC_TRY_PROTECT_RECURSION(input);
 	output = zend_new_array(zend_hash_num_elements(input));
-	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
 			ckey = php_mb_convert_encoding(
@@ -2482,7 +2482,7 @@ try_again:
 		} else {
 			zend_hash_index_add(output, idx, &entry_tmp);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	GC_TRY_UNPROTECT_RECURSION(input);
 
 	return output;
@@ -3009,7 +3009,7 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 
 		ht = HASH_OF(var);
 		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+			ZEND_ARRAY_FOREACH_VAL_IND(ht, entry) {
 				if (mb_recursive_encoder_detector_feed(identd, entry, recursion_error)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
@@ -3021,7 +3021,7 @@ static int mb_recursive_encoder_detector_feed(mbfl_encoding_detector *identd, zv
 					}
 					return 0;
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 
 		if (Z_REFCOUNTED_P(var)) {
@@ -3062,14 +3062,14 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 
 		ht = HASH_OF(var);
 		if (ht != NULL) {
-			ZEND_HASH_FOREACH_VAL_IND(ht, entry) {
+			ZEND_ARRAY_FOREACH_VAL_IND(ht, entry) {
 				if (mb_recursive_convert_variable(convd, entry)) {
 					if (Z_REFCOUNTED_P(var)) {
 						Z_UNPROTECT_RECURSION_P(var);
 					}
 					return 1;
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 
 		if (Z_REFCOUNTED_P(var)) {
@@ -3209,9 +3209,9 @@ static int *make_conversion_map(HashTable *target_hash, int *convmap_size)
 	int *convmap = (int *)safe_emalloc(n_elems, sizeof(int), 0);
 	int *mapelm = convmap;
 
-	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+	ZEND_ARRAY_FOREACH_VAL(target_hash, hash_entry) {
 		*mapelm++ = zval_get_long(hash_entry);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	*convmap_size = n_elems / 4;
 	return convmap;
@@ -3924,7 +3924,7 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 		return 0;
 	}
 	GC_TRY_PROTECT_RECURSION(vars);
-	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
 			if (!php_mb_check_encoding(ZSTR_VAL(key), ZSTR_LEN(key), encoding)) {
@@ -3956,7 +3956,7 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 				valid = 0;
 				break;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	GC_TRY_UNPROTECT_RECURSION(vars);
 	return valid;
 }

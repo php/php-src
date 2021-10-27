@@ -3919,7 +3919,7 @@ ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function
 	fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 	fci->params = params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
 		if (func && !Z_ISREF_P(arg) && ARG_SHOULD_BE_SENT_BY_REF(func, n)) {
 			ZVAL_NEW_REF(params, arg);
 			Z_TRY_ADDREF_P(arg);
@@ -3928,7 +3928,7 @@ ZEND_API zend_result zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function
 		}
 		params++;
 		n++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return SUCCESS;
 }

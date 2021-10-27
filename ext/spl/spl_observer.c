@@ -182,9 +182,9 @@ static int spl_object_storage_detach(spl_SplObjectStorage *intern, zend_object *
 void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
 	spl_SplObjectStorageElement *element;
 
-	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
+	ZEND_ARRAY_FOREACH_PTR(&other->storage, element) {
 		spl_object_storage_attach(intern, element->obj, &element->inf);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	intern->index = 0;
 } /* }}} */
@@ -257,7 +257,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 
 	array_init(&storage);
 
-	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
+	ZEND_ARRAY_FOREACH_PTR(&intern->storage, element) {
 		array_init(&tmp);
 		/* Incrementing the refcount of obj and inf would confuse the garbage collector.
 		 * Prefer to null the destructor */
@@ -267,7 +267,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &obj);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
 	zend_symtable_update(debug_info, zname, &storage);
@@ -284,10 +284,10 @@ static HashTable *spl_object_storage_get_gc(zend_object *obj, zval **table, int 
 	spl_SplObjectStorageElement *element;
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
-	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
+	ZEND_ARRAY_FOREACH_PTR(&intern->storage, element) {
 		zend_get_gc_buffer_add_obj(gc_buffer, element->obj);
 		zend_get_gc_buffer_add_zval(gc_buffer, &element->inf);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	zend_get_gc_buffer_use(gc_buffer, table, n);
 	return zend_std_get_properties(obj);
@@ -474,11 +474,11 @@ PHP_METHOD(SplObjectStorage, removeAllExcept)
 
 	other = Z_SPLOBJSTORAGE_P(obj);
 
-	ZEND_HASH_FOREACH_PTR(&intern->storage, element) {
+	ZEND_ARRAY_FOREACH_PTR(&intern->storage, element) {
 		if (!spl_object_storage_contains(other, element->obj)) {
 			spl_object_storage_detach(intern, element->obj);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 	intern->index = 0;
@@ -803,13 +803,13 @@ PHP_METHOD(SplObjectStorage, __serialize)
 
 	/* storage */
 	array_init_size(&tmp, 2 * zend_hash_num_elements(&intern->storage));
-	ZEND_HASH_FOREACH_PTR(&intern->storage, elem) {
+	ZEND_ARRAY_FOREACH_PTR(&intern->storage, elem) {
 		zval obj;
 		ZVAL_OBJ_COPY(&obj, elem->obj);
 		zend_hash_next_index_insert(Z_ARRVAL(tmp), &obj);
 		Z_TRY_ADDREF(elem->inf);
 		zend_hash_next_index_insert(Z_ARRVAL(tmp), &elem->inf);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
 
 	/* members */
@@ -844,7 +844,7 @@ PHP_METHOD(SplObjectStorage, __unserialize)
 	}
 
 	key = NULL;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), val) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(storage_zv), val) {
 		if (key) {
 			if (Z_TYPE_P(key) != IS_OBJECT) {
 				zend_throw_exception(spl_ce_UnexpectedValueException, "Non-object key", 0);
@@ -856,7 +856,7 @@ PHP_METHOD(SplObjectStorage, __unserialize)
 		} else {
 			key = val;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 }

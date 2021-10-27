@@ -607,7 +607,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		return 0;
 	}
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
@@ -632,7 +632,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 			}
 			cnt++;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	return cnt ? 1 : 0;
 }
 
@@ -650,7 +650,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	}
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		php_socket_t this_fd;
 
 		ZVAL_DEREF(elem);
@@ -676,7 +676,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 				continue;
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* destroy old array and add new one */
 	zval_ptr_dtor(stream_array);
@@ -699,7 +699,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	}
 	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		ZVAL_DEREF(elem);
 		php_stream_from_zval_no_verify(stream, elem);
 		if (stream == NULL) {
@@ -721,7 +721,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			ret++;
 			continue;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	if (ret > 0) {
 		/* destroy old array and add new one */
@@ -891,19 +891,21 @@ static int parse_context_options(php_stream_context *context, HashTable *options
 	zend_string *wkey, *okey;
 	int ret = SUCCESS;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(options, wkey, wval) {
+	ZEND_ARRAY_FOREACH_STR_KEY_VAL(options, wkey, wval) {
 		ZVAL_DEREF(wval);
 		if (wkey && Z_TYPE_P(wval) == IS_ARRAY) {
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
-				if (okey) {
-					php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);
-				}
-			} ZEND_HASH_FOREACH_END();
+			if (!HT_IS_PACKED(Z_ARRVAL_P(wval))) {
+				ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(wval), okey, oval) {
+					if (okey) {
+						php_stream_context_set_option(context, ZSTR_VAL(wkey), ZSTR_VAL(okey), oval);
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
 		} else {
 			zend_value_error("Options should have the form [\"wrappername\"][\"optionname\"] = $value");
 			return FAILURE;
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return ret;
 }

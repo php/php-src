@@ -593,7 +593,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					if (*parts == '\0') break;
 					end = strchr(parts, ' ');
 					if (end) *end = '\0';
-					ZEND_HASH_FOREACH_PTR(params, param) {
+					ZEND_ARRAY_FOREACH_PTR(params, param) {
 						if (param->paramName &&
 						    strcmp(parts, param->paramName) == 0) {
 					  	sdlParamPtr x_param;
@@ -604,7 +604,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 					  	found = 1;
 					  	break;
 						}
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_ARRAY_FOREACH_END();
 					if (!found) {
 						soap_error1(E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", parts);
 					}
@@ -1884,9 +1884,9 @@ static void sdl_serialize_model(sdlContentModelPtr model, HashTable *tmp_types, 
 				int i = zend_hash_num_elements(model->u.content);
 
 				WSDL_CACHE_PUT_INT(i, out);
-				ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+				ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 					sdl_serialize_model(tmp, tmp_types, tmp_elements, out);
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 			}
 			break;
 		case XSD_CONTENT_GROUP_REF:
@@ -2508,7 +2508,7 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 	pparams = malloc(sizeof(HashTable));
 	zend_hash_init(pparams, zend_hash_num_elements(params), NULL, delete_parameter_persistent, 1);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(params, key, tmp) {
+	ZEND_ARRAY_FOREACH_STR_KEY_PTR(params, key, tmp) {
 		pparam = malloc(sizeof(sdlParam));
 		memset(pparam, 0, sizeof(sdlParam));
 		*pparam = *tmp;
@@ -2536,7 +2536,7 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 		} else {
 			zend_hash_next_index_insert_ptr(pparams, pparam);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return pparams;
 }
@@ -2668,10 +2668,10 @@ static sdlContentModelPtr make_persistent_sdl_model(sdlContentModelPtr model, Ha
 			pmodel->u.content = malloc(sizeof(HashTable));
 			zend_hash_init(pmodel->u.content, zend_hash_num_elements(model->u.content), NULL, delete_model_persistent, 1);
 
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				pcontent = make_persistent_sdl_model(tmp, ptr_map, bp_types, bp_encoders);
 				zend_hash_next_index_insert_ptr(pmodel->u.content, pcontent);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			break;
 
 		case XSD_CONTENT_GROUP_REF:
@@ -2783,7 +2783,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		ptype->elements = malloc(sizeof(HashTable));
 		zend_hash_init(ptype->elements, zend_hash_num_elements(type->elements), NULL, delete_type_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
 			pelem = make_persistent_sdl_type(tmp, ptr_map, bp_types, bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -2792,7 +2792,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 				zend_hash_next_index_insert_ptr(ptype->elements, pelem);
 			}
 			zend_hash_str_add_ptr(ptr_map, (char*)&tmp, sizeof(tmp), pelem);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (ptype->attributes) {
@@ -2972,7 +2972,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->types = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->types, zend_hash_num_elements(sdl->types), NULL, delete_type_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -2981,7 +2981,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 				zend_hash_next_index_insert_ptr(psdl->types, ptype);
 			}
 			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), ptype);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (sdl->elements) {
@@ -3036,12 +3036,12 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 	if (zend_hash_num_elements(&bp_encoders)) {
 		encodePtr *tmp, penc = NULL;
 
-		ZEND_HASH_FOREACH_PTR(&bp_encoders, tmp) {
+		ZEND_ARRAY_FOREACH_PTR(&bp_encoders, tmp) {
 			if ((penc = zend_hash_str_find_ptr(&ptr_map, (char*)tmp, sizeof(*tmp))) == NULL) {
 				assert(0);
 			}
 			*tmp = penc;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 

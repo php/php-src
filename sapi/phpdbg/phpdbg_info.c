@@ -399,7 +399,7 @@ PHPDBG_INFO(classes) /* {{{ */
 	phpdbg_notice("User Classes (%d)", zend_hash_num_elements(&classes));
 
 	/* once added, assume that classes are stable... until shutdown. */
-	ZEND_HASH_FOREACH_PTR(&classes, ce) {
+	ZEND_PACKED_FOREACH_PTR(&classes, ce) {
 		phpdbg_print_class_name(ce);
 
 		if (ce->parent) {
@@ -416,7 +416,7 @@ PHPDBG_INFO(classes) /* {{{ */
 		} else {
 			phpdbg_writeln("|---- no source code");
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_PACKED_FOREACH_END();
 
 	zend_hash_destroy(&classes);
 
@@ -442,7 +442,7 @@ PHPDBG_INFO(funcs) /* {{{ */
 
 	phpdbg_notice("User Functions (%d)", zend_hash_num_elements(&functions));
 
-	ZEND_HASH_FOREACH_PTR(&functions, zf) {
+	ZEND_PACKED_FOREACH_PTR(&functions, zf) {
 		zend_op_array *op_array = &zf->op_array;
 
 		phpdbg_write("|-------- %s", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}");
@@ -452,7 +452,7 @@ PHPDBG_INFO(funcs) /* {{{ */
 		} else {
 			phpdbg_writeln(" (no source code)");
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_PACKED_FOREACH_END();
 
 	zend_hash_destroy(&functions);
 

@@ -526,9 +526,9 @@ PHP_FUNCTION(phpdbg_get_executable)
 			files = &files_tmp;
 			zend_hash_init(files, 0, NULL, NULL, 0);
 
-			ZEND_HASH_FOREACH_VAL(Z_ARR_P(option_buffer), filename) {
+			ZEND_ARRAY_FOREACH_VAL(Z_ARR_P(option_buffer), filename) {
 				zend_hash_add_empty_element(files, zval_get_string(filename));
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		} else {
 			GC_ADDREF(files);
 		}

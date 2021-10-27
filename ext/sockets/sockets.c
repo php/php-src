@@ -656,7 +656,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(sock_array), element) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(sock_array), element) {
 		ZVAL_DEREF(element);
 
 		if (Z_TYPE_P(element) != IS_OBJECT || Z_OBJCE_P(element) != socket_ce) {
@@ -675,7 +675,7 @@ static int php_sock_array_to_fd_set(uint32_t arg_num, zval *sock_array, fd_set *
 			*max_fd = php_sock->bsd_socket;
 		}
 		num++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return num ? 1 : 0;
 }
@@ -694,7 +694,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 	ZEND_ASSERT(Z_TYPE_P(sock_array) == IS_ARRAY);
 
 	array_init(&new_hash);
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(sock_array), num_key, key, element) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(sock_array), num_key, key, element) {
 		ZVAL_DEREF(element);
 
 		php_sock = Z_SOCKET_P(element);
@@ -713,7 +713,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 			}
 		}
 		num++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	/* Destroy old array, add new one */
 	zval_ptr_dtor(sock_array);
@@ -2353,7 +2353,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zhints) {
+	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				if (zend_string_equals_literal(key, "ai_flags")) {

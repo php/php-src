@@ -213,7 +213,7 @@ static unsigned from_array_iterate(const zval *arr,
 
 	/* Note i starts at 1, not 0! */
 	i = 1;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
 		if ((size_t)snprintf(buf, sizeof(buf), "element #%u", i) >= sizeof(buf)) {
 			memcpy(buf, "element", sizeof("element"));
 		}
@@ -226,7 +226,7 @@ static unsigned from_array_iterate(const zval *arr,
 			break;
 		}
 		i++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	return i -1;
 }
@@ -936,7 +936,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 	control_len = (size_t)num_elems * CMSG_SPACE(20);
 	cur_offset	= 0;
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
 		if (ctx->err.has_error) {
 			break;
 		}
@@ -949,7 +949,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 		from_zval_write_control(elem, &control_buf, alloc, &control_len, &cur_offset, ctx);
 
 		zend_llist_remove_tail(&ctx->keys);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	msg->msg_control = control_buf;
 	msg->msg_controllen = cur_offset; /* not control_len, which may be larger */

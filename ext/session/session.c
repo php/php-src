@@ -1727,8 +1727,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			zend_argument_value_error(5, "must be null when argument #1 ($lifetime_or_options) is an array");
 			RETURN_THROWS();
 		}
-
-		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(options_ht, key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
 				if (zend_string_equals_literal_ci(key, "lifetime")) {
@@ -1757,7 +1756,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			} else {
 				php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) cannot contain numeric keys");
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		if (found == 0) {
 			zend_argument_value_error(1, "must contain at least 1 valid key");
@@ -2492,7 +2491,7 @@ PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
 			if (str_idx) {
 				switch(Z_TYPE_P(value)) {
 					case IS_STRING:
@@ -2518,7 +2517,7 @@ PHP_FUNCTION(session_start)
 				}
 			}
 			(void) num_idx;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	php_session_start();

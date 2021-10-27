@@ -878,7 +878,7 @@ PHP_METHOD(Phar, mungServer)
 
 	phar_request_initialize();
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
 
 		if (Z_TYPE_P(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
@@ -895,7 +895,7 @@ PHP_METHOD(Phar, mungServer)
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
 		}
 		// TODO Warning for invalid value?
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 }
 /* }}} */
 
@@ -4357,7 +4357,7 @@ PHP_METHOD(Phar, extractTo)
 			RETURN_FALSE;
 		}
 
-		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
+		ZEND_ARRAY_FOREACH_VAL(files_ht, zval_file) {
 			ZVAL_DEREF(zval_file);
 			if (IS_STRING != Z_TYPE_P(zval_file)) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
@@ -4376,7 +4376,7 @@ PHP_METHOD(Phar, extractTo)
 						ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
 					RETURN_THROWS();
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		RETURN_TRUE;
 	}
 

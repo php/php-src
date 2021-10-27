@@ -707,7 +707,7 @@ PHP_FUNCTION(get_headers)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(&stream->wrapperdata), hdr) {
 		if (Z_TYPE_P(hdr) != IS_STRING) {
 			continue;
 		}
@@ -738,7 +738,7 @@ no_name_header:
 				goto no_name_header;
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	php_stream_close(stream);
 }

@@ -418,7 +418,7 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 	zval *val;
 
 	GC_PROTECT_RECURSION(ht);
-	ZEND_HASH_FOREACH_VAL(ht, val) {
+	ZEND_ARRAY_FOREACH_VAL(ht, val) {
 		ZVAL_DEREF(val);
 		if (Z_TYPE_P(val) == IS_ARRAY && Z_REFCOUNTED_P(val)) {
 			if (Z_IS_RECURSIVE_P(val)) {
@@ -430,7 +430,7 @@ static bool validate_constant_array_argument(HashTable *ht, int argument_number)
 				break;
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	GC_UNPROTECT_RECURSION(ht);
 	return ret;
 }
@@ -443,7 +443,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 	zval *new_val, *val;
 
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(src), idx, key, val) {
+	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(src), idx, key, val) {
 		/* constant arrays can't contain references */
 		ZVAL_DEREF(val);
 		if (key) {
@@ -458,7 +458,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 		} else {
 			Z_TRY_ADDREF_P(val);
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 }
 /* }}} */
 
@@ -1399,20 +1399,20 @@ ZEND_FUNCTION(get_resources)
 
 	if (!type) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
 			if (!key) {
 				Z_ADDREF_P(val);
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	} else if (zend_string_equals_literal(type, "Unknown")) {
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
 			if (!key && Z_RES_TYPE_P(val) <= 0) {
 				Z_ADDREF_P(val);
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	} else {
 		int id = zend_fetch_list_dtor_id(ZSTR_VAL(type));
 
@@ -1422,12 +1422,12 @@ ZEND_FUNCTION(get_resources)
 		}
 
 		array_init(return_value);
-		ZEND_HASH_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(&EG(regular_list), index, key, val) {
 			if (!key && Z_RES_TYPE_P(val) == id) {
 				Z_ADDREF_P(val);
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), index, val);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 }
 /* }}} */

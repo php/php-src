@@ -959,41 +959,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define zend_hash_get_current_data_ptr(ht) \
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
+/* Hash array iterators */
 #define ZEND_HASH_FOREACH_FROM(_ht, indirect, _from) do { \
-		HashTable *__ht = (_ht); \
-		bool _is_packed = HT_IS_PACKED(__ht); \
-		zval *__z; \
-		zend_ulong __h; \
-		zend_string *__key = NULL; \
-		Bucket *_p = NULL; \
-		uint32_t _idx = _from; \
-		zval *_end; \
-		if (_is_packed) { \
-			__z = __ht->arPacked + _from; \
-			_end = __ht->arPacked + __ht->nNumUsed; \
-		} else { \
-			__z = &__ht->arData[_from].val; \
-			_end = &__ht->arData[__ht->nNumUsed].val; \
-		} \
-		while (__z != _end) { \
-			zval *_z = __z; \
-			if (_is_packed) { \
-				__z++; \
-				__h = _idx; \
-				_idx++; \
-			} else { \
-				_p = (Bucket*)__z; \
-				__z = &(_p + 1)->val; \
-				__h = _p->h; \
-				__key = _p->key; \
-				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
-					_z = Z_INDIRECT_P(_z); \
-				} \
-			} \
-			(void) __h; (void) __key; (void) _p; (void) _idx; \
-			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
-
-#define ZEND_HASH_FOREACH_FROM_OLD(_ht, indirect, _from) do { \
 		HashTable *__ht = (_ht); \
 		Bucket *_p = __ht->arData + (_from); \
 		Bucket *_end = __ht->arData + __ht->nNumUsed; \
@@ -1008,37 +975,6 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH(_ht, indirect) ZEND_HASH_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
-		HashTable *__ht = (_ht); \
-		uint32_t _idx = __ht->nNumUsed; \
-		Bucket *_p = NULL; \
-		zval *_z; \
-		zval *__z = NULL; \
-		zend_ulong __h; \
-		zend_string *__key = NULL; \
-		bool _is_packed = HT_IS_PACKED(__ht); \
-		if (_is_packed) { \
-			__z = __ht->arPacked + _idx; \
-		} else { \
-			_p = __ht->arData + _idx; \
-		} \
-		for (;_idx > 0; _idx--) { \
-			if (_is_packed) { \
-				__z--; \
-				_z = __z; \
-				__h = _idx - 1; \
-			} else { \
-				_p--; \
-				_z = &_p->val; \
-				__h = _p->h; \
-				__key = _p->key; \
-				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
-					_z = Z_INDIRECT_P(_z); \
-				} \
-			} \
-			(void) __h; (void) __key; (void) _p; (void) __z; \
-			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
-
-#define ZEND_HASH_REVERSE_FOREACH_OLD(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
 		Bucket *_p = __ht->arData + _idx; \
@@ -1119,117 +1055,434 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h;
+	_h = _p->h;
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = __h;
+	_h = _p->h;
 
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = __key;
+	_key = _p->key;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = __key;
+	_key = _p->key;
 
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h; \
-	_key = __key;
+	_h = _p->h; \
+	_key = _p->key;
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = __h; \
-	_key = __key;
+	_h = _p->h; \
+	_key = _p->key;
 
 #define ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h; \
+	_h = _p->h; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = __h; \
+	_h = _p->h; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = __key; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL_FROM(ht, _key, _val, _from) \
 	ZEND_HASH_FOREACH_FROM(ht, 0, _from); \
-	_key = __key; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = __key; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_KEY_VAL(ht, _h, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h; \
-	_key = __key; \
+	_h = _p->h; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = __h; \
-	_key = __key; \
+	_h = _p->h; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_key = __key; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_key = __key; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_h = __h; \
-	_key = __key; \
+	_h = _p->h; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_h = __h; \
-	_key = __key; \
+	_h = _p->h; \
+	_key = _p->key; \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h; \
+	_h = _p->h; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = __h; \
+	_h = _p->h; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = __key; \
+	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_key = __key; \
+	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = __h; \
-	_key = __key; \
+	_h = _p->h; \
+	_key = _p->key; \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_key = _p->key; \
+	_ptr = Z_PTR_P(_z);
+
+/* Packed array iterators */
+#define ZEND_PACKED_FOREACH_FROM(_ht, _from) do { \
+		HashTable *__ht = (_ht); \
+		zend_ulong _idx = (_from); \
+		zval *_z = __ht->arPacked + (_from); \
+		zval *_end = __ht->arPacked + __ht->nNumUsed; \
+		ZEND_ASSERT(HT_IS_PACKED(__ht)); \
+		for (;_z != _end; _z++, _idx++) { \
+			(void) _idx; \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_PACKED_FOREACH(_ht) ZEND_PACKED_FOREACH_FROM(_ht, 0)
+
+#define ZEND_PACKED_REVERSE_FOREACH(_ht) do { \
+		HashTable *__ht = (_ht); \
+		zend_ulong _idx = __ht->nNumUsed; \
+		zval *_z = __ht->arPacked + _idx; \
+		ZEND_ASSERT(HT_IS_PACKED(__ht)); \
+		while (_idx > 0) { \
+			_z--; \
+			_idx--; \
+			(void) _idx; \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_PACKED_FOREACH_END() \
+		} \
+	} while (0)
+
+#define ZEND_PACKED_FOREACH_VAL(ht, _val) \
+	ZEND_PACKED_FOREACH(ht); \
+	_val = _z;
+
+#define ZEND_PACKED_REVERSE_FOREACH_VAL(ht, _val) \
+	ZEND_PACKED_REVERSE_FOREACH(ht); \
+	_val = _z;
+
+#define ZEND_PACKED_FOREACH_PTR(ht, _ptr) \
+	ZEND_PACKED_FOREACH(ht); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_PACKED_REVERSE_FOREACH_PTR(ht, _ptr) \
+	ZEND_PACKED_REVERSE_FOREACH(ht); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_PACKED_FOREACH_KEY(ht, _h) \
+	ZEND_PACKED_FOREACH(ht); \
+	_h = _idx;
+
+#define ZEND_PACKED_REVERSE_FOREACH_KEY(ht, _h) \
+	ZEND_PACKED_REVERSE_FOREACH(ht); \
+	_h = _idx;
+
+#define ZEND_PACKED_FOREACH_KEY_VAL(ht, _h, _val) \
+	ZEND_PACKED_FOREACH(ht); \
+	_h = _idx; \
+	_val = _z;
+
+#define ZEND_PACKED_REVERSE_FOREACH_KEY_VAL(ht, _h, _val) \
+	ZEND_PACKED_REVERSE_FOREACH(ht); \
+	_h = _idx; \
+	_val = _z;
+
+#define ZEND_PACKED_FOREACH_KEY_PTR(ht, _h, _ptr) \
+	ZEND_PACKED_FOREACH(ht); \
+	_h = _idx; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_PACKED_REVERSE_FOREACH_KEY_PTR(ht, _h, _ptr) \
+	ZEND_PACKED_REVERSE_FOREACH(ht); \
+	_h = _idx; \
+	_ptr = Z_PTR_P(_z);
+
+/* Common hash/packed array iterators */
+#define ZEND_ARRAY_FOREACH_FROM(_ht, indirect, _from) do { \
+		HashTable *__ht = (_ht); \
+		bool _is_packed = HT_IS_PACKED(__ht); \
+		zval *__z; \
+		zend_ulong __h; \
+		zend_string *__key = NULL; \
+		Bucket *_p = NULL; \
+		uint32_t _idx = _from; \
+		zval *_end; \
+		if (_is_packed) { \
+			__z = __ht->arPacked + _from; \
+			_end = __ht->arPacked + __ht->nNumUsed; \
+		} else { \
+			__z = &__ht->arData[_from].val; \
+			_end = &__ht->arData[__ht->nNumUsed].val; \
+		} \
+		while (__z != _end) { \
+			zval *_z = __z; \
+			if (_is_packed) { \
+				__z++; \
+				__h = _idx; \
+				_idx++; \
+			} else { \
+				_p = (Bucket*)__z; \
+				__z = &(_p + 1)->val; \
+				__h = _p->h; \
+				__key = _p->key; \
+				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
+					_z = Z_INDIRECT_P(_z); \
+				} \
+			} \
+			(void) __h; (void) __key; (void) _p; (void) _idx; \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_ARRAY_FOREACH(_ht, indirect) ZEND_ARRAY_FOREACH_FROM(_ht, indirect, 0)
+
+#define ZEND_ARRAY_REVERSE_FOREACH(_ht, indirect) do { \
+		HashTable *__ht = (_ht); \
+		uint32_t _idx = __ht->nNumUsed; \
+		Bucket *_p = NULL; \
+		zval *_z; \
+		zval *__z = NULL; \
+		zend_ulong __h; \
+		zend_string *__key = NULL; \
+		bool _is_packed = HT_IS_PACKED(__ht); \
+		if (_is_packed) { \
+			__z = __ht->arPacked + _idx; \
+		} else { \
+			_p = __ht->arData + _idx; \
+		} \
+		for (;_idx > 0; _idx--) { \
+			if (_is_packed) { \
+				__z--; \
+				_z = __z; \
+				__h = _idx - 1; \
+			} else { \
+				_p--; \
+				_z = &_p->val; \
+				__h = _p->h; \
+				__key = _p->key; \
+				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
+					_z = Z_INDIRECT_P(_z); \
+				} \
+			} \
+			(void) __h; (void) __key; (void) _p; (void) __z; \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_ARRAY_FOREACH_END() \
+		} \
+	} while (0)
+
+#define _ZEND_ARRAY_FOREACH_VAL(_ht) do { \
+		HashTable *__ht = (_ht); \
+		zval *_z, *_end; \
+		size_t _size; \
+		if (HT_IS_PACKED(_ht)) { \
+			_z = __ht->arPacked; \
+			_end = __ht->arPacked + __ht->nNumUsed; \
+			_size = sizeof(zval); \
+		} else {\
+			_z = &__ht->arData->val; \
+			_end = &__ht->arData[__ht->nNumUsed].val; \
+			_size = sizeof(Bucket); \
+		} \
+		for (; _z != _end; _z = (zval*)(((char*)_z) + _size)) { \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define _ZEND_ARRAY_REVERSE_FOREACH_VAL(_ht) do { \
+		HashTable *__ht = (_ht); \
+		uint32_t _idx = __ht->nNumUsed; \
+		zval *_z; \
+		size_t _size; \
+		if (HT_IS_PACKED(__ht)) { \
+			_z = __ht->arPacked + _idx; \
+			_size = sizeof(zval); \
+		} else { \
+			_z = &__ht->arData[_idx].val; \
+			_size = sizeof(Bucket); \
+		} \
+		for (;_idx > 0; _idx--) { \
+			_z = (zval*)(((char*)_z) - _size); \
+			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
+
+#define ZEND_ARRAY_FOREACH_VAL(ht, _val) \
+	_ZEND_ARRAY_FOREACH_VAL(ht); \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_VAL(ht, _val) \
+	_ZEND_ARRAY_REVERSE_FOREACH_VAL(ht); \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_VAL_IND(ht, _val) \
+	ZEND_ARRAY_FOREACH(ht, 1); \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_VAL_IND(ht, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 1); \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_PTR(ht, _ptr) \
+	_ZEND_ARRAY_FOREACH_VAL(ht); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_REVERSE_FOREACH_PTR(ht, _ptr) \
+	_ZEND_ARRAY_REVERSE_FOREACH_VAL(ht, 0); \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_FOREACH_NUM_KEY(ht, _h) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_NUM_KEY(ht, _h) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_h = __h;
+
+#define ZEND_ARRAY_FOREACH_STR_KEY(ht, _key) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_key = __key;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_STR_KEY(ht, _key) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_key = __key;
+
+#define ZEND_ARRAY_FOREACH_KEY(ht, _h, _key) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h; \
+	_key = __key;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_KEY(ht, _h, _key) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_h = __h; \
+	_key = __key;
+
+#define ZEND_ARRAY_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h; \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_h = __h; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_STR_KEY_VAL_FROM(ht, _key, _val, _from) \
+	ZEND_ARRAY_FOREACH_FROM(ht, 0, _from); \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h; \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_h = __h; \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
+	ZEND_ARRAY_FOREACH(ht, 1); \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 1); \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+	ZEND_ARRAY_FOREACH(ht, 1); \
+	_h = __h; \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 1); \
+	_h = __h; \
+	_key = __key; \
+	_val = _z;
+
+#define ZEND_ARRAY_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_REVERSE_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_h = __h; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_key = __key; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_REVERSE_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
+	_key = __key; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
+	ZEND_ARRAY_FOREACH(ht, 0); \
+	_h = __h; \
+	_key = __key; \
+	_ptr = Z_PTR_P(_z);
+
+#define ZEND_ARRAY_REVERSE_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
+	ZEND_ARRAY_REVERSE_FOREACH(ht, 0); \
 	_h = __h; \
 	_key = __key; \
 	_ptr = Z_PTR_P(_z);
@@ -1309,16 +1562,24 @@ static zend_always_inline bool zend_array_is_list(zend_array *array)
 	}
 
 	/* Packed arrays are lists */
-	if (HT_IS_PACKED(array) && HT_IS_WITHOUT_HOLES(array)) {
-		return 1;
-	}
-
-	/* Check if the list could theoretically be repacked */
-	ZEND_HASH_FOREACH_KEY(array, num_idx, str_idx) {
-		if (str_idx != NULL || num_idx != expected_idx++) {
-			return 0;
+	if (HT_IS_PACKED(array)) {
+		if (HT_IS_WITHOUT_HOLES(array)) {
+			return 1;
 		}
-	} ZEND_HASH_FOREACH_END();
+		/* Check if the list could theoretically be repacked */
+		ZEND_PACKED_FOREACH_KEY(array, num_idx) {
+			if (num_idx != expected_idx++) {
+				return 0;
+			}
+		} ZEND_PACKED_FOREACH_END();
+	} else {
+		/* Check if the list could theoretically be repacked */
+		ZEND_HASH_FOREACH_KEY(array, num_idx, str_idx) {
+			if (str_idx != NULL || num_idx != expected_idx++) {
+				return 0;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	return 1;
 }

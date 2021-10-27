@@ -3139,7 +3139,7 @@ PHP_FUNCTION(imap_mail_compose)
 		if (Z_TYPE_P(pvalue) == IS_ARRAY) {
 			custom_headers_param = tmp_param = NULL;
 			SEPARATE_ARRAY(pvalue);
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pvalue), env_data) {
+			ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pvalue), env_data) {
 				custom_headers_param = mail_newbody_parameter();
 				convert_to_string(env_data);
 				CHECK_HEADER_INJECTION(Z_STR_P(env_data), 0, "custom_headers");
@@ -3148,12 +3148,12 @@ PHP_FUNCTION(imap_mail_compose)
 				memcpy(custom_headers_param->value, Z_STRVAL_P(env_data), Z_STRLEN_P(env_data) + 1);
 				custom_headers_param->next = tmp_param;
 				tmp_param = custom_headers_param;
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 	}
 
 	first = 1;
-	ZEND_HASH_FOREACH_VAL(body, data) {
+	ZEND_ARRAY_FOREACH_VAL(body, data) {
 		if (first) {
 			first = 0;
 
@@ -3193,7 +3193,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->parameter = tmp_param;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
-				if(Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if(Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
@@ -3233,7 +3233,7 @@ PHP_FUNCTION(imap_mail_compose)
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
@@ -3315,7 +3315,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->parameter = tmp_param;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
@@ -3355,7 +3355,7 @@ PHP_FUNCTION(imap_mail_compose)
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
 					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
@@ -3399,7 +3399,7 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->md5 = cpystr(Z_STRVAL_P(pvalue));
 			}
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
 		php_error_docref(NULL, E_WARNING, "Cannot generate multipart e-mail without components.");

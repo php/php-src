@@ -1592,7 +1592,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp->node = nodep;
 
 		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
-		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY) {
+		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
 			zval *tmpns;
 			zend_string *prefix;
 
@@ -1626,11 +1626,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 			inclusive_ns_prefixes = safe_emalloc(zend_hash_num_elements(Z_ARRVAL_P(ns_prefixes)) + 1,
 				sizeof(xmlChar *), 0);
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ns_prefixes), tmpns) {
+			ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(ns_prefixes), tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					inclusive_ns_prefixes[nscount++] = (xmlChar *) Z_STRVAL_P(tmpns);
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			inclusive_ns_prefixes[nscount] = NULL;
 		} else {
 			php_error_docref(NULL, E_NOTICE,

@@ -2530,7 +2530,7 @@ static void report_variance_errors(zend_class_entry *ce) {
 	obligations = zend_hash_index_find_ptr(all_obligations, num_key);
 	ZEND_ASSERT(obligations != NULL);
 
-	ZEND_HASH_FOREACH_PTR(obligations, obligation) {
+	ZEND_PACKED_FOREACH_PTR(obligations, obligation) {
 		if (obligation->type == OBLIGATION_COMPATIBILITY) {
 			/* Just used to populate the delayed_autoloads table,
 			 * which will be used when printing the "unresolved" error. */
@@ -2546,7 +2546,7 @@ static void report_variance_errors(zend_class_entry *ce) {
 		} else {
 			zend_error_noreturn(E_CORE_ERROR, "Bug #78647");
 		}
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_PACKED_FOREACH_END();
 
 	/* Only warnings were thrown above -- that means that there are incompatibilities, but only
 	 * ones that we permit. Mark all classes with open obligations as fully linked. */

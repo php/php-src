@@ -190,9 +190,9 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			HashTable *ht = Z_ARRVAL_P(val);
 			zval *tmpzval;
 
-			ZEND_HASH_FOREACH_VAL(ht, tmpzval) {
+			ZEND_ARRAY_FOREACH_VAL(ht, tmpzval) {
 				php_converter_append_toUnicode_target(tmpzval, args, objval);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return;
 		}
 		default:
@@ -274,9 +274,9 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 		{
 			HashTable *ht = Z_ARRVAL_P(val);
 			zval *tmpzval;
-			ZEND_HASH_FOREACH_VAL(ht, tmpzval) {
+			ZEND_ARRAY_FOREACH_VAL(ht, tmpzval) {
 				php_converter_append_fromUnicode_target(tmpzval, args, objval);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return;
 		}
 		default:

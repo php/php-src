@@ -205,7 +205,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 
 		m = func ? func->common.num_args : 0;
 
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), argstmp) {
+		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(args), argstmp) {
 			if (j) {
 				phpdbg_out(", ");
 			}
@@ -234,7 +234,7 @@ static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 				php_printf("%s", arg_print);
 				efree(arg_print);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		if (is_variadic) {
 			phpdbg_out("]");

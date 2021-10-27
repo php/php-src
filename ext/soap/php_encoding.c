@@ -1346,13 +1346,13 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 			sdlContentModelPtr tmp;
 			sdlContentModelPtr any = NULL;
 
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				if (tmp->kind == XSD_CONTENT_ANY) {
 					any = tmp;
 				} else {
 					model_to_zval_object(ret, tmp, data, sdl);
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			if (any) {
 				model_to_zval_any(ret, data->children);
 			}
@@ -1607,7 +1607,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
-					ZEND_HASH_FOREACH_VAL(ht, val) {
+					ZEND_ARRAY_FOREACH_VAL(ht, val) {
 						ZVAL_DEREF(val);
 						if (Z_TYPE_P(val) == IS_NULL && model->u.element->nillable) {
 							property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
@@ -1627,7 +1627,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 							xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
 							xmlSetNs(property, nsp);
 						}
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_ARRAY_FOREACH_END();
 				} else {
 					if (Z_TYPE_P(data) == IS_NULL && model->u.element->nillable) {
 						property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
@@ -1686,9 +1686,9 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 					HashTable *ht = Z_ARRVAL_P(data);
 					zval *val;
 
-					ZEND_HASH_FOREACH_VAL(ht, val) {
+					ZEND_ARRAY_FOREACH_VAL(ht, val) {
 						master_to_xml(enc, val, style, node);
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_ARRAY_FOREACH_END();
 				} else {
 					master_to_xml(enc, data, style, node);
 				}
@@ -1707,28 +1707,28 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 		case XSD_CONTENT_ALL: {
 			sdlContentModelPtr tmp;
 
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				if (!model_to_xml_object(node, tmp, object, style, strict && (tmp->min_occurs > 0))) {
 					if (!strict || tmp->min_occurs > 0) {
 						return 0;
 					}
 				}
 				strict = 1;
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return 1;
 		}
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr tmp;
 			int ret = 0;
 
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				int tmp_ret = model_to_xml_object(node, tmp, object, style, 0);
 				if (tmp_ret == 1) {
 					return 1;
 				} else if (tmp_ret != 0) {
 					ret = 1;
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return ret;
 		}
 		case XSD_CONTENT_GROUP: {
@@ -1758,9 +1758,9 @@ static sdlTypePtr model_array_element(sdlContentModelPtr model)
 			if (zend_hash_num_elements(model->u.content) != 1) {
 			  return NULL;
 			}
-			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
 				return model_array_element(tmp);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 		/* TODO Check this is correct */
 		ZEND_FALLTHROUGH;
@@ -1863,7 +1863,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		      (array_el = model_array_element(sdlType->model)) != NULL) {
 				zval *val;
 
-				ZEND_HASH_FOREACH_VAL(prop, val) {
+				ZEND_ARRAY_FOREACH_VAL(prop, val) {
 					xmlNodePtr property;
 					ZVAL_DEREF(val);
 					if (Z_TYPE_P(val) == IS_NULL && array_el->nillable) {
@@ -1880,7 +1880,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 						xmlNsPtr nsp = encode_add_ns(property, array_el->namens);
 						xmlSetNs(property, nsp);
 					}
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 			} else if (sdlType->model) {
 				model_to_xml_object(xmlParam, sdlType->model, data, style, 1);
 			}
@@ -1934,7 +1934,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			zend_string *str_key;
 			xmlNodePtr property;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL_IND(prop, str_key, zprop) {
+			ZEND_ARRAY_FOREACH_STR_KEY_VAL_IND(prop, str_key, zprop) {
 				ZVAL_DEREF(zprop);
 				property = master_to_xml(get_conversion(Z_TYPE_P(zprop)), zprop, style, xmlParam);
 
@@ -1952,7 +1952,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 						xmlNodeSetName(property, BAD_CAST(prop_name));
 					}
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 		if (style == SOAP_ENCODED) {
 			set_ns_and_type(xmlParam, type);
@@ -2088,7 +2088,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 	xmlNodePtr xparam;
 
 	if (data && Z_TYPE_P(data) == IS_ARRAY) {
-		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(data), zdata) {
+		ZEND_ARRAY_FOREACH_VAL_IND(Z_ARRVAL_P(data), zdata) {
 	 		if (j >= dims[0]) {
 	 			break;
 	 		}
@@ -2112,7 +2112,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 				add_xml_array_elements(xmlParam, type, enc, ns, dimension-1, dims+1, zdata, style);
 			}
 			j++;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		if (dimension == 1) {
 	 		while (j < dims[0]) {
@@ -2284,9 +2284,9 @@ iterator_done:
 			for (i = 1; i < dimension; i++) {
 				if (el != NULL && Z_TYPE_P(el) == IS_ARRAY &&
 				    zend_hash_num_elements(Z_ARRVAL_P(el)) > 0) {
-				    ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(el), el) {
+				    ZEND_ARRAY_FOREACH_VAL_IND(Z_ARRVAL_P(el), el) {
 				    	break;
-				    } ZEND_HASH_FOREACH_END();
+				    } ZEND_ARRAY_FOREACH_END();
 					ZVAL_DEREF(el);
 					if (Z_TYPE_P(el) == IS_ARRAY) {
 						dims[i] = zend_hash_num_elements(Z_ARRVAL_P(el));
@@ -2646,7 +2646,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 	FIND_ZVAL_NULL(data, xmlParam, style);
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
-		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(data), int_val, key_val, temp_data) {
+		ZEND_ARRAY_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(data), int_val, key_val, temp_data) {
 			item = xmlNewNode(NULL, BAD_CAST("item"));
 			xmlAddChild(xmlParam, item);
 			key = xmlNewNode(NULL, BAD_CAST("key"));
@@ -2672,7 +2672,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 			ZVAL_DEREF(temp_data);
 			xparam = master_to_xml(get_conversion(Z_TYPE_P(temp_data)), temp_data, style, item);
 			xmlNodeSetName(xparam, BAD_CAST("value"));
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(xmlParam, type);
@@ -2951,10 +2951,10 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 	if (enc->sdl_type && enc->sdl_type->kind == XSD_TYPEKIND_LIST && enc->sdl_type->elements) {
 		sdlTypePtr type;
 
-		ZEND_HASH_FOREACH_PTR(enc->sdl_type->elements, type) {
+		ZEND_ARRAY_FOREACH_PTR(enc->sdl_type->elements, type) {
 			list_enc = type->encode;
 			break;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
@@ -2965,7 +2965,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 		smart_str list = {0};
 		HashTable *ht = Z_ARRVAL_P(data);
 
-		ZEND_HASH_FOREACH_VAL(ht, tmp) {
+		ZEND_ARRAY_FOREACH_VAL(ht, tmp) {
 			xmlNodePtr dummy = master_to_xml(list_enc, tmp, SOAP_LITERAL, ret);
 			if (dummy && dummy->children && dummy->children->content) {
 				if (list.s && ZSTR_LEN(list.s) != 0) {
@@ -2977,7 +2977,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 			}
 			xmlUnlinkNode(dummy);
 			xmlFreeNode(dummy);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		smart_str_0(&list);
 		if (list.s) {
 			xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(list.s)), ZSTR_LEN(list.s));
@@ -3459,12 +3459,12 @@ static int is_map(zval *array)
 		return FALSE;
 	}
 
-	ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(array), index, key) {
+	ZEND_ARRAY_FOREACH_KEY(Z_ARRVAL_P(array), index, key) {
 		if (key || index != i) {
 			return TRUE;
 		}
 		i++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 	return FALSE;
 }
 
@@ -3485,7 +3485,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 	cur_type = prev_type = 0;
 	ht = Z_ARRVAL_P(array);
 
-	ZEND_HASH_FOREACH_VAL_IND(ht, tmp) {
+	ZEND_ARRAY_FOREACH_VAL_IND(ht, tmp) {
 		ZVAL_DEREF(tmp);
 		if (Z_TYPE_P(tmp) == IS_OBJECT &&
 		    Z_OBJCE_P(tmp) == soap_var_class_entry) {
@@ -3534,7 +3534,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type)
 		prev_stype = cur_stype;
 		prev_ns = cur_ns;
 		i++;
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	if (different || i == 0) {
 		smart_str_appendl(type, "xsd:anyType", sizeof("xsd:anyType")-1);

@@ -846,11 +846,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 		ZEND_ASSERT(params);
 
 		index = 0;
-		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
+		ZEND_ARRAY_FOREACH_VAL(input_params, tmp) {
 			ZVAL_COPY_VALUE(&params[index].zv, tmp);
 			params[index].type = MYSQL_TYPE_VAR_STRING;
 			index++;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		if (mysqlnd_stmt_bind_param(stmt->stmt, params)) {
 			MYSQLI_REPORT_STMT_ERROR(stmt->stmt);

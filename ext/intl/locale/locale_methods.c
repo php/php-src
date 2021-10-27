@@ -774,7 +774,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			HashTable *arr = Z_ARRVAL_P(ele_value);
 			zval *data;
 
-			ZEND_HASH_FOREACH_VAL(arr, data) {
+			ZEND_ARRAY_FOREACH_VAL(arr, data) {
 				if(Z_TYPE_P(data) != IS_STRING) {
 					return FAILURE;
 				}
@@ -783,7 +783,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return SUCCESS;
 		} else {
 			return FAILURE;
@@ -1342,7 +1342,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 	zend_string* return_value = NULL;
 
 	char **cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
-	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
+	ZEND_ARRAY_FOREACH_VAL(hash_arr, ele_value) {
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
 			/* element value is not a string */
@@ -1357,7 +1357,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 		}
 		cur_arr[cur_arr_len*2+1] = Z_STRVAL_P(ele_value);
 		cur_arr_len++ ;
-	} ZEND_HASH_FOREACH_END(); /* end of for */
+	} ZEND_ARRAY_FOREACH_END(); /* end of for */
 
 	/* Canonicalize array elements */
 	if(canonicalize) {

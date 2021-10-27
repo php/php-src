@@ -121,9 +121,9 @@ static void zend_persist_zval_calc(zval *z)
 				if (HT_IS_PACKED(ht)) {
 					zval *zv;
 
-					ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
+					ZEND_PACKED_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
 						zend_persist_zval_calc(zv);
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_PACKED_FOREACH_END();
 				} else {
 					Bucket *p;
 
@@ -164,7 +164,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 		ADD_SIZE(sizeof(HashTable));
 		zend_hash_persist_calc(attributes);
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_PACKED_FOREACH_PTR(attributes, attr) {
 			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
 			ADD_INTERNED_STRING(attr->name);
 			ADD_INTERNED_STRING(attr->lcname);
@@ -175,7 +175,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 				}
 				zend_persist_zval_calc(&attr->args[i].value);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_PACKED_FOREACH_END();
 	}
 }
 
@@ -551,9 +551,9 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			if (HT_IS_PACKED(ce->backed_enum_table)) {
 				zval *zv;
 
-				ZEND_HASH_FOREACH_VAL(ce->backed_enum_table, zv) {
+				ZEND_PACKED_FOREACH_VAL(ce->backed_enum_table, zv) {
 					zend_persist_zval_calc(zv);
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_PACKED_FOREACH_END();
 			} else {
 				Bucket *p;
 

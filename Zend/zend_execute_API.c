@@ -816,7 +816,7 @@ cleanup_args:
 		zval *arg;
 		uint32_t arg_num = ZEND_CALL_NUM_ARGS(call) + 1;
 		bool have_named_params = 0;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(fci->named_params, name, arg) {
 			bool must_wrap = 0;
 			zval *target;
 			if (name) {
@@ -867,7 +867,7 @@ cleanup_args:
 				ZEND_CALL_NUM_ARGS(call)++;
 				arg_num++;
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAY_HAVE_UNDEF)) {

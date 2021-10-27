@@ -487,7 +487,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 		if (new_index && index_len == 0) {
 			zend_ulong numkey;
 			zend_string *strkey;
-			ZEND_HASH_FOREACH_KEY_VAL_IND(parent, numkey, strkey, zv) {
+			ZEND_ARRAY_FOREACH_KEY_VAL_IND(parent, numkey, strkey, zv) {
 				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
 					char *key, *propkey;
 					size_t namelen, keylen;
@@ -538,7 +538,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 				} else {
 					/* Ignore silently */
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			return ret;
 		} else if (new_index) {
 			char last_chr = last_index[index_len];

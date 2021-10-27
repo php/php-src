@@ -1116,9 +1116,9 @@ ZEND_API void pass_two(zend_op_array *op_array)
 				/* absolute indexes to relative offsets */
 				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));
 				zval *zv;
-				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+				ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
 					Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, Z_LVAL_P(zv));
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				break;

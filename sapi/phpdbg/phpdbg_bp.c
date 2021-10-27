@@ -97,13 +97,13 @@ PHPDBG_API void phpdbg_reset_breakpoints(void) /* {{{ */
 {
 	HashTable *table;
 
-	ZEND_HASH_FOREACH_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], table) {
+	ZEND_ARRAY_FOREACH_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], table) {
 		phpdbg_breakbase_t *brake;
 
-		ZEND_HASH_FOREACH_PTR(table, brake) {
+		ZEND_ARRAY_FOREACH_PTR(table, brake) {
 			brake->hits = 0;
-		} ZEND_HASH_FOREACH_END();
-	} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 } /* }}} */
 
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle) /* {{{ */
@@ -125,10 +125,10 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 		phpdbg_notice("Exporting %d breakpoints", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]));
 
 		/* this only looks like magic, it isn't */
-		ZEND_HASH_FOREACH_NUM_KEY_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id, table) {
+		ZEND_ARRAY_FOREACH_NUM_KEY_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id, table) {
 			phpdbg_breakbase_t *brake;
 
-			ZEND_HASH_FOREACH_PTR(table, brake) {
+			ZEND_ARRAY_FOREACH_PTR(table, brake) {
 				if (brake->id == id) {
 					char *new_str = NULL;
 
@@ -244,8 +244,8 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 					}
 					*str = new_str;
 				}
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if ((*str) && !(*str)[0]) {
@@ -362,7 +362,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			master = zend_hash_str_add_mem(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, &new_ht, sizeof(HashTable));
 		}
 
-		ZEND_HASH_FOREACH_PTR(fileht, brake) {
+		ZEND_ARRAY_FOREACH_PTR(fileht, brake) {
 			new_brake = *brake;
 			new_brake.filename = estrndup(file, filelen);
 			PHPDBG_BREAK_UNMAPPING(brake->id);
@@ -370,7 +370,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			if (zend_hash_index_add_mem(master, brake->line, &new_brake, sizeof(phpdbg_breakfile_t))) {
 				PHPDBG_BREAK_MAPPING(brake->id, master);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		zend_hash_del(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur);
 
@@ -1431,11 +1431,11 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable
 	if ((*table = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id))) {
 		phpdbg_breakbase_t *brake;
 
-		ZEND_HASH_FOREACH_KEY_PTR(*table, *numkey, *strkey, brake) {
+		ZEND_ARRAY_FOREACH_KEY_PTR(*table, *numkey, *strkey, brake) {
 			if (brake->id == id) {
 				return brake;
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	return NULL;

@@ -460,7 +460,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 		zval *val;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (key) {
 				zend_hash_update(Z_ARRVAL_P(result), key, val);
 			} else {
@@ -471,7 +471,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 				}
 			}
 			Z_TRY_ADDREF_P(val);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 		return SUCCESS;
 	}
 
@@ -1418,7 +1418,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 			zval *val;
 			bool first = true;
 			smart_str_appendc(str, '[');
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(zv), idx, key, val) {
+			ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(zv), idx, key, val) {
 				if (first) {
 					first = false;
 				} else {
@@ -1433,7 +1433,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 					smart_str_appends(str, " => ");
 				}
 				zend_ast_export_zval(str, val, 0, indent);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			smart_str_appendc(str, ']');
 			break;
 		}

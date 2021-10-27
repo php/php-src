@@ -403,7 +403,7 @@ options:
 			zend_ulong long_key;
 			zend_string *str_key = NULL;
 
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
+			ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
 				if (str_key) {
 					continue;
 				}
@@ -411,7 +411,7 @@ options:
 
 				/* TODO: Should the constructor fail when the attribute cannot be set? */
 				pdo_dbh_attribute_set(dbh, long_key, attr_value);
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 
 		zend_restore_error_handling(&zeh);

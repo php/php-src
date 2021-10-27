@@ -801,9 +801,9 @@ PHP_FUNCTION(imagesetstyle)
 	/* copy the style values in the stylearr */
 	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
+	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
 		stylearr[index++] = zval_get_long(item);
-	} ZEND_HASH_FOREACH_END();
+	} ZEND_ARRAY_FOREACH_END();
 
 	gdImageSetStyle(im, stylearr, index);
 
@@ -3233,15 +3233,17 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		zend_string *key;
 
 		/* walk the assoc array */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
-			if (key == NULL) {
-				continue;
-			}
-			if (zend_string_equals_literal(key, "linespacing")) {
-				strex.flags |= gdFTEX_LINESPACE;
-				strex.linespacing = zval_get_double(item);
-			}
-		} ZEND_HASH_FOREACH_END();
+		if (!HT_IS_PACKED(Z_ARRVAL_P(EXT))) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
+				if (key == NULL) {
+					continue;
+				}
+				if (zend_string_equals_literal(key, "linespacing")) {
+					strex.flags |= gdFTEX_LINESPACE;
+					strex.linespacing = zval_get_double(item);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 
 #ifdef VIRTUAL_DIR
@@ -3487,9 +3489,9 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 
 		colors = emalloc(num_colors * sizeof(int));
 
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
+		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
 			*(colors + i++) = (int) zval_get_long(color);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 
 		RETVAL_BOOL(gdImageScatterColor(im, (int)scatter_sub, (int)scatter_plus, colors, num_colors));
 
