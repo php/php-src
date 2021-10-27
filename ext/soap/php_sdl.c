@@ -1982,13 +1982,13 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 		tmp_elements = emalloc(sizeof(HashTable));
 		zend_hash_init(tmp_elements, i, NULL, NULL, 0);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_type(tmp, tmp_encoders, tmp_types, out);
 			ZVAL_LONG(&zv, i);
 			zend_hash_str_add(tmp_elements, (char*)&tmp, sizeof(tmp), &zv);
 			i--;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (type->attributes) {
@@ -2001,10 +2001,10 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 		sdlAttributePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_attribute(tmp, tmp_encoders, out);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (type->model) {
 		WSDL_CACHE_PUT_1(1, out);
@@ -2040,13 +2040,13 @@ static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, Has
 		sdlParamPtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(ht, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(ht, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_string(tmp->paramName, out);
 			WSDL_CACHE_PUT_INT(tmp->order, out);
 			sdl_serialize_encoder_ref(tmp->encode, tmp_encoders, out);
 			sdl_serialize_type_ref(tmp->element, tmp_types, out);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 }
 
@@ -2164,11 +2164,11 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zval zv;
 
-		ZEND_HASH_FOREACH_PTR(sdl->types, tmp) {
+		ZEND_ARRAY_FOREACH_PTR(sdl->types, tmp) {
 			ZVAL_LONG(&zv,  type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (sdl->elements) {
@@ -2198,11 +2198,11 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		encodePtr tmp;
 		zval zv;
 
-		ZEND_HASH_FOREACH_PTR(sdl->encoders, tmp) {
+		ZEND_ARRAY_FOREACH_PTR(sdl->encoders, tmp) {
 			ZVAL_LONG(&zv, encoder_num);
 			zend_hash_str_add(&tmp_encoders, (char*)&tmp, sizeof(tmp), &zv);
 			++encoder_num;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	enc = defaultEncoding;
 	while (enc->details.type != END_KNOWN_TYPES) {
@@ -2228,10 +2228,10 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_type(tmp, &tmp_encoders, &tmp_types, out);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (sdl->elements) {
@@ -2248,10 +2248,10 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		encodePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_encoder(tmp, &tmp_types, out);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	/* serialize bindings */
@@ -2801,7 +2801,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		ptype->attributes = malloc(sizeof(HashTable));
 		zend_hash_init(ptype->attributes, zend_hash_num_elements(type->attributes), NULL, delete_attribute_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
 			pattr = make_persistent_sdl_attribute(tmp, ptr_map, bp_types, bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -2809,7 +2809,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 			} else {
 				zend_hash_next_index_insert_ptr(ptype->attributes, pattr);
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	if (type->model) {
@@ -3010,7 +3010,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->encoders = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->encoders, zend_hash_num_elements(sdl->encoders), NULL, delete_encoder_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
+		ZEND_ARRAY_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
 			penc = make_persistent_sdl_encoder(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -3019,19 +3019,19 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 				zend_hash_next_index_insert_ptr(psdl->encoders, penc);
 			}
 			zend_hash_str_add_ptr(&ptr_map, (char*)&tmp, sizeof(tmp), penc);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 
 	/* do backpatching here */
 	if (zend_hash_num_elements(&bp_types)) {
 		sdlTypePtr *tmp, ptype = NULL;
 
-		ZEND_HASH_FOREACH_PTR(&bp_types, tmp) {
+		ZEND_ARRAY_FOREACH_PTR(&bp_types, tmp) {
 			if ((ptype = zend_hash_str_find_ptr(&ptr_map, (char*)tmp, sizeof(*tmp))) == NULL) {
 				assert(0);
 			}
 			*tmp = ptype;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (zend_hash_num_elements(&bp_encoders)) {
 		encodePtr *tmp, penc = NULL;

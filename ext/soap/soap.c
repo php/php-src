@@ -3361,7 +3361,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		zend_string *param_name;
 		zend_ulong param_index = i;
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {
+		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {
 			parameter = get_param(function, ZSTR_VAL(param_name), param_index, TRUE);
 			if (style == SOAP_RPC) {
 				param = serialize_parameter(parameter, data, i, ZSTR_VAL(param_name), use, method);
@@ -3378,7 +3378,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 
 			i++;
 			param_index = i;
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (use == SOAP_ENCODED && version == SOAP_1_2 && method != NULL) {
 		xmlSetNsProp(method, body->ns, BAD_CAST("encodingStyle"), BAD_CAST(SOAP_1_2_ENC_NAMESPACE));
@@ -4159,7 +4159,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 		} else {
 			i = 0;
 			smart_str_appendl(buf, "list(", 5);
-			ZEND_HASH_FOREACH_PTR(function->responseParameters, param) {
+			ZEND_ARRAY_FOREACH_PTR(function->responseParameters, param) {
 				if (i > 0) {
 					smart_str_appendl(buf, ", ", 2);
 				}
@@ -4171,7 +4171,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 				smart_str_appendl(buf, " $", 2);
 				smart_str_appendl(buf, param->paramName, strlen(param->paramName));
 				i++;
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 			smart_str_appendl(buf, ") ", 2);
 		}
 	} else {
@@ -4380,7 +4380,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				if (type->attributes) {
 					sdlAttributePtr attr;
 
-					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
+					ZEND_ARRAY_FOREACH_PTR(type->attributes, attr) {
 						if (spaces.s) {
 							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
 						}
@@ -4393,7 +4393,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						}
 						smart_str_appends(buf, attr->name);
 						smart_str_appendl(buf, ";\n", 2);
-					} ZEND_HASH_FOREACH_END();
+					} ZEND_ARRAY_FOREACH_END();
 				}
 				if (spaces.s) {
 					smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));

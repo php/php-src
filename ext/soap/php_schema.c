@@ -2282,9 +2282,9 @@ void schema_pass2(sdlCtx *ctx)
 	sdlTypePtr type;
 
 	if (ctx->attributes) {
-		ZEND_HASH_FOREACH_PTR(ctx->attributes, attr) {
+		ZEND_ARRAY_FOREACH_PTR(ctx->attributes, attr) {
 			schema_attribute_fixup(ctx, attr);
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	if (ctx->attributeGroups) {
 		ZEND_HASH_FOREACH_PTR(ctx->attributeGroups, type) {

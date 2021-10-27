@@ -270,11 +270,11 @@ static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 	if (sdl && sdl->encoders) {
 		encodePtr enc;
 
-		ZEND_HASH_FOREACH_PTR(sdl->encoders, enc)  {
+		ZEND_ARRAY_FOREACH_PTR(sdl->encoders, enc)  {
 		    if (strcmp(enc->details.type_str, type) == 0) {
 				return enc;
 			}
-		} ZEND_HASH_FOREACH_END();
+		} ZEND_ARRAY_FOREACH_END();
 	}
 	return NULL;
 }
@@ -1490,7 +1490,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		if (sdlType->attributes) {
 			sdlAttributePtr attr;
 
-			ZEND_HASH_FOREACH_PTR(sdlType->attributes, attr) {
+			ZEND_ARRAY_FOREACH_PTR(sdlType->attributes, attr) {
 				if (attr->name) {
 					xmlAttrPtr val = get_attribute(data->properties, attr->name);
 					char *str_val = NULL;
@@ -1524,7 +1524,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 						set_zval_property(ret, attr->name, &data);
 					}
 				}
-			} ZEND_HASH_FOREACH_END();
+			} ZEND_ARRAY_FOREACH_END();
 		}
 	} else {
 		ZVAL_NULL(ret);
@@ -1888,7 +1888,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				sdlAttributePtr attr;
 				zval *zattr, rv;
 
-				ZEND_HASH_FOREACH_PTR(sdlType->attributes, attr) {
+				ZEND_ARRAY_FOREACH_PTR(sdlType->attributes, attr) {
 					if (attr->name) {
 						zattr = get_zval_property(data, attr->name, &rv);
 						if (zattr) {
@@ -1916,7 +1916,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 							xmlFreeNode(dummy);
 						}
 					}
-				} ZEND_HASH_FOREACH_END();
+				} ZEND_ARRAY_FOREACH_END();
 			}
 		}
 		if (style == SOAP_ENCODED) {
