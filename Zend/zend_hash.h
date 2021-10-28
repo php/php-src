@@ -1243,30 +1243,22 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_ptr = Z_PTR_P(_z);
 
 /* Common hash/packed array iterators */
-#define ZEND_ARRAY_FOREACH_FROM(_ht, indirect, _from) do { \
+#define ZEND_ARRAY_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
 		bool _is_packed = HT_IS_PACKED(__ht); \
-		zval *__z; \
+		zval *__z = __ht->arPacked; \
 		zend_ulong __h; \
 		zend_string *__key = NULL; \
-		Bucket *_p = NULL; \
-		uint32_t _idx = _from; \
-		zval *_end; \
-		if (_is_packed) { \
-			__z = __ht->arPacked + _from; \
-			_end = __ht->arPacked + __ht->nNumUsed; \
-		} else { \
-			__z = &__ht->arData[_from].val; \
-			_end = &__ht->arData[__ht->nNumUsed].val; \
-		} \
-		while (__z != _end) { \
+		uint32_t _idx = 0; \
+		uint32_t _count = __ht->nNumUsed; \
+		for (;_count > 0; _count--) { \
 			zval *_z = __z; \
 			if (_is_packed) { \
 				__z++; \
 				__h = _idx; \
 				_idx++; \
 			} else { \
-				_p = (Bucket*)__z; \
+				Bucket *_p = (Bucket*)__z; \
 				__z = &(_p + 1)->val; \
 				__h = _p->h; \
 				__key = _p->key; \
@@ -1274,40 +1266,36 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 					_z = Z_INDIRECT_P(_z); \
 				} \
 			} \
-			(void) __h; (void) __key; (void) _p; (void) _idx; \
+			(void) __h; (void) __key; (void) _idx; \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
-
-#define ZEND_ARRAY_FOREACH(_ht, indirect) ZEND_ARRAY_FOREACH_FROM(_ht, indirect, 0)
 
 #define ZEND_ARRAY_REVERSE_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
-		Bucket *_p = NULL; \
 		zval *_z; \
-		zval *__z = NULL; \
 		zend_ulong __h; \
 		zend_string *__key = NULL; \
 		bool _is_packed = HT_IS_PACKED(__ht); \
-		if (_is_packed) { \
-			__z = __ht->arPacked + _idx; \
-		} else { \
-			_p = __ht->arData + _idx; \
-		} \
+		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
+			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
+		zval *__z = (zval*)(((char*)__ht->arPacked) + (_idx * _size)); \
 		for (;_idx > 0; _idx--) { \
 			if (_is_packed) { \
 				__z--; \
 				_z = __z; \
 				__h = _idx - 1; \
 			} else { \
+				Bucket *_p = (Bucket*)__z; \
 				_p--; \
-				_z = &_p->val; \
+				__z = &_p->val; \
+				_z = __z; \
 				__h = _p->h; \
 				__key = _p->key; \
 				if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 					_z = Z_INDIRECT_P(_z); \
 				} \
 			} \
-			(void) __h; (void) __key; (void) _p; (void) __z; \
+			(void) __h; (void) __key; (void) __z; \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define ZEND_ARRAY_FOREACH_END() \
@@ -1316,32 +1304,19 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define _ZEND_ARRAY_FOREACH_VAL(_ht) do { \
 		HashTable *__ht = (_ht); \
-		zval *_z, *_end; \
-		size_t _size; \
-		if (HT_IS_PACKED(_ht)) { \
-			_z = __ht->arPacked; \
-			_end = __ht->arPacked + __ht->nNumUsed; \
-			_size = sizeof(zval); \
-		} else {\
-			_z = &__ht->arData->val; \
-			_end = &__ht->arData[__ht->nNumUsed].val; \
-			_size = sizeof(Bucket); \
-		} \
-		for (; _z != _end; _z = (zval*)(((char*)_z) + _size)) { \
+		uint32_t _count = __ht->nNumUsed; \
+		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
+			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
+		zval *_z = __ht->arPacked; \
+		for (; _count > 0; _z = (zval*)(((char*)_z) + _size), _count--) { \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define _ZEND_ARRAY_REVERSE_FOREACH_VAL(_ht) do { \
 		HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
-		zval *_z; \
-		size_t _size; \
-		if (HT_IS_PACKED(__ht)) { \
-			_z = __ht->arPacked + _idx; \
-			_size = sizeof(zval); \
-		} else { \
-			_z = &__ht->arData[_idx].val; \
-			_size = sizeof(Bucket); \
-		} \
+		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
+			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
+		zval *_z = (zval*)(((char*)__ht->arPacked) + (_idx * _size)); \
 		for (;_idx > 0; _idx--) { \
 			_z = (zval*)(((char*)_z) - _size); \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
@@ -1408,11 +1383,6 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_ARRAY_FOREACH(ht, 0); \
-	_key = __key; \
-	_val = _z;
-
-#define ZEND_ARRAY_FOREACH_STR_KEY_VAL_FROM(ht, _key, _val, _from) \
-	ZEND_ARRAY_FOREACH_FROM(ht, 0, _from); \
 	_key = __key; \
 	_val = _z;
 
