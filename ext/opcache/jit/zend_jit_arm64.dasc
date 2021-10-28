@@ -14436,7 +14436,7 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 					|	GC_ADDREF REG0, TMP1w
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_STRING_EX, TMP1w, TMP2
 
-					if ((op1_info & MAY_BE_ARRAY_KEY_LONG) && MAY_BE_PACKED(op1_info)) {
+					if ((op1_info & MAY_BE_ARRAY_KEY_LONG) || MAY_BE_PACKED(op1_info)) {
 					    |	b >3
 						|2:
 					}
