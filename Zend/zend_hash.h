@@ -1243,6 +1243,24 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_ptr = Z_PTR_P(_z);
 
 /* Common hash/packed array iterators */
+
+#if 0
+# define ZEND_ARRAY_ELEMET_SIZE(__ht) \
+	(HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket))
+#else /* optimized version */
+# define ZEND_ARRAY_ELEMET_SIZE(__ht) \
+	(sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED))
+#endif
+
+#define ZEND_ARRAY_ELEMET(__ht, _idx, _size) \
+	((zval*)(((char*)(__ht)->arPacked) + ((_idx) * (_size))))
+
+#define ZEND_ARRAY_NEXT_ELEMENT(_el, _size) \
+	((zval*)(((char*)(_el)) + (_size)))
+
+#define ZEND_ARRAY_PREV_ELEMENT(_el, _size) \
+	((zval*)(((char*)(_el)) - (_size)))
+
 #define ZEND_ARRAY_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
 		bool _is_packed = HT_IS_PACKED(__ht); \
@@ -1276,9 +1294,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		zend_ulong __h; \
 		zend_string *__key = NULL; \
 		bool _is_packed = HT_IS_PACKED(__ht); \
-		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
-			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
-		zval *__z = (zval*)(((char*)__ht->arPacked) + (_idx * _size)); \
+		size_t _size = ZEND_ARRAY_ELEMET_SIZE(__ht); \
+		zval *__z = ZEND_ARRAY_ELEMET(__ht, _idx, _size); \
 		for (;_idx > 0; _idx--) { \
 			if (_is_packed) { \
 				__z--; \
@@ -1305,20 +1322,18 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define _ZEND_ARRAY_FOREACH_VAL(_ht) do { \
 		HashTable *__ht = (_ht); \
 		uint32_t _count = __ht->nNumUsed; \
-		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
-			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
+		size_t _size = ZEND_ARRAY_ELEMET_SIZE(__ht); \
 		zval *_z = __ht->arPacked; \
-		for (; _count > 0; _z = (zval*)(((char*)_z) + _size), _count--) { \
+		for (; _count > 0; _z = ZEND_ARRAY_NEXT_ELEMENT(_z, _size), _count--) { \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define _ZEND_ARRAY_REVERSE_FOREACH_VAL(_ht) do { \
 		HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
-		size_t _size = /*HT_IS_PACKED(__ht) ? sizeof(zval) : sizeof(Bucket);*/ \
-			sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED); \
-		zval *_z = (zval*)(((char*)__ht->arPacked) + (_idx * _size)); \
+		size_t _size = ZEND_ARRAY_ELEMET_SIZE(__ht); \
+		zval *_z = ZEND_ARRAY_ELEMET(__ht, _idx, _size); \
 		for (;_idx > 0; _idx--) { \
-			_z = (zval*)(((char*)_z) - _size); \
+			_z = ZEND_ARRAY_PREV_ELEMENT(_z, _size); \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
 
 #define ZEND_ARRAY_FOREACH_VAL(ht, _val) \
