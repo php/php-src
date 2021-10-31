@@ -168,6 +168,26 @@ if test "$PHP_IMAP" != "no"; then
 		AC_MSG_ERROR([utf8_mime2text() has old signature, but U8T_CANONICAL is present. This should not happen. Check config.log for additional information.])
     fi
 
+    dnl Check for XOAUTH2 support
+    old_CFLAGS=$CFLAGS
+    CFLAGS="-I$IMAP_INC_DIR"
+    AC_CACHE_CHECK(for IMAP XOAUTH2 support, ac_cv_imap_xoauth2,
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <c-client.h>
+      ]],[[
+         auth_link(&auth_oa2);
+      ]])],[
+         ac_cv_imap_xoauth2=yes
+      ],[
+         ac_cv_imap_xoauth2=no
+      ])
+    )
+    CFLAGS=$old_CFLAGS
+
+    if test "$ac_cv_imap_xoauth2" = "yes"; then
+		AC_DEFINE(HAVE_IMAP_XOAUTH2, 1, [Whether imap_open() supports XOAUTH2])
+    fi
+
     dnl Check for c-client version 2001
     old_CPPFLAGS=$CPPFLAGS
     CPPFLAGS=-I$IMAP_INC_DIR
