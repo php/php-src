@@ -121,13 +121,13 @@ static void zend_persist_zval_calc(zval *z)
 				if (HT_IS_PACKED(ht)) {
 					zval *zv;
 
-					ZEND_PACKED_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
 						zend_persist_zval_calc(zv);
-					} ZEND_PACKED_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
 				} else {
 					Bucket *p;
 
-					ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
+					ZEND_HASH_MAP_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
 						if (p->key) {
 							ADD_INTERNED_STRING(p->key);
 						}
@@ -164,7 +164,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 		ADD_SIZE(sizeof(HashTable));
 		zend_hash_persist_calc(attributes);
 
-		ZEND_PACKED_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
 			ADD_INTERNED_STRING(attr->name);
 			ADD_INTERNED_STRING(attr->lcname);
@@ -175,7 +175,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 				}
 				zend_persist_zval_calc(&attr->args[i].value);
 			}
-		} ZEND_PACKED_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 
@@ -228,7 +228,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			zend_shared_alloc_register_xlat_entry(op_array->static_variables, op_array->static_variables);
 			ADD_SIZE(sizeof(HashTable));
 			zend_hash_persist_calc(op_array->static_variables);
-			ZEND_HASH_FOREACH_BUCKET(op_array->static_variables, p) {
+			ZEND_HASH_MAP_FOREACH_BUCKET(op_array->static_variables, p) {
 				ZEND_ASSERT(p->key != NULL);
 				ADD_INTERNED_STRING(p->key);
 				zend_persist_zval_calc(&p->val);
@@ -419,7 +419,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		}
 
 		zend_hash_persist_calc(&ce->function_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
 			zend_persist_class_method_calc(&p->val);
@@ -443,14 +443,14 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			}
 		}
 		zend_hash_persist_calc(&ce->constants_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->constants_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
 			zend_persist_class_constant_calc(&p->val);
 		} ZEND_HASH_FOREACH_END();
 
 		zend_hash_persist_calc(&ce->properties_info);
-		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->properties_info, p) {
 			zend_property_info *prop = Z_PTR(p->val);
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
@@ -551,13 +551,13 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			if (HT_IS_PACKED(ce->backed_enum_table)) {
 				zval *zv;
 
-				ZEND_PACKED_FOREACH_VAL(ce->backed_enum_table, zv) {
+				ZEND_HASH_PACKED_FOREACH_VAL(ce->backed_enum_table, zv) {
 					zend_persist_zval_calc(zv);
-				} ZEND_PACKED_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 			} else {
 				Bucket *p;
 
-				ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
+				ZEND_HASH_MAP_FOREACH_BUCKET(ce->backed_enum_table, p) {
 					if (p->key != NULL) {
 						ADD_INTERNED_STRING(p->key);
 					}
@@ -573,7 +573,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	Bucket *p;
 
 	zend_hash_persist_calc(class_table);
-	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
 		zend_persist_class_entry_calc(Z_CE(p->val));
@@ -631,7 +631,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		zend_hash_rehash(&new_persistent_script->script.function_table);
 	}
 	zend_hash_persist_calc(&new_persistent_script->script.function_table);
-	ZEND_HASH_FOREACH_BUCKET(&new_persistent_script->script.function_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(&new_persistent_script->script.function_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
 		zend_persist_op_array_calc(&p->val);

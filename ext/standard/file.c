@@ -675,7 +675,7 @@ PHP_FUNCTION(file_put_contents)
 				ssize_t bytes_written;
 				zval *tmp;
 
-				ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
 					zend_string *t;
 					zend_string *str = zval_get_tmp_string(tmp, &t);
 					if (ZSTR_LEN(str)) {
@@ -689,7 +689,7 @@ PHP_FUNCTION(file_put_contents)
 						}
 					}
 					zend_tmp_string_release(t);
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 			}
 			break;
 
@@ -1902,7 +1902,7 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 
 	ZEND_ASSERT((escape_char >= 0 && escape_char <= UCHAR_MAX) || escape_char == PHP_CSV_NO_ESCAPE);
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
 		zend_string *tmp_field_str;
 		zend_string *field_str = zval_get_tmp_string(field_tmp, &tmp_field_str);
 
@@ -1940,7 +1940,7 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
 		zend_tmp_string_release(tmp_field_str);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	if (eol_str) {
 		smart_str_append(&csvline, eol_str);

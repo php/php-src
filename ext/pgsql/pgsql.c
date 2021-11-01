@@ -1194,7 +1194,7 @@ PHP_FUNCTION(pg_query_params)
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -1208,7 +1208,7 @@ PHP_FUNCTION(pg_query_params)
 				zend_string_release(param_str);
 			}
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	pgsql_result = PQexecParams(pgsql, query, num_params,
@@ -1380,7 +1380,7 @@ PHP_FUNCTION(pg_execute)
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -1393,7 +1393,7 @@ PHP_FUNCTION(pg_execute)
 			}
 
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	pgsql_result = PQexecPrepared(pgsql, stmtname, num_params,
@@ -3221,7 +3221,7 @@ PHP_FUNCTION(pg_copy_from)
 			if (pgsql_result) {
 				int command_failed = 0;
 				PQclear(pgsql_result);
-				ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), value) {
 					zend_string *tmp = zval_try_get_string(value);
 					if (UNEXPECTED(!tmp)) {
 						return;
@@ -3239,7 +3239,7 @@ PHP_FUNCTION(pg_copy_from)
 					}
 					efree(query);
 					zend_string_release(tmp);
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 
 				if (PQputCopyEnd(pgsql, NULL) != 1) {
 					PHP_PQ_ERROR("putcopyend failed: %s", pgsql);
@@ -3745,7 +3745,7 @@ PHP_FUNCTION(pg_send_query_params)
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -3758,7 +3758,7 @@ PHP_FUNCTION(pg_send_query_params)
 			}
 
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (PQsendQueryParams(pgsql, query, num_params, NULL, (const char * const *)params, NULL, NULL, 0)) {
@@ -3912,7 +3912,7 @@ PHP_FUNCTION(pg_send_execute)
 		int i = 0;
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
@@ -3927,7 +3927,7 @@ PHP_FUNCTION(pg_send_execute)
 			}
 
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (PQsendQueryPrepared(pgsql, stmtname, num_params, (const char * const *)params, NULL, NULL, 0)) {
@@ -4582,7 +4582,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 		return FAILURE;
 	}
 
-	ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), field, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), field, val) {
 		skip_field = 0;
 		ZVAL_NULL(&new_val);
 
@@ -5193,7 +5193,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 				PQfreemem(escaped);
 			}
 		}
-	} ZEND_ARRAY_FOREACH_END(); /* for */
+	} ZEND_HASH_FOREACH_END(); /* for */
 
 	zval_ptr_dtor(&meta);
 
@@ -5333,7 +5333,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 	build_tablename(&querystr, pg_link, table);
 	smart_str_appends(&querystr, " (");
 
-	ZEND_ARRAY_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
+	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(var_array), fld) {
 		if (fld == NULL) {
 			zend_value_error("Array of values must be an associative array with string keys");
 			goto cleanup;
@@ -5346,12 +5346,12 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 			smart_str_append(&querystr, fld);
 		}
 		smart_str_appendc(&querystr, ',');
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	ZSTR_LEN(querystr.s)--;
 	smart_str_appends(&querystr, ") VALUES (");
 
 	/* make values string */
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(var_array), val) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(var_array), val) {
 		/* we can avoid the key_type check here, because we tested it in the other loop */
 		switch (Z_TYPE_P(val)) {
 			case IS_STRING:
@@ -5382,7 +5382,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				goto cleanup;
 		}
 		smart_str_appendc(&querystr, ',');
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	/* Remove the trailing "," */
 	ZSTR_LEN(querystr.s)--;
 	smart_str_appends(&querystr, ");");
@@ -5508,7 +5508,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 	zend_string *fld;
 	zval *val;
 
-	ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, fld, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, fld, val) {
 		if (fld == NULL) {
 			zend_value_error("Array of values must be an associative array with string keys");
 			return -1;
@@ -5556,7 +5556,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				return -1;
 		}
 		smart_str_appendl(querystr, pad, pad_len);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	if (querystr->s) {
 		ZSTR_LEN(querystr->s) -= pad_len;
 	}

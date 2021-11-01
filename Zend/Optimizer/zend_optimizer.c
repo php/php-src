@@ -676,9 +676,9 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
-			ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
+			ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 				Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			break;
 		}
@@ -722,9 +722,9 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
-			ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
+			ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 				Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))]);
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
 			break;
 		}
@@ -1360,15 +1360,15 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 
 	zend_foreach_op_array_helper(&script->main_op_array, func, context);
 
-	ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
+	ZEND_HASH_MAP_FOREACH_PTR(&script->function_table, op_array) {
 		zend_foreach_op_array_helper(op_array, func, context);
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
 		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
 			continue;
 		}
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->scope == ce
 					&& op_array->type == ZEND_USER_FUNCTION
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
@@ -1516,11 +1516,11 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 		}
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
 		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
 			continue;
 		}
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
 			if (op_array->scope != ce && op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array =
 					zend_hash_find_ptr(&op_array->scope->function_table, name);

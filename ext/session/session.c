@@ -1727,7 +1727,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			zend_argument_value_error(5, "must be null when argument #1 ($lifetime_or_options) is an array");
 			RETURN_THROWS();
 		}
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(options_ht, key, value) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(options_ht, key, value) {
 			if (key) {
 				ZVAL_DEREF(value);
 				if (zend_string_equals_literal_ci(key, "lifetime")) {
@@ -1756,7 +1756,7 @@ PHP_FUNCTION(session_set_cookie_params)
 			} else {
 				php_error_docref(NULL, E_WARNING, "Argument #1 ($lifetime_or_options) cannot contain numeric keys");
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		if (found == 0) {
 			zend_argument_value_error(1, "must contain at least 1 valid key");
@@ -1985,7 +1985,7 @@ PHP_FUNCTION(session_set_save_handler)
 		/* For compatibility reason, implemented interface is not checked */
 		/* Find implemented methods - SessionHandlerInterface */
 		i = 0;
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&php_session_iface_entry->function_table, func_name) {
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
 				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
@@ -2004,7 +2004,7 @@ PHP_FUNCTION(session_set_save_handler)
 		} ZEND_HASH_FOREACH_END();
 
 		/* Find implemented methods - SessionIdInterface (optional) */
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_id_iface_entry->function_table, func_name) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&php_session_id_iface_entry->function_table, func_name) {
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
 				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
@@ -2024,7 +2024,7 @@ PHP_FUNCTION(session_set_save_handler)
 		} ZEND_HASH_FOREACH_END();
 
 		/* Find implemented methods - SessionUpdateTimestampInterface (optional) */
-		ZEND_HASH_FOREACH_STR_KEY(&php_session_update_timestamp_iface_entry->function_table, func_name) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&php_session_update_timestamp_iface_entry->function_table, func_name) {
 			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
 				if (!Z_ISUNDEF(PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
@@ -2491,7 +2491,7 @@ PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
 			if (str_idx) {
 				switch(Z_TYPE_P(value)) {
 					case IS_STRING:
@@ -2517,7 +2517,7 @@ PHP_FUNCTION(session_start)
 				}
 			}
 			(void) num_idx;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	php_session_start();

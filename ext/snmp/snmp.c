@@ -695,7 +695,7 @@ static bool php_snmp_parse_oid(
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);
 		objid_query->array_output = (st & SNMP_CMD_SET) == 0;
-		ZEND_ARRAY_FOREACH_VAL(oid_ht, tmp_oid) {
+		ZEND_HASH_FOREACH_VAL(oid_ht, tmp_oid) {
 			convert_to_string(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
@@ -769,7 +769,7 @@ static bool php_snmp_parse_oid(
 				}
 			}
 			objid_query->count++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* now parse all OIDs */
@@ -1821,7 +1821,7 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 	obj = php_snmp_fetch_object(object);
 	props = zend_std_get_properties(object);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
 		if (!hnd->read_func || hnd->read_func(obj, &rv) != SUCCESS) {
 			ZVAL_NULL(&rv);
 		}

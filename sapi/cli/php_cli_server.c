@@ -398,7 +398,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	array_init_size(return_value, zend_hash_num_elements(headers));
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(headers, key, value) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, value) {
 		ZVAL_STRING(&tmp, value);
 		zend_symtable_update(Z_ARRVAL_P(return_value), key, &tmp);
 	} ZEND_HASH_FOREACH_END();

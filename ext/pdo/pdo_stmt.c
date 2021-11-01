@@ -68,7 +68,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 			return 0;
 		}
 
-		ZEND_ARRAY_FOREACH_PTR(stmt->bound_param_map, name) {
+		ZEND_HASH_FOREACH_PTR(stmt->bound_param_map, name) {
 			if (!zend_string_equals(name, param->name)) {
 				position++;
 				continue;
@@ -80,7 +80,7 @@ static inline bool rewrite_name_to_position(pdo_stmt_t *stmt, struct pdo_bound_p
 			}
 			param->paramno = position;
 			return 1;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		/* TODO Error? */
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined");
 		return 0;
@@ -108,12 +108,12 @@ static bool dispatch_param_event(pdo_stmt_t *stmt, enum pdo_param_event event_ty
 
 iterate:
 	if (ht) {
-		ZEND_ARRAY_FOREACH_PTR(ht, param) {
+		ZEND_HASH_FOREACH_PTR(ht, param) {
 			if (!stmt->methods->param_hook(stmt, param, event_type)) {
 				ret = 0;
 				break;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (ret && is_param) {
 		ht = stmt->bound_columns;
@@ -409,7 +409,7 @@ PHP_METHOD(PDOStatement, execute)
 			stmt->bound_params = NULL;
 		}
 
-		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(input_params), num_index, key, tmp) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input_params), num_index, key, tmp) {
 			memset(&param, 0, sizeof(param));
 
 			if (key) {
@@ -431,7 +431,7 @@ PHP_METHOD(PDOStatement, execute)
 				}
 				RETURN_FALSE;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (PDO_PLACEHOLDER_NONE == stmt->supports_placeholders) {
@@ -592,7 +592,7 @@ static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, ze
 		/* update those bound column variables now */
 		struct pdo_bound_param_data *param;
 
-		ZEND_ARRAY_FOREACH_PTR(stmt->bound_columns, param) {
+		ZEND_HASH_FOREACH_PTR(stmt->bound_columns, param) {
 			if (param->paramno >= 0) {
 				if (!Z_ISREF(param->parameter)) {
 					continue;
@@ -609,7 +609,7 @@ static bool do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, ze
 				 * it's better to use LAZY or BOUND fetches if you want to shave
 				 * off those cycles */
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	return 1;
@@ -1981,7 +1981,7 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 	if (stmt->bound_params) {
 		zend_ulong num;
 		zend_string *key = NULL;
-		ZEND_ARRAY_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
+		ZEND_HASH_FOREACH_KEY_PTR(stmt->bound_params, num, key, param) {
 			if (key) {
 				php_stream_printf(out, "Key: Name: [%zd] %.*s\n",
 					ZSTR_LEN(key), (int) ZSTR_LEN(key), ZSTR_VAL(key));
@@ -1999,7 +1999,7 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 				param->is_param,
 				param->param_type);
 
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	php_stream_close(out);

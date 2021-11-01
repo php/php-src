@@ -691,7 +691,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 	zend_ulong num_key;
 	int globals_check = (dest == (&EG(symbol_table)));
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
+	ZEND_HASH_FOREACH_KEY_VAL(src, num_key, string_key, src_entry) {
 		if (Z_TYPE_P(src_entry) != IS_ARRAY
 			|| (string_key && (dest_entry = zend_hash_find(dest, string_key)) == NULL)
 			|| (string_key == NULL && (dest_entry = zend_hash_index_find(dest, num_key)) == NULL)
@@ -711,7 +711,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 			SEPARATE_ARRAY(dest_entry);
 			php_autoglobal_merge(Z_ARRVAL_P(dest_entry), Z_ARRVAL_P(src_entry));
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

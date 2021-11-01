@@ -757,7 +757,7 @@ static LDAPControl** _php_ldap_controls_from_array(LDAP *ld, zval* array, uint32
 	ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
 	*ctrls = NULL;
 	ctrlp = ctrls;
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(array), ctrlarray) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), ctrlarray) {
 		if (Z_TYPE_P(ctrlarray) != IS_ARRAY) {
 			zend_argument_type_error(arg_num, "must contain only arrays, where each array is a control");
 			error = 1;
@@ -772,7 +772,7 @@ static LDAPControl** _php_ldap_controls_from_array(LDAP *ld, zval* array, uint32
 		}
 
 		*ctrlp = NULL;
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	if (error) {
 		ctrlp = ctrls;

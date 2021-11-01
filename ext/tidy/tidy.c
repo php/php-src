@@ -775,7 +775,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 	zend_string *opt_name;
 
 	if (!HT_IS_PACKED(ht_options)) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
 			if (opt_name == NULL) {
 				continue;
 			}

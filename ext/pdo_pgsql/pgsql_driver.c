@@ -610,7 +610,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 		zval *tmp;
 
 		PQclear(pgsql_result);
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pg_rows), tmp) {
 			size_t query_len;
 			if (!try_convert_to_string(tmp)) {
 				efree(query);
@@ -633,7 +633,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		if (query) {
 			efree(query);
 		}

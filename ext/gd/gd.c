@@ -801,9 +801,9 @@ PHP_FUNCTION(imagesetstyle)
 	/* copy the style values in the stylearr */
 	stylearr = safe_emalloc(sizeof(int), num_styles, 0);
 
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(styles), item) {
 		stylearr[index++] = zval_get_long(item);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	gdImageSetStyle(im, stylearr, index);
 
@@ -3234,7 +3234,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 		/* walk the assoc array */
 		if (!HT_IS_PACKED(Z_ARRVAL_P(EXT))) {
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
 				if (key == NULL) {
 					continue;
 				}
@@ -3489,9 +3489,9 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 
 		colors = emalloc(num_colors * sizeof(int));
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hash_colors), color) {
 			*(colors + i++) = (int) zval_get_long(color);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		RETVAL_BOOL(gdImageScatterColor(im, (int)scatter_sub, (int)scatter_plus, colors, num_colors));
 

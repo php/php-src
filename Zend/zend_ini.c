@@ -125,7 +125,7 @@ ZEND_API void zend_ini_deactivate(void) /* {{{ */
 	if (EG(modified_ini_directives)) {
 		zend_ini_entry *ini_entry;
 
-		ZEND_HASH_FOREACH_PTR(EG(modified_ini_directives), ini_entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(modified_ini_directives), ini_entry) {
 			zend_restore_ini_entry_cb(ini_entry, ZEND_INI_STAGE_DEACTIVATE);
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_destroy(EG(modified_ini_directives));
@@ -266,7 +266,7 @@ ZEND_API void zend_ini_refresh_caches(int stage) /* {{{ */
 {
 	zend_ini_entry *p;
 
-	ZEND_HASH_FOREACH_PTR(EG(ini_directives), p) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), p) {
 		if (p->on_modify) {
 			p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, stage);
 		}

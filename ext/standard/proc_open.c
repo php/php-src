@@ -161,7 +161,7 @@ static php_process_env _php_array_to_envp(zval *environment)
 	zend_hash_init(env_hash, cnt, NULL, NULL, 0);
 
 	/* first, we have to get the size of all the elements in the hash */
-	ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
 		str = zval_get_string(element);
 
 		if (ZSTR_LEN(str) == 0) {
@@ -177,14 +177,14 @@ static php_process_env _php_array_to_envp(zval *environment)
 		} else {
 			zend_hash_next_index_insert_ptr(env_hash, str);
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 #ifndef PHP_WIN32
 	ep = env.envarray = (char **) ecalloc(cnt + 1, sizeof(char *));
 #endif
 	p = env.envp = (char *) ecalloc(sizeenv + 4, 1);
 
-	ZEND_ARRAY_FOREACH_STR_KEY_PTR(env_hash, key, str) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
 #ifndef PHP_WIN32
 		*ep = p;
 		++ep;
@@ -200,7 +200,7 @@ static php_process_env _php_array_to_envp(zval *environment)
 		p += ZSTR_LEN(str);
 		*p++ = '\0';
 		zend_string_release_ex(str, 0);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	assert((uint32_t)(p - env.envp) <= sizeenv);
 
@@ -524,7 +524,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 	bool is_prog_name = 1;
 	int elem_num = 0;
 
-	ZEND_ARRAY_FOREACH_VAL(args, arg_zv) {
+	ZEND_HASH_FOREACH_VAL(args, arg_zv) {
 		zend_string *arg_str = get_valid_arg_string(arg_zv, ++elem_num);
 		if (!arg_str) {
 			smart_str_free(&str);
@@ -539,7 +539,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 
 		is_prog_name = 0;
 		zend_string_release(arg_str);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	smart_str_0(&str);
 	return str.s;
 }
@@ -620,7 +620,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 
 	*argv = safe_emalloc(sizeof(char *), num_elems + 1, 0);
 
-	ZEND_ARRAY_FOREACH_VAL(array, arg_zv) {
+	ZEND_HASH_FOREACH_VAL(array, arg_zv) {
 		zend_string *arg_str = get_valid_arg_string(arg_zv, i + 1);
 		if (!arg_str) {
 			/* Terminate with NULL so exit_fail code knows how many entries to free */
@@ -637,7 +637,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 
 		(*argv)[i++] = estrdup(ZSTR_VAL(arg_str));
 		zend_string_release(arg_str);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	(*argv)[i] = NULL;
 	return command;
@@ -1088,7 +1088,7 @@ PHP_FUNCTION(proc_open)
 	descriptors = alloc_descriptor_array(descriptorspec);
 
 	/* Walk the descriptor spec and set up files/pipes */
-	ZEND_ARRAY_FOREACH_KEY_VAL(descriptorspec, nindex, str_index, descitem) {
+	ZEND_HASH_FOREACH_KEY_VAL(descriptorspec, nindex, str_index, descitem) {
 		if (str_index) {
 			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(proc_open)
 			goto exit_fail;
 		}
 		ndesc++;
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 #ifdef PHP_WIN32
 	if (cwd == NULL) {

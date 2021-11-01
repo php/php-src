@@ -2798,10 +2798,10 @@ static void *tracked_realloc(void *ptr, size_t new_size) {
 static void tracked_free_all() {
 	HashTable *tracked_allocs = AG(mm_heap)->tracked_allocs;
 	zend_ulong h;
-	ZEND_ARRAY_FOREACH_NUM_KEY(tracked_allocs, h) {
+	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
 		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
 		free(ptr);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 #endif
 

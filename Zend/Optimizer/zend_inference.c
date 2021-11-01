@@ -2031,14 +2031,14 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 		tmp |= MAY_BE_RCN;
 	}
 
-	ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, str, val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
 		if (str) {
 			tmp |= MAY_BE_ARRAY_KEY_STRING;
 		} else {
 			tmp |= MAY_BE_ARRAY_KEY_LONG;
 		}
 		tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	if (HT_IS_PACKED(ht)) {
 		tmp &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 	}

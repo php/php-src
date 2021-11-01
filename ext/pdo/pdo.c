@@ -71,7 +71,7 @@ PHP_FUNCTION(pdo_drivers)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -277,7 +277,7 @@ PHP_MINFO_FUNCTION(pdo)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO support", "enabled");
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		spprintf(&drivers, 0, "%s, %s", ldrivers, pdriver->driver_name);
 		efree(ldrivers);
 		ldrivers = drivers;

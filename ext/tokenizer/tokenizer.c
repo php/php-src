@@ -168,7 +168,7 @@ PHP_METHOD(PhpToken, is)
 	} else if (Z_TYPE_P(kind) == IS_ARRAY) {
 		zval *id_zval = NULL, *entry;
 		zend_string *text = NULL;
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(kind), entry) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(kind), entry) {
 			ZVAL_DEREF(entry);
 			if (Z_TYPE_P(entry) == IS_LONG) {
 				if (!id_zval) {
@@ -194,7 +194,7 @@ PHP_METHOD(PhpToken, is)
 				zend_argument_type_error(1, "must only have elements of type string|int, %s given", zend_zval_type_name(entry));
 				RETURN_THROWS();
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		RETURN_FALSE;
 	} else {
 		zend_argument_type_error(1, "must be of type string|int|array, %s given", zend_zval_type_name(kind));
@@ -435,12 +435,12 @@ void on_event(
 		case ON_FEEDBACK: {
 			HashTable *tokens_ht = Z_ARRVAL_P(ctx->tokens);
 			zval *token_zv, *id_zv = NULL;
-			ZEND_ARRAY_REVERSE_FOREACH_VAL(tokens_ht, token_zv) {
+			ZEND_HASH_REVERSE_FOREACH_VAL(tokens_ht, token_zv) {
 				id_zv = extract_token_id_to_replace(token_zv, text, length);
 				if (id_zv) {
 					break;
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			ZEND_ASSERT(id_zv);
 			ZVAL_LONG(id_zv, token);
 			break;

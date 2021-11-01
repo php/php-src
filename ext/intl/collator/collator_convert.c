@@ -118,13 +118,13 @@ void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* stat
 	zval *hashData;
 	zend_string *hashKey;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
+	ZEND_HASH_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
 		/* Convert current hash item from UTF-8 to UTF-16LE. */
 		collator_convert_hash_item_from_utf8_to_utf16(
 			hash, hashData, hashKey, hashIndex, status );
 		if( U_FAILURE( *status ) )
 			return;
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -137,14 +137,14 @@ void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* stat
 	zend_string *hashKey;
 	zval *hashData;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
+	ZEND_HASH_FOREACH_KEY_VAL(hash, hashIndex, hashKey, hashData) {
 		/* Convert current hash item from UTF-16LE to UTF-8. */
 		collator_convert_hash_item_from_utf16_to_utf8(
 			hash, hashData, hashKey, hashIndex, status );
 		if( U_FAILURE( *status ) ) {
 			return;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

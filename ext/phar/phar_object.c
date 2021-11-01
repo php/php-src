@@ -878,7 +878,7 @@ PHP_METHOD(Phar, mungServer)
 
 	phar_request_initialize();
 
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(mungvalues), data) {
 
 		if (Z_TYPE_P(data) != IS_STRING) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "Non-string value passed to Phar::mungServer(), expecting an array of any of these strings: PHP_SELF, REQUEST_URI, SCRIPT_FILENAME, SCRIPT_NAME");
@@ -895,7 +895,7 @@ PHP_METHOD(Phar, mungServer)
 			PHAR_G(phar_SERVER_mung_list) |= PHAR_MUNG_SCRIPT_FILENAME;
 		}
 		// TODO Warning for invalid value?
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -2250,7 +2250,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	phar_metadata_tracker_copy(&phar->metadata_tracker, &source->metadata_tracker, phar->is_persistent);
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
-	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&source->manifest, entry) {
 
 		newentry = *entry;
 
@@ -4269,13 +4269,13 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 
 	if (!search) {
 		/* nothing to match -- extract all files */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else if ('/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
 		/* ends in "/" -- extract all entries having that prefix */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (0 != strncmp(ZSTR_VAL(search), entry->filename, ZSTR_LEN(search))) continue;
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
@@ -4357,7 +4357,7 @@ PHP_METHOD(Phar, extractTo)
 			RETURN_FALSE;
 		}
 
-		ZEND_ARRAY_FOREACH_VAL(files_ht, zval_file) {
+		ZEND_HASH_FOREACH_VAL(files_ht, zval_file) {
 			ZVAL_DEREF(zval_file);
 			if (IS_STRING != Z_TYPE_P(zval_file)) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
@@ -4376,7 +4376,7 @@ PHP_METHOD(Phar, extractTo)
 						ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
 					RETURN_THROWS();
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
 	}
 

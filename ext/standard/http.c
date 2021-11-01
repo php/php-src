@@ -48,7 +48,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(ht, idx, key, zdata) {
+	ZEND_HASH_FOREACH_KEY_VAL(ht, idx, key, zdata) {
 		bool is_dynamic = 1;
 		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
 			zdata = Z_INDIRECT_P(zdata);
@@ -215,7 +215,7 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					}
 			}
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

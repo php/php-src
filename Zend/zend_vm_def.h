@@ -5032,7 +5032,7 @@ ZEND_VM_C_LABEL(send_again):
 			bool separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
-			ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (UNEXPECTED(name)) {
 					void *cache_slot[2] = {NULL, NULL};
 					tmp_arg_num = zend_get_arg_offset_by_name(
@@ -5043,14 +5043,14 @@ ZEND_VM_C_LABEL(send_again):
 					break;
 				}
 				tmp_arg_num++;
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			if (separate) {
 				SEPARATE_ARRAY(args);
 				ht = Z_ARRVAL_P(args);
 			}
 		}
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 			if (UNEXPECTED(name)) {
 				void *cache_slot[2] = {NULL, NULL};
 				have_named_params = 1;
@@ -5088,7 +5088,7 @@ ZEND_VM_C_LABEL(send_again):
 			}
 
 			arg_num++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 	} else if (EXPECTED(Z_TYPE_P(args) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(args);
@@ -5277,7 +5277,7 @@ ZEND_VM_C_LABEL(send_array):
 				zend_vm_stack_extend_call_frame(&EX(call), 0, len);
 				arg_num = 1;
 				param = ZEND_CALL_ARG(EX(call), 1);
-				ZEND_ARRAY_FOREACH_VAL(ht, arg) {
+				ZEND_HASH_FOREACH_VAL(ht, arg) {
 					bool must_wrap = 0;
 					if (skip > 0) {
 						skip--;
@@ -5309,7 +5309,7 @@ ZEND_VM_C_LABEL(send_array):
 					ZEND_CALL_NUM_ARGS(EX(call))++;
 					arg_num++;
 					param++;
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 			}
 			FREE_OP2();
 		} else {
@@ -5319,7 +5319,7 @@ ZEND_VM_C_LABEL(send_array):
 			arg_num = 1;
 			param = ZEND_CALL_ARG(EX(call), 1);
 			have_named_params = 0;
-			ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, name, arg) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (name) {
 					void *cache_slot[2] = {NULL, NULL};
 					have_named_params = 1;
@@ -5364,7 +5364,7 @@ ZEND_VM_C_LABEL(send_array):
 					arg_num++;
 					param++;
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 	FREE_OP1();
@@ -5559,7 +5559,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED, CACHE_SLOT)
 		zend_arg_info *arg_info = &EX(func)->common.arg_info[EX(func)->common.num_args];
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
 			SEPARATE_ARRAY(params);
-			ZEND_HASH_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, param) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, param) {
 				if (UNEXPECTED(!zend_verify_variadic_arg_type(EX(func), arg_info, arg_num, param, CACHE_ADDR(opline->extended_value)))) {
 					HANDLE_EXCEPTION();
 				}
@@ -5571,7 +5571,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, NUM, UNUSED, CACHE_SLOT)
 			ZVAL_ARR(params, EX(extra_named_params));
 		} else {
 			SEPARATE_ARRAY(params);
-			ZEND_HASH_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, param) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EX(extra_named_params), name, param) {
 				Z_TRY_ADDREF_P(param);
 				zend_hash_add_new(Z_ARRVAL_P(params), name, param);
 			} ZEND_HASH_FOREACH_END();
@@ -6008,7 +6008,7 @@ ZEND_VM_C_LABEL(add_unpack_again):
 		zval *val;
 		zend_string *key;
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
 				val = Z_REFVAL_P(val);
 			}
@@ -6022,7 +6022,7 @@ ZEND_VM_C_LABEL(add_unpack_again):
 					break;
 				}
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_OBJECT)) {
 		zend_class_entry *ce = Z_OBJCE_P(op1);
 		zend_object_iterator *iter;
@@ -9044,7 +9044,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM
 		}
 
 		SAVE_OPLINE();
-		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 				FREE_OP1();

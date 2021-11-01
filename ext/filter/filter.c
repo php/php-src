@@ -446,7 +446,7 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 		}
 		Z_PROTECT_RECURSION_P(value);
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(value), element) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 			ZVAL_DEREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				SEPARATE_ARRAY(element);
@@ -454,7 +454,7 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		Z_UNPROTECT_RECURSION_P(value);
 	} else {
 		php_zval_filter(value, filter, flags, options, charset, copy);
@@ -616,7 +616,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 	} else {
 		array_init(return_value);
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(op_ht, arg_key, arg_elm) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(op_ht, arg_key, arg_elm) {
 			if (arg_key == NULL) {
 				zend_argument_type_error(2, "must contain only string keys");
 				RETURN_THROWS();
@@ -640,7 +640,7 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 				);
 				zend_hash_update(Z_ARRVAL_P(return_value), arg_key, &nval);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */

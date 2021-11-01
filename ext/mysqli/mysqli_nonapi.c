@@ -772,7 +772,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 		return SUCCESS;
 	}
 	*out_array = ecalloc(zend_hash_num_elements(Z_ARRVAL_P(in_array)) + 1, sizeof(MYSQLND *));
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(in_array), elem) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(in_array), elem) {
 		i++;
 		if (Z_TYPE_P(elem) != IS_OBJECT ||
 			!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
@@ -793,7 +793,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 			}
 			(*out_array)[current++] = mysql->mysql;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	return SUCCESS;
 }
 /* }}} */
@@ -808,7 +808,7 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 
 	array_init_size(&dest_array, zend_hash_num_elements(Z_ARRVAL_P(out_array)));
 
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(out_array), elem) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(out_array), elem) {
 		if (Z_TYPE_P(elem) != IS_OBJECT ||
 				!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
 			continue;
@@ -831,7 +831,7 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 				p++;
 			}
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	/* destroy old array and add new one */
 	zval_ptr_dtor(out_array);
@@ -850,7 +850,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 
 	array_init(&proxy);
 	if (in_array) {
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(in_zval_array), elem) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(in_zval_array), elem) {
 			MY_MYSQL *mysql;
 			mysqli_object *intern = Z_MYSQLI_P(elem);
 			mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)intern->ptr)->ptr;
@@ -862,7 +862,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 				ret++;
 				p++;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* destroy old array and add new one */

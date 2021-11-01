@@ -285,11 +285,11 @@ ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 {
 	zend_rsrc_list_dtors_entry *lde;
 
-	ZEND_ARRAY_FOREACH_PTR(&list_destructors, lde) {
+	ZEND_HASH_FOREACH_PTR(&list_destructors, lde) {
 		if (lde->type_name && (strcmp(type_name, lde->type_name) == 0)) {
 			return lde->resource_id;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	return 0;
 }

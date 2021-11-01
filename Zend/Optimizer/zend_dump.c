@@ -31,7 +31,7 @@ void zend_dump_ht(HashTable *ht)
 	zval *val;
 	bool first = 1;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(ht, index, key, val) {
+	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
 		if (first) {
 			first = 0;
 		} else {
@@ -44,7 +44,7 @@ void zend_dump_ht(HashTable *ht)
 		}
 		fprintf(stderr, " =>");
 		zend_dump_const(val);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 
 void zend_dump_const(const zval *zv)
@@ -643,7 +643,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			zend_string *key;
 			zend_ulong num_key;
 			zval *zv;
-			ZEND_ARRAY_FOREACH_KEY_VAL(jumptable, num_key, key, zv) {
+			ZEND_HASH_FOREACH_KEY_VAL(jumptable, num_key, key, zv) {
 				if (key) {
 					fprintf(stderr, " \"%s\":", ZSTR_VAL(key));
 				} else {
@@ -654,7 +654,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				} else {
 					fprintf(stderr, " %04u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			fprintf(stderr, " default:");
 		} else {
 			zend_dump_const(op);

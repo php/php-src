@@ -837,7 +837,7 @@ PHP_FUNCTION(pcntl_exec)
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
 		*argv = path;
 		current_arg = argv+1;
-		ZEND_ARRAY_FOREACH_VAL(args_hash, element) {
+		ZEND_HASH_FOREACH_VAL(args_hash, element) {
 			if (argi >= argc) break;
 			if (!try_convert_to_string(element)) {
 				efree(argv);
@@ -847,7 +847,7 @@ PHP_FUNCTION(pcntl_exec)
 			*current_arg = Z_STRVAL_P(element);
 			argi++;
 			current_arg++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		*current_arg = NULL;
 	} else {
 		argv = emalloc(2 * sizeof(char *));
@@ -862,7 +862,7 @@ PHP_FUNCTION(pcntl_exec)
 		envc = zend_hash_num_elements(envs_hash);
 
 		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
-		ZEND_ARRAY_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
+		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
 			if (envi >= envc) break;
 			if (!key) {
 				key = zend_long_to_str(key_num);
@@ -889,7 +889,7 @@ PHP_FUNCTION(pcntl_exec)
 			zend_string_release_ex(key, 0);
 			envi++;
 			pair++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		*(pair) = NULL;
 
 		if (execve(path, argv, envp) == -1) {
@@ -1048,14 +1048,14 @@ PHP_FUNCTION(pcntl_sigprocmask)
 		RETURN_FALSE;
 	}
 
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		signo = zval_get_long(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	if (sigprocmask(how, &set, &oldset) != 0) {
 		PCNTL_G(last_error) = errno;
@@ -1109,14 +1109,14 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 		RETURN_FALSE;
 	}
 
-	ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
 		signo = zval_get_long(user_signo);
 		if (sigaddset(&set, signo) != 0) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	if (timedwait) {
 		timeout.tv_sec  = (time_t) tv_sec;

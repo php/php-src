@@ -1156,14 +1156,14 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 		RETURN_EMPTY_STRING();
 	} else if (numelems == 1) {
 		/* loop to search the first not undefined element... */
-		ZEND_ARRAY_FOREACH_VAL(pieces, tmp) {
+		ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 			RETURN_STR(zval_get_string(tmp));
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	ptr = strings = do_alloca((sizeof(*strings)) * numelems, use_heap);
 
-	ZEND_ARRAY_FOREACH_VAL(pieces, tmp) {
+	ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
 			ptr->str = Z_STR_P(tmp);
 			len += ZSTR_LEN(ptr->str);
@@ -1188,7 +1188,7 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 			ptr->lval = 1;
 			ptr++;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	/* numelems cannot be 0, we checked above */
 	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
@@ -2404,7 +2404,7 @@ PHP_FUNCTION(substr_replace)
 
 		from_idx = len_idx = repl_idx = 0;
 
-		ZEND_ARRAY_FOREACH_KEY_VAL(str_ht, num_index, str_index, tmp_str) {
+		ZEND_HASH_FOREACH_KEY_VAL(str_ht, num_index, str_index, tmp_str) {
 			zend_string *tmp_orig_str;
 			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
@@ -2556,7 +2556,7 @@ PHP_FUNCTION(substr_replace)
 			}
 
 			zend_tmp_string_release(tmp_orig_str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} /* if */
 }
 /* }}} */
@@ -2846,7 +2846,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	memset(bitset, 0, sizeof(bitset));
 
 	/* check if original array has numeric keys */
-	ZEND_ARRAY_FOREACH_STR_KEY(pats, str_key) {
+	ZEND_HASH_FOREACH_STR_KEY(pats, str_key) {
 		if (UNEXPECTED(!str_key)) {
 			num_keys = 1;
 		} else {
@@ -2868,13 +2868,13 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 			num_bitset[len / sizeof(zend_ulong)] |= Z_UL(1) << (len % sizeof(zend_ulong));
 			bitset[((unsigned char)ZSTR_VAL(str_key)[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)ZSTR_VAL(str_key)[0]) % sizeof(zend_ulong));
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	if (UNEXPECTED(num_keys)) {
 		zend_string *key_used;
 		/* we have to rebuild HashTable with numeric keys */
 		zend_hash_init(&str_hash, zend_hash_num_elements(pats), NULL, NULL, 0);
-		ZEND_ARRAY_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
+		ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
 			if (UNEXPECTED(!str_key)) {
 				key_used = zend_long_to_str(num_key);
 				len = ZSTR_LEN(key_used);
@@ -2904,7 +2904,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 			if (UNEXPECTED(!str_key)) {
 				zend_string_release_ex(key_used, 0);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		pats = &str_hash;
 	}
 
@@ -3307,7 +3307,7 @@ PHP_FUNCTION(strtr)
 			zend_string *str_key, *tmp_str, *replace, *tmp_replace;
 			zval *entry;
 
-			ZEND_ARRAY_FOREACH_KEY_VAL(from_ht, num_key, str_key, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(from_ht, num_key, str_key, entry) {
 				tmp_str = NULL;
 				if (UNEXPECTED(!str_key)) {
 					str_key = tmp_str = zend_long_to_str(num_key);
@@ -3332,7 +3332,7 @@ PHP_FUNCTION(strtr)
 				zend_tmp_string_release(tmp_str);
 				zend_tmp_string_release(tmp_replace);
 				return;
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			php_strtr_array(return_value, str, from_ht);
 		}
@@ -4187,7 +4187,7 @@ static zend_long php_str_replace_in_subject(
 		}
 
 		/* For each entry in the search array, get the entry */
-		ZEND_ARRAY_FOREACH_VAL(search_ht, search_entry) {
+		ZEND_HASH_FOREACH_VAL(search_ht, search_entry) {
 			/* Make sure we're dealing with strings. */
 			zend_string *tmp_search_str;
 			zend_string *search_str = zval_get_tmp_string(search_entry, &tmp_search_str);
@@ -4284,7 +4284,7 @@ static zend_long php_str_replace_in_subject(
 					return replace_count;
 				}
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		ZVAL_STR(result, subject_str);
 		if (lc_subject_str) {
 			zend_string_release_ex(lc_subject_str, 0);
@@ -4355,7 +4355,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		ZEND_ARRAY_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
+		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
 			zend_string *tmp_subject_str;
 			ZVAL_DEREF(subject_entry);
 			subject_str = zval_get_tmp_string(subject_entry, &tmp_subject_str);
@@ -4368,7 +4368,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			} else {
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &result);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {	/* if subject is not an array */
 		count = php_str_replace_in_subject(search_str, search_ht, replace_str, replace_ht, subject_str, return_value, case_sensitivity);
 	}
@@ -4660,13 +4660,13 @@ PHP_FUNCTION(strip_tags)
 		zval *tmp;
 		zend_string *tag;
 
-		ZEND_ARRAY_FOREACH_VAL(allow_ht, tmp) {
+		ZEND_HASH_FOREACH_VAL(allow_ht, tmp) {
 			tag = zval_get_string(tmp);
 			smart_str_appendc(&tags_ss, '<');
 			smart_str_append(&tags_ss, tag);
 			smart_str_appendc(&tags_ss, '>');
 			zend_string_release(tag);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		if (tags_ss.s) {
 			smart_str_0(&tags_ss);
 			allowed_tags = ZSTR_VAL(tags_ss.s);
@@ -4776,7 +4776,7 @@ PHP_FUNCTION(setlocale)
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (Z_TYPE(args[i]) == IS_ARRAY) {
 			zval *elem;
-			ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL(args[i]), elem) {
 				zend_string *result = try_setlocale_zval(cat, elem);
 				if (EG(exception)) {
 					RETURN_THROWS();
@@ -4784,7 +4784,7 @@ PHP_FUNCTION(setlocale)
 				if (result) {
 					RETURN_STR(result);
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			zend_string *result = try_setlocale_zval(cat, &args[i]);
 			if (EG(exception)) {

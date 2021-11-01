@@ -415,7 +415,7 @@ static int zend_jit_disasm(const char    *name,
 
 	/* label numbering */
 	n = 0; m = 0;
-	ZEND_HASH_FOREACH_VAL(&labels, z) {
+	ZEND_HASH_MAP_FOREACH_VAL(&labels, z) {
 		if (Z_TYPE_P(z) == IS_FALSE) {
 			m--;
 			ZVAL_LONG(z, m);

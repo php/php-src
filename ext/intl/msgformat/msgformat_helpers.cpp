@@ -391,7 +391,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	zend_string		*str_index;
 	zend_ulong		 num_index;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
+	ZEND_HASH_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
 		Formattable& formattable = fargs[argNum];
 		UnicodeString& key = farg_names[argNum];
 		Formattable::Type argType = Formattable::kObject, //unknown
@@ -586,7 +586,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			}
 		}
 		argNum++;
-	} ZEND_ARRAY_FOREACH_END(); // visiting each argument
+	} ZEND_HASH_FOREACH_END(); // visiting each argument
 
 	if (U_FAILURE(err.code)) {
 		return;

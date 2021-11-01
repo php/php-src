@@ -730,7 +730,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 	HashTable *ht2;
 	HashTable *typemap = NULL;
 
-	ZEND_ARRAY_FOREACH_VAL(ht, tmp) {
+	ZEND_HASH_FOREACH_VAL(ht, tmp) {
 		char *type_name = NULL;
 		char *type_ns = NULL;
 		zval *to_xml = NULL;
@@ -745,7 +745,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 		ht2 = Z_ARRVAL_P(tmp);
 
 		if (!HT_IS_PACKED(ht2)) {
-			ZEND_HASH_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
 				if (name) {
 					if (zend_string_equals_literal(name, "type_name")) {
 						if (Z_TYPE_P(tmp) == IS_STRING) {
@@ -821,7 +821,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 			zend_hash_update_ptr(typemap, nscat.s, new_enc);
 			smart_str_free(&nscat);
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	return typemap;
 }
 /* }}} */
@@ -1065,14 +1065,14 @@ PHP_METHOD(SoapServer, getFunctions)
 	} else if (service->soap_functions.ft != NULL) {
 		zval *name;
 
-		ZEND_HASH_FOREACH_VAL(service->soap_functions.ft, name) {
+		ZEND_HASH_MAP_FOREACH_VAL(service->soap_functions.ft, name) {
 			add_next_index_str(return_value, zend_string_copy(Z_STR_P(name)));
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ft != NULL) {
 		zend_function *f;
 
-		ZEND_HASH_FOREACH_PTR(ft, f) {
+		ZEND_HASH_MAP_FOREACH_PTR(ft, f) {
 			if ((service->type != SOAP_OBJECT && service->type != SOAP_CLASS) || (f->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				add_next_index_str(return_value, zend_string_copy(f->common.function_name));
 			}
@@ -1109,7 +1109,7 @@ PHP_METHOD(SoapServer, addFunction)
 				service->soap_functions.ft = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(function_name)));
 			}
 
-			ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(function_name), tmp_function) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(function_name), tmp_function) {
 				zend_string *key;
 				zend_function *f;
 
@@ -1129,7 +1129,7 @@ PHP_METHOD(SoapServer, addFunction)
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
 
 				zend_string_release_ex(key, 0);
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 	} else if (Z_TYPE_P(function_name) == IS_STRING) {
 		zend_string *key;
@@ -2419,12 +2419,12 @@ static void verify_soap_headers_array(HashTable *ht) /* {{{ */
 {
 	zval *tmp;
 
-	ZEND_ARRAY_FOREACH_VAL(ht, tmp) {
+	ZEND_HASH_FOREACH_VAL(ht, tmp) {
 		if (Z_TYPE_P(tmp) != IS_OBJECT ||
 		    !instanceof_function(Z_OBJCE_P(tmp), soap_header_class_entry)) {
 			php_error_docref(NULL, E_ERROR, "Invalid SOAP header");
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -2501,12 +2501,12 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 				soap_headers = zend_array_dup(soap_headers);
 				free_soap_headers = 1;
 			}
-			ZEND_ARRAY_FOREACH_VAL(default_headers, tmp) {
+			ZEND_HASH_FOREACH_VAL(default_headers, tmp) {
 				if(Z_TYPE_P(tmp) == IS_OBJECT) {
 					Z_ADDREF_P(tmp);
 					zend_hash_next_index_insert(soap_headers, tmp);
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			soap_headers = Z_ARRVAL_P(tmp);
 			free_soap_headers = 0;
@@ -2517,12 +2517,12 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 
 	if (arg_count > 0) {
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(args), param) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
 			/*zval_add_ref(param);*/
 			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (output_headers) {
 		output_headers = zend_try_array_init(output_headers);
@@ -2570,7 +2570,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 		sdlFunctionPtr function;
 
 		array_init(return_value);
-		ZEND_HASH_FOREACH_PTR(&sdl->functions, function) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sdl->functions, function) {
 			function_to_string(function, &buf);
 			add_next_index_stringl(return_value, ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 			smart_str_free(&buf);
@@ -2597,11 +2597,11 @@ PHP_METHOD(SoapClient, __getTypes)
 
 		array_init(return_value);
 		if (sdl->types) {
-			ZEND_ARRAY_FOREACH_PTR(sdl->types, type) {
+			ZEND_HASH_FOREACH_PTR(sdl->types, type) {
 				type_to_string(type, &buf, 0);
 				add_next_index_stringl(return_value, ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 				smart_str_free(&buf);
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 }
@@ -2881,14 +2881,14 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 			return;
 		}
 		num_of_params = zend_hash_num_elements(function->requestParameters);
-		ZEND_ARRAY_FOREACH_PTR(function->requestParameters, param) {
+		ZEND_HASH_FOREACH_PTR(function->requestParameters, param) {
 			if (get_node(params, param->paramName) != NULL) {
 				use_names = 1;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		if (use_names) {
 			tmp_parameters = safe_emalloc(num_of_params, sizeof(zval), 0);
-			ZEND_ARRAY_FOREACH_PTR(function->requestParameters, param) {
+			ZEND_HASH_FOREACH_PTR(function->requestParameters, param) {
 				val = get_node(params, param->paramName);
 				if (!val) {
 					/* TODO: may be "nil" is not OK? */
@@ -2897,7 +2897,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 					master_to_zval(&tmp_parameters[cur_param], param->encode, val);
 				}
 				cur_param++;
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			*parameters = tmp_parameters;
 			*num_params = num_of_params;
 			return;
@@ -3361,7 +3361,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		zend_string *param_name;
 		zend_ulong param_index = i;
 
-		ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(ret), param_index, param_name, data) {
 			parameter = get_param(function, ZSTR_VAL(param_name), param_index, TRUE);
 			if (style == SOAP_RPC) {
 				param = serialize_parameter(parameter, data, i, ZSTR_VAL(param_name), use, method);
@@ -3378,7 +3378,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 
 			i++;
 			param_index = i;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (use == SOAP_ENCODED && version == SOAP_1_2 && method != NULL) {
 		xmlSetNsProp(method, body->ns, BAD_CAST("encodingStyle"), BAD_CAST(SOAP_1_2_ENC_NAMESPACE));
@@ -3891,7 +3891,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 	if (head) {
 		zval* header;
 
-		ZEND_ARRAY_FOREACH_VAL(soap_headers, header) {
+		ZEND_HASH_FOREACH_VAL(soap_headers, header) {
 			if (Z_TYPE_P(header) != IS_OBJECT
 					|| !instanceof_function(Z_OBJCE_P(header), soap_header_class_entry)) {
 				continue;
@@ -3935,7 +3935,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 				xmlSetNs(h, nsptr);
 				set_soap_header_attributes(h, header, version);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	if (use == SOAP_ENCODED) {
@@ -4051,11 +4051,11 @@ static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int inde
 		if ((tmp = zend_hash_str_find_ptr(ht, param_name, strlen(param_name))) != NULL) {
 			return tmp;
 		} else {
-			ZEND_ARRAY_FOREACH_PTR(ht, tmp) {
+			ZEND_HASH_FOREACH_PTR(ht, tmp) {
 				if (tmp->paramName && strcmp(param_name, tmp->paramName) == 0) {
 					return tmp;
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 	} else {
 		if ((tmp = zend_hash_index_find_ptr(ht, index)) != NULL) {
@@ -4093,7 +4093,7 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 		sdlFunctionPtr tmp;
 		sdlParamPtr    param;
 
-		ZEND_HASH_FOREACH_PTR(&sdl->functions, tmp) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sdl->functions, tmp) {
 			if (tmp->binding && tmp->binding->bindingType == BINDING_SOAP) {
 				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)tmp->bindingAttributes;
 				if (fnb->style == SOAP_DOCUMENT) {
@@ -4107,7 +4107,7 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 						int ok = 1;
 						xmlNodePtr node = params;
 
-						ZEND_ARRAY_FOREACH_PTR(tmp->requestParameters, param) {
+						ZEND_HASH_FOREACH_PTR(tmp->requestParameters, param) {
 							if (param->element) {
 								if (strcmp(param->element->name, (char*)node->name) != 0) {
 									ok = 0;
@@ -4127,7 +4127,7 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 								break;
 							}
 							node = node->next;
-						} ZEND_ARRAY_FOREACH_END();
+						} ZEND_HASH_FOREACH_END();
 						if (ok /*&& node == NULL*/) {
 							return tmp;
 						}
@@ -4159,7 +4159,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 		} else {
 			i = 0;
 			smart_str_appendl(buf, "list(", 5);
-			ZEND_ARRAY_FOREACH_PTR(function->responseParameters, param) {
+			ZEND_HASH_FOREACH_PTR(function->responseParameters, param) {
 				if (i > 0) {
 					smart_str_appendl(buf, ", ", 2);
 				}
@@ -4171,7 +4171,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 				smart_str_appendl(buf, " $", 2);
 				smart_str_appendl(buf, param->paramName, strlen(param->paramName));
 				i++;
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			smart_str_appendl(buf, ") ", 2);
 		}
 	} else {
@@ -4183,7 +4183,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 	smart_str_appendc(buf, '(');
 	if (function->requestParameters) {
 		i = 0;
-		ZEND_ARRAY_FOREACH_PTR(function->requestParameters, param) {
+		ZEND_HASH_FOREACH_PTR(function->requestParameters, param) {
 			if (i > 0) {
 				smart_str_appendl(buf, ", ", 2);
 			}
@@ -4195,7 +4195,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf) /* {{{ *
 			smart_str_appendl(buf, " $", 2);
 			smart_str_appendl(buf, param->paramName, strlen(param->paramName));
 			i++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, ')');
 	smart_str_0(buf);
@@ -4222,9 +4222,9 @@ static void model_to_string(sdlContentModelPtr model, smart_str *buf, int level)
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr tmp;
 
-			ZEND_ARRAY_FOREACH_PTR(model->u.content, tmp) {
+			ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
 				model_to_string(tmp, buf, level);
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			break;
 		}
 		case XSD_CONTENT_GROUP:
@@ -4263,9 +4263,9 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				sdlTypePtr item_type;
 
 				smart_str_appendl(buf, " {", 2);
-				ZEND_ARRAY_FOREACH_PTR(type->elements, item_type) {
+				ZEND_HASH_FOREACH_PTR(type->elements, item_type) {
 					smart_str_appendl(buf, item_type->name, strlen(item_type->name));
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 				smart_str_appendc(buf, '}');
 			}
 			break;
@@ -4277,13 +4277,13 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				int first = 0;
 
 				smart_str_appendl(buf, " {", 2);
-				ZEND_ARRAY_FOREACH_PTR(type->elements, item_type) {
+				ZEND_HASH_FOREACH_PTR(type->elements, item_type) {
 					if (!first) {
 						smart_str_appendc(buf, ',');
 						first = 0;
 					}
 					smart_str_appendl(buf, item_type->name, strlen(item_type->name));
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 				smart_str_appendc(buf, '}');
 			}
 			break;
@@ -4380,7 +4380,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 				if (type->attributes) {
 					sdlAttributePtr attr;
 
-					ZEND_ARRAY_FOREACH_PTR(type->attributes, attr) {
+					ZEND_HASH_FOREACH_PTR(type->attributes, attr) {
 						if (spaces.s) {
 							smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));
 						}
@@ -4393,7 +4393,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 						}
 						smart_str_appends(buf, attr->name);
 						smart_str_appendl(buf, ";\n", 2);
-					} ZEND_ARRAY_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
 				}
 				if (spaces.s) {
 					smart_str_appendl(buf, ZSTR_VAL(spaces.s), ZSTR_LEN(spaces.s));

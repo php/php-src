@@ -560,7 +560,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 
 		array_init(&val);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(static_variables, key, var) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(static_variables, key, var) {
 			zval copy;
 
 			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {

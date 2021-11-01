@@ -315,7 +315,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 	}
 	smart_str_appends(buf, "(\n");
 	indent += PRINT_ZVAL_INDENT;
-	ZEND_ARRAY_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
 		for (i = 0; i < indent; i++) {
 			smart_str_appendc(buf, ' ');
 		}
@@ -345,7 +345,7 @@ static void print_hash(smart_str *buf, HashTable *ht, int indent, bool is_object
 		smart_str_appends(buf, "] => ");
 		zend_print_zval_r_to_buf(buf, tmp, indent+PRINT_ZVAL_INDENT);
 		smart_str_appends(buf, "\n");
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	indent -= PRINT_ZVAL_INDENT;
 	for (i = 0; i < indent; i++) {
 		smart_str_appendc(buf, ' ');
@@ -361,7 +361,7 @@ static void print_flat_hash(smart_str *buf, HashTable *ht) /* {{{ */
 	zend_ulong num_key;
 	int i = 0;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, string_key, tmp) {
 		if (i++ > 0) {
 			smart_str_appendc(buf, ',');
 		}
@@ -373,7 +373,7 @@ static void print_flat_hash(smart_str *buf, HashTable *ht) /* {{{ */
 		}
 		smart_str_appends(buf, "] => ");
 		zend_print_flat_zval_r_to_buf(buf, tmp);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

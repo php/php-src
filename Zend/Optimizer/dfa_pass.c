@@ -415,7 +415,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 					ZVAL_TRUE(&tmp);
 					dst = zend_new_array(zend_hash_num_elements(src));
 					if (strict) {
-						ZEND_ARRAY_FOREACH_VAL(src, val) {
+						ZEND_HASH_FOREACH_VAL(src, val) {
 							if (Z_TYPE_P(val) == IS_STRING) {
 								zend_hash_add(dst, Z_STR_P(val), &tmp);
 							} else if (Z_TYPE_P(val) == IS_LONG) {
@@ -425,16 +425,16 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 								ok = 0;
 								break;
 							}
-						} ZEND_ARRAY_FOREACH_END();
+						} ZEND_HASH_FOREACH_END();
 					} else {
-						ZEND_ARRAY_FOREACH_VAL(src, val) {
+						ZEND_HASH_FOREACH_VAL(src, val) {
 							if (Z_TYPE_P(val) != IS_STRING || ZEND_HANDLE_NUMERIC(Z_STR_P(val), idx)) {
 								zend_array_destroy(dst);
 								ok = 0;
 								break;
 							}
 							zend_hash_add(dst, Z_STR_P(val), &tmp);
-						} ZEND_ARRAY_FOREACH_END();
+						} ZEND_HASH_FOREACH_END();
 					}
 
 					if (ok) {
@@ -660,11 +660,11 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 				{
 					HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 					zval *zv;
-					ZEND_ARRAY_FOREACH_VAL(jumptable, zv) {
+					ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 						if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)) == old->start) {
 							Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
 						}
-					} ZEND_ARRAY_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
 					if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
 						opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
 					}

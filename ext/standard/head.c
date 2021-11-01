@@ -198,7 +198,7 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 	zend_string *key;
 	zval *value;
 
-	ZEND_ARRAY_FOREACH_STR_KEY_VAL(options, key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(options, key, value) {
 		if (!key) {
 			zend_value_error("%s(): option array cannot have numeric keys", get_active_function_name());
 			return FAILURE;
@@ -219,7 +219,7 @@ static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_
 			zend_value_error("%s(): option \"%s\" is invalid", get_active_function_name(), ZSTR_VAL(key));
 			return FAILURE;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	return SUCCESS;
 }
 

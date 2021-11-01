@@ -510,9 +510,9 @@ PHP_RINIT_FUNCTION(zend_test)
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_ulong objptr;
-	ZEND_ARRAY_FOREACH_NUM_KEY(&ZT_G(global_weakmap), objptr) {
+	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), objptr) {
 		zend_weakrefs_hash_del(&ZT_G(global_weakmap), (zend_object *)(uintptr_t)objptr);
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&ZT_G(global_weakmap));
 	return SUCCESS;
 }

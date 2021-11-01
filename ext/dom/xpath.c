@@ -500,12 +500,12 @@ PHP_METHOD(DOMXPath, registerPhpFunctions)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ht) {
-		ZEND_ARRAY_FOREACH_VAL(ht, entry) {
+		ZEND_HASH_FOREACH_VAL(ht, entry) {
 			zend_string *str = zval_get_string(entry);
 			ZVAL_LONG(&new_string, 1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_string_release_ex(str, 0);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		intern->registerPhpFunctions = 2;
 	} else if (name) {
 		ZVAL_LONG(&new_string, 1);

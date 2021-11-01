@@ -184,13 +184,13 @@ static int php_openssl_is_http_stream_talking_to_iis(php_stream *stream) /* {{{ 
 #define SERVER_MICROSOFT_IIS	"Server: Microsoft-IIS"
 #define SERVER_GOOGLE "Server: GFE/"
 
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL(stream->wrapperdata), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL(stream->wrapperdata), tmp) {
 			if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_MICROSOFT_IIS)) {
 				return 1;
 			} else if (zend_string_equals_literal_ci(Z_STR_P(tmp), SERVER_GOOGLE)) {
 				return 1;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	return 0;
 }
@@ -358,7 +358,7 @@ static bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 			return 0;
 		}
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
 			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
 				return 0;
@@ -366,7 +366,7 @@ static bool php_openssl_x509_fingerprint_match(X509 *peer, zval *val)
 			if (php_openssl_x509_fingerprint_cmp(peer, ZSTR_VAL(key), Z_STRVAL_P(current)) != 0) {
 				return 0;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		return 1;
 	} else {
@@ -1417,7 +1417,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 	);
 	memset(sslsock->sni_certs, 0, sslsock->sni_cert_count * sizeof(php_openssl_sni_cert_t));
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index, key, current) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index, key, current) {
 		(void) key_index;
 
 		if (!key) {
@@ -1496,7 +1496,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 		sslsock->sni_certs[i].ctx = ctx;
 		++i;
 
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	SSL_CTX_set_tlsext_servername_callback(sslsock->ctx, php_openssl_server_sni_callback);
 

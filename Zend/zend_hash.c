@@ -441,7 +441,7 @@ static uint32_t zend_array_recalc_elements(HashTable *ht)
 	zval *val;
 	uint32_t num = ht->nNumOfElements;
 
-	ZEND_HASH_FOREACH_VAL(ht, val) {
+	ZEND_HASH_MAP_FOREACH_VAL(ht, val) {
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
 			if (UNEXPECTED(Z_TYPE_P(Z_INDIRECT_P(val)) == IS_UNDEF)) {
 				num--;
@@ -3171,7 +3171,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 		goto convert;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(ht, str_key) {
 		if (!str_key) {
 			goto convert;
 		}
@@ -3187,7 +3187,7 @@ convert:
 	{
 		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
-		ZEND_ARRAY_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
 			if (!str_key) {
 				str_key = zend_long_to_str(num_key);
 				zend_string_delref(str_key);
@@ -3204,7 +3204,7 @@ convert:
 				}
 			} while (0);
 			zend_hash_update(new_ht, str_key, zv);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		return new_ht;
 	}
@@ -3221,7 +3221,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool
 	zval *zv;
 
 	if (!HT_IS_PACKED(ht)) {
-		ZEND_HASH_FOREACH_STR_KEY(ht, str_key) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(ht, str_key) {
 			/* The `str_key &&` here might seem redundant: property tables should
 			 * only have string keys. Unfortunately, this isn't true, at the very
 			 * least because of ArrayObject, which stores a symtable where the
@@ -3247,7 +3247,7 @@ convert:
 	{
 		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
-		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, str_key, zv) {
+		ZEND_HASH_MAP_FOREACH_KEY_VAL_IND(ht, num_key, str_key, zv) {
 			do {
 				if (Z_OPT_REFCOUNTED_P(zv)) {
 					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {

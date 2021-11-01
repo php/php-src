@@ -223,7 +223,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 		zval *data;
 		zend_ulong index;
 
-		ZEND_ARRAY_FOREACH_KEY_VAL_IND(myht, index, key, data) {
+		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
 			if (r == PHP_JSON_OUTPUT_ARRAY) {
 				if (need_comma) {
 					smart_str_appendc(buf, ',');
@@ -281,7 +281,7 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 				zend_release_properties(prop_ht);
 				return FAILURE;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	PHP_JSON_HASH_UNPROTECT_RECURSION(myht);

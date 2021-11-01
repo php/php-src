@@ -2374,7 +2374,7 @@ static X509_STORE *php_openssl_setup_verify(zval *calist)
 	}
 
 	if (calist && (Z_TYPE_P(calist) == IS_ARRAY)) {
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(calist), item) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(calist), item) {
 			zend_string *str = zval_try_get_string(item);
 			if (UNEXPECTED(!str)) {
 				return NULL;
@@ -2406,7 +2406,7 @@ static X509_STORE *php_openssl_setup_verify(zval *calist)
 				dir_lookup = NULL;
 			}
 			zend_string_release(str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (nfiles == 0) {
 		file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
@@ -2484,7 +2484,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval * zcerts) /* {{{ */
 
 	/* get certs */
 	if (Z_TYPE_P(zcerts) == IS_ARRAY) {
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(zcerts), zcertval) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zcerts), zcertval) {
 			cert = php_openssl_x509_from_zval(zcertval, &free_cert);
 			if (cert == NULL) {
 				// TODO Add Warning?
@@ -2501,7 +2501,7 @@ static STACK_OF(X509) * php_array_to_X509_sk(zval * zcerts) /* {{{ */
 
 			}
 			sk_X509_push(sk, cert);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
 		cert = php_openssl_x509_from_zval(zcerts, &free_cert);
@@ -2859,7 +2859,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 
 		subj = X509_REQ_get_subject_name(csr);
 		/* apply values from the dn hash */
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(dn), strindex, item) {
 			if (strindex) {
 				int nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
@@ -2884,7 +2884,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
 				}
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		/* Finally apply defaults from config file */
 		for(i = 0; i < sk_CONF_VALUE_num(dn_sk); i++) {
@@ -2936,7 +2936,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			}
 		}
 		if (attribs) {
-			ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(attribs), strindex, item) {
 				int nid;
 
 				if (NULL == strindex) {
@@ -2960,7 +2960,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				} else {
 					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 			for (i = 0; i < sk_CONF_VALUE_num(attr_sk); i++) {
 				v = sk_CONF_VALUE_value(attr_sk, i);
 				/* if it is already set, skip this */
@@ -5346,7 +5346,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
 			bool free_cert;
 
 			cert = php_openssl_x509_from_zval(zcertval, &free_cert);
@@ -5365,7 +5365,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				}
 			}
 			sk_X509_push(recipcerts, cert);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
 		bool free_cert;
@@ -5405,7 +5405,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 	/* tack on extra headers */
 	if (zheaders) {
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
 			zend_string *str = zval_try_get_string(zcertval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
@@ -5416,7 +5416,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 				BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	(void)BIO_reset(infile);
@@ -5626,7 +5626,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	if (zheaders) {
 		int ret;
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
 			zend_string *str = zval_try_get_string(hval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
@@ -5640,7 +5640,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 			if (ret < 0) {
 				php_openssl_store_errors();
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* write the signed data */
 	if (!SMIME_write_PKCS7(outfile, p7, infile, (int)flags)) {
@@ -5976,7 +5976,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 
 	/* get certs */
 	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
 			bool free_cert;
 
 			cert = php_openssl_x509_from_zval(zcertval, &free_cert);
@@ -5994,7 +5994,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 				}
 			}
 			sk_X509_push(recipcerts, cert);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		/* a single certificate */
 		bool free_cert;
@@ -6037,7 +6037,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 
 	/* tack on extra headers */
 	if (zheaders && encoding == ENCODING_SMIME) {
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
 			zend_string *str = zval_try_get_string(zcertval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
@@ -6048,7 +6048,7 @@ PHP_FUNCTION(openssl_cms_encrypt)
 				BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
 			}
 			zend_string_release(str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	(void)BIO_reset(infile);
@@ -6317,7 +6317,7 @@ PHP_FUNCTION(openssl_cms_sign)
 	if (zheaders && encoding == ENCODING_SMIME) {
 		int ret;
 
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
 			zend_string *str = zval_try_get_string(hval);
 			if (UNEXPECTED(!str)) {
 				goto clean_exit;
@@ -6331,7 +6331,7 @@ PHP_FUNCTION(openssl_cms_sign)
 			if (ret < 0) {
 				php_openssl_store_errors();
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* writing the signed data depends on the encoding */
 	switch (encoding) {
@@ -6885,7 +6885,7 @@ PHP_FUNCTION(openssl_seal)
 
 	/* get the public keys we are using to seal this data */
 	i = 0;
-	ZEND_ARRAY_FOREACH_VAL(pubkeysht, pubkey) {
+	ZEND_HASH_FOREACH_VAL(pubkeysht, pubkey) {
 		pkeys[i] = php_openssl_pkey_from_zval(pubkey, 1, NULL, 0);
 		if (pkeys[i] == NULL) {
 			if (!EG(exception)) {
@@ -6896,7 +6896,7 @@ PHP_FUNCTION(openssl_seal)
 		}
 		eks[i] = emalloc(EVP_PKEY_size(pkeys[i]) + 1);
 		i++;
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	ctx = EVP_CIPHER_CTX_new();
 	if (ctx == NULL || !EVP_EncryptInit(ctx,cipher,NULL,NULL)) {

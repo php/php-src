@@ -1728,7 +1728,7 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
-	ZEND_HASH_FOREACH_PTR(CG(auto_globals), auto_global) {
+	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
 		if (auto_global->jit) {
 			auto_global->armed = 1;
 		} else if (auto_global->auto_global_callback) {
@@ -4079,7 +4079,7 @@ static zend_result zend_compile_func_in_array(znode *result, zend_ast_list *args
 		ZVAL_TRUE(&tmp);
 
 		if (strict) {
-			ZEND_ARRAY_FOREACH_VAL(src, val) {
+			ZEND_HASH_FOREACH_VAL(src, val) {
 				if (Z_TYPE_P(val) == IS_STRING) {
 					zend_hash_add(dst, Z_STR_P(val), &tmp);
 				} else if (Z_TYPE_P(val) == IS_LONG) {
@@ -4089,9 +4089,9 @@ static zend_result zend_compile_func_in_array(znode *result, zend_ast_list *args
 					ok = 0;
 					break;
 				}
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_ARRAY_FOREACH_VAL(src, val) {
+			ZEND_HASH_FOREACH_VAL(src, val) {
 				if (Z_TYPE_P(val) != IS_STRING
 				 || is_numeric_string(Z_STRVAL_P(val), Z_STRLEN_P(val), NULL, NULL, 0)) {
 					zend_array_destroy(dst);
@@ -4099,7 +4099,7 @@ static zend_result zend_compile_func_in_array(znode *result, zend_ast_list *args
 					break;
 				}
 				zend_hash_add(dst, Z_STR_P(val), &tmp);
-			} ZEND_ARRAY_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		zend_array_destroy(src);
@@ -5765,7 +5765,7 @@ static void zend_compile_try(zend_ast *ast) /* {{{ */
 	/* label: try { } must not be equal to try { label: } */
 	if (CG(context).labels) {
 		zend_label *label;
-		ZEND_HASH_REVERSE_FOREACH_PTR(CG(context).labels, label) {
+		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(CG(context).labels, label) {
 			if (label->opline_num == get_next_op_number()) {
 				zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 			}
@@ -6437,7 +6437,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 	}
 
 	/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
-	ZEND_PACKED_FOREACH_PTR(*attributes, attr) {
+	ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 		if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
 			continue;
 		}
@@ -6460,7 +6460,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 		if (config->validator != NULL) {
 			config->validator(attr, target, CG(active_class_entry));
 		}
-	} ZEND_PACKED_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -6878,7 +6878,7 @@ static void compile_implicit_lexical_binds(
 		op_array->static_variables = zend_new_array(8);
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
 		zval *value = zend_hash_add(
 			op_array->static_variables, var_name, &EG(uninitialized_zval));
 		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
@@ -6927,7 +6927,7 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 static void zend_compile_implicit_closure_uses(closure_info *info)
 {
 	zend_string *var_name;
-	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
 		zval zv;
 		ZVAL_NULL(&zv);
 		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);
@@ -8402,7 +8402,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 				zval *val;
 				zend_string *key;
 
-				ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, key, val) {
+				ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 					if (key) {
 						zend_hash_update(Z_ARRVAL_P(result), key, val);
 					} else if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
@@ -8410,7 +8410,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 						return 0;
 					}
 					Z_TRY_ADDREF_P(val);
-				} ZEND_ARRAY_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
 
 				continue;
 			} else {
@@ -8954,22 +8954,22 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	opline = zend_emit_op_tmp(NULL, ZEND_QM_ASSIGN, &assign_node, NULL);
 	SET_NODE(opline->result, result);
 
-	ZEND_ARRAY_FOREACH_PTR(CG(memoized_exprs), node) {
+	ZEND_HASH_FOREACH_PTR(CG(memoized_exprs), node) {
 		if (node->op_type == IS_TMP_VAR || node->op_type == IS_VAR) {
 			need_frees = 1;
 			break;
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	/* Free DUPed expressions if there are any */
 	if (need_frees) {
 		uint32_t jump_opnum = zend_emit_jump(0);
 		zend_update_jump_target_to_next(coalesce_opnum);
-		ZEND_ARRAY_FOREACH_PTR(CG(memoized_exprs), node) {
+		ZEND_HASH_FOREACH_PTR(CG(memoized_exprs), node) {
 			if (node->op_type == IS_TMP_VAR || node->op_type == IS_VAR) {
 				zend_emit_op(NULL, ZEND_FREE, node, NULL);
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		zend_update_jump_target_to_next(jump_opnum);
 	} else {
 		zend_update_jump_target_to_next(coalesce_opnum);

@@ -1069,14 +1069,14 @@ PHP_FUNCTION(getopt)
 		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
 
 		/* Iterate over the hash to construct the argv array. */
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
 			zend_string *tmp_arg_str;
 			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
 			argv[pos++] = estrdup(ZSTR_VAL(arg_str));
 
 			zend_tmp_string_release(tmp_arg_str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
 		 * keep some getopt implementations happy. */
@@ -1103,7 +1103,7 @@ PHP_FUNCTION(getopt)
 		memset(opts, 0, count * sizeof(opt_struct));
 
 		/* Iterate over the hash to construct the argv array. */
-		ZEND_ARRAY_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
 			zend_string *tmp_arg_str;
 			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(getopt)
 			opts++;
 
 			zend_tmp_string_release(tmp_arg_str);
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
 		orig_opts = opts;
@@ -1383,9 +1383,9 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 	zend_string *key;
 	zval *zv;
 
-	ZEND_ARRAY_FOREACH_KEY_VAL(hash, h, key, zv)
+	ZEND_HASH_FOREACH_KEY_VAL(hash, h, key, zv)
 		add_config_entry(h, key, zv, return_value);
-	ZEND_ARRAY_FOREACH_END();
+	ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -2015,7 +2015,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
 		zval option;
 
 		if (module_number != 0 && ini_entry->module_number != module_number) {

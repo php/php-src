@@ -125,7 +125,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
 		if (ini_entry->module_number != module_number) {
 			continue;
 		}
@@ -812,7 +812,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 	zval *data;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(source_hash, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(source_hash, str, data) {
 		zend_string *data_str = zend_string_dup(Z_STR_P(data), 0);
 		zend_alter_ini_entry_ex(str, data_str, modify_type, stage, 0);
 		zend_string_release(data_str);

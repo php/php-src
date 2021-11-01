@@ -398,7 +398,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
-	ZEND_ARRAY_FOREACH_PTR(props, entry) {
+	ZEND_HASH_FOREACH_PTR(props, entry) {
 		zval rv;
 		zval *value;
 
@@ -406,7 +406,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 		if (value != &EG(uninitialized_zval)) {
 			zend_hash_add(retval, entry->name, value);
 		}
-	} ZEND_ARRAY_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	*is_temp = 1;
 	return retval;

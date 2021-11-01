@@ -228,13 +228,13 @@ static void zend_persist_zval(zval *z)
 				if (HT_IS_PACKED(ht)) {
 					zval *zv;
 
-					ZEND_PACKED_FOREACH_VAL(ht, zv) {
+					ZEND_HASH_PACKED_FOREACH_VAL(ht, zv) {
 						zend_persist_zval(zv);
-					} ZEND_PACKED_FOREACH_END();
+					} ZEND_HASH_FOREACH_END();
 				} else {
 					Bucket *p;
 
-					ZEND_HASH_FOREACH_BUCKET(ht, p) {
+					ZEND_HASH_MAP_FOREACH_BUCKET(ht, p) {
 						if (p->key) {
 							zend_accel_store_interned_string(p->key);
 						}
@@ -285,7 +285,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 
 	zend_hash_persist(attributes);
 
-	ZEND_PACKED_FOREACH_VAL(attributes, v) {
+	ZEND_HASH_PACKED_FOREACH_VAL(attributes, v) {
 		zend_attribute *attr = Z_PTR_P(v);
 		zend_attribute *copy = zend_shared_memdup_put_free(attr, ZEND_ATTRIBUTE_SIZE(attr->argc));
 
@@ -300,7 +300,7 @@ static HashTable *zend_persist_attributes(HashTable *attributes)
 		}
 
 		ZVAL_PTR(v, copy);
-	} ZEND_PACKED_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
 	HashTable *ptr = zend_shared_memdup_put_free(attributes, sizeof(HashTable));
 	GC_SET_REFCOUNT(ptr, 2);
@@ -344,13 +344,13 @@ static HashTable *zend_persist_backed_enum_table(HashTable *backed_enum_table)
 	if (HT_IS_PACKED(backed_enum_table)) {
 		zval *zv;
 
-		ZEND_PACKED_FOREACH_VAL(backed_enum_table, zv) {
+		ZEND_HASH_PACKED_FOREACH_VAL(backed_enum_table, zv) {
 			zend_persist_zval(zv);
-		} ZEND_PACKED_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		Bucket *p;
 
-		ZEND_HASH_FOREACH_BUCKET(backed_enum_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(backed_enum_table, p) {
 			if (p->key != NULL) {
 				zend_accel_store_interned_string(p->key);
 			}
@@ -513,7 +513,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		Bucket *p;
 
 		zend_hash_persist(op_array->static_variables);
-		ZEND_HASH_FOREACH_BUCKET(op_array->static_variables, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(op_array->static_variables, p) {
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
 			zend_persist_zval(&p->val);
@@ -902,7 +902,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 
 		zend_hash_persist(&ce->function_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
 			zend_persist_class_method(&p->val, ce);
@@ -936,7 +936,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		}
 
 		zend_hash_persist(&ce->constants_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->constants_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
 			zend_persist_class_constant(&p->val);
@@ -944,7 +944,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		HT_FLAGS(&ce->constants_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 
 		zend_hash_persist(&ce->properties_info);
-		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->properties_info, p) {
 			zend_property_info *prop = Z_PTR(p->val);
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
@@ -1228,12 +1228,12 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	JIT_G(on) = 0;
 #endif
 	zend_hash_persist(class_table);
-	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		zend_accel_store_interned_string(p->key);
 		Z_CE(p->val) = zend_persist_class_entry(Z_CE(p->val));
 	} ZEND_HASH_FOREACH_END();
-	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 			ce = Z_PTR(p->val);
 			zend_update_parent_ce(ce);
@@ -1245,10 +1245,10 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	    !ZCG(current_persistent_script)->corrupted) {
 	    zend_op_array *op_array;
 
-	    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	    ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
 						if (op_array->scope == ce
 						 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
@@ -1261,10 +1261,10 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 				} ZEND_HASH_FOREACH_END();
 			}
 		} ZEND_HASH_FOREACH_END();
-	    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	    ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
 						if ((op_array->scope != ce
 						 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
@@ -1348,7 +1348,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table);
-	ZEND_HASH_FOREACH_BUCKET(&script->script.function_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(&script->script.function_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		zend_accel_store_interned_string(p->key);
 		zend_persist_op_array(&p->val);

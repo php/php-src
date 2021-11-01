@@ -99,7 +99,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 		uint32_t idx = 0;
 		zval *z;
-		ZEND_ARRAY_FOREACH_VAL(ht, z) {
+		ZEND_HASH_FOREACH_VAL(ht, z) {
 			if (!valid_format(z)) {
 				if (idx == 0) {
 					intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -120,7 +120,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 				timeStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 			}
 			idx++;
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 		ZEND_ASSERT(idx == 2 && "We checked that there are two elements above");
 	} else if (Z_TYPE_P(format) == IS_LONG) {
 		if (!valid_format(format)) {

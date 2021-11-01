@@ -1224,7 +1224,7 @@ static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 		uint32_t num_checked = 0;
 		zend_string *str;
 		zval *val;
-		ZEND_ARRAY_FOREACH_STR_KEY_VAL(ht, str, val) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
 			if (str) {
 				if (!(type_mask & MAY_BE_ARRAY_KEY_STRING)) {
 					zend_error_noreturn(E_CORE_ERROR,
@@ -1248,7 +1248,7 @@ static void zend_verify_internal_func_info(zend_function *fn, zval *retval) {
 			if (++num_checked > 16) {
 				break;
 			}
-		} ZEND_ARRAY_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
 	}
 #endif
 }
