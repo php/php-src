@@ -3582,7 +3582,9 @@ unknown_opcode:
 				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				if (opline->result_type == IS_TMP_VAR) {
 					if (opline->opcode == ZEND_FETCH_R || opline->opcode == ZEND_FETCH_IS) {
-						tmp |= MAY_BE_RCN;
+						/* Variable reference counter may be decremented before use */
+						/* See: ext/opcache/tests/jit/fetch_r_001.phpt */
+						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					}
