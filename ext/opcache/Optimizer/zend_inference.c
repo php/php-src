@@ -3389,6 +3389,7 @@ static zend_always_inline int _zend_update_type_info(
 								 * is already an object. */
 								break;
 							case ZEND_SEND_VAR:
+							case ZEND_FETCH_DIM_R:
 								/* This can occur if a DIM_FETCH_FUNC_ARG with UNUSED op2 is left
 								 * behind, because it can't be converted to DIM_FETCH_R. */
 								break;
