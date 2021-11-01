@@ -3047,9 +3047,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_dispatch_try
 				if (ex) {
 					zend_exception_set_previous(ex, Z_OBJ_P(fast_call));
 				} else {
-					EG(exception) = Z_OBJ_P(fast_call);
+					ex = EG(exception) = Z_OBJ_P(fast_call);
 				}
-				ex = Z_OBJ_P(fast_call);
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 --TEST--
-JIT ASSIGN_DIM_OP: Cyclic dependency
+FETCH_R: 001 result reference counter may be decremented befor use
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -7,12 +7,10 @@ opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
 --FILE--
 <?php
-$a = null; 
-$a[] .= $a;
-var_dump($a);
+$x = [&$v];
+$y = 'x';
+$$y == [&$x[0]];
 ?>
+DONE
 --EXPECT--
-array(1) {
-  [0]=>
-  string(0) ""
-}
+DONE
