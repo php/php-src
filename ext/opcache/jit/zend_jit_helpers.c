@@ -347,7 +347,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_rw(HashTable *ht, zend_strin
 		if (_zend_handle_numeric_str_ex(str->val, str->len, &idx)) {
 			retval = zend_hash_index_find(ht, idx);
 			if (!retval) {
-				if (UNEXPECTED(zend_undefined_index_write(ht, str) == FAILURE)) {
+				if (UNEXPECTED(zend_undefined_offset_write(ht, idx) == FAILURE)) {
 					return NULL;
 				}
 				retval = zend_hash_index_add_new(ht, idx, &EG(uninitialized_zval));
