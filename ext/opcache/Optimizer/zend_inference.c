@@ -656,35 +656,26 @@ static int zend_inference_calc_binary_op_range(
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				if (op2_min <= 0 && op2_max >= 0) {
-					/* If op2 crosses zero, then floating point values close to zero might be
-					 * possible, which will result in arbitrarily large results. As such, we can't
-					 * do anything useful in that case. */
-					break;
-				}
-				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
-					/* Avoid ill-defined division, which may trigger SIGFPE. */
-					break;
-				}
 
-				zend_long t1_, t2_, t3_, t4_;
-				float_div(op1_min, op2_min, &t1, &t1_);
-				float_div(op1_min, op2_max, &t2, &t2_);
-				float_div(op1_max, op2_min, &t3, &t3_);
-				float_div(op1_max, op2_max, &t4, &t4_);
-
-				/* The only case in which division can "overflow" either a division by an absolute
-				 * value smaller than one, or LONG_MIN / -1 in particular. Both cases have already
-				 * been excluded above. */
-				if (OP1_RANGE_UNDERFLOW() ||
-					OP2_RANGE_UNDERFLOW() ||
-					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()) {
+				/* If op2 crosses zero, then floating point values close to zero might be
+				 * possible, which will result in arbitrarily large results (overflow). Also
+				 * avoid dividing LONG_MIN by -1, which is UB. */
+				if (OP1_RANGE_UNDERFLOW() || OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() || OP2_RANGE_OVERFLOW() ||
+					(op2_min <= 0 && op2_max >= 0) ||
+					(op1_min == ZEND_LONG_MIN && op2_max == -1)
+				) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
+					zend_long t1_, t2_, t3_, t4_;
+					float_div(op1_min, op2_min, &t1, &t1_);
+					float_div(op1_min, op2_max, &t2, &t2_);
+					float_div(op1_max, op2_min, &t3, &t3_);
+					float_div(op1_max, op2_max, &t4, &t4_);
+
 					tmp->min = MIN(MIN(MIN(t1, t2), MIN(t3, t4)), MIN(MIN(t1_, t2_), MIN(t3_, t4_)));
 					tmp->max = MAX(MAX(MAX(t1, t2), MAX(t3, t4)), MAX(MAX(t1_, t2_), MAX(t3_, t4_)));
 				}
