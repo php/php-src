@@ -3920,6 +3920,18 @@ static int zend_jit_escape_if_undef_r0(dasm_State **Dst, int var, uint32_t flags
 
 	ZEND_ASSERT(opline);
 
+	if ((opline-1)->opcode != ZEND_FETCH_CONSTANT
+	 && (opline-1)->opcode != ZEND_FETCH_LIST_R
+	 && ((opline-1)->op1_type & (IS_VAR|IS_TMP_VAR))
+	 && !(flags & ZEND_JIT_EXIT_FREE_OP1)) {
+		val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline-1)->op1.var);
+
+		|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
+		|	GET_ZVAL_PTR r0, val_addr
+		|	GC_ADDREF r0
+		|2:
+	}
+
 	|	LOAD_IP_ADDR (opline - 1)
 	|	jmp ->trace_escape
 	|1:
