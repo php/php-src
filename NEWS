@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug #76167 (mbstring may use pointer from some previous request).
     (cmb, cataphract)
+  . Fixed bug #81390 (mb_detect_encoding() regression). (alexdowad)
 
 14 Oct 2021, PHP 8.1.0RC4
 
