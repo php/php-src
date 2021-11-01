@@ -190,14 +190,18 @@ static bool is_live_loop_var_free(
 		return false;
 	}
 
-	int ssa_var = ssa_op->op1_use;
-	if (ssa_var < 0) {
+	int var = ssa_op->op1_use;
+	if (var < 0) {
 		return false;
 	}
 
-	int op_num = scdf->ssa->vars[ssa_var].definition;
-	ZEND_ASSERT(op_num >= 0);
-	uint32_t def_block = scdf->ssa->cfg.map[op_num];
+	zend_ssa_var *ssa_var = &scdf->ssa->vars[var];
+	uint32_t def_block;
+	if (ssa_var->definition >= 0) {
+		def_block = scdf->ssa->cfg.map[ssa_var->definition];
+	} else {
+		def_block = ssa_var->definition_phi->block;
+	}
 	return zend_bitset_in(scdf->executable_blocks, def_block);
 }
 
