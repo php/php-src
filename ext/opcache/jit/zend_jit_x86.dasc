@@ -15733,8 +15733,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 					    (ssa_op->op1_use != current_var || !last_use)) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
 					}
-					res_info = OP1_INFO();
+					res_info = RES_INFO();
 					if (res_info & MAY_BE_DOUBLE) {
+						ZEND_REGSET_INCL(regset, ZREG_R0);
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 						ZEND_REGSET_INCL(regset, ZREG_XMM1);
 					}
