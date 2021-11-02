@@ -119,24 +119,24 @@ phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong id
 	return &branch->result;
 }
 
-phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong higher_idx) {
+phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong exclusive_upper_bound) {
 	phpdbg_btree_position pos;
 
 	pos.tree = tree;
 	pos.end = lower_idx;
-	pos.cur = higher_idx;
+	pos.cur = exclusive_upper_bound;
 
 	return pos;
 }
 
 phpdbg_btree_result *phpdbg_btree_next(phpdbg_btree_position *pos) {
-	phpdbg_btree_result *result = phpdbg_btree_find_closest(pos->tree, pos->cur);
+	phpdbg_btree_result *result = phpdbg_btree_find_closest(pos->tree, pos->cur - 1);
 
 	if (result == NULL || result->idx < pos->end) {
 		return NULL;
 	}
 
-	pos->cur = result->idx - 1;
+	pos->cur = result->idx;
 
 	return result;
 }

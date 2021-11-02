@@ -1,0 +1,42 @@
+--TEST--
+phpdbg_watch_recursive()
+--PHPDBG--
+r
+q
+--EXPECTF--
+[Successful compilation of %s]
+prompt> UPDATED: $->foo: array ( 0 => 1, )
+ADDED: 1: array ( 0 => 1, 1 => 10, )
+UPDATED: $->foo[]: array ( 0 => 1, 1 => 10, )
+ADDED: key: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
+ADDED: 1: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
+ADDED: 0: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
+UPDATED: $->foo[]: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
+UPDATED: $->foo[key]: array ( 2 => 20, )
+UPDATED: $->foo: array ( )
+[Script ended normally]
+prompt>
+--FILE--
+<?php
+
+class A {
+    public $foo = [];
+}
+
+$a = new A;
+$handle = phpdbg_watch_recursive('', $a, function($name, $type, $value = null) {
+    if ($type == PhpdbgWatchModification::REMOVED) {
+        print "$name REMOVED\n";
+    } else {
+        print "{$type->name}: $name: " . preg_replace("(\s+)", " ", var_export($value, true)) . "\n";
+    }
+});
+
+$a->foo[] = 1;
+$a->foo[1] = 10;
+$a->foo += [2];
+$a->foo["key"] = [];
+$a->foo["key"][2] = 20;
+$a->foo = [];
+
+?>

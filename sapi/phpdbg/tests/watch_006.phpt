@@ -54,16 +54,16 @@ prompt> [Element 1 has been added to watchpoint]
 1 elements were added to the array
 >00008: $c = [1];
  00009: $b = &$c;
- 00010: 
-prompt> [Breaking on watchpoint $b]
-Old value inaccessible or destroyed
-New value (reference): Array ([0] => 2,[1] => 3)
->00009: $b = &$c;
- 00010: 
+ 00010: $c = 2;
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed
 New value (reference): Array ([0] => 1)
->00010: 
+>00010: $c = 2;
+ 00011: 
+prompt> [Breaking on watchpoint $b]
+Old value inaccessible or destroyed
+New value: 2
+>00011: 
 prompt> [$b has been removed, removing watchpoint recursively]
 [$a[0] has been removed, removing watchpoint]
 [Script ended normally]
@@ -78,3 +78,4 @@ $a[0] = 2;
 $a[1] = 3;
 $c = [1];
 $b = &$c;
+$c = 2;

@@ -26,8 +26,8 @@ prompt> [Breakpoint #0 at %s:%d, hits: 2]
  00021:     } else {
 prompt> [Added watchpoint #0 for $value]
 prompt> [Added watchpoint #1 for $lower[0]]
-prompt> [$lower[0] has been removed, removing watchpoint]
-[$value has been removed, removing watchpoint]
+prompt> [$value has been removed, removing watchpoint]
+[$lower[0] has been removed, removing watchpoint]
 --FILE--
 <?php
 

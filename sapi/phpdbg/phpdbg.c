@@ -27,6 +27,7 @@
 #include "zend_alloc.h"
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
+#include "zend_enum.h"
 #include "phpdbg_arginfo.h"
 #include "zend_vm.h"
 
@@ -46,6 +47,8 @@ int phpdbg_startup_run = 0;
 static bool phpdbg_booted = 0;
 static bool phpdbg_fully_started = 0;
 bool use_mm_wrappers = 1;
+
+zend_class_entry *phpdbg_watch_modification_ce;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -174,6 +177,8 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR",  PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
+
+	phpdbg_watch_modification_ce = register_class_PhpdbgWatchModification();
 
 	return SUCCESS;
 } /* }}} */
@@ -374,6 +379,74 @@ PHP_FUNCTION(phpdbg_clear)
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
+
+static void phpdbg_watch_func(int type, INTERNAL_FUNCTION_PARAMETERS) {
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc = {0};
+
+	zend_string *watchstr;
+	zval *target = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zf", &watchstr, &target, &fci, &fcc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	HashPosition pos;
+	zend_hash_internal_pointer_end_ex(&PHPDBG_G(watch_elements), &pos);
+	phpdbg_watch_element *last_watch = zend_hash_get_current_data_ptr_ex(&PHPDBG_G(watch_elements), &pos);
+
+	if (Z_ISNULL_P(target)) {
+		target = NULL;
+	}
+
+	if (fcc.function_handler) {
+		Z_TRY_ADDREF(fci.function_name);
+		if (fcc.object) {
+			GC_ADDREF(fcc.object);
+		}
+	}
+
+	phpdbg_watch_creation_options options = {
+		.fcc = &fcc,
+		.call_name = &fci.function_name,
+		.quiet = true,
+		.base = target,
+	};
+
+	phpdbg_create_watchpoint(ZSTR_VAL(watchstr), ZSTR_LEN(watchstr), type, &options);
+
+	phpdbg_watch_element *element;
+	ZEND_HASH_REVERSE_FOREACH_PTR(&PHPDBG_G(watch_elements), element) {
+		if (element == last_watch) {
+			break;
+		}
+		RETURN_LONG(element->id);
+	} ZEND_HASH_FOREACH_END();
+}
+
+PHP_FUNCTION(phpdbg_watch)
+{
+	phpdbg_watch_func(PHPDBG_WATCH_SIMPLE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(phpdbg_watch_recursive)
+{
+	phpdbg_watch_func(PHPDBG_WATCH_RECURSIVE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(phpdbg_unwatch)
+{
+	zend_long watch_id;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &watch_id) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	phpdbg_watch_element *element;
+	if ((element = zend_hash_index_find_ptr(&PHPDBG_G(watch_elements), watch_id))) {
+		phpdbg_remove_watch_element(element);
+	}
+}
 
 /* {{{ */
 PHP_FUNCTION(phpdbg_color)

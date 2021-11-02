@@ -259,6 +259,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable watch_free;                        /* pointers to watch for being freed */
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
+	int watch_element_count;                     /* total number of active elements */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
