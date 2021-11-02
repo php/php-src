@@ -828,7 +828,7 @@ try_again:
 			zend_string *key;
 			has_cookies = 1;
 			smart_str_append_const(&soap_headers, "Cookie: ");
-			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
 				if (key && Z_TYPE_P(data) == IS_ARRAY) {
 					zval *value;
 

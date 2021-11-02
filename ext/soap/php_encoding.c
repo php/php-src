@@ -3091,7 +3091,7 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 		encodePtr enc = get_conversion(XSD_ANYXML);
 		zend_string *name;
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), name, el) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), name, el) {
 			ret = master_to_xml(enc, el, style, parent);
 		    if (ret &&
 		        ret->name != xmlStringTextNoenc) {
