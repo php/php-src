@@ -1,10 +1,10 @@
 --TEST--
-IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject() for ICU >= 58.1 and < 70.1
+IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject() for ICU >= 70.1
 --EXTENSIONS--
 intl
 --SKIPIF--
 <?php
-if (version_compare(INTL_ICU_VERSION, '58.1') < 0 || version_compare(INTL_ICU_VERSION, '70.1') >= 0) die('skip for ICU >= 58.1 and < 70.1');
+if (version_compare(INTL_ICU_VERSION, '70.1') < 0) die('skip for ICU >= 70.1');
 ?>
 --FILE--
 <?php
@@ -48,7 +48,7 @@ int(0)
 string(7) "islamic"
 string(12) "Europe/Minsk"
 
-dimanche 1 janvier 2012 ap. J.-C. à 00:00:00 Temps universel coordonné
+dimanche 1 janvier 2012 ap. J.-C. à 00:00:00 temps universel coordonné
 bool(false)
 string(9) "gregorian"
 string(3) "UTC"
