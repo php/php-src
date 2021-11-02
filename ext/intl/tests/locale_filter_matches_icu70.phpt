@@ -1,8 +1,10 @@
 --TEST--
-locale_filter_matches.phpt() for ICU >= 67.1 and < 70.1
+locale_filter_matches.phpt() for ICU >= 70.1
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '67.1') < 0 || version_compare(INTL_ICU_VERSION, '70.1') >= 0) die('skip for ICU >= 67.1 and < 70.1'); ?>
+<?php
+if( !extension_loaded( 'intl' ) ) die('skip');
+if (version_compare(INTL_ICU_VERSION, '70.1') < 0) die('skip for ICU >= 70.1');
+?>
 --FILE--
 <?php
 
@@ -96,7 +98,7 @@ loc_range:de-de matches lang_tag sl_IT ? NO
 loc_range:de_DE canonically matches lang_tag sl_IT ? NO
 --------------
 loc_range:de-de matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? NO
-loc_range:de_DE canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? NO
+loc_range:de_DE canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? NO
 --------------
 loc_range:de-de matches lang_tag sl_IT_rozaj ? NO
 loc_range:de_DE canonically matches lang_tag sl_IT_ROZAJ ? NO
@@ -144,7 +146,7 @@ loc_range:sl_IT matches lang_tag sl_IT ? YES
 loc_range:sl_IT canonically matches lang_tag sl_IT ? YES
 --------------
 loc_range:sl_IT matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? YES
-loc_range:sl_IT canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? YES
+loc_range:sl_IT canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? YES
 --------------
 loc_range:sl_IT matches lang_tag sl_IT_rozaj ? YES
 loc_range:sl_IT canonically matches lang_tag sl_IT_ROZAJ ? YES
@@ -192,7 +194,7 @@ loc_range:sl_IT_Nedis matches lang_tag sl_IT ? NO
 loc_range:sl_IT_NEDIS canonically matches lang_tag sl_IT ? NO
 --------------
 loc_range:sl_IT_Nedis matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? YES
-loc_range:sl_IT_NEDIS canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? YES
+loc_range:sl_IT_NEDIS canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? YES
 --------------
 loc_range:sl_IT_Nedis matches lang_tag sl_IT_rozaj ? NO
 loc_range:sl_IT_NEDIS canonically matches lang_tag sl_IT_ROZAJ ? NO
@@ -240,7 +242,7 @@ loc_range:jbo matches lang_tag sl_IT ? NO
 loc_range:jbo canonically matches lang_tag sl_IT ? NO
 --------------
 loc_range:jbo matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? NO
-loc_range:jbo canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? NO
+loc_range:jbo canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? NO
 --------------
 loc_range:jbo matches lang_tag sl_IT_rozaj ? NO
 loc_range:jbo canonically matches lang_tag sl_IT_ROZAJ ? NO
@@ -288,7 +290,7 @@ loc_range:art-lojban matches lang_tag sl_IT ? NO
 loc_range:jbo canonically matches lang_tag sl_IT ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? NO
-loc_range:jbo canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? NO
+loc_range:jbo canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? NO
 --------------
 loc_range:art-lojban matches lang_tag sl_IT_rozaj ? NO
 loc_range:jbo canonically matches lang_tag sl_IT_ROZAJ ? NO
@@ -336,7 +338,7 @@ loc_range:sl_IT matches lang_tag sl_IT ? YES
 loc_range:sl_IT canonically matches lang_tag sl_IT ? YES
 --------------
 loc_range:sl_IT matches lang_tag sl_IT_nedis-a-kirti-x-xyz ? YES
-loc_range:sl_IT canonically matches lang_tag sl_IT_NEDIS_A_KIRTI_X_XYZ ? YES
+loc_range:sl_IT canonically matches lang_tag sl_IT_NEDIS@a=kirti;x=xyz ? YES
 --------------
 loc_range:sl_IT matches lang_tag sl_IT_rozaj ? YES
 loc_range:sl_IT canonically matches lang_tag sl_IT_ROZAJ ? YES
