@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.26
+04 Nov 2021, PHP 7.4.26RC1
 
 - Core:
   . Fixed bug #81518 (Header injection via default_mimetype / default_charset).
