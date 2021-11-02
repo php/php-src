@@ -2967,7 +2967,6 @@ static bool zend_ffi_same_types(zend_ffi_type *old, zend_ffi_type *type) /* {{{ 
 				zend_string *key;
 				Bucket *b = type->record.fields.arData;
 
-				ZEND_ASSERT(!HT_IS_PACKED(&type->record.fields));
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&old->record.fields, key, old_field) {
 					while (Z_TYPE(b->val) == IS_UNDEF) {
 						b++;

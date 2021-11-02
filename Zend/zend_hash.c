@@ -1339,8 +1339,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 
 static zend_always_inline void _zend_hash_packed_del_val(HashTable *ht, uint32_t idx, zval *zv)
 {
-	ZEND_ASSERT(HT_IS_PACKED(ht));
-
 	idx = HT_HASH_TO_IDX(idx);
 	ht->nNumOfElements--;
 	if (ht->nInternalPointer == idx || UNEXPECTED(HT_HAS_ITERATORS(ht))) {
@@ -1378,8 +1376,6 @@ static zend_always_inline void _zend_hash_packed_del_val(HashTable *ht, uint32_t
 
 static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx, Bucket *p, Bucket *prev)
 {
-	ZEND_ASSERT(!HT_IS_PACKED(ht));
-
 	if (prev) {
 		Z_NEXT(prev->val) = Z_NEXT(p->val);
 	} else {
@@ -1428,8 +1424,6 @@ static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bu
 	Bucket *prev = NULL;
 	uint32_t nIndex;
 	uint32_t i;
-
-	ZEND_ASSERT(!HT_IS_PACKED(ht));
 
 	nIndex = p->h | ht->nTableMask;
 	i = HT_HASH(ht, nIndex);
@@ -2592,6 +2586,7 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulo
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
+	ZEND_ASSERT(!HT_IS_PACKED(ht));
 
 	p = zend_hash_index_find_bucket(ht, h);
 	return p ? &p->val : NULL;
