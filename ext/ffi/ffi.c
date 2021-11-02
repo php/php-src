@@ -6291,7 +6291,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 		zend_ulong i;
 		zend_ffi_type *arg_type;
 
-		ZEND_HASH_PACKED_FOREACH_NUM_KEY_PTR(args, i, arg_type) {
+		ZEND_HASH_PACKED_FOREACH_KEY_PTR(args, i, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
 # ifdef _WIN64
 			if (i >= 4 && i <= 5 && (arg_type->kind == ZEND_FFI_TYPE_FLOAT || arg_type->kind == ZEND_FFI_TYPE_DOUBLE)) {
