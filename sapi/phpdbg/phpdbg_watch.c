@@ -1240,7 +1240,7 @@ void phpdbg_watch_efree(void *ptr) {
 void phpdbg_list_watchpoints(void) {
 	phpdbg_watch_element *element;
 
-	ZEND_HASH_MAP_FOREACH_PTR(&PHPDBG_G(watch_elements), element) {
+	ZEND_HASH_FOREACH_PTR(&PHPDBG_G(watch_elements), element) {
 		phpdbg_writeln("%.*s (%s, %s)", (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str), (element->flags & (PHPDBG_WATCH_ARRAY|PHPDBG_WATCH_OBJECT)) ? "array" : "variable", (element->flags & PHPDBG_WATCH_RECURSIVE) ? "recursive" : "simple");
 	} ZEND_HASH_FOREACH_END();
 }
