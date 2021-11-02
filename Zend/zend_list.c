@@ -218,7 +218,7 @@ void zend_close_rsrc_list(HashTable *ht)
 	uint32_t i = ht->nNumUsed;
 
 	while (i-- > 0) {
-		zval *p = HT_IS_PACKED(ht) ? &ht->arPacked[i] : &ht->arData[i].val;
+		zval *p = ZEND_HASH_ELEMENT(ht, i);
 		if (Z_TYPE_P(p) != IS_UNDEF) {
 			zend_resource *res = Z_PTR_P(p);
 			if (res->type >= 0) {

@@ -968,8 +968,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	(sizeof(zval) + (~HT_FLAGS(__ht) & HASH_FLAG_PACKED) * ((sizeof(Bucket)-sizeof(zval))/HASH_FLAG_PACKED))
 #endif
 
-#define ZEND_HASH_ELEMENT(__ht, _idx, _size) \
+#define ZEND_HASH_ELEMENT_EX(__ht, _idx, _size) \
 	((zval*)(((char*)(__ht)->arPacked) + ((_idx) * (_size))))
+
+#define ZEND_HASH_ELEMENT(__ht, _idx) \
+	ZEND_HASH_ELEMENT_EX(__ht, _idx, ZEND_HASH_ELEMENT_SIZE(__ht))
 
 #define ZEND_HASH_NEXT_ELEMENT(_el, _size) \
 	((zval*)(((char*)(_el)) + (_size)))
@@ -989,7 +992,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		HashTable *__ht = (_ht); \
 		uint32_t _idx = __ht->nNumUsed; \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
-		zval *_z = ZEND_HASH_ELEMENT(__ht, _idx, _size); \
+		zval *_z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
 		for (;_idx > 0; _idx--) { \
 			_z = ZEND_HASH_PREV_ELEMENT(_z, _size); \
 			if (UNEXPECTED(Z_TYPE_P(_z) == IS_UNDEF)) continue;
@@ -1000,7 +1003,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		zend_string *__key = NULL; \
 		uint32_t _idx = (_from); \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
-		zval *__z = ZEND_HASH_ELEMENT(__ht, _idx, _size); \
+		zval *__z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
 		uint32_t _count = __ht->nNumUsed - _idx; \
 		for (;_count > 0; _count--) { \
 			zval *_z = __z; \
@@ -1029,7 +1032,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		zend_ulong __h; \
 		zend_string *__key = NULL; \
 		size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht); \
-		zval *__z = ZEND_HASH_ELEMENT(__ht, _idx, _size); \
+		zval *__z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size); \
 		for (;_idx > 0; _idx--) { \
 			if (HT_IS_PACKED(__ht)) { \
 				__z--; \

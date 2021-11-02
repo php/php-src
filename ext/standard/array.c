@@ -6462,11 +6462,7 @@ PHP_FUNCTION(array_combine)
 			if (pos_values >= values->nNumUsed) {
 				break;
 			}
-			if (HT_IS_PACKED(values)) {
-				entry_values = &values->arPacked[pos_values];
-			} else {
-				entry_values = &values->arData[pos_values].val;
-			}
+			entry_values = ZEND_HASH_ELEMENT(values, pos_values);
 			if (Z_TYPE_P(entry_values) != IS_UNDEF) {
 				if (Z_TYPE_P(entry_keys) == IS_LONG) {
 					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
