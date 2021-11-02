@@ -3600,7 +3600,7 @@ PHP_FUNCTION(array_slice)
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
-	// Contains modified variants of ZEND_HASH_MAP_FOREACH_VAL
+	// Contains modified variants of ZEND_HASH_FOREACH_VAL
 	{
 		HashTable *ht = Z_ARRVAL_P(input);
 
