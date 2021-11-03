@@ -790,6 +790,15 @@ void phpdbg_queue_element_for_recreation(phpdbg_watch_element *element) {
 			}
 			child = child->child;
 		} while (child);
+	} else {
+		phpdbg_watch_element *child = element->child;
+		while (child) {
+			if (zend_hash_del(&PHPDBG_G(watch_recreation), child->str) == SUCCESS) {
+				prev = child;
+				break;
+			}
+			child = child->child;
+		}
 	}
 	zend_hash_update_ptr(&PHPDBG_G(watch_recreation), element->str, element);
 
