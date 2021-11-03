@@ -13,6 +13,13 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+/* offset = size of the string */
+try {
+    substr_count($str, "t", 10);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 /* offset > size of the string */
 try {
     substr_count($str, "t", 25);
@@ -40,6 +47,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 *** Testing error conditions ***
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 substr_count(): Argument #4 ($length) must be contained in argument #1 ($haystack)

@@ -5416,7 +5416,7 @@ PHP_FUNCTION(substr_count)
 	if (offset < 0) {
 		offset += (zend_long)haystack_len;
 	}
-	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+	if ((offset < 0) || ((size_t)offset >= haystack_len)) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
