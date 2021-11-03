@@ -1225,7 +1225,7 @@ void phpdbg_check_watchpoint(phpdbg_watchpoint_t *watch) {
 		}
 	}
 
-	bool use_heap;
+	ALLOCA_FLAG(use_heap);
 	phpdbg_watch_element **touched_elements = do_alloca(PHPDBG_G(watch_element_count) * sizeof(phpdbg_watch_element *), use_heap);
 	int checked_elements = phpdbg_watchpoint_change_collision_elements(watch, touched_elements);
 
