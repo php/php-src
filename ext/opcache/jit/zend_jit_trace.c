@@ -4367,8 +4367,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									zend_may_throw(opline, ssa_op, op_array, ssa))) {
 								goto jit_failure;
 							}
-							if ((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)
-							 || (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD)) {
+							if (((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)
+							  || (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD))
+							 && has_concrete_type(op1_info)
+							 && has_concrete_type(op2_info)) {
 								ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 							}
 						}
