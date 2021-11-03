@@ -214,7 +214,7 @@ found_weakref:
 	}
 
 	if (tag == ZEND_WEAKREF_TAG_HT) {
-		ZEND_HASH_FOREACH(ptr, tagged_ptr) {
+		ZEND_HASH_FOREACH_PTR(ptr, tagged_ptr) {
 			if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_REF) {
 				ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
 				goto found_weakref;
