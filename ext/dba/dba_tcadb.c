@@ -77,6 +77,7 @@ DBA_CLOSE_FUNC(tcadb)
 	dba_tcadb_data *dba = info->dbf;
 
 	tcadbclose(dba->tcadb);
+	tcadbdel(dba->tcadb);
 	pefree(dba, info->flags & DBA_PERSISTENT);
 }
 
