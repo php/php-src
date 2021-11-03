@@ -1284,6 +1284,9 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 	zend_string *key;
 	zval *value;
 
+	if (HT_IS_PACKED(properties)) {
+		return;
+	}
 	EG(fake_scope) = Z_OBJCE_P(obj);
 	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(properties, key, value) {
 		if (key) {
@@ -1558,7 +1561,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 	zend_long h;
 	zend_property_info *property_info;
 
-	ZEND_HASH_MAP_FOREACH_KEY_VAL(properties, h, key, prop) {
+	ZEND_HASH_FOREACH_KEY_VAL(properties, h, key, prop) {
 		if (key) {
 			if (ZSTR_VAL(key)[0] == '\0') {
 				const char *class_name, *prop_name;
