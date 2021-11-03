@@ -75,9 +75,9 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 
 	major = php_strtok_r(NULL, ",", &strtok_buf);
 	minor = php_strtok_r(NULL, ",", &strtok_buf);
-	efree(token);
 
-	p = php_com_string_to_olestring(ZSTR_VAL(search_string), ZSTR_LEN(search_string), codepage);
+	size_t token_len = strlen(token);
+	p = php_com_string_to_olestring(token, token_len, codepage);
 
 	if (SUCCEEDED(CLSIDFromString(p, &clsid))) {
 		WORD major_i = 1, minor_i = 0;
@@ -121,7 +121,6 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 			DWORD VersionCount;
 			char version[20];
 			char *libname;
-			long libnamelen;
 
 			if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CLASSES_ROOT, "TypeLib", 0, KEY_READ, &hkey) &&
 					ERROR_SUCCESS == RegQueryInfoKey(hkey, NULL, NULL, NULL, &SubKeys,
@@ -129,7 +128,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 
 				MaxSubKeyLength++; /* make room for NUL */
 				keyname = emalloc(MaxSubKeyLength);
-				libname = emalloc(ZSTR_LEN(search_string) + 1);
+				libname = emalloc(token_len + 1);
 
 				for (i = 0; i < SubKeys && TL == NULL; i++) {
 					if (ERROR_SUCCESS == RegEnumKey(hkey, i, keyname, MaxSubKeyLength) &&
@@ -141,10 +140,9 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 									continue;
 								}
 								/* get the default value for this key and compare */
-								libnamelen = (long)ZSTR_LEN(search_string)+1;
+								long libnamelen = (long)token_len+1;
 								if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen)) {
-									if (0 == stricmp(libname, ZSTR_VAL(search_string))) {
-										zend_string *str = NULL;
+									if (0 == stricmp(libname, token_len)) {
 										int major_tmp, minor_tmp;
 
 										/* fetch the GUID and add the version numbers */
@@ -152,7 +150,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 											major_tmp = 1;
 											minor_tmp = 0;
 										}
-										str = zend_strpprintf(0, "%s,%d,%d", keyname, major_tmp, minor_tmp);
+										zend_string *str = zend_strpprintf(0, "%s,%d,%d", keyname, major_tmp, minor_tmp);
 										/* recurse */
 										TL = php_com_load_typelib(str, codepage);
 
@@ -173,6 +171,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(const zend_string *search_stri
 	}
 
 	efree(p);
+	efree(token);
 
 	return TL;
 }
