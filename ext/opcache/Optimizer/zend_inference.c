@@ -3330,6 +3330,10 @@ static zend_always_inline int _zend_update_type_info(
 						|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
 						|| opline->opcode == ZEND_FETCH_LIST_W) {
 					j = ssa_vars[ssa_op->result_def].use_chain;
+					if (j < 0) {
+						/* no uses */
+						tmp |= key_type | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_NULL;
+					}
 					while (j >= 0) {
 						zend_uchar opcode;
 
