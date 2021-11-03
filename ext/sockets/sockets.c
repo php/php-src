@@ -2353,8 +2353,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zhints) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
+	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				if (zend_string_equals_literal(key, "ai_flags")) {
 					hints.ai_flags = zval_get_long(hint);

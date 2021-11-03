@@ -2115,7 +2115,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zv = &replace_ht->arData[replace_idx].val;
+				zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);

@@ -1726,8 +1726,23 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_COUNT:
 				case ZEND_QM_ASSIGN:
 				case ZEND_FE_RESET_R:
+					ADD_OP1_TRACE_GUARD();
+					break;
 				case ZEND_FE_FETCH_R:
 					ADD_OP1_TRACE_GUARD();
+					if (op1_type == IS_ARRAY && (orig_op1_type & ~IS_TRACE_PACKED) == IS_ARRAY) {
+
+						zend_ssa_var_info *info = &tssa->var_info[tssa->ops[idx].op1_use];
+
+						if (MAY_BE_PACKED(info->type) && MAY_BE_HASH(info->type)) {
+							info->type |= MAY_BE_PACKED_GUARD;
+							if (orig_op1_type & IS_TRACE_PACKED) {
+								info->type &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+							} else {
+								info->type &= ~MAY_BE_ARRAY_PACKED;
+							}
+						}
+					}
 					break;
 				case ZEND_VERIFY_RETURN_TYPE:
 					if (opline->op1_type == IS_UNUSED) {

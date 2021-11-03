@@ -744,25 +744,27 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht) /* {{{ */
 		}
 		ht2 = Z_ARRVAL_P(tmp);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
-			if (name) {
-				if (zend_string_equals_literal(name, "type_name")) {
-					if (Z_TYPE_P(tmp) == IS_STRING) {
-						type_name = Z_STRVAL_P(tmp);
-					} else if (Z_TYPE_P(tmp) != IS_NULL) {
+		if (!HT_IS_PACKED(ht2)) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht2, name, tmp) {
+				if (name) {
+					if (zend_string_equals_literal(name, "type_name")) {
+						if (Z_TYPE_P(tmp) == IS_STRING) {
+							type_name = Z_STRVAL_P(tmp);
+						} else if (Z_TYPE_P(tmp) != IS_NULL) {
+						}
+					} else if (zend_string_equals_literal(name, "type_ns")) {
+						if (Z_TYPE_P(tmp) == IS_STRING) {
+							type_ns = Z_STRVAL_P(tmp);
+						} else if (Z_TYPE_P(tmp) != IS_NULL) {
+						}
+					} else if (zend_string_equals_literal(name, "to_xml")) {
+						to_xml = tmp;
+					} else if (zend_string_equals_literal(name, "from_xml")) {
+						to_zval = tmp;
 					}
-				} else if (zend_string_equals_literal(name, "type_ns")) {
-					if (Z_TYPE_P(tmp) == IS_STRING) {
-						type_ns = Z_STRVAL_P(tmp);
-					} else if (Z_TYPE_P(tmp) != IS_NULL) {
-					}
-				} else if (zend_string_equals_literal(name, "to_xml")) {
-					to_xml = tmp;
-				} else if (zend_string_equals_literal(name, "from_xml")) {
-					to_zval = tmp;
 				}
-			}
-		} ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
+		}
 
 		if (type_name) {
 			smart_str nscat = {0};
@@ -1063,14 +1065,14 @@ PHP_METHOD(SoapServer, getFunctions)
 	} else if (service->soap_functions.ft != NULL) {
 		zval *name;
 
-		ZEND_HASH_FOREACH_VAL(service->soap_functions.ft, name) {
+		ZEND_HASH_MAP_FOREACH_VAL(service->soap_functions.ft, name) {
 			add_next_index_str(return_value, zend_string_copy(Z_STR_P(name)));
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ft != NULL) {
 		zend_function *f;
 
-		ZEND_HASH_FOREACH_PTR(ft, f) {
+		ZEND_HASH_MAP_FOREACH_PTR(ft, f) {
 			if ((service->type != SOAP_OBJECT && service->type != SOAP_CLASS) || (f->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				add_next_index_str(return_value, zend_string_copy(f->common.function_name));
 			}
@@ -2568,7 +2570,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 		sdlFunctionPtr function;
 
 		array_init(return_value);
-		ZEND_HASH_FOREACH_PTR(&sdl->functions, function) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sdl->functions, function) {
 			function_to_string(function, &buf);
 			add_next_index_stringl(return_value, ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 			smart_str_free(&buf);
@@ -4091,7 +4093,7 @@ static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params) /* {{{ */
 		sdlFunctionPtr tmp;
 		sdlParamPtr    param;
 
-		ZEND_HASH_FOREACH_PTR(&sdl->functions, tmp) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sdl->functions, tmp) {
 			if (tmp->binding && tmp->binding->bindingType == BINDING_SOAP) {
 				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)tmp->bindingAttributes;
 				if (fnb->style == SOAP_DOCUMENT) {

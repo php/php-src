@@ -53,7 +53,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 {
 	zend_property_info *property_info;
 
-	ZEND_HASH_FOREACH_PTR(&ce->properties_info, property_info) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property_info) {
 		if (zend_string_equals_literal(property_info->name, "name")) {
 			continue;
 		}
@@ -192,7 +192,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
+	ZEND_HASH_MAP_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
 		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
 			continue;
 		}

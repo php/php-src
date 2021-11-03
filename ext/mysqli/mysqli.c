@@ -398,7 +398,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
-	ZEND_HASH_FOREACH_PTR(props, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(props, entry) {
 		zval rv;
 		zval *value;
 

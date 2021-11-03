@@ -72,7 +72,7 @@ static void zend_weakref_unref(zend_ulong obj_addr, void *tagged_ptr) {
 	uintptr_t tag = ZEND_WEAKREF_GET_TAG(tagged_ptr);
 	if (tag == ZEND_WEAKREF_TAG_HT) {
 		HashTable *ht = ptr;
-		ZEND_HASH_FOREACH_PTR(ht, tagged_ptr) {
+		ZEND_HASH_MAP_FOREACH_PTR(ht, tagged_ptr) {
 			zend_weakref_unref_single(
 				ZEND_WEAKREF_GET_PTR(tagged_ptr), ZEND_WEAKREF_GET_TAG(tagged_ptr), obj_addr);
 		} ZEND_HASH_FOREACH_END();
@@ -209,7 +209,7 @@ found_weakref:
 	}
 
 	if (tag == ZEND_WEAKREF_TAG_HT) {
-		ZEND_HASH_FOREACH_PTR(ptr, tagged_ptr) {
+		ZEND_HASH_MAP_FOREACH_PTR(ptr, tagged_ptr) {
 			if (ZEND_WEAKREF_GET_TAG(tagged_ptr) == ZEND_WEAKREF_TAG_REF) {
 				ptr = ZEND_WEAKREF_GET_PTR(tagged_ptr);
 				goto found_weakref;
@@ -290,7 +290,7 @@ static void zend_weakmap_free_obj(zend_object *object)
 {
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_ulong obj_addr;
-	ZEND_HASH_FOREACH_NUM_KEY(&wm->ht, obj_addr) {
+	ZEND_HASH_MAP_FOREACH_NUM_KEY(&wm->ht, obj_addr) {
 		zend_weakref_unregister(
 			(zend_object *) obj_addr, ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP));
 	} ZEND_HASH_FOREACH_END();
@@ -412,7 +412,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 
 	zend_ulong obj_addr;
 	zval *val;
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(&wm->ht, obj_addr, val) {
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(&wm->ht, obj_addr, val) {
 		zend_object *obj = (zend_object*)obj_addr;
 		zval pair;
 		array_init(&pair);
@@ -433,7 +433,7 @@ static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 	zval *val;
-	ZEND_HASH_FOREACH_VAL(&wm->ht, val) {
+	ZEND_HASH_MAP_FOREACH_VAL(&wm->ht, val) {
 		zend_get_gc_buffer_add_zval(gc_buffer, val);
 	} ZEND_HASH_FOREACH_END();
 	zend_get_gc_buffer_use(gc_buffer, table, n);
@@ -449,7 +449,7 @@ static zend_object *zend_weakmap_clone_obj(zend_object *old_object)
 
 	zend_ulong obj_addr;
 	zval *val;
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(&new_wm->ht, obj_addr, val) {
+	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(&new_wm->ht, obj_addr, val) {
 		zend_weakref_register(
 			(zend_object *) obj_addr, ZEND_WEAKREF_ENCODE(new_wm, ZEND_WEAKREF_TAG_MAP));
 		zval_add_ref(val);

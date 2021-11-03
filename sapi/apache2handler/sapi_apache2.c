@@ -562,7 +562,7 @@ typedef struct {
 		zend_string *str;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php_module);
 
-		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
 		} ZEND_HASH_FOREACH_END();
 	}

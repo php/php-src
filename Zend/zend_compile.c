@@ -1728,7 +1728,7 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
-	ZEND_HASH_FOREACH_PTR(CG(auto_globals), auto_global) {
+	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
 		if (auto_global->jit) {
 			auto_global->armed = 1;
 		} else if (auto_global->auto_global_callback) {
@@ -5768,7 +5768,7 @@ static void zend_compile_try(zend_ast *ast) /* {{{ */
 	/* label: try { } must not be equal to try { label: } */
 	if (CG(context).labels) {
 		zend_label *label;
-		ZEND_HASH_REVERSE_FOREACH_PTR(CG(context).labels, label) {
+		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(CG(context).labels, label) {
 			if (label->opline_num == get_next_op_number()) {
 				zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
 			}
@@ -6440,7 +6440,7 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 	}
 
 	/* Validate attributes in a secondary loop (needed to detect repeated attributes). */
-	ZEND_HASH_FOREACH_PTR(*attributes, attr) {
+	ZEND_HASH_PACKED_FOREACH_PTR(*attributes, attr) {
 		if (attr->offset != offset || NULL == (config = zend_internal_attribute_get(attr->lcname))) {
 			continue;
 		}
@@ -6881,7 +6881,7 @@ static void compile_implicit_lexical_binds(
 		op_array->static_variables = zend_new_array(8);
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
 		zval *value = zend_hash_add(
 			op_array->static_variables, var_name, &EG(uninitialized_zval));
 		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
@@ -6930,7 +6930,7 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 static void zend_compile_implicit_closure_uses(closure_info *info)
 {
 	zend_string *var_name;
-	ZEND_HASH_FOREACH_STR_KEY(&info->uses, var_name)
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
 		zval zv;
 		ZVAL_NULL(&zv);
 		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);

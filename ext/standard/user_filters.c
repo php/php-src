@@ -497,8 +497,8 @@ PHP_FUNCTION(stream_get_filters)
 
 	filters_hash = php_get_stream_filters_hash();
 
-	if (filters_hash) {
-		ZEND_HASH_FOREACH_STR_KEY(filters_hash, filter_name) {
+	if (filters_hash && !HT_IS_PACKED(filters_hash)) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
 				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}

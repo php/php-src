@@ -2015,7 +2015,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
 		zval option;
 
 		if (module_number != 0 && ini_entry->module_number != module_number) {

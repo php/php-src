@@ -2352,12 +2352,22 @@ PHP_FUNCTION(substr_replace)
 		zend_string *tmp_repl_str = NULL;
 		if (repl_ht) {
 			repl_idx = 0;
-			while (repl_idx < repl_ht->nNumUsed) {
-				tmp_repl = &repl_ht->arData[repl_idx].val;
-				if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
-					break;
+			if (HT_IS_PACKED(repl_ht)) {
+				while (repl_idx < repl_ht->nNumUsed) {
+					tmp_repl = &repl_ht->arPacked[repl_idx];
+					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
+						break;
+					}
+					repl_idx++;
 				}
-				repl_idx++;
+			} else {
+				while (repl_idx < repl_ht->nNumUsed) {
+					tmp_repl = &repl_ht->arData[repl_idx].val;
+					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
+						break;
+					}
+					repl_idx++;
+				}
 			}
 			if (repl_idx < repl_ht->nNumUsed) {
 				repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
@@ -2399,12 +2409,22 @@ PHP_FUNCTION(substr_replace)
 			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
 			if (from_ht) {
-				while (from_idx < from_ht->nNumUsed) {
-					tmp_from = &from_ht->arData[from_idx].val;
-					if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
-						break;
+				if (HT_IS_PACKED(from_ht)) {
+					while (from_idx < from_ht->nNumUsed) {
+						tmp_from = &from_ht->arPacked[from_idx];
+						if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
+							break;
+						}
+						from_idx++;
 					}
-					from_idx++;
+				} else {
+					while (from_idx < from_ht->nNumUsed) {
+						tmp_from = &from_ht->arData[from_idx].val;
+						if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
+							break;
+						}
+						from_idx++;
+					}
 				}
 				if (from_idx < from_ht->nNumUsed) {
 					f = zval_get_long(tmp_from);
@@ -2434,12 +2454,22 @@ PHP_FUNCTION(substr_replace)
 			}
 
 			if (len_ht) {
-				while (len_idx < len_ht->nNumUsed) {
-					tmp_len = &len_ht->arData[len_idx].val;
-					if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
-						break;
+				if (HT_IS_PACKED(len_ht)) {
+					while (len_idx < len_ht->nNumUsed) {
+						tmp_len = &len_ht->arPacked[len_idx];
+						if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
+							break;
+						}
+						len_idx++;
 					}
-					len_idx++;
+				} else {
+					while (len_idx < len_ht->nNumUsed) {
+						tmp_len = &len_ht->arData[len_idx].val;
+						if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
+							break;
+						}
+						len_idx++;
+					}
 				}
 				if (len_idx < len_ht->nNumUsed) {
 					l = zval_get_long(tmp_len);
@@ -2469,12 +2499,22 @@ PHP_FUNCTION(substr_replace)
 			result_len = ZSTR_LEN(orig_str) - l;
 
 			if (repl_ht) {
-				while (repl_idx < repl_ht->nNumUsed) {
-					tmp_repl = &repl_ht->arData[repl_idx].val;
-					if (repl_ht != IS_UNDEF) {
-						break;
+				if (HT_IS_PACKED(repl_ht)) {
+					while (repl_idx < repl_ht->nNumUsed) {
+						tmp_repl = &repl_ht->arPacked[repl_idx];
+						if (repl_ht != IS_UNDEF) {
+							break;
+						}
+						repl_idx++;
 					}
-					repl_idx++;
+				} else {
+					while (repl_idx < repl_ht->nNumUsed) {
+						tmp_repl = &repl_ht->arData[repl_idx].val;
+						if (repl_ht != IS_UNDEF) {
+							break;
+						}
+						repl_idx++;
+					}
 				}
 				if (repl_idx < repl_ht->nNumUsed) {
 					zend_string *tmp_repl_str;
@@ -4157,12 +4197,22 @@ static zend_long php_str_replace_in_subject(
 			if (replace_ht) {
 				/* Get current entry */
 				zval *replace_entry = NULL;
-				while (replace_idx < replace_ht->nNumUsed) {
-					replace_entry = &replace_ht->arData[replace_idx].val;
-					if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
-						break;
+				if (HT_IS_PACKED(replace_ht)) {
+					while (replace_idx < replace_ht->nNumUsed) {
+						replace_entry = &replace_ht->arPacked[replace_idx];
+						if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
+							break;
+						}
+						replace_idx++;
 					}
-					replace_idx++;
+				} else {
+					while (replace_idx < replace_ht->nNumUsed) {
+						replace_entry = &replace_ht->arData[replace_idx].val;
+						if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
+							break;
+						}
+						replace_idx++;
+					}
 				}
 				if (replace_idx < replace_ht->nNumUsed) {
 					/* Make sure we're dealing with strings. */

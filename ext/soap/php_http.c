@@ -823,12 +823,12 @@ try_again:
 		/* Send cookies along with request */
 		cookies = Z_CLIENT_COOKIES_P(this_ptr);
 		ZEND_ASSERT(Z_TYPE_P(cookies) == IS_ARRAY);
-		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0) {
+		if (zend_hash_num_elements(Z_ARRVAL_P(cookies)) != 0 && !HT_IS_PACKED(Z_ARRVAL_P(cookies))) {
 			zval *data;
 			zend_string *key;
 			has_cookies = 1;
 			smart_str_append_const(&soap_headers, "Cookie: ");
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(cookies), key, data) {
 				if (key && Z_TYPE_P(data) == IS_ARRAY) {
 					zval *value;
 

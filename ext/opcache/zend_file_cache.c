@@ -299,8 +299,6 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
                                            void                     *buf,
                                            serialize_callback_t      func)
 {
-	Bucket *p, *end;
-
 	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		ht->arData = NULL;
 		return;
@@ -308,16 +306,33 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
 	if (IS_SERIALIZED(ht->arData)) {
 		return;
 	}
-	SERIALIZE_PTR(ht->arData);
-	p = ht->arData;
-	UNSERIALIZE_PTR(p);
-	end = p + ht->nNumUsed;
-	while (p < end) {
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			SERIALIZE_STR(p->key);
-			func(&p->val, script, info, buf);
+	if (HT_IS_PACKED(ht)) {
+		zval *p, *end;
+
+		SERIALIZE_PTR(ht->arPacked);
+		p = ht->arPacked;
+		UNSERIALIZE_PTR(p);
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE_P(p) != IS_UNDEF) {
+				func(p, script, info, buf);
+			}
+			p++;
 		}
-		p++;
+	} else {
+		Bucket *p, *end;
+
+		SERIALIZE_PTR(ht->arData);
+		p = ht->arData;
+		UNSERIALIZE_PTR(p);
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE(p->val) != IS_UNDEF) {
+				SERIALIZE_STR(p->key);
+				func(&p->val, script, info, buf);
+			}
+			p++;
+		}
 	}
 }
 
@@ -1107,8 +1122,6 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
                                              unserialize_callback_t   func,
                                              dtor_func_t              dtor)
 {
-	Bucket *p, *end;
-
 	ht->pDestructor = dtor;
 	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!file_cache_only)) {
@@ -1122,14 +1135,29 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
 		return;
 	}
 	UNSERIALIZE_PTR(ht->arData);
-	p = ht->arData;
-	end = p + ht->nNumUsed;
-	while (p < end) {
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			UNSERIALIZE_STR(p->key);
-			func(&p->val, script, buf);
+	if (HT_IS_PACKED(ht)) {
+		zval *p, *end;
+
+		p = ht->arPacked;
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE_P(p) != IS_UNDEF) {
+				func(p, script, buf);
+			}
+			p++;
 		}
-		p++;
+	} else {
+		Bucket *p, *end;
+
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE(p->val) != IS_UNDEF) {
+				UNSERIALIZE_STR(p->key);
+				func(&p->val, script, buf);
+			}
+			p++;
+		}
 	}
 }
 

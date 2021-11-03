@@ -3233,15 +3233,17 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		zend_string *key;
 
 		/* walk the assoc array */
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
-			if (key == NULL) {
-				continue;
-			}
-			if (zend_string_equals_literal(key, "linespacing")) {
-				strex.flags |= gdFTEX_LINESPACE;
-				strex.linespacing = zval_get_double(item);
-			}
-		} ZEND_HASH_FOREACH_END();
+		if (!HT_IS_PACKED(Z_ARRVAL_P(EXT))) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(EXT), key, item) {
+				if (key == NULL) {
+					continue;
+				}
+				if (zend_string_equals_literal(key, "linespacing")) {
+					strex.flags |= gdFTEX_LINESPACE;
+					strex.linespacing = zval_get_double(item);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 
 #ifdef VIRTUAL_DIR

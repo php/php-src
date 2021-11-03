@@ -1986,10 +1986,17 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* {
 					uint32_t idx = 0;
 					zval *first;
 
-					while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
-						idx++;
+					if (HT_IS_PACKED(Z_ARRVAL(intern->u.file.current_zval))) {
+						while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx])) {
+							idx++;
+						}
+						first = &Z_ARRVAL(intern->u.file.current_zval)->arPacked[idx];
+					} else {
+						while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
+							idx++;
+						}
+						first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
 					}
-					first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
 					return Z_TYPE_P(first) == IS_STRING && Z_STRLEN_P(first) == 0;
 				}
 				return zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 0;
