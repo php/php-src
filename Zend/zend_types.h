@@ -472,6 +472,7 @@ typedef uint32_t HashPosition;
 typedef struct _HashTableIterator {
 	HashTable    *ht;
 	HashPosition  pos;
+	unsigned      is_delete:1;
 } HashTableIterator;
 
 struct _zend_object {

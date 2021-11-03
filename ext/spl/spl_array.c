@@ -957,11 +957,41 @@ static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key) 
 }
 /* }}} */
 
+static int spl_array_check_if_delete(HashTable *ht) /* {{{ */
+{
+	int result = FAILURE;
+	HashTableIterator *iter = EG(ht_iterators);
+	HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+	while (iter != end) {
+		/* The iterator has unset value in foreach, so the current position is valid. */
+		if (iter->ht == ht && iter->is_delete == 1) {
+			result = SUCCESS;
+			iter->is_delete = 0;
+		}
+		iter++;
+	}
+
+	return result;
+}
+/* }}} */
+
 static void spl_array_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
 	HashTable *aht = spl_array_get_hash_table(object);
-	spl_array_next_ex(object, aht);
+
+	if (spl_array_check_if_delete(aht) != SUCCESS) {
+		spl_array_next_ex(object, aht);
+	} else {
+		/* execute the common part */
+		if (spl_array_is_object(object)) {
+			spl_array_skip_protected(object, aht);
+		} else {
+			uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, object);
+			zend_hash_has_more_elements_ex(aht, pos_ptr);
+		}
+	}
 }
 /* }}} */
 
