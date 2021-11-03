@@ -138,7 +138,7 @@ void php_com_typelibrary_dtor(zval *pDest);
 ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,
 		zend_string *dispatch_name, bool sink);
 bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool printdef, GUID *guid, int codepage);
-ITypeLib *php_com_cache_typelib(ITypeLib* TL, zend_string *cache_key);
+ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
 PHP_MINIT_FUNCTION(com_typeinfo);
 PHP_MSHUTDOWN_FUNCTION(com_typeinfo);
 

@@ -253,7 +253,7 @@ PHP_METHOD(com, __construct)
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
 				zend_string *typelib_str = php_com_olestring_to_string(name, obj->code_page);
 
-				if (NULL != php_com_cache_typelib(TL, typelib_str)) {
+				if (NULL != php_com_cache_typelib(TL, ZSTR_VAL(typelib_str), ZSTR_LEN(typelib_str))) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
