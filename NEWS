@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #81500 (Interval serialization regression since 7.3.14 / 7.4.2).
     (cmb)
 
+- DBA:
+  . Fixed bug #81588 (TokyoCabinet driver leaks memory). (girgias)
+
 - MBString:
   . Fixed bug #76167 (mbstring may use pointer from some previous request).
     (cmb, cataphract)

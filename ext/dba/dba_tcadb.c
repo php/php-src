@@ -81,6 +81,7 @@ DBA_CLOSE_FUNC(tcadb)
 	TCADB_DATA;
 
 	tcadbclose(dba->tcadb);
+	tcadbdel(dba->tcadb);
 	pefree(dba, info->flags & DBA_PERSISTENT);
 }
 
