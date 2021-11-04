@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.14
 
+- Core:
+  . Fixed bug #81582 (Stringable not implicitly declared if __toString() came
+    from a trait). (Nikita)
+
 - GD:
   . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
 

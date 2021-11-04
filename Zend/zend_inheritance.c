@@ -2485,6 +2485,18 @@ ZEND_API zend_result zend_do_link_class(zend_class_entry *ce, zend_string *lc_pa
 		zend_verify_abstract_class(ce);
 	}
 
+	/* Normally Stringable is added during compilation. However, if it is important from a trait,
+	 * we need to explicilty add the interface here. */
+	if (ce->__tostring && !zend_class_implements_interface(ce, zend_ce_stringable)) {
+		ZEND_ASSERT(ce->__tostring->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
+		ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
+		ce->num_interfaces++;
+		ce->interfaces = perealloc(ce->interfaces,
+			sizeof(zend_class_entry *) * ce->num_interfaces, ce->type == ZEND_INTERNAL_CLASS);
+		ce->interfaces[ce->num_interfaces - 1] = zend_ce_stringable;
+		do_interface_implementation(ce, zend_ce_stringable);
+	}
+
 	zend_build_properties_info_table(ce);
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
