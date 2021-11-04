@@ -1123,7 +1123,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
             }
             if ($use) {
                 // This handler is used by other handlers. We will add label to call it.
-                out($f," {$spec_name}_LABEL:\n");
+                out($f," {$spec_name}_LABEL: ZEND_ATTRIBUTE_UNUSED_LABEL\n");
             } else {
                 out($f,"\n");
             }
