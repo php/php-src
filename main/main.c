@@ -1216,7 +1216,7 @@ static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, co
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
 		/* no check for PG(last_error_file) is needed since it cannot
 		 * be NULL if PG(last_error_message) is not NULL */
-		if (zend_string_equals(PG(last_error_message), message)
+		if (!zend_string_equals(PG(last_error_message), message)
 			|| (!PG(ignore_repeated_source)
 				&& ((PG(last_error_lineno) != (int)error_lineno)
 					|| strcmp(PG(last_error_file), error_filename)))) {
