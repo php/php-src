@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2021, PHP 8.0.14
 
+- SPL:
+  . Fixed bug #81587 (MultipleIterator Segmentation fault w/ SimpleXMLElement
+    attached). (Nikita)
+
 18 Nov 2021, PHP 8.0.13
 
 - Core:
