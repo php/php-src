@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81507 (Fiber does not compile on AIX). (Clément Chigot)
 
+- GD:
+  . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
+
 28 Oct 2021, PHP 8.1.0RC5
 
 - Core:
