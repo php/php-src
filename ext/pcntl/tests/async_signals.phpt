@@ -18,8 +18,19 @@ posix_kill(posix_getpid(), SIGTERM);
 $i = 0; // dummy
 echo "Done!\n";
 
+// Test exception from signal handler (bug #81577)
+pcntl_signal(SIGTERM, function ($signo) { throw new Exception("Signal"); });
+posix_kill(posix_getpid(), SIGTERM);
+!$i;
+
 ?>
---EXPECT--
+--EXPECTF--
 Start!
 Signal handler called!
 Done!
+
+Fatal error: Uncaught Exception: Signal in %s:%d
+Stack trace:
+#0 %s(%d): {closure}(%s)
+#1 {main}
+  thrown in %s on line %d

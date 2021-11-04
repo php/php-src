@@ -3446,9 +3446,9 @@ ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {
 }
 /* }}} */
 
-#define ZEND_VM_INTERRUPT_CHECK() do { \
+#define ZEND_VM_INTERRUPT_CHECK(target_opline) do { \
 		if (UNEXPECTED(EG(vm_interrupt))) { \
-			ZEND_VM_INTERRUPT(); \
+			ZEND_VM_INTERRUPT(target_opline); \
 		} \
 	} while (0)
 
@@ -4677,8 +4677,8 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 #define ZEND_VM_SET_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \
-	OPLINE = new_op; \
-	ZEND_VM_INTERRUPT_CHECK()
+	ZEND_VM_INTERRUPT_CHECK(new_op); \
+	OPLINE = new_op
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))

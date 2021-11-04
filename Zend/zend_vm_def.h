@@ -9672,15 +9672,20 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 
 ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
 
-ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
+ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY, const zend_op *target_opline)
 {
+	USE_OPLINE
 	EG(vm_interrupt) = 0;
 	SAVE_OPLINE();
 	if (EG(timed_out)) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
-		ZEND_VM_ENTER();
+		if (EG(current_execute_data) != execute_data || execute_data->opline != opline) {
+			ZEND_VM_ENTER();
+		}
 	}
+
+	OPLINE = target_opline;
 	ZEND_VM_CONTINUE();
 }
