@@ -71,6 +71,11 @@ static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 
 	longjmp (jmpbuf_ptr->jmpbuf, 1);
 }
+
+static void gdPngWarningHandler (png_structp png_ptr, png_const_charp msg)
+{
+	gd_error_ex(GD_WARNING, "gd-png: libpng warning: %s", msg);
+}
 #endif
 
 static void gdPngReadData (png_structp png_ptr, png_bytep data, png_size_t length)
@@ -152,7 +157,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	}
 
 #ifdef PNG_SETJMP_SUPPORTED
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, NULL);
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, gdPngWarningHandler);
 #else
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
@@ -494,7 +499,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 #ifdef PNG_SETJMP_SUPPORTED
 	jmpbuf_wrapper jbw;
 
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, NULL);
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, gdPngWarningHandler);
 #else
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
