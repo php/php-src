@@ -2883,7 +2883,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 		zend_verify_enum(ce);
 	}
 
-	/* Normally Stringable is added during compilation. However, if it is important from a trait,
+	/* Normally Stringable is added during compilation. However, if it is imported from a trait,
 	 * we need to explicilty add the interface here. */
 	if (ce->__tostring && !zend_class_implements_interface(ce, zend_ce_stringable)) {
 		ZEND_ASSERT(ce->__tostring->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
