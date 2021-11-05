@@ -9,12 +9,6 @@ trait T {
     }
 }
 
-class C {
-    use T;
-}
-
-var_dump(new C instanceof Stringable);
-
 ?>
 --EXPECTF--
-Fatal error: Declaration of T::__toString(): int must be compatible with Stringable::__toString(): string in %s on line %d
+Fatal error: T::__toString(): Return type must be string when declared in %s on line %d

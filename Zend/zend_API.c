@@ -2433,6 +2433,11 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 		return;
 	}
 
+	if (ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & MAY_BE_NEVER) {
+		/* It is always legal to specify the never type. */
+		return;
+	}
+
 	bool is_complex_type = ZEND_TYPE_IS_COMPLEX(fptr->common.arg_info[-1].type);
 	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & ~return_type;
 	if (extra_types & MAY_BE_STATIC) {
@@ -2541,6 +2546,7 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
 		zend_check_magic_method_public(ce, fptr, error_type);
+		zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_STRING);
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		zend_check_magic_method_args(0, ce, fptr, error_type);
 		zend_check_magic_method_non_static(ce, fptr, error_type);
