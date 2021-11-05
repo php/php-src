@@ -188,11 +188,16 @@ TSRM_API void tsrm_shutdown(void)
 			next_p = p->next;
 			for (j=0; j<p->count; j++) {
 				if (p->storage[j]) {
-					if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
-						resource_types_table[j].dtor(p->storage[j]);
-					}
-					if (!resource_types_table[j].fast_offset) {
-						free(p->storage[j]);
+					if (resource_types_table) {
+						if (!resource_types_table[j].done) {
+							if (resource_types_table[j].dtor) {
+								resource_types_table[j].dtor(p->storage[j]);
+							}
+
+							if (!resource_types_table[j].fast_offset) {
+								free(p->storage[j]);
+							}
+						}
 					}
 				}
 			}
@@ -531,11 +536,13 @@ void ts_free_id(ts_rsrc_id id)
 
 			while (p) {
 				if (p->count > j && p->storage[j]) {
-					if (resource_types_table && resource_types_table[j].dtor) {
-						resource_types_table[j].dtor(p->storage[j]);
-					}
-					if (!resource_types_table[j].fast_offset) {
-						free(p->storage[j]);
+					if (resource_types_table) {
+						if (resource_types_table[j].dtor) {
+							resource_types_table[j].dtor(p->storage[j]);
+						}
+						if (!resource_types_table[j].fast_offset) {
+							free(p->storage[j]);
+						}
 					}
 					p->storage[j] = NULL;
 				}
