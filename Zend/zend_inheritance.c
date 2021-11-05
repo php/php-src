@@ -2544,7 +2544,8 @@ static void report_variance_errors(zend_class_entry *ce) {
 		} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
 		} else {
-			zend_error_noreturn(E_CORE_ERROR, "Bug #78647");
+			/* Report variance errors of the dependency, which prevent it from being linked. */
+			report_variance_errors(obligation->dependency_ce);
 		}
 	} ZEND_HASH_FOREACH_END();
 
