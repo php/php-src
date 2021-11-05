@@ -2767,6 +2767,13 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 	lowercase_name = zend_new_interned_string(lowercase_name);
 	zend_hash_update_ptr(CG(class_table), lowercase_name, class_entry);
 	zend_string_release_ex(lowercase_name, 1);
+
+	if (class_entry->__tostring && !zend_string_equals_literal(class_entry->name, "Stringable")
+			&& !(class_entry->ce_flags & ZEND_ACC_TRAIT)) {
+		ZEND_ASSERT(zend_ce_stringable
+			&& "Should be registered before first class using __toString()");
+		zend_do_implement_interface(class_entry, zend_ce_stringable);
+	}
 	return class_entry;
 }
 /* }}} */
@@ -2786,6 +2793,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 		zend_do_inheritance(register_class, parent_ce);
 		zend_build_properties_info_table(register_class);
 	}
+
 	return register_class;
 }
 /* }}} */
@@ -2798,6 +2806,13 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_inter
 
 	while (num_interfaces--) {
 		interface_entry = va_arg(interface_list, zend_class_entry *);
+		if (interface_entry == zend_ce_stringable
+				&& zend_class_implements_interface(class_entry, zend_ce_stringable)) {
+			/* Stringable is implemented automatically,
+			 * silently ignore an explicit implementation. */
+			continue;
+		}
+
 		zend_do_implement_interface(class_entry, interface_entry);
 	}
 

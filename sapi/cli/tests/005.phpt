@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2194) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2194) "Class [ <internal:Core> class Exception implements Stringable, Throwable ] {
 
   - Constants [0] {
   }

@@ -9,7 +9,7 @@ $rc = new ReflectionClass("ReflectionClass");
 echo $rc;
 ?>
 --EXPECT--
-Class [ <internal:Reflection> class ReflectionClass implements Reflector, Stringable ] {
+Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector ] {
 
   - Constants [3] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
