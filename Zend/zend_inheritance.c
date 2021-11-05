@@ -2487,26 +2487,30 @@ static int check_variance_obligation(zval *zv) {
 
 static void load_delayed_classes(zend_class_entry *ce) {
 	HashTable *delayed_autoloads = CG(delayed_autoloads);
-	zend_string *name;
-
 	if (!delayed_autoloads) {
 		return;
 	}
 
-	/* Take ownership of this HT, to avoid concurrent modification during autoloading. */
-	CG(delayed_autoloads) = NULL;
-
-	ZEND_HASH_FOREACH_STR_KEY(delayed_autoloads, name) {
+	/* Autoloading can trigger linking of another class, which may register new delayed autoloads.
+	 * For that reason, this code uses a loop that pops and loads the first element of the HT. If
+	 * this triggers linking, then the remaining classes may get loaded when linking the newly
+	 * loaded class. This is important, as otherwise necessary dependencies may not be available
+	 * if the new class is lower in the hierarchy than the current one. */
+	HashPosition pos = 0;
+	zend_string *name;
+	zend_ulong idx;
+	while (zend_hash_get_current_key_ex(delayed_autoloads, &name, &idx, &pos)
+			!= HASH_KEY_NON_EXISTENT) {
+		zend_string_addref(name);
+		zend_hash_del(delayed_autoloads, name);
 		zend_lookup_class(name);
+		zend_string_release(name);
 		if (EG(exception)) {
 			zend_exception_uncaught_error(
 				"During inheritance of %s, while autoloading %s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
-	} ZEND_HASH_FOREACH_END();
-
-	zend_hash_destroy(delayed_autoloads);
-	FREE_HASHTABLE(delayed_autoloads);
+	}
 }
 
 static void resolve_delayed_variance_obligations(zend_class_entry *ce) {

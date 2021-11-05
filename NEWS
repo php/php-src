@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81507 (Fiber does not compile on AIX). (Clément Chigot)
+  . Fixed bug #78647 (SEGFAULT in zend_do_perform_implementation_check).
+    (Nikita)
 
 - GD:
   . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
