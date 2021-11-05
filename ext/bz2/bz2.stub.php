@@ -30,13 +30,13 @@ function bzflush($bz): bool {}
 function bzclose($bz): bool {}
 
 /** @param resource $bz */
-function bzerrno($bz): int {}
+function bzerrno($bz): int|false {}
 
 /** @param resource $bz */
-function bzerrstr($bz): string {}
+function bzerrstr($bz): string|false {}
 
 /** @param resource $bz */
-function bzerror($bz): array {}
+function bzerror($bz): array|false {}
 
 function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 
