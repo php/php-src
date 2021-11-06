@@ -279,9 +279,6 @@ static void dba_close(dba_info *info)
 			php_stream_close(info->lock.fp);
 		}
 	}
-	if (info->lock.name) {
-		pefree(info->lock.name, info->flags&DBA_PERSISTENT);
-	}
 	pefree(info, info->flags&DBA_PERSISTENT);
 }
 /* }}} */
@@ -754,15 +751,13 @@ restart:
 				/* do not log errors for .lck file while in read only mode on .lck file */
 				lock_file_mode = "rb";
 				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|persistent_flag, &opened_path);
+				if (opened_path) {
+					zend_string_release_ex(opened_path, 0);
+				}
 			}
 			if (!info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
 				lock_file_mode = "a+b";
-			} else {
-				if (opened_path) {
-					info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
-					zend_string_release_ex(opened_path, 0);
-				}
 			}
 		}
 		if (!info->lock.fp) {
@@ -773,8 +768,6 @@ restart:
 					pefree(info->path, persistent);
 					info->path = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 				}
-				/* now store the name of the lock */
-				info->lock.name = pestrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path), persistent);
 				zend_string_release_ex(opened_path, 0);
 			}
 		}
@@ -833,8 +826,6 @@ restart:
 				info->fp = NULL;
 				info->lock.fp = NULL;
 				info->fd = -1;
-
-				pefree(info->lock.name, persistent);
 
 				lock_file_mode = "r+b";
 
