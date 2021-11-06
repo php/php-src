@@ -23,7 +23,7 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
 	PUTS("a:link {color: #009; text-decoration: none; background-color: #fff;}\n");
 	PUTS("a:hover {text-decoration: underline;}\n");
-	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}\n");
+	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2);}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
 	PUTS(".center th {text-align: center !important;}\n");
@@ -38,5 +38,13 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS(".v i {color: #999;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
+	PUTS("@media (prefers-color-scheme: dark) {\n");
+	PUTS("  body {background-color: #333; color: #ddd;}\n");
+	PUTS("  td, th {border-color: #777;}\n");
+	PUTS("  .e {background-color: #4F5B93;}\n");
+	PUTS("  .h {background-color: #5b69a6;}\n");
+	PUTS("  .v {background-color: #444;}\n");
+	PUTS("  hr {background-color: #777;}\n");
+	PUTS("}\n");
 }
 /* }}} */
