@@ -41,11 +41,7 @@ DBA_OPEN_FUNC(db1)
 	DB		*db;
 
 	int gmode;
-	int filemode = 0644;
-
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
+	int filemode = info->file_permission;
 
 	gmode = 0;
 	switch (info->mode) {

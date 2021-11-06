@@ -51,7 +51,7 @@ DBA_OPEN_FUNC(db3)
 	DB *dbp = NULL;
 	DBTYPE type;
 	int gmode = 0, err;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
@@ -71,10 +71,6 @@ DBA_OPEN_FUNC(db3)
 
 	if (gmode == -1) {
 		return FAILURE; /* not possible */
-	}
-
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
 	}
 
 #ifdef DB_FCNTL_LOCKING

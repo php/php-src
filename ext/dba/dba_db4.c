@@ -65,7 +65,7 @@ DBA_OPEN_FUNC(db4)
 	DB *dbp = NULL;
 	DBTYPE type;
 	int gmode = 0, err;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
@@ -104,10 +104,6 @@ DBA_OPEN_FUNC(db4)
 
 	if (info->flags & DBA_PERSISTENT) {
 		gmode |= DB_THREAD;
-	}
-
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {

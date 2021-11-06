@@ -40,21 +40,11 @@ DBA_OPEN_FUNC(lmdb)
 {
 	MDB_env *env;
 	MDB_txn *txn;
-	int rc, mode = 0644, flags = MDB_NOSUBDIR;
-	zend_long mapsize = 0;
+	int rc, flags = MDB_NOSUBDIR;
+	int mode = info->file_permission;
+	zend_long map_size = info->map_size;
 
-	if(info->argc > 0) {
-		mode = zval_get_long(&info->argv[0]);
-
-		if (info->argc > 1) {
-			mapsize = zval_get_long(&info->argv[1]);
-			if (mapsize < 0) {
-				*error = "mapsize must be greater than or equal to zero";
-				return FAILURE;
-			}
-		}
-		/* TODO implement handling of the additional flags. */
-	}
+	ZEND_ASSERT(map_size >= 0);
 
 	rc = mdb_env_create(&env);
 	if (rc) {
@@ -62,8 +52,8 @@ DBA_OPEN_FUNC(lmdb)
 		return FAILURE;
 	}
 
-	if (mapsize > 0) {
-		rc = mdb_env_set_mapsize(env, (size_t) mapsize);
+	if (map_size > 0) {
+		rc = mdb_env_set_mapsize(env, (size_t) map_size);
 		if (rc) {
 			*error = mdb_strerror(rc);
 			return FAILURE;

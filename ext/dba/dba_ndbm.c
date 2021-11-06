@@ -32,7 +32,7 @@ DBA_OPEN_FUNC(ndbm)
 {
 	DBM *dbf;
 	int gmode = 0;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 	dba_info *pinfo = (dba_info *) info;
 
 	switch(info->mode) {
@@ -50,10 +50,6 @@ DBA_OPEN_FUNC(ndbm)
 			break;
 		default:
 			return FAILURE; /* not possible */
-	}
-
-	if(info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	dbf = dbm_open(info->path, gmode, filemode);

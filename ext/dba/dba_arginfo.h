@@ -1,11 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b5e8100725ae7e93f3ae4a599d88e6578884d0d4 */
+ * Stub hash: db8b6f51859bc3334abafcc0ee645e614c6f1c59 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, mode)
-	ZEND_ARG_INFO(0, handler)
-	ZEND_ARG_VARIADIC_INFO(0, handler_params)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, permission, IS_LONG, 0, "0644")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, map_size, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_open arginfo_dba_popen

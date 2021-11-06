@@ -36,7 +36,7 @@ DBA_OPEN_FUNC(gdbm)
 {
 	GDBM_FILE dbf;
 	int gmode = 0;
-	int filemode = 0644;
+	int filemode = info->file_permission;
 
 	gmode = info->mode == DBA_READER ? GDBM_READER :
 		info->mode == DBA_WRITER ? GDBM_WRITER :
@@ -45,10 +45,6 @@ DBA_OPEN_FUNC(gdbm)
 
 	if(gmode == -1)
 		return FAILURE; /* not possible */
-
-	if(info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
 
