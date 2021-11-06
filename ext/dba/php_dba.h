@@ -32,7 +32,6 @@ typedef enum {
 
 typedef struct dba_lock {
 	php_stream *fp;
-	char *name;
 	int mode; /* LOCK_EX,LOCK_SH */
 } dba_lock;
 
