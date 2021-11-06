@@ -29,6 +29,7 @@ typedef struct _php_com_dotnet_object {
 	zend_object zo;
 
 	VARIANT v;
+	zval byref;
 	bool modified;
 
 	int code_page;

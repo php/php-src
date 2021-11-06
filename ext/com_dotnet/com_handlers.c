@@ -573,6 +573,7 @@ void php_com_object_free_storage(zend_object *object)
 	}
 
 	VariantClear(&obj->v);
+	zval_dtor(&obj->byref);
 
 	if (obj->method_cache) {
 		zend_hash_destroy(obj->method_cache);
@@ -602,6 +603,9 @@ zend_object* php_com_object_clone(zend_object *object)
 	/* We use the Indirection-following version of the API since we
 	 * want to clone as much as possible */
 	VariantCopyInd(&cloneobj->v, &origobject->v);
+
+	ZVAL_NULL(&cloneobj->byref);
+	ZVAL_COPY(&cloneobj->byref, &origobject->byref);
 
 	if (cloneobj->typeinfo) {
 		ITypeInfo_AddRef(cloneobj->typeinfo);

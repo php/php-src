@@ -334,7 +334,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, bool silent, bool allow_noarg)
 {
 	HRESULT hr;
-	unsigned int arg_err;
+	unsigned int arg_err = (unsigned int)-1;
 	EXCEPINFO e = {0};
 
 	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
@@ -342,6 +342,9 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 	if (!silent && FAILED(hr)) {
 		char *desc = NULL, *msg = NULL;
+
+		if(arg_err != (unsigned int)-1)
+			arg_err = disp_params->cArgs - arg_err;		// We have reversed array of params
 
 		switch (hr) {
 			case DISP_E_EXCEPTION: {
@@ -377,7 +380,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
-				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
+				spprintf(&msg, 0, "Error [0x%08x] Parameter %d: %s", hr, arg_err, desc);
 				php_win32_error_msg_free(desc);
 				break;
 
@@ -393,7 +396,10 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 			default:
 				desc = php_win32_error_to_msg(hr);
-				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
+				if(arg_err != (unsigned int) -1)
+					spprintf(&msg, 0, "Error [0x%08x] Parameter %d: %s", hr, arg_err, desc);
+				else
+					spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
 				php_win32_error_msg_free(desc);
 				break;
 		}

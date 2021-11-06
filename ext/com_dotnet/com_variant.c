@@ -128,9 +128,13 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 					}
 					V_DISPATCH(v) = V_DISPATCH(&obj->v);
 				} else {
-					/* pass the variant by reference */
-					V_VT(v) = VT_VARIANT | VT_BYREF;
-					V_VARIANTREF(v) = &obj->v;
+					if(V_VT(&obj->v) & VT_BYREF) { //Allready by reference
+						memcpy(v, &obj->v, sizeof(VARIANT));
+					} else {
+						/* pass the variant by reference */
+						V_VT(v) = VT_VARIANT | VT_BYREF;
+						V_VARIANTREF(v) = &obj->v;
+					}
 				}
 			} else {
 				/* export the PHP object using our COM wrapper */
@@ -429,6 +433,7 @@ PHP_METHOD(variant, __construct)
 	php_com_dotnet_object *obj;
 	zval *zvalue = NULL;
 	HRESULT res;
+	char *msg = NULL;
 
 	if (ZEND_NUM_ARGS() == 0) {
 		/* just leave things as-is - an empty variant */
@@ -454,22 +459,113 @@ PHP_METHOD(variant, __construct)
 	/* Only perform conversion if variant not already of type passed */
 	if ((ZEND_NUM_ARGS() >= 2) && (vt != V_VT(&obj->v))) {
 
-		/* If already an array and VT_ARRAY is passed then:
-			- if only VT_ARRAY passed then do not perform a conversion
-			- if VT_ARRAY plus other type passed then perform conversion
-		*/
+		/**
+		 * VT_BYREF, VT_VARIANT and VT_PTR functionality
+		 * 
+		 * All of those types makes reference to another php_com_dotnet_object incrementing their refcounters.
+		 * If you use VT_VARIANT then it will be VT_BYREF | VT_VARIANT.
+		 * If you use VT_PTR then you get reference to VARIANTTAG.
+		 * If you use VT_PTR | VT_BYREF then you get reference to VARIANTTAG's variable dependently of their type.
+		 * 
+		 * For future: may be need to check if remote variable is changed.
+		 */
+		if((vt & VT_BYREF) || ((vt & ~VT_BYREF) == VT_VARIANT) || ((vt & ~VT_BYREF) == VT_PTR)) {
+
+			if((vt & VT_BYREF) && (vt & ~VT_BYREF != VT_VARIANT) && (vt & ~VT_BYREF != VT_PTR)) {
+				spprintf(&msg, E_INVALIDARG, "VT_BYREF should be used alone or with VT_VARIANT or with VT_PTR");
+				php_com_throw_exception(res, msg);
+				efree(msg);
+				return;
+			}
+
+			ZVAL_DEREF(zvalue);
+			if(!php_com_is_valid_object(zvalue)) {
+				spprintf(&msg, 0, "To use VT_BYREF or VT_VARIANT you must have another VARIANT object as 'value'");
+				php_com_throw_exception(E_INVALIDARG, msg);
+				efree(msg);
+				return;
+			}
+
+			//Save a reference to original object
+			zval_dtor(&obj->byref);				//Remove old value if exist
+			ZVAL_NEW_REF(&obj->byref, zvalue);	//Set new reference to zvalue
+			Z_ADDREF_P(zvalue);					//Increment their counter
+			
+			php_com_dotnet_object * src = CDNO_FETCH(zvalue);
+			VariantClear(&obj->v); 				//Remove our default value
+
+			switch(V_VT(&src->v)) {
+				case VT_I2:
+				case VT_I4:
+				case VT_R4:
+				case VT_R8:
+				case VT_CY:
+				case VT_DATE:
+				case VT_BSTR:
+				case VT_DISPATCH:
+				case VT_ERROR:
+				case VT_BOOL:
+				case VT_UNKNOWN:
+				case VT_I1:
+				case VT_UI1:
+				case VT_UI2:
+				case VT_UI4:
+				case VT_I8:
+				case VT_UI8:
+				case VT_INT:
+				case VT_UINT:
+				case VT_VOID:
+				case VT_HRESULT:
+				case VT_PTR:
+				case VT_SAFEARRAY:
+				case VT_INT_PTR:
+				case VT_UINT_PTR:
+					obj->v.byref = &V_NONE(&src->v);
+					break;
+				case VT_DECIMAL:
+					obj->v.byref = &V_DECIMAL(&src->v);
+					break;
+				default:
+					obj->v.byref = &src->v;
+					V_VT(&obj->v) = VT_BYREF | VT_VARIANT;
+					break;
+			}
+
+			switch(vt & ~VT_BYREF) {
+				case VT_PTR:
+					V_VT(&obj->v) = VT_PTR;
+					if(!(vt & VT_BYREF)) //If only VT_PTR is used, then ptr is referenced to VARIANT, otherway to value
+						obj->v.byref = &src->v;
+					break;
+				case VT_VARIANT:
+					V_VT(&obj->v) = vt;
+					V_VARIANTREF(&obj->v) = &src->v;
+					break;
+				default:
+					V_VT(&obj->v) = V_VT(&src->v) | VT_BYREF;
+					break;
+			}
+			vt = VT_EMPTY; //Prevent future VariantChangeType
+		}
+		
+
+		/**
+		 * VT_ARRAY functionality
+		 * 
+		 * If already an array and VT_ARRAY is passed then:
+		 *	- if only VT_ARRAY passed then do not perform a conversion
+		 *	- if VT_ARRAY plus other type passed then perform conversion
+		 */
 
 		res = S_OK;
 		SAFEARRAYBOUND  Bound;
 
-		if (!(V_VT(&obj->v) & VT_BYREF) && //not supported
-			(vt & ~VT_ARRAY) && //new variant have some type except VT_ARRAY
-			(V_VT(&obj->v) & VT_ARRAY) &&	//old variant is array
-			SafeArrayGetDim(V_ARRAY(&obj->v)) == 1 &&	//old array have one dimension
+		if ((vt & ~VT_ARRAY) &&				//new variant have some type except VT_ARRAY
+			(V_VT(&obj->v) & VT_ARRAY) &&	//our variant is array
+			SafeArrayGetDim(V_ARRAY(&obj->v)) == 1 &&	//our array have one dimension
 			SUCCEEDED(res = SafeArrayGetLBound(V_ARRAY(&obj->v), 1, &Bound.lLbound)) &&
 			SUCCEEDED(res = SafeArrayGetUBound(V_ARRAY(&obj->v), 1, &Bound.cElements)))
 		{
-
 			zend_long need_vt = vt & ~VT_ARRAY;
 			zend_long old_vt = V_VT(&obj->v) & ~VT_ARRAY;
 
