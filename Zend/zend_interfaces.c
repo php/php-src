@@ -276,8 +276,17 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 			ZSTR_VAL(class_type->name));
 	}
 
-	zend_function *zf = zend_hash_str_find_ptr(
+	/* Always initialize iterator_funcs_ptr. */
+	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
+	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
+		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
+		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+	class_type->iterator_funcs_ptr = funcs_ptr;
+
+	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+	funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(
 		&class_type->function_table, "getiterator", sizeof("getiterator") - 1);
+
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_new_iterator) {
 		/* get_iterator was explicitly assigned for an internal class. */
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
@@ -286,23 +295,14 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		}
 
 		/* The getIterator() method has not been overwritten, use inherited get_iterator(). */
-		if (zf->common.scope != class_type) {
+		if (funcs_ptr->zf_new_iterator->common.scope != class_type) {
 			return SUCCESS;
 		}
 
 		/* getIterator() has been overwritten, switch to zend_user_it_get_new_iterator. */
 	}
 
-	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
-	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
-		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
-		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
 	class_type->get_iterator = zend_user_it_get_new_iterator;
-	class_type->iterator_funcs_ptr = funcs_ptr;
-
-	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-	funcs_ptr->zf_new_iterator = zf;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -316,16 +316,24 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 			ZSTR_VAL(class_type->name));
 	}
 
-	zend_function *zf_rewind = zend_hash_str_find_ptr(
+	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
+	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
+		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
+		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
+	class_type->iterator_funcs_ptr = funcs_ptr;
+
+	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
+	funcs_ptr->zf_rewind = zend_hash_str_find_ptr(
 		&class_type->function_table, "rewind", sizeof("rewind") - 1);
-	zend_function *zf_valid = zend_hash_str_find_ptr(
+	funcs_ptr->zf_valid = zend_hash_str_find_ptr(
 		&class_type->function_table, "valid", sizeof("valid") - 1);
-	zend_function *zf_key = zend_hash_str_find_ptr(
+	funcs_ptr->zf_key = zend_hash_str_find_ptr(
 		&class_type->function_table, "key", sizeof("key") - 1);
-	zend_function *zf_current = zend_hash_str_find_ptr(
+	funcs_ptr->zf_current = zend_hash_str_find_ptr(
 		&class_type->function_table, "current", sizeof("current") - 1);
-	zend_function *zf_next = zend_hash_str_find_ptr(
+	funcs_ptr->zf_next = zend_hash_str_find_ptr(
 		&class_type->function_table, "next", sizeof("next") - 1);
+
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
 		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
 			/* get_iterator was explicitly assigned for an internal class. */
@@ -334,30 +342,19 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		}
 
 		/* None of the Iterator methods have been overwritten, use inherited get_iterator(). */
-		if (zf_rewind->common.scope != class_type && zf_valid->common.scope != class_type &&
-				zf_key->common.scope != class_type && zf_current->common.scope != class_type &&
-				zf_next->common.scope != class_type) {
+		if (funcs_ptr->zf_rewind->common.scope != class_type &&
+				funcs_ptr->zf_valid->common.scope != class_type &&
+				funcs_ptr->zf_key->common.scope != class_type &&
+				funcs_ptr->zf_current->common.scope != class_type &&
+				funcs_ptr->zf_next->common.scope != class_type) {
 			return SUCCESS;
 		}
 
 		/* One of the Iterator methods has been overwritten,
-		 * switch to zend_user_it_get_new_iterator. */
+		 * switch to zend_user_it_get_iterator. */
 	}
 
-	ZEND_ASSERT(!class_type->iterator_funcs_ptr && "Iterator funcs already set?");
-	zend_class_iterator_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
-		? pemalloc(sizeof(zend_class_iterator_funcs), 1)
-		: zend_arena_alloc(&CG(arena), sizeof(zend_class_iterator_funcs));
 	class_type->get_iterator = zend_user_it_get_iterator;
-	class_type->iterator_funcs_ptr = funcs_ptr;
-
-	memset(funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-	funcs_ptr->zf_rewind = zf_rewind;
-	funcs_ptr->zf_valid = zf_valid;
-	funcs_ptr->zf_key = zf_key;
-	funcs_ptr->zf_current = zf_current;
-	funcs_ptr->zf_next = zf_next;
-
 	return SUCCESS;
 }
 /* }}} */

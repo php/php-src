@@ -767,7 +767,7 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		zval key_tmp;
 
 		res = 0;
-		ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
 			ZVAL_STR(&key_tmp, key);
 			if (zend_compare(op1, &key_tmp) == 0) {
 				res = 1;

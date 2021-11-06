@@ -19,6 +19,10 @@
 #include <sys/procctl.h>
 #endif
 
+#ifdef HAVE_SETPFLAGS
+#include <priv.h>
+#endif
+
 #ifdef HAVE_APPARMOR
 #include <sys/apparmor.h>
 #endif
@@ -417,6 +421,12 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	int dumpable = PROC_TRACE_CTL_ENABLE;
 	if (wp->config->process_dumpable && -1 == procctl(P_PID, getpid(), PROC_TRACE_CTL, &dumpable)) {
 		zlog(ZLOG_SYSERROR, "[pool %s] failed to procctl(PROC_TRACE_CTL)", wp->config->name);
+	}
+#endif
+
+#ifdef HAVE_SETPFLAGS
+	if (wp->config->process_dumpable && 0 > setpflags(__PROC_PROTECT, 0)) {
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to setpflags(__PROC_PROTECT)", wp->config->name);
 	}
 #endif
 

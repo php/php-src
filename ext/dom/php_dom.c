@@ -405,7 +405,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 
 	object_str = zend_string_init("(object value omitted)", sizeof("(object value omitted)")-1, 0);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
 
 		if (entry->read_func(obj, &value) == FAILURE || !string_key) {

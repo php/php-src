@@ -27,6 +27,13 @@ PHP 8.2 UPGRADE NOTES
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
 
+- PCRE:
+  . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
+    `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are
+    capturing. This only affects which groups are capturing, it is still
+    possible to use numbered subpattern references, and the matches array will
+    still contain numbered results.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -54,6 +61,16 @@ PHP 8.2 UPGRADE NOTES
     until support for them is removed entirely.
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+
+- Mbstring:
+  . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
+    deprecated for all Mbstring functions. Unlike all the other text
+    encodings supported by Mbstring, these do not encode a sequence of
+    Unicode codepoints, but rather a sequence of raw bytes. It is not
+    clear what the correct return values for most Mbstring functions should
+    be when one of these non-encodings is specified. Further, PHP has
+    separate, built-in implementations of all of them; for example, UUencoded
+    data can be handled using convert_uuencode/convert_uudecode.
 
 ========================================
 5. Changed Functions
@@ -85,11 +102,14 @@ PHP 8.2 UPGRADE NOTES
 
 - Zip:
   . extension updated to 1.20.0 with new methods:
-    ZipArchive::cleaError, getStreamName and getStreamIndex
+    ZipArchive::clearError, getStreamName and getStreamIndex
 
 ========================================
 10. New Global Constants
 ========================================
+
+- COM_DOTNET:
+  . LOCALE_NEUTRAL
 
 ========================================
 11. Changes to INI File Handling
@@ -98,6 +118,10 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Core:
+  . Windows specific error messages are no longer localized, but instead in
+    English to better match PHP error messages.
 
 ========================================
 13. Other Changes

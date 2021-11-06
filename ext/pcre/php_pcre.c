@@ -734,6 +734,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE2_CASELESS;		break;
 			case 'm':	coptions |= PCRE2_MULTILINE;		break;
+			case 'n':	coptions |= PCRE2_NO_AUTO_CAPTURE;	break;
 			case 's':	coptions |= PCRE2_DOTALL;		break;
 			case 'x':	coptions |= PCRE2_EXTENDED;		break;
 
@@ -2115,7 +2116,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zv = &replace_ht->arData[replace_idx].val;
+				zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);

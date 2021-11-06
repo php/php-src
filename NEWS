@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha1
+  . Fixed bug #81390 (mb_detect_encoding() regression). (alexdowad)
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)

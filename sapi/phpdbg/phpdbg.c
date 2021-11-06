@@ -538,7 +538,7 @@ PHP_FUNCTION(phpdbg_get_executable)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
 		if (func->type == ZEND_USER_FUNCTION) {
 			if (zend_hash_exists(files, func->op_array.filename)) {
 				insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
@@ -552,10 +552,10 @@ PHP_FUNCTION(phpdbg_get_executable)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(class_table), name, ce) {
 		if (ce->type == ZEND_USER_CLASS) {
 			if (zend_hash_exists(files, ce->info.user.filename)) {
-				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
 					if (func->type == ZEND_USER_FUNCTION && zend_hash_exists(files, func->op_array.filename)) {
 						insert_ht = phpdbg_add_empty_array(Z_ARR_P(return_value), func->op_array.filename);
 
@@ -572,7 +572,7 @@ PHP_FUNCTION(phpdbg_get_executable)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_STR_KEY(files, name) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(files, name) {
 		phpdbg_file_source *source = zend_hash_find_ptr(&PHPDBG_G(file_sources), name);
 		if (source) {
 			phpdbg_oplog_fill_executable(

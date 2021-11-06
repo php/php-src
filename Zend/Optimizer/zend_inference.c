@@ -655,35 +655,26 @@ static bool zend_inference_calc_binary_op_range(
 				op2_min = OP2_MIN_RANGE();
 				op1_max = OP1_MAX_RANGE();
 				op2_max = OP2_MAX_RANGE();
-				if (op2_min <= 0 && op2_max >= 0) {
-					/* If op2 crosses zero, then floating point values close to zero might be
-					 * possible, which will result in arbitrarily large results. As such, we can't
-					 * do anything useful in that case. */
-					break;
-				}
-				if (op1_min == ZEND_LONG_MIN && op2_max == -1) {
-					/* Avoid ill-defined division, which may trigger SIGFPE. */
-					break;
-				}
 
-				zend_long t1_, t2_, t3_, t4_;
-				float_div(op1_min, op2_min, &t1, &t1_);
-				float_div(op1_min, op2_max, &t2, &t2_);
-				float_div(op1_max, op2_min, &t3, &t3_);
-				float_div(op1_max, op2_max, &t4, &t4_);
-
-				/* The only case in which division can "overflow" either a division by an absolute
-				 * value smaller than one, or LONG_MIN / -1 in particular. Both cases have already
-				 * been excluded above. */
-				if (OP1_RANGE_UNDERFLOW() ||
-					OP2_RANGE_UNDERFLOW() ||
-					OP1_RANGE_OVERFLOW()  ||
-					OP2_RANGE_OVERFLOW()) {
+				/* If op2 crosses zero, then floating point values close to zero might be
+				 * possible, which will result in arbitrarily large results (overflow). Also
+				 * avoid dividing LONG_MIN by -1, which is UB. */
+				if (OP1_RANGE_UNDERFLOW() || OP2_RANGE_UNDERFLOW() ||
+					OP1_RANGE_OVERFLOW() || OP2_RANGE_OVERFLOW() ||
+					(op2_min <= 0 && op2_max >= 0) ||
+					(op1_min == ZEND_LONG_MIN && op2_max == -1)
+				) {
 					tmp->underflow = 1;
 					tmp->overflow = 1;
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
+					zend_long t1_, t2_, t3_, t4_;
+					float_div(op1_min, op2_min, &t1, &t1_);
+					float_div(op1_min, op2_max, &t2, &t2_);
+					float_div(op1_max, op2_min, &t3, &t3_);
+					float_div(op1_max, op2_max, &t4, &t4_);
+
 					tmp->min = MIN(MIN(MIN(t1, t2), MIN(t3, t4)), MIN(MIN(t1_, t2_), MIN(t3_, t4_)));
 					tmp->max = MAX(MAX(MAX(t1, t2), MAX(t3, t4)), MAX(MAX(t1_, t2_), MAX(t3_, t4_)));
 				}
@@ -3394,6 +3385,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 						|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
 						|| opline->opcode == ZEND_FETCH_LIST_W) {
 					j = ssa_vars[ssa_op->result_def].use_chain;
+					if (j < 0) {
+						/* no uses */
+						tmp |= key_type | MAY_BE_ARRAY | MAY_BE_ARRAY_OF_NULL;
+					}
 					while (j >= 0) {
 						zend_uchar opcode;
 
@@ -3453,6 +3448,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 								 * is already an object. */
 								break;
 							case ZEND_SEND_VAR:
+							case ZEND_FETCH_DIM_R:
 								/* This can occur if a DIM_FETCH_FUNC_ARG with UNUSED op2 is left
 								 * behind, because it can't be converted to DIM_FETCH_R. */
 								break;
@@ -3679,7 +3675,9 @@ unknown_opcode:
 				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				if (opline->result_type == IS_TMP_VAR) {
 					if (opline->opcode == ZEND_FETCH_R || opline->opcode == ZEND_FETCH_IS) {
-						tmp |= MAY_BE_RCN;
+						/* Variable reference counter may be decremented before use */
+						/* See: ext/opcache/tests/jit/fetch_r_001.phpt */
+						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					} else {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 					}

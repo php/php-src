@@ -50,6 +50,10 @@ steps:
                        dovecot-imapd \
                        sendmail \
                        firebird-dev \
+                       liblmdb-dev \
+                       libtokyocabinet-dev \
+                       libdb-dev \
+                       libqdbm-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
   - script: |

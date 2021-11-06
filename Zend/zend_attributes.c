@@ -78,7 +78,7 @@ static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname,
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, lcname)) {
 				return attr;
 			}
@@ -93,7 +93,7 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && ZSTR_LEN(attr->lcname) == len) {
 				if (0 == memcmp(ZSTR_VAL(attr->lcname), str, len)) {
 					return attr;
@@ -173,7 +173,7 @@ ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *
 {
 	zend_attribute *other;
 
-	ZEND_HASH_FOREACH_PTR(attributes, other) {
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, other) {
 		if (other != attr && other->offset == attr->offset) {
 			if (zend_string_equals(other->lcname, attr->lcname)) {
 				return 1;

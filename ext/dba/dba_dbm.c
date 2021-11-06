@@ -35,9 +35,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define DBM_DATA dba_dbm_data *dba = info->dbf
-#define DBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
-
 #define TRUNC_IT(extension, mode) \
 	snprintf(buf, MAXPATHLEN, "%s" extension, info->path); \
 	buf[MAXPATHLEN-1] = '\0'; \
@@ -93,8 +90,10 @@ DBA_FETCH_FUNC(dbm)
 {
 	datum gval;
 	char *new = NULL;
+	datum gkey;
 
-	DBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval = fetch(gkey);
 	if(gval.dptr) {
 		if(newlen) *newlen = gval.dsize;
@@ -106,8 +105,10 @@ DBA_FETCH_FUNC(dbm)
 DBA_UPDATE_FUNC(dbm)
 {
 	datum gval;
+	datum gkey;
 
-	DBM_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 
 	if (mode == 1) { /* insert */
 		gval = fetch(gkey);
@@ -125,7 +126,10 @@ DBA_UPDATE_FUNC(dbm)
 DBA_EXISTS_FUNC(dbm)
 {
 	datum gval;
-	DBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 
 	gval = fetch(gkey);
 	if(gval.dptr) {
@@ -136,13 +140,16 @@ DBA_EXISTS_FUNC(dbm)
 
 DBA_DELETE_FUNC(dbm)
 {
-	DBM_GKEY;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	return(delete(gkey) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(dbm)
 {
-	DBM_DATA;
+	dba_dbm_data *dba = info->dbf;
 	datum gkey;
 	char *key = NULL;
 
@@ -158,7 +165,7 @@ DBA_FIRSTKEY_FUNC(dbm)
 
 DBA_NEXTKEY_FUNC(dbm)
 {
-	DBM_DATA;
+	dba_dbm_data *dba = info->dbf;
 	datum gkey;
 	char *nkey = NULL;
 

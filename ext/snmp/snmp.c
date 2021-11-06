@@ -703,12 +703,22 @@ static bool php_snmp_parse_oid(
 					pptr = ZSTR_VAL(type_str);
 					objid_query->vars[objid_query->count].type = *pptr;
 				} else if (type_ht) {
-					while (idx_type < type_ht->nNumUsed) {
-						tmp_type = &type_ht->arData[idx_type].val;
-						if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
-							break;
+					if (HT_IS_PACKED(type_ht)) {
+						while (idx_type < type_ht->nNumUsed) {
+							tmp_type = &type_ht->arPacked[idx_type];
+							if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
+								break;
+							}
+							idx_type++;
 						}
-						idx_type++;
+					} else {
+						while (idx_type < type_ht->nNumUsed) {
+							tmp_type = &type_ht->arData[idx_type].val;
+							if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
+								break;
+							}
+							idx_type++;
+						}
 					}
 					if (idx_type < type_ht->nNumUsed) {
 						convert_to_string(tmp_type);
@@ -730,12 +740,22 @@ static bool php_snmp_parse_oid(
 				if (value_str) {
 					objid_query->vars[objid_query->count].value = ZSTR_VAL(value_str);
 				} else if (value_ht) {
-					while (idx_value < value_ht->nNumUsed) {
-						tmp_value = &value_ht->arData[idx_value].val;
-						if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
-							break;
+					if (HT_IS_PACKED(value_ht)) {
+						while (idx_value < value_ht->nNumUsed) {
+							tmp_value = &value_ht->arPacked[idx_value];
+							if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
+								break;
+							}
+							idx_value++;
 						}
-						idx_value++;
+					} else {
+						while (idx_value < value_ht->nNumUsed) {
+							tmp_value = &value_ht->arData[idx_value].val;
+							if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
+								break;
+							}
+							idx_value++;
+						}
 					}
 					if (idx_value < value_ht->nNumUsed) {
 						convert_to_string(tmp_value);
@@ -1801,7 +1821,7 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 	obj = php_snmp_fetch_object(object);
 	props = zend_std_get_properties(object);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
 		if (!hnd->read_func || hnd->read_func(obj, &rv) != SUCCESS) {
 			ZVAL_NULL(&rv);
 		}

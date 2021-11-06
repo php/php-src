@@ -32,9 +32,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define FLATFILE_DATA flatfile *dba = info->dbf
-#define FLATFILE_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
-
 DBA_OPEN_FUNC(flatfile)
 {
 	info->dbf = pemalloc(sizeof(flatfile), info->flags&DBA_PERSISTENT);
@@ -47,7 +44,7 @@ DBA_OPEN_FUNC(flatfile)
 
 DBA_CLOSE_FUNC(flatfile)
 {
-	FLATFILE_DATA;
+	flatfile *dba = info->dbf;
 
 	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
@@ -57,11 +54,13 @@ DBA_CLOSE_FUNC(flatfile)
 
 DBA_FETCH_FUNC(flatfile)
 {
+	flatfile *dba = info->dbf;
 	datum gval;
 	char *new = NULL;
+	datum gkey;
 
-	FLATFILE_DATA;
-	FLATFILE_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 
 	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
@@ -76,10 +75,12 @@ DBA_FETCH_FUNC(flatfile)
 
 DBA_UPDATE_FUNC(flatfile)
 {
+	flatfile *dba = info->dbf;
 	datum gval;
+	datum gkey;
 
-	FLATFILE_DATA;
-	FLATFILE_GKEY;
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 
@@ -99,10 +100,12 @@ DBA_UPDATE_FUNC(flatfile)
 
 DBA_EXISTS_FUNC(flatfile)
 {
+	flatfile *dba = info->dbf;
 	datum gval;
-	FLATFILE_DATA;
-	FLATFILE_GKEY;
+	datum gkey;
 
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
 		efree(gval.dptr);
@@ -113,14 +116,17 @@ DBA_EXISTS_FUNC(flatfile)
 
 DBA_DELETE_FUNC(flatfile)
 {
-	FLATFILE_DATA;
-	FLATFILE_GKEY;
+	flatfile *dba = info->dbf;
+	datum gkey;
+
+	gkey.dptr = (char *) key;
+	gkey.dsize = keylen;
 	return(flatfile_delete(dba, gkey) == -1 ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(flatfile)
 {
-	FLATFILE_DATA;
+	flatfile *dba = info->dbf;
 
 	if (dba->nextkey.dptr) {
 		efree(dba->nextkey.dptr);
@@ -137,7 +143,7 @@ DBA_FIRSTKEY_FUNC(flatfile)
 
 DBA_NEXTKEY_FUNC(flatfile)
 {
-	FLATFILE_DATA;
+	flatfile *dba = info->dbf;
 
 	if (!dba->nextkey.dptr) {
 		return NULL;

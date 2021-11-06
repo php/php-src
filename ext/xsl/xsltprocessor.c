@@ -65,7 +65,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
 	memset((char *)params, 0, parsize);
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(parht, string_key, value) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(parht, string_key, value) {
 		ZEND_ASSERT(string_key != NULL);
 		if (Z_TYPE_P(value) != IS_STRING) {
 			if (!try_convert_to_string(value)) {

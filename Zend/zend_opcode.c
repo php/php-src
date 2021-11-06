@@ -249,7 +249,7 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 		if (constants_table && constants_table != &ce->constants_table) {
 			zend_class_constant *c;
 
-			ZEND_HASH_FOREACH_PTR(constants_table, c) {
+			ZEND_HASH_MAP_FOREACH_PTR(constants_table, c) {
 				zval_ptr_dtor_nogc(&c->value);
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(constants_table);
@@ -285,7 +285,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 		zend_class_constant *c;
 		zval *p, *end;
 
-		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 			if (c->ce == ce) {
 				zval_ptr_dtor_nogc(&c->value);
 			}
@@ -362,7 +362,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release_ex(prop_info->name, 0);
 					if (prop_info->doc_comment) {
@@ -379,7 +379,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
@@ -421,7 +421,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				free(ce->default_static_members_table);
 			}
 
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
@@ -432,7 +432,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_string_release_ex(ce->name, 1);
 
 			/* TODO: eliminate this loop for classes without functions with arg_info */
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 				    fn->common.scope == ce) {
 					zend_free_internal_arg_info(&fn->internal_function);
@@ -443,7 +443,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
 						if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 							/* We marked this as IMMUTABLE, but do need to free it when the

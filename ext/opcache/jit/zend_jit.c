@@ -4266,7 +4266,7 @@ void zend_jit_check_funcs(HashTable *function_table, bool is_method) {
 	uintptr_t counter;
 	zend_jit_op_array_extension *jit_extension;
 
-	ZEND_HASH_REVERSE_FOREACH_PTR(function_table, func) {
+	ZEND_HASH_MAP_REVERSE_FOREACH_PTR(function_table, func) {
 		if (func->type == ZEND_INTERNAL_FUNCTION) {
 			break;
 		}
@@ -4570,8 +4570,8 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 		zend_class_entry *ce;
 		zend_op_array *op_array;
 
-		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+		ZEND_HASH_MAP_FOREACH_PTR(&script->class_table, ce) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 				if (!ZEND_FUNC_INFO(op_array)) {
 					void *jit_extension = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
 
@@ -5053,7 +5053,7 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 		zend_jit_unprotect();
 
 		zend_jit_check_funcs(EG(function_table), 0);
-		ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
+		ZEND_HASH_MAP_REVERSE_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_INTERNAL_CLASS) {
 				break;
 			}
@@ -5108,12 +5108,12 @@ static void zend_jit_restart_preloaded_script(zend_persistent_script *script)
 
 	zend_jit_restart_preloaded_op_array(&script->script.main_op_array);
 
-	ZEND_HASH_FOREACH_PTR(&script->script.function_table, op_array) {
+	ZEND_HASH_MAP_FOREACH_PTR(&script->script.function_table, op_array) {
 		zend_jit_restart_preloaded_op_array(op_array);
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, op_array) {
+	ZEND_HASH_MAP_FOREACH_PTR(&script->script.class_table, ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->type == ZEND_USER_FUNCTION) {
 				zend_jit_restart_preloaded_op_array(op_array);
 			}
