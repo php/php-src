@@ -912,7 +912,7 @@ PHP_FUNCTION(dba_exists)
 		}
 	}
 
-	RETVAL_BOOL(info->hnd->exists(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str)) == SUCCESS);
+	RETVAL_BOOL(info->hnd->exists(info, key_str) == SUCCESS);
 	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */

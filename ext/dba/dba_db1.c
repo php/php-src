@@ -119,8 +119,8 @@ DBA_EXISTS_FUNC(db1)
 	DBT gval;
 	DBT gkey;
 
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	return dba->dbp->get(dba->dbp, &gkey, &gval, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }

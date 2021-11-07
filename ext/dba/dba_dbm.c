@@ -122,11 +122,11 @@ DBA_EXISTS_FUNC(dbm)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	gval = fetch(gkey);
-	if(gval.dptr) {
+	if (gval.dptr) {
 		return SUCCESS;
 	}
 	return FAILURE;

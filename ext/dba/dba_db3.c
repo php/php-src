@@ -158,7 +158,8 @@ DBA_EXISTS_FUNC(db3)
 	DBT gkey;
 
 	memset(&gkey, 0, sizeof(gkey));
-	gkey.data = (char *) key; gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {

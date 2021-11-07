@@ -112,7 +112,7 @@ DBA_EXISTS_FUNC(inifile)
 		php_error_docref(NULL, E_WARNING, "No key specified");
 		return 0;
 	}
-	ini_key = inifile_key_split((char*)key); /* keylen not needed here */
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	ini_val = inifile_fetch(dba, &ini_key, 0);
 	inifile_key_free(&ini_key);

@@ -125,7 +125,7 @@ DBA_EXISTS_FUNC(tcadb)
 	char *value;
 	int value_len;
 
-	value = tcadbget(dba->tcadb, key, keylen, &value_len);
+	value = tcadbget(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), &value_len);
 	if (value) {
 		tcfree(value);
 		return SUCCESS;

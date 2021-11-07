@@ -97,10 +97,10 @@ DBA_EXISTS_FUNC(ndbm)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	gval = dbm_fetch(info->dbf, gkey);
-	if(gval.dptr) {
+	if (gval.dptr) {
 		return SUCCESS;
 	}
 	return FAILURE;
