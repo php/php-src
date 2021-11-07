@@ -351,7 +351,13 @@ static zend_always_inline bool zend_string_equal_val(const zend_string *s1, cons
 
 static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
-	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
+	if (ZSTR_LEN(s1) != ZSTR_LEN(s2)) {
+		return false;
+	}
+	if (ZSTR_H(s1) && ZSTR_H(s2) && ZSTR_H(s1) != ZSTR_H(s2)) {
+		return false;
+	}
+	return zend_string_equal_val(s1, s2);
 }
 
 static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
