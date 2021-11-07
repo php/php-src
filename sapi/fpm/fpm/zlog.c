@@ -414,7 +414,8 @@ static inline ssize_t zlog_stream_unbuffered_write(
 static inline ssize_t zlog_stream_buf_copy_cstr(
 		struct zlog_stream *stream, const char *str, size_t str_len) /* {{{ */
 {
-	if (stream->buf.size - stream->len <= str_len && !zlog_stream_buf_alloc_ex(stream, str_len)) {
+	if (stream->buf.size - stream->len <= str_len &&
+			!zlog_stream_buf_alloc_ex(stream, str_len + stream->len)) {
 		return -1;
 	}
 
