@@ -74,17 +74,17 @@ DBA_CLOSE_FUNC(qdbm)
 DBA_FETCH_FUNC(qdbm)
 {
 	dba_qdbm_data *dba = info->dbf;
-	char *value, *new = NULL;
+	char *value;
 	int value_size;
+	zend_string *fetched_val = NULL;
 
-	value = dpget(dba->dbf, key, keylen, 0, -1, &value_size);
+	value = dpget(dba->dbf, ZSTR_VAL(key), ZSTR_LEN(key), 0, -1, &value_size);
 	if (value) {
-		if (newlen) *newlen = value_size;
-		new = estrndup(value, value_size);
+		fetched_val = zend_string_init(value, value_size, /* persistent */ false);
 		free(value);
 	}
 
-	return new;
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(qdbm)

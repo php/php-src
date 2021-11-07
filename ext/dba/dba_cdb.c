@@ -145,32 +145,30 @@ DBA_CLOSE_FUNC(cdb)
 DBA_FETCH_FUNC(cdb)
 {
 	CDB_INFO;
+	zend_string *fetched_val = NULL;
 	unsigned int len;
-	char *new_entry = NULL;
 
 #if DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
 #endif
-	if (php_cdb_find(&cdb->c, key, keylen) == 1) {
+	if (php_cdb_find(&cdb->c, ZSTR_VAL(key), ZSTR_LEN(key)) == 1) {
 		while(skip--) {
-			if (php_cdb_findnext(&cdb->c, key, keylen) != 1) {
+			if (php_cdb_findnext(&cdb->c, ZSTR_VAL(key), ZSTR_LEN(key)) != 1) {
 				return NULL;
 			}
 		}
 		len = cdb_datalen(&cdb->c);
-		new_entry = safe_emalloc(len, 1, 1);
+		fetched_val = zend_string_alloc(len, /* persistent */ false);
 
-		if (php_cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
-			efree(new_entry);
+		if (php_cdb_read(&cdb->c, ZSTR_VAL(fetched_val), len, cdb_datapos(&cdb->c)) == -1) {
+			zend_string_release_ex(fetched_val, /* persistent */ false);
 			return NULL;
 		}
-		new_entry[len] = 0;
-		if (newlen)
-			*newlen = len;
+		ZSTR_VAL(fetched_val)[len] = 0;
 	}
 
-	return new_entry;
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(cdb)

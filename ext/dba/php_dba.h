@@ -73,7 +73,7 @@ typedef struct dba_handler {
 	int flags; /* whether and how dba does locking and other flags*/
 	zend_result (*open)(dba_info *, char **error);
 	void (*close)(dba_info *);
-	char* (*fetch)(dba_info *, char *, size_t, int, size_t *);
+	zend_string* (*fetch)(dba_info *, zend_string *, int);
 	zend_result (*update)(dba_info *, char *, size_t, char *, size_t, int);
 	zend_result (*exists)(dba_info *, char *, size_t);
 	zend_result (*delete)(dba_info *, char *, size_t);
@@ -92,7 +92,7 @@ typedef struct dba_handler {
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info)
 #define DBA_FETCH_FUNC(x) \
-	char *dba_fetch_##x(dba_info *info, char *key, size_t keylen, int skip, size_t *newlen)
+	zend_string *dba_fetch_##x(dba_info *info, zend_string *key, int skip)
 #define DBA_UPDATE_FUNC(x) \
 	zend_result dba_update_##x(dba_info *info, char *key, size_t keylen, char *val, size_t vallen, int mode)
 #define DBA_EXISTS_FUNC(x) \

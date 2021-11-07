@@ -87,15 +87,14 @@ DBA_FETCH_FUNC(db2)
 	DBT gval = {0};
 	DBT gkey = {0};
 
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return NULL;
 	}
 
-	if (newlen) *newlen = gval.size;
-	return estrndup(gval.data, gval.size);
+	return zend_string_init(gval.data, gval.size, /* persistent */ false);
 }
 
 DBA_UPDATE_FUNC(db2)

@@ -56,21 +56,18 @@ DBA_FETCH_FUNC(flatfile)
 {
 	flatfile *dba = info->dbf;
 	datum gval;
-	char *new = NULL;
 	datum gkey;
+	zend_string *fetched_val = NULL;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
-		if (newlen) {
-			*newlen = gval.dsize;
-		}
-		new = estrndup(gval.dptr, gval.dsize);
+		fetched_val = zend_string_init(gval.dptr, gval.dsize, /* persistent */ false);
 		efree(gval.dptr);
 	}
-	return new;
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(flatfile)

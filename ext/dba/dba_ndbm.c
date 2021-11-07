@@ -66,17 +66,15 @@ DBA_CLOSE_FUNC(ndbm)
 DBA_FETCH_FUNC(ndbm)
 {
 	datum gval;
-	char *new = NULL;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	gval = dbm_fetch(info->dbf, gkey);
-	if(gval.dptr) {
-		if(newlen) *newlen = gval.dsize;
-		new = estrndup(gval.dptr, gval.dsize);
+	if (gval.dptr) {
+		return zend_string_init(gval.dptr, gval.dsize, /* persistent */ false);
 	}
-	return new;
+	return NULL;
 }
 
 DBA_UPDATE_FUNC(ndbm)

@@ -84,19 +84,17 @@ DBA_CLOSE_FUNC(tcadb)
 DBA_FETCH_FUNC(tcadb)
 {
 	dba_tcadb_data *dba = info->dbf;
-	char *value, *new = NULL;
+	char *value;
 	int value_size;
+	zend_string *fetched_val = NULL;
 
-	value = tcadbget(dba->tcadb, key, keylen, &value_size);
+	value = tcadbget(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		fetched_val = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(tcadb)

@@ -108,7 +108,7 @@ DBA_FETCH_FUNC(lmdb)
 {
 	int rc;
 	MDB_val k, v;
-	char *ret = NULL;
+	zend_string *ret = NULL;
 
 	if (LMDB_IT(cur)) {
 		rc = mdb_txn_renew(LMDB_IT(txn));
@@ -116,25 +116,24 @@ DBA_FETCH_FUNC(lmdb)
 		rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	}
 	if (rc) {
-		php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return NULL;
 	}
 
-	k.mv_size = keylen;
-	k.mv_data = key;
+	k.mv_size = ZSTR_LEN(key);
+	k.mv_data = ZSTR_VAL(key);
 
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return NULL;
 	}
 
 	if (v.mv_data) {
-		if(newlen) *newlen = v.mv_size;
-		ret = estrndup(v.mv_data, v.mv_size);
+		ret = zend_string_init(v.mv_data, v.mv_size, /* persistent */ false);
 	}
 
 	if (LMDB_IT(cur)) {

@@ -51,17 +51,21 @@ DBA_FETCH_FUNC(inifile)
 	inifile *dba = info->dbf;
 	val_type ini_val;
 	key_type ini_key;
+	zend_string *fetched_val = NULL;
 
 	if (!key) {
 		php_error_docref(NULL, E_WARNING, "No key specified");
 		return 0;
 	}
-	ini_key = inifile_key_split((char*)key); /* keylen not needed here */
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	ini_val = inifile_fetch(dba, &ini_key, skip);
-	*newlen = ini_val.value ? strlen(ini_val.value) : 0;
 	inifile_key_free(&ini_key);
-	return ini_val.value;
+	if (ini_val.value) {
+		fetched_val = zend_string_init(ini_val.value, strlen(ini_val.value), /* persistent */ false);
+		inifile_val_free(&ini_val);
+	}
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(inifile)
