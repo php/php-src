@@ -54,7 +54,7 @@
         /**
         * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
         *
-        * @param enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
+        * @param bool $enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
         */
         function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
             global $connect_flags;
@@ -74,7 +74,7 @@
         /**
         * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
         *
-        * @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
+        * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
         */
         function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
             global $connect_flags;
