@@ -128,8 +128,8 @@ DBA_DELETE_FUNC(gdbm)
 	dba_gdbm_data *dba = info->dbf;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	return gdbm_delete(dba->dbf, gkey) == -1 ? FAILURE : SUCCESS;
 }

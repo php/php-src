@@ -136,8 +136,8 @@ DBA_DELETE_FUNC(dbm)
 {
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	return(delete(gkey) == -1 ? FAILURE : SUCCESS);
 }
 

@@ -134,7 +134,7 @@ DBA_DELETE_FUNC(inifile)
 		php_error_docref(NULL, E_WARNING, "No key specified");
 		return 0;
 	}
-	ini_key = inifile_key_split((char*)key); /* keylen not needed here */
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	res =  inifile_delete_ex(dba, &ini_key, &found);
 

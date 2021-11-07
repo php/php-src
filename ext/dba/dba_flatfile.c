@@ -118,8 +118,8 @@ DBA_DELETE_FUNC(flatfile)
 	flatfile *dba = info->dbf;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	return(flatfile_delete(dba, gkey) == -1 ? FAILURE : SUCCESS);
 }
 

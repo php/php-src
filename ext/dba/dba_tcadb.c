@@ -138,7 +138,7 @@ DBA_DELETE_FUNC(tcadb)
 {
 	dba_tcadb_data *dba = info->dbf;
 
-	return tcadbout(dba->tcadb, key, keylen) ? SUCCESS : FAILURE;
+	return tcadbout(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key)) ? SUCCESS : FAILURE;
 }
 
 DBA_FIRSTKEY_FUNC(tcadb)

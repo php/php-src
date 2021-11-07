@@ -130,8 +130,8 @@ DBA_DELETE_FUNC(db1)
 	dba_db1_data *dba = info->dbf;
 	DBT gkey;
 
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	return dba->dbp->del(dba->dbp, &gkey, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
