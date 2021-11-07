@@ -101,32 +101,27 @@
         }
 
         function have_innodb($link) {
-          if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'")) &&
-                ($row = $res->fetch_row()) &&
-                !empty($row)) {
-                if ($row[1] == "DISABLED" || $row[1] == "NO") {
-                    return false;
-                }
-                return true;
-          } else {
-                /* MySQL 5.6.1+ */
-                if ($res = $link->query("SHOW ENGINES")) {
-                    while ($row = $res->fetch_assoc()) {
-                        if (!isset($row['Engine']) || !isset($row['Support']))
-                            return false;
-
-                        if (('InnoDB' == $row['Engine']) &&
-                            (('YES' == $row['Support']) || ('DEFAULT' == $row['Support']))
-                            ) {
-                            return true;
-                        }
+            if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
+                && ($row = $res->fetch_row())
+                && !empty($row)
+            ) {
+                return !($row[1] == 'DISABLED' || $row[1] == 'NO');
+            }
+            // MySQL 5.6.1+
+            if ($res = $link->query('SHOW ENGINES')) {
+                while ($row = $res->fetch_assoc()) {
+                    if (!isset($row['Engine']) || !isset($row['Support'])) {
+                        return false;
                     }
-                    return false;
-                } else {
-                    return false;
+
+                    if (($row['Engine'] == 'InnoDB')
+                        && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
+                    ) {
+                        return true;
+                    }
                 }
-          }
-          return false;
+            }
+            return false;
         }
 
     } else {
