@@ -166,11 +166,19 @@ function create_object($n) {
     }
 }
 
-define('TEST', null);
+const TEST_C = null;
 
-function read_const($n) {
+function read_compile_time_const($n) {
     for ($i = 0; $i < $n; ++$i) {
-        $x = TEST;
+        $x = TEST_C;
+    }
+}
+
+define('TEST_R', null);
+
+function read_runtime_time_const($n) {
+    for ($i = 0; $i < $n; ++$i) {
+        $x = TEST_R;
     }
 }
 
@@ -336,8 +344,10 @@ $x->read_const(N);
 $t = end_test($t, '$x = Foo::TEST', $overhead);
 create_object(N);
 $t = end_test($t, 'new Foo()', $overhead);
-read_const(N);
-$t = end_test($t, '$x = TEST', $overhead);
+read_compile_time_const(N);
+$t = end_test($t, '$x = TEST_C', $overhead);
+read_runtime_time_const(N);
+$t = end_test($t, '$x = TEST_R', $overhead);
 read_auto_global(N);
 $t = end_test($t, '$x = $_GET', $overhead);
 read_global_var(N);
