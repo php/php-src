@@ -91,12 +91,12 @@ DBA_UPDATE_FUNC(qdbm)
 {
 	dba_qdbm_data *dba = info->dbf;
 
-	if (dpput(dba->dbf, key, keylen, val, vallen, mode == 1 ? DP_DKEEP : DP_DOVER)) {
+	if (dpput(dba->dbf, ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(val), ZSTR_LEN(val), mode == 1 ? DP_DKEEP : DP_DOVER)) {
 		return SUCCESS;
 	}
 
 	if (dpecode != DP_EKEEP) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", dperrmsg(dpecode));
+		php_error_docref(NULL, E_WARNING, "%s", dperrmsg(dpecode));
 	}
 
 	return FAILURE;

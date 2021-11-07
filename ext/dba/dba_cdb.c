@@ -180,7 +180,7 @@ DBA_UPDATE_FUNC(cdb)
 		return FAILURE; /* database was opened readonly */
 	if (!mode)
 		return FAILURE; /* cdb_make doesn't know replace */
-	if (cdb_make_add(&cdb->m, key, keylen, val, vallen) != -1)
+	if (cdb_make_add(&cdb->m, ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(val), ZSTR_LEN(val)) != -1)
 		return SUCCESS;
 #endif
 	return FAILURE;

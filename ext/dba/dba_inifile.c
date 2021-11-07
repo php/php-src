@@ -79,9 +79,9 @@ DBA_UPDATE_FUNC(inifile)
 		php_error_docref(NULL, E_WARNING, "No key specified");
 		return 0;
 	}
-	ini_key = inifile_key_split((char*)key); /* keylen not needed here */
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
-	ini_val.value = val;
+	ini_val.value = ZSTR_VAL(val);
 
 	if (mode == 1) {
 		res = inifile_append(dba, &ini_key, &ini_val);
@@ -91,7 +91,8 @@ DBA_UPDATE_FUNC(inifile)
 	inifile_key_free(&ini_key);
 	switch(res) {
 	case -1:
-		php_error_docref1(NULL, key, E_WARNING, "Operation not possible");
+		// TODO Check when this happens and confirm this can even happen
+		php_error_docref(NULL, E_WARNING, "Operation not possible");
 		return FAILURE;
 	default:
 	case 0:

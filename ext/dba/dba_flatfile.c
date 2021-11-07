@@ -76,10 +76,10 @@ DBA_UPDATE_FUNC(flatfile)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
-	gval.dptr = (char *) val;
-	gval.dsize = vallen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
+	gval.dptr = ZSTR_VAL(val);
+	gval.dsize = ZSTR_LEN(val);
 
 	switch(flatfile_store(dba, gkey, gval, mode==1 ? FLATFILE_INSERT : FLATFILE_REPLACE)) {
 		case 0:
@@ -87,10 +87,12 @@ DBA_UPDATE_FUNC(flatfile)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref1(NULL, key, E_WARNING, "Operation not possible");
+			// TODO Check when this happens and confirm this can even happen
+			php_error_docref(NULL, E_WARNING, "Operation not possible");
 			return FAILURE;
 		default:
-			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
+			// TODO Convert this to an assertion failure
+			php_error_docref(NULL, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }
