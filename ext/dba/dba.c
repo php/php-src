@@ -1094,7 +1094,7 @@ PHP_FUNCTION(dba_delete)
 		}
 	}
 
-	RETVAL_BOOL(info->hnd->delete(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str)) == SUCCESS);
+	RETVAL_BOOL(info->hnd->delete(info, key_str) == SUCCESS);
 	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */

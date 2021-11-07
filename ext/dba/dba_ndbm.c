@@ -110,8 +110,8 @@ DBA_DELETE_FUNC(ndbm)
 {
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	return(dbm_delete(info->dbf, gkey) == -1 ? FAILURE : SUCCESS);
 }
 

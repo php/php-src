@@ -120,7 +120,7 @@ DBA_DELETE_FUNC(qdbm)
 {
 	dba_qdbm_data *dba = info->dbf;
 
-	return dpout(dba->dbf, key, keylen) ? SUCCESS : FAILURE;
+	return dpout(dba->dbf, ZSTR_VAL(key), ZSTR_LEN(key)) ? SUCCESS : FAILURE;
 }
 
 DBA_FIRSTKEY_FUNC(qdbm)

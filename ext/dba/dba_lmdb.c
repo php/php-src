@@ -223,25 +223,25 @@ DBA_DELETE_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return FAILURE;
 	}
 
-	k.mv_size = keylen;
-	k.mv_data = key;
+	k.mv_size = ZSTR_LEN(key);
+	k.mv_data = ZSTR_VAL(key);
 
 	rc = mdb_del(LMDB_IT(txn), LMDB_IT(dbi), &k, NULL);
 	if (!rc) {
 		rc = mdb_txn_commit(LMDB_IT(txn));
 		if (rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 			mdb_txn_abort(LMDB_IT(txn));
 			return FAILURE;
 		}
 		return SUCCESS;
 	}
 
-	php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
+	php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 
 	return FAILURE;
 }
