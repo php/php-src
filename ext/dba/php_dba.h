@@ -77,8 +77,8 @@ typedef struct dba_handler {
 	zend_result (*update)(dba_info *, zend_string *, zend_string *, int);
 	zend_result (*exists)(dba_info *, zend_string *);
 	zend_result (*delete)(dba_info *, zend_string *);
-	char* (*firstkey)(dba_info *, size_t *);
-	char* (*nextkey)(dba_info *, size_t *);
+	zend_string* (*firstkey)(dba_info *);
+	zend_string* (*nextkey)(dba_info *);
 	zend_result (*optimize)(dba_info *);
 	zend_result (*sync)(dba_info *);
 	char* (*info)(struct dba_handler *hnd, dba_info *);
@@ -100,9 +100,9 @@ typedef struct dba_handler {
 #define DBA_DELETE_FUNC(x) \
 	zend_result dba_delete_##x(dba_info *info, zend_string *key)
 #define DBA_FIRSTKEY_FUNC(x) \
-	char *dba_firstkey_##x(dba_info *info, size_t *newlen)
+	zend_string *dba_firstkey_##x(dba_info *info)
 #define DBA_NEXTKEY_FUNC(x) \
-	char *dba_nextkey_##x(dba_info *info, size_t *newlen)
+	zend_string *dba_nextkey_##x(dba_info *info)
 #define DBA_OPTIMIZE_FUNC(x) \
 	zend_result dba_optimize_##x(dba_info *info)
 #define DBA_SYNC_FUNC(x) \

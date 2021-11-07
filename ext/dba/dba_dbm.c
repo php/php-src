@@ -145,15 +145,15 @@ DBA_FIRSTKEY_FUNC(dbm)
 {
 	dba_dbm_data *dba = info->dbf;
 	datum gkey;
-	char *key = NULL;
+	zend_string *key = NULL;
 
 	gkey = firstkey();
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		key = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
-	} else
+	} else {
 		dba->nextkey.dptr = NULL;
+	}
 	return key;
 }
 
@@ -161,18 +161,18 @@ DBA_NEXTKEY_FUNC(dbm)
 {
 	dba_dbm_data *dba = info->dbf;
 	datum gkey;
-	char *nkey = NULL;
+	zend_string *key = NULL;
 
-	if(!dba->nextkey.dptr) return NULL;
+	if (!dba->nextkey.dptr) { return NULL; }
 
 	gkey = nextkey(dba->nextkey);
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		nkey = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
-	} else
+	} else {
 		dba->nextkey.dptr = NULL;
-	return nkey;
+	}
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(dbm)

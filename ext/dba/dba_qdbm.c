@@ -127,34 +127,34 @@ DBA_FIRSTKEY_FUNC(qdbm)
 {
 	dba_qdbm_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	dpiterinit(dba->dbf);
 
 	value = dpiternext(dba->dbf, &value_size);
 	if (value) {
-		if (newlen) *newlen = value_size;
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		free(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_NEXTKEY_FUNC(qdbm)
 {
 	dba_qdbm_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	value = dpiternext(dba->dbf, &value_size);
 	if (value) {
-		if (newlen) *newlen = value_size;
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		free(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(qdbm)

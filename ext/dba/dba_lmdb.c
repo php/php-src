@@ -250,7 +250,7 @@ DBA_FIRSTKEY_FUNC(lmdb)
 {
 	int rc;
 	MDB_val k, v;
-	char *ret = NULL;
+	zend_string *ret = NULL;
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, MDB_RDONLY, &LMDB_IT(txn));
 	if (rc) {
@@ -276,9 +276,8 @@ DBA_FIRSTKEY_FUNC(lmdb)
 		return NULL;
 	}
 
-	if(k.mv_data) {
-		if(newlen) *newlen = k.mv_size;
-		ret = estrndup(k.mv_data, k.mv_size);
+	if (k.mv_data) {
+		ret = zend_string_init(k.mv_data, k.mv_size, /* persistent */ false);
 	}
 
 	mdb_txn_reset(LMDB_IT(txn));
@@ -290,7 +289,7 @@ DBA_NEXTKEY_FUNC(lmdb)
 {
 	int rc;
 	MDB_val k, v;
-	char *ret = NULL;
+	zend_string *ret = NULL;
 
 	rc = mdb_txn_renew(LMDB_IT(txn));
 	if (rc) {
@@ -309,9 +308,8 @@ DBA_NEXTKEY_FUNC(lmdb)
 		return NULL;
 	}
 
-	if(k.mv_data) {
-		if(newlen) *newlen = k.mv_size;
-		ret = estrndup(k.mv_data, k.mv_size);
+	if (k.mv_data) {
+		ret = zend_string_init(k.mv_data, k.mv_size, /* persistent */ false);
 	}
 
 	mdb_txn_reset(LMDB_IT(txn));

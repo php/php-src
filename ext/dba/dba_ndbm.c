@@ -118,27 +118,23 @@ DBA_DELETE_FUNC(ndbm)
 DBA_FIRSTKEY_FUNC(ndbm)
 {
 	datum gkey;
-	char *key = NULL;
 
 	gkey = dbm_firstkey(info->dbf);
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		key = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		return zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 	}
-	return key;
+	return NULL;
 }
 
 DBA_NEXTKEY_FUNC(ndbm)
 {
 	datum gkey;
-	char *nkey = NULL;
 
 	gkey = dbm_nextkey(info->dbf);
-	if(gkey.dptr) {
-		if(newlen) *newlen = gkey.dsize;
-		nkey = estrndup(gkey.dptr, gkey.dsize);
+	if (gkey.dptr) {
+		return zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 	}
-	return nkey;
+	return NULL;
 }
 
 DBA_OPTIMIZE_FUNC(ndbm)

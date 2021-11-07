@@ -132,10 +132,7 @@ DBA_FIRSTKEY_FUNC(flatfile)
 	}
 	dba->nextkey = flatfile_firstkey(dba);
 	if (dba->nextkey.dptr) {
-		if (newlen)  {
-			*newlen = dba->nextkey.dsize;
-		}
-		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
+		return zend_string_init(dba->nextkey.dptr, dba->nextkey.dsize, /* persistent */ false);
 	}
 	return NULL;
 }
@@ -153,10 +150,7 @@ DBA_NEXTKEY_FUNC(flatfile)
 	}
 	dba->nextkey = flatfile_nextkey(dba);
 	if (dba->nextkey.dptr) {
-		if (newlen) {
-			*newlen = dba->nextkey.dsize;
-		}
-		return estrndup(dba->nextkey.dptr, dba->nextkey.dsize);
+		return zend_string_init(dba->nextkey.dptr, dba->nextkey.dsize, /* persistent */ false);
 	}
 	return NULL;
 }

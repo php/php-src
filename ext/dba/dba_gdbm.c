@@ -138,16 +138,15 @@ DBA_FIRSTKEY_FUNC(gdbm)
 {
 	dba_gdbm_data *dba = info->dbf;
 	datum gkey;
-	char *key = NULL;
+	zend_string *key = NULL;
 
-	if(dba->nextkey.dptr) {
+	if (dba->nextkey.dptr) {
 		free(dba->nextkey.dptr);
 	}
 
 	gkey = gdbm_firstkey(dba->dbf);
-	if(gkey.dptr) {
-		key = estrndup(gkey.dptr, gkey.dsize);
-		if(newlen) *newlen = gkey.dsize;
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
 	} else {
 		dba->nextkey.dptr = NULL;
@@ -158,21 +157,20 @@ DBA_FIRSTKEY_FUNC(gdbm)
 DBA_NEXTKEY_FUNC(gdbm)
 {
 	dba_gdbm_data *dba = info->dbf;
-	char *nkey = NULL;
+	zend_string *key = NULL;
 	datum gkey;
 
-	if(!dba->nextkey.dptr) return NULL;
+	if(!dba->nextkey.dptr) { return NULL; }
 
 	gkey = gdbm_nextkey(dba->dbf, dba->nextkey);
 	free(dba->nextkey.dptr);
-	if(gkey.dptr) {
-		nkey = estrndup(gkey.dptr, gkey.dsize);
-		if(newlen) *newlen = gkey.dsize;
+	if (gkey.dptr) {
+		key = zend_string_init(gkey.dptr, gkey.dsize, /* persistent */ false);
 		dba->nextkey = gkey;
 	} else {
 		dba->nextkey.dptr = NULL;
 	}
-	return nkey;
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(gdbm)

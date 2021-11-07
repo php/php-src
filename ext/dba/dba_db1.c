@@ -146,8 +146,7 @@ DBA_FIRSTKEY_FUNC(db1)
 	memset(&gval, 0, sizeof(gval));
 
 	if (dba->dbp->seq(dba->dbp, &gkey, &gval, R_FIRST) == RET_SUCCESS) {
-		if (newlen) *newlen = gkey.size;
-		return estrndup(gkey.data, gkey.size);
+		return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 	}
 	return NULL;
 }
@@ -162,8 +161,7 @@ DBA_NEXTKEY_FUNC(db1)
 	memset(&gval, 0, sizeof(gval));
 
 	if (dba->dbp->seq(dba->dbp, &gkey, &gval, R_NEXT) == RET_SUCCESS) {
-		if (newlen) *newlen = gkey.size;
-		return estrndup(gkey.data, gkey.size);
+		return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 	}
 	return NULL;
 }

@@ -193,27 +193,24 @@ DBA_FIRSTKEY_FUNC(db3)
 		return NULL;
 	}
 
-	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db3(info, newlen);
+	return dba_nextkey_db3(info);
 }
 
 DBA_NEXTKEY_FUNC(db3)
 {
 	dba_db3_data *dba = info->dbf;
 	DBT gkey, gval;
-	char *nkey = NULL;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
 
 	if (dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT) == 0) {
 		if (gkey.data) {
-			nkey = estrndup(gkey.data, gkey.size);
-			if (newlen) *newlen = gkey.size;
+			return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 		}
 	}
 
-	return nkey;
+	return NULL;
 }
 
 DBA_OPTIMIZE_FUNC(db3)
