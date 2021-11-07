@@ -60,7 +60,7 @@ if (!$IS_MYSQLND)
     if (!is_array($reject) || !empty($reject))
         printf("[007] Expecting empty array got %s/%s\n", gettype($reject), var_export($reject, true));
 
-    // Lets pass a dead connection
+    // Let's pass a dead connection
     $links = array($link);
     $errors = array($link);
     $reject = array($link);

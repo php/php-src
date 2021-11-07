@@ -69,10 +69,10 @@ mysqli.max_persistent=1
             At this point 'persistent' is not to be confused with what a user calls a 'persistent' - in this case
             'persistent' means that mysqlnd uses malloc() instead of emalloc(). nothing else. ext/mysqli will
             not consider it as a 'persistent' connection in a user sense, ext/mysqli will not apply max_persistent etc.
-            Its only about malloc() vs. emalloc().
+            It's only about malloc() vs. emalloc().
 
-            However, the bug is about malloc() and efree(). You can make make mysqlnd use malloc() by either using
-            pconnect or mysql_init() - so we should test pconnect as well..
+            However, the bug is about malloc() and efree(). You can make mysqlnd use malloc() by either using
+            pconnect or mysql_init() - so we should test pconnect as well.
         */
         $host = 'p:' . $host;
         if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
