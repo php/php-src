@@ -239,6 +239,42 @@ function ternary2($n) {
     }
 }
 
+const STR_S_S1 = "same string";
+const STR_S_S2 = "same string";
+
+function compare_str_short_equal($n) {
+    for ($i = 0; $i < $n; ++$i) {
+        STR_S_S1 == STR_S_S2;
+    }
+}
+
+const STR_S_N1 = "same string nod";
+const STR_S_N2 = "same string not";
+
+function compare_str_short_not_equal($n) {
+    for ($i = 0; $i < $n; ++$i) {
+        STR_S_N1 == STR_S_N2;
+    }
+}
+
+define('STR_L_S1', str_repeat('Vivamus eu lorem ac dui.', 200));
+define('STR_L_S2', str_repeat('Vivamus eu lorem ac dui.', 200));
+
+function compare_str_long_equal($n) {
+    for ($i = 0; $i < $n; ++$i) {
+        STR_L_S1 == STR_L_S2;
+    }
+}
+
+define('STR_L_N1', str_repeat('Vivamus eu lorem ac dui.', 200) . 'k');
+define('STR_L_N2', str_repeat('Vivamus eu lorem ac dui.', 200) . 'l');
+
+function compare_str_long_not_equal($n) {
+    for ($i = 0; $i < $n; ++$i) {
+        STR_L_N1 == STR_L_N2;
+    }
+}
+
 /*****/
 
 function empty_loop($n) {
@@ -257,6 +293,7 @@ function start_test()
   return gethrtime();
 }
 
+const PADDING = 30;
 function end_test($start, $name, $overhead = null)
 {
   global $total;
@@ -266,7 +303,7 @@ function end_test($start, $name, $overhead = null)
   $last_time = $end-$start;
   $total += $last_time;
   $num = number_format($last_time,3);
-  $pad = str_repeat(" ", 24-strlen($name)-strlen($num));
+  $pad = str_repeat(" ", PADDING-strlen($name)-strlen($num));
   if (is_null($overhead)) {
     echo $name,$pad,$num,"\n";
   } else {
@@ -280,10 +317,10 @@ function end_test($start, $name, $overhead = null)
 function total()
 {
   global $total;
-  $pad = str_repeat("-", 24);
+  $pad = str_repeat("-", PADDING);
   echo $pad,"\n";
   $num = number_format($total,3);
-  $pad = str_repeat(" ", 24-strlen("Total")-strlen($num));
+  $pad = str_repeat(" ", PADDING-strlen("Total")-strlen($num));
   echo "Total",$pad,$num."\n";
 }
 
@@ -364,4 +401,12 @@ ternary(N);
 $t = end_test($t, '$x = $f ? $f : $a', $overhead);
 ternary2(N);
 $t = end_test($t, '$x = $f ? $f : tmp', $overhead);
+compare_str_short_equal(N);
+$t = end_test($t, 'STR_S_S1 == STR_S_S2', $overhead);
+compare_str_short_not_equal(N);
+$t = end_test($t, 'STR_S_N1 == STR_S_N2', $overhead);
+compare_str_long_equal(N);
+$t = end_test($t, 'STR_L_S1 == STR_L_S2', $overhead);
+compare_str_long_not_equal(N);
+$t = end_test($t, 'STR_L_N1 == STR_L_N2', $overhead);
 total($t0, "Total");
