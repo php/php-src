@@ -117,18 +117,17 @@ DBA_FETCH_FUNC(db3)
 {
 	dba_db3_data *dba = info->dbf;
 	DBT gval;
-	char *new = NULL;
 	DBT gkey;
 
 	memset(&gkey, 0, sizeof(gkey));
-	gkey.data = (char *) key; gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	memset(&gval, 0, sizeof(gval));
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
-		if (newlen) *newlen = gval.size;
-		new = estrndup(gval.data, gval.size);
+		return zend_string_init(gval.data, gval.size, /* persistent */ false);
 	}
-	return new;
+	return NULL;
 }
 
 DBA_UPDATE_FUNC(db3)

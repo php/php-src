@@ -979,15 +979,13 @@ PHP_FUNCTION(dba_fetch)
 		}
 	}
 
-	char *val;
-	size_t len = 0;
-	if ((val = info->hnd->fetch(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str), skip, &len)) == NULL) {
+	zend_string *val;
+	if ((val = info->hnd->fetch(info, key_str, skip)) == NULL) {
 		DBA_RELEASE_HT_KEY_CREATION();
 		RETURN_FALSE;
 	}
 	DBA_RELEASE_HT_KEY_CREATION();
-	RETVAL_STRINGL(val, len);
-	efree(val);
+	RETURN_STR(val);
 }
 /* }}} */
 

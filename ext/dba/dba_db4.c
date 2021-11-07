@@ -146,25 +146,24 @@ DBA_FETCH_FUNC(db4)
 {
 	dba_db4_data *dba = info->dbf;
 	DBT gval;
-	char *new = NULL;
 	DBT gkey;
+	zend_string *fetched_value = NULL;
 
 	memset(&gkey, 0, sizeof(gkey));
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	memset(&gval, 0, sizeof(gval));
 	if (info->flags & DBA_PERSISTENT) {
 		gval.flags |= DB_DBT_MALLOC;
 	}
 	if (!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
-		if (newlen) *newlen = gval.size;
-		new = estrndup(gval.data, gval.size);
+		fetched_value = zend_string_init(gval.data, gval.size, /* persistent */ false);
 		if (info->flags & DBA_PERSISTENT) {
 			free(gval.data);
 		}
 	}
-	return new;
+	return fetched_value;
 }
 
 DBA_UPDATE_FUNC(db4)
