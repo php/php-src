@@ -338,17 +338,6 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 	}
 }
 
-#if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
-BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
-END_EXTERN_C()
-#else
-static zend_always_inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
-{
-	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
-}
-#endif
-
 static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
 	if (ZSTR_LEN(s1) != ZSTR_LEN(s2)) {
@@ -357,7 +346,7 @@ static zend_always_inline bool zend_string_equal_content(const zend_string *s1, 
 	if (ZSTR_H(s1) && ZSTR_H(s2) && ZSTR_H(s1) != ZSTR_H(s2)) {
 		return false;
 	}
-	return zend_string_equal_val(s1, s2);
+	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 
 static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
