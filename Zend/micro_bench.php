@@ -240,8 +240,7 @@ function empty_loop($n) {
 
 function gethrtime()
 {
-  $hrtime = hrtime();
-  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
+    return hrtime(true) / 1000000000;
 }
 
 function start_test()
