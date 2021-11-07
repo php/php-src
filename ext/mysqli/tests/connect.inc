@@ -23,9 +23,7 @@
     }
 
     /* Development setting: test experimental features and/or feature requests that never worked before? */
-    $TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
-                ((1 == getenv("MYSQL_TEST_EXPERIMENTAL")) ? true : false) :
-                false;
+    $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
     $IS_MYSQLND = stristr(mysqli_get_client_info(), "mysqlnd");
 
