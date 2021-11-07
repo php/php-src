@@ -365,7 +365,7 @@ function end_test($start, $name)
   $num = number_format($end-$start,3);
   $pad = str_repeat(" ", 24-strlen($name)-strlen($num));
 
-  echo $name.$pad.$num."\n";
+  echo $name,$pad,$num,"\n";
     ob_start();
   return gethrtime();
 }
@@ -374,10 +374,10 @@ function total()
 {
   global $total;
   $pad = str_repeat("-", 24);
-  echo $pad."\n";
+  echo $pad,"\n";
   $num = number_format($total,3);
   $pad = str_repeat(" ", 24-strlen("Total")-strlen($num));
-  echo "Total".$pad.$num."\n";
+  echo "Total",$pad,$num,"\n";
 }
 
 $t0 = $t = start_test();
