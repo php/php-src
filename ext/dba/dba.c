@@ -424,8 +424,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 	}
 
-	RETVAL_BOOL(info->hnd->update(info, ZSTR_VAL(key_str), ZSTR_LEN(key_str),
-		ZSTR_VAL(value), ZSTR_LEN(value), mode) == SUCCESS);
+	RETVAL_BOOL(info->hnd->update(info, key_str, value, mode) == SUCCESS);
 	DBA_RELEASE_HT_KEY_CREATION();
 }
 /* }}} */

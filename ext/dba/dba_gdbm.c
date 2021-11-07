@@ -91,10 +91,10 @@ DBA_UPDATE_FUNC(gdbm)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
-	gval.dptr = (char *) val;
-	gval.dsize = vallen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
+	gval.dptr = ZSTR_VAL(val);
+	gval.dsize = ZSTR_LEN(val);
 
 	switch (gdbm_store(dba->dbf, gkey, gval, mode == 1 ? GDBM_INSERT : GDBM_REPLACE)) {
 		case 0:
@@ -102,10 +102,12 @@ DBA_UPDATE_FUNC(gdbm)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref2(NULL, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			// TODO Check when this happens and confirm this can even happen
+			php_error_docref(NULL, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
 			return FAILURE;
 		default:
-			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
+			// TODO Convert this to an assertion failure
+			php_error_docref(NULL, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }

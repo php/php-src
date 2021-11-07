@@ -152,19 +152,19 @@ DBA_UPDATE_FUNC(lmdb)
 
 	rc = mdb_txn_begin(LMDB_IT(env), NULL, 0, &LMDB_IT(txn));
 	if (rc) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		return FAILURE;
 	}
 
-	k.mv_size = keylen;
-	k.mv_data = key;
-	v.mv_size = vallen;
-	v.mv_data = val;
+	k.mv_size = ZSTR_LEN(key);
+	k.mv_data = ZSTR_VAL(key);
+	v.mv_size = ZSTR_LEN(val);
+	v.mv_data = ZSTR_VAL(val);
 
 	rc = mdb_put(LMDB_IT(txn), LMDB_IT(dbi), &k, &v, mode == 1 ? MDB_NOOVERWRITE : 0);
 	if (rc) {
 		if (MDB_KEYEXIST != rc) {
-			php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+			php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
@@ -172,7 +172,7 @@ DBA_UPDATE_FUNC(lmdb)
 
 	rc = mdb_txn_commit(LMDB_IT(txn));
 	if (rc) {
-		php_error_docref2(NULL, key, val, E_WARNING, "%s", mdb_strerror(rc));
+		php_error_docref(NULL, E_WARNING, "%s", mdb_strerror(rc));
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
 	}

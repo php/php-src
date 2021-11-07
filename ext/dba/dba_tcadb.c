@@ -104,18 +104,18 @@ DBA_UPDATE_FUNC(tcadb)
 
 	if (mode == 1) {
 		/* Insert */
-		if (tcadbvsiz(dba->tcadb, key, keylen) > -1) {
+		if (tcadbvsiz(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key)) > -1) {
 			return FAILURE;
 		}
 	}
 
-	result = tcadbput(dba->tcadb, key, keylen, val, vallen);
+	result = tcadbput(dba->tcadb, ZSTR_VAL(key), ZSTR_LEN(key), ZSTR_VAL(val), ZSTR_LEN(val));
 
 	if (result) {
 		return SUCCESS;
 	}
 
-	php_error_docref2(NULL, key, val, E_WARNING, "Error updating data");
+	php_error_docref(NULL, E_WARNING, "Error updating data");
 	return FAILURE;
 }
 

@@ -101,18 +101,18 @@ DBA_UPDATE_FUNC(dbm)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 
 	if (mode == 1) { /* insert */
 		gval = fetch(gkey);
-		if(gval.dptr) {
+		if (gval.dptr) {
 			return FAILURE;
 		}
 	}
 
-	gval.dptr = (char *) val;
-	gval.dsize = vallen;
+	gval.dptr = ZSTR_VAL(val);
+	gval.dsize = ZSTR_LEN(val);
 
 	return (store(gkey, gval) == -1 ? FAILURE : SUCCESS);
 }
