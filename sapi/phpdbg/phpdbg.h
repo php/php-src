@@ -91,6 +91,10 @@
 # endif
 #endif
 
+#ifdef __APPLE__
+#	include <mach/mach.h>
+#endif
+
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
@@ -249,7 +253,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
     int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
-    pthread_t watch_userfault_thread;            /* thread for watch fault handling */
+	pthread_t watchpoint_thread;            /* thread for watch fault handling */
 #endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */

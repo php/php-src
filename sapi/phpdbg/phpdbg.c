@@ -146,7 +146,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	pg->watch_userfaultfd = 0;
-	pg->watch_userfault_thread = 0;
+	pg->watchpoint_thread = 0;
 #endif
 } /* }}} */
 

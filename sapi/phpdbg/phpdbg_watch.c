@@ -1298,7 +1298,8 @@ int phpdbg_diff_changed_zvals(void) {
 	phpdbg_btree_result *res;
 	HashTable *mem_list = NULL;
 
-	if (zend_hash_num_elements(&PHPDBG_G(watch_elements)) == 0) {
+	// prevent recursion due to phpdbg_diff_changed_zvals being called within fcall handler
+	if (zend_hash_num_elements(&PHPDBG_G(watch_elements)) == 0 || PHPDBG_G(watchlist_mem) == PHPDBG_G(watchlist_mem_backup)) {
 		return FAILURE;
 	}
 
@@ -1736,7 +1737,7 @@ void phpdbg_setup_watchpoints(void) {
 		userfaultfd_features.features = UFFD_FEATURE_PAGEFAULT_FLAG_WP;
 		ioctl(PHPDBG_G(watch_userfaultfd), UFFDIO_API, &userfaultfd_features);
 		if (userfaultfd_features.features & UFFD_FEATURE_PAGEFAULT_FLAG_WP) {
-			pthread_create(&PHPDBG_G(watch_userfault_thread), NULL, phpdbg_watchpoint_userfaultfd_thread, ZEND_MODULE_GLOBALS_BULK(phpdbg));
+			pthread_create(&PHPDBG_G(watchpoint_thread), NULL, phpdbg_watchpoint_userfaultfd_thread, ZEND_MODULE_GLOBALS_BULK(phpdbg));
 		} else {
 			PHPDBG_G(watch_userfaultfd) = 0;
 		}
@@ -1757,7 +1758,7 @@ void phpdbg_destroy_watchpoints(void) {
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	if (PHPDBG_G(watch_userfaultfd)) {
-		pthread_cancel(PHPDBG_G(watch_userfault_thread));
+		pthread_cancel(PHPDBG_G(watchpoint_thread));
 		close(PHPDBG_G(watch_userfaultfd));
 	}
 #endif
