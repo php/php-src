@@ -145,38 +145,34 @@ DBA_FIRSTKEY_FUNC(tcadb)
 {
 	dba_tcadb_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	tcadbiterinit(dba->tcadb);
 
 	value = tcadbiternext(dba->tcadb, &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_NEXTKEY_FUNC(tcadb)
 {
 	dba_tcadb_data *dba = info->dbf;
 	int value_size;
-	char *value, *new = NULL;
+	char *value;
+	zend_string *key = NULL;
 
 	value = tcadbiternext(dba->tcadb, &value_size);
 	if (value) {
-		if (newlen) {
-			*newlen = value_size;
-		}
-		new = estrndup(value, value_size);
+		key = zend_string_init(value, value_size, /* persistent */ false);
 		tcfree(value);
 	}
 
-	return new;
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(tcadb)

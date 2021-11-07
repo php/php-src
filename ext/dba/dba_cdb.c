@@ -241,7 +241,7 @@ DBA_FIRSTKEY_FUNC(cdb)
 	CDB_INFO;
 	uint32 klen, dlen;
 	char buf[8];
-	char *key;
+	zend_string *key;
 
 #if DBA_CDB_BUILTIN
 	if (cdb->make)
@@ -262,13 +262,12 @@ DBA_FIRSTKEY_FUNC(cdb)
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
 
-	key = safe_emalloc(klen, 1, 1);
-	if (cdb_file_read(cdb->file, key, klen) < klen) {
-		efree(key);
+	key = zend_string_alloc(klen, /* persistent */ false);
+	if (cdb_file_read(cdb->file, ZSTR_VAL(key), klen) < klen) {
+		zend_string_release_ex(key, /* persistent */ false);
 		key = NULL;
 	} else {
-		key[klen] = '\0';
-		if (newlen) *newlen = klen;
+		ZSTR_VAL(key)[klen] = 0;
 	}
 
 	/*       header + klenlen + dlenlen + klen + dlen */
@@ -282,7 +281,7 @@ DBA_NEXTKEY_FUNC(cdb)
 	CDB_INFO;
 	uint32 klen, dlen;
 	char buf[8];
-	char *key;
+	zend_string *key;
 
 #if DBA_CDB_BUILTIN
 	if (cdb->make)
@@ -294,13 +293,12 @@ DBA_NEXTKEY_FUNC(cdb)
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
 
-	key = safe_emalloc(klen, 1, 1);
-	if (cdb_file_read(cdb->file, key, klen) < klen) {
-		efree(key);
+	key = zend_string_alloc(klen, /* persistent */ false);
+	if (cdb_file_read(cdb->file, ZSTR_VAL(key), klen) < klen) {
+		zend_string_release_ex(key, /* persistent */ false);
 		key = NULL;
 	} else {
-		key[klen] = '\0';
-		if (newlen) *newlen = klen;
+		ZSTR_VAL(key)[klen] = 0;
 	}
 
 	cdb->pos += 8 + klen + dlen;

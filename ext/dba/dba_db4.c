@@ -237,15 +237,14 @@ DBA_FIRSTKEY_FUNC(db4)
 		return NULL;
 	}
 
-	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db4(info, newlen);
+	return dba_nextkey_db4(info);
 }
 
 DBA_NEXTKEY_FUNC(db4)
 {
 	dba_db4_data *dba = info->dbf;
 	DBT gkey, gval;
-	char *nkey = NULL;
+	zend_string *key = NULL;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
@@ -256,8 +255,7 @@ DBA_NEXTKEY_FUNC(db4)
 	}
 	if (dba->cursor && dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT) == 0) {
 		if (gkey.data) {
-			nkey = estrndup(gkey.data, gkey.size);
-			if (newlen) *newlen = gkey.size;
+			key = zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 		}
 		if (info->flags & DBA_PERSISTENT) {
 			if (gkey.data) {
@@ -269,7 +267,7 @@ DBA_NEXTKEY_FUNC(db4)
 		}
 	}
 
-	return nkey;
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(db4)

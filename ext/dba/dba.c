@@ -1020,8 +1020,6 @@ PHP_FUNCTION(dba_key_split)
 /* {{{ Resets the internal key pointer and returns the first key */
 PHP_FUNCTION(dba_firstkey)
 {
-	char *fkey;
-	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
@@ -1031,12 +1029,10 @@ PHP_FUNCTION(dba_firstkey)
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	fkey = info->hnd->firstkey(info, &len);
+	zend_string *fkey = info->hnd->firstkey(info);
 
 	if (fkey) {
-		RETVAL_STRINGL(fkey, len);
-		efree(fkey);
-		return;
+		RETURN_STR(fkey);
 	}
 
 	RETURN_FALSE;
@@ -1046,8 +1042,6 @@ PHP_FUNCTION(dba_firstkey)
 /* {{{ Returns the next key */
 PHP_FUNCTION(dba_nextkey)
 {
-	char *nkey;
-	size_t len;
 	zval *id;
 	dba_info *info = NULL;
 
@@ -1057,12 +1051,10 @@ PHP_FUNCTION(dba_nextkey)
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	nkey = info->hnd->nextkey(info, &len);
+	zend_string *nkey = info->hnd->nextkey(info);
 
 	if (nkey) {
-		RETVAL_STRINGL(nkey, len);
-		efree(nkey);
-		return;
+		RETURN_STR(nkey);
 	}
 
 	RETURN_FALSE;

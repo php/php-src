@@ -159,8 +159,7 @@ DBA_FIRSTKEY_FUNC(db2)
 		return NULL;
 	}
 
-	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db2(info, newlen);
+	return dba_nextkey_db2(info);
 }
 
 DBA_NEXTKEY_FUNC(db2)
@@ -169,11 +168,11 @@ DBA_NEXTKEY_FUNC(db2)
 	DBT gkey = {0}, gval = {0};
 
 	if (dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT)
-			|| !gkey.data)
+			|| !gkey.data) {
 		return NULL;
+	}
 
-	if (newlen) *newlen = gkey.size;
-	return estrndup(gkey.data, gkey.size);
+	return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 }
 
 DBA_OPTIMIZE_FUNC(db2)

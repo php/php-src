@@ -148,8 +148,9 @@ DBA_FIRSTKEY_FUNC(inifile)
 
 	if (inifile_firstkey(dba)) {
 		char *result = inifile_key_string(&dba->curr.key);
-		*newlen = strlen(result);
-		return result;
+		zend_string *key = zend_string_init(result, strlen(result), /* persistent */ false);
+		efree(result);
+		return key;
 	} else {
 		return NULL;
 	}
@@ -165,8 +166,9 @@ DBA_NEXTKEY_FUNC(inifile)
 
 	if (inifile_nextkey(dba)) {
 		char *result = inifile_key_string(&dba->curr.key);
-		*newlen = strlen(result);
-		return result;
+		zend_string *key = zend_string_init(result, strlen(result), /* persistent */ false);
+		efree(result);
+		return key;
 	} else {
 		return NULL;
 	}
