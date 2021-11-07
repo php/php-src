@@ -57,7 +57,7 @@ if (!$IS_MYSQLND)
 
     }
 
-    // Connections on which no query has been send - 1
+    // Connections on which no query has been sent - 1
     $link = get_connection();
     $link->query("SELECT 1 AS _one", MYSQLI_ASYNC | MYSQLI_STORE_RESULT);
     $links = array($link);
