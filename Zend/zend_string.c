@@ -378,7 +378,7 @@ ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_va
 }
 
 #if defined(__GNUC__) && defined(__i386__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	char *ptr = ZSTR_VAL(s1);
 	size_t delta = (char*)s2 - (char*)s1;
@@ -416,7 +416,7 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *
 }
 
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	char *ptr = ZSTR_VAL(s1);
 	size_t delta = (char*)s2 - (char*)s1;
