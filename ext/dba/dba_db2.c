@@ -122,8 +122,8 @@ DBA_EXISTS_FUNC(db2)
 	DBT gval = {0};
 	DBT gkey = {0};
 
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return FAILURE;

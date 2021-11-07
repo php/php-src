@@ -194,7 +194,7 @@ DBA_EXISTS_FUNC(cdb)
 	if (cdb->make)
 		return FAILURE; /* database was opened writeonly */
 #endif
-	if (php_cdb_find(&cdb->c, key, keylen) == 1)
+	if (php_cdb_find(&cdb->c, ZSTR_VAL(key), ZSTR_LEN(key)) == 1)
 		return SUCCESS;
 	return FAILURE;
 }

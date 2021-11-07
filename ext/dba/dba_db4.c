@@ -194,8 +194,8 @@ DBA_EXISTS_FUNC(db4)
 	DBT gkey;
 
 	memset(&gkey, 0, sizeof(gkey));
-	gkey.data = (char *) key;
-	gkey.size = keylen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	memset(&gval, 0, sizeof(gval));
 

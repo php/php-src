@@ -107,7 +107,7 @@ DBA_EXISTS_FUNC(qdbm)
 	dba_qdbm_data *dba = info->dbf;
 	char *value;
 
-	value = dpget(dba->dbf, key, keylen, 0, -1, NULL);
+	value = dpget(dba->dbf, ZSTR_VAL(key), ZSTR_LEN(key), 0, -1, NULL);
 	if (value) {
 		free(value);
 		return SUCCESS;

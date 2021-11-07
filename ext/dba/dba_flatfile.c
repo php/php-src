@@ -103,8 +103,8 @@ DBA_EXISTS_FUNC(flatfile)
 	datum gval;
 	datum gkey;
 
-	gkey.dptr = (char *) key;
-	gkey.dsize = keylen;
+	gkey.dptr = ZSTR_VAL(key);
+	gkey.dsize = ZSTR_LEN(key);
 	gval = flatfile_fetch(dba, gkey);
 	if (gval.dptr) {
 		efree(gval.dptr);
