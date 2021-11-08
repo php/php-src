@@ -146,6 +146,11 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	pg->watch_userfaultfd = 0;
+#endif
+#ifdef __APPLE__
+	pg->watch_exception_port = -1;
+#endif
+#if defined(HAVE_USERFAULTFD_WRITEFAULT) || defined(__APPLE__)
 	pg->watchpoint_thread = 0;
 #endif
 } /* }}} */
@@ -385,7 +390,7 @@ static void phpdbg_watch_func(int type, INTERNAL_FUNCTION_PARAMETERS) {
 	zend_fcall_info_cache fcc = {0};
 
 	zend_string *watchstr;
-	zval *target = NULL;
+	zval *target = NULL, dummy_target;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|zf", &watchstr, &target, &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
@@ -397,6 +402,14 @@ static void phpdbg_watch_func(int type, INTERNAL_FUNCTION_PARAMETERS) {
 
 	if (Z_ISNULL_P(target)) {
 		target = NULL;
+	}
+	
+	if (target == NULL) {
+		target = &dummy_target;
+		ZVAL_ARR(target, zend_rebuild_symbol_table());
+		if (!Z_ARR_P(target)) {
+			RETURN_NULL();
+		}
 	}
 
 	if (fcc.function_handler) {

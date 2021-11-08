@@ -119,6 +119,8 @@
 # include <linux/userfaultfd.h>
 # include <sys/ioctl.h>
 # include <sys/syscall.h>
+#elif defined(__APPLE__)
+# include <pthread.h>
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
@@ -331,6 +333,62 @@ void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
 			}
 		};
 		ioctl(globals->watch_userfaultfd, UFFDIO_WRITEPROTECT, &unprotect);
+	}
+
+	return NULL;
+}
+#elif defined (__APPLE__)
+void *phpdbg_watchpoint_listen_mach_exceptions_thread(void *phpdbg_globals) {
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals;
+
+	for (;;) {
+		struct {
+			mach_msg_header_t head;
+			mach_msg_body_t msgh_body;
+			mach_msg_port_descriptor_t thread;
+			mach_msg_port_descriptor_t task;
+			NDR_record_t NDR;
+			exception_type_t exception;
+			mach_msg_type_number_t codeCnt;
+			integer_t code[2];
+			mach_msg_trailer_t trailer;
+		} msg;
+		struct {
+			mach_msg_header_t head;
+			NDR_record_t NDR;
+			kern_return_t RetCode;
+		} reply;
+
+		x86_exception_state64_t exceptionState;
+		mach_msg_type_number_t state_count = x86_EXCEPTION_STATE64_COUNT;
+
+		mach_msg(&msg.head, MACH_RCV_MSG | MACH_RCV_LARGE, 0, sizeof(msg), globals->watch_exception_port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+
+		reply.head.msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REMOTE(msg.head.msgh_bits), 0);
+		reply.head.msgh_remote_port = msg.head.msgh_remote_port;
+		reply.head.msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
+		reply.head.msgh_local_port = MACH_PORT_NULL;
+		reply.head.msgh_id = msg.head.msgh_id + 100;
+		reply.head.msgh_reserved = 0;
+		reply.NDR = NDR_record;
+		reply.RetCode = KERN_SUCCESS;
+
+		thread_get_state(msg.thread.name, x86_EXCEPTION_STATE64, (void *) &exceptionState, &state_count);
+
+		void *page = phpdbg_get_page_boundary((void *) (uintptr_t) exceptionState.__faultvaddr);
+
+		/* perhaps unnecessary, but check to be sure to not conflict with other segfault handlers */
+		if (phpdbg_check_for_watchpoint(&globals->watchpoint_tree, page) == NULL) {
+			reply.RetCode = KERN_FAILURE;
+		} else {
+			/* re-enable writing */
+			mprotect(page, phpdbg_pagesize, PROT_READ | PROT_WRITE);
+
+			zend_hash_index_add_empty_element(globals->watchlist_mem, (zend_ulong) page);
+		}
+
+		mach_msg(&reply.head, MACH_SEND_MSG, reply.head.msgh_size, 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
 	}
 
 	return NULL;
@@ -1742,6 +1800,15 @@ void phpdbg_setup_watchpoints(void) {
 			PHPDBG_G(watch_userfaultfd) = 0;
 		}
 	}
+#elif defined(__APPLE__)
+	if (mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &PHPDBG_G(watch_exception_port)) != KERN_SUCCESS) {
+		return;
+	}
+	if (mach_port_insert_right(mach_task_self(), PHPDBG_G(watch_exception_port), PHPDBG_G(watch_exception_port), MACH_MSG_TYPE_MAKE_SEND) != KERN_SUCCESS) {
+		return;
+	}
+	pthread_create(&PHPDBG_G(watchpoint_thread), NULL, phpdbg_watchpoint_listen_mach_exceptions_thread, ZEND_MODULE_GLOBALS_BULK(phpdbg));
+	task_set_exception_ports(mach_task_self(), EXC_MASK_BAD_ACCESS, PHPDBG_G(watch_exception_port), EXCEPTION_DEFAULT, MACHINE_THREAD_STATE);
 #endif
 }
 
@@ -1760,6 +1827,10 @@ void phpdbg_destroy_watchpoints(void) {
 	if (PHPDBG_G(watch_userfaultfd)) {
 		pthread_cancel(PHPDBG_G(watchpoint_thread));
 		close(PHPDBG_G(watch_userfaultfd));
+	}
+#elif defined(__APPLE__)
+	if (PHPDBG_G(watch_exception_port) != -1) {
+		pthread_cancel(PHPDBG_G(watchpoint_thread));
 	}
 #endif
 

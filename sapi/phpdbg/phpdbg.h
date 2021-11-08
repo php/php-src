@@ -253,6 +253,11 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
     int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
+#elif defined(__APPLE__)
+	mach_port_t watch_exception_thread;
+	mach_port_t watch_exception_port;
+#endif
+#if defined(HAVE_USERFAULTFD_WRITEFAULT) || defined(__APPLE__)
 	pthread_t watchpoint_thread;            /* thread for watch fault handling */
 #endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
