@@ -473,7 +473,7 @@ PHP_METHOD(variant, __construct)
 
 			if((vt & VT_BYREF) && (vt & ~VT_BYREF != VT_VARIANT) && (vt & ~VT_BYREF != VT_PTR)) {
 				spprintf(&msg, E_INVALIDARG, "VT_BYREF should be used alone or with VT_VARIANT or with VT_PTR");
-				php_com_throw_exception(res, msg);
+				php_com_throw_exception(E_INVALIDARG, msg);
 				efree(msg);
 				return;
 			}
