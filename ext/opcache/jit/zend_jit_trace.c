@@ -3495,13 +3495,13 @@ static int zend_jit_trace_deoptimization(dasm_State             **Dst,
 				} else {
 					uint8_t type = STACK_TYPE(parent_stack, i);
 
-					if (stack) {
-						SET_STACK_TYPE(stack, i, type, 1);
-					}
 					if (!(STACK_FLAGS(parent_stack, i) & (ZREG_LOAD|ZREG_STORE))
 					 && !zend_jit_store_var(Dst, 1 << type, i, reg,
 							STACK_MEM_TYPE(parent_stack, i) != type)) {
 						return 0;
+					}
+					if (stack) {
+						SET_STACK_TYPE(stack, i, type, 1);
 					}
 				}
 			} else {
