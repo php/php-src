@@ -596,7 +596,7 @@ static void replace_predecessor(zend_ssa *ssa, int block_id, int old_pred, int n
 		/* Also remove the corresponding phi node entries */
 		for (phi = ssa->blocks[block_id].phis; phi; phi = phi->next) {
 			if (phi->pi >= 0) {
-				if (phi->pi == old_pred) {
+				if (phi->pi == old_pred || phi->pi == new_pred) {
 					zend_ssa_rename_var_uses(
 						ssa, phi->ssa_var, phi->sources[0], /* update_types */ 0);
 					zend_ssa_remove_phi(ssa, phi);
