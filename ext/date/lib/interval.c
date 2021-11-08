@@ -59,7 +59,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->s = two->s - one->s;
 	rt->us = two->us - one->us;
 
-	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
+	rt->days = timelib_diff_days(one, two);
 
 	/* Fall Back: Cater for transition period, where rt->invert is 0, but there are negative numbers */
 	if (one->dst == 1 && two->dst == 0) {
@@ -146,6 +146,37 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	return rt;
 }
+
+
+int timelib_diff_days(timelib_time *one, timelib_time *two)
+{
+	int days = 0;
+
+	if (timelib_same_timezone(one, two)) {
+		timelib_time *earliest, *latest;
+		double earliest_time, latest_time;
+
+		if (timelib_time_compare(one, two) < 0) {
+			earliest = one;
+			latest = two;
+		} else {
+			earliest = two;
+			latest = one;
+		}
+		timelib_hmsf_to_decimal_hour(earliest->h, earliest->i, earliest->s, earliest->us, &earliest_time);
+		timelib_hmsf_to_decimal_hour(latest->h, latest->i, latest->s, latest->us, &latest_time);
+
+		days = llabs(timelib_epoch_days_from_time(one) - timelib_epoch_days_from_time(two));
+		if (latest_time < earliest_time && days > 0) {
+			days--;
+		}
+	} else {
+		days = fabs(floor(one->sse - two->sse) / 86400);
+	}
+
+	return days;
+}
+
 
 timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 {
