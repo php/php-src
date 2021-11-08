@@ -7,6 +7,11 @@ function test(bool $a, bool $b) {
     if ($a && $byte > 0 && $b) {}
     unknown($byte);
 }
+function test2() {
+    foreach (0 as $v) {
+        $v ??= 0;
+    }
+}
 ?>
 ===DONE===
 --EXPECT--
