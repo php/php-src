@@ -770,6 +770,14 @@ add_op1_def:
 				//NEW_SSA_VAR(opline->op2.var)
 			}
 			break;
+		case ZEND_COPY_TMP:
+			if (build_flags & ZEND_SSA_RC_INFERENCE) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			break;
 		default:
 			break;
 	}
