@@ -207,6 +207,15 @@ void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h)
 	}
 }
 
+void timelib_hmsf_to_decimal_hour(int hour, int min, int sec, int us, double *h)
+{
+	if (hour > 0) {
+		*h = ((double)hour + (double)min / MINS_PER_HOUR + (double)sec / SECS_PER_HOUR) + (double)us / USECS_PER_HOUR;
+	} else {
+		*h = ((double)hour - (double)min / MINS_PER_HOUR - (double)sec / SECS_PER_HOUR) - (double)us / USECS_PER_HOUR;
+	}
+}
+
 timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s)
 {
 	return (h * SECS_PER_HOUR) + (m * 60) + s;

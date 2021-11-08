@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202108
-#define TIMELIB_EXTENDED_VERSION 20210801
-#define TIMELIB_ASCII_VERSION "2021.08"
+#define TIMELIB_VERSION 202110
+#define TIMELIB_EXTENDED_VERSION 20211001
+#define TIMELIB_ASCII_VERSION "2021.10"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -800,6 +800,16 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 timelib_sll timelib_get_current_offset(timelib_time *t);
 
 /**
+ * Returns whether the timezone information in *one and *two are the same
+ *
+ * A timezone is considered the same if:
+ * - the ->zone_type values are the same for *one and *two
+ * - for TYPE_ABBR and TYPE_OFFSET, ->z + (->dst * 3600), is the same
+ * - for TYPE_ID, the zone's names are the same
+ */
+int timelib_same_timezone(timelib_time *one, timelib_time *two);
+
+/**
  * Displays debugging information about the time zone information in 'tz'.
  */
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
@@ -962,6 +972,11 @@ void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
 void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h);
 
 /**
+ * Converts hour/min/sec/micro sec values into a decimal hour
+ */
+void timelib_hmsf_to_decimal_hour(int hour, int min, int sec, int us, double *h);
+
+/**
  * Converts hour/min/sec values into seconds
  */
 timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s);
@@ -1026,6 +1041,15 @@ int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, 
  * way months and days are calculated.
  */
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
+
+/**
+ * Calculates the difference in full days between two times
+ *
+ * The result is the number of full days between 'one' and 'two'. It does take
+ * into account 23 and 25 hour (and variants) days when the zone_type
+ * is TIMELIB_ZONETYPE_ID and have the same TZID for 'one' and 'two'.
+ */
+int timelib_diff_days(timelib_time *one, timelib_time *two);
 
 /**
  * Adds the relative time information 'interval' to the base time 't'.

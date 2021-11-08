@@ -930,3 +930,23 @@ timelib_sll timelib_get_current_offset(timelib_time *t)
 			return 0;
 	}
 }
+
+int timelib_same_timezone(timelib_time *one, timelib_time *two)
+{
+    if (one->zone_type != two->zone_type) {
+        return 0;
+    }
+
+    if (one->zone_type == TIMELIB_ZONETYPE_ABBR || one->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+        if ((one->z + (one->dst * 3600)) == (two->z + (two->dst * 3600))) {
+            return 1;
+        }
+        return 0;
+    }
+
+    if (one->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
+        return 1;
+    }
+
+    return 0;
+}
