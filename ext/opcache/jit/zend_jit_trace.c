@@ -953,7 +953,8 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 
 static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
-	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG) {
+	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG
+	 && !(tssa->var_info[var].type & MAY_BE_REF)) {
 		int idx = tssa->vars[var].definition;
 
 		if (idx >= 0) {
