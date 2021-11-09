@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
 
+- Standard:
+  . Fixed bug #81441 (gethostbyaddr('::1') returns ip instead of name after
+    calling some other method). (Nikita)
+
 28 Oct 2021, PHP 8.1.0RC5
 
 - Core:
