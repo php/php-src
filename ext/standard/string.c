@@ -46,6 +46,10 @@
 /* For php_next_utf8_char() */
 #include "ext/standard/html.h"
 
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
 #define STR_PAD_BOTH			2
@@ -2782,17 +2786,59 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 	} else if (trlen == 1) {
 		char ch_from = *str_from;
 		char ch_to = *str_to;
+		char *output;
+		char *input = ZSTR_VAL(str);
+		size_t len = ZSTR_LEN(str);
 
-		for (i = 0; i < ZSTR_LEN(str); i++) {
-			if (ZSTR_VAL(str)[i] == ch_from) {
-				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
-				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), i);
-				ZSTR_VAL(new_str)[i] = ch_to;
-				i++;
-				for (; i < ZSTR_LEN(str); i++) {
-					ZSTR_VAL(new_str)[i] = (ZSTR_VAL(str)[i] != ch_from) ? ZSTR_VAL(str)[i] : ch_to;
+#ifdef __SSE2__
+		if (ZSTR_LEN(str) >= sizeof(__m128i)) {
+			__m128i search = _mm_set1_epi8(ch_from);
+			__m128i delta = _mm_set1_epi8(ch_to - ch_from);
+
+			do {
+				__m128i src = _mm_loadu_si128((__m128i*)(input));
+				__m128i mask = _mm_cmpeq_epi8(src, search);
+				if (_mm_movemask_epi8(mask)) {
+					new_str = zend_string_alloc(ZSTR_LEN(str), 0);
+					memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), input - ZSTR_VAL(str));
+					output = ZSTR_VAL(new_str) + (input - ZSTR_VAL(str));
+					_mm_storeu_si128((__m128i *)(output),
+						_mm_add_epi8(src,
+							_mm_and_si128(mask, delta)));
+					input += sizeof(__m128i);
+					output += sizeof(__m128i);
+					len -= sizeof(__m128i);
+					for (; len >= sizeof(__m128i); input += sizeof(__m128i), output += sizeof(__m128i), len -= sizeof(__m128i)) {
+						src = _mm_loadu_si128((__m128i*)(input));
+						mask = _mm_cmpeq_epi8(src, search);
+						_mm_storeu_si128((__m128i *)(output),
+							_mm_add_epi8(src,
+								_mm_and_si128(mask, delta)));
+					}
+					for (; len > 0; input++, output++, len--) {
+						*output = (*input == ch_from) ? ch_to : *input;
+					}
+					*output = 0;
+					return new_str;
 				}
-				ZSTR_VAL(new_str)[i] = 0;
+				input += sizeof(__m128i);
+				len -= sizeof(__m128i);
+			} while (len >= sizeof(__m128i));
+		}
+#endif
+		for (; len > 0; input++, len--) {
+			if (*input == ch_from) {
+				new_str = zend_string_alloc(ZSTR_LEN(str), 0);
+				memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), input - ZSTR_VAL(str));
+				output = ZSTR_VAL(new_str) + (input - ZSTR_VAL(str));
+				*output = ch_to;
+				input++;
+				output++;
+				len--;
+				for (; len > 0; input++, output++, len--) {
+					*output = (*input == ch_from) ? ch_to : *input;
+				}
+				*output = 0;
 				return new_str;
 			}
 		}
@@ -5666,9 +5712,6 @@ PHP_FUNCTION(sscanf)
 /* }}} */
 
 /* static zend_string *php_str_rot13(zend_string *str) {{{ */
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
 static zend_string *php_str_rot13(zend_string *str)
 {
 	zend_string *ret;
