@@ -1178,6 +1178,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 
 void *phpdbg_realloc_wrapper(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{{ */
 {
+	phpdbg_watch_erealloc(ptr, size);
 	return _zend_mm_realloc(zend_mm_get_heap(), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 } /* }}} */
 
@@ -1538,6 +1539,9 @@ phpdbg_main:
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
+		PHPDBG_G(original_realloc_function) = _realloc;
+		_realloc = phpdbg_watch_erealloc;
+
 		if (use_mm_wrappers) {
 #if ZEND_DEBUG
 			zend_mm_set_custom_debug_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
@@ -1549,6 +1553,7 @@ phpdbg_main:
 		}
 
 		_free = PHPDBG_G(original_free_function);
+		_realloc = PHPDBG_G(original_realloc_function);
 
 
 		phpdbg_init_list();

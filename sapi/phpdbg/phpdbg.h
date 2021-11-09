@@ -271,6 +271,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int watch_element_count;                     /* total number of active elements */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	void *(*original_realloc_function)(void *, size_t); /* the original AG(mm_heap)->_realloc function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */

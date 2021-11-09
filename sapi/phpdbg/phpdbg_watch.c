@@ -1404,57 +1404,74 @@ int phpdbg_diff_changed_zvals(void) {
 	return ret;
 }
 
-void phpdbg_watch_efree(void *ptr) {
+void phpdbg_watch_check_invalidated_pointer(void *ptr) {
 	phpdbg_btree_result *result;
 
+	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) ptr))) {
+		phpdbg_watchpoint_t *watch = result->ptr;
+		if (watch->type != WATCH_ON_HASHDATA) {
+			phpdbg_remove_watchpoint(watch);
+		} else {
+			/* remove all linked watchpoints, they will be dissociated from their elements */
+			phpdbg_watch_element *element;
+			phpdbg_watch_ht_info *hti = (phpdbg_watch_ht_info *) watch;
+
+			ZEND_HASH_MAP_FOREACH_PTR(&hti->watches, element) {
+				zend_ulong num = zend_hash_num_elements(&hti->watches);
+				if (element->parent) {
+					phpdbg_remove_watchpoint(element->watch);
+				} else {
+					phpdbg_deactivate_watchpoint(element->watch);
+					if (zend_hash_index_del(&PHPDBG_G(watch_elements), element->id) == SUCCESS) {
+						if (element->fcc.function_handler) {
+							phpdbg_watch_sandboxed_fcall(element->watch, element->str, &element->fcc, true);
+						} else {
+							PHPDBG_G(watchpoint_hit) = 1;
+							phpdbg_notice("%.*s has been removed, removing watchpoint%s", (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str), (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursively" : "");
+						}
+					}
+					phpdbg_remove_watch_element(element);
+				}
+				if (num == 1) { /* prevent access into freed memory */
+					break;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+	}
+
+	/* special case watchpoints as they aren't on ptr but on ptr + HT_WATCH_OFFSET */
+	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), HT_WATCH_OFFSET + (zend_ulong) ptr))) {
+		phpdbg_watchpoint_t *watch = result->ptr;
+		if (watch->type == WATCH_ON_HASHTABLE) {
+			phpdbg_remove_watchpoint(watch);
+		}
+	}
+
+	zend_hash_index_del(&PHPDBG_G(watch_free), (zend_ulong) ptr);
+
+}
+
+void phpdbg_watch_efree(void *ptr) {
 	/* only do expensive checks if there are any watches at all */
 	if (zend_hash_num_elements(&PHPDBG_G(watch_elements))) {
-		if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) ptr))) {
-			phpdbg_watchpoint_t *watch = result->ptr;
-			if (watch->type != WATCH_ON_HASHDATA) {
-				phpdbg_remove_watchpoint(watch);
-			} else {
-				/* remove all linked watchpoints, they will be dissociated from their elements */
-				phpdbg_watch_element *element;
-				phpdbg_watch_ht_info *hti = (phpdbg_watch_ht_info *) watch;
-
-				ZEND_HASH_MAP_FOREACH_PTR(&hti->watches, element) {
-					zend_ulong num = zend_hash_num_elements(&hti->watches);
-					if (element->parent) {
-						phpdbg_remove_watchpoint(element->watch);
-					} else {
-						phpdbg_deactivate_watchpoint(element->watch);
-						if (zend_hash_index_del(&PHPDBG_G(watch_elements), element->id) == SUCCESS) {
-							if (element->fcc.function_handler) {
-								phpdbg_watch_sandboxed_fcall(element->watch, element->str, &element->fcc, true);
-							} else {
-								PHPDBG_G(watchpoint_hit) = 1;
-								phpdbg_notice("%.*s has been removed, removing watchpoint%s", (int) ZSTR_LEN(element->str), ZSTR_VAL(element->str), (element->flags & PHPDBG_WATCH_RECURSIVE_ROOT) ? " recursively" : "");
-							}
-						}
-						phpdbg_remove_watch_element(element);
-					}
-					if (num == 1) { /* prevent access into freed memory */
-						break;
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-		}
-
-		/* special case watchpoints as they aren't on ptr but on ptr + HT_WATCH_OFFSET */
-		if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), HT_WATCH_OFFSET + (zend_ulong) ptr))) {
-			phpdbg_watchpoint_t *watch = result->ptr;
-			if (watch->type == WATCH_ON_HASHTABLE) {
-				phpdbg_remove_watchpoint(watch);
-			}
-		}
-
-		zend_hash_index_del(&PHPDBG_G(watch_free), (zend_ulong) ptr);
+		phpdbg_watch_check_invalidated_pointer(ptr);
 	}
 
 	if (PHPDBG_G(original_free_function)) {
 		PHPDBG_G(original_free_function)(ptr);
 	}
+}
+
+void *phpdbg_watch_erealloc(void *ptr, size_t size) {
+	/* only do expensive checks if there are any watches at all */
+	if (zend_hash_num_elements(&PHPDBG_G(watch_elements))) {
+		phpdbg_watch_check_invalidated_pointer(ptr);
+	}
+
+	if (PHPDBG_G(original_realloc_function)) {
+		return PHPDBG_G(original_realloc_function)(ptr, size);
+	}
+	return NULL;
 }
 
 /* ### USER API ### */

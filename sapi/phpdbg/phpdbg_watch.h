@@ -147,6 +147,7 @@ int phpdbg_diff_changed_zvals(void);
 void phpdbg_list_watchpoints(void);
 
 void phpdbg_watch_efree(void *ptr);
+void *phpdbg_watch_erealloc(void *ptr, size_t size);
 
 
 static long phpdbg_pagesize;
