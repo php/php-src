@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0RC6
+?? ??? ????, PHP 8.1.0
+
+
+
+11 Nov 2021, PHP 8.1.0RC6
 
 - Core:
   . Fixed bug #81507 (Fiber does not compile on AIX). (Clément Chigot)
