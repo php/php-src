@@ -21,11 +21,8 @@ namespace {
 
         public static function is_object(): int {}
 
-        /**
-         * @deprecated
-         * @return string
-         */
-        public function __toString() {}
+        /** @deprecated */
+        public function __toString(): string {}
 
         public function returnsStatic(): static {}
 
