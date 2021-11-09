@@ -3522,6 +3522,33 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 		} \
 	} while (0)
 
+/* Check if an interrupt is pending, and if so, call the handler. The opline
+ * is saved if _expect_exception is false. The result of the expression is
+ * true if EG(exception) is set. This is a helper for smart branches.
+ */
+#if ((ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) || (ZEND_VM_KIND == ZEND_VM_KIND_CALL))
+#define ZEND_VM_SMART_EXCEPTION_CHECK(_expect_exception) \
+		((_expect_exception) \
+		 	? ZEND_VM_SMART_EXCEPTION_CHECK_EXPECTED() \
+			: ZEND_VM_SMART_EXCEPTION_CHECK_UNEXPECTED())
+
+#define ZEND_VM_SMART_EXCEPTION_CHECK_EXPECTED() \
+	(UNEXPECTED(EG(vm_interrupt)) ? \
+		(ZEND_VM_SMART_INTERRUPT(), EG(exception)) \
+		: EG(exception))
+
+#define ZEND_VM_SMART_EXCEPTION_CHECK_UNEXPECTED() \
+	(UNEXPECTED(EG(vm_interrupt)) ? \
+		(EX(opline) = OPLINE, ZEND_VM_SMART_INTERRUPT(), EG(exception)) \
+		: 0)
+#else
+/* FIXME: ZEND_VM_LOOP_INTERRUPT is a goto in these VM kinds so can't be done
+ * prior to updating the opline.
+ */
+#define ZEND_VM_SMART_EXCEPTION_CHECK(_expect_exception) \
+	((_expect_exception) ? EG(exception) : 0)
+#endif
+
 /*
  * Stack Frame Layout (the whole stack frame is allocated at once)
  * ==================
@@ -4708,8 +4735,8 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 #define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \
 	CHECK_SYMBOL_TABLES() \
-	if (check_exception) { \
-		OPLINE = EX(opline) + (skip); \
+	if (check_exception && EG(exception)) { \
+		OPLINE = EX(opline); \
 	} else { \
 		ZEND_ASSERT(!EG(exception)); \
 		OPLINE = opline + (skip); \
@@ -4728,8 +4755,7 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 #define ZEND_VM_SET_OPCODE(new_op) \
 	CHECK_SYMBOL_TABLES() \
-	OPLINE = new_op; \
-	ZEND_VM_INTERRUPT_CHECK()
+	OPLINE = new_op
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
@@ -4751,12 +4777,14 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 
 #define ZEND_VM_REPEATABLE_OPCODE \
 	do {
+
 #define ZEND_VM_REPEAT_OPCODE(_opcode) \
 	} while (UNEXPECTED((++opline)->opcode == _opcode)); \
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
+
 #define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(_check)) { \
 			OPLINE = EX(opline); \
 		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			if (_result) { \
@@ -4776,8 +4804,9 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(_check)) { \
 			OPLINE = EX(opline); \
 		} else if (_result) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4786,8 +4815,9 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(_check)) { \
 			OPLINE = EX(opline); \
 		} else if (!(_result)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4796,13 +4826,17 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_NONE(_result, _check) do { \
 		ZVAL_BOOL(EX_VAR(opline->result.var), _result); \
 		ZEND_VM_NEXT_OPCODE_EX(_check, 1); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_TRUE() do { \
-		if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(0)) { \
+			OPLINE = EX(opline); \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4812,20 +4846,30 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_TRUE_JMPZ() do { \
 		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_TRUE_JMPNZ() do { \
-		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(0)) { \
+			OPLINE = EX(opline); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_TRUE_NONE() do { \
 		ZVAL_TRUE(EX_VAR(opline->result.var)); \
 		ZEND_VM_NEXT_OPCODE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_FALSE() do { \
-		if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(0)) { \
+			OPLINE = EX(opline); \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
@@ -4835,14 +4879,21 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_FALSE_JMPZ() do { \
-		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		if (ZEND_VM_SMART_EXCEPTION_CHECK(0)) { \
+			OPLINE = EX(opline); \
+		} else { \
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
+		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_FALSE_JMPNZ() do { \
 		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
 #define ZEND_VM_SMART_BRANCH_FALSE_NONE() do { \
 		ZVAL_FALSE(EX_VAR(opline->result.var)); \
 		ZEND_VM_NEXT_OPCODE(); \

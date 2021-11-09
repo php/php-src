@@ -413,7 +413,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 #define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_CONTINUE()
 #define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_LEAVE()
 #if defined(ZEND_VM_FP_GLOBAL_REG)
-# define ZEND_VM_ENTER_EX()        ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()
+# define ZEND_VM_ENTER_EX()        ZEND_VM_CONTINUE()
 # define ZEND_VM_ENTER()           execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()
 # define ZEND_VM_LEAVE()           ZEND_VM_CONTINUE()
 #elif defined(ZEND_VM_IP_GLOBAL_REG)
@@ -427,6 +427,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 #endif
 #define ZEND_VM_INTERRUPT()      ZEND_VM_TAIL_CALL(zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 #define ZEND_VM_LOOP_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#define ZEND_VM_SMART_INTERRUPT() zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
 #define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_opcode_handler_func(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
@@ -1207,6 +1208,8 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op1), 0);
 }
@@ -3997,6 +4000,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_CONST_H
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = RT_CONSTANT(opline, opline->op1);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -4031,6 +4036,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_CONST_
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = RT_CONSTANT(opline, opline->op1);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -4064,6 +4071,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND
 	USE_OPLINE
 	zval *val;
 	zend_uchar op1_type;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -4100,6 +4109,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_CONS
 	zval *val;
 	bool ret;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = RT_CONSTANT(opline, opline->op1);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -4135,6 +4146,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_EX_SPEC_CON
 	USE_OPLINE
 	zval *val;
 	bool ret;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = RT_CONSTANT(opline, opline->op1);
 
@@ -5127,6 +5140,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CONS
 	zend_reference *ref = NULL;
 	bool ret;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	SAVE_OPLINE();
 	value = RT_CONSTANT(opline, opline->op1);
 
@@ -5211,6 +5226,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_CON
 {
 	USE_OPLINE
 	zval *val;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = RT_CONSTANT(opline, opline->op1);
 	if (IS_CONST != IS_CONST) {
@@ -12048,6 +12065,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_TMPV
 	USE_OPLINE
 	zval *val;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = EX_VAR(opline->op1.var);
 	if ((IS_TMP_VAR|IS_VAR|IS_CV) != IS_CONST) {
 		ZVAL_DEREF(val);
@@ -14130,6 +14149,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_TMPVAR_H
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -14164,6 +14185,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_TMPVAR_
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -14197,6 +14220,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_TMPVAR_HANDLER(ZEN
 	USE_OPLINE
 	zval *val;
 	zend_uchar op1_type;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
@@ -14233,6 +14258,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_TMPVAR_HANDLER(ZE
 	zval *val;
 	bool ret;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -14268,6 +14295,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_EX_SPEC_TMPVAR_HANDLER(Z
 	USE_OPLINE
 	zval *val;
 	bool ret;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
@@ -19280,6 +19309,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_TMP_HANDLER(ZEND_
 	zend_reference *ref = NULL;
 	bool ret;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	SAVE_OPLINE();
 	value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
@@ -22162,6 +22193,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_VAR_HANDLER(ZEND_
 	zval *value;
 	zend_reference *ref = NULL;
 	bool ret;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	SAVE_OPLINE();
 	value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
@@ -37617,6 +37650,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_CV_HANDL
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = EX_VAR(opline->op1.var);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -37651,6 +37686,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_CV_HAND
 	zval *val;
 	zend_uchar op1_type;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = EX_VAR(opline->op1.var);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -37684,6 +37721,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CV_HANDLER(ZEND_OP
 	USE_OPLINE
 	zval *val;
 	zend_uchar op1_type;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = EX_VAR(opline->op1.var);
 
@@ -37720,6 +37759,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_O
 	zval *val;
 	bool ret;
 
+	ZEND_VM_INTERRUPT_CHECK();
+
 	val = EX_VAR(opline->op1.var);
 
 	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
@@ -37755,6 +37796,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_
 	USE_OPLINE
 	zval *val;
 	bool ret;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	val = EX_VAR(opline->op1.var);
 
@@ -38437,6 +38480,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_O
 	zval *value;
 	zend_reference *ref = NULL;
 	bool ret;
+
+	ZEND_VM_INTERRUPT_CHECK();
 
 	SAVE_OPLINE();
 	value = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
