@@ -2624,6 +2624,9 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 	}
 }
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 /* registers all functions in *library_functions in the function hash */
 ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
@@ -2705,6 +2708,16 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			internal_function->num_args = 0;
 			internal_function->required_num_args = 0;
 		}
+
+		/* If not specified, add __toString() return type for compatibility with Stringable
+		 * interface. */
+		if (scope && zend_string_equals_literal_ci(internal_function->function_name, "__tostring") &&
+				!(internal_function->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			internal_function->arg_info = (zend_internal_arg_info *) arg_info_toString + 1;
+			internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+			internal_function->num_args = internal_function->required_num_args = 0;
+		}
+
 
 		zend_set_function_arg_flags((zend_function*)internal_function);
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
