@@ -1677,8 +1677,8 @@ zend.assertions = -1
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
-; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
-;mbstring.http_output_conv_mimetype=
+; Default: mbstring.http_output_conv_mimetypes=^(text/|application/xhtml\+xml)
+;mbstring.http_output_conv_mimetypes=
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.
