@@ -15,6 +15,10 @@ PHP                                                                        NEWS
     (devnexen)
   . Introduced MYSQLI_IS_MARIADB. (devnexen)
 
+- Readline:
+  . Fixed bug #81598 (Cannot input unicode characters in PHP 8 interactive
+    shell). (Nikita)
+
 - Reflection:
   . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 

@@ -1999,7 +1999,7 @@ PHP_MINIT_FUNCTION(snmp)
 
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
-	setlocale(LC_CTYPE, "C");
+	zend_reset_lc_ctype_locale();
 
 #ifdef NETSNMP_DS_LIB_DONT_PERSIST_STATE
 	/* Prevent update of the snmpapp.conf file */

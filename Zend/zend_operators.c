@@ -2662,6 +2662,15 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zend_reset_lc_ctype_locale(void)
+{
+	/* Use the C.UTF-8 locale so that readline can process UTF-8 input, while not interfering
+	 * with single-byte locale-dependent functions used by PHP. */
+	if (!setlocale(LC_CTYPE, "C.UTF-8")) {
+		setlocale(LC_CTYPE, "C");
+	}
+}
+
 static zend_always_inline void zend_str_tolower_impl(char *dest, const char *str, size_t length) /* {{{ */ {
 	unsigned char *p = (unsigned char*)str;
 	unsigned char *q = (unsigned char*)dest;

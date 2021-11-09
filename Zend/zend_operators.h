@@ -472,6 +472,8 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 ZEND_API void zend_update_current_locale(void);
 
+ZEND_API void zend_reset_lc_ctype_locale(void);
+
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
 	(offsetof(zval, u1.type_info) - offsetof(zval, value))
