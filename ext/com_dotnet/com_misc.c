@@ -121,7 +121,6 @@ PHP_COM_DOTNET_API bool php_com_safearray_get_elem(VARIANT *array, VARIANT *dest
 
 	/* check bounds */
 	if (dim1 < lbound || dim1 > ubound) {
-		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds");
 		return 0;
 	}
 

@@ -456,6 +456,9 @@ PHP_METHOD(variant, __construct)
 		php_com_variant_from_zval(&obj->v, zvalue, obj->code_page);
 	}
 
+	if(ZEND_NUM_ARGS() >= 2 && vt == VT_ARRAY && V_VT(&obj->v) & VT_ARRAY)
+		vt = VT_EMPTY;//Prevent future VariantChangeType
+
 	/* Only perform conversion if variant not already of type passed */
 	if ((ZEND_NUM_ARGS() >= 2) && (vt != V_VT(&obj->v))) {
 
