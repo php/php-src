@@ -30,6 +30,7 @@
 #define PREG_SET_ORDER				2
 #define PREG_OFFSET_CAPTURE			(1<<8)
 #define PREG_UNMATCHED_AS_NULL		(1<<9)
+#define PREG_START_LEN_OFFSET		   (1<<10)
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
@@ -439,6 +440,8 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_START_LEN_OFFSET", PREG_START_LEN_OFFSET, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -1192,6 +1195,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	uint32_t		 subpats_order;		/* Order of subpattern matches */
 	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
 	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
+	uint32_t     start_len_offset;   /* use start offset on subject_str pointer and length, 0 for pcre2 start_offset */
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
@@ -1213,8 +1217,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	subpats_order = global ? PREG_PATTERN_ORDER : 0;
 
 	if (use_flags) {
+
 		offset_capture = flags & PREG_OFFSET_CAPTURE;
 		unmatched_as_null = flags & PREG_UNMATCHED_AS_NULL;
+		start_len_offset = flags & PREG_START_LEN_OFFSET;
 
 		/*
 		 * subpats_order is pre-set to pattern mode so we change it only if
@@ -1231,23 +1237,37 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	} else {
 		offset_capture = 0;
 		unmatched_as_null = 0;
+		start_len_offset = 0;
 	}
 
-	/* Negative offset counts from the end of the string. */
-	if (start_offset < 0) {
-		if ((PCRE2_SIZE)-start_offset <= subject_len) {
-			start_offset2 = subject_len + start_offset;
+	
+
+	if (start_len_offset) {
+		/* caller knows best */
+		subject = subject + start_offset;
+		subject_len -= start_offset;
+		start_offset2 = 0; // 
+	}
+	else {
+		/* Negative offset counts from the end of the string. */
+		if (start_offset < 0) {
+			if ((PCRE2_SIZE)-start_offset <= subject_len) {
+				start_offset2 = subject_len + start_offset;
+			} else {
+				start_offset2 = 0;
+			}
 		} else {
-			start_offset2 = 0;
+			start_offset2 = (PCRE2_SIZE)start_offset;
 		}
-	} else {
-		start_offset2 = (PCRE2_SIZE)start_offset;
+
+		if (start_offset2 > subject_len) {
+			pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
+			RETURN_FALSE;
+		}
+
 	}
 
-	if (start_offset2 > subject_len) {
-		pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
-		RETURN_FALSE;
-	}
+
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
@@ -1291,11 +1311,17 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	orig_start_offset = start_offset2;
-	options =
-		(pce->compile_options & PCRE2_UTF) && !is_known_valid_utf8(subject_str, orig_start_offset)
+	if (!start_len_offset) {
+		/* No offset applied to subject and subject len  */
+		orig_start_offset = start_offset2;
+		options = (pce->compile_options & PCRE2_UTF) 
+					&& !is_known_valid_utf8(subject_str, orig_start_offset)
 			? 0 : PCRE2_NO_UTF_CHECK;
-
+	}
+	else {
+		orig_start_offset = 0;
+		options = PCRE2_NO_UTF_CHECK;
+	}
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
