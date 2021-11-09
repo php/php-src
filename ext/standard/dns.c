@@ -176,6 +176,8 @@ static zend_string *php_gethostbyaddr(char *ip)
 	struct sockaddr_in sa4;
 	struct sockaddr_in6 sa6;
 	char out[NI_MAXHOST];
+	memset(&sa4, 0, sizeof(struct sockaddr_in));
+	memset(&sa6, 0, sizeof(struct sockaddr_in6));
 
 	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
 		sa6.sin6_family = AF_INET6;
