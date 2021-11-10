@@ -6221,7 +6221,8 @@ done:
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
 						(type == IS_UNKNOWN || !ra ||
-							(!ra[ssa_op->op1_def] && !ssa->vars[ssa_op->op1_def].no_val)));
+							(!ra[ssa_op->op1_def] &&
+								(opline->opcode == ZEND_ASSIGN || !ssa->vars[ssa_op->op1_def].no_val))));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
