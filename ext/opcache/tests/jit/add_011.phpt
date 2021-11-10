@@ -195,4 +195,6 @@ Warning: Undefined variable $u in %sadd_011.php on line 5
 int(-9223371969208523780)
 
 Warning: Undefined variable $u in %sadd_011.php on line 5
+
+Deprecated: Implicit conversion from float %f to int loses precision in %sadd_011.php on line 5
 int(66572500992)
