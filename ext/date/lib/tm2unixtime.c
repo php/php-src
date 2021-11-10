@@ -450,27 +450,63 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 		default:
 			/* No timezone in struct, fallback to reference if possible */
 			if (tzi) {
-				timelib_time_offset *before, *after;
+				timelib_time_offset *before;
 				timelib_sll          tmp;
-				int                  in_transition;
 
 				tz->is_localtime = 1;
 				before = timelib_get_time_zone_info(tz->sse, tzi);
-				after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
-				timelib_set_timezone(tz, tzi);
+				if (before->offset != 0) {
+					timelib_time_offset *after;
+					int32_t              actual_offset;
+					timelib_sll          actual_transition_time;
+					int                  in_transition;
 
-				in_transition = (
-					((tz->sse - after->offset) >= (after->transition_time + (before->offset - after->offset))) &&
-					((tz->sse - after->offset) < after->transition_time)
-				);
+					after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
+					actual_offset = after->offset;
+					actual_transition_time = after->transition_time;
+					if (before->offset == after->offset) {
+						/* Make sure we're not missing a DST change because we don't know the actual offset yet */
+						if (before->offset > 0 && tz->dst && !before->is_dst) {
+							/* Timezone east of UTC, so the local time, interpreted as UTC, leaves DST (as defined in the actual timezone) before the actual local time */
+							timelib_time_offset *earlier;
 
-				if ((before->offset != after->offset) && !in_transition) {
-					tmp = -after->offset;
+							earlier = timelib_get_time_zone_info(tz->sse - before->offset - 7200, tzi);
+							if ((earlier->offset != after->offset) && (tz->sse - earlier->offset < after->transition_time)) {
+								/* Looking behind a bit clarified the actual offset to use */
+								actual_offset = earlier->offset;
+								actual_transition_time = earlier->transition_time;
+							}
+							timelib_time_offset_dtor(earlier);
+						} else if (before->offset < 0 && before->is_dst && !tz->dst) {
+							/* Timezone west of UTC, so the local time, interpreted as UTC, leaves DST (as defined in the actual timezone) after the actual local time */
+							timelib_time_offset *later;
+
+							later = timelib_get_time_zone_info(tz->sse - before->offset + 7200, tzi);
+							if ((later->offset != after->offset) && (tz->sse - later->offset >= later->transition_time)) {
+								/* Looking ahead a bit clarified the actual offset to use */
+								actual_offset = later->offset;
+								actual_transition_time = later->transition_time;
+							}
+							timelib_time_offset_dtor(later);
+						}
+					}
+
+					in_transition = (
+						((tz->sse - actual_offset) >= (actual_transition_time + (before->offset - actual_offset))) &&
+						((tz->sse - actual_offset) < actual_transition_time)
+					);
+
+					timelib_set_timezone(tz, tzi);
+					if ((before->offset != actual_offset) && !in_transition) {
+						tmp = -actual_offset;
+					} else {
+						tmp = -tz->z;
+					}
+					timelib_time_offset_dtor(after);
 				} else {
-					tmp = -tz->z;
+					tmp = 0;
 				}
 				timelib_time_offset_dtor(before);
-				timelib_time_offset_dtor(after);
 
 				{
 					timelib_time_offset *gmt_offset;
