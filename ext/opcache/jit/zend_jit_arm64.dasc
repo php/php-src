@@ -4609,26 +4609,12 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 {
 	bool same_ops = zend_jit_same_addr(op1_addr, op2_addr);
 	zend_reg result_reg;
-	zval tmp;
 
 	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
 		|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >6, ZREG_TMP1
 	}
 	if (!same_ops && (op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 		|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >6, ZREG_TMP1
-	}
-
-	if (opcode == ZEND_MOD && Z_MODE(op2_addr) == IS_CONST_ZVAL &&
-	    op1_range &&
-	    op1_range->min >= 0) {
-		zend_long l = Z_LVAL_P(Z_ZV(op2_addr));
-
-		if (zend_long_is_power_of_two(l)) {
-			/* Optimisation for mod of power of 2 */
-			opcode = ZEND_BW_AND;
-			ZVAL_LONG(&tmp, l - 1);
-			op2_addr = ZEND_ADDR_CONST_ZVAL(&tmp);
-		}
 	}
 
 	if (Z_MODE(res_addr) == IS_REG) {
@@ -4742,6 +4728,15 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	b ->mod_by_zero
 			} else if (op2_lval == -1) {
 				|	mov Rx(result_reg), xzr
+			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
+				zval tmp;
+				zend_jit_addr tmp_addr;
+
+				/* Optimisation for mod of power of 2 */
+				ZVAL_LONG(&tmp, op2_lval - 1);
+				tmp_addr = ZEND_ADDR_CONST_ZVAL(&tmp);
+				|	GET_ZVAL_LVAL result_reg, op1_addr, TMP1
+				|	LONG_MATH ZEND_BW_AND, result_reg, tmp_addr, TMP1
 			} else {
 				|	GET_ZVAL_LVAL ZREG_TMP1, op1_addr, TMP1
 				|	GET_ZVAL_LVAL ZREG_TMP2, op2_addr, TMP2
