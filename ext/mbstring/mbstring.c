@@ -292,7 +292,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		included_auto = 0;
 		p1 = tmpstr;
 		while (1) {
-			char *comma = (char *) php_memnstr(p1, ",", 1, endp);
+			char *comma = memchr(p1, ',', endp - p1);
 			char *p = comma ? comma : endp;
 			*p = '\0';
 			/* trim spaces */
