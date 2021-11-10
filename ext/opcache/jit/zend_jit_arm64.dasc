@@ -2117,22 +2117,56 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
+	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+
 	|->negative_shift:
+	|	ldr RX, EX->opline
 	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
 	|	LOAD_ADDR CARG1, zend_ce_arithmetic_error
 	|	LOAD_ADDR CARG2, "Bit shift by negative number"
 	|	EXT_CALL zend_throw_error, REG0
+	|	ldrb TMP1w, OP:RX->op1_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op1.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	ldrb TMP1w, OP:RX->op2_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op2.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
 	|	b ->exception_handler
 	return 1;
 }
 
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
+	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+
 	|->mod_by_zero:
+	|	ldr RX, EX->opline
 	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
 	|	LOAD_ADDR CARG1, zend_ce_division_by_zero_error
 	|	LOAD_ADDR CARG2, "Modulo by zero"
 	|	EXT_CALL zend_throw_error, REG0
+	|	ldrb TMP1w, OP:RX->op1_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op1.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	ldrb TMP1w, OP:RX->op2_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op2.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
 	|	b ->exception_handler
 	return 1;
 }
