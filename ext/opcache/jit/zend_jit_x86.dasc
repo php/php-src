@@ -2149,6 +2149,7 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
+	|	mov RX, EX->opline
 	|	UNDEF_OPLINE_RESULT_IF_USED
 	|.if X64
 		|.if WIN
@@ -2171,6 +2172,18 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
+	|	test byte OP:RX->op1_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op1.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
+	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op2.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
 	|	jmp ->exception_handler
 	return 1;
 }
@@ -2178,6 +2191,7 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
+	|	mov RX, EX->opline
 	|	UNDEF_OPLINE_RESULT_IF_USED
 	|.if X64
 		|.if WIN
@@ -2200,6 +2214,18 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
+	|	test byte OP:RX->op1_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op1.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
+	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op2.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
 	|	jmp ->exception_handler
 	return 1;
 }
