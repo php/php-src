@@ -172,19 +172,17 @@ static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
 	const char *p = haystack;
-	ptrdiff_t off_p;
 	size_t off_s;
 
-	if (needle_len == 0) {
-		return p;
-	}
+	ZEND_ASSERT(end >= p);
 
 	if (needle_len == 1) {
 		return (const char *)memchr(p, *needle, (end-p));
+	} else if (UNEXPECTED(needle_len == 0)) {
+		return p;
 	}
 
-	off_p = end - haystack;
-	off_s = (off_p > 0) ? (size_t)off_p : 0;
+	off_s = (size_t)(end - p);
 
 	if (needle_len > off_s) {
 		return NULL;
@@ -195,16 +193,13 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 		end -= needle_len;
 
 		while (p <= end) {
-			if ((p = (const char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-				if (!memcmp(needle+1, p+1, needle_len-2)) {
+			if ((p = (const char *)memchr(p, *needle, (end-p+1)))) {
+				if (ne == p[needle_len-1] && !memcmp(needle+1, p+1, needle_len-2)) {
 					return p;
 				}
-			}
-
-			if (p == NULL) {
+			} else {
 				return NULL;
 			}
-
 			p++;
 		}
 
