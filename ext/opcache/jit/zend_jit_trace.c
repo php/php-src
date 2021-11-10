@@ -1436,6 +1436,12 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 				if (op_type != IS_UNKNOWN) {
 					ssa_var_info[i].type &= zend_jit_trace_type_to_info(op_type);
+					if (!ssa_var_info[i].type
+					 && op_type == IS_UNDEF
+					 && i >= op_array->last_var) {
+						// TODO: It's better to use NULL instead of UNDEF for temporary variables
+						ssa_var_info[i].type |= MAY_BE_UNDEF;
+					}
 				}
 			}
 			i++;
