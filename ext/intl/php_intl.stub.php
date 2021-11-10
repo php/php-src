@@ -160,8 +160,8 @@ function intl_error_name(int $errorCode): string {}
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
 function datefmt_create(
     ?string $locale,
-    int $dateType = IntlDateFormatter::FULL,
-    int $timeType = IntlDateFormatter::FULL,
+    ?int $dateType = IntlDateFormatter::FULL,
+    ?int $timeType = IntlDateFormatter::FULL,
     $timezone = null,
     IntlCalendar|int|null $calendar = null,
     ?string $pattern = null

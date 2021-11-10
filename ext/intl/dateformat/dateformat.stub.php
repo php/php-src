@@ -10,8 +10,8 @@ class IntlDateFormatter
      */
     public function __construct(
         ?string $locale,
-        int $dateType = IntlDateFormatter::FULL,
-        int $timeType = IntlDateFormatter::FULL,
+        ?int $dateType = IntlDateFormatter::FULL,
+        ?int $timeType = IntlDateFormatter::FULL,
         $timezone = null,
         $calendar = null,
         ?string $pattern = null
@@ -24,8 +24,8 @@ class IntlDateFormatter
      */
     public static function create(
         ?string $locale,
-        int $dateType = IntlDateFormatter::FULL,
-        int $timeType = IntlDateFormatter::FULL,
+        ?int $dateType = IntlDateFormatter::FULL,
+        ?int $timeType = IntlDateFormatter::FULL,
         $timezone = null,
         IntlCalendar|int|null $calendar = null,
         ?string $pattern = null
