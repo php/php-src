@@ -13,6 +13,8 @@ function Test($param) {
 }
 
 class TestSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $opt) {
     parent::__construct($wsdl, $opt);
     $this->server = new SoapServer($wsdl, $opt);

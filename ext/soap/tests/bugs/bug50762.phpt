@@ -15,6 +15,7 @@ class testSoap {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -34,10 +35,8 @@ class LocalSoapClient extends SoapClient {
 
 $cl = new LocalSoapClient(__DIR__.'/bug50762.wsdl', array('cache_wsdl'=>WSDL_CACHE_NONE, 'trace'=>true));
 
-class authToken{
-    public function __construct($token){
-        $this->authToken=$token;
-    }
+class authToken {
+    public function __construct(public $authToken) {}
 }
 
 $cl->__setSoapHeaders(array(new SoapHeader('http://sova.pronto.ru/', 'authToken', new authToken('tokendata'))));

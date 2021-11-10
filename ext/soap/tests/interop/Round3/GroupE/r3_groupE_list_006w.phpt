@@ -7,11 +7,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPList {
-    function __construct($s, $i, $c) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->child = $c;
-    }
+    function __construct(public $varString, public $varInt, public $child) {}
 }
 $struct = new SOAPList('arg1',1,new SOAPList('arg2',2,new SOAPList('arg3',3,NULL)));
 $struct->child->child->child = $struct->child;
