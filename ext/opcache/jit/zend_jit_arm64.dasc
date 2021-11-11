@@ -1778,6 +1778,10 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	//zend_interrupt_function(execute_data);
 		|	mov CARG1, FP
 		|	EXT_CALL zend_interrupt_function, TMP1
+		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
+		|	cbz REG0, >1
+		|	EXT_CALL zend_jit_exception_in_interrupt_handler_helper, TMP1
+		|1:
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
 		|	MEM_LOAD_64_ZTS ldr, FP, executor_globals, current_execute_data, TMP1
