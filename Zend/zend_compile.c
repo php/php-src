@@ -8305,6 +8305,10 @@ static inline bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zva
 ZEND_API bool zend_unary_op_produces_error(uint32_t opcode, zval *op)
 {
 	if (opcode == ZEND_BW_NOT) {
+		/* BW_NOT on string does not convert the string into an integer. */
+		if (Z_TYPE_P(op) == IS_STRING) {
+			return 0;
+		}
 		return Z_TYPE_P(op) <= IS_TRUE || !zend_is_op_long_compatible(op);
 	}
 
