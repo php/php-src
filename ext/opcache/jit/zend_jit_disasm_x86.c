@@ -496,6 +496,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zval_jit_update_constant_ex);
 #endif
 	REGISTER_HELPER(zend_jit_free_trampoline_helper);
+	REGISTER_HELPER(zend_jit_exception_in_interrupt_handler_helper);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32
