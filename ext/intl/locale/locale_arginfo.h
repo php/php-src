@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 539e559bc038e18358540b3b3f4db7b09e532dae */
+ * Stub hash: 3635a4069505cc9e9c22deddf7cb68c396990cd1 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -8,13 +8,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_setDefault, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getPrimaryLanguage, 0, 1, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getLanguage, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_getScript arginfo_class_Locale_getPrimaryLanguage
+#define arginfo_class_Locale_getPrimaryLanguage arginfo_class_Locale_getLanguage
 
-#define arginfo_class_Locale_getRegion arginfo_class_Locale_getPrimaryLanguage
+#define arginfo_class_Locale_getScript arginfo_class_Locale_getLanguage
+
+#define arginfo_class_Locale_getRegion arginfo_class_Locale_getLanguage
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_getKeywords, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -56,7 +58,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_lookup, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, defaultLocale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Locale_canonicalize arginfo_class_Locale_getPrimaryLanguage
+#define arginfo_class_Locale_canonicalize arginfo_class_Locale_getLanguage
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_acceptFromHttp, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
@@ -65,7 +67,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
-ZEND_FUNCTION(locale_get_primary_language);
+ZEND_FUNCTION(locale_get_language);
 ZEND_FUNCTION(locale_get_script);
 ZEND_FUNCTION(locale_get_region);
 ZEND_FUNCTION(locale_get_keywords);
@@ -86,7 +88,8 @@ ZEND_FUNCTION(locale_accept_from_http);
 static const zend_function_entry class_Locale_methods[] = {
 	ZEND_ME_MAPPING(getDefault, locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(setDefault, locale_set_default, arginfo_class_Locale_setDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getPrimaryLanguage, locale_get_primary_language, arginfo_class_Locale_getPrimaryLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(getLanguage, locale_get_language, arginfo_class_Locale_getLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(getPrimaryLanguage, locale_get_language, arginfo_class_Locale_getPrimaryLanguage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getScript, locale_get_script, arginfo_class_Locale_getScript, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getRegion, locale_get_region, arginfo_class_Locale_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getKeywords, locale_get_keywords, arginfo_class_Locale_getKeywords, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

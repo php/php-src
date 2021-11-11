@@ -296,6 +296,11 @@ function locale_get_default(): string {}
 
 function locale_set_default(string $locale): bool {}
 
+function locale_get_language(string $locale): ?string {}
+
+/**
+ * @alias locale_get_language
+ */
 function locale_get_primary_language(string $locale): ?string {}
 
 function locale_get_script(string $locale): ?string {}

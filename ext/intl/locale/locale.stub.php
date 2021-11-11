@@ -18,7 +18,13 @@ class Locale
 
     /**
      * @tentative-return-type
-     * @alias locale_get_primary_language
+     * @alias locale_get_language
+     */
+    public static function getLanguage(string $locale): ?string{}
+
+    /**
+     * @tentative-return-type
+     * @alias locale_get_language
      */
     public static function getPrimaryLanguage(string $locale): ?string{}
 

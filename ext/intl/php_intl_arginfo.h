@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 09aa0aa66c78b86c0e6e0e554c3ebe205a0e5f59 */
+ * Stub hash: 0374661db01144e54cfca6f0ac751aa3b1d5ffe0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -507,13 +507,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_set_default, 0, 1, _IS_BO
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_get_primary_language, 0, 1, IS_STRING, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_get_language, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_locale_get_script arginfo_locale_get_primary_language
+#define arginfo_locale_get_primary_language arginfo_locale_get_language
 
-#define arginfo_locale_get_region arginfo_locale_get_primary_language
+#define arginfo_locale_get_script arginfo_locale_get_language
+
+#define arginfo_locale_get_region arginfo_locale_get_language
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_keywords, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -548,7 +550,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_filter_matches, 0, 2, _IS
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, canonicalize, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_locale_canonicalize arginfo_locale_get_primary_language
+#define arginfo_locale_canonicalize arginfo_locale_get_language
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_lookup, 0, 2, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, languageTag, IS_ARRAY, 0)
@@ -901,7 +903,7 @@ ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
-ZEND_FUNCTION(locale_get_primary_language);
+ZEND_FUNCTION(locale_get_language);
 ZEND_FUNCTION(locale_get_script);
 ZEND_FUNCTION(locale_get_region);
 ZEND_FUNCTION(locale_get_keywords);
@@ -1091,7 +1093,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
 	ZEND_FE(locale_get_default, arginfo_locale_get_default)
 	ZEND_FE(locale_set_default, arginfo_locale_set_default)
-	ZEND_FE(locale_get_primary_language, arginfo_locale_get_primary_language)
+	ZEND_FE(locale_get_language, arginfo_locale_get_language)
+	ZEND_FALIAS(locale_get_primary_language, locale_get_language, arginfo_locale_get_primary_language)
 	ZEND_FE(locale_get_script, arginfo_locale_get_script)
 	ZEND_FE(locale_get_region, arginfo_locale_get_region)
 	ZEND_FE(locale_get_keywords, arginfo_locale_get_keywords)

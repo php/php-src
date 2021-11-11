@@ -12,6 +12,7 @@ $methods = [
 'composeLocale',
 'getAllVariants',
 'getKeywords',
+'getLanguage',
 'getPrimaryLanguage',
 'getRegion',
 'getScript',
@@ -38,6 +39,7 @@ canonicalize: 1, 1
 composeLocale: 1, 1
 getAllVariants: 1, 1
 getKeywords: 1, 1
+getLanguage: 1, 1
 getPrimaryLanguage: 1, 1
 getRegion: 1, 1
 getScript: 1, 1

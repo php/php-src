@@ -236,6 +236,10 @@ function ut_loc_set_default( $locale  )
 {
     return $GLOBALS['oo-mode'] ? Locale::setDefault( $locale  ) : locale_set_default( $locale );
 }
+function ut_loc_get_language( $locale )
+{
+    return $GLOBALS['oo-mode'] ? Locale::getLanguage( $locale ) : locale_get_language( $locale );
+}
 function ut_loc_get_primary_language( $locale )
 {
     return $GLOBALS['oo-mode'] ? Locale::getPrimaryLanguage( $locale ) : locale_get_primary_language( $locale );

@@ -5,8 +5,11 @@ intl
 --FILE--
 <?php
 $var1=str_repeat("A", 1000);
+$out = locale_get_language($var1);
+var_dump($out);
 $out = locale_get_primary_language($var1);
 var_dump($out);
 ?>
 --EXPECT--
+NULL
 NULL

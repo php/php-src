@@ -368,27 +368,27 @@ static zend_string* get_icu_value_internal( const char* loc_name , char* tag_nam
 			}
 		}
 
-	if( fromParseLocale==1 ){
-		zend_off_t singletonPos = 0;
+		if( fromParseLocale==1 ){
+			zend_off_t singletonPos = 0;
 
-		/* Handle singletons */
-		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
-			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1) ){
-				return zend_string_init(loc_name, strlen(loc_name), 0);
+			/* Handle singletons */
+			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
+				 if( strlen(loc_name)>1 && (isIDPrefix(loc_name) == 1) ){
+					 return zend_string_init(loc_name, strlen(loc_name), 0);
+				 }
 			}
-		}
 
-		singletonPos = getSingletonPos( loc_name );
-		if( singletonPos == 0){
-			/* singleton at start of script, region , variant etc.
-			 * or invalid singleton at start of language */
-			return NULL;
-		} else if( singletonPos > 0 ){
-			/* singleton at some position except at start
-			 * strip off the singleton and rest of the loc_name */
-			mod_loc_name = estrndup ( loc_name , singletonPos-1);
-		}
-	} /* end of if fromParse */
+			singletonPos = getSingletonPos( loc_name );
+			if( singletonPos == 0){
+				 /* singleton at start of script, region , variant etc.
+				  * or invalid singleton at start of language */
+				 return NULL;
+			} else if( singletonPos > 0 ){
+				 /* singleton at some position except at start
+				  * strip off the singleton and rest of the loc_name */
+				 mod_loc_name = estrndup ( loc_name , singletonPos-1);
+			}
+		} /* end of if fromParse */
 
 	} /* end of if != LOC_CANONICAL_TAG */
 
@@ -537,8 +537,8 @@ PHP_FUNCTION( locale_get_region )
 }
 /* }}} */
 
-/* {{{ gets the primary language for the $locale */
-PHP_FUNCTION(locale_get_primary_language )
+/* {{{ gets the language for the $locale */
+PHP_FUNCTION( locale_get_language )
 {
 	get_icu_value_src_php( LOC_LANG_TAG , INTERNAL_FUNCTION_PARAM_PASSTHRU );
 }
