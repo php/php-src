@@ -1715,6 +1715,10 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 			|	mov aword A1, FP
 			|	EXT_CALL zend_interrupt_function, r0
 		|.endif
+		|	MEM_CMP_ZTS aword, executor_globals, exception, 0, r0
+		|	je >1
+		|	EXT_CALL zend_jit_exception_in_interrupt_handler_helper, r0
+		|1:
 		|	//ZEND_VM_ENTER();
 		|	//execute_data = EG(current_execute_data);
 		|	MEM_LOAD_ZTS FP, aword, executor_globals, current_execute_data, r0
