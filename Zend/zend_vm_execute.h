@@ -3384,6 +3384,20 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_he
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
+		if (EG(exception)) {
+			/* We have to UNDEF result, because ZEND_HANDLE_EXCEPTION is going to free it */
+			const zend_op *throw_op = EG(opline_before_exception);
+
+			if (throw_op
+			 && throw_op->result_type & (IS_TMP_VAR|IS_VAR)
+			 && throw_op->opcode != ZEND_ADD_ARRAY_ELEMENT
+			 && throw_op->opcode != ZEND_ADD_ARRAY_UNPACK
+			 && throw_op->opcode != ZEND_ROPE_INIT
+			 && throw_op->opcode != ZEND_ROPE_ADD) {
+				ZVAL_UNDEF(ZEND_CALL_VAR(EG(current_execute_data), throw_op->result.var));
+
+			}
+		}
 		ZEND_VM_ENTER();
 	}
 	ZEND_VM_CONTINUE();
