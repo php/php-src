@@ -3,6 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ; About php.ini   ;
 ;;;;;;;;;;;;;;;;;;;
+
 ; PHP's initialization file, generally called php.ini, is responsible for
 ; configuring many of the aspects of PHP's behavior.
 
@@ -69,6 +70,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ; About this file ;
 ;;;;;;;;;;;;;;;;;;;
+
 ; PHP comes packaged with two INI files. One that is recommended to be used
 ; in production environments and one that is recommended to be used in
 ; development environments.
@@ -88,6 +90,7 @@
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
 ;;;;;;;;;;;;;;;;;;;
+
 ; The following are all the settings which are different in either the production
 ; or development versions of the INIs with respect to PHP's default behavior.
 ; Please see the actual settings later in the document for more details as to why
@@ -156,6 +159,7 @@
 ;;;;;;;;;;;;;;;;;;;;
 ; php.ini Options  ;
 ;;;;;;;;;;;;;;;;;;;;
+
 ; Name for user-defined php.ini (.htaccess) files. Default is ".user.ini"
 ;user_ini.filename = ".user.ini"
 
@@ -236,7 +240,7 @@ output_buffering = 4096
 ; Default Value: "form="
 ; Development Value: "form="
 ; Production Value: "form="
-;url_rewriter.tags
+;url_rewriter.tags =
 
 ; URL rewriter will not rewrite absolute URL nor form by default. To enable
 ; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
@@ -244,7 +248,7 @@ output_buffering = 4096
 ; Default Value: ""
 ; Development Value: ""
 ; Production Value: ""
-;url_rewriter.hosts
+;url_rewriter.hosts =
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
@@ -638,7 +642,7 @@ report_memleaks = On
 ; need to.
 ; Default Value: "EGPCS"
 ; Development Value: "GPCS"
-; Production Value: "GPCS";
+; Production Value: "GPCS"
 ; http://php.net/variables-order
 variables_order = "GPCS"
 
@@ -795,11 +799,11 @@ enable_dl = Off
 ; of zero causes PHP to behave as before.  Default is 1.  You should fix your scripts
 ; to use SCRIPT_FILENAME rather than PATH_TRANSLATED.
 ; http://php.net/cgi.fix-pathinfo
-;cgi.fix_pathinfo=1
+;cgi.fix_pathinfo = 1
 
 ; if cgi.discard_path is enabled, the PHP CGI binary can safely be placed outside
 ; of the web tree and people will not be able to circumvent .htaccess security.
-;cgi.discard_path=1
+;cgi.discard_path = 1
 
 ; FastCGI under IIS supports the ability to impersonate
 ; security tokens of the calling client.  This allows IIS to define the
@@ -826,7 +830,7 @@ enable_dl = Off
 ; script support running both as stand-alone script and via PHP CGI<. PHP in CGI
 ; mode skips this line and ignores its content if this directive is turned on.
 ; http://php.net/cgi.check-shebang-line
-;cgi.check_shebang_line=1
+;cgi.check_shebang_line = 1
 
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
@@ -863,11 +867,11 @@ allow_url_include = Off
 ; Define the anonymous ftp password (your email address). PHP's default setting
 ; for this is empty.
 ; http://php.net/from
-;from="john@doe.com"
+;from = "john@doe.com"
 
 ; Define the User-Agent string. PHP's default setting for this is empty.
 ; http://php.net/user-agent
-;user_agent="PHP"
+;user_agent = "PHP"
 
 ; Default timeout for socket based streams (seconds)
 ; http://php.net/default-socket-timeout
@@ -1003,7 +1007,7 @@ cli_server.color = On
 ; enable them. Note that the IMAP library does not filter mailbox names before
 ; passing them to rsh/ssh command, thus passing untrusted data to this function
 ; with rsh/ssh enabled is insecure.
-;imap.enable_insecure_rsh=0
+;imap.enable_insecure_rsh = 0
 
 [intl]
 ;intl.default_locale =
@@ -1030,30 +1034,30 @@ cli_server.color = On
 [Pcre]
 ; PCRE library backtracking limit.
 ; http://php.net/pcre.backtrack-limit
-;pcre.backtrack_limit=100000
+;pcre.backtrack_limit = 100000
 
 ; PCRE library recursion limit.
 ; Please note that if you set this value to a high number you may consume all
 ; the available process stack and eventually crash PHP (due to reaching the
 ; stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
-;pcre.recursion_limit=100000
+;pcre.recursion_limit = 100000
 
 ; Enables or disables JIT compilation of patterns. This requires the PCRE
 ; library to be compiled with JIT support.
-;pcre.jit=1
+;pcre.jit = 1
 
 [Pdo]
 ; Whether to pool ODBC connections. Can be one of "strict", "relaxed" or "off"
 ; http://php.net/pdo-odbc.connection-pooling
-;pdo_odbc.connection_pooling=strict
+;pdo_odbc.connection_pooling = strict
 
-;pdo_odbc.db2_instance_name
+;pdo_odbc.db2_instance_name =
 
 [Pdo_mysql]
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
 ; MySQL defaults.
-pdo_mysql.default_socket=
+pdo_mysql.default_socket =
 
 [Phar]
 ; http://php.net/phar.readonly
@@ -1095,17 +1099,17 @@ mail.add_x_header = Off
 
 [ODBC]
 ; http://php.net/odbc.default-db
-;odbc.default_db    =  Not yet implemented
+;odbc.default_db = Not yet implemented
 
 ; http://php.net/odbc.default-user
-;odbc.default_user  =  Not yet implemented
+;odbc.default_user = Not yet implemented
 
 ; http://php.net/odbc.default-pw
-;odbc.default_pw    =  Not yet implemented
+;odbc.default_pw = Not yet implemented
 
 ; Controls the ODBC cursor model.
 ; Default: SQL_CURSOR_STATIC (default).
-;odbc.default_cursortype
+;odbc.default_cursortype =
 
 ; Allow or prevent persistent links.
 ; http://php.net/odbc.allow-persistent
@@ -1490,7 +1494,7 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; Default Value: ""
 ; Development Value: ""
 ; Production Value: ""
-;session.trans_sid_hosts=""
+;session.trans_sid_hosts = ""
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
@@ -1540,7 +1544,7 @@ session.sid_bits_per_character = 5
 ; Development Value: "1%"
 ; Production Value: "1%"
 ; http://php.net/session.upload-progress.freq
-;session.upload_progress.freq =  "1%"
+;session.upload_progress.freq = "1%"
 
 ; The minimum delay between updates, in seconds
 ; Default Value: 1
@@ -1613,7 +1617,7 @@ zend.assertions = -1
 
 ; The default character set code-page to use when passing strings to and from COM objects.
 ; Default: system ANSI code page
-;com.code_page=
+;com.code_page =
 
 [mbstring]
 ; language for internal character representation.
@@ -1682,17 +1686,17 @@ zend.assertions = -1
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
 ; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
-;mbstring.http_output_conv_mimetype=
+;mbstring.http_output_conv_mimetype =
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.
 ; Default: 100000
-;mbstring.regex_stack_limit=100000
+;mbstring.regex_stack_limit = 100000
 
 ; This directive specifies maximum retry count for mbstring regular expressions. It is similar
 ; to the pcre.backtrack_limit for PCRE.
 ; Default: 1000000
-;mbstring.regex_retry_limit=1000000
+;mbstring.regex_retry_limit = 1000000
 
 [gd]
 ; Tell the jpeg decode to ignore warnings and try to create
@@ -1714,7 +1718,7 @@ zend.assertions = -1
 ;exif.decode_unicode_motorola = UCS-2BE
 
 ; http://php.net/exif.decode-unicode-intel
-;exif.decode_unicode_intel    = UCS-2LE
+;exif.decode_unicode_intel = UCS-2LE
 
 ; http://php.net/exif.encode-jis
 ;exif.encode_jis =
@@ -1723,7 +1727,7 @@ zend.assertions = -1
 ;exif.decode_jis_motorola = JIS
 
 ; http://php.net/exif.decode-jis-intel
-;exif.decode_jis_intel    = JIS
+;exif.decode_jis_intel = JIS
 
 [Tidy]
 ; The path to a default tidy configuration file to use when using tidy
@@ -1739,16 +1743,16 @@ tidy.clean_output = Off
 [soap]
 ; Enables or disables WSDL caching feature.
 ; http://php.net/soap.wsdl-cache-enabled
-soap.wsdl_cache_enabled=1
+soap.wsdl_cache_enabled = 1
 
 ; Sets the directory name where SOAP extension will put cache files.
 ; http://php.net/soap.wsdl-cache-dir
-soap.wsdl_cache_dir="/tmp"
+soap.wsdl_cache_dir = "/tmp"
 
 ; (time to live) Sets the number of second while cached file will be used
 ; instead of original one.
 ; http://php.net/soap.wsdl-cache-ttl
-soap.wsdl_cache_ttl=86400
+soap.wsdl_cache_ttl = 86400
 
 ; Sets the size of the cache limit. (Max. number of WSDL files to cache)
 soap.wsdl_cache_limit = 5
@@ -1762,58 +1766,58 @@ soap.wsdl_cache_limit = 5
 ldap.max_links = -1
 
 [dba]
-;dba.default_handler=
+;dba.default_handler =
 
 [opcache]
 ; Determines if Zend OPCache is enabled
-;opcache.enable=1
+;opcache.enable = 1
 
 ; Determines if Zend OPCache is enabled for the CLI version of PHP
-;opcache.enable_cli=0
+;opcache.enable_cli = 0
 
 ; The OPcache shared memory storage size.
-;opcache.memory_consumption=128
+;opcache.memory_consumption = 128
 
 ; The amount of memory for interned strings in Mbytes.
-;opcache.interned_strings_buffer=8
+;opcache.interned_strings_buffer = 8
 
 ; The maximum number of keys (scripts) in the OPcache hash table.
 ; Only numbers between 200 and 1000000 are allowed.
-;opcache.max_accelerated_files=10000
+;opcache.max_accelerated_files = 10000
 
 ; The maximum percentage of "wasted" memory until a restart is scheduled.
-;opcache.max_wasted_percentage=5
+;opcache.max_wasted_percentage = 5
 
 ; When this directive is enabled, the OPcache appends the current working
 ; directory to the script key, thus eliminating possible collisions between
 ; files with the same name (basename). Disabling the directive improves
 ; performance, but may break existing applications.
-;opcache.use_cwd=1
+;opcache.use_cwd = 1
 
 ; When disabled, you must reset the OPcache manually or restart the
 ; webserver for changes to the filesystem to take effect.
-;opcache.validate_timestamps=1
+;opcache.validate_timestamps = 1
 
 ; How often (in seconds) to check file timestamps for changes to the shared
 ; memory storage allocation. ("1" means validate once per second, but only
 ; once per request. "0" means always validate)
-;opcache.revalidate_freq=2
+;opcache.revalidate_freq = 2
 
 ; Enables or disables file search in include_path optimization
-;opcache.revalidate_path=0
+;opcache.revalidate_path = 0
 
 ; If disabled, all PHPDoc comments are dropped from the code to reduce the
 ; size of the optimized code.
-;opcache.save_comments=1
+;opcache.save_comments = 1
 
 ; Allow file existence override (file_exists, etc.) performance feature.
-;opcache.enable_file_override=0
+;opcache.enable_file_override = 0
 
 ; A bitmask, where each bit enables or disables the appropriate OPcache
 ; passes
-;opcache.optimization_level=0x7FFFBFFF
+;opcache.optimization_level = 0x7FFFBFFF
 
-;opcache.dups_fix=0
+;opcache.dups_fix = 0
 
 ; The location of the OPcache blacklist file (wildcards allowed).
 ; Each OPcache blacklist file is a text file that holds the names of files
@@ -1821,97 +1825,97 @@ ldap.max_links = -1
 ; to a new line. The filename may be a full path or just a file prefix
 ; (i.e., /var/www/x  blacklists all the files and directories in /var/www
 ; that start with 'x'). Line starting with a ; are ignored (comments).
-;opcache.blacklist_filename=
+;opcache.blacklist_filename =
 
 ; Allows exclusion of large files from being cached. By default all files
 ; are cached.
-;opcache.max_file_size=0
+;opcache.max_file_size = 0
 
 ; Check the cache checksum each N requests.
 ; The default value of "0" means that the checks are disabled.
-;opcache.consistency_checks=0
+;opcache.consistency_checks = 0
 
 ; How long to wait (in seconds) for a scheduled restart to begin if the cache
 ; is not being accessed.
-;opcache.force_restart_timeout=180
+;opcache.force_restart_timeout = 180
 
 ; OPcache error_log file name. Empty string assumes "stderr".
-;opcache.error_log=
+;opcache.error_log =
 
 ; All OPcache errors go to the Web server log.
 ; By default, only fatal errors (level 0) or errors (level 1) are logged.
 ; You can also enable warnings (level 2), info messages (level 3) or
 ; debug messages (level 4).
-;opcache.log_verbosity_level=1
+;opcache.log_verbosity_level = 1
 
 ; Preferred Shared Memory back-end. Leave empty and let the system decide.
-;opcache.preferred_memory_model=
+;opcache.preferred_memory_model =
 
 ; Protect the shared memory from unexpected writing during script execution.
 ; Useful for internal debugging only.
-;opcache.protect_memory=0
+;opcache.protect_memory = 0
 
 ; Allows calling OPcache API functions only from PHP scripts which path is
 ; started from specified string. The default "" means no restriction
-;opcache.restrict_api=
+;opcache.restrict_api =
 
 ; Mapping base of shared memory segments (for Windows only). All the PHP
 ; processes have to map shared memory into the same address space. This
 ; directive allows to manually fix the "Unable to reattach to base address"
 ; errors.
-;opcache.mmap_base=
+;opcache.mmap_base =
 
 ; Facilitates multiple OPcache instances per user (for Windows only). All PHP
 ; processes with the same cache ID and user share an OPcache instance.
-;opcache.cache_id=
+;opcache.cache_id =
 
 ; Enables and sets the second level cache directory.
 ; It should improve performance when SHM memory is full, at server restart or
 ; SHM reset. The default "" disables file based caching.
-;opcache.file_cache=
+;opcache.file_cache =
 
 ; Enables or disables opcode caching in shared memory.
-;opcache.file_cache_only=0
+;opcache.file_cache_only = 0
 
 ; Enables or disables checksum validation when script loaded from file cache.
-;opcache.file_cache_consistency_checks=1
+;opcache.file_cache_consistency_checks = 1
 
 ; Implies opcache.file_cache_only=1 for a certain process that failed to
 ; reattach to the shared memory (for Windows only). Explicitly enabled file
 ; cache is required.
-;opcache.file_cache_fallback=1
+;opcache.file_cache_fallback = 1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
 ; This should improve performance, but requires appropriate OS configuration.
-;opcache.huge_code_pages=1
+;opcache.huge_code_pages = 1
 
 ; Validate cached file permissions.
-;opcache.validate_permission=0
+;opcache.validate_permission = 0
 
 ; Prevent name collisions in chroot'ed environment.
-;opcache.validate_root=0
+;opcache.validate_root = 0
 
 ; If specified, it produces opcode dumps for debugging different stages of
 ; optimizations.
-;opcache.opt_debug_level=0
+;opcache.opt_debug_level = 0
 
 ; Specifies a PHP script that is going to be compiled and executed at server
 ; start-up.
 ; http://php.net/opcache.preload
-;opcache.preload=
+;opcache.preload =
 
 ; Preloading code as root is not allowed for security reasons. This directive
 ; facilitates to let the preloading to be run as another user.
 ; http://php.net/opcache.preload_user
-;opcache.preload_user=
+;opcache.preload_user =
 
 ; Prevents caching files that are less than this number of seconds old. It
 ; protects from caching of incompletely updated files. In case all file updates
 ; on your site are atomic, you may increase performance by setting it to "0".
-;opcache.file_update_protection=2
+;opcache.file_update_protection = 2
 
 ; Absolute path used to store shared lockfiles (for *nix only).
-;opcache.lockfile_path=/tmp
+;opcache.lockfile_path = /tmp
 
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
@@ -1925,7 +1929,7 @@ ldap.max_links = -1
 ; OS-managed cert stores in its absence. If specified, this value may still
 ; be overridden on a per-stream basis via the "cafile" SSL stream context
 ; option.
-;openssl.cafile=
+;openssl.cafile =
 
 ; If openssl.cafile is not specified or if the CA file is not found, the
 ; directory pointed to by openssl.capath is searched for a suitable
@@ -1934,14 +1938,14 @@ ldap.max_links = -1
 ; attempt to use the OS-managed cert stores in its absence. If specified,
 ; this value may still be overridden on a per-stream basis via the "capath"
 ; SSL stream context option.
-;openssl.capath=
+;openssl.capath =
 
 [ffi]
 ; FFI API restriction. Possible values:
 ; "preload" - enabled in CLI scripts and preloaded files (default)
 ; "false"   - always disabled
 ; "true"    - always enabled
-;ffi.enable=preload
+;ffi.enable = preload
 
 ; List of headers files to preload, wildcard patterns allowed.
-;ffi.preload=
+;ffi.preload =
