@@ -1479,21 +1479,25 @@ void zend_unset_timeout(void) /* {{{ */
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type) /* {{{ */
+zend_class_entry *zend_fetch_class_with_scope(zend_string *class_name, int fetch_type, zend_class_entry *scope) /* {{{ */
 {
-	zend_class_entry *ce, *scope;
+	zend_class_entry *ce;
 	int fetch_sub_type = fetch_type & ZEND_FETCH_CLASS_MASK;
 
 check_fetch_type:
 	switch (fetch_sub_type) {
 		case ZEND_FETCH_CLASS_SELF:
-			scope = zend_get_executed_scope();
+			if (scope == NULL) {
+				scope = zend_get_executed_scope();
+			}
 			if (UNEXPECTED(!scope)) {
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"self\" when no class scope is active");
 			}
 			return scope;
 		case ZEND_FETCH_CLASS_PARENT:
-			scope = zend_get_executed_scope();
+			if (scope == NULL) {
+				scope = zend_get_executed_scope();
+			}
 			if (UNEXPECTED(!scope)) {
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when no class scope is active");
 				return NULL;
@@ -1532,6 +1536,12 @@ check_fetch_type:
 		return NULL;
 	}
 	return ce;
+}
+/* }}} */
+
+zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type) /* {{{ */
+{
+	return zend_fetch_class_with_scope(class_name, fetch_type, NULL);
 }
 /* }}} */
 
