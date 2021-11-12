@@ -563,6 +563,12 @@ if test "$PHP_FPM" != "no"; then
     [no],
     [no])
 
+  PHP_ARG_WITH([fpm-selinux],,
+    [AS_HELP_STRING([--with-fpm-selinux],
+      [Support SELinux policy library])],
+    [no],
+    [no])
+
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
@@ -603,6 +609,14 @@ if test "$PHP_FPM" != "no"; then
     ],[
       AC_MSG_ERROR(libapparmor required but not found)
     ])
+  fi
+
+  if test "x$PHP_FPM_SELINUX" != "xno" ; then
+    AC_CHECK_HEADERS([selinux/selinux.h])
+    AC_CHECK_LIB(selinux, security_setenforce, [
+      PHP_ADD_LIBRARY(selinux)
+      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
+    ],[])
   fi
 
   PHP_SUBST_OLD(php_fpm_systemd)
