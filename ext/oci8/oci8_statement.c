@@ -359,7 +359,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 	if (errstatus == OCI_SUCCESS_WITH_INFO || errstatus == OCI_SUCCESS) {
 		statement->has_data = 1;
 
-		/* do the stuff needed for OCIDefineByName */
+		/* do the stuff needed for OCIDefineByPos */
 		for (i = 0; i < statement->ncolumns; i++) {
 			column = php_oci_statement_get_column(statement, i + 1, NULL, 0);
 			if (column == NULL) {
@@ -794,7 +794,6 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 						OCI_DYNAMIC_FETCH							/* IN	  mode (OCI_DEFAULT, OCI_DYNAMIC_FETCH) */
 					)
 				);
-
 			} else {
 				PHP_OCI_CALL_RETURN(errstatus,
 					OCIDefineByPos,
@@ -821,12 +820,19 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 				return 1;
 			}
 
-			/* additional OCIDefineDynamic() call */
+			/* additional define setup */
 			switch (outcol->data_type) {
-				case SQLT_RSET:
-				case SQLT_RDD:
 				case SQLT_BLOB:
 				case SQLT_CLOB:
+					if (OCI_G(prefetch_lob_size) > 0) {
+						int get_lob_len = 1;  /* == true */
+						ub4 prefetch_size = OCI_G(prefetch_lob_size);
+						PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &get_lob_len, 0, OCI_ATTR_LOBPREFETCH_LENGTH, statement->err));
+						PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &prefetch_size, 0, OCI_ATTR_LOBPREFETCH_SIZE, statement->err));
+					}
+					ZEND_FALLTHROUGH;
+				case SQLT_RSET:
+				case SQLT_RDD:
 				case SQLT_BFILE:
 					PHP_OCI_CALL_RETURN(errstatus,
 						OCIDefineDynamic,
@@ -1483,12 +1489,6 @@ sb4 php_oci_bind_out_callback(
 			ZVAL_STRINGL(val, p, PHP_OCI_PIECE_SIZE);
 			efree(p);
 		}
-#if 0
-		Z_STRLEN_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		Z_STRVAL_P(val) = ecalloc(1, Z_STRLEN_P(val) + 1);
-		/* XXX is this right? */
-		ZVAL_STRINGL(val, NULL, Z_STRLEN(val) + 1);
-#endif
 
 		/* XXX we assume that zend-zval len has 4 bytes */
 		*alenpp = (ub4*) &Z_STRLEN_P(val);

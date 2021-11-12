@@ -174,6 +174,7 @@ PHP_INI_BEGIN()
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	STD_PHP_INI_BOOLEAN("oci8.events",					"0",	PHP_INI_SYSTEM,	OnUpdateBool,		events,					zend_oci_globals,	oci_globals)
 #endif
+	STD_PHP_INI_ENTRY(	"oci8.prefetch_lob_size",		"0",	PHP_INI_ALL, 	OnUpdateLong,	prefetch_lob_size,		zend_oci_globals,	oci_globals)
 PHP_INI_END()
 /* }}} */
 

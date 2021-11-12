@@ -27,6 +27,11 @@ PHP 8.2 UPGRADE NOTES
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
 
+- OCI8:
+  . Added an oci8.prefetch_lob_size directive to tune LOB query performance
+    by reducing the number of round-trips between PHP and Oracle Database when
+    fetching LOBS. This is usable with Oracle Database 12.2 or later.
+
 - PCRE:
   . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
     `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are

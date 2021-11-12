@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
+- OCI8:
+  . Added oci8.prefetch_lob_size directive to tune LOB query performance
+
 - Zip:
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method

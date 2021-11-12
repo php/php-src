@@ -53,12 +53,12 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2021-08-02</date>
+ <date>2021-11-15</date>
  <time>12:00:00</time>
 
   <version>
-   <release>3.1.0</release>
-   <api>3.1.0</api>
+   <release>3.2.0</release>
+   <api>3.2.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -68,7 +68,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <notes>
     This version is for PHP 8 only.
 
-    Deprecated directive oci8.old_oci_close_semantics
+    Added oci8.prefetch_lob_size directive to improve LOB query performance.
   </notes>
  <contents>
   <dir name="/">
@@ -447,6 +447,23 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>3.1.0</release>
+   <api>3.1.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8 only.
+
+    Deprecated directive oci8.old_oci_close_semantics
+  </notes>
+</release>
 
 <release>
   <version>
