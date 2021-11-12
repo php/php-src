@@ -710,7 +710,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
 /* Fast class cache */
-#define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
+#define ZSTR_HAS_CE_CACHE(s) \
+	((GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR) \
+		&& ((GC_REFCOUNT(s)-1)/sizeof(void *) < CG(map_ptr_last)))
 #define ZSTR_GET_CE_CACHE(s) \
 	(*(zend_class_entry **)ZEND_MAP_PTR_OFFSET2PTR(GC_REFCOUNT(s)))
 #define ZSTR_SET_CE_CACHE(s, ce) do { \
