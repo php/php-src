@@ -1549,6 +1549,39 @@ check_fetch_type:
 }
 /* }}} */
 
+zend_class_entry *zend_fetch_class_with_scope(
+		zend_string *class_name, int fetch_type, zend_class_entry *scope)
+{
+	zend_class_entry *ce;
+	switch (fetch_type & ZEND_FETCH_CLASS_MASK) {
+		case ZEND_FETCH_CLASS_SELF:
+			if (UNEXPECTED(!scope)) {
+				zend_throw_or_error(fetch_type, NULL, "Cannot access \"self\" when no class scope is active");
+			}
+			return scope;
+		case ZEND_FETCH_CLASS_PARENT:
+			if (UNEXPECTED(!scope)) {
+				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when no class scope is active");
+				return NULL;
+			}
+			if (UNEXPECTED(!scope->parent)) {
+				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when current class scope has no parent");
+			}
+			return scope->parent;
+		case 0:
+			break;
+		/* Other fetch types are not supported by this function. */
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+
+	ce = zend_lookup_class_ex(class_name, NULL, fetch_type);
+	if (!ce) {
+		report_class_fetch_error(class_name, fetch_type);
+		return NULL;
+	}
+	return ce;
+}
+
 zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *key, int fetch_type) /* {{{ */
 {
 	zend_class_entry *ce = zend_lookup_class_ex(class_name, key, fetch_type);

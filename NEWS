@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
     (Jakub Zelenka)
 
+- Reflection:
+  . Fixed bug #81611 (ArgumentCountError when getting default value from
+    ReflectionParameter with new). (Cameron Porter)
+
 - XML:
   . Fixed bug #79971 (special character is breaking the path in xml function).
     (CVE-2021-21707) (cmb)
