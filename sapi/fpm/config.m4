@@ -605,6 +605,12 @@ if test "$PHP_FPM" != "no"; then
     ])
   fi
 
+  AC_CHECK_HEADERS([selinux/selinux.h])
+  AC_CHECK_LIB(selinux, security_setenforce, [
+    PHP_ADD_LIBRARY(selinux)
+    AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
+  ],[])
+
   PHP_SUBST_OLD(php_fpm_systemd)
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
