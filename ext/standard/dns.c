@@ -946,8 +946,15 @@ PHP_FUNCTION(dns_get_record)
 			n = php_dns_search(handle, hostname, C_IN, type_to_fetch, answer.qb2, sizeof answer);
 
 			if (n < 0) {
+#if defined(HAVE_RES_NSEARCH)
+				int r_h_errno = handle->res_h_errno;
+#endif
 				php_dns_free_handle(handle);
+#if defined(HAVE_RES_NSEARCH)
+				switch (r_h_errno) {
+#else
 				switch (h_errno) {
+#endif
 					case NO_DATA:
 					case HOST_NOT_FOUND:
 						continue;
