@@ -3434,7 +3434,7 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
-static zend_always_inline bool zend_is_callable_check_func(int check_flags, zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error) /* {{{ */
+static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = 0;
@@ -3772,7 +3772,7 @@ again:
 			}
 
 check_func:
-			ret = zend_is_callable_check_func(check_flags, callable, frame, fcc, strict_class, error);
+			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error);
 			if (fcc == &fcc_local) {
 				zend_release_fcall_info_cache(fcc);
 			}
