@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #81591 (Fatal Error not properly logged in particular cases).
     (Nikita)
 
+- FPM:
+  . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
+    (Jakub Zelenka)
+
 - GD:
   . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
 
