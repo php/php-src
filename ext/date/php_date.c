@@ -3763,7 +3763,6 @@ static void php_date_timestamp_set(zval *object, zend_long timestamp, zval *retu
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	timelib_unixtime2local(dateobj->time, (timelib_sll)timestamp);
-	timelib_update_ts(dateobj->time, NULL);
 	php_date_set_time_fraction(dateobj->time, 0);
 } /* }}} */
 
@@ -3820,7 +3819,10 @@ PHP_FUNCTION(date_timestamp_get)
 	}
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	timelib_update_ts(dateobj->time, NULL);
+
+	if (!dateobj->time->sse_uptodate) {
+		timelib_update_ts(dateobj->time, NULL);
+	}
 
 	timestamp = timelib_date_to_int(dateobj->time, &error);
 	if (error) {
