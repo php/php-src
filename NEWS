@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #71316 (libpng warning from imagecreatefromstring). (cmb)
 
+- Standard:
+  . Fixed bug #81618 (dns_get_record fails on FreeBSD for missing type).
+    (fsbruva)
+
 18 Nov 2021, PHP 7.4.26
 
 - Core:
