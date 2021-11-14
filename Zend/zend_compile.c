@@ -799,11 +799,7 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
 		return 0;
 	}
-	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
-		zend_throw_exception(zend_ce_compile_error,
-			"Cannot use the final modifier on an abstract class", 0);
-		return 0;
-	}
+
 	return new_flags;
 }
 /* }}} */

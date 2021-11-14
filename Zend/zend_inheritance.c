@@ -1418,7 +1418,8 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL))) {
 		/* Class must not extend a final class */
 		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend final class %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend final %s %s",
+				ZSTR_VAL(ce->name), parent_ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS ? "abstract class" : "class", ZSTR_VAL(parent_ce->name));
 		}
 
 		/* Class declaration must not extend traits or interfaces */

@@ -1626,7 +1626,8 @@ static zend_always_inline zend_result _object_and_properties_init(zval *arg, zen
 		} else if (class_type->ce_flags & ZEND_ACC_ENUM) {
 			zend_throw_error(NULL, "Cannot instantiate enum %s", ZSTR_VAL(class_type->name));
 		} else {
-			zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(class_type->name));
+			zend_throw_error(NULL, "Cannot instantiate %s class %s",
+                             class_type->ce_flags & ZEND_ACC_FINAL ? "final abstract" : "abstract", ZSTR_VAL(class_type->name));
 		}
 		ZVAL_NULL(arg);
 		Z_OBJ_P(arg) = NULL;
