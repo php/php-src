@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0
 
-
+- FPM:
+  . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
+    (Jakub Zelenka)
 
 11 Nov 2021, PHP 8.1.0RC6
 
