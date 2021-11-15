@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.33
 
+- XML:
+  . Fix #79971: special character is breaking the path in xml function.
+    (CVE-2021-21707) (cmb)
 
 28 Oct 2021, PHP 7.3.32
 
