@@ -1347,7 +1347,7 @@ static void zend_foreach_op_array_helper(
 		zend_op_array *op_array, zend_op_array_func_t func, void *context) {
 	func(op_array, context);
 	for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
-		func(op_array->dynamic_func_defs[i], context);
+		zend_foreach_op_array_helper(op_array->dynamic_func_defs[i], func, context);
 	}
 }
 
