@@ -20,7 +20,7 @@ var_dump($sxe->asXML("$uri.out%00foo"));
 --EXPECTF--
 Warning: simplexml_load_file(): URI must not contain percent-encoded NUL bytes in %s on line %d
 
-Warning: simplexml_load_file(): I/O warning : failed to load external entity "%s/bug79971_1.xml%00foo" in %s on line %d
+Warning: simplexml_load_file(): I/O warning : failed to load external entity "%s/bug79971_1.xml%%r00%rfoo" in %s on line %d
 bool(false)
 
 Warning: SimpleXMLElement::asXML(): URI must not contain percent-encoded NUL bytes in %s on line %d
