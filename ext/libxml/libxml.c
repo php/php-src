@@ -257,6 +257,10 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	int isescaped=0;
 	xmlURI *uri;
 
+	if (strstr(filename, "%00")) {
+		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
+		return NULL;
+	}
 
 	uri = xmlParseURI(filename);
 	if (uri && (uri->scheme == NULL ||
@@ -435,6 +439,11 @@ php_libxml_output_buffer_create_filename(const char *URI,
 
 	if (URI == NULL)
 		return(NULL);
+
+	if (strstr(URI, "%00")) {
+		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
+		return NULL;
+	}
 
 	puri = xmlParseURI(URI);
 	if (puri != NULL) {
