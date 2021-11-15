@@ -1423,7 +1423,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		while (i < op_array->last_var + op_array->T) {
 			if (!ssa->var_info
 			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i)) {
-				if (ssa->vars) {
+				if (ssa->vars && i < ssa->vars_count) {
 					ssa_vars[i].alias = ssa->vars[i].alias;
 				} else {
 					ssa_vars[i].alias = zend_jit_var_may_alias(op_array, ssa, i);
