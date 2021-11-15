@@ -6201,7 +6201,10 @@ done:
 						ssa->var_info[ssa_op->result_def].has_range = 1;
 					}
 				}
-				if (ssa_op->op1_def >= 0) {
+				if (ssa_op->op1_def >= 0
+				 && (opline->opcode != ZEND_QM_ASSIGN
+				  || opline->result_type != IS_CV
+				  || opline->result.var != opline->op1.var)) {
 					zend_uchar type = IS_UNKNOWN;
 
 					if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
@@ -6260,7 +6263,10 @@ done:
 						ssa->var_info[ssa_op->op1_def].has_range = 1;
 					}
 				}
-				if (ssa_op->op2_def >= 0) {
+				if (ssa_op->op2_def >= 0
+				 && (opline->opcode != ZEND_ASSIGN
+				  || opline->op1_type != IS_CV
+				  || opline->op1.var != opline->op2.var)) {
 					zend_uchar type = IS_UNKNOWN;
 
 					if (!(ssa->var_info[ssa_op->op2_def].type & MAY_BE_GUARD)
