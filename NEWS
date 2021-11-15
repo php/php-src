@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #81587 (MultipleIterator Segmentation fault w/ SimpleXMLElement
     attached). (Nikita)
 
+- Standard:
+  . Fixed bug #81618 (dns_get_record fails on FreeBSD for missing type).
+    (fsbruva)
+
 18 Nov 2021, PHP 8.0.13
 
 - Core:
