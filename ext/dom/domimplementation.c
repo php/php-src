@@ -112,6 +112,11 @@ PHP_METHOD(domimplementation, createDocumentType)
 		pch2 = (xmlChar *) systemid;
 	}
 
+	if (strstr(name, "%00")) {
+		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
+		RETURN_FALSE;
+	}
+
 	uri = xmlParseURI(name);
 	if (uri != NULL && uri->opaque != NULL) {
 		localname = xmlStrdup((xmlChar *) uri->opaque);
