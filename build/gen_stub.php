@@ -1460,7 +1460,7 @@ class PropertyInfo
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
 
-                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_PTR(property_{$propertyName}_type_list, _ZEND_TYPE_LIST_BIT, 0, $typeMaskCode);\n";
+                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
                     $typeCode = "property_{$propertyName}_type";
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
