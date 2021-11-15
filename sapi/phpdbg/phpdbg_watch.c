@@ -240,7 +240,7 @@ static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int acce
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	if (PHPDBG_G(watch_userfaultfd)) {
 		struct uffdio_range range = {
-			.start = (__u64) page_addr,
+			.start = (__u64)(uintptr_t) page_addr,
 			.len = size
 		};
 		if (access == PROT_READ) {
@@ -312,12 +312,12 @@ void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
 
 	struct uffd_msg fault_msg = {0};
 	while (read(globals->watch_userfaultfd, &fault_msg, sizeof(fault_msg)) == sizeof(fault_msg)) {
-    	void *page = phpdbg_get_page_boundary((char *) fault_msg.arg.pagefault.address);
+    	void *page = phpdbg_get_page_boundary((char *)(uintptr_t) fault_msg.arg.pagefault.address);
 		zend_hash_index_add_empty_element(globals->watchlist_mem, (zend_ulong) page);
 		struct uffdio_writeprotect unprotect = {
 			.mode = 0,
 			.range = {
-				.start = (__u64) page,
+				.start = (__u64)(uintptr_t) page,
 				.len = phpdbg_pagesize
 			}
 		};
