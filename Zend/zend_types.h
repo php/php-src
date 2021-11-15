@@ -273,6 +273,9 @@ typedef struct {
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
 	{ (void *) (ptr), (type_mask) }
 
+#define ZEND_TYPE_INIT_UNION(ptr, extra_flags) \
+	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
+
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
