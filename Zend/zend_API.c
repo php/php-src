@@ -1322,12 +1322,19 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 	zend_hash_extend(constants_table, zend_hash_num_elements(&class_type->constants_table), 0);
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&class_type->constants_table, key, c) {
-		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
-			new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
-			memcpy(new_c, c, sizeof(zend_class_constant));
-			c = new_c;
+		if (c->ce == class_type) {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
+				memcpy(new_c, c, sizeof(zend_class_constant));
+				c = new_c;
+			}
+			Z_TRY_ADDREF(c->value);
+		} else {
+			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+				c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(c->ce), key);
+				ZEND_ASSERT(c);
+			}
 		}
-		Z_TRY_ADDREF(c->value);
 		_zend_hash_append_ptr(constants_table, key, c);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1409,8 +1416,18 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		} else {
 			constants_table = &class_type->constants_table;
 		}
-		ZEND_HASH_FOREACH_PTR(constants_table, c) {
+
+		zend_string *name;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(constants_table, name, val) {
+			c = Z_PTR_P(val);
 			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
+				if (c->ce != class_type) {
+					Z_PTR_P(val) = c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(c->ce), name);
+					if (Z_TYPE(c->value) != IS_CONSTANT_AST) {
+						continue;
+					}
+				}
+
 				val = &c->value;
 				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 					return FAILURE;

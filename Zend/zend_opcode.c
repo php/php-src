@@ -250,7 +250,9 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			zend_class_constant *c;
 
 			ZEND_HASH_FOREACH_PTR(constants_table, c) {
-				zval_ptr_dtor_nogc(&c->value);
+				if (c->ce == ce) {
+					zval_ptr_dtor_nogc(&c->value);
+				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(constants_table);
 			mutable_data->constants_table = NULL;
