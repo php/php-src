@@ -1037,8 +1037,10 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func,
 
 	retval = zend_hash_sort(arr, compare_func, renumber) != FAILURE;
 
-	zval_ptr_dtor(array);
+	zval garbage;
+	ZVAL_COPY_VALUE(&garbage, array);
 	ZVAL_ARR(array, arr);
+	zval_ptr_dtor(&garbage);
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_BOOL(retval);
