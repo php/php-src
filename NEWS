@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     from a trait). (Nikita)
   . Fixed bug #81591 (Fatal Error not properly logged in particular cases).
     (Nikita)
+  . Fixed bug #81626 (Error on use static:: in __сallStatic() wrapped to
+    Closure::fromCallable()). (Nikita)
 
 - FPM:
   . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
