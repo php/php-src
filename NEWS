@@ -48,6 +48,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
 
+- XML:
+  . Fixed bug #79971 (special character is breaking the path in xml function).
+    (CVE-2021-21707) (cmb)
+
 - XMLReader:
   . Fixed bug #81521 (XMLReader::getParserProperty may throw with a valid
     property). (Nikita)
