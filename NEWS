@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
     (Jakub Zelenka)
 
+- XML:
+  . Fixed bug #79971 (special character is breaking the path in xml function).
+    (CVE-2021-21707) (cmb)
+
 11 Nov 2021, PHP 8.1.0RC6
 
 - Core:
