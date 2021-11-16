@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-04 Nov 2021, PHP 7.4.26RC1
+?? ??? ????, PHP 7.4.26
 
 - Core:
   . Fixed bug #81518 (Header injection via default_mimetype / default_charset).
@@ -22,6 +22,11 @@ PHP                                                                        NEWS
 
 - Streams:
   . Fixed bug #54340 (Memory corruption with user_filter). (Nikita)
+
+- XML:
+  . Fixed bug #79971 (special character is breaking the path in xml function).
+    (CVE-2021-21707) (cmb)
+
 
 21 Oct 2021, PHP 7.4.25
 
