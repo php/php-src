@@ -43,6 +43,10 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #54340 (Memory corruption with user_filter). (Nikita)
 
+- XML:
+  . Fixed bug #79971 (special character is breaking the path in xml function).
+    (CVE-2021-21707) (cmb)
+
 21 Oct 2021, PHP 7.4.25
 
 - DOM:
