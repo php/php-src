@@ -419,6 +419,10 @@ options:
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
+	if (is_persistent) {
+		dbh->refcount--;
+	}
+
 	/* XXX raise exception */
 	zend_restore_error_handling(&zeh);
 	if (!EG(exception)) {
