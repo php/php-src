@@ -988,8 +988,10 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 
 	zend_hash_sort(arr, compare_func, renumber);
 
-	zval_ptr_dtor(array);
+	zval garbage;
+	ZVAL_COPY_VALUE(&garbage, array);
 	ZVAL_ARR(array, arr);
+	zval_ptr_dtor(&garbage);
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
 	RETURN_TRUE;
