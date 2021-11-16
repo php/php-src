@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is		  |
    | available through the world-wide-web at the following url:			  |
-   | http://www.php.net/license/3_01.txt								  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to		  |
    | license@php.net so we can mail you a copy immediately.				  |
@@ -162,9 +162,10 @@ PHP_FUNCTION( normalizer_normalize )
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */
 	if( U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR && status != U_STRING_NOT_TERMINATED_WARNING ) {
+		intl_error_set_custom_msg( NULL, "Error normalizing string", 0 );
 		efree( uret_buf );
 		efree( uinput );
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	if ( size_needed > uret_len ) {
@@ -306,10 +307,10 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	UChar32 codepoint = -1;
 	int32_t offset = 0;
 
-    UErrorCode status = U_ZERO_ERROR;
-    const UNormalizer2 *norm;
-    UChar decomposition[32];
-    int32_t decomposition_length;
+	UErrorCode status = U_ZERO_ERROR;
+	const UNormalizer2 *norm;
+	UChar decomposition[32];
+	int32_t decomposition_length;
 
 	zend_long form = NORMALIZER_DEFAULT;
 

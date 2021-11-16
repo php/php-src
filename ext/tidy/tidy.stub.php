@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function tidy_parse_string(string $string, array|string|null $config = null, ?string $encoding = null): tidy|false {}
 
@@ -57,108 +57,108 @@ class tidy
     public function __construct(?string $filename = null, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
 
     /**
-     * @return string|int|bool
+     * @tentative-return-type
      * @alias tidy_getopt
      */
-    public function getOpt(string $option) {}
+    public function getOpt(string $option): string|int|bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_clean_repair
      */
-    public function cleanRepair() {}
+    public function cleanRepair(): bool {}
 
-    /** @return bool */
-    public function parseFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
+    /** @tentative-return-type */
+    public function parseFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): bool {}
 
-    /** @return bool */
-    public function parseString(string $string, array|string|null $config = null, ?string $encoding = null) {}
+    /** @tentative-return-type */
+    public function parseString(string $string, array|string|null $config = null, ?string $encoding = null): bool {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias tidy_repair_string
      */
-    public static function repairString(string $string, array|string|null $config = null, ?string $encoding = null) {}
+    public static function repairString(string $string, array|string|null $config = null, ?string $encoding = null): string|false {}
 
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias tidy_repair_file
      */
-    public static function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
+    public static function repairFile(string $filename, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false): string|false {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_diagnose
      */
-    public function diagnose() {}
+    public function diagnose(): bool {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias tidy_get_release
      */
-    public function getRelease() {}
+    public function getRelease(): string {}
 
     /**
-     * @return array
+     * @tentative-return-type
      * @alias tidy_get_config
      */
-    public function getConfig() {}
+    public function getConfig(): array {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias tidy_get_status
      */
-    public function getStatus() {}
+    public function getStatus(): int {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias tidy_get_html_ver
      */
-    public function getHtmlVer() {}
+    public function getHtmlVer(): int {}
 
 #ifdef HAVE_TIDYOPTGETDOC
     /**
-     * @return string|false
+     * @tentative-return-type
      * @alias tidy_get_opt_doc
      */
-    public function getOptDoc(string $option) {}
+    public function getOptDoc(string $option): string|false {}
 #endif
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_is_xhtml
      */
-    public function isXhtml() {}
+    public function isXhtml(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @alias tidy_is_xml
      */
-    public function isXml() {}
+    public function isXml(): bool {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_root
      */
-    public function root() {}
+    public function root(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_head
      */
-    public function head() {}
+    public function head(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_html
      */
-    public function html() {}
+    public function html(): ?tidyNode {}
 
     /**
-     * @return tidyNode|null
+     * @tentative-return-type
      * @alias tidy_get_body
      */
-    public function body() {}
+    public function body(): ?tidyNode {}
 }
 
 final class tidyNode

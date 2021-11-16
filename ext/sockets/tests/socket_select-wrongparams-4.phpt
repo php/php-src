@@ -2,11 +2,8 @@
 Test parameter handling in socket_select().
 --DESCRIPTION--
 usec > 999999
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $sockets = array();

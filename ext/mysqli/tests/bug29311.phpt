@@ -1,8 +1,9 @@
 --TEST--
 Bug #29311 (Cannot override mysqli constructor)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

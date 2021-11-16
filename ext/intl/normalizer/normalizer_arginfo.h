@@ -1,15 +1,18 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b9ef4888cc32bd009fb87db52859953902454fc */
+ * Stub hash: 71dd44d3b839789639c16a4b6d5b2e4f40703a74 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Normalizer_normalize, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Normalizer_isNormalized arginfo_class_Normalizer_normalize
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Normalizer_isNormalized, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
+ZEND_END_ARG_INFO()
 
 #if U_ICU_VERSION_MAJOR_NUM >= 56
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Normalizer_getRawDecomposition, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Normalizer_getRawDecomposition, 0, 1, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()
@@ -31,3 +34,13 @@ static const zend_function_entry class_Normalizer_methods[] = {
 #endif
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Normalizer(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Normalizer", class_Normalizer_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}

@@ -41,7 +41,7 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	"ISO-2022-JP-2004",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_2004_wchar,
 	&vtbl_wchar_2022jp_2004
 };
@@ -52,7 +52,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis2004_wchar_flush,
 	NULL,
 };
 

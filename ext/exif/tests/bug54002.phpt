@@ -2,8 +2,8 @@
 Bug #54002 (crash on crafted tag)
 --INI--
 memory_limit=-1
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --FILE--
 <?php
 exif_read_data(__DIR__ . '/bug54002_1.jpg');

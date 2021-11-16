@@ -1,25 +1,22 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0alpha1
+?? ??? ????, PHP 8.2.0alpha1
+
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
 
 - Core:
-  . Fixed inclusion order for phpize builds on Windows. (cmb)
-  . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
 
-- FTP:
-  . Convert resource<ftp> to object \FTPConnection. (Sara)
+- Intl:
+  . Update all grandfathered language tags with preferred values
 
-- GD:
-  . Convert resource<gd font> to object \GdFont. (Sara)
+- OCI8:
+  . Added oci8.prefetch_lob_size directive to tune LOB query performance
 
-- hash:
-  . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
-
-- OpenSSL:
-  . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
-
-- PSpell:
-  . Convert resource<pspell> to object \PSpell. (Sara)
-  . Convert resource<pspell config> to object \PSPellConfig. (Sara)
+- Zip:
+  . add ZipArchive::clearError() method
+  . add ZipArchive::getStreamName() method
+  . add ZipArchive::getStreamIndex() method
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

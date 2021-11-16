@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c890e3cde79ffeade4623001cc369aa734812959 */
+ * Stub hash: dc9632b2417200deb39cc5cce25aa26a44128707 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -18,12 +18,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_available_locales, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get, 0, 2, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_time, 0, 1, IS_DOUBLE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_time, 0, 1, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
@@ -71,7 +71,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_clear, 0, 1, _IS_BOOL, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, field, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_field_difference, 0, 3, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_field_difference, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
@@ -81,12 +81,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_intlcal_get_actual_minimum arginfo_intlcal_get
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_day_of_week_type, 0, 2, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_day_of_week_type, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 	ZEND_ARG_TYPE_INFO(0, dayOfWeek, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_first_day_of_week, 0, 1, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_first_day_of_week, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
@@ -94,7 +94,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_intlcal_get_greatest_minimum arginfo_intlcal_get
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_locale, 0, 2, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_locale, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -148,11 +148,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_set_lenient, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, lenient, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_intlcal_get_repeated_wall_time_option arginfo_intlcal_get_first_day_of_week
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_get_repeated_wall_time_option, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_intlcal_equals arginfo_intlcal_after
 
-#define arginfo_intlcal_get_skipped_wall_time_option arginfo_intlcal_get_first_day_of_week
+#define arginfo_intlcal_get_skipped_wall_time_option arginfo_intlcal_get_repeated_wall_time_option
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_set_repeated_wall_time_option, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
@@ -170,9 +172,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intlcal_to_date_time, 0, 1, 
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_error_code, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_intlcal_get_error_code arginfo_intlcal_get_first_day_of_week
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_error_message, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
@@ -276,13 +276,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intl_error_name, 0, 1, IS_STRING
 	ZEND_ARG_TYPE_INFO(0, errorCode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datefmt_create, 0, 3, IntlDateFormatter, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_datefmt_create, 0, 1, IntlDateFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, dateType, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, timeType, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dateType, IS_LONG, 0, "IntlDateFormatter::FULL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeType, IS_LONG, 0, "IntlDateFormatter::FULL")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
 	ZEND_ARG_OBJ_TYPE_MASK(0, calendar, IntlCalendar, MAY_BE_LONG|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_get_datetype, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
@@ -370,7 +370,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_numfmt_create, 0, 2, NumberFormatter, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_numfmt_format, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -494,7 +494,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_idn_to_ascii, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "IDNA_DEFAULT")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, variant, IS_LONG, 0, "INTL_IDNA_VARIANT_UTS46")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, idna_info, "null")
 ZEND_END_ARG_INFO()
@@ -630,7 +630,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_resourcebundle_create, 0, 2, Reso
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_resourcebundle_get, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_resourcebundle_get, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_OBJ_INFO(0, bundle, ResourceBundle, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
@@ -657,7 +657,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_create_default, 0, 0, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intltz_create_enumeration, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intltz_create_enumeration, 0, 0, IntlIterator, MAY_BE_FALSE)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
 ZEND_END_ARG_INFO()
 
@@ -1165,3 +1165,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_IntlException_methods[] = {
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IntlException", class_IntlException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}

@@ -3,11 +3,11 @@ ext/sockets - socket_getpeername_ipv6loop - basic test
 --CREDITS--
 Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 require 'ipv6_skipif.inc';
 ?>
 --FILE--
@@ -16,7 +16,7 @@ require 'ipv6_skipif.inc';
     $localhost = '::1';
 
         /* Setup socket server */
-        $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+        $server = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
         if (!$server) {
                 die('Unable to create AF_INET6 socket [server]');
         }
@@ -38,7 +38,7 @@ require 'ipv6_skipif.inc';
         }
 
         /* Connect to it */
-        $client = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
+        $client = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
         if (!$client) {
                 die('Unable to create AF_INET6 socket [client]');
         }

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -321,6 +321,19 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
+/* {{{ Returns true if $array is an array whose keys are all numeric, sequential, and start at 0 */
+PHP_FUNCTION(array_is_list)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_array_is_list(array));
+}
+/* }}} */
+
 /* {{{ Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
@@ -389,9 +402,8 @@ PHP_FUNCTION(is_callable)
 {
 	zval *var, *callable_name = NULL;
 	zend_string *name;
-	char *error;
-	zend_bool retval;
-	zend_bool syntax_only = 0;
+	bool retval;
+	bool syntax_only = 0;
 	int check_flags = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -405,14 +417,10 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL);
 		ZEND_TRY_ASSIGN_REF_STR(callable_name, name);
 	} else {
-		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
-	}
-	if (error) {
-		/* ignore errors */
-		efree(error);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, NULL);
 	}
 
 	RETURN_BOOL(retval);

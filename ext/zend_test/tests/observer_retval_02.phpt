@@ -1,7 +1,7 @@
 --TEST--
 Observer: Unused retvals from generators are still observable
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -21,12 +21,12 @@ $gen->current();
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_retval_%d.php' -->
-<file '%s/observer_retval_%d.php'>
+<!-- init '%s%eobserver_retval_%d.php' -->
+<file '%s%eobserver_retval_%d.php'>
   <!-- init foo() -->
   <foo>
   </foo:'I should be observable'>
   <foo>
   </foo:'Me too!'>
 Done
-</file '%s/observer_retval_%d.php'>
+</file '%s%eobserver_retval_%d.php'>

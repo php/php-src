@@ -26,15 +26,15 @@ try {
 var_dump($ary);
 
 class AA implements ArrayAccess {
-    public function offsetExists($k) {
+    public function offsetExists($k): bool {
         return true;
     }
-    public function &offsetGet($k) {
+    public function &offsetGet($k): mixed {
         $var = ["foo" => "bar"];
         return $var;
     }
-    public function offsetSet($k,$v) {}
-    public function offsetUnset($k) {}
+    public function offsetSet($k,$v): void {}
+    public function offsetUnset($k): void {}
 }
 
 class Dtor {
@@ -52,14 +52,14 @@ try {
 var_dump($foo);
 
 class AA2 implements ArrayAccess {
-    public function offsetExists($k) {
+    public function offsetExists($k): bool {
         return false;
     }
-    public function offsetGet($k) {
+    public function offsetGet($k): mixed {
         return null;
     }
-    public function offsetSet($k,$v) {}
-    public function offsetUnset($k) {}
+    public function offsetSet($k,$v): void {}
+    public function offsetUnset($k): void {}
 }
 
 $ary = ["foo" => new AA2];

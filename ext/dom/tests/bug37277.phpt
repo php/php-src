@@ -1,7 +1,7 @@
 --TEST--
 Bug #37277 (cloning Dom Documents or Nodes does not work)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom1 = new DomDocument('1.0', 'UTF-8');

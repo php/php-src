@@ -1,7 +1,7 @@
 --TEST--
 Bug #72613 (Inadequate error handling in bzread())
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 $fp = bzopen(__DIR__.'/72613.bz2', 'r');

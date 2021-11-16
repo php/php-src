@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -56,8 +56,8 @@ typedef struct _zend_signal_globals_t {
 	int blocked;            /* 1==TRUE, 0==FALSE */
 	int running;            /* in signal handler execution */
 	int active;             /* internal signal handling is enabled */
-	zend_bool check;        /* check for replaced handlers on shutdown */
-	zend_bool reset;        /* reset signal handlers on each request */
+	bool check;        /* check for replaced handlers on shutdown */
+	bool reset;        /* reset signal handlers on each request */
 	zend_signal_entry_t handlers[NSIG];
 	zend_signal_queue_t pstorage[ZEND_SIGNAL_QUEUE_SIZE], *phead, *ptail, *pavail; /* pending queue */
 } zend_signal_globals_t;

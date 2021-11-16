@@ -1,9 +1,7 @@
 --TEST--
 Bug #80220 (imap_mail_compose() may leak memory) - message/rfc822 regression
---SKIPIF--
-<?php
-if (!extension_loaded('imap')) die('skip imap extension not available');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $bodies = [[

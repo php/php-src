@@ -1,6 +1,10 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
+
+class IntlException extends Exception
+{
+}
 
 /* calendar */
 
@@ -13,9 +17,9 @@ function intlcal_get_now(): float {}
 
 function intlcal_get_available_locales(): array {}
 
-function intlcal_get(IntlCalendar $calendar, int $field): int {}
+function intlcal_get(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_time(IntlCalendar $calendar): float {}
+function intlcal_get_time(IntlCalendar $calendar): float|false {}
 
 function intlcal_set_time(IntlCalendar $calendar, float $timestamp): bool {}
 
@@ -35,35 +39,35 @@ function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
 function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
 
-function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int {}
+function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
-function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_actual_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int {}
+function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int|false {}
 
-function intlcal_get_first_day_of_week(IntlCalendar $calendar): int {}
+function intlcal_get_first_day_of_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_greatest_minimum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_locale(IntlCalendar $calendar, int $type): string {}
+function intlcal_get_locale(IntlCalendar $calendar, int $type): string|false {}
 
-function intlcal_get_maximum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
-function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int {}
+function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
 function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
 
-function intlcal_get_minimum(IntlCalendar $calendar, int $field): int {}
+function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_time_zone(IntlCalendar $calendar): IntlTimeZone|false {}
 
 function intlcal_get_type(IntlCalendar $calendar): string {}
 
-function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int {}
+function intlcal_get_weekend_transition(IntlCalendar $calendar, int $dayOfWeek): int|false {}
 
 function intlcal_in_daylight_time(IntlCalendar $calendar): bool {}
 
@@ -154,7 +158,14 @@ function intl_error_name(int $errorCode): string {}
 /* dateformat */
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_create(?string $locale, int $dateType, int $timeType, $timezone = null, IntlCalendar|int|null $calendar = null, string $pattern = ""): ?IntlDateFormatter {}
+function datefmt_create(
+    ?string $locale,
+    int $dateType = IntlDateFormatter::FULL,
+    int $timeType = IntlDateFormatter::FULL,
+    $timezone = null,
+    IntlCalendar|int|null $calendar = null,
+    ?string $pattern = null
+): ?IntlDateFormatter {}
 
 function datefmt_get_datetype(IntlDateFormatter $formatter): int|false {}
 
@@ -204,7 +215,7 @@ function datefmt_get_error_message(IntlDateFormatter $formatter): string {}
 
 /* formatter */
 
-function numfmt_create(string $locale, int $style, string $pattern = ""): ?NumberFormatter {}
+function numfmt_create(string $locale, int $style, ?string $pattern = null): ?NumberFormatter {}
 
 function numfmt_format(NumberFormatter $formatter, int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
@@ -265,10 +276,10 @@ function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR
 /* idn */
 
 /** @param array $idna_info */
-function idn_to_ascii(string $domain, int $flags = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
+function idn_to_ascii(string $domain, int $flags = IDNA_DEFAULT, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
 /** @param array $idna_info */
-function idn_to_utf8(string $domain, int $flags = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
+function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
 /* locale */
 
@@ -345,11 +356,8 @@ function normalizer_get_raw_decomposition(string $string, int $form = Normalizer
 
 function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-/**
- * @param string|int $index
- * @return mixed
- */
-function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true) {}
+/** @param string|int $index */
+function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true): mixed {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
@@ -365,11 +373,8 @@ function intltz_count_equivalent_ids(string $timezoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
-/**
- * @param IntlTimeZone|string|int|float|null $countryOrRawOffset
- * @return IntlIterator|false
- */
-function intltz_create_enumeration($countryOrRawOffset = null) {}
+/** @param IntlTimeZone|string|int|float|null $countryOrRawOffset */
+function intltz_create_enumeration($countryOrRawOffset = null): IntlIterator|false {}
 
 function intltz_create_time_zone(string $timezoneId): ?IntlTimeZone {}
 

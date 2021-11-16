@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -19,8 +19,9 @@
 #include "phpdbg.h"
 #include "phpdbg_print.h"
 #include "phpdbg_utils.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_prompt.h"
+
+#include "Optimizer/zend_dump.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
@@ -42,7 +43,7 @@ PHPDBG_PRINT(opline) /* {{{ */
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
 		phpdbg_print_opline(phpdbg_user_execute_data(EG(current_execute_data)), 1);
 	} else {
-		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
+		phpdbg_error("Not Executing!");
 	}
 
 	return SUCCESS;
@@ -55,46 +56,22 @@ static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 			zend_op_array* op_array = &(method->op_array);
 
 			if (op_array) {
-				zend_op *opline = &(op_array->opcodes[0]);
-				uint32_t opcode = 0,
-				end = op_array->last-1;
+				zend_dump_op_array(op_array, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 
-				if (method->common.scope) {
-					phpdbg_writeln("printoplineinfo", "type=\"User\" startline=\"%d\" endline=\"%d\" method=\"%s::%s\" file=\"%s\" opline=\"%p\"", "L%d-%d %s::%s() %s - %p + %d ops",
-						op_array->line_start,
-						op_array->line_end,
-						ZSTR_VAL(method->common.scope->name),
-						ZSTR_VAL(method->common.function_name),
-						op_array->filename ? ZSTR_VAL(op_array->filename) : "unknown",
-						opline,
-						op_array->last);
-				} else {
-					phpdbg_writeln("printoplineinfo", "type=\"User\" startline=\"%d\" endline=\"%d\" function=\"%s\" file=\"%s\" opline=\"%p\"", "L%d-%d %s() %s - %p + %d ops",
-						op_array->line_start,
-						op_array->line_end,
-						method->common.function_name ? ZSTR_VAL(method->common.function_name) : "{main}",
-						op_array->filename ? ZSTR_VAL(op_array->filename) : "unknown",
-						opline,
-						op_array->last);
+				for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
+					zend_op_array *def = op_array->dynamic_func_defs[i];
+					phpdbg_out("\ndynamic def: %i, function name: %.*s\n",
+						i, (int) ZSTR_LEN(def->function_name), ZSTR_VAL(def->function_name));
+					zend_dump_op_array(def, ZEND_DUMP_LINE_NUMBERS, NULL, NULL);
 				}
-
-				do {
-					char *decode = phpdbg_decode_opline(op_array, opline);
-					phpdbg_writeln("print", "line=\"%u\" opnum=\"%u\" op=\"%s\"", " L%-4u #%-5u %s",
-						opline->lineno,
-						opcode,
-						decode);
-					efree(decode);
-					opline++;
-				} while (opcode++ < end);
 			}
 		} break;
 
 		default: {
 			if (method->common.scope) {
-				phpdbg_writeln("printoplineinfo", "type=\"Internal\" method=\"%s::%s\"", "\tInternal %s::%s()", ZSTR_VAL(method->common.scope->name), ZSTR_VAL(method->common.function_name));
+				phpdbg_writeln("\tInternal %s::%s()", ZSTR_VAL(method->common.scope->name), ZSTR_VAL(method->common.function_name));
 			} else {
-				phpdbg_writeln("printoplineinfo", "type=\"Internal\" function=\"%s\"", "\tInternal %s()", ZSTR_VAL(method->common.function_name));
+				phpdbg_writeln("\tInternal %s()", ZSTR_VAL(method->common.function_name));
 			}
 		}
 	}
@@ -108,15 +85,15 @@ PHPDBG_PRINT(exec) /* {{{ */
 		}
 
 		if (PHPDBG_G(ops)) {
-			phpdbg_notice("printinfo", "file=\"%s\" num=\"%d\"", "Context %s (%d ops)", PHPDBG_G(exec), PHPDBG_G(ops)->last);
+			phpdbg_notice("Context %s (%d ops)", PHPDBG_G(exec), PHPDBG_G(ops)->last);
 
 			phpdbg_print_function_helper((zend_function*) PHPDBG_G(ops));
 		}
 	} else {
-		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context set");
+		phpdbg_error("No execution context set");
 	}
 
-return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_PRINT(stack) /* {{{ */
@@ -125,20 +102,20 @@ PHPDBG_PRINT(stack) /* {{{ */
 		zend_op_array *ops = &phpdbg_user_execute_data(EG(current_execute_data))->func->op_array;
 		if (ops->function_name) {
 			if (ops->scope) {
-				phpdbg_notice("printinfo", "method=\"%s::%s\" num=\"%d\"", "Stack in %s::%s() (%d ops)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), ops->last);
+				phpdbg_notice("Stack in %s::%s() (%d ops)", ZSTR_VAL(ops->scope->name), ZSTR_VAL(ops->function_name), ops->last);
 			} else {
-				phpdbg_notice("printinfo", "function=\"%s\" num=\"%d\"", "Stack in %s() (%d ops)", ZSTR_VAL(ops->function_name), ops->last);
+				phpdbg_notice("Stack in %s() (%d ops)", ZSTR_VAL(ops->function_name), ops->last);
 			}
 		} else {
 			if (ops->filename) {
-				phpdbg_notice("printinfo", "file=\"%s\" num=\"%d\"", "Stack in %s (%d ops)", ZSTR_VAL(ops->filename), ops->last);
+				phpdbg_notice("Stack in %s (%d ops)", ZSTR_VAL(ops->filename), ops->last);
 			} else {
-				phpdbg_notice("printinfo", "opline=\"%p\" num=\"%d\"", "Stack @ %p (%d ops)", ops, ops->last);
+				phpdbg_notice("Stack @ %p (%d ops)", ops, ops->last);
 			}
 		}
 		phpdbg_print_function_helper((zend_function*) ops);
 	} else {
-		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
+		phpdbg_error("Not Executing!");
 	}
 
 	return SUCCESS;
@@ -149,7 +126,7 @@ PHPDBG_PRINT(class) /* {{{ */
 	zend_class_entry *ce;
 
 	if (phpdbg_safe_class_lookup(param->str, param->len, &ce) == SUCCESS) {
-		phpdbg_notice("printinfo", "type=\"%s\" flag=\"%s\" class=\"%s\" num=\"%d\"", "%s %s: %s (%d methods)",
+		phpdbg_notice("%s %s: %s (%d methods)",
 			(ce->type == ZEND_USER_CLASS) ?
 				"User" : "Internal",
 			(ce->ce_flags & ZEND_ACC_INTERFACE) ?
@@ -160,19 +137,15 @@ PHPDBG_PRINT(class) /* {{{ */
 			ZSTR_VAL(ce->name),
 			zend_hash_num_elements(&ce->function_table));
 
-		phpdbg_xml("<printmethods %r>");
-
 		if (zend_hash_num_elements(&ce->function_table)) {
 			zend_function *method;
 
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 				phpdbg_print_function_helper(method);
 			} ZEND_HASH_FOREACH_END();
 		}
-
-		phpdbg_xml("</printmethods>");
 	} else {
-		phpdbg_error("print", "type=\"noclass\" class=\"%s\"", "The class %s could not be found", param->str);
+		phpdbg_error("The class %s could not be found", param->str);
 	}
 
 	return SUCCESS;
@@ -188,19 +161,19 @@ PHPDBG_PRINT(method) /* {{{ */
 		zend_str_tolower_copy(ZSTR_VAL(lcname), param->method.name, ZSTR_LEN(lcname));
 
 		if ((fbc = zend_hash_find_ptr(&ce->function_table, lcname))) {
-			phpdbg_notice("printinfo", "type=\"%s\" flags=\"Method\" symbol=\"%s\" num=\"%d\"", "%s Method %s (%d ops)",
+			phpdbg_notice("%s Method %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				ZSTR_VAL(fbc->common.function_name),
 				(fbc->type == ZEND_USER_FUNCTION) ? fbc->op_array.last : 0);
 
 			phpdbg_print_function_helper(fbc);
 		} else {
-			phpdbg_error("print", "type=\"nomethod\" method=\"%s::%s\"", "The method %s::%s could not be found", param->method.class, param->method.name);
+			phpdbg_error("The method %s::%s could not be found", param->method.class, param->method.name);
 		}
 
 		zend_string_release(lcname);
 	} else {
-		phpdbg_error("print", "type=\"noclass\" class=\"%s\"", "The class %s could not be found", param->method.class);
+		phpdbg_error("The class %s could not be found", param->method.class);
 	}
 
 	return SUCCESS;
@@ -223,11 +196,11 @@ PHPDBG_PRINT(func) /* {{{ */
 
 			func_table = &scope->function_table;
 		} else {
-			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
+			phpdbg_error("No active class");
 			return SUCCESS;
 		}
 	} else if (!EG(function_table)) {
-		phpdbg_error("inactive", "type=\"function_table\"", "No function table loaded");
+		phpdbg_error("No function table loaded");
 		return SUCCESS;
 	} else {
 		func_table = EG(function_table);
@@ -238,7 +211,7 @@ PHPDBG_PRINT(func) /* {{{ */
 
 	phpdbg_try_access {
 		if ((fbc = zend_hash_find_ptr(func_table, lcname))) {
-			phpdbg_notice("printinfo", "type=\"%s\" flags=\"%s\" symbol=\"%s\" num=\"%d\"", "%s %s %s (%d ops)",
+			phpdbg_notice("%s %s %s (%d ops)",
 				(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 				(fbc->common.scope) ? "Method" : "Function",
 				ZSTR_VAL(fbc->common.function_name),
@@ -246,10 +219,10 @@ PHPDBG_PRINT(func) /* {{{ */
 
 			phpdbg_print_function_helper(fbc);
 		} else {
-			phpdbg_error("print", "type=\"nofunction\" function=\"%s\"", "The function %s could not be found", func_name);
+			phpdbg_error("The function %s could not be found", func_name);
 		}
 	} phpdbg_catch_access {
-		phpdbg_error("signalsegv", "function=\"%.*s\"", "Couldn't fetch function %.*s, invalid data source", (int) func_name_len, func_name);
+		phpdbg_error("Couldn't fetch function %.*s, invalid data source", (int) func_name_len, func_name);
 	} phpdbg_end_try_access();
 
 	efree(lcname);
@@ -257,8 +230,7 @@ PHPDBG_PRINT(func) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_print_opcodes_main() {
-	phpdbg_out("function name: (null)\n");
+void phpdbg_print_opcodes_main(void) {
 	phpdbg_print_function_helper((zend_function *) PHPDBG_G(ops));
 }
 
@@ -266,19 +238,10 @@ void phpdbg_print_opcodes_function(const char *function, size_t len) {
 	zend_function *func = zend_hash_str_find_ptr(EG(function_table), function, len);
 
 	if (!func) {
-		zend_string *rt_name;
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, func) {
-			if (func->type == ZEND_USER_FUNCTION && *rt_name->val == '\0') {
-				if (func->op_array.function_name->len == len && !zend_binary_strcasecmp(function, len, func->op_array.function_name->val, func->op_array.function_name->len)) {
-					phpdbg_print_opcodes_function(rt_name->val, rt_name->len);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
+		phpdbg_error("The function %s could not be found", function);
 		return;
 	}
 
-	phpdbg_out("function name: %.*s\n", (int) ZSTR_LEN(func->op_array.function_name), ZSTR_VAL(func->op_array.function_name));
 	phpdbg_print_function_helper(func);
 }
 
@@ -291,10 +254,10 @@ static void phpdbg_print_opcodes_method_ce(zend_class_entry *ce, const char *fun
 	}
 
 	if (!(func = zend_hash_str_find_ptr(&ce->function_table, function, strlen(function)))) {
+		phpdbg_error("The method %s::%s could not be found", ZSTR_VAL(ce->name), function);
 		return;
 	}
 
-	phpdbg_out("function name: %s::%s\n", ce->name->val, function);
 	phpdbg_print_function_helper(func);
 }
 
@@ -302,15 +265,7 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 	zend_class_entry *ce;
 
 	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
-		zend_string *rt_name;
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
-			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
-				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
-					phpdbg_print_opcodes_method_ce(ce, function);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
+		phpdbg_error("The class %s could not be found", class);
 		return;
 	}
 
@@ -319,8 +274,7 @@ void phpdbg_print_opcodes_method(const char *class, const char *function) {
 
 static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	zend_function *method;
-	zend_string *method_name;
-	zend_bool first = 1;
+	bool first = 1;
 
 	phpdbg_out("%s %s: %s\n",
 		(ce->type == ZEND_USER_CLASS) ?
@@ -337,7 +291,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 
 	phpdbg_out("%d methods: ", zend_hash_num_elements(&ce->function_table));
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		if (first) {
 			first = 0;
 		} else {
@@ -350,8 +304,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 	phpdbg_out("\n");
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, method_name, method) {
-		phpdbg_out("\nfunction name: %s\n", ZSTR_VAL(method_name));
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		phpdbg_print_function_helper(method);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -360,22 +313,14 @@ void phpdbg_print_opcodes_class(const char *class) {
 	zend_class_entry *ce;
 
 	if (phpdbg_safe_class_lookup(class, strlen(class), &ce) != SUCCESS) {
-		zend_string *rt_name;
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(class_table), rt_name, ce) {
-			if (ce->type == ZEND_USER_CLASS && *rt_name->val == '\0') {
-				if (ce->name->len == strlen(class) && !zend_binary_strcasecmp(class, strlen(class), ce->name->val, ce->name->len)) {
-					phpdbg_print_opcodes_ce(ce);
-				}
-			}
-		} ZEND_HASH_FOREACH_END();
-
+		phpdbg_error("The class %s could not be found", class);
 		return;
 	}
 
 	phpdbg_print_opcodes_ce(ce);
 }
 
-PHPDBG_API void phpdbg_print_opcodes(const char *function)
+void phpdbg_print_opcodes(const char *function)
 {
 	if (function == NULL) {
 		phpdbg_print_opcodes_main();
@@ -387,16 +332,15 @@ PHPDBG_API void phpdbg_print_opcodes(const char *function)
 
 		phpdbg_print_opcodes_main();
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
 			if (func->type == ZEND_USER_FUNCTION) {
-				phpdbg_out("\n");
 				phpdbg_print_opcodes_function(ZSTR_VAL(name), ZSTR_LEN(name));
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_FOREACH_PTR(EG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_USER_CLASS) {
-				phpdbg_out("\n\n");
+				phpdbg_out("\n");
 				phpdbg_print_opcodes_ce(ce);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -417,3 +361,23 @@ PHPDBG_API void phpdbg_print_opcodes(const char *function)
 		efree(function_lowercase);
 	}
 }
+
+void phpdbg_print_opline(zend_execute_data *execute_data, bool ignore_flags) /* {{{ */
+{
+	if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) && (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+		zend_dump_op_line(&EX(func)->op_array, NULL, EX(opline), ZEND_DUMP_LINE_NUMBERS, NULL);
+	}
+
+	if (PHPDBG_G(oplog_list)) {
+		phpdbg_oplog_entry *cur = zend_arena_alloc(&PHPDBG_G(oplog_arena), sizeof(phpdbg_oplog_entry));
+		zend_op_array *op_array = &EX(func)->op_array;
+		cur->op = (zend_op *) EX(opline);
+		cur->opcodes = op_array->opcodes;
+		cur->filename = op_array->filename;
+		cur->scope = op_array->scope;
+		cur->function_name = op_array->function_name;
+		cur->next = NULL;
+		PHPDBG_G(oplog_cur)->next = cur;
+		PHPDBG_G(oplog_cur) = cur;
+	}
+} /* }}} */

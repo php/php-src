@@ -33,7 +33,7 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 
 	YYSETCONDITION(INITIAL);
 
-	LEX(text) = YYCURSOR = YYMARKER = (unsigned char *) input;
+	LEX(text) = YYCURSOR = (unsigned char *) input;
 	LEX(len) = strlen(input);
 }
 
@@ -81,7 +81,7 @@ DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 GENERIC_ID  ([^ \r\n\t:#\000"']|":\\")+|["]([^\n\000"\\]|"\\\\"|"\\"["])+["]|[']([^\n\000'\\]|"\\\\"|"\\"['])+[']
 ADDR        [0][x][a-fA-F0-9]+
-OPCODE      (ZEND_|zend_)([A-Za-z])+
+OPCODE      (ZEND_|zend_)([A-Z_a-z])+
 INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\n\000'])+[']|[^\n\000#"'])+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
@@ -163,10 +163,6 @@ INPUT       ("\\"[#"']|["]("\\\\"|"\\"["]|[^\n\000"])+["]|[']("\\"[']|"\\\\"|[^\
 	yylval->str = estrndup(yytext, yyleng - unescape_string(yytext));
 	yylval->len = yyleng;
 	return T_ID;
-}
-
-<NORMAL>* {
-	return T_UNEXPECTED;
 }
 
 <RAW>{INPUT} {

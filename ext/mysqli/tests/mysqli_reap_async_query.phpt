@@ -1,10 +1,10 @@
 --TEST--
 mysqli_reap_async_query()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!$IS_MYSQLND)
     die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
@@ -57,7 +57,7 @@ if (!$IS_MYSQLND)
 
     }
 
-    // Connections on which no query has been send - 1
+    // Connections on which no query has been sent - 1
     $link = get_connection();
     $link->query("SELECT 1 AS _one", MYSQLI_ASYNC | MYSQLI_STORE_RESULT);
     $links = array($link);

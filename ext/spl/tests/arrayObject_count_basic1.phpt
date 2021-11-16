@@ -4,7 +4,7 @@ SPL: ArrayObject::count() and ArrayIterator::count() basic functionality.
 ==ArrayObject==
 <?php
 class C extends ArrayObject {
-  function count() {
+  function count(): int {
     return 99;
   }
 }
@@ -29,7 +29,7 @@ var_dump($c->count(), $ao->count());
 ==ArrayIterator==
 <?php
 class D extends ArrayIterator {
-  function count() {
+  function count(): int {
     return 99;
   }
 }

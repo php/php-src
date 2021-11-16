@@ -2,12 +2,8 @@
 Check xsltprocessor::registerPHPFunctions and a undefined php function
 --DESCRIPTION--
 The XSL script tries to call a php function that is not defined
---SKIPIF--
-<?php
-        if (!extension_loaded('xsl')) {
-                die("skip\n");
-        }
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 include __DIR__ .'/prepare.inc';

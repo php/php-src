@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,7 +27,7 @@ do { \
 	if (Z_TYPE_P(val) == IS_STRING) { \
 		php_mail_build_headers_elem(&s, key, val); \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
-		if (!strncasecmp(target, ZSTR_VAL(key), ZSTR_LEN(key))) { \
+		if (zend_string_equals_literal_ci(key, target)) { \
 			zend_type_error("Header \"%s\" must be of type string, array given", target); \
 			break; \
 		} \

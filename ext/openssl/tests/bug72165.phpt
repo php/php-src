@@ -1,13 +1,12 @@
 --TEST--
 Bug #72165 Null pointer dereference - openssl_csr_new
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
-$var0 = array(0 => "hello", 1 => "world");
-$var2 = openssl_csr_new(array(0),$var0,null,array(0));
+$var0 = [0 => "hello", 1 => "world"];
+$options = ['config' => __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf'];
+$var2 = openssl_csr_new([0], $var0, $options, [0]);
 ?>
 --EXPECTF--
 Warning: openssl_csr_new(): dn: numeric fild names are not supported in %sbug72165.php on line %d

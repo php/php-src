@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -124,7 +124,11 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	/* Don't store callback if headers have already been sent:
+	 * It won't get used and we won't have a chance to release it. */
+	if (!SG(headers_sent)) {
+		ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	}
 
 	RETURN_TRUE;
 }
@@ -340,7 +344,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint32_t len;
+	uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -575,8 +579,8 @@ static void sapi_update_response_code(int ncode)
 }
 
 /*
- * since zend_llist_del_element only remove one matched item once,
- * we should remove them by ourself
+ * since zend_llist_del_element only removes one matched item once,
+ * we should remove them manually
  */
 static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	sapi_header_struct *header;
@@ -606,7 +610,7 @@ static void sapi_remove_header(zend_llist *l, char *name, size_t len) {
 	}
 }
 
-SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(const char *header_line, size_t header_line_len, bool duplicate, bool replace)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -1069,9 +1073,8 @@ SAPI_API double sapi_get_request_time(void)
 {
 	if(SG(global_request_time)) return SG(global_request_time);
 
-	if (sapi_module.get_request_time && SG(server_context)) {
-		SG(global_request_time) = sapi_module.get_request_time();
-	} else {
+	if (!sapi_module.get_request_time
+			|| sapi_module.get_request_time(&SG(global_request_time)) == FAILURE) {
 		struct timeval tp = {0};
 		if (!gettimeofday(&tp, NULL)) {
 			SG(global_request_time) = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);

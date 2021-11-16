@@ -1,9 +1,7 @@
 --TEST--
 Bug #74651: negative-size-param (-1) in memcpy in zif_openssl_seal()
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

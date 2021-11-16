@@ -1,9 +1,7 @@
 --TEST--
 Bug #62915: incomplete cloning of IntlTimeZone objects
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-        die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

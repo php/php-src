@@ -245,12 +245,12 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue) /* {{{ */
 }
 /* }}} */
 
-int fpm_event_pre_init(char *machanism) /* {{{ */
+int fpm_event_pre_init(char *mechanism) /* {{{ */
 {
 	/* kqueue */
 	module = fpm_event_kqueue_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -258,7 +258,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* port */
 	module = fpm_event_port_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -266,7 +266,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* epoll */
 	module = fpm_event_epoll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -274,7 +274,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* /dev/poll */
 	module = fpm_event_devpoll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -282,7 +282,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* poll */
 	module = fpm_event_poll_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
@@ -290,13 +290,13 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 	/* select */
 	module = fpm_event_select_module();
 	if (module) {
-		if (!machanism || strcasecmp(module->name, machanism) == 0) {
+		if (!mechanism || strcasecmp(module->name, mechanism) == 0) {
 			return 0;
 		}
 	}
 
-	if (machanism) {
-		zlog(ZLOG_ERROR, "event mechanism '%s' is not available on this system", machanism);
+	if (mechanism) {
+		zlog(ZLOG_ERROR, "event mechanism '%s' is not available on this system", mechanism);
 	} else {
 		zlog(ZLOG_ERROR, "unable to find a suitable event mechanism on this system");
 	}
@@ -304,7 +304,7 @@ int fpm_event_pre_init(char *machanism) /* {{{ */
 }
 /* }}} */
 
-const char *fpm_event_machanism_name() /* {{{ */
+const char *fpm_event_mechanism_name() /* {{{ */
 {
 	return module ? module->name : NULL;
 }

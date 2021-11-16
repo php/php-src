@@ -53,12 +53,11 @@ typedef struct _zend_file_handle {
 		FILE          *fp;
 		zend_stream   stream;
 	} handle;
-	const char        *filename;
+	zend_string       *filename;
 	zend_string       *opened_path;
-	zend_stream_type  type;
-	/* free_filename is used by wincache */
-	/* TODO: Clean up filename vs opened_path mess */
-	zend_bool         free_filename;
+	zend_uchar        type; /* packed zend_stream_type */
+	bool              primary_script;
+	bool              in_list; /* added into CG(open_file) */
 	char              *buf;
 	size_t            len;
 } zend_file_handle;
@@ -66,10 +65,13 @@ typedef struct _zend_file_handle {
 BEGIN_EXTERN_C()
 ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char *filename);
 ZEND_API void zend_stream_init_filename(zend_file_handle *handle, const char *filename);
-ZEND_API zend_result zend_stream_open(const char *filename, zend_file_handle *handle);
+ZEND_API void zend_stream_init_filename_ex(zend_file_handle *handle, zend_string *filename);
+ZEND_API zend_result zend_stream_open(zend_file_handle *handle);
 ZEND_API zend_result zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t *len);
-ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
-ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
+ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
+
+void zend_stream_init(void);
+void zend_stream_shutdown(void);
 END_EXTERN_C()
 
 #ifdef ZEND_WIN32

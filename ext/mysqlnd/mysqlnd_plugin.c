@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -167,7 +167,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 	zval *val;
 	int result;
 
-	ZEND_HASH_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
+	ZEND_HASH_MAP_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
 		result = apply_func(val, argument);
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");

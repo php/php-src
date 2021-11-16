@@ -28,9 +28,17 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --The ISO 8601:1988 week number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "32"
 
 --Weekday as decimal--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(1) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(1) "5"

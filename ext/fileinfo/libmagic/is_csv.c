@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_csv.c,v 1.4 2019/06/26 20:31:31 christos Exp $")
+FILE_RCSID("@(#)$File: is_csv.c,v 1.6 2020/08/09 16:43:36 christos Exp $")
 #endif
 
 #include <string.h>
@@ -94,8 +94,7 @@ csv_parse(const unsigned char *uc, const unsigned char *ue)
 	size_t nf = 0, tf = 0, nl = 0;
 
 	while (uc < ue) {
-		unsigned char c;
-		switch (c = *uc++) {
+		switch (*uc++) {
 		case '"':
 			// Eat until the matching quote
 			uc = eatquote(uc, ue);
@@ -150,7 +149,7 @@ file_is_csv(struct magic_set *ms, const struct buffer *b, int looks_text)
 		return 1;
 
 	if (mime) {
-		if (file_printf(ms, "application/csv") == -1)
+		if (file_printf(ms, "text/csv") == -1)
 			return -1;
 		return 1;
 	}

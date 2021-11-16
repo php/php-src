@@ -141,7 +141,7 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 	}
 }
 
-ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), zend_bool free_elements)
+ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), bool free_elements)
 {
 	int i;
 

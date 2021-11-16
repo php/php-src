@@ -1,9 +1,7 @@
 --TEST--
 Phar object: iterator & entries
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=1
 phar.require_hash=0

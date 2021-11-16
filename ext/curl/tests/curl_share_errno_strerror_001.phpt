@@ -1,11 +1,7 @@
 --TEST--
 curl_share_errno and curl_share_strerror basic test
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-        exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

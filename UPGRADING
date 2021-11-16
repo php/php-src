@@ -1,4 +1,4 @@
-PHP 8.1 UPGRADE NOTES
+PHP 8.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,48 +19,25 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- MySQLi:
-  . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
-    zero for max_length. You can compute this information by iterating over the
-    result set and taking the maximum length. This is what PHP was doing
-    internally previously.
-  . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
-  . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
-
-- MySQLnd:
-  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
-    should not result in user-visible behavior changes.
-
-- Standard:
-  . version_compare() no longer accepts undocumented operator abbreviations.
-
 ========================================
 2. New Features
 ========================================
 
-- hash:
-  . The following functions have changed signatures:
+- Curl:
+  . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
+    HTTP method in curl_getinfo() return value.
 
-    - function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
-    - function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
-    - function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
+- OCI8:
+  . Added an oci8.prefetch_lob_size directive to tune LOB query performance
+    by reducing the number of round-trips between PHP and Oracle Database when
+    fetching LOBS. This is usable with Oracle Database 12.2 or later.
 
-    The additional `$options` argument can be used to pass algorithm specific data.
-
-  . Added MurmurHash3 with streaming support. The following variants are implemented:
-
-    - murmur3a, 32-bit hash
-    - murmur3c, 128-bit hash for x86
-    - murmur3f, 128-bit hash for x64
-
-    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
-
-    ```php
-    $h = hash("murmur3f", $data, options: ["seed" => 42]);
-    echo $h, "\n";
-    ```
-
-    A valid seed value is within the range from 0 to the plaform defined UINT_MAX, usually 4294967295.
+- PCRE:
+  . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
+    `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are
+    capturing. This only affects which groups are capturing, it is still
+    possible to use numbered subpattern references, and the matches array will
+    still contain numbered results.
 
 ========================================
 3. Changes in SAPI modules
@@ -70,9 +47,49 @@ PHP 8.1 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Callables that are not accepted by the $callable() syntax (but are accepted
+    by call_user_func) are deprecated. In particular:
+
+        "self::method"
+        "parent::method"
+        "static::method"
+        ["self", "method"]
+        ["parent", "method"]
+        ["static", "method"]
+        ["Foo", "Bar::method"]
+        [new Foo, "Bar::method"]
+
+    This does not affect normal method callables like "A::method" or
+    ["A", "method"]. A deprecation notice is only emitted on call. Both
+    is_callable() and the callable type will silently accept these callables
+    until support for them is removed entirely.
+
+    RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+
+- Mbstring:
+  . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
+    deprecated for all Mbstring functions. Unlike all the other text
+    encodings supported by Mbstring, these do not encode a sequence of
+    Unicode codepoints, but rather a sequence of raw bytes. It is not
+    clear what the correct return values for most Mbstring functions should
+    be when one of these non-encodings is specified. Further, PHP has
+    separate, built-in implementations of all of them; for example, UUencoded
+    data can be handled using convert_uuencode/convert_uudecode.
+
 ========================================
 5. Changed Functions
 ========================================
+
+- DBA
+  . dba_open() and dba_popen() now have the following enforced function signature
+    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
+  . dba_fetch()'s optional skip argument is now at the end in line with
+    PHP userland semantics its signature now is:
+    dba_fetch(string|array $key, $dba, int $skip = 0): string|false
+    The overloaded signature
+    dba_fetch(string|array $key, $skip, $dba): string|false
+    is still accepted, but it is recommended to use the new standard variant.
 
 ========================================
 6. New Functions
@@ -90,17 +107,16 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
-- OpenSSL:
-  . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
-
-- Standard:
-  . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
-    an alternative libargon2 location should now be specified using
-    PKG_CONFIG_PATH.
+- Zip:
+  . extension updated to 1.20.0 with new methods:
+    ZipArchive::clearError, getStreamName and getStreamIndex
 
 ========================================
 10. New Global Constants
 ========================================
+
+- COM_DOTNET:
+  . LOCALE_NEUTRAL
 
 ========================================
 11. Changes to INI File Handling
@@ -110,7 +126,9 @@ PHP 8.1 UPGRADE NOTES
 12. Windows Support
 ========================================
 
-. The macro IGNORE_URL_WIN has been removed; it had no effect as of PHP 5.0.0.
+- Core:
+  . Windows specific error messages are no longer localized, but instead in
+    English to better match PHP error messages.
 
 ========================================
 13. Other Changes

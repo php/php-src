@@ -1,9 +1,10 @@
 --TEST--
 pcntl_unshare() with CLONE_NEWNET
+--EXTENSIONS--
+pcntl
+posix
 --SKIPIF--
 <?php
-if (!extension_loaded("pcntl")) die("skip");
-if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
 if (!defined("CLONE_NEWNET")) die("skip flag unavailable");
 if (posix_getuid() !== 0 &&

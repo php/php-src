@@ -1,10 +1,9 @@
 --TEST--
 Bug #24155 (gdImageRotate270 rotation problem).
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) {
-        die("skip gd extension not available\n");
-    }
     if (!function_exists("imagerotate")) die("skip requires bundled GD library\n");
 ?>
 --FILE--

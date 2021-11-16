@@ -1,7 +1,7 @@
 --TEST--
 Observer: Generator with 'yield from'
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -33,8 +33,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_generator_%d.php' -->
-<file '%s/observer_generator_%d.php'>
+<!-- init '%s%eobserver_generator_%d.php' -->
+<file '%s%eobserver_generator_%d.php'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init fooResults() -->
@@ -65,4 +65,4 @@ echo doSomething() . PHP_EOL;
     </fooResults:NULL>
   </doSomething:'Done'>
 Done
-</file '%s/observer_generator_%d.php'>
+</file '%s%eobserver_generator_%d.php'>

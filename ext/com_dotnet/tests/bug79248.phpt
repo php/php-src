@@ -1,9 +1,7 @@
 --TEST--
 Bug #79248 (Traversing empty VT_ARRAY throws com_exception)
---SKIPIF--
-<?php
-if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
-?>
+--EXTENSIONS--
+com_dotnet
 --FILE--
 <?php
 $v = new variant([], VT_ARRAY);

@@ -1,13 +1,15 @@
 --TEST--
 openssl_pkcs12_read() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
-$p12_file = __DIR__ . "/p12_with_extra_certs.p12";
-$p12 = file_get_contents($p12_file);
-$certs = array();
+
+$cert = file_get_contents(__DIR__ . "/public.crt");
+$priv = file_get_contents(__DIR__ . "/private.crt");
+$extracert = file_get_contents(__DIR__ . "/cert.crt");
 $pass = "qwerty";
+openssl_pkcs12_export($cert, $p12, $priv, $pass, array('extracerts' => $extracert));
 
 var_dump(openssl_pkcs12_read("", $certs, ""));
 var_dump(openssl_pkcs12_read($p12, $certs, ""));
@@ -73,24 +75,26 @@ MK80GEnRQIkB7uZVk+r0HusK
   ["extracerts"]=>
   array(1) {
     [0]=>
-    string(1111) "-----BEGIN CERTIFICATE-----
-MIIDBjCCAe4CCQDaL5/+UVeXuTANBgkqhkiG9w0BAQsFADBFMQswCQYDVQQGEwJB
-VTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50ZXJuZXQgV2lkZ2l0
-cyBQdHkgTHRkMB4XDTE1MDYxMDEyNDAwNVoXDTE2MDYwOTEyNDAwNVowRTELMAkG
-A1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0
-IFdpZGdpdHMgUHR5IEx0ZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
-AL/IF7bW0vpEg5A054SDqTi5pkSeie6nyIT77qCAVI5PMlhNjxuqDIlLpCWonvKb
-LMRtp7t24BsQBRgQgps8mtfRr0gV1qq9HMfDj2bZdGcTShZN/M/BFATwxaNRTHl9
-ey8zxGcLd4aFFBlVhXHYdBXg/PG/oxJMAFuMwa+KxSP6Mqp1FlOZtvUUieQcToMf
-Mh8Lbr4g/yHFj5lgWIJ2fmJjHJZ4wf9QBeGUrVqqxzSDEL9f0PGy+grqSHoIzLr3
-+uhvhoI85nCyZs9+lrELuQKqbiZ8Q6Vmj6JGt3miNBFVTbBpP9GK8sVuVQwgqd8p
-C3e8hHqv7vwF+s0zjiZ+rCcCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAdpTtiyDJ
-0wLB18iunXCMUJpjc/HVYEp5P9vl2E/bcZfGns/8KxNHoe9mgJycr3mwjCjMjVx2
-L/9q/8XoT02aBncwAx4oZ2H0qfjZppaUSnSc1Uv+dsldDC2mZvJgwXN7jtQmU5P3
-cspFHuJoYK8AqYJqlO6E4L9uRF7dLEliUnrBpF4BxziwskTquRX+zgD+fmk0L5O8
-qqvm8btWCxfng+qD7UHFWbUQ2IegZ3VrBWJ2XsxOvokMM4HoHVb0BZgq8Dvu0XJ9
-EriEQkcydtrRKtlcWHLKcJuNUnkw2qfj+F8mmdaZib8Apa1UCkt0ZlpyYO3V2ejY
-WIjafwJYrv6f5g==
+    string(1249) "-----BEGIN CERTIFICATE-----
+MIIDbDCCAtWgAwIBAgIJAK7FVsxyN1CiMA0GCSqGSIb3DQEBBQUAMIGBMQswCQYD
+VQQGEwJCUjEaMBgGA1UECBMRUmlvIEdyYW5kZSBkbyBTdWwxFTATBgNVBAcTDFBv
+cnRvIEFsZWdyZTEeMBwGA1UEAxMVSGVucmlxdWUgZG8gTi4gQW5nZWxvMR8wHQYJ
+KoZIhvcNAQkBFhBobmFuZ2Vsb0BwaHAubmV0MB4XDTA4MDYzMDEwMjg0M1oXDTA4
+MDczMDEwMjg0M1owgYExCzAJBgNVBAYTAkJSMRowGAYDVQQIExFSaW8gR3JhbmRl
+IGRvIFN1bDEVMBMGA1UEBxMMUG9ydG8gQWxlZ3JlMR4wHAYDVQQDExVIZW5yaXF1
+ZSBkbyBOLiBBbmdlbG8xHzAdBgkqhkiG9w0BCQEWEGhuYW5nZWxvQHBocC5uZXQw
+gZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMteno+QK1ulX4/WDAVBYfoTPRTz
+e4SZLwgael4jwWTytj+8c5nNllrFELD6WjJzfjaoIMhCF4w4I2bkWR6/PTqrvnv+
+iiiItHfKvJgYqIobUhkiKmWa2wL3mgqvNRIqTrTC4jWZuCkxQ/ksqL9O/F6zk+aR
+S1d+KbPaqCR5Rw+lAgMBAAGjgekwgeYwHQYDVR0OBBYEFNt+QHK9XDWF7CkpgRLo
+Ymhqtz99MIG2BgNVHSMEga4wgauAFNt+QHK9XDWF7CkpgRLoYmhqtz99oYGHpIGE
+MIGBMQswCQYDVQQGEwJCUjEaMBgGA1UECBMRUmlvIEdyYW5kZSBkbyBTdWwxFTAT
+BgNVBAcTDFBvcnRvIEFsZWdyZTEeMBwGA1UEAxMVSGVucmlxdWUgZG8gTi4gQW5n
+ZWxvMR8wHQYJKoZIhvcNAQkBFhBobmFuZ2Vsb0BwaHAubmV0ggkArsVWzHI3UKIw
+DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCP1GUnStC0TBqngr3Kx+zS
+UW8KutKO0ORc5R8aV/x9LlaJrzPyQJgiPpu5hXogLSKRIHxQS3X2+Y0VvIpW72LW
+PVKPhYlNtO3oKnfoJGKin0eEhXRZMjfEW/kznY+ZZmNifV2r8s+KhNAqI4PbClvn
+4vh8xF/9+eVEj+hM+0OflA==
 -----END CERTIFICATE-----
 "
   }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8466049fca2eae179adbc19bb67e71f6486ec4e */
+ * Stub hash: d0ed07f608581a5700a10ec53a817ca788ef9638 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hash, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -180,19 +180,19 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash_equals, arginfo_hash_equals)
 	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
+	ZEND_DEP_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
+	ZEND_DEP_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
+	ZEND_DEP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash_count, arginfo_mhash_count)
+	ZEND_DEP_FE(mhash_count, arginfo_mhash_count)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_FE(mhash, arginfo_mhash)
+	ZEND_DEP_FE(mhash, arginfo_mhash)
 #endif
 	ZEND_FE_END
 };
@@ -204,3 +204,14 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_HashContext(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "HashContext", class_HashContext_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}

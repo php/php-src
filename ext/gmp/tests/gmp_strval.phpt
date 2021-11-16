@@ -1,13 +1,13 @@
 --TEST--
 gmp_strval() tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
 try {
     var_dump(gmp_strval(""));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {

@@ -1,8 +1,9 @@
 --TEST--
 Trying implicit reconnect after wait_timeout and KILL using mysqli_ping()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

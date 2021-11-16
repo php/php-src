@@ -1,8 +1,9 @@
 --TEST--
 Bug #48909 (Segmentation fault in mysqli_stmt_execute)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

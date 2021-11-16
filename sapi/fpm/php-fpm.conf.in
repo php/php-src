@@ -53,7 +53,7 @@
 ; Log buffering specifies if the log line is buffered which means that the
 ; line is written in a single write operation. If the value is false, then the
 ; data is written directly into the file descriptor. It is an experimental
-; option that can potentionaly improve logging performance and memory usage
+; option that can potentially improve logging performance and memory usage
 ; for some heavy logging scenarios. This option is ignored if logging to syslog
 ; as it has to be always buffered.
 ; Default value: yes

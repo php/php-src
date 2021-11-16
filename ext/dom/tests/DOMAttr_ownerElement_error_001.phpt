@@ -3,8 +3,8 @@ Read $ownerElement with null parent.
 --CREDITS--
 Travis Pew
 # TestFest Atlanta 2009-05-14
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

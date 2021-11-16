@@ -1,7 +1,7 @@
 --TEST--
 Bug #32773 (binary GMP functions returns unexpected value, when second parameter is int(0))
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 echo '10 + 0 = ', gmp_strval(gmp_add(10, 0)), "\n";

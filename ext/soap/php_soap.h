@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -159,7 +159,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	int        cur_uniq_ns;
 	int        soap_version;
 	sdlPtr     sdl;
-	zend_bool  use_soap_error_handler;
+	bool  use_soap_error_handler;
 	char*      error_code;
 	zval       error_object;
 	char       cache;
@@ -192,6 +192,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+extern zend_class_entry* soap_class_entry;
 extern zend_class_entry* soap_var_class_entry;
 
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
@@ -207,5 +208,49 @@ void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 
 #define soap_error3(severity, format, param1, param2, param3) \
 	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
+
+static zend_always_inline zval *php_soap_deref(zval *zv) {
+	if (UNEXPECTED(Z_TYPE_P(zv) == IS_REFERENCE)) {
+		return Z_REFVAL_P(zv);
+	}
+	return zv;
+}
+
+#define Z_CLIENT_URI_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_CLIENT_STYLE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_CLIENT_USE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_CLIENT_LOCATION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_CLIENT_TRACE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_CLIENT_COMPRESSION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+#define Z_CLIENT_SDL_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 6))
+#define Z_CLIENT_TYPEMAP_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 7))
+#define Z_CLIENT_HTTPSOCKET_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 8))
+#define Z_CLIENT_HTTPURL_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 9))
+#define Z_CLIENT_LOGIN_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 10))
+#define Z_CLIENT_PASSWORD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 11))
+#define Z_CLIENT_USE_DIGEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 12))
+#define Z_CLIENT_DIGEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 13))
+#define Z_CLIENT_PROXY_HOST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 14))
+#define Z_CLIENT_PROXY_PORT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 15))
+#define Z_CLIENT_PROXY_LOGIN_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 16))
+#define Z_CLIENT_PROXY_PASSWORD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 17))
+#define Z_CLIENT_EXCEPTIONS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 18))
+#define Z_CLIENT_ENCODING_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 19))
+#define Z_CLIENT_CLASSMAP_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 20))
+#define Z_CLIENT_FEATURES_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 21))
+#define Z_CLIENT_CONNECTION_TIMEOUT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 22))
+#define Z_CLIENT_STREAM_CONTEXT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 23))
+#define Z_CLIENT_USER_AGENT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 24))
+#define Z_CLIENT_KEEP_ALIVE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 25))
+#define Z_CLIENT_SSL_METHOD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 26))
+#define Z_CLIENT_SOAP_VERSION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 27))
+#define Z_CLIENT_USE_PROXY_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 28))
+#define Z_CLIENT_COOKIES_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 29))
+#define Z_CLIENT_DEFAULT_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 30))
+#define Z_CLIENT_SOAP_FAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 31))
+#define Z_CLIENT_LAST_REQUEST_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 32))
+#define Z_CLIENT_LAST_RESPONSE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 33))
+#define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 34))
+#define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 35))
 
 #endif

@@ -1,4 +1,4 @@
-.TH PHP-FPM 8 "2019" "The PHP Group" "Scripting Language"
+.TH PHP-FPM 8 "2021" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
@@ -224,7 +224,7 @@ that is bundled with this package in the file LICENSE, and is
 available through the world-wide-web at the following url:
 .PD 0
 .P
-.B http://www.php.net/license/3_01.txt
+.B https://www.php.net/license/3_01.txt
 .PD 1
 .P
 If you did not receive a copy of the PHP license and are unable to

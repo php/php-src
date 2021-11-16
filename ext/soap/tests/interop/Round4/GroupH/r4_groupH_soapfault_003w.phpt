@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round4 GroupH SoapFault 003 (php/wsdl): echoVersionMismatchFault(unknown version)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

@@ -7,7 +7,7 @@ try {
     try {
         try {
             try {
-                throw new Exception(NULL);
+                throw new Exception();
             } catch (Exception $e) {
                 var_dump($e->getMessage());
                 throw $e;

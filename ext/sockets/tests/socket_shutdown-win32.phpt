@@ -2,11 +2,11 @@
 bool socket_shutdown ( resource $socket [, int $how = 2 ] ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-  die('SKIP sockets extension not available.');
-}
+
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }

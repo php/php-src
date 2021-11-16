@@ -1,5 +1,7 @@
 --TEST--
 unset($_SESSION["name"]); test
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

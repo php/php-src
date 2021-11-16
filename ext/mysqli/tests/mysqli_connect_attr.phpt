@@ -1,8 +1,9 @@
 --TEST--
 mysqli check the session_connect_attrs table for connection attributes
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$IS_MYSQLND)

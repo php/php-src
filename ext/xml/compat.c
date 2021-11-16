@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -284,9 +284,9 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 static void
 _unparsed_entity_decl_handler(void *user,
                               const xmlChar *name,
-							  const xmlChar *pub_id,
-							  const xmlChar *sys_id,
-							  const xmlChar *notation)
+                              const xmlChar *pub_id,
+                              const xmlChar *sys_id,
+                              const xmlChar *notation)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -563,16 +563,8 @@ XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
 	int error;
 
-	if (parser->parser->lastError.level >= XML_ERR_WARNING) {
-		return 0;
-	}
-
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
-	if (error) {
-		return 0;
-	} else {
-		return 1;
-	}
+	return !error && parser->parser->lastError.level <= XML_ERR_WARNING;
 }
 
 PHP_XML_API int

@@ -19,7 +19,6 @@ $filenames = array(
   "",
   TRUE,
   FALSE,
-  NULL,
 
   /* scalars */
   1234,
@@ -32,11 +31,6 @@ foreach( $filenames as $filename ) {
   clearstatcache();
 }
 ?>
---CLEAN--
-<?php
-$file_path = __DIR__;
-unlink($file_path."/fileowner_variation2.tmp");
-?>
 --EXPECTF--
 *** Testing Invalid file types ***
 
@@ -48,7 +42,6 @@ bool(false)
 bool(false)
 
 Warning: fileowner(): stat failed for 1 in %s on line %d
-bool(false)
 bool(false)
 bool(false)
 

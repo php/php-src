@@ -40,13 +40,6 @@ $inputs = array(
        12345,
        -2345,
 
-       // float data
-/*5*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
-
        // null data
 /*10*/ NULL,
        null,
@@ -112,13 +105,13 @@ bool(false)
 bool(false)
 
 -- Iteration 5 --
-bool(true)
+bool(false)
 
 -- Iteration 6 --
 bool(false)
 
 -- Iteration 7 --
-bool(false)
+bool(true)
 
 -- Iteration 8 --
 bool(true)
@@ -127,16 +120,16 @@ bool(true)
 bool(true)
 
 -- Iteration 10 --
-bool(false)
+bool(true)
 
 -- Iteration 11 --
 bool(false)
 
 -- Iteration 12 --
-bool(true)
+bool(false)
 
 -- Iteration 13 --
-bool(true)
+Illegal offset type
 
 -- Iteration 14 --
 bool(true)
@@ -145,33 +138,18 @@ bool(true)
 bool(true)
 
 -- Iteration 16 --
-bool(false)
+bool(true)
 
 -- Iteration 17 --
-bool(false)
+Illegal offset type
 
 -- Iteration 18 --
-Illegal offset type
+bool(false)
 
 -- Iteration 19 --
-bool(true)
+bool(false)
 
 -- Iteration 20 --
-bool(true)
-
--- Iteration 21 --
-bool(true)
-
--- Iteration 22 --
-Illegal offset type
-
--- Iteration 23 --
-bool(false)
-
--- Iteration 24 --
-bool(false)
-
--- Iteration 25 --
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)

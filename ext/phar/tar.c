@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -202,8 +202,8 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 
 #ifndef HAVE_STRNLEN
 static size_t strnlen(const char *s, size_t maxlen) {
-        char *r = (char *)memchr(s, '\0', maxlen);
-        return r ? r-s : maxlen;
+	char *r = (char *)memchr(s, '\0', maxlen);
+	return r ? r-s : maxlen;
 }
 #endif
 
@@ -242,11 +242,11 @@ int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alia
 	myphar->is_persistent = PHAR_G(persist);
 	/* estimate number of entries, can't be certain with tar files */
 	zend_hash_init(&myphar->manifest, 2 + (totalsize >> 12),
-		zend_get_hash_value, destroy_phar_manifest_entry, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, destroy_phar_manifest_entry, (bool)myphar->is_persistent);
 	zend_hash_init(&myphar->mounted_dirs, 5,
-		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
 	zend_hash_init(&myphar->virtual_dirs, 4 + (totalsize >> 11),
-		zend_get_hash_value, NULL, (zend_bool)myphar->is_persistent);
+		zend_get_hash_value, NULL, (bool)myphar->is_persistent);
 	myphar->is_tar = 1;
 	/* remember whether this entire phar was compressed with gz/bzip2 */
 	myphar->flags = compression;
@@ -497,7 +497,7 @@ bail:
 
 		entry.link = NULL;
 		/* link field is null-terminated unless it has 100 non-null chars.
-		 * Thus we can not use strlen. */
+		 * Thus we cannot use strlen. */
 		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
 			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, linkname_len)) {

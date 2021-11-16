@@ -1,8 +1,9 @@
 --TEST--
 mysqli autocommit/commit/rollback with innodb
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
     require_once('skipifconnectfailure.inc');
 
     require_once('connect.inc');

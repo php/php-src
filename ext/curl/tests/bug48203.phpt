@@ -1,7 +1,7 @@
 --TEST--
 Bug #48203 (Crash when CURLOPT_STDERR is set to regular file)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 include 'server.inc';

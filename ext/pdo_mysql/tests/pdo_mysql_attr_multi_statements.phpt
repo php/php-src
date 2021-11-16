@@ -1,8 +1,9 @@
 --TEST--
 PDO::MYSQL_ATTR_MULTI_STATEMENTS
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -20,6 +21,7 @@ error_reporting=E_ALL
     $table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
     $db = new PDO($dsn, $user, $pass);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
     $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     $db->exec($create);
@@ -37,6 +39,7 @@ error_reporting=E_ALL
     // New connection, does not allow multiple statements.
     $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => false));
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
     $stmt = $db->query(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (3)', $table, $table));
     var_dump($stmt);
     $info = $db->errorInfo();

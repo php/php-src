@@ -1,5 +1,7 @@
 --TEST--
 Check that phi use chains are correctly maintained when removing blocks
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

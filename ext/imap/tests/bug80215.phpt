@@ -1,9 +1,7 @@
 --TEST--
 Bug #80215 (imap_mail_compose() may modify by-val parameters)
---SKIPIF--
-<?php
-if (!extension_loaded('imap')) die('skip imap extension not available');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $envelope = [

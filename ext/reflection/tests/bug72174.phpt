@@ -27,7 +27,6 @@ class Foo
 
 $instance = new Foo();
 $reflectionBar = (new ReflectionProperty(Foo::class, 'bar'));
-$reflectionBar->setAccessible(true);
 var_dump($reflectionBar->getValue($instance));
 
 ?>

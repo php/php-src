@@ -1,7 +1,7 @@
 --TEST--
 checks zlib compression output size is always the same
---SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+--EXTENSIONS--
+zlib
 --CGI--
 --FILE--
 <?php

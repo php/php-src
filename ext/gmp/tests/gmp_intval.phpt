@@ -1,7 +1,7 @@
 --TEST--
 gmp_intval() tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -9,14 +9,13 @@ var_dump(gmp_intval("-1"));
 var_dump(gmp_intval(-1));
 var_dump(gmp_intval(-2349828));
 var_dump(gmp_intval(2342344));
-var_dump(gmp_intval(1.0001));
 
 $g = gmp_init("12345678");
 var_dump(gmp_intval($g));
 
 try {
     var_dump(gmp_intval(""));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
@@ -31,7 +30,7 @@ try {
 }
 try {
     var_dump(gmp_intval("1.0001"));
-} catch (TypeError $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -42,7 +41,6 @@ int(-1)
 int(-1)
 int(-2349828)
 int(2342344)
-int(1)
 int(12345678)
 gmp_intval(): Argument #1 ($num) is not an integer string
 gmp_intval(): Argument #1 ($num) must be of type GMP|string|int, stdClass given

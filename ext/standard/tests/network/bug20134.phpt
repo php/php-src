@@ -1,5 +1,7 @@
 --TEST--
 Bug #20134 (UDP reads from invalid ports)
+--INI--
+default_socket_timeout=1
 --FILE--
 <?php
 

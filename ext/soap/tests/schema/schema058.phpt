@@ -1,7 +1,8 @@
 --TEST--
 SOAP XML Schema 58: SOAP 1.2 Array (literal encoding)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
+xml
 --FILE--
 <?php
 include "test_schema.inc";

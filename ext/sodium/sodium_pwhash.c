@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -95,14 +95,14 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 	return ret;
 }
 
-static zend_bool php_sodium_argon2_verify(const zend_string *password, const zend_string *hash) {
+static bool php_sodium_argon2_verify(const zend_string *password, const zend_string *hash) {
 	if ((ZSTR_LEN(password) >= 0xffffffff) || (ZSTR_LEN(hash) >= 0xffffffff)) {
 		return 0;
 	}
 	return crypto_pwhash_str_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password)) == 0;
 }
 
-static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
+static bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
 	size_t opslimit, memlimit;
 
 	if (get_options(options, &memlimit, &opslimit) == FAILURE) {

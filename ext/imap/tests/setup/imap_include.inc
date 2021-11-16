@@ -63,12 +63,19 @@ function displayOverviewFields($resp, array $fields = MANDATORY_OVERVIEW_FIELDS)
  * @param int message_count number of test msgs to be written to new mailbox
  * @param null $new_mailbox
  * @param bool $simpleMessages
+ * @param int $flags OP_* (or CL_EXPUNGE) flags to pass to imap_open() sub-call
  * @return resource IMAP stream to new mailbox
  * @throws Exception
  */
-function setup_test_mailbox(string $mailbox_suffix, int $message_count, &$new_mailbox = null, bool $simpleMessages = true){
+function setup_test_mailbox(
+    string $mailbox_suffix,
+    int $message_count,
+    &$new_mailbox = null,
+    bool $simpleMessages = true,
+    int $flags = 0,
+){
     // open a stream to default mailbox
-    $imap_stream = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD);
+    $imap_stream = imap_open(IMAP_DEFAULT_MAILBOX, IMAP_MAILBOX_USERNAME, IMAP_MAILBOX_PASSWORD, flags: $flags);
 
     if ($imap_stream === false) {
         throw new Exception("Cannot connect to IMAP server " . IMAP_SERVER . ": " . imap_last_error());

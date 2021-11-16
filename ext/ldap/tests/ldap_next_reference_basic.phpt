@@ -3,8 +3,9 @@ ldap_next_reference() - Basic ldap_next_reference test
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -39,7 +40,8 @@ ldap_delete($link, "cn=userref2,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'is
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
-resource(%d) of type (ldap result entry)
+object(LDAP\ResultEntry)#%d (0) {
+}
 array(1) {
   [0]=>
   string(%d) "cn=userB,%s"

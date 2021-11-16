@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar with hard link to nowhere
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';

@@ -1,8 +1,9 @@
 --TEST--
 Bug #52082 (character_set_client & character_set_connection reset after mysqli_change_user)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

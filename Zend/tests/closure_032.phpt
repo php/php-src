@@ -29,7 +29,7 @@ Array
         )
 
 )
-#0  {closure}(23) called at [%s:%d]
+#0 %s(%d): {closure}(23)
 Array
 (
     [0] => Array
@@ -65,5 +65,5 @@ Array
         )
 
 )
-#0  {closure}(23) called at [%s:%d]
-#1  test(Closure Object ()) called at [%s:%d]
+#0 %s(%d): {closure}(23)
+#1 %s(%d): test(Object(Closure))

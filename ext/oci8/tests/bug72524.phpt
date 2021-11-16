@@ -1,5 +1,7 @@
 --TEST--
 Bug #72524 (Binding null values triggers ORA-24816 error)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs

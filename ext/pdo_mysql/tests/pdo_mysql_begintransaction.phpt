@@ -1,8 +1,9 @@
 --TEST--
 PDO->beginTransaction()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -13,6 +14,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
+
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
     if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
@@ -31,6 +33,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     /* This is the PDO way to close a connection */
     $db = null;
     $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     /* Autocommit was off - by definition. Commit was not issued. DELETE should have been rolled back. */
     if (!($stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC')))

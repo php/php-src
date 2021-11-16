@@ -1,9 +1,11 @@
 --TEST--
 Test ftp_ssl_connect() function : error conditions
+--EXTENSIONS--
+ftp
+pcntl
+openssl
 --SKIPIF--
 <?php
-$ssl = 1;
-require 'skipif.inc';
 if (!function_exists("ftp_ssl_connect")) die("skip ftp_ssl is disabled");
 ?>
 --FILE--
@@ -25,7 +27,7 @@ echo "===DONE===\n";
 
 -- Testing ftp_ssl_connect() function on failure --
 
-Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s on line %d
+Warning: ftp_ssl_connect(): php_network_getaddresses: getaddrinfo for %s failed: %s in %s on line %d
 bool(false)
 
 -- Testing ftp_ssl_connect() function timeout exception for value 0 --

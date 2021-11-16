@@ -1,8 +1,9 @@
 --TEST--
 MySQL: PDOStatement->getColumnMeta()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // Too many differences among MySQL version - run only with a recent one
@@ -139,23 +140,22 @@ try {
     $real_as_float = (false === stristr($row['_mode'], "REAL_AS_FLOAT")) ? false : true;
 
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-    $is_mysqlnd = MySQLPDOTest::isPDOMySQLnd();
-    test_meta($db, 20, 'BIT(8)', 1, 'BIT', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 30, 'TINYINT', -127, 'TINY', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 40, 'TINYINT UNSIGNED', 255, 'TINY', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 50, 'BOOLEAN', 1, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    test_meta($db, 20, 'BIT(8)', 1, 'BIT', PDO::PARAM_INT);
+    test_meta($db, 30, 'TINYINT', -127, 'TINY', PDO::PARAM_INT);
+    test_meta($db, 40, 'TINYINT UNSIGNED', 255, 'TINY', PDO::PARAM_INT);
+    test_meta($db, 50, 'BOOLEAN', 1, NULL, PDO::PARAM_INT);
 
-    test_meta($db, 60, 'SMALLINT', -32768, 'SHORT', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 70, 'SMALLINT UNSIGNED', 65535, 'SHORT', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    test_meta($db, 60, 'SMALLINT', -32768, 'SHORT', PDO::PARAM_INT);
+    test_meta($db, 70, 'SMALLINT UNSIGNED', 65535, 'SHORT', PDO::PARAM_INT);
 
-    test_meta($db, 80, 'MEDIUMINT', -8388608, 'INT24', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 90, 'MEDIUMINT UNSIGNED', 16777215, 'INT24', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    test_meta($db, 80, 'MEDIUMINT', -8388608, 'INT24', PDO::PARAM_INT);
+    test_meta($db, 90, 'MEDIUMINT UNSIGNED', 16777215, 'INT24', PDO::PARAM_INT);
 
-    test_meta($db, 100, 'INT', -2147483648, 'LONG', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    test_meta($db, 110, 'INT UNSIGNED', 4294967295, 'LONG', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    test_meta($db, 100, 'INT', -2147483648, 'LONG', PDO::PARAM_INT);
+    test_meta($db, 110, 'INT UNSIGNED', 4294967295, 'LONG', PDO::PARAM_INT);
 
-    test_meta($db, 120, 'BIGINT', '-9223372036854775808', 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
-    test_meta($db, 130, 'BIGINT UNSIGNED', '18446744073709551615', 'LONGLONG', ($is_mysqlnd) ? ((PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT) : PDO::PARAM_STR);
+    test_meta($db, 120, 'BIGINT', '-9223372036854775808', 'LONGLONG', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
+    test_meta($db, 130, 'BIGINT UNSIGNED', '18446744073709551615', 'LONGLONG', (PHP_INT_SIZE == 4) ? PDO::PARAM_STR : PDO::PARAM_INT);
 
     test_meta($db, 130, 'REAL', -1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
     test_meta($db, 140, 'REAL UNSIGNED', 1.01, ($real_as_float) ? 'FLOAT' : 'DOUBLE', PDO::PARAM_STR);
@@ -186,7 +186,7 @@ try {
     test_meta($db, 340, 'TIME', '14:37:00', 'TIME', PDO::PARAM_STR);
     test_meta($db, 350, 'TIMESTAMP', '2008-03-23 14:38:00', 'TIMESTAMP', PDO::PARAM_STR);
     test_meta($db, 360, 'DATETIME', '2008-03-23 14:38:00', 'DATETIME', PDO::PARAM_STR);
-    test_meta($db, 370, 'YEAR', '2008', 'YEAR', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    test_meta($db, 370, 'YEAR', '2008', 'YEAR', PDO::PARAM_INT);
 
     test_meta($db, 380, 'CHAR(1)', 'a', 'STRING', PDO::PARAM_STR);
     test_meta($db, 390, 'CHAR(10)', '0123456789', 'STRING', PDO::PARAM_STR);

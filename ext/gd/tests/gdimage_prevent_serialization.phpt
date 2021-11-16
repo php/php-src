@@ -1,11 +1,7 @@
 --TEST--
 GdImage instances must not be serialized
---SKIPIF--
-<?php
-if(!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 

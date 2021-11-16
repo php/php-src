@@ -1,5 +1,7 @@
 --TEST--
 imagefilledpolygon()
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
     if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');

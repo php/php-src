@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_fetch_fields() unicode, win32
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -60,7 +60,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 {
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
-	DBG_INF_FMT("Freeing "PRIu64" row(s)", set->row_count);
+	DBG_INF_FMT("Freeing %" PRIu64 " row(s)", set->row_count);
 
 	mysqlnd_error_info_free_contents(&set->error_info);
 
@@ -177,7 +177,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 	MYSQLND_PACKET_EOF fields_eof;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
-	DBG_INF_FMT("stmt=%lu", stmt? stmt->stmt_id:0);
+	DBG_INF_FMT("stmt=" ZEND_ULONG_FMT, stmt? stmt->stmt_id:0);
 
 	ret = FAIL;
 	do {
@@ -217,7 +217,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 
 		switch (rset_header.field_count) {
 			case MYSQLND_NULL_LENGTH: {	/* LOAD DATA LOCAL INFILE */
-				zend_bool is_warning;
+				bool is_warning;
 				DBG_INF("LOAD DATA");
 				conn->last_query_type = QUERY_LOAD_LOCAL;
 				conn->field_count = 0; /* overwrite previous value, or the last value could be used and lead to bug#53503 */
@@ -236,8 +236,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, rset_header.server_status);
 				UPSERT_STATUS_SET_AFFECTED_ROWS(conn->upsert_status, rset_header.affected_rows);
 				UPSERT_STATUS_SET_LAST_INSERT_ID(conn->upsert_status, rset_header.last_insert_id);
-				SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l,
-								rset_header.info_or_local_file.s, rset_header.info_or_local_file.l);
+				mysqlnd_set_string(&conn->last_message, rset_header.info_or_local_file.s, rset_header.info_or_local_file.l);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS) {
 					SET_CONNECTION_STATE(&conn->state, CONN_NEXT_RESULT_PENDING);
@@ -252,7 +251,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 				DBG_INF("Result set pending");
-				SET_EMPTY_MESSAGE(conn->last_message.s, conn->last_message.l);
+				mysqlnd_set_string(&conn->last_message, NULL, 0);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
 				UPSERT_STATUS_RESET(conn->upsert_status);
@@ -407,7 +406,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(const MYSQLND_RES * const result)
 
 /* {{{ mysqlnd_result_unbuffered::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, bool * fetched_anything)
 {
 	enum_func_status ret;
 	MYSQLND_PACKET_ROW	*row_packet = result->unbuf->row_packet;
@@ -548,7 +547,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, MYSQLND_STMT
 
 /* {{{ mysqlnd_result_buffered::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, zend_bool * fetched_anything)
+MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **row_ptr, const unsigned int flags, bool * fetched_anything)
 {
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
@@ -601,7 +600,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row)(MYSQLND_RES * result, zval **
 
 /* {{{ mysqlnd_res::fetch_row */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES *result, zval **row_ptr, const unsigned int flags, zend_bool *fetched_anything)
+MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES *result, zval **row_ptr, const unsigned int flags, bool *fetched_anything)
 {
 	const mysqlnd_fetch_row_func f =
 		result->stored_data ? result->stored_data->m.fetch_row :
@@ -620,7 +619,7 @@ enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA * meta,
 													MYSQLND_ROW_BUFFER **row_buffers,
-													zend_bool binary_protocol)
+													bool binary_protocol)
 {
 	enum_func_status ret;
 	uint64_t total_allocated_rows = 0;
@@ -782,10 +781,10 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 
 /* {{{ mysqlnd_res::skip_result */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 
 	DBG_ENTER("mysqlnd_res::skip_result");
 	/*
@@ -807,14 +806,14 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 					? STAT_ROWS_SKIPPED_NORMAL : STAT_ROWS_SKIPPED_PS);
 		}
 	}
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_res::free_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const zend_bool implicit)
+MYSQLND_METHOD(mysqlnd_res, free_result)(MYSQLND_RES * result, const bool implicit)
 {
 	DBG_ENTER("mysqlnd_res::free_result");
 
@@ -834,7 +833,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, data_seek)(MYSQLND_RES * const result, const uint64_t row)
 {
 	DBG_ENTER("mysqlnd_res::data_seek");
-	DBG_INF_FMT("row=%lu", row);
+	DBG_INF_FMT("row=%" PRIu64, row);
 
 	DBG_RETURN(result->stored_data? result->stored_data->m.data_seek(result->stored_data, row) : FAIL);
 }
@@ -966,12 +965,11 @@ static void
 MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int flags,
 										zval *return_value ZEND_FILE_LINE_DC)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 	zval *row_data;
 
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {
-		php_error_docref(NULL, E_WARNING, "Error while reading a row");
 		RETVAL_FALSE;
 		DBG_VOID_RETURN;
 	} else if (fetched_anything == FALSE) {
@@ -1023,7 +1021,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 static MYSQLND_ROW_C
 MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 {
-	zend_bool fetched_anything;
+	bool fetched_anything;
 	zval *row_data;
 	MYSQLND_ROW_C ret = NULL;
 	DBG_ENTER("mysqlnd_res::fetch_row_c");
@@ -1050,49 +1048,12 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 /* }}} */
 
 
-/* {{{ mysqlnd_res::fetch_all */
-static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC)
-{
-	zval  row;
-	zend_ulong i = 0;
-	MYSQLND_RES_BUFFERED *set = result->stored_data;
-
-	DBG_ENTER("mysqlnd_res::fetch_all");
-
-	if ((!result->unbuf && !set)) {
-		php_error_docref(NULL, E_WARNING, "fetch_all can be used only with buffered sets");
-		if (result->conn) {
-			SET_CLIENT_ERROR(result->conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "fetch_all can be used only with buffered sets");
-		}
-		RETVAL_NULL();
-		DBG_VOID_RETURN;
-	}
-
-	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
-	array_init_size(return_value, set? (unsigned int) set->row_count : 4);
-
-	do {
-		mysqlnd_fetch_into(result, flags, &row);
-		if (Z_TYPE(row) != IS_ARRAY) {
-			zval_ptr_dtor_nogc(&row);
-			break;
-		}
-		add_index_zval(return_value, i++, &row);
-	} while (1);
-
-	DBG_VOID_RETURN;
-}
-/* }}} */
-
-
 MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, fetch_row),
 	MYSQLND_METHOD(mysqlnd_res, use_result),
 	MYSQLND_METHOD(mysqlnd_res, store_result),
 	MYSQLND_METHOD(mysqlnd_res, fetch_into),
 	MYSQLND_METHOD(mysqlnd_res, fetch_row_c),
-	MYSQLND_METHOD(mysqlnd_res, fetch_all),
 	MYSQLND_METHOD(mysqlnd_res, num_rows),
 	MYSQLND_METHOD(mysqlnd_res, num_fields),
 	MYSQLND_METHOD(mysqlnd_res, skip_result),

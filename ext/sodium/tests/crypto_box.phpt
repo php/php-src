@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium box
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $keypair = sodium_crypto_box_keypair();

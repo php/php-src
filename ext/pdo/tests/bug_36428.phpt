@@ -1,9 +1,10 @@
 --TEST--
 PDO Common: Bug #36428 (Incorrect error message for PDO::fetchAll())
+--EXTENSIONS--
+pdo
+simplexml
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
-if (!extension_loaded('simplexml')) die('skip SimpleXML not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';

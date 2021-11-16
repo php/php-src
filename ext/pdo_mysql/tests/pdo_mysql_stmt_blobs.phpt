@@ -1,8 +1,9 @@
 --TEST--
 MySQL Prepared Statements and BLOBs
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -48,9 +49,15 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        if ($label !== $value) {
+        if (!is_resource($label)) {
+            printf("[%03d + 3] Returned value is not a stream resource\n", $offset);
+            return false;
+        }
+
+        $contents = stream_get_contents($label);
+        if ($contents !== $value) {
             printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d characters). Check manually\n",
-                $offset, strlen($label), strlen($value));
+                $offset, strlen($contents), strlen($value));
             return false;
         }
 

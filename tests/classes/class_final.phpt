@@ -17,4 +17,4 @@ class derived extends base {
 echo "Done\n"; // shouldn't be displayed
 ?>
 --EXPECTF--
-Fatal error: Class derived may not inherit from final class (base) in %s on line %d
+Fatal error: Class derived cannot extend final class base in %s on line %d

@@ -30,17 +30,17 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
         parent::__construct($lhs, $rhs, $flags);
     }
 
-    /** @return whether both LHS and RHS have children
+    /** @return bool whether both LHS and RHS have children
      */
-    function hasChildren()
+    function hasChildren(): bool
     {
         return $this->getLHS()->hasChildren() && $this->getRHS()->hasChildren();
     }
 
-    /** @return new RecursiveDualIterator (late binding) for the two inner
+    /** @return RecursiveDualIterator (late binding) for the two inner
      * iterators current children.
      */
-    function getChildren()
+    function getChildren(): RecursiveDualIterator
     {
         if (empty($this->ref))
         {
@@ -50,19 +50,19 @@ class RecursiveDualIterator extends DualIterator implements RecursiveIterator
                     $this->getLHS()->getChildren(), $this->getRHS()->getChildren(), $this->getFlags());
     }
 
-    /** @return whether both inner iterators are valid, have same hasChildren()
+    /** @return bool whether both inner iterators are valid, have same hasChildren()
      * state and identical current and key values or both are non valid.
      */
-    function areIdentical()
+    function areIdentical(): bool
     {
         return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
             && parent::areIdentical();
     }
 
-    /** @return whether both inner iterators are valid, have same hasChildren()
+    /** @return bool whether both inner iterators are valid, have same hasChildren()
      * state and equal current and key values or both are invalid.
      */
-    function areEqual()
+    function areEqual(): bool
     {
         return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
             && parent::areEqual();

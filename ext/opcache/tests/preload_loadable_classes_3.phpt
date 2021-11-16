@@ -5,13 +5,20 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.preload={PWD}/preload_loadable_classes_3.inc
+--EXTENSIONS--
+opcache
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
-if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
 ?>
 --FILE--
-Unreachable
+<?php
+class Foo {
+}
+var_dump(new Test);
+?>
 --EXPECT--
-Fatal error: Failed to load class Foo used by typed property Test::$prop during preloading in Unknown on line 0
+object(Test)#1 (0) {
+  ["prop":protected]=>
+  uninitialized(Foo)
+}

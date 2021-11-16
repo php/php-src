@@ -4,9 +4,11 @@ Tests for LOBs with multibyte strings, reading them out in chunks
 --CREDITS--
 Chuck Burgess
 ashnazg@php.net
+--EXTENSIONS--
+mbstring
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring is not enabled');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>

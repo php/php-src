@@ -1,7 +1,7 @@
 --TEST--
 Bug #28969 (Wrong data encoding of special characters)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 function test() {
@@ -10,6 +10,7 @@ function test() {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -17,7 +18,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('test');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

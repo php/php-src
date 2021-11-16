@@ -37,20 +37,20 @@ Object
 test Object
 (
     [p1] => test:1
+    [p2] => base:2
     [p3] => test:3
     [p4] => A
     [p5] => test:5
-    [p2] => base:2
     [p6:base:private] => base:6
 )
 Clown
 test Object
 (
     [p1] => test:1
+    [p2] => base:2
     [p3] => test:3
     [p4] => A
     [p5] => clone:5
-    [p2] => base:2
     [p6:base:private] => base:6
 )
 Done

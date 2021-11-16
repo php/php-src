@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -111,8 +111,8 @@ static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type,
 		}
 		VariantInit(&v);
 
-		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+		res = php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0);
 
 		efree(args);
@@ -228,8 +228,8 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 			return;
 		}
 		VariantInit(&v);
-		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
-					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STR(proxy->indices[0]),
+					DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
 					args, 0)) {
 			VariantClear(&v);
 		}
@@ -415,7 +415,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	NULL,									/* get_properties_for */
 };
 
-int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
+void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
 {
 	php_com_saproxy *proxy, *rel = NULL;
 
@@ -442,8 +442,6 @@ int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
 	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
-
-	return 1;
 }
 
 /* iterator */

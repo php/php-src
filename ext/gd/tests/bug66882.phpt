@@ -1,9 +1,7 @@
 --TEST--
 Bug #66882 (imagerotate by -90 degrees truncates image by 1px)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagerotate(imagecreate(10, 10), -90, 0);

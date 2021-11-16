@@ -3,10 +3,10 @@ curl_error() function - basic test for curl_error using a fake url
 --CREDITS--
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
-
-if (!extension_loaded("curl")) die("skip\n");
 
 $url = "fakeURL";
 $ip = gethostbyname($url);

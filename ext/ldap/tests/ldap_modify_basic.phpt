@@ -3,8 +3,9 @@ ldap_modify() - Basic modify operation
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php

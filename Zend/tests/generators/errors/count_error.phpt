@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECT--
-count(): Argument #1 ($var) must be of type Countable|array, Generator given
+count(): Argument #1 ($value) must be of type Countable|array, Generator given

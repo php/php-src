@@ -2,8 +2,8 @@
 Test ReflectionZendExtension class
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
---SKIPIF--
-<?php if(!extension_loaded('Zend OPcache')) die('skip Zend OPcache extension not loaded'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $reflection = new ReflectionZendExtension('Zend OPcache');

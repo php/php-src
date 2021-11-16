@@ -1,8 +1,10 @@
 --TEST--
 PDO MySQL Bug #33689 (query() execute() and fetch() return false on valid select queries)
+--EXTENSIONS--
+pdo
+pdo_mysql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -27,8 +29,9 @@ $stmt->execute();
 $tmp = $stmt->getColumnMeta(0);
 
 // libmysql and mysqlnd will show the pdo_type entry at a different position in the hash
-if (!isset($tmp['pdo_type']) || (isset($tmp['pdo_type']) && $tmp['pdo_type'] != 2))
-    printf("Expecting pdo_type = 2 got %s\n", $tmp['pdo_type']);
+// and will report a different type, as mysqlnd returns native types.
+if (!isset($tmp['pdo_type']) || ($tmp['pdo_type'] != 1 && $tmp['pdo_type'] != 2))
+    printf("Expecting pdo_type = 1 got %s\n", $tmp['pdo_type']);
 else
     unset($tmp['pdo_type']);
 

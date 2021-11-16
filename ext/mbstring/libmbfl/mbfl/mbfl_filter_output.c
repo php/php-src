@@ -39,5 +39,5 @@ int mbfl_filter_output_pipe(int c, void* data)
 
 int mbfl_filter_output_null(int c, void* data)
 {
-	return c;
+	return 0;
 }

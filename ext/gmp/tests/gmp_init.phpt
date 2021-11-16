@@ -1,7 +1,7 @@
 --TEST--
 gmp_init() basic tests
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
@@ -15,17 +15,17 @@ try {
 
 try {
     var_dump(gmp_init("",36));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(gmp_init("foo",3));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
     var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
-} catch (\TypeError $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 

@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 File Creation open("c") with existing file
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";
@@ -39,6 +41,6 @@ require(__DIR__ .'/clean.inc');
 database handler: db4
 int(14)
 
-Warning: dba_open(%stest0.dbm,c): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_003.php on line %d
+Warning: dba_open(): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_003.php on line %d
 Error creating %stest0.dbm
 Dummy contents

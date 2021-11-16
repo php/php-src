@@ -1,7 +1,7 @@
 --TEST--
 Check for number base recognition
---SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
         /* Binary */
@@ -25,7 +25,7 @@ Check for number base recognition
         $test[] = gmp_init("0x4d2", 16);
         try {
             $test[] = gmp_init("4d2");
-        } catch (\TypeError $e) {
+        } catch (\ValueError $e) {
             echo $e->getMessage() . \PHP_EOL;
         }
         $test[] = gmp_init("4d2", 16);

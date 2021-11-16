@@ -19,13 +19,10 @@ $instanceWithNoProperties = new AnotherClass();
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
 
 echo "\nProtected property:\n";
-try {
-    $propInfo = new ReflectionProperty('TestClass', 'prot');
-    var_dump($propInfo->setValue($instance, "NewValue"));
-}
-catch(Exception $exc) {
-    echo $exc->getMessage();
-}
+
+$propInfo = new ReflectionProperty('TestClass', 'prot');
+$propInfo->setValue($instance, "NewValue");
+var_dump($propInfo->getValue($instance));
 
 echo "\n\nInstance without property:\n";
 $propInfo = new ReflectionProperty('TestClass', 'pub2');
@@ -34,7 +31,8 @@ var_dump($instanceWithNoProperties->pub2);
 ?>
 --EXPECT--
 Protected property:
-Cannot access non-public property TestClass::$prot
+string(8) "NewValue"
+
 
 Instance without property:
 NULL

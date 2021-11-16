@@ -1,8 +1,9 @@
 --TEST--
 Bug #50194 (imagettftext broken on transparent background w/o alphablending)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!function_exists('imagettftext')) die('skip imagettftext() not available');
 //die('skip freetype issues');
 ?>

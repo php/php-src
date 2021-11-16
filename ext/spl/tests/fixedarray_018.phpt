@@ -5,7 +5,7 @@ SPL: FixedArray: overridden count()
 $obj = new SplFixedArray(2);
 var_dump(count($obj));
 class SplFixedArray2 extends SplFixedArray {
-    public function count() {
+    public function count(): int {
         return -parent::count();
     }
 }

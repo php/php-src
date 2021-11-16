@@ -1,8 +1,9 @@
 --TEST--
 mysqli_change_user() - SET NAMES
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))

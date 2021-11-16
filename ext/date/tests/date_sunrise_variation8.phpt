@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunrise() function : usage variation -  Checking with North and South poles when Sun is up and down all day
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 echo "*** Testing date_sunrise() : usage variation ***\n";

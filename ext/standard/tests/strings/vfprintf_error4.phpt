@@ -35,4 +35,4 @@ unlink( $file );
 --EXPECT--
 -- Testing vfprintf() function with other strangeties  --
 vfprintf(): Argument #1 ($stream) must be of type resource, string given
-Error found: Argument number must be greater than zero.
+Error found: Argument number specifier must be greater than zero and less than 2147483647.

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -108,24 +108,17 @@ static zend_object *php_create_incomplete_object(zend_class_entry *class_type)
 	return object;
 }
 
-PHPAPI void php_register_incomplete_class(void)
+PHPAPI void php_register_incomplete_class_handlers(void)
 {
-	zend_class_entry incomplete_class;
-
-	INIT_CLASS_ENTRY(incomplete_class, INCOMPLETE_CLASS, NULL);
-
-	incomplete_class.create_object = php_create_incomplete_object;
-
 	memcpy(&php_incomplete_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_incomplete_object_handlers.read_property = incomplete_class_get_property;
 	php_incomplete_object_handlers.has_property = incomplete_class_has_property;
 	php_incomplete_object_handlers.unset_property = incomplete_class_unset_property;
 	php_incomplete_object_handlers.write_property = incomplete_class_write_property;
 	php_incomplete_object_handlers.get_property_ptr_ptr = incomplete_class_get_property_ptr_ptr;
-    php_incomplete_object_handlers.get_method = incomplete_class_get_method;
+	php_incomplete_object_handlers.get_method = incomplete_class_get_method;
 
-	php_ce_incomplete_class = zend_register_internal_class(&incomplete_class);
-	php_ce_incomplete_class->ce_flags |= ZEND_ACC_FINAL;
+	php_ce_incomplete_class->create_object = php_create_incomplete_object;
 }
 /* }}} */
 

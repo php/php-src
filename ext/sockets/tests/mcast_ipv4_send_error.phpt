@@ -1,10 +1,10 @@
 --TEST--
 Multicast support: IPv4 send options with unusual values
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 $domain = AF_INET;
 $level = IPPROTO_IP;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP);

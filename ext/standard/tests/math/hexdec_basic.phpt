@@ -23,7 +23,7 @@ $values = array(0x123abc,
                 '011237',
                 true,
                 false,
-                null);
+                );
 for ($i = 0; $i < count($values); $i++) {
     $res = hexdec($values[$i]);
     var_dump($res);
@@ -50,5 +50,4 @@ int(51446064)
 int(18279)
 int(70199)
 int(1)
-int(0)
 int(0)

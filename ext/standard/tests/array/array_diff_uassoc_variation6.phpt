@@ -5,7 +5,7 @@ Test array_diff_uassoc() function : usage variation - Comparing floating points 
 echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
-$arr_float = array(0 => 1.00, 1.00 => 2.00);
+$arr_float = array(0 => 1.00, 1 => 2.00);
 $arr_string_int = array('1', '2');
 $arr_string_float = array('0' => '1.00', '1.00' => '2.00');
 

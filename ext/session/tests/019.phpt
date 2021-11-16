@@ -1,5 +1,7 @@
 --TEST--
 serializing references test case using globals
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

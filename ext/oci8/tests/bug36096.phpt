@@ -1,7 +1,7 @@
 --TEST--
 Bug #36096 (oci_result() returns garbage after oci_fetch() failed)
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

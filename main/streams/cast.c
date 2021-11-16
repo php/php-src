@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -293,7 +293,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (php_stream_is_filtered(stream)) {
-		php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
+		if (show_err) {
+			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
+		}
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
 		goto exit_success;

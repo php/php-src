@@ -1,9 +1,7 @@
 --TEST--
 Bug #72494 (imagecropauto out-of-bounds access)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require __DIR__ . '/func.inc';

@@ -1,5 +1,7 @@
 --TEST--
 DBA with persistent connections
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "flatfile";

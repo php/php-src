@@ -32,11 +32,6 @@ var_dump(set_file_buffer($fd, 50));
 var_dump(stream_set_chunk_size($fd, 42));
 var_dump(fwrite($fd, str_repeat('0', 70)));
 ?>
---CLEAN--
-<?php
-fclose($fd);
-unset($fd);
-?>
 --EXPECTF--
 bool(true)
 option: %d, %d, %d

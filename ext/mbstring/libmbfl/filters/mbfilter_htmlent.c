@@ -133,7 +133,7 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 	last:
 		CK((*filter->output_function)(';', filter->data));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_html_enc_flush(mbfl_convert_filter *filter)
@@ -276,7 +276,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 			}
 		}
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_html_dec_flush(mbfl_convert_filter *filter)

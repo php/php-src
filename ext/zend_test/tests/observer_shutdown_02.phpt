@@ -1,7 +1,7 @@
 --TEST--
 Observer: Function calls from a __destruct during shutdown are observable
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
@@ -16,33 +16,33 @@ class MyClass
     }
 }
 
-function bar() {
-    return 42;
+function bar($arg) {
+    return $arg;
 }
 
 function foo() {
-    bar();
-    return bar();
+    bar(41);
+    return bar(42);
 }
 
 $mc = new MyClass();
 
-echo 'Done: ' . bar() . PHP_EOL;
+echo 'Done: ' . bar(40) . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s/observer_shutdown_%d.php' -->
-<file '%s/observer_shutdown_%d.php'>
+<!-- init '%s%eobserver_shutdown_%d.php' -->
+<file '%s%eobserver_shutdown_%d.php'>
   <!-- init bar() -->
   <bar>
-  </bar:42>
-Done: 42
-</file '%s/observer_shutdown_%d.php'>
+  </bar:40>
+Done: 40
+</file '%s%eobserver_shutdown_%d.php'>
 <!-- init MyClass::__destruct() -->
 <MyClass::__destruct>
   <!-- init foo() -->
   <foo>
     <bar>
-    </bar:42>
+    </bar:41>
     <bar>
     </bar:42>
   </foo:42>

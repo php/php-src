@@ -1,5 +1,7 @@
 --TEST--
 collections and negative/too big element indexes
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -40,10 +42,10 @@ require __DIR__."/drop_type.inc";
 --EXPECTF--
 bool(true)
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [%d] must be in the range of %s to [0] in %s on line %d
 bool(false)
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [5000] must be in the range of %s to [0] in %s on line %d
 bool(false)
 bool(false)
 bool(false)

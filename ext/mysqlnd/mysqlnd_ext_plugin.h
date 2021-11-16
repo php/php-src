@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -49,73 +49,73 @@ struct st_mysqlnd_plugin_methods_xetters
 {
 	struct st_mnd_object_factory_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) *methods);
 	} object_factory;
 
 	struct st_mnd_connection_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn) *methods);
 	} connection;
 
 	struct st_mnd_connection_data_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) *methods);
 	} connection_data;
 
 	struct st_mnd_result_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) *methods);
 	} result;
 
 	struct st_mnd_unbuffered_result_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_unbuffered) *methods);
 	} unbuffered_result;
 
 	struct st_mnd_buffered_result_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered)* (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered)* (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) *methods);
 	} buffered_result;
 
 	struct st_mnd_stmt_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * methods);
 	} statement;
 
 	struct st_mnd_protocol_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)* (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)* (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory) *methods);
 	} protocol;
 
 	struct st_mnd_pfc_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_packet_frame_codec) * methods);
 	} pfc;
 
 	struct st_mnd_vio_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods);
 	} vio;
 
 	struct st_mnd_error_info_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) * methods);
 	} error_info;
 
 	struct st_mnd_command_xetters
 	{
-		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * (*get)();
+		MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * (*get)(void);
 		void (*set)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command) * methods);
 	} command;
 };

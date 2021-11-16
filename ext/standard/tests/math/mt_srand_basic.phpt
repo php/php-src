@@ -11,12 +11,12 @@ var_dump(mt_srand("500"));
 var_dump(mt_srand("500E3"));
 var_dump(mt_srand(true));
 var_dump(mt_srand(false));
-var_dump(mt_srand(NULL));
 ?>
---EXPECT--
+--EXPECTF--
 NULL
 NULL
-NULL
+
+Deprecated: Implicit conversion from float 500.1 to int loses precision in %s on line %d
 NULL
 NULL
 NULL

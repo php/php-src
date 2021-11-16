@@ -1,7 +1,7 @@
 --TEST--
 Bug #65544: mb title case conversion-first word in quotation isn't capitalized
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(mb_convert_case("\"or else it doesn't, you know. the name of the song is called 'haddocks' eyes.'\"", MB_CASE_TITLE));

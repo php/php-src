@@ -1,5 +1,7 @@
 --TEST--
 session_decode(); should not segfault
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

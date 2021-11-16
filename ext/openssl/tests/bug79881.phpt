@@ -1,5 +1,7 @@
 --TEST--
 Bug #79881: Memory leak in openssl_pkey_get_public()
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

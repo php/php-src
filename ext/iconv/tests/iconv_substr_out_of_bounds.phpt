@@ -1,7 +1,7 @@
 --TEST--
 iconv_substr() with out of bounds offset
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 

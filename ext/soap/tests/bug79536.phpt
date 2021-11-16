@@ -1,7 +1,7 @@
 --TEST--
 Bug #79536 (zend_clear_exception prevent exception's destructor to be called)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

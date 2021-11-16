@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -663,8 +663,8 @@ void php_oci_lob_free (php_oci_descriptor *descriptor)
 		if (zend_hash_num_elements(descriptor->connection->descriptors) == 0) {
 			descriptor->connection->descriptor_count = 0;
 		} else {
-            /* delete descriptor from the hash */
-            zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
+			/* delete descriptor from the hash */
+			zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 			if (descriptor->index + 1 == descriptor->connection->descriptor_count) {
 				/* If the descriptor being freed is the end-most one
 				 * allocated, then the descriptor_count is reduced so
@@ -752,7 +752,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 
 	return 0;
 }
- 	/* }}} */
+/* }}} */
 
 /* {{{ php_oci_lob_append()
  Append data to the end of the LOB */

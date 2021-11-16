@@ -154,7 +154,7 @@ int mbfl_filt_conv_ucs2_wchar(int c, mbfl_convert_filter *filter)
 			}
 		}
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter)
@@ -166,7 +166,7 @@ int mbfl_filt_conv_ucs2be_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		CK((*filter->output_function)((c & 0xFF) | filter->cache, filter->data));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter)
@@ -177,7 +177,7 @@ int mbfl_filt_conv_wchar_ucs2be(int c, mbfl_convert_filter *filter)
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter)
@@ -189,7 +189,7 @@ int mbfl_filt_conv_ucs2le_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		CK((*filter->output_function)(((c & 0xFF) << 8) | filter->cache, filter->data));
 	}
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
@@ -200,14 +200,14 @@ int mbfl_filt_conv_wchar_ucs2le(int c, mbfl_convert_filter *filter)
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {

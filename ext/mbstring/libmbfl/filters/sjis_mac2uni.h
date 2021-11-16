@@ -253,7 +253,7 @@ static const unsigned short code_tbl_m[][6] = {
 	{0x0523, 0xf862, 0x8ca1, 0x56e3, 0x6cd5, 0x4eba},
 };
 
-static  int code_tbl_m_len = sizeof(code_tbl_m)/(sizeof(unsigned short)*6);
+static int code_tbl_m_len = sizeof(code_tbl_m)/(sizeof(unsigned short)*6);
 
 static const unsigned short s_form_tbl[] = {
 	0x2010,0x2016,0x2026,

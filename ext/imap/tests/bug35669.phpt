@@ -1,9 +1,7 @@
 --TEST--
 Bug #35669 (imap_mail_compose() crashes with multipart-multiboundary-email)
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $envelope["from"] = 'Santa <somewhere@northpole.gov>';

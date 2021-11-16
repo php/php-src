@@ -4,9 +4,10 @@ Bug #65915 (Inconsistent results with require return value)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=0
+--EXTENSIONS--
+opcache
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 // We don't invalidate the file after the second write.
 if (getenv('SKIP_REPEAT')) die("skip Not repeatable");
 ?>

@@ -73,12 +73,12 @@ string(0) ""
 -- Iteration 2 --
 string(0) ""
 -- Iteration 3 --
-string(103) "<html>Roy&#039;s height > Sam&#039;s height
+string(93) "<html>Roy's height > Sam's height
 13 < 25
 1111 & 0000 = 0000
 "This is a double quoted string""
 -- Iteration 4 --
-string(130) "<html>Roy&#039;s height > Sam	&#039;s height
+string(120) "<html>Roy's height > Sam	's height
 1111		 & 0000 = 0000
 " heredoc
 double quoted string. withdifferentwhitespaces""
@@ -87,8 +87,8 @@ string(62) "<html>11 < 12. 123 string 4567
 "string" 1111	 & 0000	 = 0000
 ;"
 -- Iteration 6 --
-string(153) "<html>< This's a string with quotes:
+string(143) "<html>< This's a string with quotes:
 "strings in double quote" &
 'strings in single quote' "
-this\line is &#039;single quoted&#039; /with\slashes </html>"
+this\line is 'single quoted' /with\slashes </html>"
 Done

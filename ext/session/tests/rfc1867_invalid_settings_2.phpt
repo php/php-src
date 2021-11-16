@@ -3,6 +3,8 @@ session rfc1867 invalid settings 2
 --INI--
 session.upload_progress.freq=200%
 error_log=
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
 include('skipif.inc');

@@ -1,8 +1,9 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: interleaved with DBMS_OUTPUT
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -59,7 +60,7 @@ function getdbmsoutput_do($c)
     $s = oci_parse($c, "begin dbms_output.get_line(:ln, :st); end;");
     oci_bind_by_name($s, ":ln", $ln, 100);
     oci_bind_by_name($s, ":st", $st, -1, SQLT_INT);
-    $res = false;
+    $res = [];
     while (($succ = oci_execute($s)) && !$st) {
         $res[] = $ln;  // append each line to the array
     }

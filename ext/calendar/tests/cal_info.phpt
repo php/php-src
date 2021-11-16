@@ -2,8 +2,8 @@
 cal_info()
 --INI--
 date.timezone=UTC
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
   print_r(cal_info());

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -172,10 +172,10 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 	}
 }
 
-PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage)
+PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, int codepage)
 {
 	OLECHAR *olestring = NULL;
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 	switch (V_VT(v)) {
 		case VT_EMPTY:
@@ -271,9 +271,9 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 }
 
 
-PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
+PHP_COM_DOTNET_API zend_result php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 {
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 	switch (V_VT(dstvar) & ~VT_BYREF) {
 	case VT_EMPTY:
@@ -384,14 +384,14 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		} else {
 			V_BOOL(dstvar) = V_BOOL(srcvar);
 		}
-        break;
+		break;
 
 	case VT_BSTR:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_BSTRREF(dstvar) = V_BSTR(srcvar);
 		} else {
 			V_BSTR(dstvar) = V_BSTR(srcvar);
-        }
+		}
 		break;
 
 	case VT_UNKNOWN:
@@ -510,7 +510,7 @@ PHP_FUNCTION(variant_set)
 		obj->typeinfo = NULL;
 	}
 	if (obj->sink_dispatch) {
-		php_com_object_enable_event_sink(obj, FALSE);
+		php_com_object_enable_event_sink(obj, /* enable */ false);
 		IDispatch_Release(obj->sink_dispatch);
 		obj->sink_dispatch = NULL;
 	}

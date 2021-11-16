@@ -519,11 +519,6 @@ display_startup_errors = On
 ; https://php.net/log-errors
 log_errors = On
 
-; Set maximum length of log_errors. In error_log information about the source is
-; added. The default is 1024 and 0 allows to not apply any maximum length at all.
-; https://php.net/log-errors-max-len
-log_errors_max_len = 1024
-
 ; Do not log repeated messages. Repeated errors must occur in same file on same
 ; line unless ignore_repeated_source is set true.
 ; https://php.net/ignore-repeated-errors
@@ -1151,6 +1146,10 @@ mysqli.max_persistent = -1
 ; https://php.net/mysqli.allow_local_infile
 ;mysqli.allow_local_infile = On
 
+; It allows the user to specify a folder where files that can be sent via LOAD DATA
+; LOCAL can exist. It is ignored if mysqli.allow_local_infile is enabled.
+;mysqli.local_infile_directory =
+
 ; Allow or prevent persistent links.
 ; https://php.net/mysqli.allow-persistent
 mysqli.allow_persistent = On
@@ -1189,6 +1188,11 @@ mysqli.default_pw =
 
 ; Allow or prevent reconnect
 mysqli.reconnect = Off
+
+; If this option is enabled, closing a persistent connection will rollback
+; any pending transactions of this connection, before it is put back
+; into the persistent connection pool.
+;mysqli.rollback_on_cached_plink = Off
 
 [mysqlnd]
 ; Enable / Disable collection of general statistics by mysqlnd which can be
@@ -1250,7 +1254,7 @@ mysqlnd.collect_memory_statistics = On
 ;oci8.ping_interval = 60
 
 ; Connection: Set this to a user chosen connection class to be used
-; for all pooled server requests with Oracle 11g Database Resident
+; for all pooled server requests with Oracle Database Resident
 ; Connection Pooling (DRCP).  To use DRCP, this value should be set to
 ; the same string for all web servers running the same application,
 ; the database pool must be configured, and the connection string must
@@ -1267,10 +1271,17 @@ mysqlnd.collect_memory_statistics = On
 ; https://php.net/oci8.statement-cache-size
 ;oci8.statement_cache_size = 20
 
-; Tuning: Enables statement prefetching and sets the default number of
+; Tuning: Enables row prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
 ; https://php.net/oci8.default-prefetch
 ;oci8.default_prefetch = 100
+
+; Tuning: Sets the amount of LOB data that is internally returned from
+; Oracle Database when an Oracle LOB locator is initially retrieved as
+; part of a query. Setting this can improve performance by reducing
+; round-trips.
+; https://php.net/oci8.prefetch-lob-size
+; oci8.prefetch_lob_size = 0
 
 ; Compatibility. Using On means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.
@@ -1601,7 +1612,7 @@ zend.assertions = 1
 ; https://php.net/com.allow-dcom
 ;com.allow_dcom = true
 
-; autoregister constants of a component's typlib on com_load()
+; autoregister constants of a component's typelib on com_load()
 ; https://php.net/com.autoregister-typelib
 ;com.autoregister_typelib = true
 
@@ -1675,8 +1686,8 @@ zend.assertions = 1
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
-; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
-;mbstring.http_output_conv_mimetype=
+; Default: mbstring.http_output_conv_mimetypes=^(text/|application/xhtml\+xml)
+;mbstring.http_output_conv_mimetypes=
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.

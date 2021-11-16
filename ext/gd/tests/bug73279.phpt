@@ -1,8 +1,9 @@
 --TEST--
 Bug #73279 (Integer overflow in gdImageScaleBilinearPalette())
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.4', '<')) {
     die('skip only for bundled libgd or external libgd >= 2.2.4');
 }

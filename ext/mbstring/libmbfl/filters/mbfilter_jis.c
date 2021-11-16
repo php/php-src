@@ -33,13 +33,15 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter);
+
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
 	"JIS",
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_jis_wchar,
 	&vtbl_wchar_jis
 };
@@ -50,7 +52,7 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022jp_wchar,
 	&vtbl_wchar_2022jp
 };
@@ -61,7 +63,7 @@ const struct mbfl_convert_vtbl vtbl_jis_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -81,7 +83,7 @@ const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
 	mbfl_filt_conv_common_ctor,
 	NULL,
 	mbfl_filt_conv_jis_wchar,
-	mbfl_filt_conv_common_flush,
+	mbfl_filt_conv_jis_wchar_flush,
 	NULL,
 };
 
@@ -133,9 +135,7 @@ retry:
 		} else if (c > 0xa0 && c < 0xe0) {	/* GR kana */
 			CK((*filter->output_function)(0xfec0 + c, filter->data));
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -152,10 +152,9 @@ retry:
 				} else {
 					w = 0;
 				}
+
 				if (w <= 0) {
-					w = (c1 << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0208;
+					w = MBFL_BAD_INPUT;
 				}
 			} else {
 				if (s >= 0 && s < jisx0212_ucs_table_size) {
@@ -163,22 +162,14 @@ retry:
 				} else {
 					w = 0;
 				}
+
 				if (w <= 0) {
-					w = (c1 << 8) | c;
-					w &= MBFL_WCSPLANE_MASK;
-					w |= MBFL_WCSPLANE_JIS0212;
+					w = MBFL_BAD_INPUT;
 				}
 			}
 			CK((*filter->output_function)(w, filter->data));
-		} else if (c == 0x1b) {
-			filter->status += 2;
-		} else if ((c >= 0 && c < 0x21) || c == 0x7f) {		/* CTLs */
-			CK((*filter->output_function)(c, filter->data));
 		} else {
-			w = (c1 << 8) | c;
-			w &= MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -195,7 +186,7 @@ retry:
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			goto retry;
 		}
 		break;
@@ -213,7 +204,7 @@ retry:
 			filter->status++;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			goto retry;
 		}
@@ -232,7 +223,7 @@ retry:
 			filter->status = 0x90;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x24, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
@@ -254,18 +245,25 @@ retry:
 			filter->status = 0x20;
 		} else {
 			filter->status &= ~0xf;
-			CK((*filter->output_function)(0x1b, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(0x28, filter->data));
 			goto retry;
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
+}
+
+static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
+{
+	if ((filter->status & 0xF) == 1) {
+		/* 2-byte (JIS X 0208 or 0212) character was truncated */
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+	}
+	return 0;
 }
 
 /*
@@ -278,6 +276,8 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 
 	if (c >= ucs_a1_jis_table_min && c < ucs_a1_jis_table_max) {
 		s = ucs_a1_jis_table[c - ucs_a1_jis_table_min];
+	} else if (c == 0x203E) { /* OVERLINE */
+		s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
 	} else if (c >= ucs_a2_jis_table_min && c < ucs_a2_jis_table_max) {
 		s = ucs_a2_jis_table[c - ucs_a2_jis_table_min];
 	} else if (c >= ucs_i_jis_table_min && c < ucs_i_jis_table_max) {
@@ -288,8 +288,6 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 	if (s <= 0) {
 		if (c == 0xa5) {		/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
@@ -318,14 +316,6 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 			}
 			filter->status = 0;
 			CK((*filter->output_function)(s, filter->data));
-		} else if (s < 0x100) { /* kana */
-			if ((filter->status & 0xff00) != 0x100) {
-				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
-				CK((*filter->output_function)(0x28, filter->data));		/* '(' */
-				CK((*filter->output_function)(0x49, filter->data));		/* 'I' */
-			}
-			filter->status = 0x100;
-			CK((*filter->output_function)(s & 0x7f, filter->data));
 		} else if (s < 0x8080) { /* X 0208 */
 			if ((filter->status & 0xff00) != 0x200) {
 				CK((*filter->output_function)(0x1b, filter->data));		/* ESC */
@@ -358,7 +348,7 @@ mbfl_filt_conv_wchar_jis(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 
@@ -380,11 +370,10 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s = ucs_r_jis_table[c - ucs_r_jis_table_min];
 	}
+
 	if (s <= 0) {
 		if (c == 0xa5) {			/* YEN SIGN */
 			s = 0x1005c;
-		} else if (c == 0x203e) {	/* OVER LINE */
-			s = 0x1007e;
 		} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 			s = 0x2140;
 		} else if (c == 0x2225) {	/* PARALLEL TO */
@@ -437,7 +426,7 @@ mbfl_filt_conv_wchar_2022jp(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int

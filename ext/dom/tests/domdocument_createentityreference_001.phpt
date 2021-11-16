@@ -2,8 +2,8 @@
 DomDocument::CreateEntityReference() - Creates an entity reference with the appropriate name
 --CREDITS--
 Clint Priest @ PhpTek09
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
     $objDoc = new DomDocument();
@@ -13,4 +13,3 @@ Clint Priest @ PhpTek09
 ?>
 --EXPECT--
 Test
-	

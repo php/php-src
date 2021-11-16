@@ -40,7 +40,7 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->limit_extensions) {
 		fpm_worker_pool_free_limit_extensions(wp->limit_extensions);
 	}
-	fpm_unix_free_socket_premissions(wp);
+	fpm_unix_free_socket_permissions(wp);
 	free(wp);
 }
 /* }}} */
@@ -54,7 +54,7 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		fpm_worker_pool_config_free(wp->config);
 		fpm_children_free(wp->children);
 		if ((which & FPM_CLEANUP_CHILD) == 0 && fpm_globals.parent_pid == getpid()) {
-			fpm_scoreboard_free(wp->scoreboard);
+			fpm_scoreboard_free(wp);
 		}
 		fpm_worker_pool_free(wp);
 	}

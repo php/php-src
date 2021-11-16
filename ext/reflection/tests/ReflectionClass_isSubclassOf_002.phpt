@@ -35,10 +35,12 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
 Test bad arguments:
 ReflectionClass::isSubclassOf() expects exactly 1 argument, 0 given
 ReflectionClass::isSubclassOf() expects exactly 1 argument, 2 given
+
+Deprecated: ReflectionClass::isSubclassOf(): Passing null to parameter #1 ($class) of type ReflectionClass|string is deprecated in %s on line %d
 Class "" does not exist
 Class "ThisClassDoesNotExist" does not exist
 Class "2" does not exist

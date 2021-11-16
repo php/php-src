@@ -24,8 +24,10 @@ var_dump($_POST);
 --EXPECTF--
 array(1) {
   ["pics"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(12) "bug37276.txt"
+    ["full_path"]=>
     string(12) "bug37276.txt"
     ["type"]=>
     string(10) "text/plain"

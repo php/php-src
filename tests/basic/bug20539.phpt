@@ -1,7 +1,8 @@
 --TEST--
 Bug #20539 (PHP CLI Segmentation Fault)
+--EXTENSIONS--
+session
 --SKIPIF--
-<?php if (!extension_loaded("session")) die("skip session extension not available"); ?>
 <?php if (file_exists(__DIR__. '/sess_' .session_id())) unlink(__DIR__. '/sess_' .session_id()); ?>
 --INI--
 session.auto_start=1

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -2188,7 +2188,7 @@ static int parse_specifier_qualifier_list(int sym, zend_ffi_dcl *dcl) {
 		} else {
 			yy_error_sym("unexpected", sym);
 		}
-	} while ((YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\377\377\107\360\017\000\000\000\002\000")) && (sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text)));
+	} while ((YY_IN_SET(sym, (YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\376\377\377\107\360\017\000\000\000\002\000")) && (sym != YY_ID || zend_ffi_is_typedef_name((const char*)yy_text, yy_pos - yy_text) || (dcl->flags & ZEND_FFI_DCL_TYPE_SPECIFIERS) == 0));
 	return sym;
 }
 
@@ -2569,7 +2569,7 @@ static int parse_enumerator(int sym, zend_ffi_dcl *enum_dcl, int64_t *min, int64
 
 static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2598,7 +2598,7 @@ static int parse_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_
 
 static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2623,7 +2623,7 @@ static int parse_abstract_declarator(int sym, zend_ffi_dcl *dcl) {
 
 static int parse_parameter_declarator(int sym, zend_ffi_dcl *dcl, const char **name, size_t *name_len) {
 	zend_ffi_dcl nested_dcl = {ZEND_FFI_DCL_CHAR, 0, 0, 0, NULL};
-	zend_bool nested = 0;
+	bool nested = 0;
 	if (sym == YY__STAR) {
 		sym = parse_pointer(sym, dcl);
 	}
@@ -2863,7 +2863,7 @@ _yy_state_119:
 static int parse_parameter_declaration(int sym, HashTable **args) {
 	const char *name = NULL;
 	size_t name_len = 0;
-	zend_bool old_allow_vla = FFI_G(allow_vla);
+	bool old_allow_vla = FFI_G(allow_vla);
 	FFI_G(allow_vla) = 1;
 	zend_ffi_dcl param_dcl = ZEND_FFI_ATTR_INIT;
 	sym = parse_specifier_qualifier_list(sym, &param_dcl);
@@ -2965,7 +2965,7 @@ static int parse_attrib(int sym, zend_ffi_dcl *dcl) {
 	size_t name_len;
 	int n;
 	zend_ffi_val val;
-	zend_bool orig_attribute_parsing;
+	bool orig_attribute_parsing;
 	if (sym == YY_ID || sym == YY_CONST || sym == YY___CONST || sym == YY___CONST__) {
 		if (sym == YY_ID) {
 			sym = parse_ID(sym, &name, &name_len);

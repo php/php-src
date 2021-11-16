@@ -1,7 +1,7 @@
 --TEST--
 DOMParentNode::append() with DOMNode from wrong document throws exception
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 require_once("dom_test.inc");

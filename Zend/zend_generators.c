@@ -115,7 +115,7 @@ static void zend_generator_cleanup_unfinished_execution(
 }
 /* }}} */
 
-ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution) /* {{{ */
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -226,6 +226,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
 			|| CG(unclean_shutdown)) {
+		zend_generator_close(generator, 0);
 		return;
 	}
 
@@ -265,7 +266,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 			/* TODO: If we hit another yield inside try/finally,
 			 * should we also jump to the next finally block? */
-			return;
+			break;
 		} else if (op_num < try_catch->finally_end) {
 			zval *fast_call =
 				ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[try_catch->finally_end].op1.var);
@@ -284,6 +285,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 		try_catch_offset--;
 	}
+
+	zend_generator_close(generator, 0);
 }
 /* }}} */
 
@@ -605,31 +608,46 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		HashTable *ht = Z_ARR(generator->values);
 		HashPosition pos = Z_FE_POS(generator->values);
 
-		Bucket *p;
-		do {
-			if (UNEXPECTED(pos >= ht->nNumUsed)) {
-				/* Reached end of array */
-				goto failure;
-			}
+		if (HT_IS_PACKED(ht)) {
+			do {
+				if (UNEXPECTED(pos >= ht->nNumUsed)) {
+					/* Reached end of array */
+					goto failure;
+				}
 
-			p = &ht->arData[pos];
-			value = &p->val;
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
-			}
-			pos++;
-		} while (Z_ISUNDEF_P(value));
+				value = &ht->arPacked[pos];
+				pos++;
+			} while (Z_ISUNDEF_P(value));
 
-		zval_ptr_dtor(&generator->value);
-		ZVAL_COPY(&generator->value, value);
+			zval_ptr_dtor(&generator->value);
+			ZVAL_COPY(&generator->value, value);
 
-		zval_ptr_dtor(&generator->key);
-		if (p->key) {
-			ZVAL_STR_COPY(&generator->key, p->key);
+			zval_ptr_dtor(&generator->key);
+			ZVAL_LONG(&generator->key, pos - 1);
 		} else {
-			ZVAL_LONG(&generator->key, p->h);
-		}
+			Bucket *p;
 
+			do {
+				if (UNEXPECTED(pos >= ht->nNumUsed)) {
+					/* Reached end of array */
+					goto failure;
+				}
+
+				p = &ht->arData[pos];
+				value = &p->val;
+				pos++;
+			} while (Z_ISUNDEF_P(value));
+
+			zval_ptr_dtor(&generator->value);
+			ZVAL_COPY(&generator->value, value);
+
+			zval_ptr_dtor(&generator->key);
+			if (p->key) {
+				ZVAL_STR_COPY(&generator->key, p->key);
+			} else {
+				ZVAL_LONG(&generator->key, p->h);
+			}
+		}
 		Z_FE_POS(generator->values) = pos;
 	} else {
 		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator->values);
@@ -711,7 +729,7 @@ try_again:
 			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 			return;
 		}
-		/* If there are no more deletegated values, resume the generator
+		/* If there are no more delegated values, resume the generator
 		 * after the "yield from" expression. */
 	}
 
@@ -860,9 +878,7 @@ ZEND_METHOD(Generator, current)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->value) != IS_UNDEF)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -880,9 +896,7 @@ ZEND_METHOD(Generator, key)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data != NULL && Z_TYPE(root->key) != IS_UNDEF)) {
-		zval *key = &root->key;
-
-		ZVAL_COPY_DEREF(return_value, key);
+		RETURN_COPY_DEREF(&root->key);
 	}
 }
 /* }}} */
@@ -931,9 +945,7 @@ ZEND_METHOD(Generator, send)
 
 	root = zend_generator_get_current(generator);
 	if (EXPECTED(generator->execute_data)) {
-		zval *value = &root->value;
-
-		ZVAL_COPY_DEREF(return_value, value);
+		RETURN_COPY_DEREF(&root->value);
 	}
 }
 /* }}} */
@@ -963,9 +975,7 @@ ZEND_METHOD(Generator, throw)
 
 		root = zend_generator_get_current(generator);
 		if (generator->execute_data) {
-			zval *value = &root->value;
-
-			ZVAL_COPY_DEREF(return_value, value);
+			RETURN_COPY_DEREF(&root->value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
@@ -1115,17 +1125,9 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 void zend_register_generator_ce(void) /* {{{ */
 {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "Generator", class_Generator_methods);
-	zend_ce_generator = zend_register_internal_class(&ce);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_ce_generator = register_class_Generator(zend_ce_iterator);
 	zend_ce_generator->create_object = zend_generator_create;
-	zend_ce_generator->serialize = zend_class_serialize_deny;
-	zend_ce_generator->unserialize = zend_class_unserialize_deny;
-
 	/* get_iterator has to be assigned *after* implementing the interface */
-	zend_class_implements(zend_ce_generator, 1, zend_ce_iterator);
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 
 	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1135,7 +1137,6 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_generator_handlers.clone_obj = NULL;
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 
-	INIT_CLASS_ENTRY(ce, "ClosedGeneratorException", NULL);
-	zend_ce_ClosedGeneratorException = zend_register_internal_class_ex(&ce, zend_ce_exception);
+	zend_ce_ClosedGeneratorException = register_class_ClosedGeneratorException(zend_ce_exception);
 }
 /* }}} */

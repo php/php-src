@@ -9,11 +9,6 @@ echo "*** Test readfile(): error conditions ***\n";
 echo "\n-- Testing readfile() with invalid arguments --\n";
 // invalid arguments
 try {
-    var_dump( readfile(NULL) );  // NULL as $filename
-} catch (\ValueError $e) {
-    echo $e->getMessage() . \PHP_EOL;
-}
-try {
     var_dump( readfile('') );  // empty string as $filename
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
@@ -34,7 +29,6 @@ echo "Done\n";
 *** Test readfile(): error conditions ***
 
 -- Testing readfile() with invalid arguments --
-Path cannot be empty
 Path cannot be empty
 Path cannot be empty
 

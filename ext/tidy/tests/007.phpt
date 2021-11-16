@@ -1,7 +1,7 @@
 --TEST--
 Verbose  tidy_getopt()
---SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+--EXTENSIONS--
+tidy
 --INI--
 tidy.default_config=
 --FILE--
@@ -27,7 +27,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Current Value of 'tidy-mark': bool(false)
 Current Value of 'error-file': string(0) ""
 Current Value of 'tab-size': int(8)

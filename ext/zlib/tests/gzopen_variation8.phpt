@@ -1,11 +1,7 @@
 --TEST--
 Test gzopen() function : variation: opening a plain file
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 echo "*** Testing gzopen() : variation ***\n";

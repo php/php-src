@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 26: setObject
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 class Foo {

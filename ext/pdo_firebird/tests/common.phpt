@@ -1,12 +1,15 @@
 --TEST--
 FIREBIRD
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo_firebird')) print 'skip'; ?>
+?>
 --REDIRECTTEST--
 # magic auto-configuration
 
 $config = array(
+	'ENV' => ['LSAN_OPTIONS' => 'detect_leaks=0'],
 	'TESTS' => 'ext/pdo/tests'
 );
 	

@@ -1,7 +1,7 @@
 --TEST--
 Bug #34643 (wsdl default value)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -15,6 +15,7 @@ class fp {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -22,7 +23,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->setClass('fp');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

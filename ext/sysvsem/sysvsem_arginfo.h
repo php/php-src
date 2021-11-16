@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 745e7cf135c7d1c9ad09d1ea1ab6cf2a8181433a */
+ * Stub hash: 946ea9d0d2156ced1bac460d7d5fc3420e1934bb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_sem_get, 0, 1, SysvSemaphore, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -38,3 +38,14 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_SysvSemaphore_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SysvSemaphore(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}

@@ -7,7 +7,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 ?>
 --FILE--
 <?php
-chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
+chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
 echo "ALIVE\n";
 ?>
 --EXPECTF--

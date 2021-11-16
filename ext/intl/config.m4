@@ -69,6 +69,8 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_create.cpp \
     dateformat/dateformat_attrcpp.cpp \
     dateformat/dateformat_helpers.cpp \
+    dateformat/datepatterngenerator_class.cpp \
+    dateformat/datepatterngenerator_methods.cpp \
     msgformat/msgformat_helpers.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \

@@ -1,5 +1,7 @@
 --TEST--
 DBA Sync Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once __DIR__ .'/skipif.inc';

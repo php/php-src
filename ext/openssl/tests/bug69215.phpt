@@ -1,8 +1,9 @@
 --TEST--
 Bug #69215: Crypto servers should send client CA list
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--

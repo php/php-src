@@ -27,15 +27,15 @@ echo "\n*** Testing possible variations of count() function on arrays ***";
 $count_array = array(
   array(),
   array( 1 => "string"),
-  array( "" => "string", 0 => "a", NULL => "b", -1.00 => "c",
+  array( "" => "string", 0 => "a", NULL => "b", -1 => "c",
          array(array(array(NULL)))),
-  array( -2.44444 => 12, array(array(1, 2, array(array("0"))))),
+  array( -2 => 12, array(array(1, 2, array(array("0"))))),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
   array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
      NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
-  array( NULL, 1.23 => "Hi", "string" => "hello",
+  array( NULL, 1 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -58,7 +58,7 @@ class count_class implements Countable {
   public $var_public;
   protected $var_protected;
 
-  public function count() {
+  public function count(): int {
     return 3;
   }
 }
@@ -88,7 +88,7 @@ var_dump(count($arr, COUNT_RECURSIVE));
 fclose( $resource1 );
 closedir( $resource2 );
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functionality of count() function ***
 -- Testing arrays --
 COUNT_NORMAL: should be 2, is 2

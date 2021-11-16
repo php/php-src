@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL old api
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -8,7 +10,7 @@ PostgreSQL old api
 include('config.inc');
 
 $db = pg_connect($conn_str);
-$result = pg_exec("SELECT * FROM ".$table_name);
+$result = pg_exec($db, "SELECT * FROM ".$table_name);
 pg_numrows($result);
 pg_numfields($result);
 pg_fieldname($result, 0);
@@ -18,11 +20,11 @@ pg_fieldprtlen($result, 0);
 pg_fieldisnull($result, 0);
 
 pg_result($result,0,0);
-$result = pg_exec("INSERT INTO ".$table_name." VALUES (7777, 'KKK')");
+$result = pg_exec($db, "INSERT INTO ".$table_name." VALUES (7777, 'KKK')");
 $oid = pg_getlastoid($result);
 pg_freeresult($result);
-pg_errormessage();
-$result = pg_exec("UPDATE ".$table_name." SET str = 'QQQ' WHERE str like 'RGD';");
+pg_errormessage($db);
+$result = pg_exec($db, "UPDATE ".$table_name." SET str = 'QQQ' WHERE str like 'RGD';");
 pg_cmdtuples($result);
 
 

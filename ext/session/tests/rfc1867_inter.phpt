@@ -15,6 +15,8 @@ session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=1%
 session.upload_progress.min_freq=0.000000001
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --COOKIE--
@@ -57,8 +59,10 @@ session_destroy();
 string(%d) "rfc1867-inter"
 array(2) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""
@@ -70,8 +74,10 @@ array(2) {
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file2.txt"
+    ["full_path"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""

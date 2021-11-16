@@ -1,7 +1,7 @@
 --TEST--
 openssl_get_cert_locations() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 // openssl locations differ per distro.

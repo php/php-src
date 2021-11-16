@@ -1,7 +1,7 @@
 --TEST--
 Phar: create and modify tar-based phar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 opcache.validate_timestamps=1

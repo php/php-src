@@ -1,9 +1,7 @@
 --TEST--
 DOMNode::normalize()
---SKIPIF--
-<?php
-include('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

@@ -1,8 +1,9 @@
 --TEST--
 Bug #44327 (PDORow::queryString property & numeric offsets / Crash)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -11,6 +12,7 @@ $db = MySQLPDOTest::factory();
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     $stmt = $db->prepare("SELECT 1 AS \"one\"");
     $stmt->execute();
@@ -51,7 +53,7 @@ string(1) "1"
 string(1) "1"
 string(17) "SELECT 1 AS "one""
 ----------------------------------
-object(PDORow)#%d (2) {
+object(PDORow)#5 (2) {
   ["queryString"]=>
   string(19) "SELECT id FROM test"
   ["id"]=>

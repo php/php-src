@@ -1,8 +1,9 @@
 --TEST--
 Bug #43828 (broken transparency of imagearc for truecolor in blendingmode)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip ext/gd not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.2', '<')) {
     die("skip test requires GD 2.2.2 or higher");
 }

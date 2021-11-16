@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_pconnect() with oci_close() and oci8.old_oci_close_semantics ON
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=1
 oci8.connection_class=test
@@ -37,6 +37,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Deprecated: Directive oci8.old_oci_close_semantics is deprecated%s
 This is with a OCI_PCONNECT
 resource(%d) of type (oci8 persistent connection)
 resource(%d) of type (oci8 persistent connection)

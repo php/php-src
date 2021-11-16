@@ -49,17 +49,6 @@ ZEND_API zval* zend_call_method(zend_object *object, zend_class_entry *obj_ce, z
 #define zend_call_method_with_2_params(obj, obj_ce, fn_proxy, function_name, retval, arg1, arg2) \
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2)
 
-#define REGISTER_MAGIC_INTERFACE(class_name, class_name_str) \
-	{\
-		zend_class_entry ce;\
-		INIT_CLASS_ENTRY(ce, # class_name_str, class_ ## class_name_str ## _methods) \
-		zend_ce_ ## class_name = zend_register_internal_interface(&ce);\
-		zend_ce_ ## class_name->interface_gets_implemented = zend_implement_ ## class_name;\
-	}
-
-#define REGISTER_MAGIC_IMPLEMENT(class_name, interface_name) \
-	zend_class_implements(zend_ce_ ## class_name, 1, zend_ce_ ## interface_name)
-
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter);
 ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key);
@@ -74,9 +63,6 @@ ZEND_API void zend_register_interfaces(void);
 
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
-
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
 
 ZEND_API zend_result zend_create_internal_iterator_zval(zval *return_value, zval *obj);
 

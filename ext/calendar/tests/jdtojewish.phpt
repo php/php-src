@@ -1,7 +1,7 @@
 --TEST--
 jdtojewish() function
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 

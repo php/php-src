@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -153,7 +153,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 					case '}':
 					case '\\':
 						*p++ = '\\';
-						/* break missing intentionally */
+						ZEND_FALLTHROUGH;
 					default:
 						*p++ = *c++;
 				}
@@ -185,10 +185,12 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 				return;
 			}
 #ifdef HAVE_PCRE_JIT_SUPPORT
-			if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
-				/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
-				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
-				zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+			if (PCRE_G(jit)) {
+				if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
+					/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
+					pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
+					zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+				}
 			}
 #endif
 			/* prepare for the next iteration */
@@ -344,7 +346,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_blacklist_update_regexp(blacklist);
 }
 
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
+bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;

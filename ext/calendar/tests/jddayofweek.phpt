@@ -1,7 +1,7 @@
 --TEST--
 jddayofweek()
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 foreach (array(2440588, 2452162, 2453926, -1000) as $jd) {

@@ -1,11 +1,7 @@
 --TEST--
 Test incremental deflate_add() error functionality
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $badResource = fopen("php://memory", "r+");

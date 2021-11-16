@@ -1,8 +1,9 @@
 --TEST--
 Bug #39457 (Multiple invoked OO connections never close)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

@@ -5,8 +5,8 @@ The default value is false in the parent class method's signature.
 
 interface MyDateTimeInterface extends DateTimeInterface
 {
-    public function diff();
+    public function diff(): DateInterval;
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of MyDateTimeInterface::diff() must be compatible with DateTimeInterface::diff(DateTimeInterface $targetObject, bool $absolute = false) in %s on line %d
+Fatal error: Declaration of MyDateTimeInterface::diff(): DateInterval must be compatible with DateTimeInterface::diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval in %s on line %d

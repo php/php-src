@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -117,7 +117,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
 	zend_ini_entry *ini_entry;
-	zend_bool first = 1;
+	bool first = 1;
 
 	if (module) {
 		module_number = module->module_number;
@@ -125,7 +125,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
 		if (ini_entry->module_number != module_number) {
 			continue;
 		}
@@ -200,10 +200,10 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				}
 
 				/* PHP and Zend extensions are not added into configuration hash! */
-				if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
+				if (!is_special_section && zend_string_equals_literal_ci(Z_STR_P(arg1), PHP_EXTENSION_TOKEN)) { /* load PHP extension */
 					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					zend_llist_add_element(&extension_lists.functions, &extension_name);
-				} else if (!is_special_section && !strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
+				} else if (!is_special_section && zend_string_equals_literal_ci(Z_STR_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
 					extension_name = estrndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 					zend_llist_add_element(&extension_lists.engine, &extension_name);
 
@@ -404,8 +404,6 @@ int php_init_config(void)
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_string *opened_path = NULL;
-	FILE *fp;
-	const char *filename;
 
 	zend_hash_init(&configuration_hash, 8, NULL, config_zval_dtor, 1);
 
@@ -557,8 +555,9 @@ int php_init_config(void)
 	 * Find and open actual ini file
 	 */
 
-	fp = NULL;
-	filename = NULL;
+	FILE *fp = NULL;
+	char *filename = NULL;
+	bool free_filename = false;
 
 	/* If SAPI does not want to ignore all ini files OR an overriding file/path is given.
 	 * This allows disabling scanning for ini files in the PHP_CONFIG_FILE_SCAN_DIR but still
@@ -574,6 +573,7 @@ int php_init_config(void)
 					fp = VCWD_FOPEN(php_ini_file_name, "r");
 					if (fp) {
 						filename = expand_filepath(php_ini_file_name, NULL);
+						free_filename = true;
 					}
 				}
 			}
@@ -616,14 +616,17 @@ int php_init_config(void)
 		{
 			zval tmp;
 
-			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
+			ZVAL_NEW_STR(&tmp, zend_string_init(filename, strlen(filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
 				zend_string_release_ex(opened_path, 0);
-			} else {
-				efree((char *)fh.filename);
 			}
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		}
+		zend_destroy_file_handle(&fh);
+
+		if (free_filename) {
+			efree(filename);
 		}
 	}
 
@@ -693,6 +696,7 @@ int php_init_config(void)
 									zend_llist_add_element(&scanned_ini_list, &p);
 								}
 							}
+							zend_destroy_file_handle(&fh);
 						}
 					}
 					free(namelist[i]);
@@ -771,17 +775,30 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename
 	if (VCWD_STAT(ini_file, &sb) == 0) {
 		if (S_ISREG(sb.st_mode)) {
 			zend_file_handle fh;
+			int ret = FAILURE;
+
 			zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
 			if (fh.handle.fp) {
 				/* Reset active ini section */
 				RESET_ACTIVE_INI_HASH();
 
-				if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, target_hash) == SUCCESS) {
+#if ZEND_RC_DEBUG
+				/* User inis are parsed during SAPI activate (part of the request),
+				 * but persistently allocated to allow caching. This is fine as long as
+				 * strings are duplicated in php_ini_activate_config(). */
+				bool orig_rc_debug = zend_rc_debug;
+				zend_rc_debug = false;
+#endif
+				ret = zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, target_hash);
+#if ZEND_RC_DEBUG
+				zend_rc_debug = orig_rc_debug;
+#endif
+				if (ret == SUCCESS) {
 					/* FIXME: Add parsed file to the list of user files read? */
-					return SUCCESS;
 				}
-				return FAILURE;
 			}
+			zend_destroy_file_handle(&fh);
+			return ret;
 		}
 	}
 	return FAILURE;
@@ -795,8 +812,10 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 	zval *data;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(source_hash, str, data) {
-		zend_alter_ini_entry_ex(str, Z_STR_P(data), modify_type, stage, 0);
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(source_hash, str, data) {
+		zend_string *data_str = zend_string_dup(Z_STR_P(data), 0);
+		zend_alter_ini_entry_ex(str, data_str, modify_type, stage, 0);
+		zend_string_release(data_str);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */

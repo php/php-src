@@ -1,5 +1,7 @@
 --TEST--
 If SIGQUIT and SIGTERM during reloading fail, SIGKILL should be sent
+--EXTENSIONS--
+pcntl
 --SKIPIF--
 <?php
 include "skipif.inc";

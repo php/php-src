@@ -4,8 +4,9 @@ Testing ftp_delete basic functionality
 Gabriel Caruso (carusogabriel34@gmail.com)
 Contributed by Ward Cappelle <wardcappelle@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
---SKIPIF--
-<?php require 'skipif.inc'; ?>
+--EXTENSIONS--
+ftp
+pcntl
 --FILE--
 <?php
 require 'server.inc';

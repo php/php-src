@@ -1,7 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Shmop {}
 
 function shmop_open(int $key, string $mode, int $permissions, int $size): Shmop|false {}

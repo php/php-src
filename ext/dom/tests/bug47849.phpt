@@ -1,7 +1,7 @@
 --TEST--
 Bug #47849 (Non-deep import loses the namespace).
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

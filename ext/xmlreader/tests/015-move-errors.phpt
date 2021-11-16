@@ -2,8 +2,8 @@
 XMLReader: libxml2 XML Reader, Move cursor to a named attribute within a namespace, with invalid arguments
 --CREDITS--
 Mark Baker mark@lange.demon.co.uk at the PHPNW2017 Conference for PHP Testfest 2017
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 // Set up test data in a new file
@@ -40,5 +40,6 @@ $reader->close();
 <?php
 unlink(__DIR__.'/015-move-errors.xml');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: XMLReader::moveToAttributeNs(): Passing null to parameter #2 ($namespace) of type string is deprecated in %s on line %d
 XMLReader::moveToAttributeNs(): Argument #2 ($namespace) cannot be empty

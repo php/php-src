@@ -4,6 +4,8 @@ Test session_module_name() function : variation
 session.save_path=
 session.name=PHPSESSID
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

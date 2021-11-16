@@ -21,7 +21,7 @@ f3($gen);
 
 ?>
 --EXPECTF--
-#0  f1() called at [%s:%d]
-#1  f2(foo, bar)
-#2  Generator->rewind() called at [%s:%d]
-#3  f3(Generator Object ()) called at [%s:%d]
+#0 %s(%d): f1()
+#1 [internal function]: f2('foo', 'bar')
+#2 %s(%d): Generator->rewind()
+#3 %s(%d): f3(Object(Generator))

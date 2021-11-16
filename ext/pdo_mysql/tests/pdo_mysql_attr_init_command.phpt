@@ -1,8 +1,9 @@
 --TEST--
 PDO::MYSQL_ATTR_INIT_COMMAND
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -24,6 +25,7 @@ error_reporting=E_ALL
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     var_dump($create);
     $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => $create));
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     $info = $db->errorInfo();
     var_dump($info[0]);

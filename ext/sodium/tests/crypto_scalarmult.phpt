@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium scalarmult
---SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+--EXTENSIONS--
+sodium
 --FILE--
 <?php
 $n = sodium_hex2bin("5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb");

@@ -1,7 +1,7 @@
 --TEST--
 mb_preferred_mime_name()
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 // TODO: Add more encoding names

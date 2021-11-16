@@ -3,8 +3,8 @@ DOMCharacterData::deleteData() with offset exceeding string size.
 --CREDITS--
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-24
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $document = new DOMDocument;

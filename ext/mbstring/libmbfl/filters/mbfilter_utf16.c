@@ -40,7 +40,7 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	"UTF-16",
 	mbfl_encoding_utf16_aliases,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16_wchar,
 	&vtbl_wchar_utf16
 };
@@ -51,7 +51,7 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	"UTF-16BE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16be_wchar,
 	&vtbl_wchar_utf16be
 };
@@ -62,7 +62,7 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	"UTF-16LE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16le_wchar,
 	&vtbl_wchar_utf16le
 };
@@ -147,10 +147,10 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 			if (n >= 0xD800 && n <= 0xDBFF) {
 				filter->cache = n & 0x3FF; /* Pick out 10 data bits */
 				filter->status = 2;
-				return c;
+				return 0;
 			} else if (n >= 0xDC00 && n <= 0xDFFF) {
 				/* This is wrong; second part of surrogate pair has come first */
-				CK((*filter->output_function)(n | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			} else if (n != 0xFEFF) {
 				CK((*filter->output_function)(n, filter->data));
 			}
@@ -158,7 +158,7 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
@@ -178,7 +178,7 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
 			/* This is wrong; second part of surrogate pair has come first */
-			CK((*filter->output_function)(n | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->status = 0;
 		} else {
 			CK((*filter->output_function)(n, filter->data));
@@ -195,7 +195,7 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 		n = ((filter->cache & 0xFF) << 8) | (c & 0xFF);
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* Wrong; that's the first half of a surrogate pair, not the second */
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
@@ -203,13 +203,13 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 8) | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter)
@@ -230,7 +230,7 @@ int mbfl_filt_conv_wchar_utf16be(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
@@ -249,11 +249,8 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache += ((c & 0x3) << 8);
 			filter->status = 2;
 		} else if ((c & 0xfc) == 0xdc) {
-			/* This is wrong; the second part of the surrogate pair has come first
-			 * Flag it with `MBFL_WCSGROUP_THROUGH`; the following filter will handle
-			 * the error */
-			n = (filter->cache + ((c & 0xff) << 8)) | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(n, filter->data));
+			/* This is wrong; the second part of the surrogate pair has come first */
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->status = 0;
 		} else {
 			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
@@ -269,7 +266,9 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 	case 3:
 		n = (filter->cache & 0xFF) | ((c & 0xFF) << 8);
 		if (n >= 0xD800 && n <= 0xDBFF) {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
+			/* We previously saw the first part of a surrogate pair and were
+			 * expecting the second part; this is another first part */
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
@@ -277,14 +276,16 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		} else {
-			CK((*filter->output_function)((0xD8 << 10) | (filter->cache >> 10) | MBFL_WCSGROUP_THROUGH, filter->data));
+			/* The first part of a surrogate pair was followed by some other codepoint
+			 * which is not part of a surrogate pair at all */
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
 		}
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
@@ -305,18 +306,14 @@ int mbfl_filt_conv_wchar_utf16le(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 {
-	int status = filter->status;
-	int cache = filter->cache;
-	filter->status = filter->cache = 0;
-
-	if (status) {
+	if (filter->status) {
 		/* Input string was truncated */
-		CK((*filter->output_function)(cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {

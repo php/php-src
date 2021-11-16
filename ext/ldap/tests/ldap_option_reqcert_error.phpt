@@ -2,9 +2,10 @@
 ldap_option_reqcert_error() - A test to check if ldap can't connect to a LDAP server with a invalid certificate with certificate checking enabled
 --CREDITS--
 Edwin Hoksberg <edwin@edwinhoksberg.nl>
+--EXTENSIONS--
+ldap
 --SKIPIF--
 <?php
-    require_once __DIR__ .'/skipif.inc';
     require_once __DIR__ .'/skipifbindfailure.inc';
 ?>
 --FILE--

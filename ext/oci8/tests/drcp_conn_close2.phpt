@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_connect() with oci_close() and oci8.old_oci_close_semantics OFF
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --INI--
 oci8.old_oci_close_semantics=0
 oci8.connection_class=test

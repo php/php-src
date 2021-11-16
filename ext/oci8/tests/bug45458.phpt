@@ -1,7 +1,7 @@
 --TEST--
 Bug #45458 (OCI8: Numeric keys for associative arrays are not handled properly)
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #41600 (url rewriter tags doesn't work with namespaced tags)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

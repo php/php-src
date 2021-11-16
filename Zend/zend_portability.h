@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@php.net>                                 |
    |          Zeev Suraski <zeev@php.net>                                 |
-   |          Dmitry Stogov <zeev@php.net>                                |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -111,6 +111,13 @@
 # define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); ZEND_ASSUME(0);} while (0)
 #else
 # define ZEND_UNREACHABLE() ZEND_ASSUME(0)
+#endif
+
+/* pseudo fallthrough keyword; */
+#if defined(__GNUC__) && __GNUC__ >= 7
+# define ZEND_FALLTHROUGH __attribute__((__fallthrough__))
+#else
+# define ZEND_FALLTHROUGH ((void)0)
 #endif
 
 /* Only use this macro if you know for sure that all of the switches values
@@ -245,7 +252,7 @@ char *alloca();
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 5000
-# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((unused));
 # define ZEND_ATTRIBUTE_COLD_LABEL __attribute__((cold));
 # define ZEND_ATTRIBUTE_HOT_LABEL __attribute__((hot));
 #else
@@ -272,6 +279,12 @@ char *alloca();
 # define ZEND_NORETURN __declspec(noreturn)
 #else
 # define ZEND_NORETURN
+#endif
+
+#if __has_attribute(force_align_arg_pointer)
+# define ZEND_STACK_ALIGNED __attribute__((force_align_arg_pointer))
+#else
+# define ZEND_STACK_ALIGNED
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
@@ -335,7 +348,7 @@ char *alloca();
 #if (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
-	zend_bool name;
+	bool name;
 # define SET_ALLOCA_FLAG(name) \
 	name = 1
 # define do_alloca_ex(size, limit, use_heap) \

@@ -1,9 +1,7 @@
 --TEST--
 Bind with various unsupported 10g+ bind types
---SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
-?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

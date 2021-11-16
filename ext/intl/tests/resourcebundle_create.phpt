@@ -1,7 +1,7 @@
 --TEST--
 Test ResourceBundle::__construct() - existing/missing bundles/locales
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

@@ -1,7 +1,5 @@
 --TEST--
 Union types in reflection
---INI--
-error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 
@@ -88,10 +86,10 @@ Allows null: false
   Name: int
   String: int
   Allows Null: false
-Type x|Y|int:
+Type X|Y|int:
 Allows null: false
-  Name: x
-  String: x
+  Name: X
+  String: X
   Allows Null: false
   Name: Y
   String: Y
@@ -99,13 +97,13 @@ Allows null: false
   Name: int
   String: int
   Allows Null: false
-Type x|y|int:
+Type X|Y|int:
 Allows null: false
-  Name: x
-  String: x
+  Name: X
+  String: X
   Allows Null: false
-  Name: y
-  String: y
+  Name: Y
+  String: Y
   Allows Null: false
   Name: int
   String: int

@@ -1,7 +1,7 @@
 --TEST--
 iconv_strpos()
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --INI--
 iconv.internal_charset=ISO-8859-1
 --FILE--

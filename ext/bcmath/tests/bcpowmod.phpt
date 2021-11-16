@@ -1,7 +1,7 @@
 --TEST--
 bcpowmod() - Raise an arbitrary precision number to another, reduced by a specified modulus
---SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--EXTENSIONS--
+bcmath
 --INI--
 bcmath.scale=0
 --FILE--

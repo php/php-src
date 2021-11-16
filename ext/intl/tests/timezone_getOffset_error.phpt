@@ -1,10 +1,9 @@
 --TEST--
 IntlTimeZone::getOffset(): errors
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
-
 /* INF being an invalid offset depends on UB in float->int cast behavior. */
 $arch = php_uname('m');
 if ($arch != 'x86_64' && $arch != 'i386')
@@ -25,6 +24,6 @@ bool(false)
 
 Fatal error: Uncaught TypeError: intltz_get_offset(): Argument #1 ($timezone) must be of type IntlTimeZone, null given in %s:%d
 Stack trace:
-#0 %s(%d): intltz_get_offset(NULL, %d, false, NULL, NULL)
+#0 %s(%d): intltz_get_offset(NULL, %f, false, NULL, NULL)
 #1 {main}
   thrown in %s on line %d

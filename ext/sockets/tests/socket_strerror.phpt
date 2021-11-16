@@ -3,11 +3,11 @@ ext/sockets - socket_strerror - basic test
 --CREDITS--
 Florian Anderiasch
 fa@php.net
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 if (!stristr(PHP_OS, "Linux")) {
     die('skip - test validates linux error strings only.');
 }

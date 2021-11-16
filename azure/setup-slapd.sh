@@ -165,5 +165,21 @@ o: php ldap tests
 EOF
 
 # Verify TLS connection
-
-ldapsearch -d 255 -H ldaps://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com 'objectclass=*'
+tries=0
+while : ; do
+	ldapsearch -d 255 -H ldaps://localhost -D cn=Manager,dc=my-domain,dc=com -w secret -s base -b dc=my-domain,dc=com 'objectclass=*'
+	rt=$?
+	if [ $rt -eq 0 ]; then
+		echo "OK"
+		exit 0
+	else
+		tries=$((tries+1))
+		if [ $((tries)) -gt 3 ]; then
+			echo "exit failure $rt"
+			exit $rt
+		else
+			echo "trying again"
+			sleep 3
+		fi
+	fi
+done
