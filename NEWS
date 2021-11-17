@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #81611 (ArgumentCountError when getting default value from
     ReflectionParameter with new). (Cameron Porter)
+  . Fixed bug #81630 (PHP 8.1: ReflectionClass->getTraitAliases() crashes with
+    Internal error). (Nikita)
 
 - XML:
   . Fixed bug #79971 (special character is breaking the path in xml function).
