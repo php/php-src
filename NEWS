@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #81626 (Error on use static:: in __сallStatic() wrapped to
     Closure::fromCallable()). (Nikita)
+  . Fixed bug #81631 (::class with dynamic class name may yield wrong line
+    number). (Nikita)
 
 - FPM:
   . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
