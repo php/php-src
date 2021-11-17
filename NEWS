@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.0
 
+- Core:
+  . Fixed bug #81607 (CE_CACHE allocation with concurrent access). (Nikita,
+    Dmitry)
+
 - FPM:
   . Fixed bug #81513 (Future possibility for heap overflow in FPM zlog).
     (Jakub Zelenka)

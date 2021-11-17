@@ -869,7 +869,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 
 		if (!(ce->ce_flags & ZEND_ACC_CACHED)) {
 			if (ZSTR_HAS_CE_CACHE(ce->name)) {
-				ZSTR_SET_CE_CACHE(ce->name, NULL);
+				ZSTR_SET_CE_CACHE_EX(ce->name, NULL, 0);
 			}
 			zend_accel_store_interned_string(ce->name);
 			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)

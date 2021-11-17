@@ -1033,10 +1033,12 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zval *zv;
 	zend_string *lc_name;
 	zend_string *autoload_name;
+	uint32_t ce_cache = 0;
 
-	if (ZSTR_HAS_CE_CACHE(name)) {
-		ce = ZSTR_GET_CE_CACHE(name);
-		if (ce) {
+	if (ZSTR_HAS_CE_CACHE(name) && ZSTR_VALID_CE_CACHE(name)) {
+		ce_cache = GC_REFCOUNT(name);
+		ce = GET_CE_CACHE(ce_cache);
+		if (EXPECTED(ce)) {
 			return ce;
 		}
 	}
@@ -1077,9 +1079,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		}
 		/* Don't populate CE_CACHE for mutable classes during compilation.
 		 * The class may be freed while persisting. */
-		if (ZSTR_HAS_CE_CACHE(name) &&
+		if (ce_cache &&
 				(!CG(in_compilation) || (ce->ce_flags & ZEND_ACC_IMMUTABLE))) {
-			ZSTR_SET_CE_CACHE(name, ce);
+			SET_CE_CACHE(ce_cache, ce);
 		}
 		return ce;
 	}
@@ -1135,8 +1137,8 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	}
 	if (ce) {
 		ZEND_ASSERT(!CG(in_compilation));
-		if (ZSTR_HAS_CE_CACHE(name)) {
-			ZSTR_SET_CE_CACHE(name, ce);
+		if (ce_cache) {
+			SET_CE_CACHE(ce_cache, ce);
 		}
 	}
 	return ce;
