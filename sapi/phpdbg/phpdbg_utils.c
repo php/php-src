@@ -544,8 +544,6 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 			} ZEND_HASH_FOREACH_END();
 			return ret;
 		} else if (new_index) {
-			char last_chr = last_index[index_len];
-			last_index[index_len] = 0;
 			if (!(zv = zend_symtable_str_find(parent, last_index, index_len))) {
 				if (!silent) {
 					phpdbg_error("%.*s is undefined", (int) (input[i] == ']' ? i + 1 : i), input);
@@ -558,7 +556,6 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 				zv = Z_INDIRECT_P(zv);
 			}
 
-			last_index[index_len] = last_chr;
 			if (i == len) {
 				char *name = estrndup(input, i);
 				char *keyname = estrndup(last_index, index_len);

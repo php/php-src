@@ -61,7 +61,7 @@ New value (reference): Array ([0] => 1)
 >00010: $c = 2;
  00011: 
 prompt> [Breaking on watchpoint $b]
-Old value inaccessible or destroyed
+Old value%s
 New value: 2
 >00011: 
 prompt> [$b has been removed, removing watchpoint recursively]
