@@ -4951,6 +4951,8 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			}
 			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
 			|	EXT_CALL zend_jit_fast_assign_concat_helper, REG0
+			/* concatination with itself may reduce refcount */
+			op2_info |= MAY_BE_RC1;
 		} else {
 			if (Z_REG(res_addr) != ZREG_FCARG1 || Z_OFFSET(res_addr) != 0) {
 				|	LOAD_ZVAL_ADDR FCARG1x, res_addr
