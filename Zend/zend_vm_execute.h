@@ -14738,8 +14738,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_TMPVAR_H
 	USE_OPLINE
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
-		zval *op = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 		SAVE_OPLINE();
+		zval *op = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
@@ -31084,8 +31084,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_UNUSED_H
 	USE_OPLINE
 
 	if (IS_UNUSED != IS_UNUSED) {
-		zval *op = NULL;
 		SAVE_OPLINE();
+		zval *op = NULL;
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
@@ -38651,8 +38651,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_NAME_SPEC_CV_HANDL
 	USE_OPLINE
 
 	if (IS_CV != IS_UNUSED) {
-		zval *op = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 		SAVE_OPLINE();
+		zval *op = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 		if (UNEXPECTED(Z_TYPE_P(op) != IS_OBJECT)) {
 			ZVAL_DEREF(op);
 			if (Z_TYPE_P(op) != IS_OBJECT) {
