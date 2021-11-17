@@ -238,9 +238,7 @@ static phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(phpdbg_btree *tree, void
 	return watch;
 }
 
-static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int access) {
-	void *page_addr = phpdbg_get_page_boundary(watch->addr.ptr);
-	size_t size = phpdbg_get_total_page_size(watch->addr.ptr, watch->size);
+static void phpdbg_change_watchpoint_access(void *page_addr, size_t size, int access) {
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	if (PHPDBG_G(watch_userfaultfd)) {
 		struct uffdio_range range = {
@@ -276,16 +274,38 @@ static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int acce
 }
 
 static inline void phpdbg_activate_watchpoint(phpdbg_watchpoint_t *watch) {
-	phpdbg_change_watchpoint_access(watch, PROT_READ);
+	void *page_addr = phpdbg_get_page_boundary(watch->addr.ptr);
+	size_t size = phpdbg_get_total_page_size(watch->addr.ptr, watch->size);
+	phpdbg_change_watchpoint_access(page_addr, size, PROT_READ);
 }
 
 static inline void phpdbg_deactivate_watchpoint(phpdbg_watchpoint_t *watch) {
 	void *page_addr = phpdbg_get_page_boundary(watch->addr.ptr);
 	size_t size = phpdbg_get_total_page_size(watch->addr.ptr, watch->size);
-	phpdbg_btree_position pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), (zend_ulong) page_addr, (zend_ulong) page_addr + size);
-	if (!phpdbg_btree_next(&pos)) {
-		phpdbg_change_watchpoint_access(watch, PROT_READ | PROT_WRITE);
+
+	phpdbg_btree_result *res = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong) page_addr + size - 1);
+	if (res) {
+		phpdbg_watchpoint_t *closest_watch = res->ptr;
+		if (closest_watch->addr.ptr > watch->addr.ptr) {
+			size -= phpdbg_pagesize;
+			if (size == 0) {
+				return;
+			}
+			res = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong) watch->addr.ptr);
+		}
+		if (res) {
+			closest_watch = res->ptr;
+			if ((char *) closest_watch->addr.ptr + closest_watch->size > (char *) page_addr) {
+				page_addr = (char *) page_addr + phpdbg_pagesize;
+				size -= phpdbg_pagesize;
+				if (size == 0) {
+					return;
+				}
+			}
+		}
 	}
+	
+	phpdbg_change_watchpoint_access(page_addr, size, PROT_READ | PROT_WRITE);
 }
 
 /* Note that consecutive pages need to be merged in order to avoid watchpoints spanning page boundaries to have part of their data in the one page, part in the other page */
@@ -1867,6 +1887,10 @@ void phpdbg_purge_watchpoint_tree(void) {
 
 	pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), 0, -1);
 	while ((res = phpdbg_btree_next(&pos))) {
-		phpdbg_change_watchpoint_access(res->ptr, PROT_READ | PROT_WRITE);
+		phpdbg_watchpoint_t *watch = res->ptr;
+		void *page_addr = phpdbg_get_page_boundary(watch->addr.ptr);
+		size_t size = phpdbg_get_total_page_size(watch->addr.ptr, watch->size);
+
+		phpdbg_change_watchpoint_access(page_addr, size, PROT_READ | PROT_WRITE);
 	}
 }
