@@ -1310,22 +1310,6 @@ static zend_class_mutable_data *zend_allocate_mutable_data(zend_class_entry *cla
 }
 /* }}} */
 
-static zend_class_constant *inherit_class_constant(zend_class_entry *ce, zend_string *name) {
-	if (ce->parent) {
-		zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce->parent), name);
-		if (c) {
-			return c;
-		}
-	}
-	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
-		zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce->interfaces[i]), name);
-		if (c) {
-			return c;
-		}
-	}
-	ZEND_UNREACHABLE();
-}
-
 ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type) /* {{{ */
 {
 	zend_class_mutable_data *mutable_data;
@@ -1344,7 +1328,8 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 				memcpy(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
 			} else {
-				c = inherit_class_constant(class_type, key);
+				c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(c->ce), key);
+				ZEND_ASSERT(c);
 			}
 		}
 		Z_TRY_ADDREF(c->value);
@@ -1434,13 +1419,16 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		ZEND_HASH_FOREACH_STR_KEY_VAL(constants_table, name, val) {
 			c = Z_PTR_P(val);
 			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
-				if (c->ce == class_type) {
-					val = &c->value;
-					if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
-						return FAILURE;
+				if (c->ce != class_type) {
+					Z_PTR_P(val) = c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(c->ce), name);
+					if (Z_TYPE(c->value) != IS_CONSTANT_AST) {
+						continue;
 					}
-				} else {
-					Z_PTR_P(val) = inherit_class_constant(class_type, name);
+				}
+
+				val = &c->value;
+				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
+					return FAILURE;
 				}
 			}
 		} ZEND_HASH_FOREACH_END();
