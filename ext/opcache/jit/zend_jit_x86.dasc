@@ -559,10 +559,9 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro UNDEF_OPLINE_RESULT_IF_USED
-|	mov r0, EX->opline
-|	test byte OP:r0->result_type, (IS_TMP_VAR|IS_VAR)
+|	test byte OP:RX->result_type, (IS_TMP_VAR|IS_VAR)
 |	jz >1
-|	mov eax, dword OP:r0->result.var
+|	mov eax, dword OP:RX->result.var
 |	SET_Z_TYPE_INFO FP + r0, IS_UNDEF
 |1:
 |.endmacro
@@ -1841,6 +1840,42 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 	return 1;
 }
 
+
+static int zend_jit_exception_handler_free_op1_op2_stub(dasm_State **Dst)
+{
+	|->exception_handler_free_op1_op2:
+	|	UNDEF_OPLINE_RESULT_IF_USED
+	|	test byte OP:RX->op1_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op1.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
+	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op2.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
+	|	jmp ->exception_handler
+	return 1;
+}
+
+static int zend_jit_exception_handler_free_op2_stub(dasm_State **Dst)
+{
+	|->exception_handler_free_op2:
+	|	MEM_OP2_2_ZTS mov, RX, aword, executor_globals, opline_before_exception, r0
+	|	UNDEF_OPLINE_RESULT_IF_USED
+	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
+	|	je >9
+	|	mov eax, dword OP:RX->op2.var
+	|	add r0, FP
+	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
+	|9:
+	|	jmp ->exception_handler
+	return 1;
+}
+
 static int zend_jit_leave_function_stub(dasm_State **Dst)
 {
 	|->leave_function_handler:
@@ -2154,7 +2189,6 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
 	|->negative_shift:
 	|	mov RX, EX->opline
-	|	UNDEF_OPLINE_RESULT_IF_USED
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_arithmetic_error
@@ -2176,19 +2210,7 @@ static int zend_jit_negative_shift_stub(dasm_State **Dst)
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
-	|	test byte OP:RX->op1_type, (IS_TMP_VAR|IS_VAR)
-	|	je >9
-	|	mov eax, dword OP:RX->op1.var
-	|	add r0, FP
-	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
-	|9:
-	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
-	|	je >9
-	|	mov eax, dword OP:RX->op2.var
-	|	add r0, FP
-	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
-	|9:
-	|	jmp ->exception_handler
+	|	jmp ->exception_handler_free_op1_op2
 	return 1;
 }
 
@@ -2196,7 +2218,6 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
 	|->mod_by_zero:
 	|	mov RX, EX->opline
-	|	UNDEF_OPLINE_RESULT_IF_USED
 	|.if X64
 		|.if WIN
 		|	LOAD_ADDR CARG1, &zend_ce_division_by_zero_error
@@ -2218,19 +2239,7 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 		|	EXT_CALL zend_throw_error, r0
 		|	add r4, 16
 	|.endif
-	|	test byte OP:RX->op1_type, (IS_TMP_VAR|IS_VAR)
-	|	je >9
-	|	mov eax, dword OP:RX->op1.var
-	|	add r0, FP
-	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
-	|9:
-	|	test byte OP:RX->op2_type, (IS_TMP_VAR|IS_VAR)
-	|	je >9
-	|	mov eax, dword OP:RX->op2.var
-	|	add r0, FP
-	|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL
-	|9:
-	|	jmp ->exception_handler
+	|	jmp ->exception_handler_free_op1_op2
 	return 1;
 }
 
@@ -2852,6 +2861,8 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler),
 	JIT_STUB(exception_handler),
 	JIT_STUB(exception_handler_undef),
+	JIT_STUB(exception_handler_free_op1_op2),
+	JIT_STUB(exception_handler_free_op2),
 	JIT_STUB(leave_function),
 	JIT_STUB(leave_throw),
 	JIT_STUB(icall_throw),
@@ -5242,7 +5253,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	FREE_OP op1_type, op1, op1_info, 0, opline
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		if (may_throw) {
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+			if (opline->opcode == ZEND_ASSIGN_DIM_OP && (opline->op2_type & (IS_VAR|IS_TMP_VAR))) {
+				|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
+				|	jne ->exception_handler_free_op2
+			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
 				zend_jit_check_exception_undef_result(Dst, opline);
 			} else {
 				zend_jit_check_exception(Dst);
