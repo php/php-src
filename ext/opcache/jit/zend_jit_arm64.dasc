@@ -830,11 +830,10 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |.endmacro
 
 |.macro UNDEF_OPLINE_RESULT_IF_USED, tmp_reg1, tmp_reg2
-|	ldr REG0, EX->opline
-|	ldrb tmp_reg1, OP:REG0->result_type
+|	ldrb tmp_reg1, OP:RX->result_type
 |	TST_32_WITH_CONST tmp_reg1, (IS_TMP_VAR|IS_VAR), tmp_reg2
 |	beq >1
-|	ldr REG0w, OP:REG0->result.var
+|	ldr REG0w, OP:RX->result.var
 |	add REG0, FP, REG0
 |	SET_Z_TYPE_INFO REG0, IS_UNDEF, tmp_reg1
 |1:
@@ -1850,6 +1849,48 @@ static int zend_jit_exception_handler_undef_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_exception_handler_free_op1_op2_stub(dasm_State **Dst)
+{
+	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+
+	|->exception_handler_free_op1_op2:
+	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
+	|	ldrb TMP1w, OP:RX->op1_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op1.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	ldrb TMP1w, OP:RX->op2_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op2.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	b ->exception_handler
+	return 1;
+}
+
+static int zend_jit_exception_handler_free_op2_stub(dasm_State **Dst)
+{
+	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
+
+	|->exception_handler_free_op2:
+	|	MEM_LOAD_64_ZTS ldr, RX, executor_globals, opline_before_exception, REG0
+	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
+	|	ldrb TMP1w, OP:RX->op2_type
+	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
+	|	beq >9
+	|	ldr REG0w, OP:RX->op2.var
+	|	add REG0, REG0, FP
+	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
+	|9:
+	|	b ->exception_handler
+	return 1;
+}
+
 static int zend_jit_leave_function_stub(dasm_State **Dst)
 {
 	|->leave_function_handler:
@@ -2121,57 +2162,23 @@ static int zend_jit_undefined_function_stub(dasm_State **Dst)
 
 static int zend_jit_negative_shift_stub(dasm_State **Dst)
 {
-	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
-
 	|->negative_shift:
 	|	ldr RX, EX->opline
-	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
 	|	LOAD_ADDR CARG1, zend_ce_arithmetic_error
 	|	LOAD_ADDR CARG2, "Bit shift by negative number"
 	|	EXT_CALL zend_throw_error, REG0
-	|	ldrb TMP1w, OP:RX->op1_type
-	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
-	|	beq >9
-	|	ldr REG0w, OP:RX->op1.var
-	|	add REG0, REG0, FP
-	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
-	|9:
-	|	ldrb TMP1w, OP:RX->op2_type
-	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
-	|	beq >9
-	|	ldr REG0w, OP:RX->op2.var
-	|	add REG0, REG0, FP
-	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
-	|9:
-	|	b ->exception_handler
+	|	b ->exception_handler_free_op1_op2
 	return 1;
 }
 
 static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 {
-	zend_jit_addr addr = ZEND_ADDR_MEM_ZVAL(ZREG_REG0, 0);
-
 	|->mod_by_zero:
 	|	ldr RX, EX->opline
-	|	UNDEF_OPLINE_RESULT_IF_USED TMP1w, TMP2w
 	|	LOAD_ADDR CARG1, zend_ce_division_by_zero_error
 	|	LOAD_ADDR CARG2, "Modulo by zero"
 	|	EXT_CALL zend_throw_error, REG0
-	|	ldrb TMP1w, OP:RX->op1_type
-	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
-	|	beq >9
-	|	ldr REG0w, OP:RX->op1.var
-	|	add REG0, REG0, FP
-	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
-	|9:
-	|	ldrb TMP1w, OP:RX->op2_type
-	|	TST_32_WITH_CONST TMP1w, (IS_TMP_VAR|IS_VAR), TMP2w
-	|	beq >9
-	|	ldr REG0w, OP:RX->op2.var
-	|	add REG0, REG0, FP
-	|	ZVAL_PTR_DTOR addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_REF, 0, 0, NULL, ZREG_TMP1, ZREG_TMP2
-	|9:
-	|	b ->exception_handler
+	|	b ->exception_handler_free_op1_op2
 	return 1;
 }
 
@@ -2701,6 +2708,8 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(interrupt_handler,         SP_ADJ_JIT,  SP_ADJ_VM),
 	JIT_STUB(exception_handler,         SP_ADJ_JIT,  SP_ADJ_VM),
 	JIT_STUB(exception_handler_undef,   SP_ADJ_JIT,  SP_ADJ_VM),
+	JIT_STUB(exception_handler_free_op1_op2, SP_ADJ_JIT,  SP_ADJ_VM),
+	JIT_STUB(exception_handler_free_op2,     SP_ADJ_JIT,  SP_ADJ_VM),
 	JIT_STUB(leave_function,            SP_ADJ_JIT,  SP_ADJ_VM),
 	JIT_STUB(leave_throw,               SP_ADJ_JIT,  SP_ADJ_VM),
 	JIT_STUB(icall_throw,               SP_ADJ_JIT,  SP_ADJ_VM),
@@ -4873,7 +4882,10 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		|	FREE_OP op2_type, op2, op2_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
 		if (may_throw) {
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
+			if (opline->opcode == ZEND_ASSIGN_DIM_OP && (opline->op2_type & (IS_VAR|IS_TMP_VAR))) {
+				|	MEM_LOAD_64_ZTS ldr, TMP2, executor_globals, exception, TMP1
+				|	cbnz TMP2, ->exception_handler_free_op2
+			} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RX) {
 				zend_jit_check_exception_undef_result(Dst, opline);
 			} else {
 				zend_jit_check_exception(Dst);
