@@ -657,18 +657,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterators_advance(HashTable *ht, HashPosit
 
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key, bool known_hash)
 {
-	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
 
-	if (known_hash) {
-		h = ZSTR_H(key);
-	} else {
-		h = zend_string_hash_val(key);
+	if (!known_hash) {
+		zend_string_hash_val(key);
 	}
 	arData = ht->arData;
-	nIndex = h | ht->nTableMask;
+	nIndex = ZSTR_H(key) | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
 
 	if (UNEXPECTED(idx == HT_INVALID_IDX)) {
@@ -680,8 +677,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 	}
 
 	while (1) {
-		if (p->h == ZSTR_H(key) &&
-		    EXPECTED(p->key) &&
+		if (EXPECTED(p->key) &&
 		    zend_string_equal_content(p->key, key)) {
 			return p;
 		}
@@ -1458,7 +1454,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p)
 
 ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 {
-	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
@@ -1467,15 +1462,14 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	h = zend_string_hash_val(key);
-	nIndex = h | ht->nTableMask;
+	zend_string_hash_val(key);
+	nIndex = ZSTR_H(key) | ht->nTableMask;
 
 	idx = HT_HASH(ht, nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->key == key) ||
-			(p->h == h &&
-		     p->key &&
+			(p->key &&
 		     zend_string_equal_content(p->key, key))) {
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
@@ -1488,7 +1482,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key
 
 ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 {
-	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
@@ -1497,15 +1490,14 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	h = zend_string_hash_val(key);
-	nIndex = h | ht->nTableMask;
+	zend_string_hash_val(key);
+	nIndex = ZSTR_H(key) | ht->nTableMask;
 
 	idx = HT_HASH(ht, nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->key == key) ||
-			(p->h == h &&
-		     p->key &&
+			(p->key &&
 		     zend_string_equal_content(p->key, key))) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
