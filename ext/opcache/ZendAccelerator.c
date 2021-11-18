@@ -2421,11 +2421,12 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 	entry->ce = new_ce = zend_persist_class_entry(ce);
 	zend_update_parent_ce(new_ce);
-	entry->next = proto->inheritance_cache;
-	proto->inheritance_cache = entry;
 
 	entry->num_warnings = EG(num_errors);
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
+	entry->next = proto->inheritance_cache;
+	proto->inheritance_cache = entry;
+
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
