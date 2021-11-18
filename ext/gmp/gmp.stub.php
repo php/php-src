@@ -4,6 +4,9 @@
 
 class GMP
 {
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 }
 
 function gmp_init(int|string $num, int $base = 0): GMP {}
