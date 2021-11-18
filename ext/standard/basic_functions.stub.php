@@ -1005,7 +1005,7 @@ function escapeshellcmd(string $command): string {}
 function escapeshellarg(string $arg): string {}
 
 /** @refcount 1 */
-function shell_exec(string $command): string|false|null {}
+function shell_exec(string $command, int &$result_code = null): string|false|null {}
 
 #ifdef HAVE_NICE
 function proc_nice(int $priority): bool {}

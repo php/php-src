@@ -515,11 +515,15 @@ PHP_FUNCTION(shell_exec)
 	FILE *in;
 	char *command;
 	size_t command_len;
+	zval *ret_code = NULL;
 	zend_string *ret;
 	php_stream *stream;
+	int ret_pclose;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(ret_code)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
@@ -542,8 +546,11 @@ PHP_FUNCTION(shell_exec)
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
 	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
-	php_stream_close(stream);
+	ret_pclose = php_stream_close(stream);
 
+	if (ret_code) {
+		ZEND_TRY_ASSIGN_REF_LONG(ret_code, ret_pclose);
+	}
 	if (ret && ZSTR_LEN(ret) > 0) {
 		RETVAL_STR(ret);
 	}
