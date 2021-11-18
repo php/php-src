@@ -1,5 +1,9 @@
 --TEST--
 Class constant inheritance with mutable data
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip preload produces additional warnings');
+?>
 --FILE--
 <?php
 
