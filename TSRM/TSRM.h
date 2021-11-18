@@ -184,8 +184,8 @@ TSRM_API const char *tsrm_api_name(void);
 #define tsrm_env_unlock()
 
 #define TSRMG_STATIC(id, type, element)
-#define TSRMLS_CACHE_MAIN_EXTERN()
-#define TSRMLS_CACHE_MAIN_DEFINE()
+#define TSRMLS_MAIN_CACHE_EXTERN()
+#define TSRMLS_MAIN_CACHE_DEFINE()
 #define TSRMLS_CACHE_EXTERN()
 #define TSRMLS_CACHE_DEFINE()
 #define TSRMLS_CACHE_UPDATE()
