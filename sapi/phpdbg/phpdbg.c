@@ -144,6 +144,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->cur_command = NULL;
 	pg->last_line = 0;
 
+	pg->watchpoint_hit = 0;
+	pg->watch_element_count = 0;
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	pg->watch_userfaultfd = 0;
 #endif

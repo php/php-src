@@ -106,12 +106,11 @@
 #include "phpdbg_watch.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
+#include <zend_exceptions.h>
+#include <zend_enum.h>
 #ifndef _WIN32
 # include <unistd.h>
 # include <sys/mman.h>
-#include <zend_exceptions.h>
-#include <zend_enum.h>
-
 #endif
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
