@@ -20,6 +20,7 @@ AC_PREREQ([2.68])
 AC_INIT([PHP],[7.4.27-dev],[https://bugs.php.net],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
+AC_CONFIG_MACRO_DIRS([build])
 AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE(config.nice)
