@@ -1974,6 +1974,9 @@ static void _php_curl_set_default_options(php_curl *ch)
 #endif
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
+#if !ENABLE_IPV6
+	curl_easy_setopt(ch->cp, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+#endif
 
 	cainfo = INI_STR("openssl.cafile");
 	if (!(cainfo && cainfo[0] != '\0')) {
@@ -2574,6 +2577,12 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		case CURLOPT_HTTP09_ALLOWED:
 #endif
 			lval = zval_get_long(zvalue);
+#if !ENABLE_IPV6
+			if (option == CURLOPT_IPRESOLVE && lval == CURL_IPRESOLVE_V6) {
+					php_error_docref(NULL, E_WARNING, "CURL_IPRESOLVE_V6 cannot be activated as PHP is compiled without IPv6 support");
+					return 1;
+			}
+#endif
 #if LIBCURL_VERSION_NUM >= 0x071304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (lval & CURLPROTO_FILE)) {
