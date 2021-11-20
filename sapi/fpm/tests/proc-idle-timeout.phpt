@@ -4,7 +4,6 @@ FPM: Process manager config pm.process_idle_timeout
 <?php
 include "skipif.inc";
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-echo "skip Test fails in CI\n";
 ?>
 --FILE--
 <?php
@@ -24,18 +23,18 @@ EOT;
 
 $code = <<<EOT
 <?php
-usleep(200);
+usleep(300000);
 EOT;
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
-$tester->multiRequest(2);
+$tester->multiRequest(2, null, null, null, false, 7000);
 $tester->status([
     'total processes' => 2,
 ]);
 // wait for process idle timeout
-sleep(6);
+sleep(5);
 $tester->status([
     'total processes' => 1,
 ]);

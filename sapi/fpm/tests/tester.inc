@@ -624,6 +624,7 @@ class Tester
      * @param string|null $successMessage
      * @param string|null $errorMessage
      * @param bool $connKeepAlive
+     * @param int $readTimeout
      * @return Response[]
      * @throws \Exception
      */
@@ -632,7 +633,8 @@ class Tester
         string $address = null,
         string $successMessage = null,
         string $errorMessage = null,
-        bool $connKeepAlive = false
+        bool $connKeepAlive = false,
+        int $readTimeout = 0
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -658,8 +660,8 @@ class Tester
                 ];
             }, $requests);
 
-            $responses = array_map(function ($conn) {
-                $response = new Response($conn['client']->wait_for_response_data($conn['requestId']));
+            $responses = array_map(function ($conn) use ($readTimeout) {
+                $response = new Response($conn['client']->wait_for_response_data($conn['requestId'], $readTimeout));
                 if ($this->debug) {
                     $response->debugOutput();
                 }
