@@ -87,9 +87,9 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 	GC_ADD_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 
 	zend_ulong obj_addr = (zend_ulong) object;
-	zval *zv = zend_hash_index_find(&EG(weakrefs), obj_addr);
-	if (!zv) {
-		zend_hash_index_add_new_ptr(&EG(weakrefs), obj_addr, payload);
+	zval *zv = zend_hash_index_lookup(&EG(weakrefs), obj_addr);
+	if (Z_TYPE_P(zv) == IS_NULL) {
+		ZVAL_PTR(zv, payload);
 		return;
 	}
 
@@ -127,9 +127,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	}
 
 	HashTable *ht = ptr;
-	tagged_ptr = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
-	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
-	ZEND_ASSERT(tagged_ptr == payload);
+#if ZEND_DEBUG
+	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
+	ZEND_ASSERT(old_payload && "Weakref not registered?");
+	ZEND_ASSERT(old_payload == payload);
+#endif
 	zend_hash_index_del(ht, (zend_ulong) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
