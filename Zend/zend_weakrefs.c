@@ -87,9 +87,9 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 	GC_ADD_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 
 	zend_ulong obj_addr = (zend_ulong) object;
-	zval *zv = zend_hash_index_find(&EG(weakrefs), obj_addr);
-	if (!zv) {
-		zend_hash_index_add_new_ptr(&EG(weakrefs), obj_addr, payload);
+	zval *zv = zend_hash_index_lookup(&EG(weakrefs), obj_addr);
+	if (Z_TYPE_P(zv) == IS_NULL) {
+		ZVAL_PTR(zv, payload);
 		return;
 	}
 
@@ -127,9 +127,11 @@ static void zend_weakref_unregister(zend_object *object, void *payload) {
 	}
 
 	HashTable *ht = ptr;
-	tagged_ptr = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
-	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
-	ZEND_ASSERT(tagged_ptr == payload);
+#if ZEND_DEBUG
+	void *old_payload = zend_hash_index_find_ptr(ht, (zend_ulong) payload);
+	ZEND_ASSERT(old_payload && "Weakref not registered?");
+	ZEND_ASSERT(old_payload == payload);
+#endif
 	zend_hash_index_del(ht, (zend_ulong) payload);
 	if (zend_hash_num_elements(ht) == 0) {
 		GC_DEL_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
@@ -346,8 +348,12 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 
 	zval *zv = zend_hash_index_find(&wm->ht, (zend_ulong) obj_key);
 	if (zv) {
-		zval_ptr_dtor(zv);
+		/* Because the destructors can have side effects such as resizing or rehashing the WeakMap storage,
+		 * free the zval only after overwriting the original value. */
+		zval zv_orig;
+		ZVAL_COPY_VALUE(&zv_orig, zv);
 		ZVAL_COPY_VALUE(zv, value);
+		zval_ptr_dtor(&zv_orig);
 		return;
 	}
 

@@ -2286,11 +2286,15 @@ static zend_class_entry* zend_accel_inheritance_cache_get(zend_class_entry *ce, 
 		entry = zend_accel_inheritance_cache_find(entry, ce, parent, traits_and_interfaces, &needs_autoload);
 		if (entry) {
 			if (!needs_autoload) {
+				replay_warnings(entry->num_warnings, entry->warnings);
 				if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
 					zend_map_ptr_extend(ZCSG(map_ptr_last));
 				}
-				replay_warnings(entry->num_warnings, entry->warnings);
-				return entry->ce;
+				ce = entry->ce;
+				if (ZSTR_HAS_CE_CACHE(ce->name)) {
+					ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+				}
+				return ce;
 			}
 
 			for (i = 0; i < entry->dependencies_count; i++) {
@@ -2417,11 +2421,12 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 	}
 	entry->ce = new_ce = zend_persist_class_entry(ce);
 	zend_update_parent_ce(new_ce);
-	entry->next = proto->inheritance_cache;
-	proto->inheritance_cache = entry;
 
 	entry->num_warnings = EG(num_errors);
 	entry->warnings = zend_persist_warnings(EG(num_errors), EG(errors));
+	entry->next = proto->inheritance_cache;
+	proto->inheritance_cache = entry;
+
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 

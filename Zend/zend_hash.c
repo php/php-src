@@ -664,6 +664,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 
 	if (known_hash) {
 		h = ZSTR_H(key);
+		ZEND_ASSERT(h != 0 && "Hash must be known");
 	} else {
 		h = zend_string_hash_val(key);
 	}

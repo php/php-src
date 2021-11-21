@@ -2768,9 +2768,6 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 					}
 					zv = zend_hash_find_known_hash(CG(class_table), key);
 					Z_CE_P(zv) = ret;
-					if (ZSTR_HAS_CE_CACHE(ret->name)) {
-						ZSTR_SET_CE_CACHE(ret->name, ret);
-					}
 					return ret;
 				}
 
@@ -2994,9 +2991,6 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if (ret) {
 				if (UNEXPECTED(!register_early_bound_ce(delayed_early_binding, lcname, ret))) {
 					return NULL;
-				}
-				if (ZSTR_HAS_CE_CACHE(ret->name)) {
-					ZSTR_SET_CE_CACHE(ret->name, ret);
 				}
 				return ret;
 			}

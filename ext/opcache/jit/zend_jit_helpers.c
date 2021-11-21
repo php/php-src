@@ -1166,6 +1166,9 @@ static void ZEND_FASTCALL zend_jit_fast_assign_concat_helper(zval *op1, zval *op
 				result_str = perealloc(Z_STR_P(op1), ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(result_len)), 0);
 				ZSTR_LEN(result_str) = result_len;
 				zend_string_forget_hash_val(result_str);
+				if (UNEXPECTED(Z_STR_P(op1) == Z_STR_P(op2))) {
+					ZVAL_NEW_STR(op2, result_str);
+				}
 				break;
 			}
 			GC_DELREF(Z_STR_P(op1));

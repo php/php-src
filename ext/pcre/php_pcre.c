@@ -1207,7 +1207,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	if (subpats != NULL) {
 		subpats = zend_try_array_init(subpats);
 		if (!subpats) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

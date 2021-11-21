@@ -15,6 +15,10 @@ function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, 
 
 function intlcal_get_now(): float {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function intlcal_get_available_locales(): array {}
 
 function intlcal_get(IntlCalendar $calendar, int $field): int|false {}
@@ -206,7 +210,11 @@ function datefmt_format_object($datetime, $format = null, ?string $locale = null
 /** @param int $offset */
 function datefmt_parse(IntlDateFormatter $formatter, string $string, &$offset = null): int|float|false {}
 
-/** @param int $offset */
+/**
+ * @param int $offset
+ * @return array<string, int>|false
+ * @refcount 1
+ */
 function datefmt_localtime(IntlDateFormatter $formatter, string $string, &$offset = null): array|false {}
 
 function datefmt_get_error_code(IntlDateFormatter $formatter): int {}
@@ -294,6 +302,10 @@ function locale_get_script(string $locale): ?string {}
 
 function locale_get_region(string $locale): ?string {}
 
+/**
+ * @return array<string, string>|false|null
+ * @refcount 1
+ */
 function locale_get_keywords(string $locale): array|false|null {}
 
 function locale_get_display_script(string $locale, ?string $displayLocale = null): string|false {}
@@ -328,8 +340,16 @@ function msgfmt_format(MessageFormatter $formatter, array $values): string|false
 
 function msgfmt_format_message(string $locale, string $pattern, array $values): string|false {}
 
+/**
+ * @return array<int, int|float|string>|false
+ * @refcount 1
+ */
 function msgfmt_parse(MessageFormatter $formatter, string $string): array|false {}
 
+/**
+ * @return array<int, int|float|string>|false
+ * @refcount 1
+ */
 function msgfmt_parse_message(string $locale, string $pattern, string $message): array|false {}
 
 function msgfmt_set_pattern(MessageFormatter $formatter, string $pattern): bool {}
@@ -361,6 +381,10 @@ function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = tru
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function resourcebundle_locales(string $bundle): array|false {}
 
 function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
@@ -431,6 +455,10 @@ function transliterator_create(string $id, int $direction = Transliterator::FORW
 
 function transliterator_create_from_rules(string $rules, int $direction = Transliterator::FORWARD): ?Transliterator {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $transliterator): ?Transliterator {}

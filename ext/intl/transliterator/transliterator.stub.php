@@ -27,6 +27,7 @@ class Transliterator
     public function createInverse(): ?Transliterator {}
 
     /**
+     * @return array<int, string>|false
      * @tentative-return-type
      * @alias transliterator_list_ids
      */

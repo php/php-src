@@ -220,7 +220,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 			if ((ce->ce_flags & ZEND_ACC_LINKED)
 			 && ZSTR_HAS_CE_CACHE(ce->name)
 			 && ZSTR_VAL(p->key)[0]) {
-				ZSTR_SET_CE_CACHE(ce->name, ce);
+				ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
 			}
 		}
 	}
