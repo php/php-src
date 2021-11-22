@@ -7250,6 +7250,12 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
+	if ((ce->ce_flags & ZEND_ACC_READONLY_CLASS) && (flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Readonly class %s cannot declare static properties",
+			ZSTR_VAL(ce->name)
+		);
+	}
+
 	for (i = 0; i < children; ++i) {
 		zend_property_info *info;
 		zend_ast *prop_ast = list->child[i];
