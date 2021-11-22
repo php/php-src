@@ -28,8 +28,6 @@ if test "$PHP_OPENSSL" != "no"; then
     PHP_EVAL_LIBLINE($KERBEROS_LIBS, OPENSSL_SHARED_LIBADD)
   fi
 
-  AC_CHECK_FUNCS([RAND_egd])
-
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
     AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
@@ -39,4 +37,5 @@ if test "$PHP_OPENSSL" != "no"; then
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
   fi
+  AC_CHECK_FUNCS([RAND_egd])
 fi
