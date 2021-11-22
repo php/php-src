@@ -227,18 +227,18 @@ int inet_ntoa_lock = 0;
 static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la;
-	struct hostent		*hp;
+	struct addrinfo		*aip;
 
 #ifndef PHP_WIN32
-	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
+	if ((aip = php_network_getaddrinfo("0.0.0.0")) == NULL) {
 #else
-	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
+	if ((aip = php_network_getaddrinfo("localhost")) == NULL) {
 #endif
 		return 0;
 	}
 
-	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
-	la.sin_family = hp->h_addrtype;
+	memcpy((char *) &la.sin_addr, aip->ai_addr, aip->ai_addrlen);
+	la.sin_family = aip->ai_family;
 	la.sin_port = htons((unsigned short) port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);

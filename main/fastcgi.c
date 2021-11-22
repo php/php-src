@@ -689,21 +689,26 @@ int fcgi_listen(const char *path, int backlog)
 			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
 			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
 #endif
-				struct hostent *hep;
+				struct addrinfo *aip;
 
 				if(strlen(host) > MAXFQDNLEN) {
-					hep = NULL;
+					aip = NULL;
 				} else {
-					hep = php_network_gethostbyname(host);
+					aip = php_network_getaddrinfo(host);
 				}
-				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
+				if (!aip || aip->ai_family != AF_INET || aip->ai_family != AF_INET6 || !aip->ai_addr) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
 					return -1;
-				} else if (hep->h_addr_list[1]) {
+				} else if (aip->ai_next) {
 					fcgi_log(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
 					return -1;
 				}
-				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
+
+				if (aip->ai_family != AF_INET) {
+					sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)aip->ai_addr)->s_addr;
+				} else {
+					sa.sa_inet6.sin6_addr = *((struct in6_addr*)aip->ai_addr);
+				}
 			}
 		}
 	} else {

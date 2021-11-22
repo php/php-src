@@ -85,7 +85,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
 {
 	struct in_addr tmp;
-	struct hostent *host_entry;
+	struct addrinfo *aip;
 
 #ifdef HAVE_INET_PTON
 	if (inet_pton(AF_INET, string, &tmp)) {
@@ -94,7 +94,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 #endif
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
-		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
+		if (strlen(string) > MAXFQDNLEN || ! (aip = php_network_getaddrinfo(string))) {
 			/* Note: < -10000 indicates a host lookup error */
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
@@ -103,11 +103,11 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 #endif
 			return 0;
 		}
-		if (host_entry->h_addrtype != AF_INET) {
+		if (aip->ai_family != AF_INET) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET domain returned on AF_INET socket");
 			return 0;
 		}
-		memcpy(&(sin->sin_addr.s_addr), host_entry->h_addr_list[0], host_entry->h_length);
+		memcpy(&(sin->sin_addr.s_addr), aip->ai_addr, aip->ai_addrlen);
 	}
 
 	return 1;
