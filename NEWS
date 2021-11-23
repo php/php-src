@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #81649 (imap_(un)delete accept sequences, not single numbers).
     (cmb)
 
+- PCRE:
+  . Update bundled PCRE2 to 10.39 (cmb)
+
 25 Nov 2021, PHP 8.1.0
 
 - Core:

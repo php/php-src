@@ -1621,7 +1621,7 @@ if (end[-(1 + LINK_SIZE)] != OP_KET || PRIVATE_DATA(begin) != 0)
 
 /* /(?:AB){4,6}/ is currently converted to /(?:AB){3}(?AB){1,3}/
  * Skip the check of the second part. */
-if (PRIVATE_DATA(end - LINK_SIZE) == 0)
+if (PRIVATE_DATA(end - LINK_SIZE) != 0)
   return TRUE;
 
 next = end;
@@ -4202,9 +4202,6 @@ TMP2 is not used. Otherwise TMP2 must contain the start of the subject buffer,
 and it is destroyed. Does not modify STR_PTR for invalid character sequences. */
 DEFINE_COMPILER;
 
-SLJIT_UNUSED_ARG(backtracks);
-SLJIT_UNUSED_ARG(must_be_valid);
-
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 struct sljit_jump *jump;
 #endif
@@ -4278,6 +4275,10 @@ if (common->invalid_utf && !must_be_valid)
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
+
+SLJIT_UNUSED_ARG(backtracks);
+SLJIT_UNUSED_ARG(must_be_valid);
+
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 }
 
@@ -8140,7 +8141,7 @@ switch(type)
     }
   else
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
 
   if (!common->endonly)
     compile_simple_assertion_matchingpath(common, OP_EODN, cc, backtracks);
@@ -8160,7 +8161,7 @@ switch(type)
     }
   else
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTEOL);
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   check_partial(common, FALSE);
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
@@ -8200,14 +8201,14 @@ switch(type)
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, begin));
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(TMP2), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
     }
   else
     {
     OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, begin));
     add_jump(compiler, backtracks, CMP(SLJIT_GREATER, STR_PTR, 0, TMP1, 0));
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
-    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+    add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
     }
   return cc;
 
@@ -8226,7 +8227,7 @@ switch(type)
     jump[1] = CMP(SLJIT_GREATER, STR_PTR, 0, TMP2, 0);
     OP2(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_UNUSED, 0, SLJIT_MEM1(ARGUMENTS), SLJIT_OFFSETOF(jit_arguments, options), SLJIT_IMM, PCRE2_NOTBOL);
     }
-  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO32));
+  add_jump(compiler, backtracks, JUMP(SLJIT_NOT_ZERO));
   jump[0] = JUMP(SLJIT_JUMP);
   JUMPHERE(jump[1]);
 
@@ -9580,11 +9581,11 @@ free_stack(common, callout_arg_size);
 
 /* Check return value. */
 OP2(SLJIT_SUB32 | SLJIT_SET_Z | SLJIT_SET_SIG_GREATER, SLJIT_UNUSED, 0, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
-add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER32));
+add_jump(compiler, &backtrack->topbacktracks, JUMP(SLJIT_SIG_GREATER));
 if (common->abort_label == NULL)
-  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL32) /* SIG_LESS */);
+  add_jump(compiler, &common->abort, JUMP(SLJIT_NOT_EQUAL) /* SIG_LESS */);
 else
-  JUMPTO(SLJIT_NOT_EQUAL32 /* SIG_LESS */, common->abort_label);
+  JUMPTO(SLJIT_NOT_EQUAL /* SIG_LESS */, common->abort_label);
 return cc + callout_length;
 }
 
@@ -14131,6 +14132,10 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
+#ifdef SUPPORT_JIT
+executable_functions *functions;
+static int executable_allocator_is_working = 0;
+#endif
 
 if (code == NULL)
   return PCRE2_ERROR_NULL;
@@ -14165,8 +14170,7 @@ actions are needed:
 */
 
 #ifdef SUPPORT_JIT
-executable_functions *functions = (executable_functions *)re->executable_jit;
-static int executable_allocator_is_working = 0;
+functions = (executable_functions *)re->executable_jit;
 #endif
 
 if ((options & PCRE2_JIT_INVALID_UTF) != 0)
