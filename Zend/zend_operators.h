@@ -209,8 +209,16 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 	}
 }
 
+#ifdef HAVE_MEMRCHR
+/* Declaration for memchr() may be missed if <string.h> is included without _GNU_SOURCE */
+extern void *memrchr(const void *s, int c, size_t n);
+#endif
+
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
+#ifdef HAVE_MEMRCHR
+	return (const void*)memrchr(s, c, n);
+#else
 	const unsigned char *e;
 	if (0 == n) {
 		return NULL;
@@ -222,6 +230,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 		}
 	}
 	return NULL;
+#endif
 }
 
 
