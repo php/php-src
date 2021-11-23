@@ -554,12 +554,13 @@ static int sapi_extract_response_code(const char *header_line)
 
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
-			char *code_begin = ptr + 1, *code_end;
+			const char *code_begin = ptr + 1;
+		       	char *code_end;
 
 			code = ZEND_STRTOUL(code_begin, &code_end, 10);
 
 			/* rfc7230 3.1.2 status-code = 3DIGIT */
-			if(*code_begin < '0' || *code_begin > '9' || (code_begin - code_end) != 3) {
+			if(*code_begin < '0' || *code_begin > '9' || (code_end - code_begin) != 3) {
 				return -1;
 			}
 
