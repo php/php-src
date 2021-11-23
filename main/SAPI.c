@@ -555,8 +555,8 @@ static int sapi_extract_response_code(const char *header_line)
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
 			/* beginning of the response code */
-			char* status_description = estrdup(ptr + 1);
-			char* response_code = strtok(status_description, " ");
+			char *status_description = estrdup(ptr + 1);
+			char *response_code = strtok(status_description, " ");
 
 			code = atoi(response_code);
 
