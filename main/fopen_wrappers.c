@@ -402,7 +402,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
 		size_t path_len = strlen(path_info);
 		filename = zend_string_alloc(length + path_len + 2, 0);
-		memcpy(filename, PG(doc_root), length);
+		memcpy(ZSTR_VAL(filename), PG(doc_root), length);
 		if (!IS_SLASH(ZSTR_VAL(filename)[length - 1])) {	/* length is never 0 */
 			ZSTR_VAL(filename)[length++] = PHP_DIR_SEPARATOR;
 		}
