@@ -68,7 +68,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
         AC_MSG_WARN([pthreads not available])
       fi
 
-      CFLAGS="$CLFAGS_SAVE"
+      CFLAGS="$CFLAGS_SAVE"
       LIBS="$LIBS_SAVE"
     else
       AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
