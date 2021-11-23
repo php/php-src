@@ -549,34 +549,25 @@ SAPI_API void sapi_initialize_empty_request(void)
 
 static int sapi_extract_response_code(const char *header_line)
 {
-	int code = 200;
+	zend_ulong code = 200;
 	const char *ptr;
 
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
-			/* beginning of the response code */
-			char *status_description = estrdup(ptr + 1);
-			char *response_code = strtok(status_description, " ");
+			char *code_begin = ptr + 1, *code_end;
 
-			code = atoi(response_code);
+			code = ZEND_STRTOUL(code_begin, &code_end, 10);
 
 			/* rfc7230 3.1.2 status-code = 3DIGIT */
-			if (code > 999 ||  (code < 100 && response_code[0] != '0') ||
-					   (code < 10  && response_code[1] != '0') ||
-					   (code < 1   && response_code[2] != '0')) {
-				code = -1;
-			}
-			if ((uint32_t)strlen(response_code) > 3) {
-				/* overflow */
-				code = -1;
+			if(*code_begin < '0' || *code_begin > '9' || (code_begin - code_end) != 3) {
+				return -1;
 			}
 
-			efree(status_description);
 			break;
 		}
 	}
 
-	return code;
+	return (int)code;
 }
 
 
