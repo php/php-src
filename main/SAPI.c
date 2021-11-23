@@ -554,7 +554,22 @@ static int sapi_extract_response_code(const char *header_line)
 
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
-			code = atoi(ptr + 1);
+			/* beginning of the response code */
+			char* status_description = estrdup(ptr + 1);
+			char* response_code = strtok(status_description, " ");
+
+			code = atoi(response_code);
+
+			/* rfc7230 3.1.2 status-code = 3DIGIT */
+			if (code < 100 || code > 999) {
+				code = 0;
+			}
+			if ((uint32_t)strlen(response_code) > 3) {
+				/* overflow */
+				code = 0;
+			}
+
+			efree(status_description);
 			break;
 		}
 	}
@@ -747,7 +762,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	if (header_line_len>=5
 		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
-		sapi_update_response_code(sapi_extract_response_code(header_line));
+		int status_code = sapi_extract_response_code(header_line);
+		if (!status_code) {
+			sapi_module.sapi_error(E_WARNING, "Cannot set HTTP status line - "
+				"status code is malformed");
+			efree(header_line);
+			return FAILURE;
+		}
+		sapi_update_response_code(status_code);
 		/* sapi_update_response_code doesn't free the status line if the code didn't change */
 		if (SG(sapi_headers).http_status_line) {
 			efree(SG(sapi_headers).http_status_line);
