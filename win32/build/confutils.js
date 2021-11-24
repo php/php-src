@@ -1432,7 +1432,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 	if (shared) {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing + " [shared]");
-		cflags = "/D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
+		cflags = "/D ZEND_COMPILE_DL_EXT=1 /D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing);

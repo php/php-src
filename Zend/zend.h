@@ -69,7 +69,11 @@
 #define ZEND_TSRMLS_CACHE
 #endif
 
+#ifndef ZEND_COMPILE_DL_EXT
+TSRMLS_MAIN_CACHE_EXTERN()
+#else
 ZEND_TSRMLS_CACHE_EXTERN()
+#endif
 
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
