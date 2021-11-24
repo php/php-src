@@ -370,19 +370,17 @@ static bool opline_supports_assign_contraction(
 	return 1;
 }
 
-static bool variable_redefined_in_range(zend_ssa *ssa, int var, int start, int end)
+static bool variable_defined_or_used_in_range(zend_ssa *ssa, int var, int start, int end)
 {
 	while (start < end) {
-		if (ssa->ops[start].op1_def >= 0
-		 && ssa->vars[ssa->ops[start].op1_def].var == var) {
-			return 1;
-		}
-		if (ssa->ops[start].op2_def >= 0
-		 && ssa->vars[ssa->ops[start].op2_def].var == var) {
-			return 1;
-		}
-		if (ssa->ops[start].result_def >= 0
-		 && ssa->vars[ssa->ops[start].result_def].var == var) {
+		const zend_ssa_op *ssa_op = &ssa->ops[start];
+		if ((ssa_op->op1_def >= 0 && ssa->vars[ssa_op->op1_def].var == var) ||
+			(ssa_op->op2_def >= 0 && ssa->vars[ssa_op->op2_def].var == var) ||
+			(ssa_op->result_def >= 0 && ssa->vars[ssa_op->result_def].var == var) ||
+			(ssa_op->op1_use >= 0 && ssa->vars[ssa_op->op1_use].var == var) ||
+			(ssa_op->op2_use >= 0 && ssa->vars[ssa_op->op2_use].var == var) ||
+			(ssa_op->result_use >= 0 && ssa->vars[ssa_op->result_use].var == var)
+		) {
 			return 1;
 		}
 		start++;
@@ -1357,7 +1355,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && opline_supports_assign_contraction(
 					 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 					 src_var, opline->result.var)
-				 && !variable_redefined_in_range(ssa, EX_VAR_TO_NUM(opline->result.var),
+				 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->result.var),
 						ssa->vars[src_var].definition+1, op_1)
 				) {
 
@@ -1514,7 +1512,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && opline_supports_assign_contraction(
 						 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 						 src_var, opline->op1.var)
-					 && !variable_redefined_in_range(ssa, EX_VAR_TO_NUM(opline->op1.var),
+					 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->op1.var),
 							ssa->vars[src_var].definition+1, op_1)
 					) {
 
