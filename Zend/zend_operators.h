@@ -209,14 +209,10 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 	}
 }
 
-#if defined(HAVE_MEMRCHR) && !defined(__cplusplus) && !defined(i386)
-/* Declaration for memchr() may be missed if <string.h> is included without _GNU_SOURCE */
-extern void *memrchr(const void *s, int c, size_t n);
-#endif
-
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-#if defined(HAVE_MEMRCHR) && !defined(__cplusplus) && !defined(i386)
+#if defined(HAVE_MEMRCHR) && !defined(i386)
+	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */ 
 	return (const void*)memrchr(s, c, n);
 #else
 	const unsigned char *e;
