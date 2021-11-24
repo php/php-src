@@ -1621,7 +1621,7 @@ if (end[-(1 + LINK_SIZE)] != OP_KET || PRIVATE_DATA(begin) != 0)
 
 /* /(?:AB){4,6}/ is currently converted to /(?:AB){3}(?AB){1,3}/
  * Skip the check of the second part. */
-if (PRIVATE_DATA(end - LINK_SIZE) == 0)
+if (PRIVATE_DATA(end - LINK_SIZE) != 0)
   return TRUE;
 
 next = end;
