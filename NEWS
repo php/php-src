@@ -49,6 +49,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #81512 (Unexpected behavior with arrays and JIT). (Dmitry)
+  . Fixed bug #81652 (The value of error_reporting() gets overridden). (Nikita)
 
 - PCRE:
   . Fixed bug #81424 (PCRE2 10.35 JIT performance regression). (cmb)
