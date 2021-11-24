@@ -555,7 +555,7 @@ static int sapi_extract_response_code(const char *header_line)
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
 			const char *code_begin = ptr + 1;
-		       	char *code_end;
+			char *code_end;
 
 			code = ZEND_STRTOUL(code_begin, &code_end, 10);
 
