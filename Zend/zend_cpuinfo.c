@@ -106,7 +106,7 @@ static bool is_avx_supported() {
 	return 1;
 }
 #else
-static bool is_avx_supported() {
+static bool is_avx_supported(void) {
 	return 0;
 }
 #endif

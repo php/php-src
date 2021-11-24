@@ -104,7 +104,7 @@ static inline spl_dllist_object *spl_dllist_from_obj(zend_object *obj) /* {{{ */
 
 #define Z_SPLDLLIST_P(zv)  spl_dllist_from_obj(Z_OBJ_P((zv)))
 
-static spl_ptr_llist *spl_ptr_llist_init() /* {{{ */
+static spl_ptr_llist *spl_ptr_llist_init(void) /* {{{ */
 {
 	spl_ptr_llist *llist = emalloc(sizeof(spl_ptr_llist));
 

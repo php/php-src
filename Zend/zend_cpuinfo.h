@@ -215,7 +215,7 @@ static inline int zend_cpu_supports_pclmul() {
 	return __builtin_cpu_supports("pclmul");
 }
 #else
-static inline int zend_cpu_supports_pclmul() {
+static inline int zend_cpu_supports_pclmul(void) {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
 }
 #endif
