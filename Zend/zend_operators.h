@@ -212,7 +212,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
 #if defined(HAVE_MEMRCHR) && !defined(i386)
-	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */ 
+	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */
 	return (const void*)memrchr(s, c, n);
 #else
 	const unsigned char *e;
