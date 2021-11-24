@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d6d158112a802d867646b8f85402b8762599180b */
+ * Stub hash: ec8020febecb370ef2e5f19f00cd092ecb198f8c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_open, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -107,7 +107,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_delete, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, imap)
-	ZEND_ARG_TYPE_INFO(0, message_num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message_nums, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
