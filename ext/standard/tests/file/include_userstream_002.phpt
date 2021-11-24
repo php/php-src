@@ -19,7 +19,7 @@ class test {
         if (strchr($mode, 'a'))
             $this->pos = strlen($this->data);
         else
-            $this->po = 0;
+            $this->pos = 0;
 
         return true;
     }
