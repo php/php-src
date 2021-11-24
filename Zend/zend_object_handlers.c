@@ -727,7 +727,7 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline bool property_uses_strict_types() {
+static zend_always_inline bool property_uses_strict_types(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
 		&& execute_data->func
