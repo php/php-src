@@ -1029,6 +1029,7 @@ tail_call:
 			if (UNEXPECTED(ht)) {
 				if (GC_REF_CHECK_COLOR(ht, GC_GREY)) {
 					GC_REF_SET_COLOR(ht, GC_WHITE);
+					GC_STACK_PUSH((zend_refcounted *) ht);
 					for (; n != 0; n--) {
 						if (Z_REFCOUNTED_P(zv)) {
 							ref = Z_COUNTED_P(zv);
@@ -1049,7 +1050,6 @@ handle_zvals:
 					ref = Z_COUNTED_P(zv);
 					if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 						GC_REF_SET_COLOR(ref, GC_WHITE);
-						GC_STACK_PUSH(ref);
 						zv++;
 						while (--n) {
 							if (Z_REFCOUNTED_P(zv)) {
