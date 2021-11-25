@@ -3906,6 +3906,15 @@ static int zend_jit_load_var(dasm_State **Dst, uint32_t info, int var, zend_reg 
 	return zend_jit_load_reg(Dst, src, dst, info);
 }
 
+static int zend_jit_invalidate_var_if_necessary(dasm_State **Dst, zend_uchar op_type, zend_jit_addr addr, znode_op op)
+{
+	if ((op_type & (IS_TMP_VAR|IS_VAR)) && Z_MODE(addr) == IS_REG && !Z_LOAD(addr) && !Z_STORE(addr)) {
+		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
+		|	SET_ZVAL_TYPE_INFO dst, IS_UNDEF
+	}
+	return 1;
+}
+
 static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr src, zend_jit_addr dst, uint32_t info)
 {
 	if (!zend_jit_same_addr(src, dst)) {
@@ -5024,6 +5033,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				if (EXPECTED(op2_lval > 0)) {
 					|	xor Ra(result_reg), Ra(result_reg)
 				} else {
+					zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+					zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 					|	SET_EX_OPLINE opline, r0
 					|	jmp ->negative_shift
 				}
@@ -5047,6 +5058,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	cmp r1, 0
 				|	mov Ra(result_reg), 0
 				|	jg >1
+				zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+				zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 				|	SET_EX_OPLINE opline, r0
 				|	jmp ->negative_shift
 				|.code
@@ -5064,6 +5077,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				if (EXPECTED(op2_lval > 0)) {
 					|	sar Ra(result_reg), (SIZEOF_ZEND_LONG * 8) - 1
 				} else {
+					zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+					zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 					|	SET_EX_OPLINE opline, r0
 					|	jmp ->negative_shift
 				}
@@ -5084,6 +5099,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	cmp r1, 0
 				|	mov r1, (SIZEOF_ZEND_LONG * 8) - 1
 				|	jg >1
+				zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+				zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 				|	SET_EX_OPLINE opline, r0
 				|	jmp ->negative_shift
 				|.code
@@ -5096,6 +5113,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 			zend_long op2_lval = Z_LVAL_P(Z_ZV(op2_addr));
 
 			if (op2_lval == 0) {
+				zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+				zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 				|	SET_EX_OPLINE opline, r0
 				|	jmp ->mod_by_zero
 			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
@@ -5135,6 +5154,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	jz >1
 				|.cold_code
 				|1:
+				zend_jit_invalidate_var_if_necessary(Dst, op1_type, op1_addr, op1);
+				zend_jit_invalidate_var_if_necessary(Dst, op2_type, op2_addr, op2);
 				|	SET_EX_OPLINE opline, r0
 				|	jmp ->mod_by_zero
 				|.code
