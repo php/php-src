@@ -4273,6 +4273,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			}
 			(*func_p)(im, ctx, (int) quality, (int) speed);
 			break;
+#ifdef HAVE_GD_PNG
 		case PHP_GDIMG_TYPE_PNG:
 #ifdef HAVE_GD_BUNDLED
 			gdImagePngCtxEx(im, ctx, (int) quality, (int) basefilter);
@@ -4280,6 +4281,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			gdImagePngCtxEx(im, ctx, (int) quality);
 #endif
 			break;
+#endif
 		case PHP_GDIMG_TYPE_GIF:
 			(*func_p)(im, ctx);
 			break;
