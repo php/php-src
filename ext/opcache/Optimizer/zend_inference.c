@@ -2402,7 +2402,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_BW_NOT:
 			tmp = 0;
 			if (t1 & MAY_BE_STRING) {
-				tmp |= MAY_BE_STRING | MAY_BE_RC1;
+				tmp |= MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
 			}
 			if (t1 & (MAY_BE_ANY-MAY_BE_STRING)) {
 				tmp |= MAY_BE_LONG;
