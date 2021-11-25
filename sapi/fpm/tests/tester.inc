@@ -579,6 +579,7 @@ class Tester
      * @param string|null $errorMessage
      * @param bool $connKeepAlive
      * @param string|null $scriptFilename = null
+     * @param string|null $stdin = null
      * @return Response
      */
     public function request(
@@ -590,7 +591,7 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
-        $stdin = false
+        ?string $stdin = null
     ) {
         if ($this->hasError()) {
             return new Response(null, true);
