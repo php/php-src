@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.15
 
+- Core:
+  . Fixed bug #81656 (GCC-11 silently ignores -R). (Michael Wallner)
 
 16 Dec 2021, PHP 8.0.14
 
