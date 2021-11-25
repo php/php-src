@@ -4010,7 +4010,7 @@ static bool can_convert_to_double(
 	for (phi = var->phi_use_chain; phi; phi = zend_ssa_next_use_phi(ssa, var_num, phi)) {
 		/* Check that narrowing can actually be useful */
 		type = ssa->var_info[phi->ssa_var].type;
-		if ((type & MAY_BE_ANY) & ~(MAY_BE_LONG|MAY_BE_DOUBLE)) {
+		if (type & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 			return 0;
 		}
 
