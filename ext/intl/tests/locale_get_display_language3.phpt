@@ -143,7 +143,7 @@ disp_locale=de :  display_language=i-mingo
 -----------------
 locale='i-navajo'
 disp_locale=en :  display_language=Navajo
-disp_locale=fr :  display_language=navajo
+disp_locale=fr :  display_language=(navajo|navaho)
 disp_locale=de :  display_language=Navajo
 -----------------
 locale='i-pwn'
