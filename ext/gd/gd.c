@@ -4260,21 +4260,27 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	switch (image_type) {
+#ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
 			gdImageJpegCtx(im, ctx, (int) quality);
 			break;
+#endif
+#ifdef HAVE_GD_WEBP
 		case PHP_GDIMG_TYPE_WEBP:
 			if (quality == -1) {
 				quality = 80;
 			}
 			gdImageWebpCtx(im, ctx, (int) quality);
 			break;
+#endif
+#ifdef HAVE_GD_AVIF
 		case PHP_GDIMG_TYPE_AVIF:
 			if (speed == -1) {
 				speed = 6;
 			}
 			gdImageAvifCtx(im, ctx, (int) quality, (int) speed);
 			break;
+#endif
 #ifdef HAVE_GD_PNG
 		case PHP_GDIMG_TYPE_PNG:
 #ifdef HAVE_GD_BUNDLED
