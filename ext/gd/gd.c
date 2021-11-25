@@ -140,16 +140,16 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 
 /* End Section filters declarations */
-static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)());
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
+static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn);
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(void);
 static int _php_image_type(zend_string *data);
 
 /* output streaming (formerly gd_ctx.c) */
-static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
+static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn);
 
 /*********************************************************
  *
@@ -291,7 +291,7 @@ static zend_function *php_gd_font_object_get_constructor(zend_object *object)
 	return NULL;
 }
 
-static void php_gd_font_minit_helper()
+static void php_gd_font_minit_helper(void)
 {
 	gd_font_ce = register_class_GdFont();
 	gd_font_ce->create_object = php_gd_font_object_create;
@@ -1524,7 +1524,7 @@ static int _php_image_type(zend_string *data)
 /* }}} */
 
 /* {{{ _php_image_create_from_string */
-gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr (*ioctx_func_p)())
+gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
 {
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
@@ -1629,7 +1629,7 @@ PHP_FUNCTION(imagecreatefromstring)
 /* }}} */
 
 /* {{{ _php_image_create_from */
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)())
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
 {
 	char *file;
 	size_t file_len;
@@ -1673,7 +1673,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS)) {
 			goto out_err;
 		}
-	} else if (ioctx_func_p) {
+	} else if (ioctx_func_p || image_type == PHP_GDIMG_TYPE_GD2PART) {
 		/* we can create an io context */
 		gdIOCtx* io_ctx;
 		zend_string *buff;
@@ -1697,7 +1697,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
-			im = (*ioctx_func_p)(io_ctx, srcx, srcy, width, height);
+			im = gdImageCreateFromGd2PartCtx(io_ctx, srcx, srcy, width, height);
 		} else {
 			im = (*ioctx_func_p)(io_ctx);
 		}
@@ -1715,7 +1715,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	if (!im && fp) {
 		switch (image_type) {
 			case PHP_GDIMG_TYPE_GD2PART:
-				im = (*func_p)(fp, srcx, srcy, width, height);
+				im = gdImageCreateFromGd2Part(fp, srcx, srcy, width, height);
 				break;
 #ifdef HAVE_GD_XPM
 			case PHP_GDIMG_TYPE_XPM:
@@ -1807,7 +1807,7 @@ PHP_FUNCTION(imagecreatefromavif)
 /* {{{ Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
 {
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", gdImageCreateFromXpm, NULL);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XPM, "XPM", NULL, NULL);
 }
 /* }}} */
 #endif
@@ -1836,7 +1836,7 @@ PHP_FUNCTION(imagecreatefromgd2)
 /* {{{ Create a new image from a given part of GD2 file or URL */
 PHP_FUNCTION(imagecreatefromgd2part)
 {
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", gdImageCreateFromGd2Part, gdImageCreateFromGd2PartCtx);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", NULL, NULL);
 }
 /* }}} */
 
@@ -1859,7 +1859,7 @@ PHP_FUNCTION(imagecreatefromtga)
 #endif
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -1906,13 +1906,13 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		switch (image_type) {
 			case PHP_GDIMG_TYPE_GD:
-				(*func_p)(im, fp);
+				gdImageGd(im, fp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
 				if (q == -1) {
 					q = 128;
 				}
-				(*func_p)(im, fp, q, t);
+				gdImageGd2(im, fp, q, t);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -1932,13 +1932,13 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		switch (image_type) {
 			case PHP_GDIMG_TYPE_GD:
-				(*func_p)(im, tmp);
+				gdImageGd(im, tmp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
 				if (q == -1) {
 					q = 128;
 				}
-				(*func_p)(im, tmp, q, t);
+				gdImageGd2(im, tmp, q, t);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -2008,7 +2008,7 @@ PHP_FUNCTION(imagexbm)
 /* {{{ Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF");
 }
 /* }}} */
 
@@ -2016,7 +2016,7 @@ PHP_FUNCTION(imagegif)
 /* {{{ Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtxEx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG");
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
@@ -2025,7 +2025,7 @@ PHP_FUNCTION(imagepng)
 /* {{{ Output WEBP image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP");
 }
 /* }}} */
 #endif /* HAVE_GD_WEBP */
@@ -2034,7 +2034,7 @@ PHP_FUNCTION(imagewebp)
 /* {{{ Output AVIF image to browser or file */
 PHP_FUNCTION(imageavif)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF", gdImageAvifCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_AVIF, "AVIF");
 }
 /* }}} */
 #endif /* HAVE_GD_AVIF */
@@ -2043,7 +2043,7 @@ PHP_FUNCTION(imageavif)
 /* {{{ Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG");
 }
 /* }}} */
 #endif /* HAVE_GD_JPG */
@@ -2095,14 +2095,14 @@ PHP_FUNCTION(imagewbmp)
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD", gdImageGd);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD, "GD");
 }
 /* }}} */
 
 /* {{{ Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2", gdImageGd2);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
 }
 /* }}} */
 
@@ -4220,7 +4220,7 @@ static gdIOCtx *create_output_context() {
 	return ctx;
 }
 
-static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
+static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn)
 {
 	zval *imgind;
 	zend_long quality = -1, basefilter = -1, speed = -1;
@@ -4259,19 +4259,19 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 
 	switch (image_type) {
 		case PHP_GDIMG_TYPE_JPG:
-			(*func_p)(im, ctx, (int) quality);
+			gdImageJpegCtx(im, ctx, (int) quality);
 			break;
 		case PHP_GDIMG_TYPE_WEBP:
 			if (quality == -1) {
 				quality = 80;
 			}
-			(*func_p)(im, ctx, (int) quality);
+			gdImageWebpCtx(im, ctx, (int) quality);
 			break;
 		case PHP_GDIMG_TYPE_AVIF:
 			if (speed == -1) {
 				speed = 6;
 			}
-			(*func_p)(im, ctx, (int) quality, (int) speed);
+			gdImageAvifCtx(im, ctx, (int) quality, (int) speed);
 			break;
 #ifdef HAVE_GD_PNG
 		case PHP_GDIMG_TYPE_PNG:
@@ -4283,7 +4283,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 #endif
 		case PHP_GDIMG_TYPE_GIF:
-			(*func_p)(im, ctx);
+			gdImageGifCtx(im, ctx);
 			break;
 		 EMPTY_SWITCH_DEFAULT_CASE()
 	}
