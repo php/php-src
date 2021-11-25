@@ -560,7 +560,7 @@ static int sapi_extract_response_code(const char *header_line)
 			code = ZEND_STRTOUL(code_begin, &code_end, 10);
 
 			/* rfc7230 3.1.2 status-code = 3DIGIT */
-			if(*code_begin < '0' || *code_begin > '9' || (code_end - code_begin) != 3) {
+			if (code < 100 || code > 599 || (code_end - code_begin) != 3) {
 				return -1;
 			}
 
