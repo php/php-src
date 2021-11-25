@@ -29,6 +29,8 @@ Warning: Undefined variable $c in %sshift_right_004.php on line 7
 
 Warning: Undefined array key 0 in %sshift_right_004.php on line 7
 
+Deprecated: Implicit conversion from float %f to int loses precision in %sshift_right_004.php on line 8
+
 Warning: A non-numeric value encountered in %sshift_right_004.php on line 7
 
 Warning: A non-numeric value encountered in %sshift_right_004.php on line 7
