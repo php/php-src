@@ -111,7 +111,6 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
 		case ZEND_INIT_ARRAY:
-		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_SPACESHIP:
 		case ZEND_STRLEN:
 		case ZEND_COUNT:
@@ -127,6 +126,12 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
+			return 0;
+		case ZEND_ADD_ARRAY_ELEMENT:
+			/* TODO: We can't free two vars. Keep instruction alive. <?php [0, "$a" => "$b"]; */
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && (opline->op2_type & (IS_VAR|IS_TMP_VAR))) {
+				return 1;
+			}
 			return 0;
 		case ZEND_ROPE_END:
 			/* TODO: Rope dce optimization, see #76446 */
