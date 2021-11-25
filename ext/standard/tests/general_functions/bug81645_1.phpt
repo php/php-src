@@ -4,6 +4,5 @@ Bug #81645 (header() allows arbitrary status codes) leading zero
 <?php
 header("HTTP/1.1 000 ZERO");
 ?>
---EXPECTHEADERS--
-Status: 000 ZERO
---EXPECT--
+--EXPECTF--
+Warning: Cannot set HTTP status line - status code is malformed in %s on line %d
