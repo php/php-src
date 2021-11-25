@@ -1356,8 +1356,6 @@ else
   sljit_emit_op_custom(compiler, instruction, 6);
   }
 
-/* TODO: use sljit_set_current_flags */
-
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp1_reg_ind << 4) | data_ind);
 instruction[1] = 7;
@@ -1403,15 +1401,14 @@ else
   sljit_emit_op_custom(compiler, instruction, 6);
   }
 
-/* TODO: use sljit_set_current_flags */
+sljit_set_current_flags(compiler, SLJIT_SET_OVERFLOW);
+JUMPTO(SLJIT_OVERFLOW, start);
 
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp1_reg_ind << 4) | data_ind);
 instruction[1] = 7;
 instruction[2] = (sljit_u16)((0x4 << 8) | 0x21);
 sljit_emit_op_custom(compiler, instruction, 6);
-
-CMPTO(SLJIT_GREATER_EQUAL, TMP1, 0, SLJIT_IMM, 16, start);
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP1, 0);
 
@@ -1549,8 +1546,6 @@ else
   sljit_emit_op_custom(compiler, instruction, 6);
   }
 
-/* TODO: use sljit_set_current_flags */
-
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp3_reg_ind << 4) | data_ind);
 instruction[1] = 7;
@@ -1594,15 +1589,14 @@ else
   sljit_emit_op_custom(compiler, instruction, 6);
   }
 
-/* TODO: use sljit_set_current_flags */
+sljit_set_current_flags(compiler, SLJIT_SET_OVERFLOW);
+JUMPTO(SLJIT_OVERFLOW, start);
 
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp3_reg_ind << 4) | data_ind);
 instruction[1] = 7;
 instruction[2] = (sljit_u16)((0x4 << 8) | 0x21);
 sljit_emit_op_custom(compiler, instruction, 6);
-
-CMPTO(SLJIT_GREATER_EQUAL, TMP3, 0, SLJIT_IMM, 16, start);
 
 OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP3, 0);
 
@@ -1778,8 +1772,6 @@ instruction[1] = (sljit_u16)((zero_ind << 12) | (1 << 4));
 instruction[2] = (sljit_u16)((0xe << 8) | 0x81);
 sljit_emit_op_custom(compiler, instruction, 6);
 
-/* TODO: use sljit_set_current_flags */
-
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp1_reg_ind << 4) | data1_ind);
 instruction[1] = 7;
@@ -1819,15 +1811,14 @@ instruction[1] = (sljit_u16)((zero_ind << 12) | (1 << 4));
 instruction[2] = (sljit_u16)((0xe << 8) | 0x81);
 sljit_emit_op_custom(compiler, instruction, 6);
 
-/* TODO: use sljit_set_current_flags */
+sljit_set_current_flags(compiler, SLJIT_SET_OVERFLOW);
+JUMPTO(SLJIT_OVERFLOW, start);
 
 /* VLGVB */
 instruction[0] = (sljit_u16)(0xe700 | (tmp2_reg_ind << 4) | data1_ind);
 instruction[1] = 7;
 instruction[2] = (sljit_u16)((0x4 << 8) | 0x21);
 sljit_emit_op_custom(compiler, instruction, 6);
-
-CMPTO(SLJIT_GREATER_EQUAL, TMP2, 0, SLJIT_IMM, 16, start);
 
 OP2(SLJIT_ADD, STR_PTR, 0, STR_PTR, 0, TMP2, 0);
 
