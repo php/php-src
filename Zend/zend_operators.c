@@ -2330,14 +2330,14 @@ ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zv
 
 ZEND_API zend_result ZEND_FASTCALL is_larger_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	ZVAL_BOOL(result, (zend_compare(op1, op2) < 0));
+	ZVAL_BOOL(result, (zend_compare(op1, op2) > 0));
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API zend_result ZEND_FASTCALL is_larger_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	ZVAL_BOOL(result, (zend_compare(op1, op2) <= 0));
+	ZVAL_BOOL(result, (zend_compare(op1, op2) >= 0));
 	return SUCCESS;
 }
 /* }}} */

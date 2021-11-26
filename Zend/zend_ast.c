@@ -524,22 +524,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 				zval_ptr_dtor_nogc(&op2);
 			}
 			break;
-		case ZEND_AST_GREATER:
-		case ZEND_AST_GREATER_EQUAL:
-			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
-				ret = FAILURE;
-			} else if (UNEXPECTED(zend_ast_evaluate(&op2, ast->child[1], scope) != SUCCESS)) {
-				zval_ptr_dtor_nogc(&op1);
-				ret = FAILURE;
-			} else {
-				/* op1 > op2 is the same as op2 < op1 */
-				binary_op_type op = ast->kind == ZEND_AST_GREATER
-					? is_smaller_function : is_smaller_or_equal_function;
-				ret = op(result, &op2, &op1);
-				zval_ptr_dtor_nogc(&op1);
-				zval_ptr_dtor_nogc(&op2);
-			}
-			break;
 		case ZEND_AST_UNARY_OP:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
@@ -2009,14 +1993,14 @@ simple_list:
 				case ZEND_IS_NOT_EQUAL:        BINARY_OP(" != ",  170, 171, 171);
 				case ZEND_IS_SMALLER:          BINARY_OP(" < ",   180, 181, 181);
 				case ZEND_IS_SMALLER_OR_EQUAL: BINARY_OP(" <= ",  180, 181, 181);
+				case ZEND_IS_LARGER:           BINARY_OP(" > ", 180, 181, 181);
+				case ZEND_IS_LARGER_OR_EQUAL:  BINARY_OP(" >= ", 180, 181, 181);
 				case ZEND_POW:                 BINARY_OP(" ** ",  250, 251, 250);
 				case ZEND_BOOL_XOR:            BINARY_OP(" xor ",  40,  40,  41);
 				case ZEND_SPACESHIP:           BINARY_OP(" <=> ", 180, 181, 181);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
-		case ZEND_AST_GREATER:                 BINARY_OP(" > ",   180, 181, 181);
-		case ZEND_AST_GREATER_EQUAL:           BINARY_OP(" >= ",  180, 181, 181);
 		case ZEND_AST_AND:                     BINARY_OP(" && ",  130, 130, 131);
 		case ZEND_AST_OR:                      BINARY_OP(" || ",  120, 120, 121);
 		case ZEND_AST_ARRAY_ELEM:
