@@ -14,7 +14,9 @@
    +----------------------------------------------------------------------+
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include "php.h"
 #include "php_globals.h"
 #include "php_network.h"
@@ -293,7 +295,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (php_stream_is_filtered(stream)) {
-		php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
+		if (show_err) {
+			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
+		}
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
 		goto exit_success;

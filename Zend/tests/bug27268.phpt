@@ -2,6 +2,7 @@
 Bug #27268 (Bad references accentuated by clone)
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class A
 {
     public function &getA()

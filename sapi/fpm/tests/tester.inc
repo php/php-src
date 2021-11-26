@@ -522,29 +522,20 @@ class Tester
     }
 
     /**
-     * Execute request.
+     * Get request params array.
      *
      * @param string $query
      * @param array $headers
      * @param string|null $uri
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessage
-     * @param bool $connKeepAlive
-     * @return Response
+     * @param string|null $scriptFilename
+     * @return array
      */
-    public function request(
+    private function getRequestParams(
         string $query = '',
         array $headers = [],
         string $uri = null,
-        string $address = null,
-        string $successMessage = null,
-        string $errorMessage = null,
-        bool $connKeepAlive = false
+        string $scriptFilename = null
     ) {
-        if ($this->hasError()) {
-            return new Response(null, true);
-        }
         if (is_null($uri)) {
             $uri = $this->makeSourceFile();
         }
@@ -553,7 +544,7 @@ class Tester
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
                 'REQUEST_METHOD'    => 'GET',
-                'SCRIPT_FILENAME'   => $uri,
+                'SCRIPT_FILENAME'   => $scriptFilename ?: $uri,
                 'SCRIPT_NAME'       => $uri,
                 'QUERY_STRING'      => $query,
                 'REQUEST_URI'       => $uri . ($query ? '?'.$query : ""),
@@ -571,9 +562,40 @@ class Tester
             ],
             $headers
         );
-        $params = array_filter($params, function($value) {
+
+        return array_filter($params, function($value) {
             return !is_null($value);
         });
+    }
+
+    /**
+     * Execute request.
+     *
+     * @param string $query
+     * @param array $headers
+     * @param string|null $uri
+     * @param string|null $address
+     * @param string|null $successMessage
+     * @param string|null $errorMessage
+     * @param bool $connKeepAlive
+     * @param string|null $scriptFilename = null
+     * @return Response
+     */
+    public function request(
+        string $query = '',
+        array $headers = [],
+        string $uri = null,
+        string $address = null,
+        string $successMessage = null,
+        string $errorMessage = null,
+        bool $connKeepAlive = false,
+        string $scriptFilename = null
+    ) {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
+
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename);
 
         try {
             $this->response = new Response(
@@ -592,6 +614,68 @@ class Tester
             $this->response->debugOutput();
         }
         return $this->response;
+    }
+
+    /**
+     * Execute multiple requests in parallel.
+     *
+     * @param array|int $requests
+     * @param string|null $address
+     * @param string|null $successMessage
+     * @param string|null $errorMessage
+     * @param bool $connKeepAlive
+     * @param int $readTimeout
+     * @return Response[]
+     * @throws \Exception
+     */
+    public function multiRequest(
+        $requests,
+        string $address = null,
+        string $successMessage = null,
+        string $errorMessage = null,
+        bool $connKeepAlive = false,
+        int $readTimeout = 0
+    ) {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
+
+        if (is_numeric($requests)) {
+            $requests = array_fill(0, $requests, []);
+        } elseif (!is_array($requests)) {
+            throw new \Exception('Requests can be either numeric or array');
+        }
+
+        try {
+            $connections = array_map(function ($requestData) use ($address, $connKeepAlive) {
+                $client = $this->getClient($address, $connKeepAlive);
+                $params = $this->getRequestParams(
+                    $requestData['query'] ?? '',
+                    $requestData['headers'] ?? [],
+                    $requestData['uri'] ?? null
+                );
+                return [
+                    'client' => $client,
+                    'requestId' => $client->async_request($params, false),
+                ];
+            }, $requests);
+
+            $responses = array_map(function ($conn) use ($readTimeout) {
+                $response = new Response($conn['client']->wait_for_response_data($conn['requestId'], $readTimeout));
+                if ($this->debug) {
+                    $response->debugOutput();
+                }
+                return $response;
+            }, $connections);
+            $this->message($successMessage);
+            return $responses;
+        } catch (\Exception $exception) {
+            if ($errorMessage === null) {
+                $this->error("Request failed", $exception);
+            } else {
+                $this->message($errorMessage);
+            }
+        }
     }
 
     /**

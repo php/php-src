@@ -1057,11 +1057,14 @@ function get_binary(string $php, string $sapi, string $sapi_path): ?string
     if (IS_WINDOWS && file_exists("$dir/$sapi.exe")) {
         return realpath("$dir/$sapi.exe");
     }
+    // Sources tree
     if (file_exists("$dir/../../$sapi_path")) {
         return realpath("$dir/../../$sapi_path");
     }
-    if (file_exists("$dir/$sapi")) {
-        return realpath("$dir/$sapi");
+    // Installation tree, preserve command prefix/suffix
+    $inst = str_replace('php', $sapi, basename($php));
+    if (file_exists("$dir/$inst")) {
+        return realpath("$dir/$inst");
     }
     return null;
 }
@@ -1866,7 +1869,8 @@ function run_test(string $php, $file, array $env): string
 
     static $skipCache;
     if (!$skipCache) {
-        $skipCache = new SkipCache($cfg['keep']['skip']);
+        $enableSkipCache = !($env['DISABLE_SKIP_CACHE'] ?? '0');
+        $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
     $temp_filenames = null;
@@ -2495,6 +2499,8 @@ COMMAND $cmd
         ];
     }
 
+    // Remember CLEAN output to report borked test if it otherwise passes.
+    $clean_output = null;
     if ($test->sectionNotEmpty('CLEAN') && (!$no_clean || $cfg['keep']['clean'])) {
         show_file_block('clean', $test->getSection('CLEAN'));
         save_text($test_clean, trim($test->getSection('CLEAN')), $temp_clean);
@@ -2502,7 +2508,7 @@ COMMAND $cmd
         if (!$no_clean) {
             $extra = !IS_WINDOWS ?
                 "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
-            system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
+            $clean_output = system_with_timeout("$extra $orig_php $pass_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
         }
 
         if (!$cfg['keep']['clean']) {
@@ -2654,25 +2660,6 @@ COMMAND $cmd
 
         if (preg_match("/^$wanted_re\$/s", $output)) {
             $passed = true;
-            if (!$cfg['keep']['php'] && !$leaked) {
-                @unlink($test_file);
-                @unlink($preload_filename);
-            }
-            @unlink($tmp_post);
-
-            if (!$leaked && !$failed_headers) {
-                if ($test->hasSection('XFAIL')) {
-                    $warn = true;
-                    $info = " (warn: XFAIL section but test passes)";
-                } elseif ($test->hasSection('XLEAK')) {
-                    $warn = true;
-                    $info = " (warn: XLEAK section but test passes)";
-                } else {
-                    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    $junit->markTestAs('PASS', $shortname, $tested);
-                    return 'PASSED';
-                }
-            }
         }
     } else {
         $wanted = trim($test->getSection('EXPECT'));
@@ -2682,29 +2669,46 @@ COMMAND $cmd
         // compare and leave on success
         if (!strcmp($output, $wanted)) {
             $passed = true;
-
-            if (!$cfg['keep']['php'] && !$leaked) {
-                @unlink($test_file);
-                @unlink($preload_filename);
-            }
-            @unlink($tmp_post);
-
-            if (!$leaked && !$failed_headers) {
-                if ($test->hasSection('XFAIL')) {
-                    $warn = true;
-                    $info = " (warn: XFAIL section but test passes)";
-                } elseif ($test->hasSection('XLEAK')) {
-                    $warn = true;
-                    $info = " (warn: XLEAK section but test passes)";
-                } else {
-                    show_result("PASS", $tested, $tested_file, '', $temp_filenames);
-                    $junit->markTestAs('PASS', $shortname, $tested);
-                    return 'PASSED';
-                }
-            }
         }
 
         $wanted_re = null;
+    }
+
+    if ($passed) {
+        if (!$cfg['keep']['php'] && !$leaked) {
+            @unlink($test_file);
+            @unlink($preload_filename);
+        }
+        @unlink($tmp_post);
+
+        if (!$leaked && !$failed_headers) {
+            // If the test passed and CLEAN produced output, report test as borked.
+            if ($clean_output) {
+                show_result("BORK", $output, $tested_file, 'reason: invalid output from CLEAN', $temp_filenames);
+                    $PHP_FAILED_TESTS['BORKED'][] = [
+                    'name' => $file,
+                    'test_name' => '',
+                    'output' => '',
+                    'diff' => '',
+                    'info' => "$clean_output [$file]",
+                ];
+
+                $junit->markTestAs('BORK', $shortname, $tested, null, $clean_output);
+                return 'BORKED';
+            }
+
+            if ($test->hasSection('XFAIL')) {
+                $warn = true;
+                $info = " (warn: XFAIL section but test passes)";
+            } elseif ($test->hasSection('XLEAK')) {
+                $warn = true;
+                $info = " (warn: XLEAK section but test passes)";
+            } else {
+                show_result("PASS", $tested, $tested_file, '', $temp_filenames);
+                $junit->markTestAs('PASS', $shortname, $tested);
+                return 'PASSED';
+            }
+        }
     }
 
     // Test failed so we need to report details.
@@ -2788,6 +2792,9 @@ $output
 case "$1" in
 "gdb")
     gdb --args {$orig_cmd}
+    ;;
+"lldb")
+    lldb -- {$orig_cmd}
     ;;
 "valgrind")
     USE_ZEND_ALLOC=0 valgrind $2 ${orig_cmd}
@@ -3659,6 +3666,7 @@ class JUnit
 
 class SkipCache
 {
+    private bool $enable;
     private bool $keepFile;
 
     private array $skips = [];
@@ -3669,8 +3677,9 @@ class SkipCache
     private int $extHits = 0;
     private int $extMisses = 0;
 
-    public function __construct(bool $keepFile)
+    public function __construct(bool $enable, bool $keepFile)
     {
+        $this->enable = $enable;
         $this->keepFile = $keepFile;
     }
 
@@ -3691,10 +3700,10 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
-        if (strpos($result, 'nocache') !== 0) {
-            $this->skips[$key][$code] = $result;
-        } else {
+        if (strpos($result, 'nocache') === 0) {
             $result = '';
+        } else if ($this->enable) {
+            $this->skips[$key][$code] = $result;
         }
         $this->misses++;
 

@@ -577,7 +577,7 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -641,11 +641,11 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 				}
 			}
 			if (w <= 0) {
-				w = (s1 << 8) | s2 | MBFL_WCSPLANE_WINCP932;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -655,7 +655,7 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = c;
 			filter->status++;
 		} else {
-			CK((*filter->output_function)((filter->cache << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->status = filter->cache = 0;
 		}
 		break;
@@ -666,7 +666,7 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->cache = c;
 			filter->status++;
 		} else {
-			CK((*filter->output_function)(0x1B2400 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->status = filter->cache = 0;
 		}
 		break;
@@ -676,7 +676,7 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 		c1 = filter->cache;
 		if (c == 0xF) { /* Terminate sequence of emoji */
 			filter->status = filter->cache = 0;
-			return c;
+			return 0;
 		} else {
 			if (c1 == 'G' && c >= 0x21 && c <= 0x7a) {
 				s1 = (0x91 - 0x21) * 94;
@@ -691,9 +691,9 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 			} else if (c1 == 'Q' && c >= 0x21 && c <= 0x5E) {
 				s1 = (0x96 - 0x21) * 94;
 			} else {
-				CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				filter->status = filter->cache = 0;
-				return c;
+				return 0;
 			}
 
 			w = mbfilter_sjis_emoji_sb2unicode(s1 + c - 0x21, &snd);
@@ -703,19 +703,19 @@ int mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 				}
 				CK((*filter->output_function)(w, filter->data));
 			} else {
-				CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 				filter->status = filter->cache = 0;
 			}
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_sjis_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status && filter->status != 4) {
-		mbfl_filt_conv_illegal_output(filter->cache, filter);
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -785,16 +785,6 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 			}
 		}
 
-		if (s1 <= 0) {
-			/* CP932 vendor ext3 (115ku - 119ku) */
-			for (c1 = 0; c1 < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; c1++) {
-				if (c == cp932ext3_ucs_table[c1]) {
-					s1 = (((c1 / 94) + 0x93) << 8) + (c1 % 94) + 0x21;
-					break;
-				}
-			}
-		}
-
 		if (c == 0) {
 			s1 = 0;
 		}
@@ -807,7 +797,7 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
  	}
 
 	if (filter->status) {
-		return c;
+		return 0;
 	}
 
 	if (s1 >= 0) {
@@ -824,7 +814,7 @@ int mbfl_filt_conv_wchar_sjis_mobile(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
@@ -832,6 +822,10 @@ int mbfl_filt_conv_sjis_mobile_flush(mbfl_convert_filter *filter)
 	int c1 = filter->cache;
 	if (filter->status == 1 && (c1 == '#' || (c1 >= '0' && c1 <= '9'))) {
 		CK((*filter->output_function)(c1, filter->data));
+	} else if (filter->status == 2) {
+		/* First of a pair of Regional Indicator codepoints came at the end of a string */
+		filter->cache = filter->status = 0;
+		mbfl_filt_conv_illegal_output(c1, filter);
 	}
 
 	if (filter->flush_function) {

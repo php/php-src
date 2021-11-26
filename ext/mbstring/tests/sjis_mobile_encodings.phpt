@@ -277,6 +277,23 @@ function testSJISVariant($validChars, $nonInvertible, $encoding) {
 
   convertAllInvalidChars($invalidCodepoints, $fromUnicode, 'UTF-32BE', $encoding, '%');
   echo "Unicode -> $encoding conversion works on all invalid codepoints\n";
+
+  // Test "long" illegal character markers
+  mb_substitute_character("long");
+  convertInvalidString("\x80", "%", $encoding, "UTF-8");
+  convertInvalidString("\x81\x20", "%", $encoding, "UTF-8");
+  convertInvalidString("\xEA\xA9", "%", $encoding, "UTF-8");
+  mb_substitute_character(0x25); // '%'
+
+  // Test Regional Indicator codepoint at end of string
+  // The mobile SJIS variants all have special characters to represent certain national
+  // flags, but in Unicode these are represented by a sequence of _two_ codepoints
+  // So if only one of those two codepoints appears at the end of a string, it can't
+  // be converted to SJIS and should be treated as an error
+  convertInvalidString("\x00\x01\xF1\xE9", "%", "UTF-32BE", $encoding); // Regional Indicator C
+
+  // Test Regional Indicator codepoint followed by some other codepoint
+  convertInvalidString("\x00\x01\xF1\xE9\x00\x00\x00A", "%A", "UTF-32BE", $encoding);
 }
 
 testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');

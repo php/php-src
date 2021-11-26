@@ -33,6 +33,8 @@ function shiftJISDecode($bytes) {
 
 /* Read in table of all characters in CP932 charset */
 $cp932Chars = array(); /* CP932 -> UTF-16BE */
+$nonInvertible = array();
+$fromUnicode = array();
 $fp = fopen(__DIR__ . '/data/CP932.txt', 'r+');
 while ($line = fgets($fp, 256)) {
   if ($line[0] == '#')
@@ -41,9 +43,14 @@ while ($line = fgets($fp, 256)) {
   if (sscanf($line, "0x%x\t0x%x", $bytes, $codepoint) == 2) {
     if ($bytes < 256)
       continue;
-    if ($bytes > 0xFA00) // We don't handle these extra characters from ku 114 and above
-      continue;
-    $cp932Chars[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+
+
+    if (isset($fromUnicode[$codepoint])) {
+      $nonInvertible[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+    } else {
+      $cp932Chars[pack('n', shiftJISDecode($bytes))] = pack('n', $codepoint);
+      $fromUnicode[$codepoint] = $bytes;
+    }
   }
 }
 
@@ -59,22 +66,6 @@ for ($i = 0xF0; $i <= 0xF9; $i++) {
   }
 }
 
-/* There are 396 Unicode codepoints which are non-invertible in CP932
- * (multiple CP932 byte sequences map to the same codepoint) */
-$nonInvertible = array();
-for ($i = 0xED00; $i <= 0xEEFF; $i++) {
-  $bytes = pack('n', shiftJISDecode($i));
-  if (isset($cp932Chars[$bytes])) {
-    $nonInvertible[$bytes] = $cp932Chars[$bytes];
-    unset($cp932Chars[$bytes]); // will test these separately
-  }
-}
-foreach ([0x8790, 0x8791, 0x8792, 0x8795, 0x8796, 0x8797, 0x879A, 0x879B, 0x879C] as $i) {
-  $bytes = pack('n', shiftJISDecode($i));
-  $nonInvertible[$bytes] = $cp932Chars[$bytes];
-  unset($cp932Chars[$bytes]); // will test these separately
-}
-
 /* Read in table of all characters in JISX-0201 charset */
 $jisx0201Chars = array(); /* JISX0201 -> UTF-16BE */
 $fp = fopen(__DIR__ . '/data/JISX0201.txt', 'r+');
@@ -84,6 +75,18 @@ while ($line = fgets($fp, 256)) {
 
   if (sscanf($line, "0x%x\t0x%x", $byte, $codepoint) == 2)
     $jisx0201Chars[chr($byte)] = pack('n', $codepoint);
+}
+
+/* Read in table of all characters in JISX-0212 charset */
+$jisx0212Chars = array();
+$fp = fopen(__DIR__ . '/data/JISX0212.txt', 'r+');
+while ($line = fgets($fp, 256)) {
+  if ($line[0] == '#')
+    continue;
+
+  if (sscanf($line, "0x%x\t0x%x", $bytes, $codepoint) == 2) {
+    $jisx0212Chars[pack('n', $bytes)] = pack('n', $codepoint);
+  }
 }
 
 /* Our conversions between CP5022x (when CP932 charset is selected) and Unicode
@@ -148,6 +151,10 @@ for ($i = 0x80; $i < 256; $i++) {
   testInvalid("\x0F" . chr($i),   "\x00%", 'CP50222');
 }
 
+// Switch back to ASCII after a multibyte character
+convertValidString("\x30\x00\x00a\x00b\x00c", "\x1B\$B\x21\x21\x1B(Babc", 'UTF-16BE', 'CP50221', false);
+convertValidString("\x30\x00\x00a\x00b\x00c", "\x1B\$B\x21\x21\x1B(Babc", 'UTF-16BE', 'CP50222', false);
+
 echo "ASCII support OK\n";
 
 /* All valid JIS X 0201 characters
@@ -161,6 +168,7 @@ foreach ($jisx0201Chars as $jisx0201 => $utf16BE) {
     testValid($jisx0201, $utf16BE, 'CP50220', false);
     testValid($jisx0201, $utf16BE, 'CP50221', false);
     testValid($jisx0201, $utf16BE, 'CP50222', false);
+    convertValidString($utf16BE, "\x0E" . chr(ord($jisx0201) - 0x80) . "\x0F", 'UTF-16BE', 'CP50222', false);
   } else { /* Latin */
     testValid("\x1B(J" . $jisx0201, $utf16BE, 'CP50220', $utf16BE > "\x00\x80");
     testValid("\x1B(J" . $jisx0201, $utf16BE, 'CP50221', $utf16BE > "\x00\x80");
@@ -179,6 +187,11 @@ for ($i = 0x80; $i < 256; $i++) {
   testInvalid("\x1B(J" . chr($i), "\x00%", 'CP50222');
 }
 
+/* Go from JIS X 0201 to ASCII or JIS X 0208 */
+convertValidString("\xFF\x61\x00A", "\x0E\x21\x0FA", 'UTF-16BE', 'CP50222', false);
+convertValidString("\xFF\x61\x22\x25", "\x0E\x21\x0F\x1B\$B\x21\x42\x1B(B", 'UTF-16BE', 'CP50222', false);
+convertValidString("\xFF\x61\x20\x3E", "\x0E\x21\x0F\x1B(J\x7E\x1B(B", 'UTF-16BE', 'CP50222');
+
 echo "JIS X 0201 support OK\n";
 
 /* All valid CP932 characters */
@@ -193,8 +206,17 @@ foreach ($nonInvertible as $cp932 => $utf16BE) {
   testValid("\x1B\$B" . $cp932, $utf16BE, 'CP50222', false);
 }
 
+/* There are some conversions we support from Unicode -> CP5022x, but not in the opposite direction */
+foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
+  convertValidString("\x22\x25", "\x1B\$B\x21\x42\x1B(B", 'UTF-16BE', $encoding, false);
+  convertValidString("\xFF\x0D", "\x1B\$B\x21\x5D\x1B(B", 'UTF-16BE', $encoding, false);
+  convertValidString("\xFF\xE0", "\x1B\$B\x21\x71\x1B(B", 'UTF-16BE', $encoding, false);
+  convertValidString("\xFF\xE1", "\x1B\$B\x21\x72\x1B(B", 'UTF-16BE', $encoding, false);
+  convertValidString("\xFF\xE2", "\x1B\$B\x22\x4C\x1B(B", 'UTF-16BE', $encoding, false);
+}
+
 /* All invalid 2-byte CP932 characters */
-for ($i = 0x21; $i <= 0x7E; $i++) {
+for ($i = 0x21; $i <= 0x97; $i++) {
   for ($j = 0; $j < 256; $j++) {
     $testString = chr($i) . chr($j);
     if (!isset($cp932Chars[$testString]) && !isset($nonInvertible[$testString])) {
@@ -206,13 +228,41 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 }
 
 /* Try truncated 2-byte characters */
-for ($i = 0x21; $i <= 0x7E; $i++) {
+for ($i = 0x21; $i <= 0x97; $i++) {
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50220');
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50221');
   testInvalid("\x1B\$B" . chr($i), "\x00%", 'CP50222');
 }
 
+/* Test alternative escape sequence to select CP932 */
+testValid("\x1B\$(B\x21\x21", "\x30\x00", 'CP50220', false);
+
 echo "CP932 support OK\n";
+
+foreach ($jisx0212Chars as $jisx0212 => $utf16BE) {
+  testValid("\x1B\$(D" . $jisx0212, $utf16BE, 'CP50220', false);
+  testValid("\x1B\$(D" . $jisx0212, $utf16BE, 'CP50221', false);
+  testValid("\x1B\$(D" . $jisx0212, $utf16BE, 'CP50222', false);
+}
+
+for ($i = 0x21; $i <= 0x97; $i++) {
+  for ($j = 0; $j < 256; $j++) {
+    $testString = chr($i) . chr($j);
+    if (!isset($jisx0212Chars[$testString])) {
+      testInvalid("\x1B\$(D" . $testString, "\x00%", 'CP50220');
+      testInvalid("\x1B\$(D" . $testString, "\x00%", 'CP50221');
+      testInvalid("\x1B\$(D" . $testString, "\x00%", 'CP50222');
+    }
+  }
+}
+
+for ($i = 0x21; $i <= 0x97; $i++) {
+  testInvalid("\x1B\$(D" . chr($i), "\x00%", 'CP50220');
+  testInvalid("\x1B\$(D" . chr($i), "\x00%", 'CP50221');
+  testInvalid("\x1B\$(D" . chr($i), "\x00%", 'CP50222');
+}
+
+echo "JIS X 0212 support OK\n";
 
 /* Unicode codepoint for halfwidth katakana -> kuten code for ordinary katakana */
 $fullwidthKatakana = array(
@@ -292,10 +342,36 @@ testInvalidString("\xD8\x00", '%', 'UTF-16BE', 'CP50222');
 
 echo "Invalid Unicode is flagged when converting to CP5022x\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "CP50220", "UTF-8");
+convertInvalidString("\x80", "%", "CP50221", "UTF-8");
+convertInvalidString("\x80", "%", "CP50222", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50220", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50221", "UTF-8");
+convertInvalidString("\x1B\$B1", "%", "CP50222", "UTF-8");
+
+echo "Long error markers OK\n";
+
+foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
+  testInvalidString("\x1B", "%", $encoding, "UTF-8");
+  testInvalidString("\x1BX", "%X", $encoding, "UTF-8");
+  testInvalidString("\x1B(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B(X", "%(X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(", "%", $encoding, "UTF-8");
+  testInvalidString("\x1B\$X", "%\$X", $encoding, "UTF-8");
+  testInvalidString("\x1B\$(X", "%\$(X", $encoding, "UTF-8");
+}
+
+echo "Invalid escape sequences OK\n";
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 CP932 support OK
+JIS X 0212 support OK
 Folding of fullwidth katakana for CP50220 OK
 Invalid Unicode is flagged when converting to CP5022x
+Long error markers OK
+Invalid escape sequences OK

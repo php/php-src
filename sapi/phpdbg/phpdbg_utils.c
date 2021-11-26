@@ -702,7 +702,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			zend_string_release(str);
 			} break;
 		case IS_RESOURCE:
-			spprintf(&decode, 0, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			spprintf(&decode, 0, "Rsrc #" ZEND_LONG_FMT, Z_RES_HANDLE_P(zv));
 			break;
 		case IS_ARRAY:
 			spprintf(&decode, 0, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));

@@ -91,7 +91,7 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 
 /* this is a convenience function for fetching a particular
  * element from a (possibly multi-dimensional) safe array */
-PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1)
+PHP_COM_DOTNET_API bool php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1)
 {
 	UINT dims;
 	LONG lbound, ubound;

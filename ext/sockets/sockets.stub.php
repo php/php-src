@@ -70,9 +70,16 @@ function socket_recvfrom(Socket $socket, &$data, int $length, int $flags, &$addr
 
 function socket_sendto(Socket $socket, string $data, int $length, int $flags, string $address, ?int $port = null): int|false {}
 
+/**
+ * @return array<string, mixed>|int|false
+ * @refcount 1
+ */
 function socket_get_option(Socket $socket, int $level, int $option): array|int|false {}
 
-/** @alias socket_get_option */
+/**
+ * @return array<string, mixed>|int|false
+ * @alias socket_get_option
+ */
 function socket_getopt(Socket $socket, int $level, int $option): array|int|false {}
 
 /** @param array|string|int $value */
@@ -109,12 +116,20 @@ function socket_recvmsg(Socket $socket, array &$message, int $flags = 0): int|fa
 
 function socket_cmsg_space(int $level, int $type, int $num = 0): ?int {}
 
+/**
+ * @return array<int, AddressInfo>|false
+ * @refcount 1
+ */
 function socket_addrinfo_lookup(string $host, ?string $service = null, array $hints = []): array|false {}
 
 function socket_addrinfo_connect(AddressInfo $address): Socket|false {}
 
 function socket_addrinfo_bind(AddressInfo $address): Socket|false {}
 
+/**
+ * @return array<string, int|string|array>
+ * @refcount 1
+ */
 function socket_addrinfo_explain(AddressInfo $address): array {}
 
 #ifdef PHP_WIN32

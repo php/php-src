@@ -15,6 +15,13 @@ for ($n = 1; $n <= 16; $n++) {
         continue;
     testEncodingFromUTF16ConversionTable(__DIR__ . "/data/8859-$n.txt", "ISO-8859-{$n}");
 }
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xAE", "%", "ISO8859-7", "UTF-8");
+convertInvalidString("\xFF", "%", "ISO8859-8", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested ISO-8859-1 -> UTF-16BE
@@ -45,3 +52,4 @@ Tested ISO-8859-15 -> UTF-16BE
 Tested UTF-16BE -> ISO-8859-15
 Tested ISO-8859-16 -> UTF-16BE
 Tested UTF-16BE -> ISO-8859-16
+Done!

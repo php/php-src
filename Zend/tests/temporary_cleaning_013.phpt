@@ -77,6 +77,7 @@ try {
 
 try {
     var_dump((function() { return new class {
+        public $foo;
         function __construct() { $this->foo = new stdClass; }
         function __destruct() { throw new Exception; }
     }; })()->foo++);
@@ -92,6 +93,7 @@ try {
 
 try {
     var_dump((function() { return new class {
+        public $bar;
         function __construct() { $this->bar = new stdClass; }
         function &__get($x) { return $this->bar; }
         function __destruct() { throw new Exception; }
@@ -115,6 +117,7 @@ try {
 
 try {
     var_dump(++(function() { return new class {
+        public $bar;
         function __construct() { $this->bar = new stdClass; }
         function &__get($x) { return $this->bar; }
         function __destruct() { throw new Exception; }
@@ -143,6 +146,7 @@ try {
 
 try {
     var_dump((new class {
+        public $foo;
         function __construct() { $this->foo = new stdClass; }
         function __destruct() { throw new Exception; }
     })->foo);
@@ -168,6 +172,7 @@ try {
 
 try {
     var_dump(isset((new class {
+        public $foo;
         function __construct() { $this->foo = new stdClass; }
         function __destruct() { throw new Exception; }
     })->foo->bar));
@@ -278,14 +283,22 @@ caught Exception 2
 caught Exception 3
 caught Exception 4
 caught Exception 5
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 6
 caught Exception 7
 caught Exception 8
 caught Exception 9
 caught Exception 10
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 11
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 12
 caught Exception 13
+
+Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 14
 
 Notice: Indirect modification of overloaded element of ArrayAccess@anonymous has no effect in %s on line %d

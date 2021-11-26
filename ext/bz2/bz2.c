@@ -578,7 +578,8 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	php_stream_from_zval(stream, bzp);
 
 	if (!php_stream_is(stream, PHP_STREAM_IS_BZIP2)) {
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be a bz2 stream");
+		RETURN_THROWS();
 	}
 
 	self = (struct php_bz2_stream_data_t *) stream->abstract;

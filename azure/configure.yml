@@ -56,6 +56,12 @@ steps:
         --with-mhash \
         --with-sodium \
         --enable-dba \
+        --with-cdb \
+        --enable-flatfile \
+        --enable-inifile \
+        --with-tcadb \
+        --with-lmdb \
+        --with-qdbm \
         --with-snmp \
         --with-unixODBC \
         --with-imap \

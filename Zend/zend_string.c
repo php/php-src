@@ -25,11 +25,14 @@
 
 ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
+ZEND_API zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
 
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_permanent(const char *str, size_t size, bool permanent);
 static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(const char *str, size_t size, bool permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
    won't be free'd until process exit. If we want an ability to
@@ -39,6 +42,7 @@ static HashTable interned_strings_permanent;
 
 static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
 static zend_string_init_interned_func_t interned_string_init_request_handler = zend_string_init_interned_request;
+static zend_string_init_existing_interned_func_t interned_string_init_existing_request_handler = zend_string_init_existing_interned_request;
 
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
@@ -83,6 +87,7 @@ ZEND_API void zend_interned_strings_init(void)
 
 	interned_string_request_handler = zend_new_interned_string_request;
 	interned_string_init_request_handler = zend_string_init_interned_request;
+	interned_string_init_existing_request_handler = zend_string_init_existing_interned_request;
 
 	zend_empty_string = NULL;
 	zend_known_strings = NULL;
@@ -91,6 +96,7 @@ ZEND_API void zend_interned_strings_init(void)
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
 	zend_string_init_interned = zend_string_init_interned_permanent;
+	zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
@@ -267,6 +273,20 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char
 	return zend_add_interned_string(ret, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_permanent(const char *str, size_t size, bool permanent)
+{
+	zend_ulong h = zend_inline_hash_func(str, size);
+	zend_string *ret = zend_interned_string_ht_lookup_ex(h, str, size, &interned_strings_permanent);
+	if (ret) {
+		return ret;
+	}
+
+	ZEND_ASSERT(permanent);
+	ret = zend_string_init(str, size, permanent);
+	ZSTR_H(ret) = h;
+	return ret;
+}
+
 static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent)
 {
 	zend_string *ret;
@@ -297,6 +317,25 @@ static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *
 	return zend_add_interned_string(ret, &CG(interned_strings), 0);
 }
 
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(const char *str, size_t size, bool permanent)
+{
+	zend_ulong h = zend_inline_hash_func(str, size);
+	zend_string *ret = zend_interned_string_ht_lookup_ex(h, str, size, &interned_strings_permanent);
+	if (ret) {
+		return ret;
+	}
+
+	ret = zend_interned_string_ht_lookup_ex(h, str, size, &CG(interned_strings));
+	if (ret) {
+		return ret;
+	}
+
+	ZEND_ASSERT(!permanent);
+	ret = zend_string_init(str, size, permanent);
+	ZSTR_H(ret) = h;
+	return ret;
+}
+
 ZEND_API void zend_interned_strings_activate(void)
 {
 	zend_init_interned_strings_ht(&CG(interned_strings), 0);
@@ -307,10 +346,11 @@ ZEND_API void zend_interned_strings_deactivate(void)
 	zend_hash_destroy(&CG(interned_strings));
 }
 
-ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler)
+ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler, zend_string_init_existing_interned_func_t init_existing_handler)
 {
 	interned_string_request_handler = handler;
 	interned_string_init_request_handler = init_handler;
+	interned_string_init_existing_request_handler = init_existing_handler;
 }
 
 ZEND_API void zend_interned_strings_switch_storage(bool request)
@@ -318,9 +358,11 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 	if (request) {
 		zend_new_interned_string = interned_string_request_handler;
 		zend_string_init_interned = interned_string_init_request_handler;
+		zend_string_init_existing_interned = interned_string_init_existing_request_handler;
 	} else {
 		zend_new_interned_string = zend_new_interned_string_permanent;
 		zend_string_init_interned = zend_string_init_interned_permanent;
+		zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 	}
 }
 

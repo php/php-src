@@ -75,7 +75,15 @@ testAllValidChars($fromUnicode, 'UTF-16BE', 'CP950', false);
 findInvalidChars($fromUnicode, $invalid, $unused, array_fill_keys(range(0,0xFF), 2));
 convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'CP950', '%');
 echo "Tested UTF-16BE -> CP950\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "CP950", "UTF-8");
+convertInvalidString("\x26\x09", "U+2609", "UTF-16BE", "CP950");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested CP950 -> UTF-16BE
 Tested UTF-16BE -> CP950
+Done!

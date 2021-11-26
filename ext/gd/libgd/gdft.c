@@ -12,7 +12,7 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
-#ifndef MSWIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <io.h>

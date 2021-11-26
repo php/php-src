@@ -176,6 +176,8 @@ static zend_string *php_gethostbyaddr(char *ip)
 	struct sockaddr_in sa4;
 	struct sockaddr_in6 sa6;
 	char out[NI_MAXHOST];
+	memset(&sa4, 0, sizeof(struct sockaddr_in));
+	memset(&sa6, 0, sizeof(struct sockaddr_in6));
 
 	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
 		sa6.sin6_family = AF_INET6;
@@ -827,6 +829,7 @@ PHP_FUNCTION(dns_get_record)
 	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
+	int dns_errno;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
 	uint32_t fromsize = sizeof(from);
@@ -975,8 +978,9 @@ PHP_FUNCTION(dns_get_record)
 			n = php_dns_search(handle, hostname, C_IN, type_to_fetch, answer.qb2, sizeof answer);
 
 			if (n < 0) {
+				dns_errno = php_dns_errno(handle);
 				php_dns_free_handle(handle);
-				switch (h_errno) {
+				switch (dns_errno) {
 					case NO_DATA:
 					case HOST_NOT_FOUND:
 						continue;

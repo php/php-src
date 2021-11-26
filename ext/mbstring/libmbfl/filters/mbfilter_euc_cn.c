@@ -100,7 +100,7 @@ int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -108,35 +108,32 @@ int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 0;
 		c1 = filter->cache;
 		if (c > 0xA0 && c < 0xFF) {
-			w = (c1 - 0x81)*192 + (c - 0x40);
-			if (w >= 0 && w < cp936_ucs_table_size) {
-				if (w == 0x1864) {
-					w = 0x30FB;
-				} else if (w == 0x186A) {
-					w = 0x2015;
-				} else if ((w >= 0x1921 && w <= 0x192A) || w == 0x1963 || (w >= 0x1C59 && w <= 0x1C7E) || (w >= 0x1DBB && w <= 0x1DC4)) {
-					w = 0;
-				} else {
-					w = cp936_ucs_table[w];
-				}
-			} else {
+			w = (c1 - 0x81)*192 + c - 0x40;
+			ZEND_ASSERT(w < cp936_ucs_table_size);
+			if (w == 0x1864) {
+				w = 0x30FB;
+			} else if (w == 0x186A) {
+				w = 0x2015;
+			} else if ((w >= 0x1921 && w <= 0x192A) || w == 0x1963 || (w >= 0x1C59 && w <= 0x1C7E) || (w >= 0x1DBB && w <= 0x1DC4)) {
 				w = 0;
+			} else {
+				w = cp936_ucs_table[w];
 			}
+
 			if (w <= 0) {
-				w = (c1 << 8) | c | MBFL_WCSPLANE_GB2312;
+				w = MBFL_BAD_INPUT;
 			}
+
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter)
@@ -201,14 +198,14 @@ int mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_euccn_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 1) {
 		/* 2-byte character was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {

@@ -69,9 +69,17 @@ echo "Unicode -> EUC-JP-2004 conversion works on all valid characters\n";
 findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'EUC-JP-2004', '%');
 echo "Unicode -> EUC-JP-2004 conversion works on all invalid characters\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "EUC-JP-2004", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "EUC-JP-2004", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 EUC-JP-2004 verification and conversion works for all valid characters
 EUC-JP-2004 verification and conversion rejects all invalid characters
 Unicode -> EUC-JP-2004 conversion works on all valid characters
 Unicode -> EUC-JP-2004 conversion works on all invalid characters
+Done!

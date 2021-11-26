@@ -154,7 +154,7 @@ int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -231,28 +231,25 @@ int mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = (c1 << 8) | c | MBFL_WCSPLANE_BIG5;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_big5_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status == 1) {
 		/* 2-byte character was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {
@@ -377,5 +374,5 @@ int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

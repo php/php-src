@@ -1024,7 +1024,7 @@ use_double:
 
 	if (!var_hash) {
 		/* Array or object key unserialization */
-		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
+		ZVAL_STR(rval, zend_string_init_existing_interned(str, len, 0));
 	} else {
 		ZVAL_STRINGL_FAST(rval, str, len);
 	}
@@ -1201,20 +1201,15 @@ object ":" uiv ":" ["]	{
 		/* Try to find class directly */
 		BG(serialize_lock)++;
 		ce = zend_lookup_class_ex(class_name, lc_name, 0);
-		zend_string_release_ex(lc_name, 0);
-		if (ce) {
-			BG(serialize_lock)--;
-			if (EG(exception)) {
-				zend_string_release_ex(class_name, 0);
-				return 0;
-			}
-			break;
-		}
 		BG(serialize_lock)--;
-
+		zend_string_release_ex(lc_name, 0);
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			return 0;
+		}
+
+		if (ce) {
+			break;
 		}
 
 		/* Check for unserialize callback */
@@ -1227,29 +1222,15 @@ object ":" uiv ":" ["]	{
 		/* Call unserialize callback */
 		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
 
-		ZVAL_STR_COPY(&args[0], class_name);
+		ZVAL_STR(&args[0], class_name);
 		BG(serialize_lock)++;
-		if (call_user_function(NULL, NULL, &user_func, &retval, 1, args) != SUCCESS) {
-			BG(serialize_lock)--;
-			if (EG(exception)) {
-				zend_string_release_ex(class_name, 0);
-				zval_ptr_dtor(&user_func);
-				zval_ptr_dtor(&args[0]);
-				return 0;
-			}
-			php_error_docref(NULL, E_WARNING, "defined (%s) but not found", Z_STRVAL(user_func));
-			incomplete_class = 1;
-			ce = PHP_IC_ENTRY;
-			zval_ptr_dtor(&user_func);
-			zval_ptr_dtor(&args[0]);
-			break;
-		}
+		call_user_function(NULL, NULL, &user_func, &retval, 1, args);
 		BG(serialize_lock)--;
 		zval_ptr_dtor(&retval);
+
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
 			zval_ptr_dtor(&user_func);
-			zval_ptr_dtor(&args[0]);
 			return 0;
 		}
 
@@ -1263,7 +1244,6 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 
 		zval_ptr_dtor(&user_func);
-		zval_ptr_dtor(&args[0]);
 	} while (0);
 
 	*p = YYCURSOR;

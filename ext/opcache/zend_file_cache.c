@@ -299,8 +299,6 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
                                            void                     *buf,
                                            serialize_callback_t      func)
 {
-	Bucket *p, *end;
-
 	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		ht->arData = NULL;
 		return;
@@ -308,16 +306,33 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
 	if (IS_SERIALIZED(ht->arData)) {
 		return;
 	}
-	SERIALIZE_PTR(ht->arData);
-	p = ht->arData;
-	UNSERIALIZE_PTR(p);
-	end = p + ht->nNumUsed;
-	while (p < end) {
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			SERIALIZE_STR(p->key);
-			func(&p->val, script, info, buf);
+	if (HT_IS_PACKED(ht)) {
+		zval *p, *end;
+
+		SERIALIZE_PTR(ht->arPacked);
+		p = ht->arPacked;
+		UNSERIALIZE_PTR(p);
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE_P(p) != IS_UNDEF) {
+				func(p, script, info, buf);
+			}
+			p++;
 		}
-		p++;
+	} else {
+		Bucket *p, *end;
+
+		SERIALIZE_PTR(ht->arData);
+		p = ht->arData;
+		UNSERIALIZE_PTR(p);
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE(p->val) != IS_UNDEF) {
+				SERIALIZE_STR(p->key);
+				func(&p->val, script, info, buf);
+			}
+			p++;
+		}
 	}
 }
 
@@ -375,16 +390,6 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 				zend_file_cache_serialize_hash(ht, script, info, buf, zend_file_cache_serialize_zval);
 			}
 			break;
-		case IS_REFERENCE:
-			if (!IS_SERIALIZED(Z_REF_P(zv))) {
-				zend_reference *ref;
-
-				SERIALIZE_PTR(Z_REF_P(zv));
-				ref = Z_REF_P(zv);
-				UNSERIALIZE_PTR(ref);
-				zend_file_cache_serialize_zval(&ref->val, script, info, buf);
-			}
-			break;
 		case IS_CONSTANT_AST:
 			if (!IS_SERIALIZED(Z_AST_P(zv))) {
 				zend_ast_ref *ast;
@@ -398,6 +403,9 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 		case IS_INDIRECT:
 			/* Used by static properties. */
 			SERIALIZE_PTR(Z_INDIRECT_P(zv));
+			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
 	}
 }
@@ -896,6 +904,21 @@ static void zend_file_cache_serialize_warnings(
 	}
 }
 
+static void zend_file_cache_serialize_early_bindings(
+		zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (script->early_bindings) {
+		SERIALIZE_PTR(script->early_bindings);
+		zend_early_binding *early_bindings = script->early_bindings;
+		UNSERIALIZE_PTR(early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			SERIALIZE_STR(early_bindings[i].lcname);
+			SERIALIZE_STR(early_bindings[i].rtd_key);
+			SERIALIZE_STR(early_bindings[i].lc_parent_name);
+		}
+	}
+}
+
 static void zend_file_cache_serialize(zend_persistent_script   *script,
                                       zend_file_cache_metainfo *info,
                                       void                     *buf)
@@ -918,6 +941,7 @@ static void zend_file_cache_serialize(zend_persistent_script   *script,
 	zend_file_cache_serialize_hash(&new_script->script.function_table, script, info, buf, zend_file_cache_serialize_func);
 	zend_file_cache_serialize_op_array(&new_script->script.main_op_array, script, info, buf);
 	zend_file_cache_serialize_warnings(new_script, info, buf);
+	zend_file_cache_serialize_early_bindings(new_script, info, buf);
 
 	new_script->mem = NULL;
 }
@@ -1098,8 +1122,6 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
                                              unserialize_callback_t   func,
                                              dtor_func_t              dtor)
 {
-	Bucket *p, *end;
-
 	ht->pDestructor = dtor;
 	if (HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED) {
 		if (EXPECTED(!file_cache_only)) {
@@ -1113,14 +1135,29 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
 		return;
 	}
 	UNSERIALIZE_PTR(ht->arData);
-	p = ht->arData;
-	end = p + ht->nNumUsed;
-	while (p < end) {
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			UNSERIALIZE_STR(p->key);
-			func(&p->val, script, buf);
+	if (HT_IS_PACKED(ht)) {
+		zval *p, *end;
+
+		p = ht->arPacked;
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE_P(p) != IS_UNDEF) {
+				func(p, script, buf);
+			}
+			p++;
 		}
-		p++;
+	} else {
+		Bucket *p, *end;
+
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		while (p < end) {
+			if (Z_TYPE(p->val) != IS_UNDEF) {
+				UNSERIALIZE_STR(p->key);
+				func(&p->val, script, buf);
+			}
+			p++;
+		}
 	}
 }
 
@@ -1157,7 +1194,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-			if (!IS_UNSERIALIZED(Z_STR_P(zv))) {
+			/* We can't use !IS_UNSERIALIZED here, because that does not recognize unserialized
+			 * interned strings in non-shm mode. */
+			if (IS_SERIALIZED(Z_STR_P(zv)) || IS_SERIALIZED_INTERNED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
 			}
 			break;
@@ -1171,15 +1210,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 						script, buf, zend_file_cache_unserialize_zval, ZVAL_PTR_DTOR);
 			}
 			break;
-		case IS_REFERENCE:
-			if (!IS_UNSERIALIZED(Z_REF_P(zv))) {
-				zend_reference *ref;
-
-				UNSERIALIZE_PTR(Z_REF_P(zv));
-				ref = Z_REF_P(zv);
-				zend_file_cache_unserialize_zval(&ref->val, script, buf);
-			}
-			break;
 		case IS_CONSTANT_AST:
 			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
 				UNSERIALIZE_PTR(Z_AST_P(zv));
@@ -1189,6 +1219,9 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 		case IS_INDIRECT:
 			/* Used by static properties. */
 			UNSERIALIZE_PTR(Z_INDIRECT_P(zv));
+			break;
+		default:
+			ZEND_ASSERT(Z_TYPE_P(zv) < IS_STRING);
 			break;
 	}
 }
@@ -1251,17 +1284,8 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		}
 	} else {
 		op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
-		if (op_array->static_variables) {
-			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr,
-				zend_arena_alloc(&CG(arena), sizeof(HashTable *)));
-			ZEND_MAP_PTR_SET(op_array->static_variables_ptr, NULL);
-		}
-		if (op_array != &script->script.main_op_array) {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, zend_arena_alloc(&CG(arena), sizeof(void*)));
-			ZEND_MAP_PTR_SET(op_array->run_time_cache, NULL);
-		} else {
-			ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
-		}
+		ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
+		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
 	/* Check whether this op_array has already been unserialized. */
@@ -1658,11 +1682,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 		ce->ce_flags |= ZEND_ACC_FILE_CACHED;
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
-		if (ce->default_static_members_count) {
-			ZEND_MAP_PTR_INIT(ce->static_members_table,
-				zend_arena_alloc(&CG(arena), sizeof(zval *)));
-			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-		}
+		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
 }
 
@@ -1674,6 +1694,18 @@ static void zend_file_cache_unserialize_warnings(zend_persistent_script *script,
 			UNSERIALIZE_PTR(script->warnings[i]);
 			UNSERIALIZE_STR(script->warnings[i]->filename);
 			UNSERIALIZE_STR(script->warnings[i]->message);
+		}
+	}
+}
+
+static void zend_file_cache_unserialize_early_bindings(zend_persistent_script *script, void *buf)
+{
+	if (script->early_bindings) {
+		UNSERIALIZE_PTR(script->early_bindings);
+		for (uint32_t i = 0; i < script->num_early_bindings; i++) {
+			UNSERIALIZE_STR(script->early_bindings[i].lcname);
+			UNSERIALIZE_STR(script->early_bindings[i].rtd_key);
+			UNSERIALIZE_STR(script->early_bindings[i].lc_parent_name);
 		}
 	}
 }
@@ -1691,6 +1723,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	zend_file_cache_unserialize_op_array(&script->script.main_op_array, script, buf);
 	zend_file_cache_unserialize_warnings(script, buf);
+	zend_file_cache_unserialize_early_bindings(script, buf);
 }
 
 zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)

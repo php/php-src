@@ -58,6 +58,9 @@ php_dir_globals dir_globals;
 
 static zend_class_entry *dir_class_entry_ptr;
 
+#define Z_DIRECTORY_PATH_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_DIRECTORY_HANDLE_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 1)
+
 #define FETCH_DIRP() \
 	myself = getThis(); \
 	if (!myself) { \
@@ -80,11 +83,12 @@ static zend_class_entry *dir_class_entry_ptr;
 		} \
 	} else { \
 		ZEND_PARSE_PARAMETERS_NONE(); \
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
+		zval *handle_zv = Z_DIRECTORY_HANDLE_P(myself); \
+		if (Z_TYPE_P(handle_zv) != IS_RESOURCE) { \
 			zend_throw_error(NULL, "Unable to find my handle property"); \
 			RETURN_THROWS(); \
 		} \
-		if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
+		if ((dirp = (php_stream *)zend_fetch_resource_ex(handle_zv, "Directory", php_file_le_stream())) == NULL) { \
 			RETURN_THROWS(); \
 		} \
 	}
@@ -218,8 +222,8 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_stringl(return_value, "path", dirname, dir_len);
-		add_property_resource(return_value, "handle", dirp->res);
+		ZVAL_STRINGL(Z_DIRECTORY_PATH_P(return_value), dirname, dir_len);
+		ZVAL_RES(Z_DIRECTORY_HANDLE_P(return_value), dirp->res);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
 		php_stream_to_zval(dirp, return_value);
@@ -244,7 +248,7 @@ PHP_FUNCTION(dir)
 /* {{{ Close directory connection identified by the dir_handle */
 PHP_FUNCTION(closedir)
 {
-	zval *id = NULL, *tmp, *myself;
+	zval *id = NULL, *myself;
 	php_stream *dirp;
 	zend_resource *res;
 
@@ -355,7 +359,7 @@ PHP_FUNCTION(getcwd)
 /* {{{ Rewind dir_handle back to the start */
 PHP_FUNCTION(rewinddir)
 {
-	zval *id = NULL, *tmp, *myself;
+	zval *id = NULL, *myself;
 	php_stream *dirp;
 
 	FETCH_DIRP();
@@ -372,7 +376,7 @@ PHP_FUNCTION(rewinddir)
 /* {{{ Read directory entry from dir_handle */
 PHP_FUNCTION(readdir)
 {
-	zval *id = NULL, *tmp, *myself;
+	zval *id = NULL, *myself;
 	php_stream *dirp;
 	php_stream_dirent entry;
 

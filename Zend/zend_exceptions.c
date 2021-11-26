@@ -155,7 +155,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline bool is_handle_exception_set() {
+static zend_always_inline bool is_handle_exception_set(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return !execute_data->func
 		|| !ZEND_USER_CODE(execute_data->func->common.type)
@@ -176,6 +176,12 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 
 	if (exception != NULL) {
 		zend_object *previous = EG(exception);
+		if (previous && zend_is_unwind_exit(previous)) {
+			/* Don't replace unwinding exception with different exception. */
+			OBJ_RELEASE(exception);
+			return;
+		}
+
 		zend_exception_set_previous(exception, EG(exception));
 		EG(exception) = exception;
 		if (previous) {
@@ -854,10 +860,12 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *except
 
 ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, zend_string *message, zend_long code, int severity) /* {{{ */
 {
-	zval tmp;
 	zend_object *obj = zend_throw_exception_zstr(exception_ce, message, code);
-	ZVAL_LONG(&tmp, severity);
-	zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	if (exception_ce && instanceof_function(exception_ce, zend_ce_error_exception)) {
+		zval tmp;
+		ZVAL_LONG(&tmp, severity);
+		zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	}
 	return obj;
 }
 /* }}} */

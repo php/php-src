@@ -22,9 +22,6 @@
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
 
-#define ZEND_ENUM_PROPERTY_ERROR() \
-	zend_throw_error(NULL, "Enum properties are immutable")
-
 #define ZEND_ENUM_DISALLOW_MAGIC_METHOD(propertyName, methodName) \
 	do { \
 		if (ce->propertyName) { \
@@ -56,7 +53,7 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 {
 	zend_property_info *property_info;
 
-	ZEND_HASH_FOREACH_PTR(&ce->properties_info, property_info) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property_info) {
 		if (zend_string_equals_literal(property_info->name, "name")) {
 			continue;
 		}
@@ -119,32 +116,6 @@ void zend_verify_enum(zend_class_entry *ce)
 	zend_verify_enum_interfaces(ce);
 }
 
-static zval *zend_enum_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
-{
-	if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
-		zend_throw_error(NULL, "Cannot acquire reference to property %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
-		return &EG(uninitialized_zval);
-	}
-
-	return zend_std_read_property(zobj, name, type, cache_slot, rv);
-}
-
-static ZEND_COLD zval *zend_enum_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot)
-{
-	ZEND_ENUM_PROPERTY_ERROR();
-	return &EG(uninitialized_zval);
-}
-
-static ZEND_COLD void zend_enum_unset_property(zend_object *object, zend_string *member, void **cache_slot)
-{
-	ZEND_ENUM_PROPERTY_ERROR();
-}
-
-static zval *zend_enum_get_property_ptr_ptr(zend_object *zobj, zend_string *name, int type, void **cache_slot)
-{
-	return NULL;
-}
-
 static int zend_implement_unit_enum(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->ce_flags & ZEND_ACC_ENUM) {
@@ -186,10 +157,6 @@ void zend_register_enum_ce(void)
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
 
 	memcpy(&enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	enum_handlers.read_property = zend_enum_read_property;
-	enum_handlers.write_property = zend_enum_write_property;
-	enum_handlers.unset_property = zend_enum_unset_property;
-	enum_handlers.get_property_ptr_ptr = zend_enum_get_property_ptr_ptr;
 	enum_handlers.clone_obj = NULL;
 	enum_handlers.compare = zend_objects_not_comparable;
 }
@@ -225,7 +192,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
+	ZEND_HASH_MAP_FOREACH_PTR(CE_CONSTANTS_TABLE(ce), c) {
 		if (!(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE)) {
 			continue;
 		}
@@ -359,16 +326,18 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 
 void zend_enum_register_props(zend_class_entry *ce)
 {
+	ce->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
 	zval name_default_value;
 	ZVAL_UNDEF(&name_default_value);
 	zend_type name_type = ZEND_TYPE_INIT_CODE(IS_STRING, 0, 0);
-	zend_declare_typed_property(ce, ZSTR_KNOWN(ZEND_STR_NAME), &name_default_value, ZEND_ACC_PUBLIC, NULL, name_type);
+	zend_declare_typed_property(ce, ZSTR_KNOWN(ZEND_STR_NAME), &name_default_value, ZEND_ACC_PUBLIC | ZEND_ACC_READONLY, NULL, name_type);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		zval value_default_value;
 		ZVAL_UNDEF(&value_default_value);
 		zend_type value_type = ZEND_TYPE_INIT_CODE(ce->enum_backing_type, 0, 0);
-		zend_declare_typed_property(ce, ZSTR_KNOWN(ZEND_STR_VALUE), &value_default_value, ZEND_ACC_PUBLIC, NULL, value_type);
+		zend_declare_typed_property(ce, ZSTR_KNOWN(ZEND_STR_VALUE), &value_default_value, ZEND_ACC_PUBLIC | ZEND_ACC_READONLY, NULL, value_type);
 	}
 }
 
@@ -385,7 +354,7 @@ static const zend_function_entry backed_enum_methods[] = {
 };
 
 ZEND_API zend_class_entry *zend_register_internal_enum(
-	const char *name, zend_uchar type, zend_function_entry *functions)
+	const char *name, zend_uchar type, const zend_function_entry *functions)
 {
 	ZEND_ASSERT(type == IS_UNDEF || type == IS_LONG || type == IS_STRING);
 

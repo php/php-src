@@ -26,6 +26,9 @@ var_dump($stmt->fetchAll());
 
 class Test
 {
+    public $val;
+    public $grp;
+
     function __construct($name = 'N/A')
     {
         echo __METHOD__ . "($name)\n";

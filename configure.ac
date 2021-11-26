@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.1.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_INIT([PHP],[8.2.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -224,9 +224,6 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
 case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-    if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
-      enable_libgcc=yes
-    fi
     ;;
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
@@ -268,6 +265,12 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
+if test "$ac_cv_safe_to_define___extensions__" = yes ; then
+  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
+  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+  AC_MSG_RESULT(yes)
+fi
 
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
@@ -612,6 +615,7 @@ vasprintf \
 asprintf \
 nanosleep \
 memmem \
+memrchr \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -1212,6 +1216,7 @@ AS_CASE([$host_cpu],
 
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
+  [aix*|os400*], [fiber_os="aix"],
   [fiber_os="other"]
 )
 
@@ -1230,6 +1235,10 @@ AS_CASE([$fiber_cpu],
 
 if test "$fiber_os" = 'mac'; then
   fiber_asm_file="combined_sysv_macho_gas"
+elif test "$fiber_os" = 'aix'; then
+  # AIX uses a different calling convention (shared with non-_CALL_ELF Linux).
+  # The AIX assembler isn't GNU, but the file is compatible.
+  fiber_asm_file="${fiber_asm_file_prefix}_xcoff_gas"
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
   fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
@@ -1507,8 +1516,14 @@ fi
 
 if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
-    CFLAGS="$CFLAGS -fsanitize=undefined"
-    CXXFLAGS="$CXXFLAGS -fsanitize=undefined"
+    CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    CXXFLAGS="$CXXFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    AX_CHECK_COMPILE_FLAG([-fno-sanitize=object-size], [
+      dnl Disable object-size sanitizer, because it is incompatible with our zend_function
+      dnl union, and this can't be easily fixed.
+      CFLAGS="$CFLAGS -fno-sanitize=object-size"
+      CXXFLAGS="$CFLAGS -fno-sanitize=object-size"
+    ])
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
 

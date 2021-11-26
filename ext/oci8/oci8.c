@@ -174,6 +174,7 @@ PHP_INI_BEGIN()
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	STD_PHP_INI_BOOLEAN("oci8.events",					"0",	PHP_INI_SYSTEM,	OnUpdateBool,		events,					zend_oci_globals,	oci_globals)
 #endif
+	STD_PHP_INI_ENTRY(	"oci8.prefetch_lob_size",		"0",	PHP_INI_ALL, 	OnUpdateLong,	prefetch_lob_size,		zend_oci_globals,	oci_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -1045,7 +1046,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
-	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
 		bool found = 0;
@@ -1711,7 +1712,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
 			if (!descriptor) {
-				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid->handle);
+				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #" ZEND_LONG_FMT, column->descid->handle);
 				return 1;
 			}
 
@@ -2163,7 +2164,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	/* Session Pool Hash Key : oci8spool***username**edition**hashedpassword**dbname**charset */
 
 	smart_str_0(&spool_hashed_details);
-	php_strtolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
 	/* }}} */
 
 	spool_out_zv = zend_hash_find(&EG(persistent_list), spool_hashed_details.s);

@@ -295,13 +295,22 @@ testInvalidString("\x90\x30\x81\xFF", "\x00\x00\x00%", "GB18030", "UTF-32BE");
 testInvalidString("\xE3\x32\x9A\x36", "\x00\x00\x00%", "GB18030", "UTF-32BE");
 testInvalidString("\xE4\x30\x81\x35", "\x00\x00\x00%\x00\x00\x00%", "GB18030", "UTF-32BE");
 
+testInvalidString("\x90\x30\x80\x30", "\x00\x00\x00%\x00\x00\x00\x30", "GB18030", "UTF-32BE");
+
 echo "Tested GB18030 4-byte characters <-> UTF-16BE\n";
 
 testAllValidChars($fromUnicode, 'UTF-16BE', 'GB18030', false);
 echo "Tested UTF-16BE -> GB18030 (1 and 2 byte characters)\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x81\x30\x81\xFF", "%", "GB18030", "UTF-8");
+convertInvalidString("\xE3\x32\x9A\x36", "%", "GB18030", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested GB18030 (1 and 2 byte characters) -> UTF-16BE
 Tested GB18030 4-byte characters <-> UTF-16BE
 Tested UTF-16BE -> GB18030 (1 and 2 byte characters)
+Done!

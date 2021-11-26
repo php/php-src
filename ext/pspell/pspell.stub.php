@@ -34,6 +34,11 @@ namespace {
     function pspell_new_config(PSpell\Config $config): PSpell\Dictionary|false {}
 
     function pspell_check(PSpell\Dictionary $dictionary, string $word): bool {}
+
+    /**
+     * @return array<int, string>|false
+     * @refcount 1
+     */
     function pspell_suggest(PSpell\Dictionary $dictionary, string $word): array|false {}
     function pspell_store_replacement(PSpell\Dictionary $dictionary, string $misspelled, string $correct): bool {}
     function pspell_add_to_personal(PSpell\Dictionary $dictionary, string $word): bool {}

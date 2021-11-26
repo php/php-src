@@ -436,41 +436,21 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op)
 
 static zend_result zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 {
-	switch (Z_TYPE_P(offset)) {
-		case IS_UNDEF:
-			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), expr)) {
-				zend_throw_error(NULL,
-					"Cannot add element to the array as the next element is already occupied");
-				return FAILURE;
-			}
-			break;
-		case IS_STRING:
-			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
-			zval_ptr_dtor_str(offset);
-			break;
-		case IS_NULL:
-			zend_symtable_update(Z_ARRVAL_P(result), ZSTR_EMPTY_ALLOC(), expr);
-			break;
-		case IS_LONG:
-			zend_hash_index_update(Z_ARRVAL_P(result), Z_LVAL_P(offset), expr);
-			break;
-		case IS_FALSE:
-			zend_hash_index_update(Z_ARRVAL_P(result), 0, expr);
-			break;
-		case IS_TRUE:
-			zend_hash_index_update(Z_ARRVAL_P(result), 1, expr);
-			break;
-		case IS_DOUBLE:
-			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval_safe(Z_DVAL_P(offset)), expr);
-			break;
-		case IS_RESOURCE:
-			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
-			zend_hash_index_update(Z_ARRVAL_P(result), Z_RES_HANDLE_P(offset), expr);
-			break;
-		default:
-			zend_type_error("Illegal offset type");
+	if (Z_TYPE_P(offset) == IS_UNDEF) {
+		if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), expr)) {
+			zend_throw_error(NULL,
+				"Cannot add element to the array as the next element is already occupied");
 			return FAILURE;
+		}
+		return SUCCESS;
 	}
+
+	if (array_set_zval_key(Z_ARRVAL_P(result), offset, expr) == FAILURE) {
+		return FAILURE;
+	}
+
+	zval_ptr_dtor_nogc(offset);
+	zval_ptr_dtor_nogc(expr);
 	return SUCCESS;
 }
 
@@ -502,7 +482,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 
 zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 {
-	return zend_fetch_class(zend_ast_get_str(ast), ast->attr | ZEND_FETCH_CLASS_EXCEPTION);
+	return zend_fetch_class_with_scope(zend_ast_get_str(ast), ast->attr | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }
 
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
@@ -1951,7 +1931,20 @@ simple_list:
 			zend_ast_export_name(str, ast->child[1], 0, indent);
 			break;
 		case ZEND_AST_CLASS_NAME:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			if (ast->child[0] == NULL) {
+				/* The const expr representation stores the fetch type instead. */
+				switch (ast->attr) {
+					case ZEND_FETCH_CLASS_SELF:
+						smart_str_appends(str, "self");
+						break;
+					case ZEND_FETCH_CLASS_PARENT:
+						smart_str_appends(str, "parent");
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
+			} else {
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			}
 			smart_str_appends(str, "::class");
 			break;
 		case ZEND_AST_ASSIGN:            BINARY_OP(" = ",   90, 91, 90);
@@ -2020,7 +2013,8 @@ simple_list:
 					zend_ast_export_attributes(str, decl->child[3], indent, 0);
 				}
 				smart_str_appends(str, "class");
-				if (zend_ast_get_list(ast->child[1])->children) {
+				if (!zend_ast_is_list(ast->child[1])
+						|| zend_ast_get_list(ast->child[1])->children) {
 					smart_str_appendc(str, '(');
 					zend_ast_export_ex(str, ast->child[1], 0, indent);
 					smart_str_appendc(str, ')');

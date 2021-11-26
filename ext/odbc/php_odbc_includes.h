@@ -42,7 +42,6 @@
 # include <sql.h>
 #endif	/* end: #if defined(HAVE_SOLID) */
 #undef HAVE_SQL_EXTENDED_FETCH
-PHP_FUNCTION(solid_fetch_prev);
 #define SQLSMALLINT SWORD
 #define SQLUSMALLINT UWORD
 #ifndef SQL_SUCCEEDED

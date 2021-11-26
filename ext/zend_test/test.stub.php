@@ -45,11 +45,24 @@ namespace {
 
     }
 
+    enum ZendTestUnitEnum {
+        case Foo;
+        case Bar;
+    }
+
+    enum ZendTestStringEnum: string {
+        case Foo = "Test1";
+        case Bar = "Test2";
+        case Baz = "Test2\\a";
+    }
+
     function zend_test_array_return(): array {}
 
     function zend_test_nullable_array_return(): ?array {}
 
     function zend_test_void_return(): void {}
+
+    function zend_test_compile_string(string $source_string, string $filename, int $position): void {}
 
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
@@ -74,6 +87,10 @@ namespace {
 
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
+    function zend_weakmap_attach(object $object, mixed $value): bool {}
+    function zend_weakmap_remove(object $object): bool {}
+    function zend_weakmap_dump(): array {}
+
     function zend_get_unit_enum(): ZendTestUnitEnum {}
 }
 
@@ -88,6 +105,8 @@ namespace ZendTestNS {
 namespace ZendTestNS2 {
 
     class Foo {
+        public ZendSubNS\Foo $foo;
+
         public function method(): void {}
     }
 

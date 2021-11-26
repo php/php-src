@@ -41,6 +41,9 @@ function false_to_array_nested_invalid_index($a) {
     $a[[]][0] += 1;
     return $a;
 }
+function modulo_string($a) {
+    $a[] %= "";
+}
 
 false_to_array(false);
 false_to_array_append(false);
@@ -54,6 +57,11 @@ var_dump(false_to_array_nested_append(false));
 try {
     var_dump(false_to_array_nested_invalid_index(false));
 } catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(modulo_string([]));
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -97,3 +105,4 @@ array(1) {
 
 Deprecated: Automatic conversion of false to array is deprecated in %s on line %d
 Illegal offset type
+Unsupported operand types: null % string

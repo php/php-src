@@ -3,9 +3,11 @@ Bug #70805 (Segmentation faults whilst running Drupal 8 test suite)
 --FILE--
 <?php
 class A {
+    public $b;
 }
 
 class B {
+    public $a;
 }
 
 class C {
@@ -37,9 +39,9 @@ $t[] = &$t;
 unset($t); // This is used to trigger C::__destruct while doing gc_colloct_roots
 
 $e = $a;
-unset($a); // This one can not be putted into roots buf because it's full, thus gc_colloct_roots will be called,
+unset($a); // This one cannot be put into roots buf because it's full, thus gc_colloct_roots will be called,
            // but C::__destructor which is called in gc_colloct_roots will put $a into buf
-           // which will make $a be putted into gc roots buf twice
+           // which will make $a be put into gc roots buf twice
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--

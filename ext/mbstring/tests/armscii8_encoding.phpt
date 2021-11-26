@@ -27,7 +27,15 @@ echo "Tested ARMSCII-8 -> UTF-16BE\n";
 findInvalidChars($fromUnicode, $invalid, $unused, array_fill_keys(range(0,0xFF), 2));
 convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'ARMSCII-8', '%');
 echo "Tested UTF-16BE -> ARMSCII-8\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xA1", "%", "ARMSCII-8", "UTF-8");
+convertInvalidString("\xFF", "%", "ARMSCII-8", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested ARMSCII-8 -> UTF-16BE
 Tested UTF-16BE -> ARMSCII-8
+Done!

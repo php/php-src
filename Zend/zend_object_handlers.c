@@ -427,6 +427,12 @@ static ZEND_COLD zend_never_inline void zend_forbidden_dynamic_property(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
+static ZEND_COLD zend_never_inline void zend_deprecated_dynamic_property(
+		zend_class_entry *ce, zend_string *member) {
+	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
+		ZSTR_VAL(ce->name), ZSTR_VAL(member));
+}
+
 static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
 		zend_class_entry *ce, zend_string *member, zend_class_entry *scope, const char *operation) {
 	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
@@ -877,7 +883,7 @@ exit:
 }
 /* }}} */
 
-static zend_always_inline bool property_uses_strict_types() {
+static zend_always_inline bool property_uses_strict_types(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return execute_data
 		&& execute_data->func
@@ -1023,6 +1029,9 @@ write_std_property:
 				zend_forbidden_dynamic_property(zobj->ce, name);
 				variable_ptr = &EG(error_zval);
 				goto exit;
+			}
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+				zend_deprecated_dynamic_property(zobj->ce, name);
 			}
 
 			Z_TRY_ADDREF_P(value);
@@ -1170,6 +1179,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
+				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
+					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize")) {
+					retval = &EG(error_zval);
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
@@ -1196,6 +1208,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
 				zend_forbidden_dynamic_property(zobj->ce, name);
 				return &EG(error_zval);
+			}
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+				zend_deprecated_dynamic_property(zobj->ce, name);
 			}
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);
@@ -1383,7 +1398,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
 	func->opcodes = &EG(call_trampoline_op);
-	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
+	ZEND_MAP_PTR_INIT(func->run_time_cache, (void**)dummy);
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temporary variables */
 	func->T = (fbc->type == ZEND_USER_FUNCTION)? MAX(fbc->op_array.last_var + fbc->op_array.T, 2) : 2;
@@ -1557,6 +1572,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		fbc = get_static_method_fallback(ce, function_name);
 	}
 
+	if (UNEXPECTED(!key)) {
+		zend_string_release_ex(lc_function_name, 0);
+	}
+
 	if (EXPECTED(fbc)) {
 		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			zend_abstract_method_call(fbc);
@@ -1566,11 +1585,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				"Calling static trait method %s::%s is deprecated, "
 				"it should only be called on a class using the trait",
 				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			if (EG(exception)) {
+				return NULL;
+			}
 		}
-	}
-
-	if (UNEXPECTED(!key)) {
-		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	return fbc;

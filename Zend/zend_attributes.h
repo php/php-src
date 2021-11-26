@@ -40,6 +40,7 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_attribute;
+extern ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 
 typedef struct {
 	zend_string *name;

@@ -90,8 +90,8 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return NULL;
 	}
 
-	if (IS_SLASH(path[0])) {
-		return path + 1;
+	if (IS_ABSOLUTE_PATH(path, path_len)) {
+		return path + COPY_WHEN_ABSOLUTE(path) + 1;
 	}
 
 	i = path_len;
@@ -105,8 +105,8 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 			return path;
 		}
 
-		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
-			/* i is the position of . or :, add 1 for / */
+		if (i >= 2 && path[i -1] == '.') {
+			/* i is the position of ., add 1 for / */
 			path_begin = path + i + 1;
 			break;
 		}
@@ -149,11 +149,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
 	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
 	if(!path_cleaned) {
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 	path_cleaned_len = strlen(path_cleaned);
 
 	if (path_cleaned_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 
@@ -188,8 +190,8 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
 				zend_string_release_ex(file_basename, 0);
-				CWD_STATE_FREE(new_state.cwd);
 			}
+			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
 	}
@@ -991,7 +993,7 @@ static HashTable *php_zip_get_properties(zend_object *object)/* {{{ */
 		return NULL;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(obj->prop_handler, key, hnd) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(obj->prop_handler, key, hnd) {
 		zval *ret, val;
 		ret = php_zip_property_reader(obj, hnd, &val);
 		if (ret == NULL) {
@@ -1597,6 +1599,26 @@ PHP_METHOD(ZipArchive, count)
 
 	num = zip_get_num_entries(intern, 0);
 	RETVAL_LONG(MIN(num, ZEND_LONG_MAX));
+}
+/* }}} */
+
+/* {{{ clear the internal status */
+PHP_METHOD(ZipArchive, clearError)
+{
+	zval *self = ZEND_THIS;
+	ze_zip_object *ze_obj;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	ze_obj = Z_ZIP_P(self); /* not ZIP_FROM_OBJECT as we can use saved error after close */
+	if (ze_obj->za) {
+		zip_error_clear(ze_obj->za);
+	} else {
+		ze_obj->err_zip = 0;
+		ze_obj->err_sys = 0;
+	}
 }
 /* }}} */
 
@@ -2878,37 +2900,68 @@ PHP_METHOD(ZipArchive, getFromIndex)
 }
 /* }}} */
 
-/* {{{ get a stream for an entry using its name */
-PHP_METHOD(ZipArchive, getStream)
+static void php_zip_get_stream(INTERNAL_FUNCTION_PARAMETERS, int type, bool accept_flags) /* {{{ */
 {
 	struct zip *intern;
 	zval *self = ZEND_THIS;
+	zend_long index;
+	zend_long flags = 0;
 	struct zip_stat sb;
 	char *mode = "rb";
 	zend_string *filename;
 	php_stream *stream;
-	ze_zip_object *obj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
-		RETURN_THROWS();
+	if (type) {
+		if (accept_flags) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
+				RETURN_THROWS();
+			}
+		} else {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+				RETURN_THROWS();
+			}
+		}
+	} else {
+		ZEND_ASSERT(accept_flags);
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &index, &flags) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
 
-	if (zip_stat(intern, ZSTR_VAL(filename), 0, &sb) != 0) {
-		RETURN_FALSE;
+	if (type) {
+		PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(filename), ZSTR_LEN(filename), flags, sb);
+	} else {
+		PHP_ZIP_STAT_INDEX(intern, index, flags, sb);
 	}
 
-	obj = Z_ZIP_P(self);
-
-	stream = php_stream_zip_open(obj->filename, ZSTR_VAL(filename), mode STREAMS_CC);
+	stream = php_stream_zip_open(intern, &sb, mode, flags STREAMS_CC);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
 	} else {
 		RETURN_FALSE;
 	}
 }
+
+/* {{{ get a stream for an entry using its name */
+PHP_METHOD(ZipArchive, getStreamName)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, /* accept_flags */ true);
+}
 /* }}} */
+
+/* {{{ get a stream for an entry using its index */
+PHP_METHOD(ZipArchive, getStreamIndex)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, /* accept_flags */ true);
+}
+/* }}} */
+
+PHP_METHOD(ZipArchive, getStream)
+{
+	php_zip_get_stream(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1, /* accept_flags */ false);
+}
 
 #ifdef HAVE_PROGRESS_CALLBACK
 static void _php_zip_progress_callback(zip_t *arch, double state, void *ptr)

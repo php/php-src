@@ -455,7 +455,7 @@ finish:
 			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
-			php_strtolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+			zend_str_tolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 			t = ZSTR_VAL(tmp);
 
 			if (!header_init) {

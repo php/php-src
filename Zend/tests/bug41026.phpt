@@ -20,6 +20,7 @@ try_class::main ();
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 Done
 CHECKPOINT

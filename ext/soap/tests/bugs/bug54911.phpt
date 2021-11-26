@@ -13,7 +13,7 @@ soap
     $client->__soapCall('', array());
 ?>
 --EXPECTF--
-Fatal error: Uncaught SoapFault exception: [Client] Access to undeclared static property XSoapClient::$crash in %sbug54911.php:4
+Fatal error: Uncaught Error: Access to undeclared static property XSoapClient::$crash in %sbug54911.php:4
 Stack trace:
 #0 [internal function]: XSoapClient->__doRequest('<?xml version="...', '', '#', 1, false)
 #1 %sbug54911.php(8): SoapClient->__soapCall('', Array)

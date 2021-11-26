@@ -38,6 +38,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_observe_all;
 	int observer_observe_includes;
 	int observer_observe_functions;
+	zend_array *observer_observe_function_names;
 	int observer_show_return_type;
 	int observer_show_return_value;
 	int observer_show_init_backtrace;
@@ -47,6 +48,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_fiber_init;
 	int observer_fiber_switch;
 	int observer_fiber_destroy;
+	HashTable global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
 	zend_test_fiber *active_fiber;

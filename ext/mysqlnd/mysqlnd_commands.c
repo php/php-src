@@ -107,11 +107,7 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 	*/
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 	if (ret == PASS) {
-		if (conn->connect_or_select_db.s) {
-			mnd_pefree(conn->connect_or_select_db.s, conn->persistent);
-		}
-		conn->connect_or_select_db.s = mnd_pestrndup(db.s, db.l, conn->persistent);
-		conn->connect_or_select_db.l = db.l;
+		mysqlnd_set_persistent_string(&conn->connect_or_select_db, db.s, db.l, conn->persistent);
 	}
 
 	DBG_RETURN(ret);

@@ -66,7 +66,7 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		$host, $user, $db, $port, $socket);
 }
 
-if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
+if (!$link->query('DROP TABLE IF EXISTS test')) {
 	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 

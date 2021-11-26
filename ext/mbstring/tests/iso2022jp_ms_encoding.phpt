@@ -55,7 +55,7 @@ foreach ([0x8790, 0x8791, 0x8792, 0x8795, 0x8796, 0x8797, 0x879A, 0x879B, 0x879C
 $udcChars = array();
 for ($cp = 0xE000; $cp < (0xE000 + (20 * 94)); $cp++) {
   $i = $cp - 0xE000;
-  $bytes = (( (int)($i / 94) + 0x7F - 0x5E) << 8) + (($i % 94) + 0x21);
+  $bytes = (((int)($i / 94) + 0x21) << 8) + (($i % 94) + 0x21);
   $udcChars[pack('n', $bytes)] = pack('N', $cp);
 }
 
@@ -175,18 +175,16 @@ foreach (array_keys($truncatedChars) as $truncated)
 echo "JIS X 0208 (with MS extensions) support OK\n";
 
 $validChars = $udcChars;
-/* We allow ASCII/JIS X 0201 characters to appear even in JIS X 0208 mode */
 for ($i = 0; $i <= 0x7F; $i++)
   $validChars[chr($i)] = chr($i);
 for ($i = 0xA1; $i <= 0xDF; $i++)
   $validChars[chr($i)] = $jisx0201Chars[chr($i)];
-$lenTable = array_fill_keys(range(0xE0, 0xFC), 2) + array_fill_keys(range(0x81, 0x9F), 2);
-findInvalidChars($validChars, $invalidChars, $truncatedChars, $lenTable);
+findInvalidChars($validChars, $invalidChars, $truncatedChars, array_fill_keys(range(0x21, 0x7F), 2));
 
 testAllValidCharsWithPrefix($udcChars, "\x1B\$(?", true);
 
 foreach (array_keys($invalidChars) as $invalid) {
-  $firstByte = ord($invalid[0]);
+  $firstByte = ord(substr($invalid, 0, 1));
   if (($firstByte > 0x80 && $firstByte < 0xA0) || $firstByte >= 0xE0) {
     testInvalidString("\x1B\$(?" . $invalid[0], "\x00\x00\x00%", 'ISO-2022-JP-MS', 'UTF-32BE');
   } else {
@@ -198,9 +196,39 @@ foreach (array_keys($truncatedChars) as $truncated)
 
 echo "UDC support OK\n";
 
+testValidString("\x00\xA5", "\x1B\$B!o\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+testValidString("\xFF\x5E", "\x1B\$B!A\x1B(B", "UTF-16BE", "ISO-2022-JP-MS", false);
+
+echo "Other mappings from Unicode -> ISO-2022-JP-MS OK\n";
+
+// Alternative escape sequences for 2-byte characters
+testValidString("\x1B\$(B\x21\x21", "\x30\x00", "ISO-2022-JP-MS", "UTF-16BE", false);
+testValidString("\x1B\$(@\x21\x21", "\x30\x00", "ISO-2022-JP-MS", "UTF-16BE", false);
+
+// Switching between different character types
+testValidString("\x00a\x00b\x00c\xFF\x61\x00a\x00b\x00c", "abc\x1B(I\x21\x1B(Babc", "UTF-16BE", "ISO-2022-JP-MS", false);
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "%", "ISO-2022-JP-MS", "UTF-8");
+// Invalid escapes:
+convertInvalidString("\x1B", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B.", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$.", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B(", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B(.", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$(", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-MS", "UTF-8");
+convertInvalidString("\x1B\$B\x9F", "%", "ISO-2022-JP-MS", "UTF-8"); // 0x9F does not start any 2-byte character
+
+echo "Done!\n";
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) support OK
 UDC support OK
+Other mappings from Unicode -> ISO-2022-JP-MS OK
+Done!

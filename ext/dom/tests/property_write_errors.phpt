@@ -26,8 +26,31 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+$entity = new DOMEntity();
+
+try {
+    $entity->actualEncoding = null;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $entity->encoding = null;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    $entity->version = null;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
 ?>
 --EXPECT--
 Cannot assign array to property DOMNode::$nodeValue of type ?string
 Cannot write read-only property DOMDocument::$nodeType
 Cannot write read-only property DOMDocument::$xmlEncoding
+Cannot write read-only property DOMEntity::$actualEncoding
+Cannot write read-only property DOMEntity::$encoding
+Cannot write read-only property DOMEntity::$version

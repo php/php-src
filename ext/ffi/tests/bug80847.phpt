@@ -2,6 +2,7 @@
 Bug #80847 (Nested structs)
 --EXTENSIONS--
 ffi
+zend_test
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows' && ((1 << 31) > 0)) die('xfail libffi doesn\'t properly support passing big structures by value on Windows/64');

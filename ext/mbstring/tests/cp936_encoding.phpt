@@ -324,7 +324,15 @@ findInvalidChars($fromUnicode, $invalid, $unused, array_fill_keys(range(0,0xFF),
 convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'CP936', '%');
 echo "Tested UTF-16BE -> CP936\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x81\x20", "%", "CP936", "UTF-8");
+convertInvalidString("\x81\x7F", "%", "CP936", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "CP936", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested CP936 -> UTF-16BE
 Tested UTF-16BE -> CP936
+Done!

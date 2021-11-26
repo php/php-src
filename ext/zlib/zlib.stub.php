@@ -18,31 +18,48 @@ final class DeflateContext
 {
 }
 
+/** @refcount 1 */
 function ob_gzhandler(string $data, int $flags): string|false {}
 
+/** @refcount 1 */
 function zlib_get_coding_type(): string|false {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function gzfile(string $filename, int $use_include_path = 0): array|false {}
 
-/** @return resource|false */
+/**
+ * @return resource|false
+ * @refcount 1
+ */
 function gzopen(string $filename, string $mode, int $use_include_path = 0) {}
 
 function readgzfile(string $filename, int $use_include_path = 0): int|false {}
 
+/** @refcount 1 */
 function zlib_encode(string $data, int $encoding, int $level = -1): string|false {}
 
+/** @refcount 1 */
 function zlib_decode(string $data, int $max_length = 0): string|false {}
 
+/** @refcount 1 */
 function gzdeflate(string $data, int $level = -1, int $encoding = ZLIB_ENCODING_RAW): string|false {}
 
+/** @refcount 1 */
 function gzencode(string $data, int $level = -1, int $encoding = ZLIB_ENCODING_GZIP): string|false {}
 
+/** @refcount 1 */
 function gzcompress(string $data, int $level = -1, int $encoding = ZLIB_ENCODING_DEFLATE): string|false {}
 
+/** @refcount 1 */
 function gzinflate(string $data, int $max_length = 0): string|false {}
 
+/** @refcount 1 */
 function gzdecode(string $data, int $max_length = 0): string|false {}
 
+/** @refcount 1 */
 function gzuncompress(string $data, int $max_length = 0): string|false {}
 
 /**

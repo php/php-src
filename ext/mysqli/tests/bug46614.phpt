@@ -13,6 +13,7 @@ if (!defined("MYSQLI_ASYNC")) {
 <?php
 class MySQL_Ext extends mysqli{
     protected $fooData = array();
+    private $extData;
 
     public function isEmpty()
     {

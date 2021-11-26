@@ -19,5 +19,5 @@ var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Enum properties are immutable
+Cannot modify readonly property Foo::$value
 int(0)

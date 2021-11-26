@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-Enum properties are immutable
+Cannot create dynamic property Foo::$baz

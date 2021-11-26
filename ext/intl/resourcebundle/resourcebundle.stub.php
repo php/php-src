@@ -26,6 +26,7 @@ class ResourceBundle implements IteratorAggregate, Countable
     public function count(): int {}
 
     /**
+     * @return array<int, string>|false
      * @tentative-return-type
      * @alias resourcebundle_locales
      */

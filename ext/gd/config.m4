@@ -82,7 +82,7 @@ AC_DEFUN([PHP_GD_PNG],[
 
 AC_DEFUN([PHP_GD_AVIF],[
   if test "$PHP_AVIF" != "no"; then
-    PKG_CHECK_MODULES([AVIF], [libavif])
+    PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
     PHP_EVAL_LIBLINE($AVIF_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($AVIF_CFLAGS)
     AC_DEFINE(HAVE_LIBAVIF, 1, [ ])
@@ -92,7 +92,7 @@ AC_DEFUN([PHP_GD_AVIF],[
 
 AC_DEFUN([PHP_GD_WEBP],[
   if test "$PHP_WEBP" != "no"; then
-    PKG_CHECK_MODULES([WEBP], [libwebp])
+    PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
     PHP_EVAL_LIBLINE($WEBP_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($WEBP_CFLAGS)
     AC_DEFINE(HAVE_LIBWEBP, 1, [ ])
@@ -158,8 +158,6 @@ dnl
 if test "$PHP_GD" != "no"; then
 
   if test "$PHP_EXTERNAL_GD" = "no"; then
-    dnl Disable strict prototypes as GD takes advantages of variadic function signatures for function pointers.
-    GD_CFLAGS="-Wno-strict-prototypes"
     extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
                   libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c libgd/gd_avif.c \
                   libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \

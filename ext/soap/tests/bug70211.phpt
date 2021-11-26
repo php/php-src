@@ -22,7 +22,7 @@ function ptr2str($ptr)
 }
 
 $sf = new SoapFault('1', 'string', 'detail', 'header','line', str_repeat("A",232).ptr2str($addr));
-$ob = unserialize("a:3:{i:0;".serialize($sf).'i:1;R:12;i:2;R:10;}');
+$ob = unserialize("a:3:{i:0;".serialize($sf).'i:1;R:13;i:2;R:11;}');
 
 var_dump($ob[1]);
 ?>

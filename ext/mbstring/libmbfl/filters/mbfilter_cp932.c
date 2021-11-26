@@ -151,9 +151,7 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 1;
 			filter->cache = c;
 		} else {
-			w = c & MBFL_WCSGROUP_MASK;
-			w |= MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -194,28 +192,27 @@ mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 					w = s - (94*94) + 0xe000;
 				}
 			}
+
 			if (w <= 0) {
-				w = (s1 << 8) | s2 | MBFL_WCSPLANE_WINCP932;
+				w = MBFL_BAD_INPUT;
 			}
+
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
-		(*filter->filter_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter);
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -309,5 +306,5 @@ mbfl_filt_conv_wchar_cp932(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

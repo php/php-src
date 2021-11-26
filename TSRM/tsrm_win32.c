@@ -609,16 +609,20 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }/*}}}*/
 
+#define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
+#define DESCRIPTOR_PREFIX "TSRM_SHM_DESCRIPTOR:"
+#define INT_MIN_AS_STRING "-2147483648"
+
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
-	char shm_segment[26], shm_info[29];
+	char shm_segment[sizeof(SEGMENT_PREFIX INT_MIN_AS_STRING)], shm_info[sizeof(DESCRIPTOR_PREFIX INT_MIN_AS_STRING)];
 	HANDLE shm_handle = NULL, info_handle = NULL;
 	BOOL created = FALSE;
 
 	if (key != IPC_PRIVATE) {
-		snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
-		snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
+		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
+		snprintf(shm_info, sizeof(shm_info), DESCRIPTOR_PREFIX "%d", key);
 
 		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
 		info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);

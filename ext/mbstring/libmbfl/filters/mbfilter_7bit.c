@@ -78,5 +78,5 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	} else {
 		mbfl_filt_conv_illegal_output(c, filter);
 	}
-	return c;
+	return 0;
 }

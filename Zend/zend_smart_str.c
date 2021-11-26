@@ -43,7 +43,7 @@ ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 {
 	if (UNEXPECTED(!str->s)) {
-		str->a = len <= SMART_STR_START_SIZE
+		str->a = len <= SMART_STR_START_LEN
 				? SMART_STR_START_LEN
 				: SMART_STR_NEW_LEN(len);
 		str->s = zend_string_alloc(str->a, 1);

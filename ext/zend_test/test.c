@@ -22,12 +22,13 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_test.h"
-#include "test_arginfo.h"
 #include "observer.h"
 #include "fiber.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
+#include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "test_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -199,6 +200,41 @@ static ZEND_FUNCTION(zend_string_or_stdclass)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_compile_string)
+{
+	zend_string *source_string = NULL;
+	zend_string *filename = NULL;
+	zend_long position = ZEND_COMPILE_POSITION_AT_OPEN_TAG;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(source_string)
+		Z_PARAM_STR(filename)
+		Z_PARAM_LONG(position)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_op_array *op_array = NULL;
+
+	op_array = compile_string(source_string, ZSTR_VAL(filename), position);
+
+	if (op_array) {
+		zval retval;
+
+		zend_try {
+			ZVAL_UNDEF(&retval);
+			zend_execute(op_array, &retval);
+		} zend_catch {
+			destroy_op_array(op_array);
+			efree_size(op_array, sizeof(zend_op_array));
+			zend_bailout();
+		} zend_end_try();
+
+		destroy_op_array(op_array);
+		efree_size(op_array, sizeof(zend_op_array));
+	}
+
+	return;
+}
+
 /* Tests Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL */
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 {
@@ -216,6 +252,40 @@ static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 	} else {
 		RETURN_NULL();
 	}
+}
+
+static ZEND_FUNCTION(zend_weakmap_attach)
+{
+	zval *value;
+	zend_object *obj;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_OBJ(obj)
+			Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_weakrefs_hash_add(&ZT_G(global_weakmap), obj, value)) {
+		Z_TRY_ADDREF_P(value);
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+
+static ZEND_FUNCTION(zend_weakmap_remove)
+{
+	zend_object *obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_weakrefs_hash_del(&ZT_G(global_weakmap), obj) == SUCCESS);
+}
+
+static ZEND_FUNCTION(zend_weakmap_dump)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_ARR(zend_array_dup(&ZT_G(global_weakmap)));
 }
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
@@ -394,16 +464,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();
 	zend_test_ns2_ns_foo_class = register_class_ZendTestNS2_ZendSubNS_Foo();
 
-	zend_test_unit_enum = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, NULL);
-	zend_enum_add_case_cstr(zend_test_unit_enum, "Foo", NULL);
-	zend_enum_add_case_cstr(zend_test_unit_enum, "Bar", NULL);
-
-	zval val;
-	zend_test_string_enum = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, NULL);
-	ZVAL_PSTRINGL(&val, "Test1", sizeof("Test1")-1);
-	zend_enum_add_case_cstr(zend_test_string_enum, "Foo", &val);
-	ZVAL_PSTRINGL(&val, "Test2", sizeof("Test2")-1);
-	zend_enum_add_case_cstr(zend_test_string_enum, "Bar", &val);
+	zend_test_unit_enum = register_class_ZendTestUnitEnum();
+	zend_test_string_enum = register_class_ZendTestStringEnum();
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {
@@ -441,11 +503,17 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 PHP_RINIT_FUNCTION(zend_test)
 {
+	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
+	zend_ulong objptr;
+	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), objptr) {
+		zend_weakrefs_hash_del(&ZT_G(global_weakmap), (zend_object *)(uintptr_t)objptr);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&ZT_G(global_weakmap));
 	return SUCCESS;
 }
 

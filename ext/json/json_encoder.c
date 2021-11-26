@@ -179,6 +179,13 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 			}
 		}
 
+		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
+		if (encoder->depth > encoder->max_depth) {
+			encoder->error_code = PHP_JSON_ERROR_DEPTH;
+			if (!(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+				return FAILURE;
+			}
+		}
 		--encoder->depth;
 
 		if (need_comma) {
@@ -186,7 +193,6 @@ static int php_json_encode_array(smart_str *buf, zval *val, int options, php_jso
 			php_json_pretty_print_indent(buf, options, encoder);
 		}
 		smart_str_appendc(buf, '}');
-		PHP_JSON_HASH_UNPROTECT_RECURSION(obj);
 		return SUCCESS;
 	} else {
 		prop_ht = myht = zend_get_properties_for(val, ZEND_PROP_PURPOSE_JSON);

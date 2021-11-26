@@ -214,11 +214,35 @@ int mbfl_convert_filter_strcat(mbfl_convert_filter *filter, const unsigned char 
 	return 0;
 }
 
+static int mbfl_filt_conv_output_hex(unsigned int w, mbfl_convert_filter *filter)
+{
+	bool nonzero = false;
+	int shift = 28, ret = 0;
+
+	while (shift >= 0) {
+		int n = (w >> shift) & 0xF;
+		if (n || nonzero) {
+			nonzero = true;
+			ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
+			if (ret < 0) {
+				return ret;
+			}
+		}
+		shift -= 4;
+	}
+
+	if (!nonzero) {
+		/* No hex digits were output by above loop */
+		ret = (*filter->filter_function)('0', filter);
+	}
+
+	return ret;
+}
+
 /* illegal character output function for conv-filter */
 int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 {
-	int n, m, r;
-
+	unsigned int w = c;
 	int ret = 0;
 	int mode_backup = filter->illegal_mode;
 	int substchar_backup = filter->illegal_substchar;
@@ -237,89 +261,32 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR:
 		ret = (*filter->filter_function)(substchar_backup, filter);
 		break;
-	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
-		if (c >= 0) {
-			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
-			} else {
-				if (c < MBFL_WCSGROUP_WCHARMAX) {
-					m = c & ~MBFL_WCSPLANE_MASK;
-					switch (m) {
-					case MBFL_WCSPLANE_JIS0208:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS+");
-						break;
-					case MBFL_WCSPLANE_JIS0212:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+");
-						break;
-					case MBFL_WCSPLANE_JIS0213:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS3+");
-						break;
-					case MBFL_WCSPLANE_WINCP932:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+");
-						break;
-					case MBFL_WCSPLANE_GB18030:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
-						break;
-					default:
-						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"?+");
-						break;
-					}
-					c &= MBFL_WCSPLANE_MASK;
-				} else {
-					ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"BAD+");
-					c &= MBFL_WCSGROUP_MASK;
-				}
-			}
-			if (ret >= 0) {
-				m = 0;
-				r = 28;
-				while (r >= 0) {
-					n = (c >> r) & 0xf;
-					if (n || m) {
-						m = 1;
-						ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
-						if (ret < 0) {
-							break;
-						}
-					}
-					r -= 4;
-				}
-				if (m == 0) {
-					ret = (*filter->filter_function)(mbfl_hexchar_table[0], filter);
-				}
-			}
-		}
-		break;
-	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
-		if (c >= 0) {
-			if (c < MBFL_WCSGROUP_UCS4MAX) {	/* unicode */
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#x");
-				if (ret < 0)
-					break;
 
-				m = 0;
-				r = 28;
-				while (r >= 0) {
-					n = (c >> r) & 0xf;
-					if (n || m) {
-						m = 1;
-						ret = (*filter->filter_function)(mbfl_hexchar_table[n], filter);
-						if (ret < 0) {
-							break;
-						}
-					}
-					r -= 4;
-				}
-				if (m == 0) {
-					/* illegal character was zero; no hex digits were output by above loop */
-					ret = (*filter->filter_function)('0', filter);
-				}
-				ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
-			} else {
-				ret = (*filter->filter_function)(substchar_backup, filter);
-			}
+	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
+		if (w != MBFL_BAD_INPUT) {
+			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"U+");
+			if (ret < 0)
+				break;
+			ret = mbfl_filt_conv_output_hex(w, filter);
+		} else {
+			ret = (*filter->filter_function)(substchar_backup, filter);
 		}
 		break;
+
+	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
+		if (w != MBFL_BAD_INPUT) {
+			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"&#x");
+			if (ret < 0)
+				break;
+			ret = mbfl_filt_conv_output_hex(w, filter);
+			if (ret < 0)
+				break;
+			ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)";");
+		} else {
+			ret = (*filter->filter_function)(substchar_backup, filter);
+		}
+		break;
+
 	case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
 	default:
 		break;

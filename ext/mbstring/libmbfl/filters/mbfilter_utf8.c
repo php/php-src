@@ -84,10 +84,10 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
+int mbfl_filt_put_invalid_char(mbfl_convert_filter *filter)
 {
 	filter->status = filter->cache = 0;
-	CK((*filter->output_function)((c & MBFL_WCSGROUP_MASK) | MBFL_WCSGROUP_THROUGH, filter->data));
+	CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	return 0;
 }
 
@@ -96,7 +96,7 @@ int mbfl_filt_conv_utf8_wchar(int c, mbfl_convert_filter *filter)
 	int s, c1;
 
 retry:
-	switch (filter->status & 0xff) {
+	switch (filter->status) {
 	case 0x00:
 		if (c < 0x80) {
 			CK((*filter->output_function)(c, filter->data));
@@ -110,21 +110,21 @@ retry:
 			filter->status = 0x30;
 			filter->cache = c & 0x7;
 		} else {
-			CK(mbfl_filt_put_invalid_char(c, filter));
+			CK(mbfl_filt_put_invalid_char(filter));
 		}
 		break;
 	case 0x10: /* 2byte code 2nd char: 0x80-0xbf */
 	case 0x21: /* 3byte code 3rd char: 0x80-0xbf */
 	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
-		filter->status = 0;
 		if (c >= 0x80 && c <= 0xbf) {
 			s = (filter->cache<<6) | (c & 0x3f);
-			filter->cache = 0;
+			filter->status = filter->cache = 0;
 			CK((*filter->output_function)(s, filter->data));
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4))
+			CK(mbfl_filt_put_invalid_char(filter));
+			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
 				goto retry;
+			}
 		}
 		break;
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
@@ -138,9 +138,10 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4))
+			CK(mbfl_filt_put_invalid_char(filter));
+			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
 				goto retry;
+			}
 		}
 		break;
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
@@ -154,9 +155,10 @@ retry:
 			filter->cache = s;
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4))
+			CK(mbfl_filt_put_invalid_char(filter));
+			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
 				goto retry;
+			}
 		}
 		break;
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -164,27 +166,23 @@ retry:
 			filter->cache = (filter->cache<<6) | (c & 0x3f);
 			filter->status++;
 		} else {
-			CK(mbfl_filt_put_invalid_char(filter->cache, filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4))
+			CK(mbfl_filt_put_invalid_char(filter));
+			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
 				goto retry;
+			}
 		}
 		break;
-	default:
-		filter->status = 0;
-		break;
+
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
-	int status = filter->status, cache = filter->cache;
-
-	filter->status = filter->cache = 0;
-
-	if (status) {
-		CK(mbfl_filt_put_invalid_char(cache, filter));
+	if (filter->status) {
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -216,5 +214,5 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

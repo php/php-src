@@ -47,7 +47,7 @@ static void _php_intlgregcal_constructor_body(
     INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
 	zval		*tz_object	= NULL;
-	zval		args_a[6] = {0},
+	zval		args_a[6],
 				*args		= &args_a[0];
 	char		*locale		= NULL;
 	size_t			locale_len;

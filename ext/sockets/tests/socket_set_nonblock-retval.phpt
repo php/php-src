@@ -5,11 +5,11 @@ sockets
 --FILE--
 <?php
 
-$socket = socket_create_listen(31339);
+$socket = socket_create_listen(0);
 var_dump(socket_set_nonblock($socket));
 socket_close($socket);
 
-$socket2 = socket_create_listen(31340);
+$socket2 = socket_create_listen(0);
 socket_close($socket2);
 try {
     var_dump(socket_set_nonblock($socket2));

@@ -8,7 +8,9 @@ $f = function () {
     yield $this->value;
 };
 
-var_dump($f->call(new class {})->current());
+var_dump($f->call(new class {
+    public $value;
+})->current());
 
 ?>
 --EXPECT--

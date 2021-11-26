@@ -4,6 +4,7 @@ trigger:
     include:
       - PHP-7.4
       - PHP-8.0
+      - PHP-8.1
       - master
   paths:
     exclude:
@@ -22,6 +23,7 @@ schedules:
       include:
         - PHP-7.4
         - PHP-8.0
+        - PHP-8.1
         - master
 
 jobs:
@@ -92,6 +94,7 @@ jobs:
         configurationParameters: >-
             --enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer
             CFLAGS='-fno-sanitize-recover'
+        timeoutInMinutes: 90
     - template: azure/coverage_job.yml
       parameters:
         configurationName: COVERAGE_DEBUG_ZTS
@@ -101,7 +104,7 @@ jobs:
       parameters:
         configurationName: DEBUG_NTS_OPCACHE
         configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
+        timeoutInMinutes: 120
     - template: azure/job.yml
       parameters:
         configurationName: DEBUG_NTS_REPEAT

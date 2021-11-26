@@ -27,16 +27,37 @@ namespace {
     function ftp_cdup(FTP\Connection $ftp): bool {}
     function ftp_chdir(FTP\Connection $ftp, string $directory): bool {}
     function ftp_exec(FTP\Connection $ftp, string $command): bool {}
-    function ftp_raw(FTP\Connection $ftp, string $command): array {}
+
+    /**
+     * @return array<int, string>|null
+     * @refcount 1
+     */
+    function ftp_raw(FTP\Connection $ftp, string $command): ?array {}
     function ftp_mkdir(FTP\Connection $ftp, string $directory): string|false {}
     function ftp_rmdir(FTP\Connection $ftp, string $directory): bool {}
     function ftp_chmod(FTP\Connection $ftp, int $permissions, string $filename): int|false {}
 
     /** @param string $response */
     function ftp_alloc(FTP\Connection $ftp, int $size, &$response = null): bool {}
+
+    /**
+     * @return array<int, string>|false
+     * @refcount 1
+     */
     function ftp_nlist(FTP\Connection $ftp, string $directory): array|false {}
+
+    /**
+     * @return array<int, string>|false
+     * @refcount 1
+     */
     function ftp_rawlist(FTP\Connection $ftp, string $directory, bool $recursive = false): array|false {}
+
+    /**
+     * @return array<int, array>|false
+     * @refcount 1
+     */
     function ftp_mlsd(FTP\Connection $ftp, string $directory): array|false {}
+
     function ftp_systype(FTP\Connection $ftp): string|false {}
 
     /** @param resource $stream */

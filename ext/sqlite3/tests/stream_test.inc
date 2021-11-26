@@ -2,6 +2,7 @@
 
 class SQLite3_Test_Stream
 {
+    public $context;
     private $position;
     public static $string_length = 10;
     public static $string = "abcdefg\0hi";

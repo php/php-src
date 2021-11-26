@@ -140,7 +140,7 @@ PHPDBG_PRINT(class) /* {{{ */
 		if (zend_hash_num_elements(&ce->function_table)) {
 			zend_function *method;
 
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 				phpdbg_print_function_helper(method);
 			} ZEND_HASH_FOREACH_END();
 		}
@@ -291,7 +291,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 
 	phpdbg_out("%d methods: ", zend_hash_num_elements(&ce->function_table));
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		if (first) {
 			first = 0;
 		} else {
@@ -304,7 +304,7 @@ static void phpdbg_print_opcodes_ce(zend_class_entry *ce) {
 	}
 	phpdbg_out("\n");
 
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, method) {
 		phpdbg_print_function_helper(method);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -332,13 +332,13 @@ void phpdbg_print_opcodes(const char *function)
 
 		phpdbg_print_opcodes_main();
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), name, func) {
 			if (func->type == ZEND_USER_FUNCTION) {
 				phpdbg_print_opcodes_function(ZSTR_VAL(name), ZSTR_LEN(name));
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		ZEND_HASH_FOREACH_PTR(EG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_USER_CLASS) {
 				phpdbg_out("\n");
 				phpdbg_print_opcodes_ce(ce);

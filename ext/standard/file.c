@@ -490,7 +490,7 @@ PHP_FUNCTION(get_meta_tags)
 		} else if (tok == TOK_CLOSETAG) {
 			if (have_name) {
 				/* For BC */
-				php_strtolower(name, strlen(name));
+				zend_str_tolower(name, strlen(name));
 				if (have_content) {
 					add_assoc_string(return_value, name, value);
 				} else {
@@ -908,7 +908,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -1069,8 +1069,6 @@ PHPAPI PHP_FUNCTION(fgets)
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval *res;
-	char buf[2];
-	int result;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1079,15 +1077,12 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	result = php_stream_getc(stream);
+	int result = php_stream_getc(stream);
 
 	if (result == EOF) {
 		RETVAL_FALSE;
 	} else {
-		buf[0] = result;
-		buf[1] = '\0';
-
-		RETURN_STRINGL(buf, 1);
+		RETURN_CHAR(result);
 	}
 }
 /* }}} */
@@ -2149,12 +2144,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
 									 * last element */
-									if ((size_t)temp_len > (size_t)(limit - buf)) {
-										goto quit_loop_2;
-									}
-									zend_array_destroy(Z_ARR_P(return_value));
-									RETVAL_FALSE;
-									goto out;
+									goto quit_loop_2;
 								}
 
 								temp_len += new_len;
@@ -2305,7 +2295,6 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 		add_next_index_stringl(return_value, temp, comp_end - temp);
 	} while (inc_len > 0);
 
-out:
 	efree(temp);
 	if (stream) {
 		efree(buf);
@@ -2392,7 +2381,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
 				if (ch == '<' || ch == '>') {
-					/* Was just an apostrohpe */
+					/* Was just an apostrophe */
 					md->ulc = 1;
 					md->lc = ch;
 				}

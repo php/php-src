@@ -419,6 +419,10 @@ options:
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
+	if (is_persistent) {
+		dbh->refcount--;
+	}
+
 	/* XXX raise exception */
 	zend_restore_error_handling(&zeh);
 	if (!EG(exception)) {
@@ -1187,7 +1191,7 @@ PHP_METHOD(PDO, getAvailableDrivers)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }

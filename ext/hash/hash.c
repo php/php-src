@@ -860,7 +860,7 @@ PHP_FUNCTION(hash_algos)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
 		add_next_index_str(return_value, zend_string_copy(str));
 	} ZEND_HASH_FOREACH_END();
 }
@@ -877,7 +877,7 @@ PHP_FUNCTION(hash_hmac_algos)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
 		if (ops->is_crypto) {
 			add_next_index_str(return_value, zend_string_copy(str));
 		}
@@ -1663,7 +1663,7 @@ PHP_MINFO_FUNCTION(hash)
 	zend_string *str;
 	char *s = buffer, *e = s + sizeof(buffer);
 
-	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
 		s += slprintf(s, e - s, "%s ", ZSTR_VAL(str));
 	} ZEND_HASH_FOREACH_END();
 	*s = 0;

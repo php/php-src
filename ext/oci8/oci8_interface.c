@@ -916,7 +916,7 @@ PHP_FUNCTION(oci_lob_export)
 /* }}} */
 
 /* {{{ Writes temporary blob */
-PHP_METHOD(OCILob, writetemporary)
+PHP_METHOD(OCILob, writeTemporary)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
@@ -1274,7 +1274,7 @@ PHP_FUNCTION(oci_fetch_all)
 	zval **outarrs;
 	ub4 nrows = 1;
 	int i;
-	zend_long rows = 0, flags = 0, skip = 0, maxrows = -1;
+	zend_long rows = 0, flags = PHP_OCI_FETCHSTATEMENT_BY_COLUMN | PHP_OCI_ASSOC, skip = 0, maxrows = -1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_RESOURCE(z_statement)

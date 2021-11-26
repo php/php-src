@@ -14,6 +14,7 @@ MySQLPDOTest::skip();
 
     try {
 
+        #[AllowDynamicProperties]
         class myclass implements Serializable {
 
             private static $instance = null;

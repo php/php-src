@@ -23,28 +23,29 @@ static int mbfl_conv_singlebyte_table(int c, mbfl_convert_filter *filter, int tb
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		int s = tbl[c - tbl_min];
-		if (!s) {
-			s = c | MBFL_WCSGROUP_THROUGH;
-		}
+		if (!s)
+			s = MBFL_BAD_INPUT;
 		CK((*filter->output_function)(s, filter->data));
 	}
-	return c;
+	return 0;
 }
 
 static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int tbl_min, const unsigned short tbl[])
 {
-	if (c < tbl_min) {
+	if (c == MBFL_BAD_INPUT) {
+		CK(mbfl_filt_conv_illegal_output(c, filter));
+	} else if (c < tbl_min) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		for (int i = 0; i < 256 - tbl_min; i++) {
 			if (c == tbl[i]) {
 				CK((*filter->output_function)(i + tbl_min, filter->data));
-				return c;
+				return 0;
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 /* Initialize data structures for a single-byte encoding */
@@ -99,19 +100,19 @@ static int mbfl_filt_conv_ascii_wchar(int c, mbfl_convert_filter *filter)
 	if (c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_wchar_ascii(int c, mbfl_convert_filter *filter)
 {
-	if (c < 0x80) {
+	if (c < 0x80 && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 /* ISO-8859-X */
@@ -126,12 +127,12 @@ static int mbfl_filt_conv_8859_1_wchar(int c, mbfl_convert_filter *filter)
 
 static int mbfl_filt_conv_wchar_8859_1(int c, mbfl_convert_filter *filter)
 {
-	if (c < 0x100) {
+	if (c < 0x100 && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 static const char *iso8859_2_aliases[] = {"ISO8859-2", "latin2", NULL};
@@ -391,16 +392,16 @@ static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 		for (int n = 0; n < 32; n++) {
 			if (c == cp1252_ucs_table[n]) {
 				CK((*filter->output_function)(0x80 + n, filter->data));
-				return c;
+				return 0;
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c <= 0x7F || c >= 0xA0) {
+	} else if ((c <= 0x7F || c >= 0xA0) && c != MBFL_BAD_INPUT) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
@@ -409,15 +410,14 @@ static int mbfl_filt_conv_cp1252_wchar(int c, mbfl_convert_filter *filter)
 
 	if (c >= 0x80 && c < 0xA0) {
 		s = cp1252_ucs_table[c - 0x80];
-		if (!s) {
-			s = c | MBFL_WCSGROUP_THROUGH;
-		}
+		if (!s)
+			s = MBFL_BAD_INPUT;
 	} else {
 		s = c;
 	}
 
 	CK((*filter->output_function)(s, filter->data));
-	return c;
+	return 0;
 }
 
 static const char *cp1254_aliases[] = {"CP1254", "CP-1254", "WINDOWS-1254", NULL};
@@ -545,7 +545,7 @@ static const unsigned char ucs_armscii8_table[] = {
 };
 DEF_SB(armscii8, "ArmSCII-8", "ArmSCII-8", armscii8_aliases);
 
-int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
+static int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
 {
 	int s;
 
@@ -553,29 +553,30 @@ int mbfl_filt_conv_armscii8_wchar(int c, mbfl_convert_filter *filter)
 		s = c;
 	} else {
 		s = armscii8_ucs_table[c - 0xA0];
-		if (!s) {
-			s = c | MBFL_WCSGROUP_THROUGH;
-		}
+		if (!s)
+			s = MBFL_BAD_INPUT;
 	}
 
 	CK((*filter->output_function)(s, filter->data));
-	return c;
+	return 0;
 }
 
-int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
+static int mbfl_filt_conv_wchar_armscii8(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0x28 && c <= 0x2F) {
 		CK((*filter->output_function)(ucs_armscii8_table[c - 0x28], filter->data));
+	} else if (c == MBFL_BAD_INPUT) {
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	} else if (c < 0xA0) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		for (int n = 0; n < 0x60; n++) {
 			if (c == armscii8_ucs_table[n]) {
 				CK((*filter->output_function)(0xA0 + n, filter->data));
-				return c;
+				return 0;
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
-	return c;
+	return 0;
 }

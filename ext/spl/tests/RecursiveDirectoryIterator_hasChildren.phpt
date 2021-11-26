@@ -30,6 +30,10 @@ bool(false)
 --CLEAN--
 <?php
 $dir = __DIR__ . DIRECTORY_SEPARATOR . 'symlinktest';
-unlink($dir . DIRECTORY_SEPARATOR . 'symlink');
+if (PHP_OS_FAMILY == 'Windows') {
+    rmdir($dir . DIRECTORY_SEPARATOR . 'symlink');
+} else {
+    unlink($dir . DIRECTORY_SEPARATOR . 'symlink');
+}
 rmdir($dir);
 ?>

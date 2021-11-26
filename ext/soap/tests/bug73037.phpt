@@ -128,10 +128,6 @@ cleanup:
 }
 
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . DIRECTORY_SEPARATOR . "bug73037_server.php");
-?>
 --EXPECT--
 Iteration 0
 

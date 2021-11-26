@@ -17,11 +17,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromiterator1.phar');
-__HALT_COMPILER();
-?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
 Cannot write out phar archive, phar is read-only

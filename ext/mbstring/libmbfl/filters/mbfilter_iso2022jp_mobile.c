@@ -134,7 +134,7 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 		} else if (c > 0xA0 && c < 0xE0) { /* Kana */
 			CK((*filter->output_function)(0xFEC0 + c, filter->data));
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -181,11 +181,11 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 			}
 
 			if (w <= 0) {
-				w = (c1 << 8) | c | MBFL_WCSPLANE_JIS0208;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			CK((*filter->output_function)((c1 << 8) | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -197,7 +197,7 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->status += 3;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B00 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -209,7 +209,7 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->status++;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B2400 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -219,7 +219,7 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = JISX0208_KANJI;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B242800 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -231,17 +231,17 @@ int mbfl_filt_conv_2022jp_mobile_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = JISX0201_KANA;
 		} else {
 			filter->status &= ~0xF;
-			CK((*filter->output_function)(0x1B2800 | c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_2022jp_mobile_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status & 0xF) {
-		mbfl_filt_conv_illegal_output(filter->cache, filter);
+		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
 	}
 
 	if (filter->flush_function) {
@@ -263,23 +263,13 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 		s1 = ucs_i_jis_table[c - ucs_i_jis_table_min];
 	} else if (c >= ucs_r_jis_table_min && c < ucs_r_jis_table_max) {
 		s1 = ucs_r_jis_table[c - ucs_r_jis_table_min];
-	} else if (c >= 0xE000 && c < (0xE000 + 20*94)) {
-		/* Private Use Area (95ku - 114ku) */
-		s1 = c - 0xE000;
-		c1 = (s1 / 94) + 0x7F;
-		c2 = (s1 % 94) + 0x21;
-		s1 = (c1 << 8) | c2;
 	}
 
 	if (s1 <= 0) {
 		if (c == 0xA5) { /* YEN SIGN */
 			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
-		} else if (c == 0x203E) { /* OVER LINE */
-			s1 = 0x2131; /* FULLWIDTH MACRON */
 		} else if (c == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
 			s1 = 0x2140;
-		} else if (c == 0xFF5E) { /* FULLWIDTH TILDE */
-			s1 = 0x2141;
 		} else if (c == 0x2225) { /* PARALLEL TO */
 			s1 = 0x2142;
 		} else if (c == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
@@ -300,7 +290,7 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 
 	if (filter->status == 1 && filter->cache) {
 		/* We are just processing one of KDDI's special emoji for a phone keypad button */
-		return c;
+		return 0;
 	}
 
 	if ((s1 <= 0) || (s1 >= 0xa1a1 && s2 == 0)) { /* not found or X 0212 */
@@ -348,7 +338,7 @@ int mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_wchar_2022jp_mobile_flush(mbfl_convert_filter *filter)

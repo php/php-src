@@ -238,7 +238,6 @@ class DOMNodeList implements IteratorAggregate, Countable
 
 class DOMCharacterData extends DOMNode implements DOMChildNode
 {
-    /** @readonly */
     public string $data;
 
     /** @readonly */
@@ -285,7 +284,6 @@ class DOMAttr extends DOMNode
     /** @readonly */
     public bool $specified = true;
 
-    /** @readonly */
     public string $value;
 
     /** @readonly */
@@ -566,7 +564,10 @@ class DOMDocument extends DOMNode implements DOMParentNode
 
 final class DOMException extends Exception
 {
-    /** @var int Intentionally left untyped */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var int
+     */
     public $code = 0;
 }
 
@@ -621,14 +622,23 @@ class DOMEntity extends DOMNode
     /** @readonly */
     public ?string $notationName;
 
-    /** @readonly */
-    public mixed $actualEncoding = null;
+    /**
+     * @readonly
+     * @deprecated
+     */
+    public ?string $actualEncoding = null;
 
-    /** @readonly */
-    public mixed $encoding = null;
+    /**
+     * @readonly
+     * @deprecated
+     */
+    public ?string $encoding = null;
 
-    /** @readonly */
-    public mixed $version = null;
+    /**
+     * @readonly
+     * @deprecated
+     */
+    public ?string $version = null;
 }
 
 class DOMEntityReference extends DOMNode

@@ -115,6 +115,14 @@ typedef struct _user_tick_function_entry {
 	bool calling;
 } user_tick_function_entry;
 
+#if HAVE_PUTENV
+typedef struct {
+	char *putenv_string;
+	char *previous_value;
+	zend_string *key;
+} putenv_entry;
+#endif
+
 /* some prototypes for local functions */
 static void user_shutdown_function_dtor(zval *zv);
 static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
@@ -152,7 +160,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 		 * is already set; if the SetEnvironmentVariable() API call
 		 * fails, the Crt will double free() a string.
 		 * We try to avoid this by setting our own value first */
-		SetEnvironmentVariable(pe->key, "bugbug");
+		SetEnvironmentVariable(ZSTR_VAL(pe->key), "bugbug");
 # endif
 		putenv(pe->previous_value);
 # if defined(PHP_WIN32)
@@ -160,17 +168,18 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 # endif
 	} else {
 # if HAVE_UNSETENV
-		unsetenv(pe->key);
+		unsetenv(ZSTR_VAL(pe->key));
 # elif defined(PHP_WIN32)
-		SetEnvironmentVariable(pe->key, NULL);
+		SetEnvironmentVariable(ZSTR_VAL(pe->key), NULL);
 # ifndef ZTS
-		_putenv_s(pe->key, "");
+		_putenv_s(ZSTR_VAL(pe->key), "");
 # endif
 # else
 		char **env;
 
 		for (env = environ; env != NULL && *env != NULL; env++) {
-			if (!strncmp(*env, pe->key, pe->key_len) && (*env)[pe->key_len] == '=') {	/* found it */
+			if (!strncmp(*env, ZSTR_VAL(pe->key), ZSTR_LEN(pe->key))
+					&& (*env)[ZSTR_LEN(pe->key)] == '=') {	/* found it */
 				*env = "";
 				break;
 			}
@@ -180,13 +189,13 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 #ifdef HAVE_TZSET
 	/* don't forget to reset the various libc globals that
 	 * we might have changed by an earlier call to tzset(). */
-	if (!strncmp(pe->key, "TZ", pe->key_len)) {
+	if (zend_string_equals_literal_ci(pe->key, "TZ")) {
 		tzset();
 	}
 #endif
 
-	efree(pe->putenv_string);
-	efree(pe->key);
+	free(pe->putenv_string);
+	zend_string_release(pe->key);
 	efree(pe);
 }
 /* }}} */
@@ -835,8 +844,7 @@ PHP_FUNCTION(putenv)
 	char *p, **env;
 	putenv_entry pe;
 #ifdef PHP_WIN32
-	char *value = NULL;
-	int equals = 0;
+	const char *value = NULL;
 	int error_code;
 #endif
 
@@ -849,34 +857,24 @@ PHP_FUNCTION(putenv)
 		RETURN_THROWS();
 	}
 
-	pe.putenv_string = estrndup(setting, setting_len);
-	pe.key = estrndup(setting, setting_len);
-	if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
-		*p = '\0';
+	pe.putenv_string = zend_strndup(setting, setting_len);
+	if ((p = strchr(setting, '='))) {
+		pe.key = zend_string_init(setting, p - setting, 0);
 #ifdef PHP_WIN32
-		equals = 1;
+		value = p + 1;
 #endif
+	} else {
+		pe.key = zend_string_init(setting, setting_len, 0);
 	}
-
-	pe.key_len = strlen(pe.key);
-#ifdef PHP_WIN32
-	if (equals) {
-		if (pe.key_len < setting_len - 1) {
-			value = p + 1;
-		} else {
-			/* empty string*/
-			value = p;
-		}
-	}
-#endif
 
 	tsrm_env_lock();
-	zend_hash_str_del(&BG(putenv_ht), pe.key, pe.key_len);
+	zend_hash_del(&BG(putenv_ht), pe.key);
 
 	/* find previous value */
 	pe.previous_value = NULL;
 	for (env = environ; env != NULL && *env != NULL; env++) {
-		if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
+		if (!strncmp(*env, ZSTR_VAL(pe.key), ZSTR_LEN(pe.key))
+				&& (*env)[ZSTR_LEN(pe.key)] == '=') {	/* found it */
 #if defined(PHP_WIN32)
 			/* must copy previous value because MSVCRT's putenv can free the string without notice */
 			pe.previous_value = estrdup(*env);
@@ -898,15 +896,15 @@ PHP_FUNCTION(putenv)
 # else
 		wchar_t *keyw, *valw = NULL;
 
-		keyw = php_win32_cp_any_to_w(pe.key);
+		keyw = php_win32_cp_any_to_w(ZSTR_VAL(pe.key));
 		if (value) {
 			valw = php_win32_cp_any_to_w(value);
 		}
 		/* valw may be NULL, but the failed conversion still needs to be checked. */
 		if (!keyw || !valw && value) {
 			tsrm_env_unlock();
-			efree(pe.putenv_string);
-			efree(pe.key);
+			free(pe.putenv_string);
+			zend_string_release(pe.key);
 			free(keyw);
 			free(valw);
 			RETURN_FALSE;
@@ -926,9 +924,9 @@ PHP_FUNCTION(putenv)
 	) { /* success */
 # endif
 #endif
-		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
+		zend_hash_add_mem(&BG(putenv_ht), pe.key, &pe, sizeof(putenv_entry));
 #ifdef HAVE_TZSET
-		if (!strncmp(pe.key, "TZ", pe.key_len)) {
+		if (zend_string_equals_literal_ci(pe.key, "TZ")) {
 			tzset();
 		}
 #endif
@@ -939,8 +937,8 @@ PHP_FUNCTION(putenv)
 #endif
 		RETURN_TRUE;
 	} else {
-		efree(pe.putenv_string);
-		efree(pe.key);
+		free(pe.putenv_string);
+		zend_string_release(pe.key);
 #if defined(PHP_WIN32)
 		free(keyw);
 		free(valw);
@@ -1342,25 +1340,32 @@ PHP_FUNCTION(get_current_user)
 }
 /* }}} */
 
+#define ZVAL_SET_INI_STR(zv, val) do { \
+	if (ZSTR_IS_INTERNED(val)) { \
+		ZVAL_INTERNED_STR(zv, val); \
+	} else if (ZSTR_LEN(val) == 0) { \
+		ZVAL_EMPTY_STRING(zv); \
+	} else if (ZSTR_LEN(val) == 1) { \
+		ZVAL_CHAR(zv, ZSTR_VAL(val)[0]); \
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
+		ZVAL_NEW_STR(zv, zend_string_copy(val)); \
+	} else { \
+		ZVAL_NEW_STR(zv, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
+	} \
+} while (0)
+
 static void add_config_entries(HashTable *hash, zval *return_value);
 
 /* {{{ add_config_entry */
 static void add_config_entry(zend_ulong h, zend_string *key, zval *entry, zval *retval)
 {
 	if (Z_TYPE_P(entry) == IS_STRING) {
-		zend_string *str = Z_STR_P(entry);
-		if (!ZSTR_IS_INTERNED(str)) {
-			if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
-				zend_string_addref(str);
-			} else {
-				str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-			}
-		}
-
+		zval str_zv;
+		ZVAL_SET_INI_STR(&str_zv, Z_STR_P(entry));
 		if (key) {
-			add_assoc_str_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), str);
+			add_assoc_zval_ex(retval, ZSTR_VAL(key), ZSTR_LEN(key), &str_zv);
 		} else {
-			add_index_str(retval, h, str);
+			add_index_zval(retval, h, &str_zv);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		zval tmp;
@@ -1387,15 +1392,13 @@ static void add_config_entries(HashTable *hash, zval *return_value) /* {{{ */
 /* {{{ Get the value of a PHP configuration option */
 PHP_FUNCTION(get_cfg_var)
 {
-	char *varname;
-	size_t varname_len;
-	zval *retval;
+	zend_string *varname;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(varname, varname_len)
+		Z_PARAM_STR(varname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	retval = cfg_get_entry(varname, (uint32_t)varname_len);
+	zval *retval = cfg_get_entry_ex(varname);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
@@ -1403,7 +1406,7 @@ PHP_FUNCTION(get_cfg_var)
 			add_config_entries(Z_ARRVAL_P(retval), return_value);
 			return;
 		} else {
-			RETURN_STRING(Z_STRVAL_P(retval));
+			ZVAL_SET_INI_STR(return_value, Z_STR_P(retval));
 		}
 	} else {
 		RETURN_FALSE;
@@ -1662,20 +1665,36 @@ PHP_FUNCTION(forward_static_call_array)
 }
 /* }}} */
 
+static void fci_addref(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+{
+	Z_TRY_ADDREF(fci->function_name);
+	if (fci_cache->object) {
+		GC_ADDREF(fci_cache->object);
+	}
+}
+
+static void fci_release(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+{
+	zval_ptr_dtor(&fci->function_name);
+	if (fci_cache->object) {
+		zend_object_release(fci_cache->object);
+	}
+}
+
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 
-	zval_ptr_dtor(&shutdown_function_entry->fci.function_name);
 	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
+	fci_release(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
 	efree(shutdown_function_entry);
 }
 /* }}} */
 
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
-	zval_ptr_dtor(&tick_function_entry->fci.function_name);
 	zend_fcall_info_args_clear(&tick_function_entry->fci, true);
+	fci_release(&tick_function_entry->fci, &tick_function_entry->fci_cache);
 }
 /* }}} */
 
@@ -1781,7 +1800,7 @@ PHP_FUNCTION(register_shutdown_function)
 		RETURN_THROWS();
 	}
 
-	Z_TRY_ADDREF(entry.fci.function_name);
+	fci_addref(&entry.fci, &entry.fci_cache);
 	zend_fcall_info_argp(&entry.fci, param_count, params);
 
 	status = append_user_shutdown_function(&entry);
@@ -1949,21 +1968,6 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-#define INI_RETVAL_STR(val) do { \
-	/* copy to return value here, because alter might free it! */ \
-	if (ZSTR_IS_INTERNED(val)) { \
-		RETVAL_INTERNED_STR(val); \
-	} else if (ZSTR_LEN(val) == 0) { \
-		RETVAL_EMPTY_STRING(); \
-	} else if (ZSTR_LEN(val) == 1) { \
-		RETVAL_CHAR(ZSTR_VAL(val)[0]); \
-	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) { \
-		ZVAL_NEW_STR(return_value, zend_string_copy(val)); \
-	} else { \
-		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0)); \
-	} \
-} while (0)
-
 /* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
@@ -1979,7 +1983,7 @@ PHP_FUNCTION(ini_get)
 		RETURN_FALSE;
 	}
 
-	INI_RETVAL_STR(val);
+	ZVAL_SET_INI_STR(return_value, val);
 }
 /* }}} */
 
@@ -2011,7 +2015,7 @@ PHP_FUNCTION(ini_get_all)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(ini_directives), key, ini_entry) {
 		zval option;
 
 		if (module_number != 0 && ini_entry->module_number != module_number) {
@@ -2084,7 +2088,7 @@ PHP_FUNCTION(ini_set)
 	val = zend_ini_get_value(varname);
 
 	if (val) {
-		INI_RETVAL_STR(val);
+		ZVAL_SET_INI_STR(return_value, val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2117,8 +2121,6 @@ PHP_FUNCTION(ini_set)
 	zend_tmp_string_release(new_value_tmp_str);
 }
 /* }}} */
-
-#undef INI_RETVAL_STR
 
 /* {{{ Restore the value of a configuration option specified by varname */
 PHP_FUNCTION(ini_restore)
@@ -2367,7 +2369,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	tick_fe.calling = false;
-	Z_TRY_ADDREF(tick_fe.fci.function_name);
+	fci_addref(&tick_fe.fci, &tick_fe.fci_cache);
 	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
 
 	if (!BG(user_tick_functions)) {

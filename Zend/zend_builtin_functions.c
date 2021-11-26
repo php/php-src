@@ -19,6 +19,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_attributes.h"
 #include "zend_gc.h"
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
@@ -33,9 +34,11 @@
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
-	zend_standard_class_def = register_class_stdClass();
-
 	zend_register_default_classes();
+
+	zend_standard_class_def = register_class_stdClass();
+	zend_add_class_attribute(zend_standard_class_def, zend_ce_allow_dynamic_properties->name, 0);
+	zend_standard_class_def->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
 	return SUCCESS;
 }
@@ -157,7 +160,7 @@ ZEND_FUNCTION(func_num_args)
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_num_args()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_LONG(-1);
 	}
 
@@ -188,7 +191,7 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_get_arg()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -226,7 +229,7 @@ ZEND_FUNCTION(func_get_args)
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_get_args()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -669,7 +672,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 	zend_string *key;
 	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 			 !zend_check_protected(prop_info->ce, scope)) ||
 			((prop_info->flags & ZEND_ACC_PRIVATE) &&
@@ -758,7 +761,7 @@ ZEND_FUNCTION(get_object_vars)
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
-		ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, value) {
+		ZEND_HASH_MAP_FOREACH_KEY_VAL(properties, num_key, key, value) {
 			bool is_dynamic = 1;
 			if (Z_TYPE_P(value) == IS_INDIRECT) {
 				value = Z_INDIRECT_P(value);
@@ -838,7 +841,7 @@ ZEND_FUNCTION(get_class_methods)
 	array_init(return_value);
 	scope = zend_get_executed_scope();
 
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (scope &&
 			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
@@ -1094,7 +1097,7 @@ ZEND_FUNCTION(get_included_files)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&EG(included_files), entry) {
 		if (entry) {
 			add_next_index_str(return_value, zend_string_copy(entry));
 		}
@@ -1248,7 +1251,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	array_init(return_value);
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 			ce = Z_PTR_P(zv);
 			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
@@ -1309,7 +1312,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
 		if (key && ZSTR_VAL(key)[0] != 0) {
 			if (func->type == ZEND_INTERNAL_FUNCTION) {
 				add_next_index_str(&internal, zend_string_copy(key));
@@ -1331,7 +1334,7 @@ ZEND_FUNCTION(get_defined_vars)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (zend_forbid_dynamic_call("get_defined_vars()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		return;
 	}
 
@@ -1455,7 +1458,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	} else {
 		zend_module_entry *module;
 
-		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
 			add_next_index_string(return_value, module->name);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1485,13 +1488,13 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names = emalloc((zend_hash_num_elements(&module_registry) + 2) * sizeof(char *));
 
 		module_names[0] = "internal";
-		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
 			module_names[module->module_number] = (char *)module->name;
 			i++;
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
 			if (!val->name) {
 				/* skip special constants */
 				continue;
@@ -1521,7 +1524,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *constant;
 		zval const_val;
 
-		ZEND_HASH_FOREACH_PTR(EG(zend_constants), constant) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (!constant->name) {
 				/* skip special constants */
 				continue;
@@ -1606,7 +1609,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		zend_string *name;
 		zval *arg;
 		SEPARATE_ARRAY(arg_array);
-		ZEND_HASH_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
 			ZVAL_DEREF(arg);
 			Z_TRY_ADDREF_P(arg);
 			zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
@@ -1820,7 +1823,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 
 skip_frame:
-		if (UNEXPECTED((ZEND_CALL_INFO(call) & ZEND_CALL_TOP_FUNCTION) != 0)
+		if (UNEXPECTED(ZEND_CALL_KIND(call) == ZEND_CALL_TOP_FUNCTION)
 		 && !fake_frame
 		 && prev
 		 && prev->func
@@ -1902,7 +1905,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		array = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {
+	ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
 		if (zif->common.type == ZEND_INTERNAL_FUNCTION
 			&& zif->internal_function.module == module) {
 			if (!array) {

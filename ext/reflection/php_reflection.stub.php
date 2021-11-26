@@ -54,7 +54,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @tentative-return-type */
     public function getClosureScopeClass(): ?ReflectionClass {}
 
-    public function getClosureUsedVariables() : array {}
+    public function getClosureUsedVariables(): array {}
 
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
@@ -374,7 +374,6 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getShortName(): string {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -450,7 +449,6 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getDefaultValue(): mixed {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -493,7 +491,6 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
@@ -577,7 +574,6 @@ class ReflectionParameter implements Reflector
 
     public function isPromoted(): bool {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -700,7 +696,7 @@ final class ReflectionReference
 }
 
 /** @not-serializable */
-final class ReflectionAttribute implements Reflector
+class ReflectionAttribute implements Reflector
 {
     public function getName(): string {}
     public function getTarget(): int {}
@@ -715,7 +711,7 @@ final class ReflectionAttribute implements Reflector
     private function __construct() {}
 }
 
-final class ReflectionEnum extends ReflectionClass
+class ReflectionEnum extends ReflectionClass
 {
     public function __construct(object|string $objectOrClass) {}
 
@@ -743,7 +739,7 @@ class ReflectionEnumUnitCase extends ReflectionClassConstant
     public function getValue(): UnitEnum {}
 }
 
-final class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
+class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
 {
     public function __construct(object|string $class, string $constant) {}
 

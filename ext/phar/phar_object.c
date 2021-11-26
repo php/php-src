@@ -1385,6 +1385,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
 	php_stream_statbuf ssb;
+	char ch;
 
 	value = iter->funcs->get_current_data(iter);
 
@@ -1505,7 +1506,7 @@ phar_spl_fileinfo:
 		base = temp;
 		base_len = strlen(base);
 
-		if (strstr(fname, base)) {
+		if (fname_len >= base_len && strncmp(fname, base, base_len) == 0 && ((ch = fname[base_len - IS_SLASH(base[base_len - 1])]) == '\0' || IS_SLASH(ch))) {
 			str_key_len = fname_len - base_len;
 
 			if (str_key_len <= 0) {
@@ -2249,7 +2250,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	phar_metadata_tracker_copy(&phar->metadata_tracker, &source->metadata_tracker, phar->is_persistent);
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
-	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&source->manifest, entry) {
 
 		newentry = *entry;
 
@@ -4268,13 +4269,13 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 
 	if (!search) {
 		/* nothing to match -- extract all files */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else if ('/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
 		/* ends in "/" -- extract all entries having that prefix */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (0 != strncmp(ZSTR_VAL(search), entry->filename, ZSTR_LEN(search))) continue;
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;

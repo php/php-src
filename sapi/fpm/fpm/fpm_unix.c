@@ -15,6 +15,14 @@
 #include <sys/prctl.h>
 #endif
 
+#ifdef HAVE_PROCCTL
+#include <sys/procctl.h>
+#endif
+
+#ifdef HAVE_SETPFLAGS
+#include <priv.h>
+#endif
+
 #ifdef HAVE_APPARMOR
 #include <sys/apparmor.h>
 #endif
@@ -409,6 +417,19 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 #endif
 
+#ifdef HAVE_PROCCTL
+	int dumpable = PROC_TRACE_CTL_ENABLE;
+	if (wp->config->process_dumpable && -1 == procctl(P_PID, getpid(), PROC_TRACE_CTL, &dumpable)) {
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to procctl(PROC_TRACE_CTL)", wp->config->name);
+	}
+#endif
+
+#ifdef HAVE_SETPFLAGS
+	if (wp->config->process_dumpable && 0 > setpflags(__PROC_PROTECT, 0)) {
+		zlog(ZLOG_SYSERROR, "[pool %s] failed to setpflags(__PROC_PROTECT)", wp->config->name);
+	}
+#endif
+
 	if (0 > fpm_clock_init()) {
 		return -1;
 	}
@@ -425,16 +446,21 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		new_con = malloc(strlen(con) + strlen(wp->config->apparmor_hat) + 3); // // + 0 Byte
 		if (!new_con) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to allocate memory for apparmor hat change.", wp->config->name);
+			free(con);
 			return -1;
 		}
 
 		if (0 > sprintf(new_con, "%s//%s", con, wp->config->apparmor_hat)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to construct apparmor confinement.", wp->config->name);
+			free(con);
+			free(new_con);
 			return -1;
 		}
 
 		if (0 > aa_change_profile(new_con)) {
 			zlog(ZLOG_SYSERROR, "[pool %s] failed to change to new confinement (%s). Please check if \"/proc/*/attr/current\" is read and writeable and \"change_profile -> %s//*\" is allowed.", wp->config->name, new_con, con);
+			free(con);
+			free(new_con);
 			return -1;
 		}
 

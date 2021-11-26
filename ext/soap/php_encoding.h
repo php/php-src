@@ -170,6 +170,13 @@
 #define UNKNOWN_TYPE 999998
 #define END_KNOWN_TYPES 999999
 
+#define Z_VAR_ENC_TYPE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
+#define Z_VAR_ENC_VALUE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_VAR_ENC_STYPE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 2))
+#define Z_VAR_ENC_NS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
+#define Z_VAR_ENC_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
+#define Z_VAR_ENC_NAMENS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 5))
+
 struct _encodeType {
 	int type;
 	char *type_str;

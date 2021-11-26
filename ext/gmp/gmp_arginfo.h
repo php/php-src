@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 69215fb94adb4156c974360e5698e842471cb27d */
+ * Stub hash: be077a57bc9ddbb9100fadfb212857c0b8f21ebf */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -184,6 +184,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_binomial, 0, 2, GMP, 0)
 	ZEND_ARG_TYPE_INFO(0, k, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_GMP___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_GMP___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(gmp_init);
 ZEND_FUNCTION(gmp_import);
@@ -235,6 +242,8 @@ ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
 ZEND_FUNCTION(gmp_binomial);
+ZEND_METHOD(GMP, __serialize);
+ZEND_METHOD(GMP, __unserialize);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -294,6 +303,8 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_GMP_methods[] = {
+	ZEND_ME(GMP, __serialize, arginfo_class_GMP___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(GMP, __unserialize, arginfo_class_GMP___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

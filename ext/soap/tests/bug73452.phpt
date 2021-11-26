@@ -11,7 +11,8 @@ echo unserialize($data);
 ?>
 ==DONE==
 --EXPECTF--
-SoapFault exception: [4298448493] 4298448543 in :0
+Fatal error: Uncaught TypeError: Cannot assign %s to property SoapFault::$faultcode of type ?string in %s:%d
 Stack trace:
 #0 %sbug73452.php(4): unserialize('O:9:"SoapFault"...')
-#1 {main}==DONE==
+#1 {main}
+  thrown in %s on line %d

@@ -152,6 +152,9 @@ ZEND_METHOD(Closure, call)
 		my_function.common.fn_flags &= ~ZEND_ACC_CLOSURE;
 		/* use scope of passed object */
 		my_function.common.scope = newclass;
+		if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
+			my_function.internal_function.handler = closure->orig_internal_handler;
+		}
 		fci_cache.function_handler = &my_function;
 
 		/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
@@ -161,10 +164,8 @@ ZEND_METHOD(Closure, call)
 			void *ptr;
 
 			my_function.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-			ptr = emalloc(sizeof(void*) + my_function.op_array.cache_size);
+			ptr = emalloc(my_function.op_array.cache_size);
 			ZEND_MAP_PTR_INIT(my_function.op_array.run_time_cache, ptr);
-			ptr = (char*)ptr + sizeof(void*);
-			ZEND_MAP_PTR_SET(my_function.op_array.run_time_cache, ptr);
 			memset(ptr, 0, my_function.op_array.cache_size);
 		}
 	}
@@ -341,6 +342,10 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, fcc.called_scope, NULL);
 	}
 
+	if (&mptr->internal_function == &call) {
+		zend_string_release(mptr->common.function_name);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -480,9 +485,10 @@ static void zend_closure_free_storage(zend_object *object) /* {{{ */
 		/* We don't own the static variables of fake closures. */
 		if (!(closure->func.op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
 			zend_destroy_static_vars(&closure->func.op_array);
+			closure->func.op_array.static_variables = NULL;
 		}
 		destroy_op_array(&closure->func.op_array);
-	} else if (closure->orig_internal_handler == zend_closure_call_magic) {
+	} else if (closure->func.type == ZEND_INTERNAL_FUNCTION) {
 		zend_string_release(closure->func.common.function_name);
 	}
 
@@ -554,7 +560,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 
 		array_init(&val);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(static_variables, key, var) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(static_variables, key, var) {
 			zval copy;
 
 			if (Z_TYPE_P(var) == IS_CONSTANT_AST) {
@@ -666,6 +672,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr, bool is_fake) /* {{{ */
 {
 	zend_closure *closure;
+	void *ptr;
 
 	object_init_ex(res, zend_ce_closure);
 
@@ -689,17 +696,24 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 					zend_array_dup(closure->func.op_array.static_variables);
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
-				&closure->func.op_array.static_variables);
+				closure->func.op_array.static_variables);
+		} else if (func->op_array.static_variables) {
+			HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+
+			if (!ht) {
+				ht = zend_array_dup(func->op_array.static_variables);
+				ZEND_MAP_PTR_SET(func->op_array.static_variables_ptr, ht);
+			}
+			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr, ht);
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
-		if (!ZEND_MAP_PTR_GET(closure->func.op_array.run_time_cache)
+		ptr = ZEND_MAP_PTR_GET(func->op_array.run_time_cache);
+		if (!ptr
 			|| func->common.scope != scope
 			|| (func->common.fn_flags & ZEND_ACC_HEAP_RT_CACHE)
 		) {
-			void *ptr;
-
-			if (!ZEND_MAP_PTR_GET(func->op_array.run_time_cache)
+			if (!ptr
 			 && (func->common.fn_flags & ZEND_ACC_CLOSURE)
 			 && (func->common.scope == scope ||
 			     !(func->common.fn_flags & ZEND_ACC_IMMUTABLE))) {
@@ -711,17 +725,15 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
-				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
 				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
-				ptr = emalloc(sizeof(void*) + func->op_array.cache_size);
-				ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
-				ptr = (char*)ptr + sizeof(void*);
-				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
+				ptr = emalloc(func->op_array.cache_size);
 			}
 			memset(ptr, 0, func->op_array.cache_size);
 		}
+		ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
+
 		zend_string_addref(closure->func.op_array.function_name);
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
@@ -739,6 +751,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			closure->orig_internal_handler = closure->func.internal_function.handler;
 		}
 		closure->func.internal_function.handler = zend_closure_internal_handler;
+		zend_string_addref(closure->func.op_array.function_name);
 		if (!func->common.scope) {
 			/* if it's a free function, we won't set scope & this since they're meaningless */
 			this_ptr = NULL;
@@ -810,6 +823,10 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_OBJCE(instance), &instance);
 	} else {
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, Z_CE(call->This), NULL);
+	}
+
+	if (&mptr->internal_function == &trampoline) {
+		zend_string_release(mptr->common.function_name);
 	}
 } /* }}} */
 

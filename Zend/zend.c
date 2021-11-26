@@ -50,7 +50,7 @@ static HashTable *global_class_table = NULL;
 static HashTable *global_constants_table = NULL;
 static HashTable *global_auto_globals_table = NULL;
 static HashTable *global_persistent_list = NULL;
-ZEND_TSRMLS_CACHE_DEFINE()
+TSRMLS_MAIN_CACHE_DEFINE()
 # define GLOBAL_FUNCTION_TABLE		global_function_table
 # define GLOBAL_CLASS_TABLE			global_class_table
 # define GLOBAL_CONSTANTS_TABLE		global_constants_table
@@ -702,22 +702,19 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->script_encoding_list = NULL;
 	compiler_globals->current_linking_class = NULL;
 
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 	/* Map region is going to be created and resized at run-time. */
-	ZEND_MAP_PTR_SET_REAL_BASE(compiler_globals->map_ptr_base, NULL);
+	compiler_globals->map_ptr_real_base = NULL;
+	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	compiler_globals->map_ptr_size = 0;
 	compiler_globals->map_ptr_last = global_map_ptr_last;
 	if (compiler_globals->map_ptr_last) {
 		/* Allocate map_ptr table */
-		void *base;
 		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
-		base = pemalloc(compiler_globals->map_ptr_size * sizeof(void*), 1);
-		ZEND_MAP_PTR_SET_REAL_BASE(compiler_globals->map_ptr_base, base);
+		void *base = pemalloc(compiler_globals->map_ptr_size * sizeof(void*), 1);
+		compiler_globals->map_ptr_real_base = base;
+		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
 		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
 	}
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 }
 /* }}} */
 
@@ -739,9 +736,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	if (compiler_globals->script_encoding_list) {
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
-	if (ZEND_MAP_PTR_REAL_BASE(compiler_globals->map_ptr_base)) {
-		free(ZEND_MAP_PTR_REAL_BASE(compiler_globals->map_ptr_base));
-		ZEND_MAP_PTR_SET_REAL_BASE(compiler_globals->map_ptr_base, NULL);
+	if (compiler_globals->map_ptr_real_base) {
+		free(compiler_globals->map_ptr_real_base);
+		compiler_globals->map_ptr_real_base = NULL;
+		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
 	}
 }
@@ -965,22 +963,11 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&EG(windows_version_info));
 #endif
-# if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-		/* Create a map region, used for indirect pointers from shared to
-		 * process memory. It's allocated once and never resized.
-		 * All processes must map it into the same address space.
-		 */
-		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
-		CG(map_ptr_last) = 0;
-		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), pemalloc(CG(map_ptr_size) * sizeof(void*), 1));
-# elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-		/* Map region is going to be created and resized at run-time. */
-		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), NULL);
-		CG(map_ptr_size) = 0;
-		CG(map_ptr_last) = 0;
-# else
-#  error "Unknown ZEND_MAP_PTR_KIND"
-# endif
+	/* Map region is going to be created and resized at run-time. */
+	CG(map_ptr_real_base) = NULL;
+	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
+	CG(map_ptr_size) = 0;
+	CG(map_ptr_last) = 0;
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1057,10 +1044,11 @@ zend_result zend_post_startup(void) /* {{{ */
 	compiler_globals->function_table = NULL;
 	free(compiler_globals->class_table);
 	compiler_globals->class_table = NULL;
-	if (ZEND_MAP_PTR_REAL_BASE(compiler_globals->map_ptr_base)) {
-		free(ZEND_MAP_PTR_REAL_BASE(compiler_globals->map_ptr_base));
+	if (compiler_globals->map_ptr_real_base) {
+		free(compiler_globals->map_ptr_real_base);
 	}
-	ZEND_MAP_PTR_SET_REAL_BASE(compiler_globals->map_ptr_base, NULL);
+	compiler_globals->map_ptr_real_base = NULL;
+	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
 		compiler_globals_ctor(compiler_globals);
 		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
@@ -1117,9 +1105,10 @@ void zend_shutdown(void) /* {{{ */
 	ts_free_id(executor_globals_id);
 	ts_free_id(compiler_globals_id);
 #else
-	if (ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base))) {
-		free(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)));
-		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), NULL);
+	if (CG(map_ptr_real_base)) {
+		free(CG(map_ptr_real_base));
+		CG(map_ptr_real_base) = NULL;
+		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		CG(map_ptr_size) = 0;
 	}
 	if (CG(script_encoding_list)) {
@@ -1224,7 +1213,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	init_executor();
 	startup_scanner();
 	if (CG(map_ptr_last)) {
-		memset(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), 0, CG(map_ptr_last) * sizeof(void*));
+		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
 	}
 	zend_observer_activate();
 }
@@ -1815,27 +1804,15 @@ ZEND_API void *zend_map_ptr_new(void)
 	void **ptr;
 
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-		// TODO: error ???
-		ZEND_UNREACHABLE();
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
-		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), CG(map_ptr_size) * sizeof(void*), 1));
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
+		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 	}
-	ptr = (void**)ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + CG(map_ptr_last);
+	ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
 	*ptr = NULL;
 	CG(map_ptr_last)++;
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-	return ptr;
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 }
 
 ZEND_API void zend_map_ptr_extend(size_t last)
@@ -1844,18 +1821,12 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		void **ptr;
 
 		if (last >= CG(map_ptr_size)) {
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-			/* This may never happen */
-			ZEND_UNREACHABLE();
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 			/* Grow map_ptr table */
 			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);
-			ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), CG(map_ptr_size) * sizeof(void*), 1));
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
+			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+			CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 		}
-		ptr = (void**)ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + CG(map_ptr_last);
+		ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));
 		CG(map_ptr_last) = last;
 	}
@@ -1881,7 +1852,7 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	/* We use the refcount to keep map_ptr of corresponding type */
 	uint32_t ret;
 	do {
-		ret = (uint32_t)(uintptr_t)zend_map_ptr_new();
+		ret = ZEND_MAP_PTR_NEW_OFFSET();
 	} while (ret <= 2);
 	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);

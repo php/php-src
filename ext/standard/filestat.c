@@ -176,18 +176,22 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
-	char *path;
+	char *path, fullpath[MAXPATHLEN];
 	size_t path_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(path)) {
+	if (!expand_filepath(path, fullpath)) {
 		RETURN_FALSE;
 	}
 
-	if (php_disk_total_space(path, &bytestotal) == SUCCESS) {
+	if (php_check_open_basedir(fullpath)) {
+		RETURN_FALSE;
+	}
+
+	if (php_disk_total_space(fullpath, &bytestotal) == SUCCESS) {
 		RETURN_DOUBLE(bytestotal);
 	}
 	RETURN_FALSE;
@@ -269,18 +273,22 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
-	char *path;
+	char *path, fullpath[MAXPATHLEN];
 	size_t path_len;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(path)) {
+	if (!expand_filepath(path, fullpath)) {
 		RETURN_FALSE;
 	}
 
-	if (php_disk_free_space(path, &bytesfree) == SUCCESS) {
+	if (php_check_open_basedir(fullpath)) {
+		RETURN_FALSE;
+	}
+
+	if (php_disk_free_space(fullpath, &bytesfree) == SUCCESS) {
 		RETURN_DOUBLE(bytesfree);
 	}
 	RETURN_FALSE;
@@ -357,7 +365,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		} else {
 #if !defined(WINDOWS)
 /* On Windows, we expect regular chgrp to fail silently by default */
-			php_error_docref(NULL, E_WARNING, "Can not call chgrp() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chgrp() for a non-standard stream");
 #endif
 			RETURN_FALSE;
 		}
@@ -483,7 +491,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		} else {
 #if !defined(WINDOWS)
 /* On Windows, we expect regular chown to fail silently by default */
-			php_error_docref(NULL, E_WARNING, "Can not call chown() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chown() for a non-standard stream");
 #endif
 			RETURN_FALSE;
 		}
@@ -566,7 +574,7 @@ PHP_FUNCTION(chmod)
 				RETURN_FALSE;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can not call chmod() for a non-standard stream");
+			php_error_docref(NULL, E_WARNING, "Cannot call chmod() for a non-standard stream");
 			RETURN_FALSE;
 		}
 	}
@@ -635,7 +643,7 @@ PHP_FUNCTION(touch)
 		} else {
 			php_stream *stream;
 			if(!filetime_is_null || !fileatime_is_null) {
-				php_error_docref(NULL, E_WARNING, "Can not call touch() for a non-standard stream");
+				php_error_docref(NULL, E_WARNING, "Cannot call touch() for a non-standard stream");
 				RETURN_FALSE;
 			}
 			stream = php_stream_open_wrapper_ex(filename, "c", REPORT_ERRORS, NULL, NULL);

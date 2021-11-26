@@ -46,9 +46,6 @@ class PDO
     /** @tentative-return-type */
     public function rollBack(): bool {}
 
-    /**
-     * @param array|int $value
-     * @tentative-return-type
-     */
-    public function setAttribute(int $attribute, $value): bool {}
+    /** @tentative-return-type */
+    public function setAttribute(int $attribute, mixed $value): bool {}
 }

@@ -118,6 +118,13 @@ while (!empty($badChars)) {
 
 echo "Tested UTF-16BE -> HZ (for all GB2312 characters)\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("~A", "%", "HZ", "UTF-8");
+convertInvalidString("\x80", "%", "HZ", "UTF-8");
+convertInvalidString("~{\x22\x21", "%", "HZ", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested ASCII -> HZ
@@ -127,3 +134,4 @@ Tested valid ~ escapes
 Tested all invalid ~ escapes
 Tested HZ -> UTF-16BE (for all GB2312 characters)
 Tested UTF-16BE -> HZ (for all GB2312 characters)
+Done!
