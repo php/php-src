@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #81618 (dns_get_record fails on FreeBSD for missing type).
     (fsbruva)
+  . Fixed bug #81659 (stream_get_contents() may unnecessarily overallocate).
+    (cmb)
 
 18 Nov 2021, PHP 7.4.26
 
