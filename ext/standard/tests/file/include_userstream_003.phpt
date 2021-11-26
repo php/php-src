@@ -107,7 +107,7 @@ Warning: include(): test1:// wrapper is disabled in the server configuration by 
 
 Warning: include(test1://hello): Failed to open stream: no suitable wrapper could be found in %s on line %d
 
-Warning: include(): Failed opening 'test1://hello' for inclusion (include_path='.:/home/nikic/php/php-src-install/lib/php') in %s on line %d
+Warning: include(): Failed opening 'test1://hello' for inclusion (include_path='%s') in %s on line %d
 
 Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
 
@@ -122,4 +122,4 @@ Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could 
 
 Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %s on line %d
 
-Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='.:/home/nikic/php/php-src-install/lib/php') in %s on line %d
+Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %s on line %d
