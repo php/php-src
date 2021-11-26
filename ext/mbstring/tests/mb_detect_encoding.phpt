@@ -12,25 +12,24 @@ $sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
 $jis = base64_decode('GyRCRnxLXDhsJUYlLSU5JUgkRyQ5ISMbKEIwMTIzNBskQiM1IzYjNyM4IzkhIxsoQg==');
 // EUC-JP string
 $euc_jp = "\xC6\xFC\xCB\xDC\xB8\xEC\xA5\xC6\xA5\xAD\xA5\xB9\xA5\xC8\xA4\xC7\xA4\xB9\xA1\xA301234\xA3\xB5\xA3\xB6\xA3\xB7\xA3\xB8\xA3\xB9\xA1\xA3";
+// UTF-8
+$polish1 = "Zażółć gęślą jaźń.";
+$polish2 = "Wół poszedł spać bardzo wcześnie. A to zdanie bez ogonka.";
 
 echo "== BASIC TEST ==\n";
 
 print("SJIS: " . mb_detect_encoding($sjis, 'SJIS') . "\n");
-
 print("JIS: " . mb_detect_encoding($jis, 'JIS') . "\n");
-
 print("EUC-JP: " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS') . "\n");
-
 print("EUC-JP: " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
+print("UTF-8: " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
+print("UTF-8: " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
 
 echo "== ARRAY ENCODING LIST ==\n";
 
 $a = ['UTF-8', 'EUC-JP', 'SJIS', 'JIS'];
-
 print("JIS: " . mb_detect_encoding($jis, $a) . "\n");
-
 print("EUC-JP: " . mb_detect_encoding($euc_jp, $a) . "\n");
-
 print("SJIS: " . mb_detect_encoding($sjis, $a) . "\n");
 
 $test = "CHARSET=windows-1252:Do\xeb;John";
@@ -226,6 +225,8 @@ $deEncodings = [
 ];
 test($deStrings, $deEncodings);
 
+test([$polish1, $polish2], ['UTF-32BE', 'UTF-32LE', 'UTF-16BE', 'UTF-16LE', 'UTF-8', 'ISO-8859-2']);
+
 echo "Done!\n";
 
 ?>
@@ -235,6 +236,8 @@ SJIS: SJIS
 JIS: JIS
 EUC-JP: EUC-JP
 EUC-JP: EUC-JP
+UTF-8: UTF-8
+UTF-8: UTF-8
 == ARRAY ENCODING LIST ==
 JIS: JIS
 EUC-JP: EUC-JP
