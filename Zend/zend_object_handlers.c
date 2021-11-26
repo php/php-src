@@ -880,7 +880,7 @@ write_std_property:
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
-			if (EXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
 				zend_deprecated_dynamic_property(zobj->ce, name);
 			}
 
@@ -1059,7 +1059,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				zend_forbidden_dynamic_property(zobj->ce, name);
 				return &EG(error_zval);
 			}
-			if (EXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
+			if (UNEXPECTED(!(zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
 				zend_deprecated_dynamic_property(zobj->ce, name);
 			}
 			if (UNEXPECTED(!zobj->properties)) {

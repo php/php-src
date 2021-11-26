@@ -4849,7 +4849,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 						return 1;
 					}
 					return !(prop_info->flags & ZEND_ACC_PUBLIC)
-						|| prop_info->ce != op_array->scope;
+						&& prop_info->ce != op_array->scope;
 				} else {
 					return !(ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 				}
