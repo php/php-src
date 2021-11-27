@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68420 - IPv4 all addresses
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68421 - IPv6 all addresses and access_log
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

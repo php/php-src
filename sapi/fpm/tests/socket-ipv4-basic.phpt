@@ -1,5 +1,7 @@
 --TEST--
 FPM: Socket for IPv4 connection
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

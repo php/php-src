@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68442 - Signal reload
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

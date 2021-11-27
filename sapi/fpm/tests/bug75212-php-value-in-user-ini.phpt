@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug75212 - php_value acts like php_admin_value
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

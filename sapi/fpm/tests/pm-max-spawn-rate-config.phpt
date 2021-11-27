@@ -1,5 +1,7 @@
 --TEST--
 FPM: set pm.max_spawn_rate
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

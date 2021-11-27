@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug73342 - Non-blocking stdin
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

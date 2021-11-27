@@ -1,5 +1,7 @@
 --TEST--
 FPM: Socket for IPv6 any address connection
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

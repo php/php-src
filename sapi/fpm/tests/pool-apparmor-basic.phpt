@@ -1,5 +1,7 @@
 --TEST--
 FPM: AppArmor basic test
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

@@ -1,5 +1,7 @@
 --TEST--
 FPM: Direct worker output plain log with limit 1000 and msg 2000
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

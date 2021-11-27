@@ -1,5 +1,7 @@
 --TEST--
 FPM: Log message in shutdown function
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug77934 - php-fpm kill -USR2 not working
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

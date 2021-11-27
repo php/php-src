@@ -1,5 +1,7 @@
 --TEST--
 FPM: Unix Domain Socket with Posix ACL
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

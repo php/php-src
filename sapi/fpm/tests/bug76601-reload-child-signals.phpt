@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug76601 children should not ignore signals during concurrent reloads
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

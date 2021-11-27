@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68381 - Log messages with warning level only
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

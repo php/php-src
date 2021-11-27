@@ -1,5 +1,7 @@
 --TEST--
 FPM: Buffered worker output plain log with msg with flush split in buffer
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

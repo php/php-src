@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug69625 - 404 should be returned on missing SCRIPT_FILENAME
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

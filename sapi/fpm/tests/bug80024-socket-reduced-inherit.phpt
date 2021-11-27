@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug80024 - Duplication of info about inherited socket after pool removing
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

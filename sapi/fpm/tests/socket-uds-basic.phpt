@@ -1,5 +1,7 @@
 --TEST--
 FPM: Unix Domain Socket connection
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

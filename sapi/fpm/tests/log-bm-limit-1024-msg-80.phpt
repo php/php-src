@@ -1,5 +1,7 @@
 --TEST--
 FPM: Buffered message output log with limit 1024 and msg 80
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 Bug #80849 (HTTP Status header truncation)
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug78599 - env_path_info underflow - CVE-2019-11043
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

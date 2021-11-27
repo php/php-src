@@ -1,5 +1,7 @@
 --TEST--
 Concurrent reload signals should not kill PHP-FPM master process. (Bug: #74083)
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

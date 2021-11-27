@@ -1,5 +1,7 @@
 --TEST--
 FPM: Socket port connection falls back to IPv4
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

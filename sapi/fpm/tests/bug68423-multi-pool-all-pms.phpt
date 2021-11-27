@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68423 - Multiple pools with different PMs (dynamic + ondemand + static)
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

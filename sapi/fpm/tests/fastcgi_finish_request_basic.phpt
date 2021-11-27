@@ -1,5 +1,7 @@
 --TEST--
 FPM: Function fastcgi_finish_request basic test
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

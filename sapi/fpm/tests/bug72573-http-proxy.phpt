@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug72573 - HTTP_PROXY - CVE-2016-5385
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

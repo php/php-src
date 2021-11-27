@@ -1,5 +1,7 @@
 --TEST--
 FPM: Process manager config pm.process_idle_timeout
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

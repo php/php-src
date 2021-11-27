@@ -1,5 +1,7 @@
 --TEST--
 FPM: Function fpm_get_status basic test
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

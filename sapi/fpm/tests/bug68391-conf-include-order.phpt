@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68391 - Configuration inclusion in alphabetical order
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

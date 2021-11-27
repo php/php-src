@@ -1,5 +1,7 @@
 --TEST--
 FPM: Status listen test
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

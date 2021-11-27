@@ -1,5 +1,7 @@
 --TEST--
 FPM: php_admin_value doc_root usage
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

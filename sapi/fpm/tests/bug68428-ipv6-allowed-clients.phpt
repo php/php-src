@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68428 - IPv6 allowed client only
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

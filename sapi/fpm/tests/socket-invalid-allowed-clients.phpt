@@ -1,5 +1,7 @@
 --TEST--
 FPM: Socket for invalid allowed client only
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

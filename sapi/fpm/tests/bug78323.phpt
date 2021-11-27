@@ -1,5 +1,7 @@
 --TEST--
 FPM: Bug #78323 Test exit code for invalid parameters
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

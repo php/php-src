@@ -1,5 +1,7 @@
 --TEST--
 FPM: Buffered worker output decorated log with multiple continuous messages
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 FPM: Buffered worker output decorated log with limit 64 fails because it is too low
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

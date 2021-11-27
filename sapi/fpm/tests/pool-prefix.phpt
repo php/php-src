@@ -1,5 +1,7 @@
 --TEST--
 FPM: Pool prefix
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

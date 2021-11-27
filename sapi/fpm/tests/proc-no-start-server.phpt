@@ -1,5 +1,7 @@
 --TEST--
 FPM: Process manager config option pm.start_servers missing
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

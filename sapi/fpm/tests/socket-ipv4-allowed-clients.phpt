@@ -1,5 +1,7 @@
 --TEST--
 FPM: Socket for IPv4 allowed client only
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

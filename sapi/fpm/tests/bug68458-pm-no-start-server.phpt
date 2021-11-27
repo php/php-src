@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug68458 - Missing pm.start_servers should emit notice instead of warning
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

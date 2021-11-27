@@ -1,5 +1,7 @@
 --TEST--
 FPM: bug81513 - Buffered worker output plain log stream reallocation
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

@@ -1,5 +1,7 @@
 --TEST--
 FPM: UNIX socket owner and group settings can be numeric
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php
 include "skipif.inc";

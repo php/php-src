@@ -1,5 +1,7 @@
 --TEST--
 FPM: Main invocation with prefix
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

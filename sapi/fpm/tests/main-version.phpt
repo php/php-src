@@ -1,5 +1,7 @@
 --TEST--
 FPM: version string
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

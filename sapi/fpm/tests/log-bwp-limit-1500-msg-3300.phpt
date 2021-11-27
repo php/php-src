@@ -1,5 +1,7 @@
 --TEST--
 FPM: Buffered worker output plain log with limit 1500 and msg 3300
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--

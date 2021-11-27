@@ -1,5 +1,7 @@
 --TEST--
 FPM: Function getallheaders basic test
+--CONFLICTS--
+fpm
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
