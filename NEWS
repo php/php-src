@@ -11,13 +11,6 @@ PHP                                                                        NEWS
 
 25 Nov 2021, PHP 8.1.0
 
-- CLI:
-  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
-
-- COM:
-  . Dispatch using LANG_NEUTRAL instead of LOCALE_SYSTEM_DEFAULT. (Dmitry
-    Maksimov)
-
 - Core:
   . Fixed bug #81607 (CE_CACHE allocation with concurrent access). (Nikita,
     Dmitry)
@@ -58,6 +51,13 @@ PHP                                                                        NEWS
     (Björn Tantau)
   . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
     (krakjoe)
+
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
+
+- COM:
+  . Dispatch using LANG_NEUTRAL instead of LOCALE_SYSTEM_DEFAULT. (Dmitry
+    Maksimov)
 
 - Curl:
   . Fixed bug #81085 (Support CURLOPT_SSLCERT_BLOB for cert strings).
