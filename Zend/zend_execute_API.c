@@ -1063,13 +1063,13 @@ ZEND_API zend_function *zend_lookup_function_ex(zend_string *name, zend_string *
 	zend_string *lc_name;
 	zend_string *autoload_name;
 
-	if (lc_key) {
-		lc_name = lc_key;
-	} else {
-		if (name == NULL || !ZSTR_LEN(name)) {
-			return NULL;
-		}
+	if (name == NULL || !ZSTR_LEN(name)) {
+		return NULL;
+	}
 
+	if (lc_key) {
+		lc_name = zend_string_copy(lc_key);
+	} else {
 		if (ZSTR_VAL(name)[0] == '\\') {
 			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
 			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
@@ -1081,37 +1081,61 @@ ZEND_API zend_function *zend_lookup_function_ex(zend_string *name, zend_string *
 	func = zend_hash_find(EG(function_table), lc_name);
 
 	if (EXPECTED(func)) {
-		if (!lc_key) {
-			zend_string_release_ex(lc_name, 0);
-		}
+		zend_string_release_ex(lc_name, 0);
 		fbc = Z_FUNC_P(func);
 		return fbc;
 	}
 
 	/* The compiler is not-reentrant. Make sure we autoload only during run-time. */
 	if (!use_autoload || zend_is_compiling()) {
-		if (!lc_key) {
-			zend_string_release_ex(lc_name, 0);
-		}
+		zend_string_release_ex(lc_name, 0);
 		return NULL;
 	}
 
 	if (!zend_autoload_function) {
-		if (!lc_key) {
-			zend_string_release_ex(lc_name, 0);
-		}
+		zend_string_release_ex(lc_name, 0);
 		return NULL;
 	}
 
-	if (!lc_key) {
+	/* Verify function name before passing it to the autoloader. */
+	/*
+	if (!lc_key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(name)) {
 		zend_string_release_ex(lc_name, 0);
+		return NULL;
 	}
-	return NULL;
+	*/
+
+	if (EG(in_autoload) == NULL) {
+		ALLOC_HASHTABLE(EG(in_autoload));
+		zend_hash_init(EG(in_autoload), 8, NULL, NULL, 0);
+	}
+
+	if (zend_hash_add_empty_element(EG(in_autoload), lc_name) == NULL) {
+		zend_string_release_ex(lc_name, 0);
+		return NULL;
+	}
+
+	if (ZSTR_VAL(name)[0] == '\\') {
+		autoload_name = zend_string_init(ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1, 0);
+	} else {
+		autoload_name = zend_string_copy(name);
+	}
+
+	zend_exception_save();
+	fbc = zend_autoload_function(autoload_name, lc_name);
+	zend_exception_restore();
+
+	zend_string_release_ex(autoload_name, 0);
+	zend_hash_del(EG(in_autoload), lc_name);
+
+	zend_string_release_ex(lc_name, 0);
+
+	return fbc;
 }
 
 ZEND_API zend_function *zend_lookup_function(zend_string *name) /* {{{ */
 {
-	return zend_lookup_function_ex(name, NULL, 0);
+	return zend_lookup_function_ex(name, NULL, true);
 }
 
 ZEND_API bool zend_is_valid_class_name(zend_string *name) {

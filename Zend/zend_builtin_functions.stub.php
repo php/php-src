@@ -74,7 +74,7 @@ function trait_exists(string $trait, bool $autoload = true): bool {}
 
 function enum_exists(string $enum, bool $autoload = true): bool {}
 
-function function_exists(string $function): bool {}
+function function_exists(string $function, bool $autoload = true): bool {}
 
 function class_alias(string $class, string $alias, bool $autoload = true): bool {}
 
@@ -203,3 +203,11 @@ function autoload_unregister_class(callable $callback): bool {}
 function autoload_call_class(string $class): void {}
 
 function autoload_list_class(): array {}
+
+function autoload_register_function(callable $callback, bool $prepend = false): void {}
+
+function autoload_unregister_function(callable $callback): bool {}
+
+function autoload_call_function(string $class): void {}
+
+function autoload_list_function(): array {}

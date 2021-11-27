@@ -128,8 +128,6 @@ ZEND_API zend_class_entry *zend_perform_class_autoload(zend_string *class_name, 
 
 ZEND_API zend_function *zend_perform_function_autoload(zend_string *function_name, zend_string *lc_name)
 {
-	zend_function *fn;
-	zend_autoload_func *func_info;
 	zval zname;
 
 	ZEND_ASSERT(&EG(autoloaders).function_autoload_functions);
@@ -138,25 +136,31 @@ ZEND_API zend_function *zend_perform_function_autoload(zend_string *function_nam
 
 	HashTable *function_autoload_functions = &EG(autoloaders).function_autoload_functions;
 
-	// TODO Mimic Class
-	ZEND_HASH_MAP_FOREACH_PTR(function_autoload_functions, func_info)
+	/* Cannot use ZEND_HASH_MAP_FOREACH_PTR here as autoloaders may be
+	 * added/removed during autoloading. */
+	HashPosition pos;
+	zend_hash_internal_pointer_reset_ex(function_autoload_functions, &pos);
+	while (1) {
+		zend_autoload_func *func_info = zend_hash_get_current_data_ptr_ex(function_autoload_functions, &pos);
+		if (!func_info) {
+			break;
+		}
 		zval retval;
 
 		func_info->fci.retval = &retval;
 		zend_fcall_info_argn(&func_info->fci, 1, &zname);
 		zend_call_function(&func_info->fci, &func_info->fcc);
-		zend_fcall_info_args_clear(&func_info->fci, /* free_mem */ true);
-		zend_exception_save();
-		if (zend_hash_exists(EG(function_table), lc_name)) {
-			break;
+
+		if (EG(exception)) {
+			return NULL;
 		}
-	ZEND_HASH_FOREACH_END();
+		if (zend_hash_exists(EG(function_table), lc_name)) {
+			return (zend_function*) zend_hash_find_ptr(EG(function_table), lc_name);
+		}
 
-	zend_exception_restore();
-
-	fn = (zend_function*) zend_hash_find_ptr(EG(function_table), lc_name);
-
-	return fn;
+		zend_hash_move_forward_ex(function_autoload_functions, &pos);
+	}
+	return NULL;
 }
 
 /* Needed for compatibility with spl_register_autoload() */
@@ -258,7 +262,6 @@ ZEND_FUNCTION(autoload_call_class)
 	zend_perform_class_autoload(class_name, lc_name);
 	zend_string_release(lc_name);
 }
-
 /* Return all registered class autoloader functions */
 ZEND_FUNCTION(autoload_list_class)
 {
@@ -271,6 +274,120 @@ ZEND_FUNCTION(autoload_list_class)
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_PTR(&EG(autoloaders).class_autoload_functions, func_info) {
+		if (Z_TYPE(func_info->fci.function_name) == IS_OBJECT) {
+			add_next_index_zval(return_value, &func_info->fci.function_name);
+		} else if (func_info->fcc.function_handler->common.scope) {
+			zval tmp;
+
+			array_init(&tmp);
+			if (func_info->fcc.object) {
+				add_next_index_object(&tmp, func_info->fcc.object);
+			} else {
+				add_next_index_str(&tmp, zend_string_copy(func_info->fcc.calling_scope->name));
+			}
+			add_next_index_str(&tmp, zend_string_copy(func_info->fcc.function_handler->common.function_name));
+			add_next_index_zval(return_value, &tmp);
+		} else {
+			add_next_index_str(return_value, zend_string_copy(func_info->fcc.function_handler->common.function_name));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+/* Register given function as a function autoloader */
+ZEND_FUNCTION(autoload_register_function)
+{
+	bool prepend = false;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zend_autoload_func *autoload_function_entry;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(prepend)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_ASSERT(&EG(autoloaders).function_autoload_functions);
+
+	if (!fcc.function_handler) {
+		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+		 * with it ourselves. It is important that it is not refetched on every call,
+		 * because calls may occur from different scopes. */
+		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
+	}
+
+	if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
+		fcc.function_handler->internal_function.handler == zif_autoload_call_function) {
+		zend_argument_value_error(1, "must not be the autoload_call_function() function");
+		return;
+	}
+
+	autoload_function_entry = autoload_func_from_fci(&fci, &fcc);
+
+	/* If function is already registered, don't do anything */
+	if (autoload_find_registered_function(&EG(autoloaders).function_autoload_functions, autoload_function_entry)) {
+		zend_autoload_callback_destroy(autoload_function_entry);
+		return;
+	}
+
+	zend_hash_next_index_insert_ptr(&EG(autoloaders).function_autoload_functions, autoload_function_entry);
+	if (prepend && zend_hash_num_elements(&EG(autoloaders).function_autoload_functions) > 1) {
+		/* Move the newly created element to the head of the hashtable */
+		HT_MOVE_TAIL_TO_HEAD(&EG(autoloaders).function_autoload_functions);
+	}
+}
+
+ZEND_FUNCTION(autoload_unregister_function)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zend_autoload_func *autoload_function_entry;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_FUNC(fci, fcc)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZEND_ASSERT(&EG(autoloaders).function_autoload_functions);
+
+	autoload_function_entry = autoload_func_from_fci(&fci, &fcc);
+
+	Bucket *p = autoload_find_registered_function(&EG(autoloaders).function_autoload_functions, autoload_function_entry);
+	zend_autoload_callback_destroy(autoload_function_entry);
+
+	if (p) {
+		zend_hash_del_bucket(&EG(autoloaders).function_autoload_functions, p);
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+
+/* Try all registered function autoloader functions to load the requested function */
+ZEND_FUNCTION(autoload_call_function)
+{
+	zend_string *function_name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &function_name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zend_string *lc_name = zend_string_tolower(function_name);
+	zend_perform_function_autoload(function_name, lc_name);
+	zend_string_release(lc_name);
+}
+
+/* Return all registered function autoloader functions */
+ZEND_FUNCTION(autoload_list_function)
+{
+	zend_autoload_func *func_info;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+
+	ZEND_HASH_FOREACH_PTR(&EG(autoloaders).function_autoload_functions, func_info) {
 		if (Z_TYPE(func_info->fci.function_name) == IS_OBJECT) {
 			add_next_index_zval(return_value, &func_info->fci.function_name);
 		} else if (func_info->fcc.function_handler->common.scope) {

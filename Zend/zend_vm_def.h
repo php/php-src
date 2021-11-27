@@ -3718,9 +3718,11 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		fbc = zend_lookup_function(Z_STR_P(function_name+1));
-		//fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (UNEXPECTED(fbc == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			if (EXPECTED(!EG(exception))) {
+				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3859,12 +3861,12 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		fbc = zend_lookup_function(Z_STR_P(function_name+1));
+		fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (fbc == NULL) {
-			fbc = zend_lookup_function(Z_STR_P(function_name+2));
-			if (fbc == NULL) {
+			if (EXPECTED(!EG(exception))) {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3891,7 +3893,10 @@ ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
 		fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (UNEXPECTED(fbc == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			if (EXPECTED(!EG(exception))) {
+				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);

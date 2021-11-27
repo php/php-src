@@ -3556,9 +3556,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		fbc = zend_lookup_function(Z_STR_P(function_name+1));
-		//fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (UNEXPECTED(fbc == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			if (EXPECTED(!EG(exception))) {
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3635,12 +3637,12 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		fbc = zend_lookup_function(Z_STR_P(function_name+1));
+		fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (fbc == NULL) {
-			fbc = zend_lookup_function(Z_STR_P(function_name+2));
-			if (fbc == NULL) {
+			if (EXPECTED(!EG(exception))) {
 				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
@@ -3667,7 +3669,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
 		fbc = zend_lookup_function(Z_STR_P(function_name));
 		if (UNEXPECTED(fbc == NULL)) {
-			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			if (EXPECTED(!EG(exception))) {
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+			}
+			HANDLE_EXCEPTION();
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
