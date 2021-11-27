@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
   . Fixed bug #81514 (Using Enum as key in WeakMap triggers GC + SegFault).
     (Nikita)
-  . Fixed Bug #81520 (TEST_PHP_CGI_EXECUTABLE badly set in run-tests.php).
+  . Fixed bug #81520 (TEST_PHP_CGI_EXECUTABLE badly set in run-tests.php).
     (Remi)
   . Fixed bug #81377 (unset() of $GLOBALS sub-key yields warning). (Nikita)
   . Fixed bug #81342 (New ampersand token parsing depends on new line after it).
@@ -187,8 +187,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #81409 (Incorrect JIT code for ADD with a reference to array).
     (Dmitry)
-  . Fixed Bug #81255 (Memory leak in PHPUnit with functional JIT).
-  . Fixed Bug #80959 (infinite loop in building cfg during JIT compilation).
+  . Fixed bug #81255 (Memory leak in PHPUnit with functional JIT).
+  . Fixed bug #80959 (infinite loop in building cfg during JIT compilation).
     (Nikita, Dmitry)
   . Fixed bug #81225 (Wrong result with pow operator with JIT enabled).
     (Dmitry)
