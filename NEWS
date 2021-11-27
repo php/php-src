@@ -233,18 +233,18 @@ PHP                                                                        NEWS
 - PDO SQLite:
   . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
 
+- PgSQL:
+  . Fixed bug #81509 (pg_end_copy still expects a resource). (Matteo)
+  . Convert resource<pgsql link> to object \PgSql\Connection. (Máté)
+  . Convert resource<pgsql result> to object \PgSql\Result. (Máté)
+  . Convert resource<pgsql large object> to object \PgSql\Lob. (Máté)
+
 - Phar:
   . Use SHA256 by default for signature. (remi)
   . Add support for OpenSSL_SHA256 and OpenSSL_SHA512 signature. (remi)
 
 - phpdbg:
   . Fixed bug #81135 (unknown help topic causes assertion failure). (krakjoe)
-
-- PgSQL:
-  . Fixed bug #81509 (pg_end_copy still expects a resource). (Matteo)
-  . Convert resource<pgsql link> to object \PgSql\Connection. (Máté)
-  . Convert resource<pgsql result> to object \PgSql\Result. (Máté)
-  . Convert resource<pgsql large object> to object \PgSql\Lob. (Máté)
 
 - PSpell:
   . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)
