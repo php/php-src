@@ -324,5 +324,3 @@ PHP                                                                        NEWS
   . Fixed bug #81420 (ZipArchive::extractTo extracts outside of destination)
     (CVE-2021-21706). (cmb)
   . Fixed bug #80833 (ZipArchive::getStream doesn't use setPassword). (Remi)
-
-<<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
