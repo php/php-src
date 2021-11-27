@@ -38,7 +38,7 @@ typedef struct _zend_weakmap_iterator {
 /* EG(weakrefs) is a map from a key corresponding to a zend_object pointer to all the WeakReference and/or WeakMap entries relating to that pointer.
  *
  * 1. For a single WeakReference,
- *    the HashTable's corresponding value's tag is a ZEND_WEAKREF_TAG_REF and the pointer is a singleton WeakReference instance (zend_weakref *)for that zend_object pointer (from WeakReference::create()).
+ *    the HashTable's corresponding value's tag is a ZEND_WEAKREF_TAG_REF and the pointer is a singleton WeakReference instance (zend_weakref *) for that zend_object pointer (from WeakReference::create()).
  * 2. For a single WeakMap, the HashTable's corresponding value's tag is a ZEND_WEAKREF_TAG_MAP and the pointer is a WeakMap instance (zend_weakmap *).
  * 3. For multiple values associated with the same zend_object pointer, the HashTable entry's tag is a ZEND_WEAKREF_TAG_HT with a HashTable mapping
  *    tagged pointers of at most 1 WeakReference and 1 or more WeakMaps to the same tagged pointer.
@@ -73,7 +73,7 @@ static inline void zend_weakref_unref_single(
 	} else {
 		/* unreferencing WeakMap entry (at ptr) with a key of object. */
 		ZEND_ASSERT(tag == ZEND_WEAKREF_TAG_MAP);
-		zend_hash_index_del((HashTable *) ptr, zend_object_ptr_to_weakref_key(object));
+		zend_hash_index_del((HashTable *) ptr, zend_object_to_weakref_key(object));
 	}
 }
 
@@ -96,7 +96,7 @@ static void zend_weakref_unref(zend_object *object, void *tagged_ptr) {
 static void zend_weakref_register(zend_object *object, void *payload) {
 	GC_ADD_FLAGS(object, IS_OBJ_WEAKLY_REFERENCED);
 
-	zend_ulong obj_key = zend_object_ptr_to_weakref_key(object);
+	zend_ulong obj_key = zend_object_to_weakref_key(object);
 	zval *zv = zend_hash_index_lookup(&EG(weakrefs), obj_key);
 	if (Z_TYPE_P(zv) == IS_NULL) {
 		ZVAL_PTR(zv, payload);
@@ -120,7 +120,7 @@ static void zend_weakref_register(zend_object *object, void *payload) {
 }
 
 static void zend_weakref_unregister(zend_object *object, void *payload, bool weakref_free) {
-	zend_ulong obj_key = zend_object_ptr_to_weakref_key(object);
+	zend_ulong obj_key = zend_object_to_weakref_key(object);
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
 	ZEND_ASSERT(tagged_ptr && "Weakref not registered?");
 
@@ -166,7 +166,7 @@ static void zend_weakref_unregister(zend_object *object, void *payload, bool wea
 }
 
 ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pData) {
-	zval *zv = zend_hash_index_add(ht, zend_object_ptr_to_weakref_key(key), pData);
+	zval *zv = zend_hash_index_add(ht, zend_object_to_weakref_key(key), pData);
 	if (zv) {
 		zend_weakref_register(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_MAP));
 	}
@@ -174,7 +174,7 @@ ZEND_API zval *zend_weakrefs_hash_add(HashTable *ht, zend_object *key, zval *pDa
 }
 
 ZEND_API zend_result zend_weakrefs_hash_del(HashTable *ht, zend_object *key) {
-	zval *zv = zend_hash_index_find(ht, zend_object_ptr_to_weakref_key(key));
+	zval *zv = zend_hash_index_find(ht, zend_object_to_weakref_key(key));
 	if (zv) {
 		zend_weakref_unregister(key, ZEND_WEAKREF_ENCODE(ht, ZEND_WEAKREF_TAG_MAP), 1);
 		return SUCCESS;
@@ -191,7 +191,7 @@ void zend_weakrefs_init(void) {
 void zend_weakrefs_notify(zend_object *object) {
 	/* Annoyingly we can't use the HT destructor here, because we need access to the key (which
 	 * is the object address), which is not provided to the dtor. */
-	const zend_ulong obj_key = zend_object_ptr_to_weakref_key(object);
+	const zend_ulong obj_key = zend_object_to_weakref_key(object);
 	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), obj_key);
 #if ZEND_DEBUG
 	ZEND_ASSERT(tagged_ptr && "Tracking of the IS_OBJ_WEAKLY_REFERENCE flag should be precise");
@@ -217,7 +217,7 @@ static zend_object* zend_weakref_new(zend_class_entry *ce) {
 }
 
 static zend_always_inline bool zend_weakref_find(zend_object *referent, zval *return_value) {
-	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), zend_object_ptr_to_weakref_key(referent));
+	void *tagged_ptr = zend_hash_index_find_ptr(&EG(weakrefs), zend_object_to_weakref_key(referent));
 	if (!tagged_ptr) {
 		return 0;
 	}
@@ -319,7 +319,7 @@ static void zend_weakmap_free_obj(zend_object *object)
 		 * Let freeing the corresponding values for WeakMap entries be done in zend_hash_destroy, freeing objects sequentially.
 		 * The performance difference is notable for larger WeakMaps with worse cache locality. */
 		zend_weakref_unregister(
-			zend_weakref_key_to_zend_object_ptr(obj_key), ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), 0);
+			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(&wm->ht, ZEND_WEAKREF_TAG_MAP), 0);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&wm->ht);
 	zend_object_std_dtor(&wm->std);
@@ -339,7 +339,7 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_addr = Z_OBJ_P(offset);
-	zval *zv = zend_hash_index_find(&wm->ht, zend_object_ptr_to_weakref_key(obj_addr));
+	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
 	if (zv == NULL) {
 		if (type != BP_VAR_IS) {
 			zend_throw_error(NULL,
@@ -369,7 +369,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_addr = Z_OBJ_P(offset);
-	zend_ulong obj_key = zend_object_ptr_to_weakref_key(obj_addr);
+	zend_ulong obj_key = zend_object_to_weakref_key(obj_addr);
 	Z_TRY_ADDREF_P(value);
 
 	zval *zv = zend_hash_index_find(&wm->ht, obj_key);
@@ -396,7 +396,7 @@ static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int che
 	}
 
 	zend_weakmap *wm = zend_weakmap_from(object);
-	zval *zv = zend_hash_index_find(&wm->ht, zend_object_ptr_to_weakref_key(Z_OBJ_P(offset)));
+	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(Z_OBJ_P(offset)));
 	if (!zv) {
 		return 0;
 	}
@@ -416,7 +416,7 @@ static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zend_object *obj_addr = Z_OBJ_P(offset);
-	if (!zend_hash_index_exists(&wm->ht, zend_object_ptr_to_weakref_key(obj_addr))) {
+	if (!zend_hash_index_exists(&wm->ht, zend_object_to_weakref_key(obj_addr))) {
 		/* Object not in WeakMap, do nothing. */
 		return;
 	}
@@ -445,7 +445,7 @@ static HashTable *zend_weakmap_get_properties_for(zend_object *object, zend_prop
 	zend_ulong obj_key;
 	zval *val;
 	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(&wm->ht, obj_key, val) {
-		zend_object *obj = zend_weakref_key_to_zend_object_ptr(obj_key);
+		zend_object *obj = zend_weakref_key_to_object(obj_key);
 		zval pair;
 		array_init(&pair);
 
@@ -483,7 +483,7 @@ static zend_object *zend_weakmap_clone_obj(zend_object *old_object)
 	zval *val;
 	ZEND_HASH_MAP_FOREACH_NUM_KEY_VAL(&new_wm->ht, obj_key, val) {
 		zend_weakref_register(
-			zend_weakref_key_to_zend_object_ptr(obj_key), ZEND_WEAKREF_ENCODE(new_wm, ZEND_WEAKREF_TAG_MAP));
+			zend_weakref_key_to_object(obj_key), ZEND_WEAKREF_ENCODE(new_wm, ZEND_WEAKREF_TAG_MAP));
 		zval_add_ref(val);
 	} ZEND_HASH_FOREACH_END();
 	return new_object;
@@ -530,7 +530,7 @@ static void zend_weakmap_iterator_get_current_key(zend_object_iterator *obj_iter
 		ZEND_ASSERT(0 && "Must have integer key");
 	}
 
-	ZVAL_OBJ_COPY(key, zend_weakref_key_to_zend_object_ptr(num_key));
+	ZVAL_OBJ_COPY(key, zend_weakref_key_to_object(num_key));
 }
 
 static void zend_weakmap_iterator_move_forward(zend_object_iterator *obj_iter)

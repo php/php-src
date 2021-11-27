@@ -51,13 +51,13 @@ static zend_always_inline void *zend_weakrefs_hash_add_ptr(HashTable *ht, zend_o
  * It is not used for the HashTable instances associated with ZEND_WEAKREF_TAG_HT tags (created in zend_weakref_register, which uses ZEND_WEAKREF_ENCODE instead).
  * The ZEND_WEAKREF_TAG_HT instances are used to disambiguate between multiple weak references to the same zend_object.
  */
-static zend_always_inline zend_ulong zend_object_ptr_to_weakref_key(const zend_object *object)
+static zend_always_inline zend_ulong zend_object_to_weakref_key(const zend_object *object)
 {
 	ZEND_ASSERT(((uintptr_t)object) % ZEND_MM_ALIGNMENT == 0);
 	return ((uintptr_t) object) >> ZEND_MM_ALIGNMENT_LOG2;
 }
 
-static zend_always_inline zend_object *zend_weakref_key_to_zend_object_ptr(zend_ulong key)
+static zend_always_inline zend_object *zend_weakref_key_to_object(zend_ulong key)
 {
 	return (zend_object *) (((uintptr_t) key) << ZEND_MM_ALIGNMENT_LOG2);
 }

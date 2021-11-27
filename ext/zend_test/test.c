@@ -511,7 +511,7 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 {
 	zend_ulong obj_key;
 	ZEND_HASH_FOREACH_NUM_KEY(&ZT_G(global_weakmap), obj_key) {
-		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_zend_object_ptr(obj_key));
+		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&ZT_G(global_weakmap));
 	return SUCCESS;
