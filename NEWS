@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 25 Nov 2021, PHP 8.1.0
 
 - Core:
+  . Fixed inclusion order for phpize builds on Windows. (cmb)
+  . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
+  . Implemented FR #77372 (Relative file path is removed from uploaded file).
+    (Björn Tantau)
   . Fixed bug #81607 (CE_CACHE allocation with concurrent access). (Nikita,
     Dmitry)
   . Fixed bug #81507 (Fiber does not compile on AIX). (Clément Chigot)
@@ -41,14 +45,10 @@ PHP                                                                        NEWS
   . Fixed bug #81202 (powerpc64 build fails on fibers). (krakjoe)
   . Fixed bug #80072 (Cyclic unserialize in TMPVAR operand may leak). (Nikita)
   . Fixed bug #81163 (__sleep allowed to return non-array). (krakjoe)
-  . Fixed inclusion order for phpize builds on Windows. (cmb)
-  . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
   . Fixed bug #75474 (function scope static variables are not bound to a unique
     function). (Nikita)
   . Fixed bug #53826 (__callStatic fired in base class through a parent call if
     the method is private). (Nikita)
-  . Implemented FR #77372 (Relative file path is removed from uploaded file).
-    (Björn Tantau)
   . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
     (krakjoe)
 
