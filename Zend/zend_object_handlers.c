@@ -340,7 +340,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT && !is_retry) {
 				zobj = Z_OBJ_P(op2);
 				ce = Z_OBJCE_P(op2);
+				Z_TYPE_INFO(left) = IS_FALSE;
 				is_retry = 1;
+				ZVAL_COPY_VALUE(&params[0], op1);
+				ZVAL_COPY_VALUE(&params[1], &left);
 				continue;
 			}
 
@@ -1741,19 +1744,21 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 
 ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
-	zend_bool is_retry;
+	zend_bool is_retry = 0;
 	zend_object *zobj;
 	zend_class_entry *ce;
 
 	if(Z_TYPE_P(o1) == IS_OBJECT) {
 		zobj = Z_OBJ_P(o1);
 		ce = Z_OBJCE_P(o1);
-		is_retry = 0;
 	} else {
 		zobj = Z_OBJ_P(o2);
 		ce = Z_OBJCE_P(o2);
 		is_retry = 1;
 	}
+
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
@@ -1764,7 +1769,6 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 	params[0] = *o2;
 
 	fci.param_count = 1;
-	fci.params = params;
 	fci.size = sizeof(fci);
 	fci.retval = &result;
 
@@ -1777,6 +1781,7 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 			if(zobj == Z_OBJ_P(o1) && Z_TYPE_P(o2) == IS_OBJECT && !is_retry) {
 				zobj = Z_OBJ_P(o2);
 				ce = Z_OBJCE_P(o2);
+				params[0] = *o1;
 				is_retry = 1;
 				continue;
 			}
@@ -1784,10 +1789,13 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 			return zend_std_compare_objects(o1, o2);
 		}
 
+		fci.params = params;
 		fcic.called_scope = ce;
 		fcic.object = zobj;
 		fcic.function_handler->type = ZEND_USER_FUNCTION;
 		int tmp = zend_call_function(&fci, &fcic);
+
+		EG(fake_scope) = orig_fake_scope;
 
 		if (tmp == SUCCESS) {
 			resultLval = Z_LVAL(result);

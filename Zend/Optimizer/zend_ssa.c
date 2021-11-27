@@ -296,7 +296,9 @@ static void place_essa_pis(
 		    ((opline-1)->opcode == ZEND_IS_EQUAL ||
 		     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
 		     (opline-1)->opcode == ZEND_IS_SMALLER ||
-		     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL) &&
+		     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
+			 (opline-1)->opcode == ZEND_IS_LARGER ||
+			 (opline-1)->opcode == ZEND_IS_LARGER_OR_EQUAL) &&
 		    opline->op1.var == (opline-1)->result.var) {
 			int  var1 = -1;
 			int  var2 = -1;
@@ -405,6 +407,24 @@ static void place_essa_pis(
 							pi_range_min(pi, var2, val2+1);
 						}
 					}
+				} else if ((opline-1)->opcode == ZEND_IS_LARGER) {
+					if (val2 > ZEND_LONG_MIN) {
+						if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var1))) {
+							pi_range_min(pi, var2, val2-1);
+						}
+					}
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var1))) {
+						pi_range_max(pi, var2, val2);
+					}
+				} else if ((opline-1)->opcode == ZEND_IS_LARGER_OR_EQUAL) {
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var1))) {
+						pi_range_min(pi, var2, val2);
+					}
+					if (val2 < ZEND_LONG_MAX) {
+						if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var1))) {
+							pi_range_max(pi, var2, val2+1);
+						}
+					}
 				}
 			}
 			if (var2 >= 0) {
@@ -438,6 +458,24 @@ static void place_essa_pis(
 					if (val1 > ZEND_LONG_MIN) {
 						if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var2))) {
 							pi_range_max(pi, var1, val1-1);
+						}
+					}
+				} else if ((opline-1)->opcode == ZEND_IS_LARGER) {
+					if (val1 < ZEND_LONG_MAX) {
+						if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var2))) {
+							pi_range_max(pi, var1, val1+1);
+						}
+					}
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var2))) {
+						pi_range_min(pi, var1, val1);
+					}
+				} else if ((opline-1)->opcode == ZEND_IS_LARGER_OR_EQUAL) {
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, bt, var2))) {
+						pi_range_max(pi, var1, val1);
+					}
+					if (val1 > ZEND_LONG_MIN) {
+						if ((pi = add_pi(arena, op_array, dfg, ssa, j, bf, var2))) {
+							pi_range_min(pi, var1, val1-1);
 						}
 					}
 				}

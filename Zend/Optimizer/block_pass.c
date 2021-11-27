@@ -505,16 +505,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
-									uint32_t tmp;
-
-									src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
-									tmp_type = src->op1_type;
-									src->op1_type = src->op2_type;
-									src->op2_type = tmp_type;
-									tmp = src->op1.num;
-									src->op1.num = src->op2.num;
-									src->op2.num = tmp;
+									src->opcode = ZEND_IS_LARGER_OR_EQUAL;
 								}
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
@@ -523,16 +514,25 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER_OR_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
-									uint32_t tmp;
-
+									src->opcode = ZEND_IS_LARGER;
+								}
+								COPY_NODE(src->result, opline->result);
+								SET_VAR_SOURCE(src);
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							case ZEND_IS_LARGER:
+								if (opline->opcode == ZEND_BOOL_NOT) {
+									src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
+								}
+								COPY_NODE(src->result, opline->result);
+								SET_VAR_SOURCE(src);
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							case ZEND_IS_LARGER_OR_EQUAL:
+								if (opline->opcode == ZEND_BOOL_NOT) {
 									src->opcode = ZEND_IS_SMALLER;
-									tmp_type = src->op1_type;
-									src->op1_type = src->op2_type;
-									src->op2_type = tmp_type;
-									tmp = src->op1.num;
-									src->op1.num = src->op2.num;
-									src->op2.num = tmp;
 								}
 								COPY_NODE(src->result, opline->result);
 								SET_VAR_SOURCE(src);
@@ -820,6 +820,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_SR:
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:
+			case ZEND_IS_LARGER:
+			case ZEND_IS_LARGER_OR_EQUAL:
 			case ZEND_IS_IDENTICAL:
 			case ZEND_IS_NOT_IDENTICAL:
 			case ZEND_BOOL_XOR:

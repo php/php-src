@@ -1238,6 +1238,42 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, zend
 				}
 			}
 			break;
+		case ZEND_IS_LARGER:
+			if (ssa_op->result_def == var) {
+				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+
+					tmp->min = op1_max > op2_min;
+					tmp->max = op1_min > op2_max;
+					return 1;
+				} else {
+					tmp->min = 0;
+					tmp->max = 1;
+					return 1;
+				}
+			}
+			break;
+		case ZEND_IS_LARGER_OR_EQUAL:
+			if (ssa_op->result_def == var) {
+				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
+
+					tmp->min = op1_max >= op2_min;
+					tmp->max = op1_min >= op2_max;
+					return 1;
+				} else {
+					tmp->min = 0;
+					tmp->max = 1;
+					return 1;
+				}
+			}
+			break;
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
@@ -2492,6 +2528,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_INSTANCEOF:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
@@ -4742,6 +4780,8 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_CASE:
 		case ZEND_SPACESHIP:
 			if ((t1 & MAY_BE_ANY) == MAY_BE_NULL

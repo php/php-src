@@ -76,6 +76,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_BOOL_XOR:

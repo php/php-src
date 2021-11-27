@@ -783,6 +783,140 @@ ZEND_VM_C_LABEL(is_smaller_or_equal_double):
 	ZEND_VM_DISPATCH_TO_HELPER(zend_is_smaller_or_equal_helper, op_1, op1, op_2, op2);
 }
 
+ZEND_VM_HELPER(zend_is_larger_helper, ANY, ANY, zval *op_1, zval *op_2)
+{
+	int ret;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+		op_1 = ZVAL_UNDEFINED_OP1();
+	}
+	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
+		op_2 = ZVAL_UNDEFINED_OP2();
+	}
+	ret = zend_compare(op_1, op_2);
+	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+		zval_ptr_dtor_nogc(op_1);
+	}
+	if (OP2_TYPE & (IS_TMP_VAR|IS_VAR)) {
+		zval_ptr_dtor_nogc(op_2);
+	}
+	ZEND_VM_SMART_BRANCH(ret > 0, 1);
+}
+
+ZEND_VM_HOT_NOCONSTCONST_HANDLER(203, ZEND_IS_LARGER, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (ZEND_VM_SPEC && OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) > Z_LVAL_P(op2))) {
+				ZEND_VM_C_LABEL(is_larger_true):
+				ZEND_VM_SMART_BRANCH_TRUE();
+			} else {
+				ZEND_VM_C_LABEL(is_larger_false):
+				ZEND_VM_SMART_BRANCH_FALSE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_GOTO(is_larger_double);
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_LABEL(is_larger_double):
+			if (d1 > d2) {
+				ZEND_VM_C_GOTO(is_larger_true);
+			} else {
+				ZEND_VM_C_GOTO(is_larger_false);
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			ZEND_VM_C_GOTO(is_larger_double);
+		}
+	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_is_larger_helper, op_1, op1, op_2, op2);
+}
+
+ZEND_VM_HELPER(zend_is_larger_or_equal_helper, ANY, ANY, zval *op_1, zval *op_2)
+{
+	int ret;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	if (UNEXPECTED(Z_TYPE_INFO_P(op_1) == IS_UNDEF)) {
+		op_1 = ZVAL_UNDEFINED_OP1();
+	}
+	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
+		op_2 = ZVAL_UNDEFINED_OP2();
+	}
+	ret = zend_compare(op_1, op_2);
+	if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+		zval_ptr_dtor_nogc(op_1);
+	}
+	if (OP2_TYPE & (IS_TMP_VAR|IS_VAR)) {
+		zval_ptr_dtor_nogc(op_2);
+	}
+	ZEND_VM_SMART_BRANCH(ret >= 0, 1);
+}
+
+ZEND_VM_HOT_NOCONSTCONST_HANDLER(204, ZEND_IS_LARGER_OR_EQUAL, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	double d1, d2;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (ZEND_VM_SPEC && OP1_TYPE == IS_CONST && OP2_TYPE == IS_CONST) {
+		/* pass */
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			if (EXPECTED(Z_LVAL_P(op1) >= Z_LVAL_P(op2))) {
+				ZEND_VM_C_LABEL(is_larger_or_equal_true):
+				ZEND_VM_SMART_BRANCH_TRUE();
+				ZVAL_TRUE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_C_LABEL(is_larger_or_equal_false):
+				ZEND_VM_SMART_BRANCH_FALSE();
+				ZVAL_FALSE(EX_VAR(opline->result.var));
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = (double)Z_LVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_GOTO(is_larger_or_equal_double);
+		}
+	} else if (EXPECTED(Z_TYPE_INFO_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_DOUBLE)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = Z_DVAL_P(op2);
+			ZEND_VM_C_LABEL(is_larger_or_equal_double):
+			if (d1 >= d2) {
+				ZEND_VM_C_GOTO(is_larger_or_equal_true);
+			} else {
+				ZEND_VM_C_GOTO(is_larger_or_equal_false);
+			}
+		} else if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
+			d1 = Z_DVAL_P(op1);
+			d2 = (double)Z_LVAL_P(op2);
+			ZEND_VM_C_GOTO(is_larger_or_equal_double);
+		}
+	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_is_larger_or_equal_helper, op_1, op1, op_2, op2);
+}
+
 ZEND_VM_COLD_CONSTCONST_HANDLER(170, ZEND_SPACESHIP, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
@@ -9534,6 +9668,54 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER_OR_EQUAL, (op1_info == MAY_BE_DOUB
 	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 	result = (Z_DVAL_P(op1) <= Z_DVAL_P(op2));
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_LARGER, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_IS_LARGER_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = (Z_LVAL_P(op1) > Z_LVAL_P(op2));
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_LARGER, (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE), ZEND_IS_LARGER_DOUBLE, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = (Z_DVAL_P(op1) > Z_DVAL_P(op2));
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_LARGER_OR_EQUAL, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_IS_LARGER_OR_EQUAL_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = (Z_LVAL_P(op1) >= Z_LVAL_P(op2));
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_LARGER_OR_EQUAL, (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE), ZEND_IS_LARGER_OR_EQUAL_DOUBLE, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = (Z_DVAL_P(op1) >= Z_DVAL_P(op2));
 	ZEND_VM_SMART_BRANCH(result, 0);
 }
 

@@ -227,7 +227,7 @@ static const char *zend_vm_opcodes_names[205] = {
 	"ZEND_VERIFY_NEVER_TYPE",
 	"ZEND_CALLABLE_CONVERT",
 	"ZEND_IS_LARGER",
-	"ZEND_IS_LARGER_OR_EQUAL"
+	"ZEND_IS_LARGER_OR_EQUAL",
 };
 
 static uint32_t zend_vm_opcodes_flags[205] = {

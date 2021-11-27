@@ -8,6 +8,10 @@ var_dump(0 < NAN);
 var_dump(0 <= NAN);
 var_dump(0 > NAN);
 var_dump(0 >= NAN);
+var_dump(NAN < 0);
+var_dump(NAN <= 0);
+var_dump(NAN > 0);
+var_dump(NAN >= 0);
 
 echo "** VAR\n";
 $nan = NAN;
@@ -15,6 +19,10 @@ var_dump(0 < $nan);
 var_dump(0 <= $nan);
 var_dump(0 > $nan);
 var_dump(0 >= $nan);
+var_dump($nan < 0);
+var_dump($nan <= 0);
+var_dump($nan > 0);
+var_dump($nan >= 0);
 ?>
 --EXPECT--
 ** CONST
@@ -22,7 +30,15 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 ** VAR
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 bool(false)
 bool(false)
 bool(false)

@@ -1173,6 +1173,8 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 || opline->opcode == ZEND_IS_NOT_EQUAL
 				 || opline->opcode == ZEND_IS_SMALLER
 				 || opline->opcode == ZEND_IS_SMALLER_OR_EQUAL
+				 || opline->opcode == ZEND_IS_LARGER
+				 || opline->opcode == ZEND_IS_LARGER_OR_EQUAL
 				) {
 
 					if (opline->op1_type == IS_CONST && opline->op2_type != IS_CONST) {

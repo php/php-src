@@ -2087,6 +2087,8 @@ ZEND_API bool zend_is_smart_branch(const zend_op *opline) /* {{{ */
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
 		case ZEND_ISSET_ISEMPTY_CV:
@@ -8565,34 +8567,6 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 		}
 		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
 	} while (0);
-}
-/* }}} */
-
-/* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
- * evaluation order. */
-static void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *left_ast = ast->child[0];
-	zend_ast *right_ast = ast->child[1];
-	znode left_node, right_node;
-
-	ZEND_ASSERT(ast->kind == ZEND_AST_GREATER || ast->kind == ZEND_AST_GREATER_EQUAL);
-
-	zend_compile_expr(&left_node, left_ast);
-	zend_compile_expr(&right_node, right_ast);
-
-	if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
-		result->op_type = IS_CONST;
-		zend_ct_eval_greater(&result->u.constant, ast->kind,
-			&left_node.u.constant, &right_node.u.constant);
-		zval_ptr_dtor(&left_node.u.constant);
-		zval_ptr_dtor(&right_node.u.constant);
-		return;
-	}
-
-	zend_emit_op_tmp(result,
-		ast->kind == ZEND_AST_GREATER ? ZEND_IS_SMALLER : ZEND_IS_SMALLER_OR_EQUAL,
-		&right_node, &left_node);
 }
 /* }}} */
 
