@@ -54,9 +54,6 @@ class SoapVar
 
 class SoapServer
 {
-    /** @var resource */
-    private $service;
-
     private ?SoapFault $__soap_fault = null;
 
     public function __construct(?string $wsdl, array $options = []) {}

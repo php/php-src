@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ab057422ee42f574e7d00462f3bf173caf14ecc1 */
+ * Stub hash: 96c82014f1fe922cee14d0cd55dd14a6ba3ffe5f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -399,12 +399,6 @@ static zend_class_entry *register_class_SoapServer(void)
 
 	INIT_CLASS_ENTRY(ce, "SoapServer", class_SoapServer_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-
-	zval property_service_default_value;
-	ZVAL_NULL(&property_service_default_value);
-	zend_string *property_service_name = zend_string_init("service", sizeof("service") - 1, 1);
-	zend_declare_property_ex(class_entry, property_service_name, &property_service_default_value, ZEND_ACC_PRIVATE, NULL);
-	zend_string_release(property_service_name);
 
 	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zval property___soap_fault_default_value;
