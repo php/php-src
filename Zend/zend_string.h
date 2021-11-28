@@ -574,6 +574,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_OFFSETSET,              "offsetset") \
 	_(ZEND_STR_OFFSETEXISTS,           "offsetexists") \
 	_(ZEND_STR_OFFSETUNSET,            "offsetunset") \
+	_(ZEND_STR_COUNT,                  "count") \
 
 
 typedef enum _zend_known_string_id {
