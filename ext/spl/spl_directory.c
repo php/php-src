@@ -2732,7 +2732,7 @@ PHP_METHOD(SplFileObject, seek)
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
 	for (i = 0; i < line_pos; i++) {
-		if (spl_filesystem_file_read_line(ZEND_THIS, intern, 1) == FAILURE) {
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, 1) == FAILURE && !intern->flags) {
 			return;
 		}
 	}
