@@ -918,7 +918,9 @@ ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int ty
 
 		GC_ADDREF(object);
 		if (type == BP_VAR_IS) {
-			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, &tmp_offset);
+			zend_function *offsetexists =
+				zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETEXISTS));
+			zend_call_known_instance_method_with_1_params(offsetexists, object, rv, &tmp_offset);
 			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
 				OBJ_RELEASE(object);
 				zval_ptr_dtor(&tmp_offset);
@@ -933,7 +935,9 @@ ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int ty
 			zval_ptr_dtor(rv);
 		}
 
-		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, &tmp_offset);
+		zend_function *offsetget =
+			zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETGET));
+		zend_call_known_instance_method_with_1_params(offsetget, object, rv, &tmp_offset);
 
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
@@ -964,7 +968,9 @@ ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *
 			ZVAL_COPY_DEREF(&tmp_offset, offset);
 		}
 		GC_ADDREF(object);
-		zend_call_method_with_2_params(object, ce, NULL, "offsetset", NULL, &tmp_offset, value);
+		zend_function *offsetset =
+			zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETSET));
+		zend_call_known_instance_method_with_2_params(offsetset, object, NULL, &tmp_offset, value);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
 	} else {
@@ -982,11 +988,15 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 	if (EXPECTED(zend_class_implements_interface(ce, zend_ce_arrayaccess) != 0)) {
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		GC_ADDREF(object);
-		zend_call_method_with_1_params(object, ce, NULL, "offsetexists", &retval, &tmp_offset);
+		zend_function *offsetexists =
+			zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETEXISTS));
+		zend_call_known_instance_method_with_1_params(offsetexists, object, &retval, &tmp_offset);
 		result = i_zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
 		if (check_empty && result && EXPECTED(!EG(exception))) {
-			zend_call_method_with_1_params(object, ce, NULL, "offsetget", &retval, &tmp_offset);
+			zend_function *offsetget =
+				zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETGET));
+			zend_call_known_instance_method_with_1_params(offsetget, object, &retval, &tmp_offset);
 			result = i_zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
 		}
@@ -1163,7 +1173,9 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset) /* {{{
 	if (zend_class_implements_interface(ce, zend_ce_arrayaccess)) {
 		ZVAL_COPY_DEREF(&tmp_offset, offset);
 		GC_ADDREF(object);
-		zend_call_method_with_1_params(object, ce, NULL, "offsetunset", NULL, &tmp_offset);
+		zend_function *offsetunset =
+			zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_OFFSETUNSET));
+		zend_call_known_instance_method_with_1_params(offsetunset, object, NULL, &tmp_offset);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
 	} else {

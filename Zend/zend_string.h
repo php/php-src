@@ -570,6 +570,10 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
+	_(ZEND_STR_OFFSETGET,              "offsetget") \
+	_(ZEND_STR_OFFSETSET,              "offsetset") \
+	_(ZEND_STR_OFFSETEXISTS,           "offsetexists") \
+	_(ZEND_STR_OFFSETUNSET,            "offsetunset") \
 
 
 typedef enum _zend_known_string_id {
