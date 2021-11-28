@@ -56,6 +56,7 @@ typedef enum {
 #define PHPDBG_WATCH_NORMAL     (PHPDBG_WATCH_SIMPLE | PHPDBG_WATCH_RECURSIVE)
 #define PHPDBG_WATCH_IMPLICIT   0x10
 #define PHPDBG_WATCH_RECURSIVE_ROOT 0x20
+#define PHPDBG_WATCH_HASH_ELEMENT 0x40
 
 typedef struct _phpdbg_watch_collision phpdbg_watch_collision;
 

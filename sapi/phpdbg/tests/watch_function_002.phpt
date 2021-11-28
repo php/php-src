@@ -16,12 +16,16 @@ q
 [Successful compilation of %s]
 prompt> UPDATED: $->foo: array ( 0 => 1, )
 ADDED: 1: array ( 0 => 1, 1 => 10, )
+ADDED: 0: array ( 0 => 1, 1 => 10, )
 UPDATED: $->foo[]: array ( 0 => 1, 1 => 10, )
 ADDED: key: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
 ADDED: 1: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
 ADDED: 0: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
 UPDATED: $->foo[]: array ( 0 => 1, 1 => 10, 'key' => array ( ), )
+UPDATED: $->foo[1]: NULL
+UPDATED: $->foo[0]: 1.6E-322
 UPDATED: $->foo[key]: array ( 2 => 20, )
+UPDATED: $->foo[1]: NULL
 UPDATED: $->foo: array ( )
 [Script ended normally]
 prompt>

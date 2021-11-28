@@ -616,7 +616,11 @@ phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdb
 
 phpdbg_watch_element *phpdbg_add_bucket_watch_element(Bucket *bucket, phpdbg_watch_element *element) {
 	phpdbg_watchpoint_t watch;
-	phpdbg_set_bucket_watchpoint(bucket, &watch);
+	if (HT_IS_PACKED(element->parent_container)) {
+		phpdbg_set_zval_watchpoint(&bucket->val, &watch);
+	} else {
+		phpdbg_set_bucket_watchpoint(bucket, &watch);
+	}
 	element = phpdbg_add_watch_element(&watch, element);
 	phpdbg_watch_parent_ht(element);
 	return element;
@@ -755,7 +759,7 @@ void phpdbg_watch_parent_ht(phpdbg_watch_element *element) {
 }
 
 void phpdbg_unwatch_parent_ht(phpdbg_watch_element *element) {
-	if (element->watch->type == WATCH_ON_BUCKET) {
+	if (element->watch->type == WATCH_ON_BUCKET || (element->watch->type == WATCH_ON_ZVAL && element->parent_container)) {
 		phpdbg_btree_result *res = phpdbg_btree_find(&PHPDBG_G(watch_HashTables), (zend_ulong) element->parent_container);
 		ZEND_ASSERT(element->parent_container);
 		if (res) {
