@@ -1,5 +1,5 @@
 --TEST--
-LOB prefetching
+LOB prefetching with oci8.
 --EXTENSIONS--
 oci8
 --SKIPIF--
@@ -7,6 +7,8 @@ oci8
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>
+--INI--
+oci8.prefetch_lob_size=100000
 --FILE--
 <?php
 
@@ -42,7 +44,6 @@ $ora_sql =
 
 $statement = oci_parse($c,$ora_sql);
 oci_execute($statement);
-
 
 function get_clob_loc($c, $sql, $pfl) {
     $stid = oci_parse($c, $sql);
@@ -100,46 +101,43 @@ function get_blob_loc($c, $sql, $pfl) {
 }
 
 
-print("Test 1 - Default prefetch_lob_size\n");
+print("Test 1 - prefetch_lob_size\n");
 
 $r = ini_get("oci8.prefetch_lob_size");
 var_dump($r);
 
-print("Test 2\n");
-
-$s = oci_parse($c, 'select * from dual');
-$r = oci_set_prefetch_lob($s, 0);
-var_dump($r);
-
-try {
-    oci_set_prefetch_lob($s, -1);
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-print("Test 3 - CLOB prefetch_lob_size 100000\n");
+print("Test 2 - CLOB with current oci8.prefetch_lob_size\n");
 
 $sql = "select clob from ${schema}${table_name}" . " order by id";
-$locarr = get_clob_loc($c, $sql, 100000);
-$inlinearr = get_clob_inline($c, $sql, 100000);
+$locarr = get_clob_loc($c, $sql, -1);
+$inlinearr = get_clob_inline($c, $sql, -1);
 
 print(count($locarr) . "\n");
 print(count($inlinearr) . "\n");
 check_clobs($locarr, $inlinearr);
 
-print("Test 3 - CLOB prefetch_lob_size 100\n");
+print("Test 3 - CLOB override prefetch_lob_size 0\n");
 
-$locarr = get_clob_loc($c, $sql, 100);
-$inlinearr = get_clob_inline($c, $sql, 100);
+$locarr = get_clob_loc($c, $sql, 0);
+$inlinearr = get_clob_inline($c, $sql, 0);
 
 print(count($locarr) . "\n");
 print(count($inlinearr) . "\n");
 check_clobs($locarr, $inlinearr);
 
-print("Test 4 - BLOB prefetch_lob_size 100000\n");
+print("Test 4 - CLOB override prefetch_lob_size 1000\n");
+
+$locarr = get_clob_loc($c, $sql, 1000);
+$inlinearr = get_clob_inline($c, $sql, 1000);
+
+print(count($locarr) . "\n");
+print(count($inlinearr) . "\n");
+check_clobs($locarr, $inlinearr);
+
+print("Test 5 - BLOB with current ocig8.prefetch_lob_size \n");
 
 $sql = "select blob from ${schema}${table_name}" . " order by id";
-$locarr = get_blob_loc($c, $sql, 100000);
+$locarr = get_blob_loc($c, $sql, -1);
 
 print(count($locarr) . "\n");
 
@@ -148,19 +146,20 @@ require __DIR__.'/drop_table.inc';
 ?>
 DONE
 --EXPECTF--
-Test 1 - Default prefetch_lob_size
-string(1) "0"
-Test 2
-bool(true)
-oci_set_prefetch_lob(): Argument #2 ($prefetch_lob_size) must be greater than or equal to 0
-Test 3 - CLOB prefetch_lob_size 100000
+Test 1 - prefetch_lob_size
+string(6) "100000"
+Test 2 - CLOB with current oci8.prefetch_lob_size
 200
 200
 Comparing CLOBS
-Test 3 - CLOB prefetch_lob_size 100
+Test 3 - CLOB override prefetch_lob_size 0
 200
 200
 Comparing CLOBS
-Test 4 - BLOB prefetch_lob_size 100000
+Test 4 - CLOB override prefetch_lob_size 1000
+200
+200
+Comparing CLOBS
+Test 5 - BLOB with current ocig8.prefetch_lob_size
 200
 DONE

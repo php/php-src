@@ -235,7 +235,8 @@ typedef struct {
 	unsigned			 has_data:1;			/* statement has more data flag */
 	unsigned			 has_descr:1;			/* statement has at least one descriptor or cursor column */
 	ub2					 stmttype;				/* statement type */
-	ub4                  prefetch_count;        /* current prefetch count */
+	ub4                  prefetch_count;        /* row prefetch count */
+	ub4                  prefetch_lob_size;     /* LOB prefetch size */
 } php_oci_statement;
 /* }}} */
 
