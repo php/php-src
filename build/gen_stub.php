@@ -2373,7 +2373,7 @@ function parseFunctionLike(
 function parseProperty(
     Name $class,
     int $flags,
-    Stmt\PropertyProperty $property,
+    Stmt\PropertyProperty|Node\Param $property,
     ?Node $type,
     ?DocComment $comment,
     PrettyPrinterAbstract $prettyPrinter
@@ -2411,13 +2411,23 @@ function parseProperty(
         }
     }
 
+    $default = $property->default;
+    if ($property instanceof Node\Param) {
+        $name = $property->var->name;
+        if ($property->flags & Stmt\Class_::MODIFIER_READONLY) {
+            $default = null;
+        }
+    } else {
+        $name = $property->name;
+    }
+
     return new PropertyInfo(
-        new PropertyName($class, $property->name->__toString()),
+        new PropertyName($class, (string) $name),
         $flags,
         $propertyType,
         $phpDocType ? Type::fromString($phpDocType) : null,
-        $property->default,
-        $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
+        $default,
+        $default ? $prettyPrinter->prettyPrintExpr($default) : null,
         $isDocReadonly,
         $link
     );
@@ -2602,6 +2612,20 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         $classStmt,
                         $cond
                     );
+                    if ($classStmt->name->toString() === "__construct") {
+                        foreach ($classStmt->params as $param) {
+                            if ($param->flags) {
+                                $propertyInfos[] = parseProperty(
+                                    $className,
+                                    $param->flags,
+                                    $param,
+                                    $param->type,
+                                    $param->getDocComment(),
+                                    $prettyPrinter
+                                );
+                            }
+                        }
+                    }
                 } else if ($classStmt instanceof Stmt\EnumCase) {
                     $enumCaseInfos[] = new EnumCaseInfo(
                         $classStmt->name->toString(), $classStmt->expr);
