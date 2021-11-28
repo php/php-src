@@ -78,6 +78,10 @@ END_EXTERN_C()
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_GETHOSTBYNAME_R
+#include <netdb.h>
+#endif
+
 #ifdef PHP_WIN32
 #include <Ws2tcpip.h>
 #endif
