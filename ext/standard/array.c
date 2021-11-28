@@ -4285,34 +4285,23 @@ PHP_FUNCTION(array_column)
 	zend_string *index_str = NULL;
 	zend_long index_long;
 	bool index_is_null = 1;
+	bool group_bool = 0;
+	bool group_is_null = 1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY_HT(input)
 		Z_PARAM_STR_OR_LONG_OR_NULL(column_str, column_long, column_is_null)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG_OR_NULL(index_str, index_long, index_is_null)
+		Z_PARAM_BOOL_OR_NULL(group_bool, group_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	void* cache_slot_column[3] = { NULL, NULL, NULL };
 	void* cache_slot_index[3] = { NULL, NULL, NULL };
 
 	array_init_size(return_value, zend_hash_num_elements(input));
-	/* Index param is not passed */
-	if (index_is_null) {
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL(input, data) {
-				ZVAL_DEREF(data);
-				if (column_is_null) {
-					Z_TRY_ADDREF_P(data);
-					colval = data;
-				} else if ((colval = array_column_fetch_prop(data, column_str, column_long, cache_slot_column, &rv)) == NULL) {
-					continue;
-				}
-				ZEND_HASH_FILL_ADD(colval);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
-	} else {
+	if (!group_is_null && group_bool && !index_is_null) {
+
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
@@ -4325,14 +4314,79 @@ PHP_FUNCTION(array_column)
 
 			zval rv;
 			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
-			if (keyval) {
-				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, colval);
+			zval *group_entry;
+
+			convert_to_string(keyval);
+			group_entry = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(keyval));
+
+			if (group_entry != NULL) {
+				if (Z_TYPE_P(colval) == IS_ARRAY) {
+					add_index_array(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_ARRVAL_P(colval));
+				} else if (Z_TYPE_P(colval) == IS_STRING) {
+					add_index_str(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_STR_P(colval));
+				} else {
+					add_index_long(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_LVAL_P(colval));
+				}
+
+				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, group_entry);
 				zval_ptr_dtor(colval);
 				zval_ptr_dtor(keyval);
 			} else {
-				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
+				zval ft;
+				array_init_size(&ft, 1);
+				if (Z_TYPE_P(colval) == IS_ARRAY) {
+					add_index_array(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_ARRVAL_P(colval));
+				} else if (Z_TYPE_P(colval) == IS_STRING) {
+					add_index_str(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_STR_P(colval));
+				} else {
+					add_index_long(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_LVAL_P(colval));
+				}
+				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, &ft);
+				ZVAL_UNDEF(&ft);
+				zval_ptr_dtor(&ft);
+				zval_ptr_dtor(colval);
+				zval_ptr_dtor(keyval);
 			}
+
 		} ZEND_HASH_FOREACH_END();
+	} else {
+		/* Index param is not passed */
+		if (index_is_null) {
+			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				ZEND_HASH_FOREACH_VAL(input, data) {
+					ZVAL_DEREF(data);
+					if (column_is_null) {
+						Z_TRY_ADDREF_P(data);
+						colval = data;
+					} else if ((colval = array_column_fetch_prop(data, column_str, column_long, cache_slot_column, &rv)) == NULL) {
+						continue;
+					}
+					ZEND_HASH_FILL_ADD(colval);
+				} ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FILL_END();
+		} else {
+			ZEND_HASH_FOREACH_VAL(input, data) {
+				ZVAL_DEREF(data);
+
+				if (column_is_null) {
+					Z_TRY_ADDREF_P(data);
+					colval = data;
+				} else if ((colval = array_column_fetch_prop(data, column_str, column_long, cache_slot_column, &rv)) == NULL) {
+					continue;
+				}
+
+				zval rv;
+				zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
+				if (keyval) {
+					array_set_zval_key(Z_ARRVAL_P(return_value), keyval, colval);
+					zval_ptr_dtor(colval);
+					zval_ptr_dtor(keyval);
+				} else {
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */
