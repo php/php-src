@@ -1616,7 +1616,7 @@ class EnumCaseInfo {
     public function getDeclaration(): string {
         $escapedName = addslashes($this->name);
         if ($this->value === null) {
-            $code = "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
+            $code = "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
         } else {
             $evaluator = new ConstExprEvaluator(function (Expr $expr) {
                 throw new Exception("Enum case $this->name has an unsupported value");
