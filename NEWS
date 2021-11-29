@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Update bundled PCRE2 to 10.39. (cmb)
 
+- Standard:
+  . Fixed bug #81659 (stream_get_contents() may unnecessarily overallocate).
+    (cmb)
+
 25 Nov 2021, PHP 8.1.0
 
 - Core:
