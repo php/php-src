@@ -6,6 +6,6 @@ echo "*** Testing gethostbyname() : basic functionality ***\n";
 
 echo gethostbyname("localhost")."\n";
 ?>
---EXPECTF--
-*** Testing gethostbyname() : basic functionality ***
-127.0.%d.1
+--EXPECTREGEX--
+\*\*\* Testing gethostbyname\(\) : basic functionality \*\*\*
+(127.0.\d.1|::1)
