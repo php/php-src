@@ -1794,7 +1794,13 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 				continue;
 			}
 
-			return zend_std_compare_objects(o1, o2);
+			if (Z_TYPE_P(o2) == IS_OBJECT &&
+					Z_OBJCE_P(o2)->type == ZEND_INTERNAL_CLASS &&
+					Z_OBJ_HANDLER_P(o2, compare) != zend_std_user_compare_objects) {
+				return Z_OBJ_HANDLER_P(o2, compare)(o1, o2);
+			} else {
+				return zend_std_compare_objects(o1, o2);
+			}
 		}
 
 		fci.params = params;

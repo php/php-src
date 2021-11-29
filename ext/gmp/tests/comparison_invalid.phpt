@@ -12,7 +12,7 @@ try {
 }
 
 try {
-    var_dump((new DateTime()) > gmp_init(0));
+    var_dump((new stdClass()) > gmp_init(0));
 } catch (\Error $e) {
     echo $e::class, ': ', $e->getMessage(), \PHP_EOL;
 }
@@ -20,4 +20,4 @@ try {
 ?>
 --EXPECT--
 ValueError: Number is not an integer string
-TypeError: Number must be of type GMP|string|int, DateTime given
+TypeError: Number must be of type GMP|string|int, stdClass given
