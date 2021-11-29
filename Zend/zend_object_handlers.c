@@ -221,6 +221,7 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zend_bool is_retry = 0;
+	zend_bool is_unary = 0;
 	zend_object *zobj;
 	zend_class_entry *ce;
 	char *operator;
@@ -232,6 +233,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		zobj = Z_OBJ_P(op2);
 		ce = Z_OBJCE_P(op2);
 		is_retry = 1;
+	}
+
+	if (op2 == NULL) {
+		is_unary = 1;
 	}
 
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
@@ -251,7 +256,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		Z_TYPE_INFO(left) = is_retry ? IS_FALSE : IS_TRUE;
 
-		if (op2 == NULL || opcode == ZEND_BW_NOT) {
+		if (is_unary) {
 			fci.param_count = 0;
 		} else {
 			fci.param_count = 2;
@@ -337,7 +342,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		if (fcic.function_handler == NULL)
 		{
-			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT && !is_retry) {
+			if(zobj == Z_OBJ_P(op1) &&
+			   !is_unary &&
+			   Z_TYPE_P(op2) == IS_OBJECT &&
+			   !is_retry ) {
 				zobj = Z_OBJ_P(op2);
 				ce = Z_OBJCE_P(op2);
 				Z_TYPE_INFO(left) = IS_FALSE;

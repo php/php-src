@@ -2181,6 +2181,14 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 	int converted = 0;
 	zval op1_copy, op2_copy;
 
+	if (Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (Z_TYPE_P(op2) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op2))) {
+		return ZEND_UNCOMPARABLE;
+	}
+
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG):
@@ -2234,17 +2242,9 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 				return -compare_long_to_string(Z_LVAL_P(op2), Z_STR_P(op1));
 
 			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
-				if (zend_isnan(Z_DVAL_P(op1))) {
-					return ZEND_UNCOMPARABLE;
-				}
-
 				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2));
 
 			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
-				if (zend_isnan(Z_DVAL_P(op2))) {
-					return ZEND_UNCOMPARABLE;
-				}
-
 				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
