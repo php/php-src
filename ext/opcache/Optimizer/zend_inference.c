@@ -1860,6 +1860,11 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
 				if (ssa_var_info[__var].type & ~__type) {				\
+					if ((ssa_var_info[__var].type & ~__type &			\
+							~(MAY_BE_RC1|MAY_BE_RCN)) == 0) {			\
+						ssa_var_info[__var].type |= __type;				\
+						break;											\
+					}													\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
 				}														\
