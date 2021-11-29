@@ -580,7 +580,11 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_equal_hel
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
 	}
-	ret = zend_compare(op_1, op_2);
+	if (Z_TYPE_P(op_1) == IS_OBJECT || Z_TYPE_P(op_2) == IS_OBJECT) {
+		ret = zend_equals_object(op_1, op_2, ZEND_IS_EQUAL);
+	} else {
+		ret = zend_compare(op_1, op_2);
+	}
 	if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(op_1);
 	}
@@ -602,7 +606,11 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_not_equal
 	if (UNEXPECTED(Z_TYPE_INFO_P(op_2) == IS_UNDEF)) {
 		op_2 = ZVAL_UNDEFINED_OP2();
 	}
-	ret = zend_compare(op_1, op_2);
+	if (Z_TYPE_P(op_1) == IS_OBJECT || Z_TYPE_P(op_2) == IS_OBJECT) {
+		ret = zend_equals_object(op_1, op_2, ZEND_IS_NOT_EQUAL);
+	} else {
+		ret = zend_compare(op_1, op_2);
+	}
 	if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(op_1);
 	}
@@ -675,7 +683,12 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_larger_he
 	if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(op_2);
 	}
-	ZEND_VM_SMART_BRANCH(ret > 0, 1);
+
+	if (ret > 1) {
+		ZEND_VM_SMART_BRANCH(false, 1);
+	} else {
+		ZEND_VM_SMART_BRANCH(ret > 0, 1);
+	}
 }
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_larger_or_equal_helper_SPEC(zval *op_1, zval *op_2 ZEND_OPCODE_HANDLER_ARGS_DC)
@@ -697,7 +710,11 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_is_larger_or
 	if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 		zval_ptr_dtor_nogc(op_2);
 	}
-	ZEND_VM_SMART_BRANCH(ret >= 0, 1);
+	if (ret > 1) {
+		ZEND_VM_SMART_BRANCH(false, 1);
+	} else {
+		ZEND_VM_SMART_BRANCH(ret >= 0, 1);
+	}
 }
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_bw_or_helper_SPEC(zval *op_1, zval *op_2 ZEND_OPCODE_HANDLER_ARGS_DC)

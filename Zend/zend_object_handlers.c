@@ -251,7 +251,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		Z_TYPE_INFO(left) = is_retry ? IS_FALSE : IS_TRUE;
 
-		if (op2 == NULL) {
+		if (op2 == NULL || opcode == ZEND_BW_NOT) {
 			fci.param_count = 0;
 		} else {
 			fci.param_count = 2;

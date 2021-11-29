@@ -2220,14 +2220,14 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 
 			case TYPE_PAIR(IS_DOUBLE, IS_STRING):
 				if (zend_isnan(Z_DVAL_P(op1))) {
-					return 1;
+					return ZEND_UNCOMPARABLE;
 				}
 
 				return compare_double_to_string(Z_DVAL_P(op1), Z_STR_P(op2));
 
 			case TYPE_PAIR(IS_STRING, IS_DOUBLE):
 				if (zend_isnan(Z_DVAL_P(op2))) {
-					return 1;
+					return ZEND_UNCOMPARABLE;
 				}
 
 				return -compare_double_to_string(Z_DVAL_P(op2), Z_STR_P(op1));
@@ -2361,14 +2361,50 @@ ZEND_API zend_result ZEND_FASTCALL is_not_equal_function(zval *result, zval *op1
 
 ZEND_API zend_result ZEND_FASTCALL is_smaller_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	ZVAL_BOOL(result, (zend_compare(op1, op2) < 0));
+	if (Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	if (Z_TYPE_P(op2) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op2))) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	int intResult;
+	intResult = zend_compare(op1, op2);
+
+	if (intResult > 1) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	ZVAL_BOOL(result, (intResult < 0));
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API zend_result ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-	ZVAL_BOOL(result, (zend_compare(op1, op2) <= 0));
+	if (Z_TYPE_P(op1) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op1))) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	if (Z_TYPE_P(op2) == IS_DOUBLE && zend_isnan(Z_DVAL_P(op2))) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	int intResult;
+	intResult = zend_compare(op1, op2);
+
+	if (intResult > 1) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	ZVAL_BOOL(result, (intResult <= 0));
 	return SUCCESS;
 }
 /* }}} */
@@ -2385,7 +2421,15 @@ ZEND_API zend_result ZEND_FASTCALL is_larger_function(zval *result, zval *op1, z
 		return SUCCESS;
 	}
 
-	ZVAL_BOOL(result, (zend_compare(op1, op2) > 0));
+	int intResult;
+	intResult = zend_compare(op1, op2);
+
+	if (intResult > 1) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	ZVAL_BOOL(result, (intResult > 0));
 	return SUCCESS;
 }
 /* }}} */
@@ -2402,7 +2446,15 @@ ZEND_API zend_result ZEND_FASTCALL is_larger_or_equal_function(zval *result, zva
 		return SUCCESS;
 	}
 
-	ZVAL_BOOL(result, (zend_compare(op1, op2) >= 0));
+	int intResult;
+	intResult = zend_compare(op1, op2);
+
+	if (intResult > 1) {
+		ZVAL_BOOL(result, false);
+		return SUCCESS;
+	}
+
+	ZVAL_BOOL(result, (intResult >= 0));
 	return SUCCESS;
 }
 /* }}} */
