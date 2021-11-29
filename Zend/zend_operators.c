@@ -1552,7 +1552,22 @@ try_again:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
 		default:
-			ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BW_NOT);
+			if (Z_TYPE_P(op1) == IS_OBJECT) {
+				int objSuccess;
+				objSuccess = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_BW_NOT, result, op1, NULL);
+
+				if (objSuccess == SUCCESS && !EG(exception)) {
+					return SUCCESS;
+				}
+
+				if (EG(exception)) {
+					if (result != op1) {
+						ZVAL_UNDEF(result);
+					}
+
+					return FAILURE;
+				}
+			}
 
 			if (result != op1) {
 				ZVAL_UNDEF(result);

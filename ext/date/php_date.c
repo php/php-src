@@ -1906,11 +1906,11 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 
 	switch (o1->type) {
 		case TIMELIB_ZONETYPE_OFFSET:
-			return o1->tzi.utc_offset == o2->tzi.utc_offset ? 0 : 1;
+			return o1->tzi.utc_offset == o2->tzi.utc_offset ? 0 : ZEND_UNCOMPARABLE;
 		case TIMELIB_ZONETYPE_ABBR:
-			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? 1 : 0;
+			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? ZEND_UNCOMPARABLE : 0;
 		case TIMELIB_ZONETYPE_ID:
-			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? 1 : 0;
+			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? ZEND_UNCOMPARABLE : 0;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 } /* }}} */

@@ -26,6 +26,7 @@
 #include "ext/standard/php_var.h"
 #include "zend_smart_str_public.h"
 #include "zend_exceptions.h"
+#include "zend_operators.h"
 
 #include <gmp.h>
 #include "gmp_arginfo.h"
@@ -432,7 +433,7 @@ static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 	/* An error/exception occurs if one of the operands is not a numeric string
 	 * or an object which is different from GMP */
 	if (EG(exception)) {
-		return 1;
+		return ZEND_UNCOMPARABLE;
 	}
 	/* result can only be a zend_long if gmp_cmp hasn't thrown an Error */
 	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
