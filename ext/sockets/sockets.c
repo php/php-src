@@ -237,7 +237,7 @@ static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ 
 		return 0;
 	}
 
-	memcpy((char *) &la.sin_addr, aip->ai_addr, aip->ai_addrlen);
+	memcpy((char *) &la.sin_addr, &((struct sockaddr_in *) aip->ai_addr)->sin_addr, sizeof(la.sin_addr));
 	la.sin_family = aip->ai_family;
 	la.sin_port = htons((unsigned short) port);
 
