@@ -491,6 +491,10 @@ static inline zend_bool may_break_varargs(const zend_op_array *op_array, const z
 	return 0;
 }
 
+static inline zend_bool may_throw_dce_exception(const zend_op *opline) {
+	return opline->opcode == ZEND_ADD_ARRAY_ELEMENT && opline->op2_type == IS_UNUSED;
+}
+
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
@@ -557,7 +561,8 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], ssa, 0);
 				}
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
-					|| zend_may_throw(&op_array->opcodes[i], &ssa->ops[i], op_array, ssa)
+					|| (zend_may_throw(&op_array->opcodes[i], &ssa->ops[i], op_array, ssa)
+						&& !may_throw_dce_exception(&op_array->opcodes[i]))
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
 				if (op_array->opcodes[i].opcode == ZEND_NEW
 						&& op_array->opcodes[i+1].opcode == ZEND_DO_FCALL

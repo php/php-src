@@ -4628,8 +4628,9 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_ROPE_END:
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
 		case ZEND_INIT_ARRAY:
-		case ZEND_ADD_ARRAY_ELEMENT:
 			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		case ZEND_ADD_ARRAY_ELEMENT:
+			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_COUNT:
