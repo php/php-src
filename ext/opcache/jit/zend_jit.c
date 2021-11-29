@@ -2629,6 +2629,7 @@ static bool zend_jit_next_is_send_result(const zend_op *opline)
 	if (opline->result_type == IS_TMP_VAR
 	 && (opline+1)->opcode == ZEND_SEND_VAL
 	 && (opline+1)->op1_type == IS_TMP_VAR
+	 && (opline+1)->op2_type != IS_CONST
 	 && (opline+1)->op1.var == opline->result.var) {
 		return 1;
 	}
