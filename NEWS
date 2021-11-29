@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #75725 (./configure: detecting RAND_egd). (Dilyan Palauzov)
 
+- PCRE:
+  . Fixed bug #74604 (Out of bounds in php_pcre_replace_impl). (cmb, Dmitry)
+
 - Standard:
   . Fixed bug #81618 (dns_get_record fails on FreeBSD for missing type).
     (fsbruva)
