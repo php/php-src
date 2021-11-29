@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Update bundled PCRE2 to 10.39. (cmb)
+  . Fixed bug #74604 (Out of bounds in php_pcre_replace_impl). (cmb, Dmitry)
 
 - Standard:
   . Fixed bug #81659 (stream_get_contents() may unnecessarily overallocate).

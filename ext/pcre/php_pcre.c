@@ -1725,7 +1725,7 @@ matched:
 			}
 
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, 0);
+				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -1961,9 +1961,9 @@ matched:
 				pcre2_get_mark(match_data), flags);
 
 			ZEND_ASSERT(eval_result);
-			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
+			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result) + ZSTR_MAX_OVERHEAD, new_len) -ZSTR_MAX_OVERHEAD;
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, 0);
+				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
