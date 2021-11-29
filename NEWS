@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #75725 (./configure: detecting RAND_egd). (Dilyan Palauzov)
 
+- PCRE:
+  . Fixed bug #74604 (Out of bounds in php_pcre_replace_impl). (cmb, Dmitry)
+
 - SPL:
   . Fixed bug #81587 (MultipleIterator Segmentation fault w/ SimpleXMLElement
     attached). (Nikita)
