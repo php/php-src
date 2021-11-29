@@ -4010,7 +4010,7 @@ static bool can_convert_to_double(
 	for (phi = var->phi_use_chain; phi; phi = zend_ssa_next_use_phi(ssa, var_num, phi)) {
 		/* Check that narrowing can actually be useful */
 		type = ssa->var_info[phi->ssa_var].type;
-		if (type & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+		if ((type & MAY_BE_ANY) & ~(MAY_BE_LONG|MAY_BE_DOUBLE)) {
 			return 0;
 		}
 
@@ -4357,8 +4357,10 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 		return FAILURE;
 	}
 
-	/* Narrowing integer initialization to doubles */
-	zend_type_narrowing(op_array, script, ssa, optimization_level);
+	if (optimization_level & ZEND_OPTIMIZER_NARROW_TO_DOUBLE) {
+		/* Narrowing integer initialization to doubles */
+		zend_type_narrowing(op_array, script, ssa, optimization_level);
+	}
 
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);

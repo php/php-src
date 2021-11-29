@@ -1332,7 +1332,8 @@ static int zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-		if (zend_ssa_inference(&CG(arena), op_array, script, ssa, optimization_level) != SUCCESS) {
+		if (zend_ssa_inference(&CG(arena), op_array, script, ssa,
+				optimization_level & ~ZEND_OPTIMIZER_NARROW_TO_DOUBLE) != SUCCESS) {
 			return FAILURE;
 		}
 	}

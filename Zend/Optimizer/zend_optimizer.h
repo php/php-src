@@ -44,6 +44,8 @@
 
 #define ZEND_OPTIMIZER_IGNORE_OVERLOADING	(1<<16)  /* (unsafe) Ignore possibility of operator overloading */
 
+#define ZEND_OPTIMIZER_NARROW_TO_DOUBLE		(1<<17)  /* try to narrow long constant assignments to double */
+
 #define ZEND_OPTIMIZER_ALL_PASSES	0x7FFFFFFF
 
 #define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFEBFFF"
