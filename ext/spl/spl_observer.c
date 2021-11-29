@@ -158,7 +158,6 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 		ZEND_ASSERT(Z_TYPE_P(entry_zv) == IS_PTR);
 		pelement = Z_PTR_P(entry_zv);
 		ZVAL_COPY_VALUE(&zv_inf, &pelement->inf);
-		ZEND_ASSERT(Z_TYPE(zv_inf) != IS_REFERENCE);
 		if (inf) {
 			ZVAL_COPY(&pelement->inf, inf);
 		} else {
@@ -192,7 +191,6 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 	if (pelement) {
 		zval zv_inf;
 		ZVAL_COPY_VALUE(&zv_inf, &pelement->inf);
-		ZEND_ASSERT(Z_TYPE(zv_inf) != IS_REFERENCE);
 		if (inf) {
 			ZVAL_COPY(&pelement->inf, inf);
 		} else {
@@ -481,7 +479,7 @@ static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset
 		/* This deliberately returns a non-reference, even for BP_VAR_W and BP_VAR_RW, to behave the same way as SplObjectStorage did when using the default zend_std_read_dimension behavior.
 		 * i.e. This prevents taking a reference to an entry of SplObjectStorage because offsetGet would return a non-reference. */
 		ZEND_ASSERT(Z_TYPE(element->inf) != IS_REFERENCE);
-		ZVAL_COPY(rv, &element->inf);
+		ZVAL_COPY_DEREF(rv, &element->inf);
 		return rv;
 	}
 }
@@ -556,7 +554,7 @@ PHP_METHOD(SplObjectStorage, offsetGet)
 	if (!element) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
 	} else {
-		RETURN_COPY(&element->inf);
+		RETURN_COPY_DEREF(&element->inf);
 	}
 } /* }}} */
 
@@ -996,6 +994,7 @@ PHP_METHOD(SplObjectStorage, __unserialize)
 				RETURN_THROWS();
 			}
 
+			ZVAL_DEREF(val);
 			spl_object_storage_attach(intern, Z_OBJ_P(key), val);
 			key = NULL;
 		} else {
