@@ -2392,6 +2392,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (i + 1) <= end
 						 && (opline+1)->opcode == ZEND_SEND_VAL
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
 							res_use_info = -1;
@@ -2446,6 +2447,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (i + 1) <= end
 						 && (opline+1)->opcode == ZEND_SEND_VAL
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
 							res_use_info = -1;
@@ -2504,6 +2506,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						 && (i + 1) <= end
 						 && (opline+1)->opcode == ZEND_SEND_VAL
 						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op2_type != IS_CONST
 						 && (opline+1)->op1.var == opline->result.var) {
 							i++;
 							res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
@@ -2727,6 +2730,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							 && (i + 1) <= end
 							 && (opline+1)->opcode == ZEND_SEND_VAL
 							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op2_type != IS_CONST
 							 && (opline+1)->op1.var == opline->result.var
 							 && (!(op1_info & MAY_HAVE_DTOR) || !(op1_info & MAY_BE_RC1))) {
 								i++;
