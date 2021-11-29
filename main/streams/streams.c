@@ -1495,9 +1495,9 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	 * result may be inaccurate, as the filter may inflate or deflate the
 	 * number of bytes that we can read.  In order to avoid an upsize followed
 	 * by a downsize of the buffer, overestimate by the step size (which is
-	 * 2K).  */
+	 * 8K).  */
 	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
-		max_len = ssbuf.sb.st_size + step;
+		max_len = MAX(ssbuf.sb.st_size - src->position, 0) + step;
 	} else {
 		max_len = step;
 	}
