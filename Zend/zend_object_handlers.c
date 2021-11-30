@@ -250,6 +250,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 	fci.size = sizeof(fci);
 	fci.retval = result;
+	fci.named_params = NULL;
 
 	do {
 		fci.object = zobj;
@@ -371,7 +372,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		fcic.called_scope = ce;
 		fcic.object = zobj;
 		fcic.function_handler->type = ZEND_USER_FUNCTION;
-		fci.named_params = NULL;
 		int tmp = zend_call_function(&fci, &fcic);
 
 		EG(fake_scope) = orig_fake_scope;
@@ -1779,6 +1779,7 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 	fci.param_count = 1;
 	fci.size = sizeof(fci);
 	fci.retval = &result;
+	fci.named_params = NULL;
 
 	do {
 		fci.object = zobj;
