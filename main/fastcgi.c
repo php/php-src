@@ -696,7 +696,7 @@ int fcgi_listen(const char *path, int backlog)
 				} else {
 					aip = php_network_getaddrinfo(host);
 				}
-				if (!aip || aip->ai_family != AF_INET || aip->ai_family != AF_INET6 || !aip->ai_addr) {
+				if (!aip || !aip->ai_addr) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
 					return -1;
 				} else if (aip->ai_next) {
