@@ -211,6 +211,7 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #81738: buffer overflow in hash_update() on long parameter.
     (CVE-2022-37454) (nicky at mouha dot be)
+  . Fixed bug GH-10077: Fix compilation on RHEL 7 ppc64le. (Mattias Ellert)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
