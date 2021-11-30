@@ -252,10 +252,13 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	fci.retval = result;
 	fci.named_params = NULL;
 
+	operator = "";
+	ZVAL_UNDEF(&left);
+
 	do {
 		fci.object = zobj;
 
-		Z_TYPE_INFO(left) = is_retry ? IS_FALSE : IS_TRUE;
+		ZVAL_BOOL(&left, !is_retry);
 
 		if (is_unary) {
 			fci.param_count = 0;
@@ -352,7 +355,7 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				Z_TYPE_INFO(left) = IS_FALSE;
 				is_retry = 1;
 				ZVAL_COPY_VALUE(&params[0], op1);
-				ZVAL_COPY_VALUE(&params[1], &left);
+				ZVAL_BOOL(&params[1], i_zend_is_true(&left));
 				continue;
 			}
 
