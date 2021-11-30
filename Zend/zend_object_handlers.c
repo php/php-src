@@ -385,8 +385,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		zend_result tmp = zend_call_function(&fci, &fcic);
 
 		zval_ptr_dtor(&left);
-		zval_ptr_dtor(&params[0]);
-		zval_ptr_dtor(&params[1]);
 
 		EG(fake_scope) = orig_fake_scope;
 
@@ -1788,8 +1786,8 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 	int resultLval;
 
 	zval params[1];
-	ZVAL_UNDEF(&params[0]);
 
+	//ZVAL_UNDEF(&result);
 	ZVAL_COPY_VALUE(&params[0], o2);
 
 	fci.param_count = 1;
@@ -1812,9 +1810,6 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 				continue;
 			}
 
-			zval_ptr_dtor(&result);
-			zval_ptr_dtor(&params[0]);
-
 			if (Z_TYPE_P(o2) == IS_OBJECT &&
 					Z_OBJCE_P(o2)->type == ZEND_INTERNAL_CLASS &&
 					Z_OBJ_HANDLER_P(o2, compare) != zend_std_user_compare_objects) {
@@ -1830,7 +1825,6 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 		//fcic.function_handler->type = ZEND_USER_FUNCTION;
 		int tmp = zend_call_function(&fci, &fcic);
 
-		zval_ptr_dtor(&params[0]);
 		EG(fake_scope) = orig_fake_scope;
 
 		if (tmp == SUCCESS) {
@@ -1840,10 +1834,8 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 			resultLval = (resultLval < -1 ? -1 : resultLval);
 			/* Reverse for right hand operand */
 			resultLval = (is_retry ? resultLval*-1 : resultLval);
-			zval_ptr_dtor(&result);
 			return resultLval;
 		} else {
-			zval_ptr_dtor(&result);
 			return ZEND_UNCOMPARABLE;
 		}
 	} while(1);
