@@ -381,7 +381,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		fcic.called_scope = ce;
 		fcic.object = zobj;
-		//fcic.function_handler->type = ZEND_USER_FUNCTION;
 		zend_result tmp = zend_call_function(&fci, &fcic);
 
 		zval_ptr_dtor(&left);
@@ -1822,7 +1821,6 @@ ZEND_API int zend_std_user_compare_objects(zval *o1, zval *o2) /* {{{ */
 		fci.params = params;
 		fcic.called_scope = ce;
 		fcic.object = zobj;
-		//fcic.function_handler->type = ZEND_USER_FUNCTION;
 		int tmp = zend_call_function(&fci, &fcic);
 
 		EG(fake_scope) = orig_fake_scope;
