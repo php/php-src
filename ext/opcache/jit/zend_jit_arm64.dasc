@@ -8141,7 +8141,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					}
 				} else if (false_label != (uint32_t)-1) {
 					|	b =>false_label
-				} else if (op1_info & MAY_BE_LONG) {
+				} else if ((op1_info & MAY_BE_LONG) || (op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 					|	b >9
 				}
 			}
@@ -8187,6 +8187,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+	    |2:
 		|	fmov FPR0, xzr  // TODO: "movi d0, #0" is not recognized by DynASM/arm64
 		|	DOUBLE_CMP ZREG_FPR0, op1_addr, ZREG_TMP1, ZREG_FPTMP
 
