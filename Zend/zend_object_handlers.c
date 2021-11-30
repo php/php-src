@@ -266,10 +266,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			fci.param_count = 2;
 			if (zobj == Z_OBJ_P(op1)) {
 				ZVAL_COPY_VALUE(&params[0], op2);
-				ZVAL_COPY_VALUE(&params[1], &left);
+				ZVAL_BOOL(&params[1], i_zend_is_true(&left));
 			} else {
 				ZVAL_COPY_VALUE(&params[0], op1);
-				ZVAL_COPY_VALUE(&params[1], &left);
+				ZVAL_BOOL(&params[1], i_zend_is_true(&left));
 			}
 			fci.params = params;
 		}
