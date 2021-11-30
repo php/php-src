@@ -4302,6 +4302,9 @@ PHP_FUNCTION(array_column)
 	array_init_size(return_value, zend_hash_num_elements(input));
 	if (!group_is_null && group_bool && !index_is_null) {
 
+		zval *group_entry;
+		zval ft;
+
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
 
@@ -4314,41 +4317,25 @@ PHP_FUNCTION(array_column)
 
 			zval rv;
 			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
-			zval *group_entry;
 
 			convert_to_string(keyval);
 			group_entry = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(keyval));
 
 			if (group_entry != NULL) {
-				if (Z_TYPE_P(colval) == IS_ARRAY) {
-					add_index_array(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_ARRVAL_P(colval));
-				} else if (Z_TYPE_P(colval) == IS_STRING) {
-					add_index_str(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_STR_P(colval));
-				} else {
-					add_index_long(group_entry, Z_ARRVAL_P(group_entry)->nNumUsed, Z_LVAL_P(colval));
-				}
-
-				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, group_entry);
-				zval_ptr_dtor(colval);
-				zval_ptr_dtor(keyval);
+				ZVAL_COPY_VALUE(&ft, group_entry);
 			} else {
-				zval ft;
-				array_init_size(&ft, 1);
-				if (Z_TYPE_P(colval) == IS_ARRAY) {
-					add_index_array(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_ARRVAL_P(colval));
-				} else if (Z_TYPE_P(colval) == IS_STRING) {
-					add_index_str(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_STR_P(colval));
-				} else {
-					add_index_long(&ft, Z_ARRVAL_P(&ft)->nNumUsed, Z_LVAL_P(colval));
-				}
-				array_set_zval_key(Z_ARRVAL_P(return_value), keyval, &ft);
-				ZVAL_UNDEF(&ft);
-				zval_ptr_dtor(&ft);
-				zval_ptr_dtor(colval);
+				array_init(&ft);
+				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(keyval), &ft);
+			}
+
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(&ft), colval);
+
+			if (keyval) {
 				zval_ptr_dtor(keyval);
 			}
 
 		} ZEND_HASH_FOREACH_END();
+
 	} else {
 		/* Index param is not passed */
 		if (index_is_null) {
