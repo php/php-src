@@ -570,6 +570,8 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
+	zend_execute_data *execute_data;
+	const zend_op *opline;
 
 	if (Z_TYPE_P(dim) == IS_REFERENCE) {
 		dim = Z_REFVAL_P(dim);
@@ -583,9 +585,15 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			offset_key = Z_STR_P(dim);
 			goto str_index;
 		case IS_UNDEF:
-			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
-				if (EG(exception)) {
-					undef_result_after_exception();
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			if (!zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
 				}
 				return NULL;
 			}
@@ -636,6 +644,8 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 	zend_ulong hval;
 	zend_string *offset_key;
 	zval *retval;
+	zend_execute_data *execute_data;
+	const zend_op *opline;
 
 	if (Z_TYPE_P(dim) == IS_REFERENCE) {
 		dim = Z_REFVAL_P(dim);
@@ -649,9 +659,15 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			offset_key = Z_STR_P(dim);
 			goto str_index;
 		case IS_UNDEF:
-			if (!zend_jit_undefined_op_helper_write(ht, EG(current_execute_data)->opline->op2.var)) {
-				if (EG(exception)) {
-					undef_result_after_exception();
+			execute_data = EG(current_execute_data);
+			opline = EX(opline);
+			if (!zend_jit_undefined_op_helper_write(ht, opline->op2.var)) {
+				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+					if (EG(exception)) {
+						ZVAL_UNDEF(EX_VAR(opline->result.var));
+					} else {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
 				}
 				return NULL;
 			}
