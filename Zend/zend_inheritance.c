@@ -2638,6 +2638,20 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			zend_update_inherited_handler(__debugInfo);
 			zend_update_inherited_handler(__serialize);
 			zend_update_inherited_handler(__unserialize);
+			zend_update_inherited_handler(__add);
+			zend_update_inherited_handler(__sub);
+			zend_update_inherited_handler(__mul);
+			zend_update_inherited_handler(__div);
+			zend_update_inherited_handler(__mod);
+			zend_update_inherited_handler(__pow);
+			zend_update_inherited_handler(__bitwiseand);
+			zend_update_inherited_handler(__bitwiseor);
+			zend_update_inherited_handler(__bitwisexor);
+			zend_update_inherited_handler(__bitwisenot);
+			zend_update_inherited_handler(__bitwiseshiftleft);
+			zend_update_inherited_handler(__bitwiseshiftright);
+			zend_update_inherited_handler(__equals);
+			zend_update_inherited_handler(__compareto);
 		}
 	}
 

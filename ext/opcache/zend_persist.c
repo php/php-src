@@ -1216,6 +1216,90 @@ void zend_update_parent_ce(zend_class_entry *ce)
 			ce->__debugInfo = tmp;
 		}
 	}
+	if (ce->__add) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__add);
+		if (tmp != NULL) {
+			ce->__add = tmp;
+		}
+	}
+	if (ce->__sub) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__sub);
+		if (tmp != NULL) {
+			ce->__sub = tmp;
+		}
+	}
+	if (ce->__mul) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__mul);
+		if (tmp != NULL) {
+			ce->__mul = tmp;
+		}
+	}
+	if (ce->__div) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__div);
+		if (tmp != NULL) {
+			ce->__div = tmp;
+		}
+	}
+	if (ce->__mod) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__mod);
+		if (tmp != NULL) {
+			ce->__mod = tmp;
+		}
+	}
+	if (ce->__pow) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__pow);
+		if (tmp != NULL) {
+			ce->__pow = tmp;
+		}
+	}
+	if (ce->__bitwiseand) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwiseand);
+		if (tmp != NULL) {
+			ce->__bitwiseand = tmp;
+		}
+	}
+	if (ce->__bitwiseor) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwiseor);
+		if (tmp != NULL) {
+			ce->__bitwiseor = tmp;
+		}
+	}
+	if (ce->__bitwisexor) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwisexor);
+		if (tmp != NULL) {
+			ce->__bitwisexor = tmp;
+		}
+	}
+	if (ce->__bitwisenot) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwisenot);
+		if (tmp != NULL) {
+			ce->__bitwisenot = tmp;
+		}
+	}
+	if (ce->__bitwiseshiftleft) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwiseshiftleft);
+		if (tmp != NULL) {
+			ce->__bitwiseshiftleft = tmp;
+		}
+	}
+	if (ce->__bitwiseshiftright) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__bitwiseshiftright);
+		if (tmp != NULL) {
+			ce->__bitwiseshiftright = tmp;
+		}
+	}
+	if (ce->__equals) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__equals);
+		if (tmp != NULL) {
+			ce->__equals = tmp;
+		}
+	}
+	if (ce->__compareto) {
+		zend_function *tmp = zend_shared_alloc_get_xlat_entry(ce->__compareto);
+		if (tmp != NULL) {
+			ce->__compareto = tmp;
+		}
+	}
 }
 
 static void zend_accel_persist_class_table(HashTable *class_table)

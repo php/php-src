@@ -869,6 +869,20 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__tostring);
 	SERIALIZE_PTR(ce->__callstatic);
 	SERIALIZE_PTR(ce->__debugInfo);
+	SERIALIZE_PTR(ce->__add);
+	SERIALIZE_PTR(ce->__sub);
+	SERIALIZE_PTR(ce->__mul);
+	SERIALIZE_PTR(ce->__div);
+	SERIALIZE_PTR(ce->__mod);
+	SERIALIZE_PTR(ce->__pow);
+	SERIALIZE_PTR(ce->__bitwiseand);
+	SERIALIZE_PTR(ce->__bitwiseor);
+	SERIALIZE_PTR(ce->__bitwisexor);
+	SERIALIZE_PTR(ce->__bitwisenot);
+	SERIALIZE_PTR(ce->__bitwiseshiftleft);
+	SERIALIZE_PTR(ce->__bitwiseshiftright);
+	SERIALIZE_PTR(ce->__equals);
+	SERIALIZE_PTR(ce->__compareto);
 
 	if (ce->iterator_funcs_ptr) {
 		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_new_iterator);
@@ -1660,6 +1674,20 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__tostring);
 	UNSERIALIZE_PTR(ce->__callstatic);
 	UNSERIALIZE_PTR(ce->__debugInfo);
+	UNSERIALIZE_PTR(ce->__add);
+	UNSERIALIZE_PTR(ce->__sub);
+	UNSERIALIZE_PTR(ce->__mul);
+	UNSERIALIZE_PTR(ce->__div);
+	UNSERIALIZE_PTR(ce->__mod);
+	UNSERIALIZE_PTR(ce->__pow);
+	UNSERIALIZE_PTR(ce->__bitwiseand);
+	UNSERIALIZE_PTR(ce->__bitwiseor);
+	UNSERIALIZE_PTR(ce->__bitwisexor);
+	UNSERIALIZE_PTR(ce->__bitwisenot);
+	UNSERIALIZE_PTR(ce->__bitwiseshiftleft);
+	UNSERIALIZE_PTR(ce->__bitwiseshiftright);
+	UNSERIALIZE_PTR(ce->__equals);
+	UNSERIALIZE_PTR(ce->__compareto);
 
 	if (ce->iterator_funcs_ptr) {
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr);

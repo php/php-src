@@ -2538,7 +2538,7 @@ static void zend_check_magic_method_unary_operator_overload(
 	zend_check_magic_method_return_type(ce, fptr, error_type, MAY_BE_OBJECT);
 }
 
-static void zend_check_magic_method_comparison_operator_overload(
+static void zend_check_magic_method_equality_operator_overload(
         const zend_class_entry *ce, const zend_function *fptr, int error_type)
 {
     zend_check_magic_method_args(1, ce, fptr, error_type);
@@ -2667,7 +2667,7 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (zend_string_equals_literal(lcname, ZEND_BWNOT_FUNC_NAME)) {
 		zend_check_magic_method_unary_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_EQ_FUNC_NAME)) {
-	    zend_check_magic_method_comparison_operator_overload(ce, fptr, error_type);
+	    zend_check_magic_method_equality_operator_overload(ce, fptr, error_type);
 	} else if (zend_string_equals_literal(lcname, ZEND_COMPARE_FUNC_NAME)) {
 	    zend_check_magic_method_args(1, ce, fptr, error_type);
 	    zend_check_magic_method_non_static(ce, fptr, error_type);
