@@ -1610,11 +1610,9 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	} else {
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(s);
-		}
+		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+		if (GC_DELREF(s) == 0) {
 			zend_string_efree(s);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1644,17 +1642,17 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(value) != IS_STRING)) {
+		zend_string *tmp;
+
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(s);
-		}
+		GC_ADDREF(s);
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 			zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
 		}
 		/* Convert to string, just the time to pick the 1st byte */
-		zend_string *tmp = zval_try_get_string_func(value);
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+		tmp = zval_try_get_string_func(value);
+		if (GC_DELREF(s) == 0) {
 			zend_string_efree(s);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1688,11 +1686,9 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
-			GC_ADDREF(s);
-		}
+		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
-		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+		if (GC_DELREF(s) == 0) {
 			zend_string_efree(s);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
