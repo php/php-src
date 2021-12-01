@@ -12,89 +12,103 @@ $ar = [
     ['id' => 6, 'name' => 'wael', 'score' => 'D', 's' => '1'],
 ];
 
-print_r(array_column($ar, null, 'id', true));
+var_dump(array_column($ar, null, 'id', true));
 ?>
 --EXPECT--
-Array
-(
-    [1] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 1
-                    [name] => hassan
-                    [score] => A
-                    [s] => 1
-                )
-
-        )
-
-    [2] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 2
-                    [name] => hassan
-                    [score] => B
-                    [s] => 2
-                )
-
-        )
-
-    [3] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 3
-                    [name] => ahmed
-                    [score] => C
-                    [s] => 1
-                )
-
-        )
-
-    [4] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 4
-                    [name] => moustafa
-                    [score] => D
-                    [s] => 2
-                )
-
-        )
-
-    [5] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 5
-                    [name] => hassan
-                    [score] => A
-                    [s] => 3
-                )
-
-        )
-
-    [6] => Array
-        (
-            [0] => Array
-                (
-                    [id] => 6
-                    [name] => wael
-                    [score] => A
-                    [s] => 3
-                )
-
-            [1] => Array
-                (
-                    [id] => 6
-                    [name] => wael
-                    [score] => D
-                    [s] => 1
-                )
-
-        )
-
-)
+array(6) {
+  [1]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(1)
+      ["name"]=>
+      string(6) "hassan"
+      ["score"]=>
+      string(1) "A"
+      ["s"]=>
+      string(1) "1"
+    }
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(2)
+      ["name"]=>
+      string(6) "hassan"
+      ["score"]=>
+      string(1) "B"
+      ["s"]=>
+      string(1) "2"
+    }
+  }
+  [3]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(3)
+      ["name"]=>
+      string(5) "ahmed"
+      ["score"]=>
+      string(1) "C"
+      ["s"]=>
+      string(1) "1"
+    }
+  }
+  [4]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(4)
+      ["name"]=>
+      string(8) "moustafa"
+      ["score"]=>
+      string(1) "D"
+      ["s"]=>
+      string(1) "2"
+    }
+  }
+  [5]=>
+  array(1) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(5)
+      ["name"]=>
+      string(6) "hassan"
+      ["score"]=>
+      string(1) "A"
+      ["s"]=>
+      string(1) "3"
+    }
+  }
+  [6]=>
+  array(2) {
+    [0]=>
+    array(4) {
+      ["id"]=>
+      int(6)
+      ["name"]=>
+      string(4) "wael"
+      ["score"]=>
+      string(1) "A"
+      ["s"]=>
+      string(1) "3"
+    }
+    [1]=>
+    array(4) {
+      ["id"]=>
+      int(6)
+      ["name"]=>
+      string(4) "wael"
+      ["score"]=>
+      string(1) "D"
+      ["s"]=>
+      string(1) "1"
+    }
+  }
+}

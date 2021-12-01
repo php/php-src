@@ -4303,7 +4303,7 @@ PHP_FUNCTION(array_column)
 	if (!group_is_null && group_bool && !index_is_null) {
 
 		zval *group_entry;
-		zval ft;
+		zval fpal;
 
 		ZEND_HASH_FOREACH_VAL(input, data) {
 			ZVAL_DEREF(data);
@@ -4318,21 +4318,29 @@ PHP_FUNCTION(array_column)
 			zval rv;
 			zval *keyval = array_column_fetch_prop(data, index_str, index_long, cache_slot_index, &rv);
 
-			convert_to_string(keyval);
-			group_entry = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(keyval));
-
-			if (group_entry != NULL) {
-				ZVAL_COPY_VALUE(&ft, group_entry);
-			} else {
-				array_init(&ft);
-				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(keyval), &ft);
-			}
-
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(&ft), colval);
-
 			if (keyval) {
+
+				if (Z_TYPE_P(keyval) == IS_LONG) {
+					group_entry = zend_hash_index_find(Z_ARRVAL_P(return_value), Z_LVAL_P(keyval));
+				} else {
+					group_entry = zend_symtable_find(Z_ARRVAL_P(return_value), Z_STR_P(keyval));
+				}
+
+				if (group_entry != NULL) {
+					ZVAL_COPY_VALUE(&fpal, group_entry);
+				} else {
+					array_init(&fpal);
+					array_set_zval_key(Z_ARRVAL_P(return_value), keyval, &fpal);
+					zval_ptr_dtor(&fpal);
+				}
+
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(&fpal), colval);
+
 				zval_ptr_dtor(keyval);
+			} else {
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), colval);
 			}
+
 
 		} ZEND_HASH_FOREACH_END();
 
