@@ -1947,6 +1947,11 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					(ssa_var_info[__var].type & MAY_BE_REF)				\
 						== (__type & MAY_BE_REF));						\
 				if (ssa_var_info[__var].type & ~__type) {				\
+					if ((ssa_var_info[__var].type & ~__type &			\
+							~(MAY_BE_RC1|MAY_BE_RCN)) == 0) {			\
+						ssa_var_info[__var].type |= __type;				\
+						break;											\
+					}													\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
 				}														\
@@ -2690,6 +2695,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			} else if (opline->opcode == ZEND_ASSIGN_STATIC_PROP) {
 				/* Nothing to do */
 			} else {
+				if (opline->opcode == ZEND_ASSIGN_OP && ssa_op->result_def >= 0 && (tmp & MAY_BE_RC1)) {
+					tmp |= MAY_BE_RCN;
+				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
@@ -4048,7 +4056,7 @@ static bool can_convert_to_double(
 	for (phi = var->phi_use_chain; phi; phi = zend_ssa_next_use_phi(ssa, var_num, phi)) {
 		/* Check that narrowing can actually be useful */
 		type = ssa->var_info[phi->ssa_var].type;
-		if (type & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+		if ((type & MAY_BE_ANY) & ~(MAY_BE_LONG|MAY_BE_DOUBLE)) {
 			return 0;
 		}
 
@@ -4395,8 +4403,10 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 		return FAILURE;
 	}
 
-	/* Narrowing integer initialization to doubles */
-	zend_type_narrowing(op_array, script, ssa, optimization_level);
+	if (optimization_level & ZEND_OPTIMIZER_NARROW_TO_DOUBLE) {
+		/* Narrowing integer initialization to doubles */
+		zend_type_narrowing(op_array, script, ssa, optimization_level);
+	}
 
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
@@ -4900,8 +4910,9 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_ROPE_END:
 			return t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT);
 		case ZEND_INIT_ARRAY:
-		case ZEND_ADD_ARRAY_ELEMENT:
 			return (opline->op2_type != IS_UNUSED) && (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		case ZEND_ADD_ARRAY_ELEMENT:
+			return (opline->op2_type == IS_UNUSED) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_STRLEN:
 			return (t1 & MAY_BE_ANY) != MAY_BE_STRING;
 		case ZEND_COUNT:

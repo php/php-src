@@ -46,6 +46,10 @@
 #include <sched.h>
 #endif
 
+#ifdef HAVE_FORKX
+#include <sys/fork.h>
+#endif
+
 #ifndef NSIG
 # define NSIG 32
 #endif
@@ -363,6 +367,11 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #ifdef RFTHREAD
 	REGISTER_LONG_CONSTANT("RFTHREAD",	RFTHREAD, CONST_CS | CONST_PERSISTENT);
 #endif
+#endif
+
+#ifdef HAVE_FORKX
+	REGISTER_LONG_CONSTANT("FORK_NOSIGCHLD", FORK_NOSIGCHLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FORK_WAITPID", FORK_WAITPID, CONST_CS | CONST_PERSISTENT);
 #endif
 }
 
@@ -1541,6 +1550,49 @@ PHP_FUNCTION(pcntl_rfork)
 			php_error_docref(NULL, E_WARNING, "Maximum process creations limit reached\n");
 		break;
 
+		default:
+			php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+	}
+
+	RETURN_LONG((zend_long) pid);
+}
+#endif
+/* }}} */
+
+#ifdef HAVE_FORKX
+/* {{{ proto bool pcntl_forkx(int flags)
+   More elaborated version of fork with the following settings.
+   FORK_WAITPID: forbid the parent process to wait for multiple pid but one only
+   FORK_NOSIGCHLD: SIGCHLD signal ignored when the child terminates */
+PHP_FUNCTION(pcntl_forkx)
+{
+	zend_long flags;
+	pid_t pid;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (flags < FORK_NOSIGCHLD || flags > FORK_WAITPID) {
+		zend_argument_value_error(1, "must be FORK_NOSIGCHLD or FORK_WAITPID");
+		RETURN_THROWS();
+	}
+
+	pid = forkx(flags);
+
+	if (pid == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case EAGAIN:
+			php_error_docref(NULL, E_WARNING, "Maximum process creations limit reached\n");
+		break;
+			case EPERM:
+			php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges\n");
+		break;
+			case ENOMEM:
+			php_error_docref(NULL, E_WARNING, "No swap space left\n");
+		break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}

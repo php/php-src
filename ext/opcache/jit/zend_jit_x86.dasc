@@ -8690,7 +8690,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 					}
 				} else if (false_label != (uint32_t)-1) {
 					|	jmp =>false_label
-				} else if (op1_info & MAY_BE_LONG) {
+				} else if ((op1_info & MAY_BE_LONG) || (op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 					|	jmp >9
 				}
 			}
@@ -8737,6 +8737,7 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 	}
 
 	if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
+		|2:
 		if (CAN_USE_AVX()) {
 			|	vxorps xmm0, xmm0, xmm0
 		} else {
@@ -15775,10 +15776,11 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 	uint32_t op1_info, op2_info;
 
 	switch (opline->opcode) {
-		case ZEND_QM_ASSIGN:
 		case ZEND_SEND_VAR:
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
+			return (opline->op2_type != IS_CONST);
+		case ZEND_QM_ASSIGN:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
 		case ZEND_IS_EQUAL:
@@ -15985,6 +15987,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			/* break missing intentionally */
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
+			if (opline->op2_type == IS_CONST) {
+				break;
+			}
 			if (ssa_op->op1_use == current_var) {
 				regset = ZEND_REGSET(ZREG_R0);
 				break;
@@ -16001,6 +16006,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			}
 			break;
 		case ZEND_SEND_VAR:
+			if (opline->op2_type == IS_CONST) {
+				break;
+			}
 			if (ssa_op->op1_use == current_var ||
 			    ssa_op->op1_def == current_var) {
 				regset = ZEND_REGSET_EMPTY;

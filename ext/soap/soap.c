@@ -30,7 +30,6 @@
 
 static int le_sdl = 0;
 int le_url = 0;
-static int le_service = 0;
 static int le_typemap = 0;
 
 typedef struct _soapHeader {
@@ -150,8 +149,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 #define Z_HEADER_MUST_UNDERSTAND_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 3))
 #define Z_HEADER_ACTOR_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 4))
 
-#define Z_SERVER_SERVICE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
-#define Z_SERVER_SOAP_FAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
+#define Z_SERVER_SOAP_FAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
 
 /* SoapFault extends Exception, so take those properties into account. */
 #define FAULT_PROP_START_OFFSET zend_ce_exception->default_properties_count
@@ -165,8 +163,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 
 #define FETCH_THIS_SERVICE(ss) \
 	{ \
-		zval *tmp = Z_SERVER_SERVICE_P(ZEND_THIS); \
-		ss = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service); \
+		ss = soap_server_object_fetch(Z_OBJ_P(ZEND_THIS))->service; \
 		if (!ss) { \
 			zend_throw_error(NULL, "Cannot fetch SoapServer object"); \
 			SOAP_SERVER_END_CODE(); \
@@ -180,6 +177,34 @@ static zend_class_entry* soap_fault_class_entry;
 static zend_class_entry* soap_header_class_entry;
 static zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_var_class_entry;
+
+static zend_object_handlers soap_server_object_handlers;
+
+typedef struct {
+	soapServicePtr service;
+	zend_object std;
+} soap_server_object;
+
+static inline soap_server_object *soap_server_object_fetch(zend_object *obj) {
+	return (soap_server_object *) ((char *) obj - XtOffsetOf(soap_server_object, std));
+}
+
+static zend_object *soap_server_object_create(zend_class_entry *ce)
+{
+	soap_server_object *obj = zend_object_alloc(sizeof(soap_server_object), ce);
+	zend_object_std_init(&obj->std, ce);
+	object_properties_init(&obj->std, ce);
+	obj->std.handlers = &soap_server_object_handlers;
+	return &obj->std;
+}
+
+static void soap_server_object_free(zend_object *obj) {
+	soap_server_object *server_obj = soap_server_object_fetch(obj);
+	if (server_obj->service) {
+		delete_service(server_obj->service);
+	}
+	zend_object_std_dtor(obj);
+}
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
@@ -361,11 +386,6 @@ static void delete_url_res(zend_resource *res)
 	delete_url(res->ptr);
 }
 
-static void delete_service_res(zend_resource *res)
-{
-	delete_service(res->ptr);
-}
-
 static void delete_hashtable_res(zend_resource *res)
 {
 	delete_hashtable(res->ptr);
@@ -386,6 +406,11 @@ PHP_MINIT_FUNCTION(soap)
 
 	/* Register SoapServer class */
 	soap_server_class_entry = register_class_SoapServer();
+	soap_server_class_entry->create_object = soap_server_object_create;
+
+	memcpy(&soap_server_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_server_object_handlers.offset = XtOffsetOf(soap_server_object, std);
+	soap_server_object_handlers.free_obj = soap_server_object_free;
 
 	/* Register SoapFault class */
 	soap_fault_class_entry = register_class_SoapFault(zend_ce_exception);
@@ -397,7 +422,6 @@ PHP_MINIT_FUNCTION(soap)
 
 	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
 	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);
-	le_service = zend_register_list_destructors_ex(delete_service_res, NULL, "SOAP service", module_number);
 	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
 
 	REGISTER_LONG_CONSTANT("SOAP_1_1", SOAP_1_1, CONST_CS | CONST_PERSISTENT);
@@ -832,7 +856,6 @@ PHP_METHOD(SoapServer, __construct)
 	soapServicePtr service;
 	zval *options = NULL;
 	zend_string *wsdl;
-	zend_resource *res;
 	int version = SOAP_1_1;
 	zend_long cache_wsdl;
 	HashTable *typemap_ht = NULL;
@@ -942,8 +965,8 @@ PHP_METHOD(SoapServer, __construct)
 		service->typemap = soap_create_typemap(service->sdl, typemap_ht);
 	}
 
-	res = zend_register_resource(service, le_service);
-	ZVAL_RES(Z_SERVER_SERVICE_P(ZEND_THIS), res);
+	soap_server_object *server_obj = soap_server_object_fetch(Z_OBJ_P(ZEND_THIS));
+	server_obj->service = service;
 
 	SOAP_SERVER_END_CODE();
 }
@@ -1824,7 +1847,7 @@ static zend_never_inline ZEND_COLD void soap_real_error_handler(int error_num, z
 			}
 			if (Z_OBJ_P(error_object) &&
 			    instanceof_function(Z_OBJCE_P(error_object), soap_server_class_entry) &&
-				(service = (soapServicePtr)zend_fetch_resource_ex(Z_SERVER_SERVICE_P(error_object), "service", le_service)) &&
+				(service = soap_server_object_fetch(Z_OBJ_P(error_object))->service) &&
 				!service->send_errors) {
 				buffer = zend_string_init("Internal Error", sizeof("Internal Error")-1, 0);
 			} else {

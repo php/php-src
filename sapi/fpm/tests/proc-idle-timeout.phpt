@@ -4,6 +4,7 @@ FPM: Process manager config pm.process_idle_timeout
 <?php
 include "skipif.inc";
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (!getenv("FPM_LOCAL_TESTS")) die("skip local test")
 ?>
 --FILE--
 <?php

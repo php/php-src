@@ -2140,10 +2140,37 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			value->str = ZSTR_EMPTY_ALLOC();
 			return IS_STRING;
 		case IS_DOUBLE:
-			value->lval = zend_dval_to_lval_safe(Z_DVAL_P(dim));
+			value->lval = zend_dval_to_lval(Z_DVAL_P(dim));
+			if (!zend_is_long_compatible(Z_DVAL_P(dim), value->lval)) {
+				/* The array may be destroyed while throwing the notice.
+				 * Temporarily increase the refcount to detect this situation. */
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					return IS_NULL;
+				}
+				if (EG(exception)) {
+					return IS_NULL;
+				}
+			}
 			return IS_LONG;
 		case IS_RESOURCE:
+			/* The array may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+				GC_ADDREF(ht);
+			}
 			zend_use_resource_as_offset(dim);
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+				zend_array_destroy(ht);
+				return IS_NULL;
+			}
+			if (EG(exception)) {
+				return IS_NULL;
+			}
 			value->lval = Z_RES_HANDLE_P(dim);
 			return IS_LONG;
 		case IS_FALSE:
@@ -2410,6 +2437,7 @@ try_array:
 		}
 	}
 	if (!is_list && EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		zend_string *str = Z_STR_P(container);
 		zend_long offset;
 
 try_string_offset:
@@ -2435,14 +2463,34 @@ try_string_offset:
 					return;
 				}
 				case IS_UNDEF:
+					/* The string may be destroyed while throwing the notice.
+					 * Temporarily increase the refcount to detect this situation. */
+					if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE)) {
+						GC_ADDREF(str);
+					}
 					ZVAL_UNDEFINED_OP2();
+					if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
+						zend_string_release_ex(str, 0);
+						ZVAL_NULL(result);
+						return;
+					}
 					ZEND_FALLTHROUGH;
 				case IS_DOUBLE:
 				case IS_NULL:
 				case IS_FALSE:
 				case IS_TRUE:
 					if (type != BP_VAR_IS) {
+						/* The string may be destroyed while throwing the notice.
+						 * Temporarily increase the refcount to detect this situation. */
+						if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE)) {
+							GC_ADDREF(str);
+						}
 						zend_error(E_WARNING, "String offset cast occurred");
+						if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
+							zend_string_release_ex(str, 0);
+							ZVAL_NULL(result);
+							return;
+						}
 					}
 					break;
 				case IS_REFERENCE:
@@ -2460,7 +2508,7 @@ try_string_offset:
 		}
 		out:
 
-		if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
+		if (UNEXPECTED(ZSTR_LEN(str) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 			if (type != BP_VAR_IS) {
 				zend_error(E_WARNING, "Uninitialized string offset " ZEND_LONG_FMT, offset);
 				ZVAL_EMPTY_STRING(result);
@@ -2472,8 +2520,8 @@ try_string_offset:
 			zend_long real_offset;
 
 			real_offset = (UNEXPECTED(offset < 0)) /* Handle negative offset */
-				? (zend_long)Z_STRLEN_P(container) + offset : offset;
-			c = (zend_uchar)Z_STRVAL_P(container)[real_offset];
+				? (zend_long)ZSTR_LEN(str) + offset : offset;
+			c = (zend_uchar)ZSTR_VAL(str)[real_offset];
 
 			ZVAL_CHAR(result, c);
 		}
