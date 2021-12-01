@@ -648,6 +648,11 @@ void php_get_windows_cpu(char *buf, int bufsize)
 			snprintf(buf, bufsize, "AMD64");
 			break;
 #endif
+#if defined(PROCESSOR_ARCHITECTURE_ARM64)
+		case PROCESSOR_ARCHITECTURE_ARM64 :
+			snprintf(buf, bufsize, "ARM64");
+			break;
+#endif
 		case PROCESSOR_ARCHITECTURE_UNKNOWN :
 		default:
 			snprintf(buf, bufsize, "Unknown");
