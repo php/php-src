@@ -517,7 +517,7 @@ extern "C++" {
 #ifdef __SSSE3__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSSE3_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
 #endif
@@ -542,7 +542,7 @@ extern "C++" {
 #ifdef __SSE4_2__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
@@ -567,7 +567,7 @@ extern "C++" {
 #ifdef __PCLMUL__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_PCLMUL_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_PCLMUL)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_PCLMUL_RESOLVER 1
 #endif
@@ -593,7 +593,7 @@ extern "C++" {
 #if defined(ZEND_INTRIN_SSE4_2_NATIVE) && defined(ZEND_INTRIN_PCLMUL_NATIVE)
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2) && defined(PHP_HAVE_PCLMUL)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER 1
 #endif
@@ -618,7 +618,7 @@ extern "C++" {
 
 #ifdef __AVX2__
 # define ZEND_INTRIN_AVX2_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 # define ZEND_INTRIN_AVX2_RESOLVER 1
 #endif
 
