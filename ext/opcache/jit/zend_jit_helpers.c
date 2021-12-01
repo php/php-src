@@ -936,13 +936,32 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result)
 {
-	zend_string *old_str;
 	zend_uchar c;
 	size_t string_len;
 	zend_long offset;
+	zend_string *s;
+
+	/* separate string */
+	if (Z_REFCOUNTED_P(str) && Z_REFCOUNT_P(str) == 1) {
+		s = Z_STR_P(str);
+	} else {
+		s = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		ZSTR_H(s) = ZSTR_H(Z_STR_P(str));
+		ZVAL_NEW_STR(str, s);
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
+		if (GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (result) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(result)) {
 				ZVAL_UNDEF(result);
@@ -952,7 +971,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
-	if (offset < -(zend_long)Z_STRLEN_P(str)) {
+	if (offset < -(zend_long)ZSTR_LEN(s)) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
 		if (result) {
@@ -962,8 +981,35 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 
 	if (Z_TYPE_P(value) != IS_STRING) {
+		zend_string *tmp;
+
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_ADDREF(s);
+
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			const zend_op *op_data = EG(current_execute_data)->opline + 1;
+			ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
+			zend_jit_undefined_op_helper(op_data->op1.var);
+			value = &EG(uninitialized_zval);
+		}
+
 		/* Convert to string, just the time to pick the 1st byte */
-		zend_string *tmp = zval_try_get_string_func(value);
+		tmp = zval_try_get_string_func(value);
+
+		if (GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (result) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
+		if (UNEXPECTED(!tmp)) {
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
 
 		if (UNEXPECTED(!tmp)) {
 			if (result) {
@@ -991,27 +1037,37 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 			return;
 		}
 
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
+		if (GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (result) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
+		/* Illegal offset assignment */
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
 	}
 
 	if (offset < 0) { /* Handle negative offset */
-		offset += (zend_long)Z_STRLEN_P(str);
+		offset += (zend_long)ZSTR_LEN(s);
 	}
 
-	if ((size_t)offset >= Z_STRLEN_P(str)) {
+	if ((size_t)offset >= ZSTR_LEN(s)) {
 		/* Extend string if needed */
-		zend_long old_len = Z_STRLEN_P(str);
-		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
-		Z_TYPE_INFO_P(str) = IS_STRING_EX;
+		zend_long old_len = ZSTR_LEN(s);
+		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
-	} else if (!Z_REFCOUNTED_P(str)) {
-		old_str = Z_STR_P(str);
-		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
-		Z_TYPE_INFO_P(str) = IS_STRING_EX;
-		zend_string_release(old_str);
 	} else {
-		SEPARATE_STRING(str);
 		zend_string_forget_hash_val(Z_STR_P(str));
 	}
 
@@ -1112,6 +1168,11 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_rw_helper(zval *object_ptr, zva
 
 static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim, zval *value, zval *result)
 {
+	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) && EXPECTED(dim != NULL)) {
+		zend_assign_to_string_offset(object_ptr, dim, value, result);
+		return;
+	}
+
 	if (dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 		const zend_op *opline = EG(current_execute_data)->opline;
 		zend_jit_undefined_op_helper(opline->op2.var);
@@ -1136,13 +1197,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
-		if (!dim) {
-			zend_throw_error(NULL, "[] operator not supported for strings");
-			if (result) {
-				ZVAL_UNDEF(result);
-			}
-		} else {
-			zend_assign_to_string_offset(object_ptr, dim, value, result);
+		zend_throw_error(NULL, "[] operator not supported for strings");
+		if (result) {
+			ZVAL_UNDEF(result);
 		}
 	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
 		zend_false_to_array_deprecated();
