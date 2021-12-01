@@ -1448,9 +1448,8 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
 	zend_ssa_block *ssa_block = &ssa->blocks[i];
-	int *predecessors;
 	zend_ssa_phi *phi;
-	int j, s;
+	int j;
 
 	block->flags &= ~ZEND_BB_REACHABLE;
 
@@ -1469,6 +1468,16 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 		zend_ssa_remove_defs_of_instr(ssa, &ssa->ops[j]);
 		zend_ssa_remove_instr(ssa, &op_array->opcodes[j], &ssa->ops[j]);
 	}
+
+	zend_ssa_remove_block_from_cfg(ssa, i);
+}
+/* }}} */
+
+void zend_ssa_remove_block_from_cfg(zend_ssa *ssa, int i) /* {{{ */
+{
+	zend_basic_block *block = &ssa->cfg.blocks[i];
+	int *predecessors;
+	int j, s;
 
 	for (s = 0; s < block->successors_count; s++) {
 		zend_ssa_remove_predecessor(ssa, i, block->successors[s]);

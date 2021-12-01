@@ -224,10 +224,11 @@ static uint32_t cleanup_loop_var_free_block(scdf_ctx *scdf, zend_basic_block *bl
 	zend_ssa *ssa = scdf->ssa;
 	const zend_op_array *op_array = scdf->op_array;
 	const zend_cfg *cfg = &ssa->cfg;
+	int block_num = block - cfg->blocks;
 	uint32_t removed_ops = 0;
 
 	/* Removes phi nodes */
-	for (zend_ssa_phi *phi = ssa->blocks[block - cfg->blocks].phis; phi; phi = phi->next) {
+	for (zend_ssa_phi *phi = ssa->blocks[block_num].phis; phi; phi = phi->next) {
 		zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
 		zend_ssa_remove_phi(ssa, phi);
 	}
@@ -235,7 +236,8 @@ static uint32_t cleanup_loop_var_free_block(scdf_ctx *scdf, zend_basic_block *bl
 	for (uint32_t i = block->start; i < block->start + block->len; i++) {
 		zend_op *opline = &op_array->opcodes[i];
 		zend_ssa_op *ssa_op = &scdf->ssa->ops[i];
-		if (is_live_loop_var_free(scdf, opline, ssa_op)) {
+		if (opline->opcode == ZEND_NOP
+		 || is_live_loop_var_free(scdf, opline, ssa_op)) {
 			continue;
 		}
 
@@ -243,10 +245,11 @@ static uint32_t cleanup_loop_var_free_block(scdf_ctx *scdf, zend_basic_block *bl
 		 * in the block. */
 		zend_ssa_remove_defs_of_instr(ssa, ssa_op);
 		zend_ssa_remove_instr(ssa, opline, ssa_op);
+		removed_ops++;
 	}
 
-	/* This block has no predecessors anymore. */
-	block->predecessors_count = 0;
+	zend_ssa_remove_block_from_cfg(ssa, block_num);
+
 	return removed_ops;
 }
 
