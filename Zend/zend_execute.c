@@ -1368,44 +1368,40 @@ static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type 
 	zend_long offset;
 
 try_again:
-	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch(Z_TYPE_P(dim)) {
-			case IS_STRING:
-			{
-				bool trailing_data = false;
-				/* For BC reasons we allow errors so that we can warn on leading numeric string */
-				if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
-						/* allow errors */ true, NULL, &trailing_data)) {
-					if (UNEXPECTED(trailing_data) && type != BP_VAR_UNSET) {
-						zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-					}
-					return offset;
+	switch(Z_TYPE_P(dim)) {
+		case IS_LONG:
+			return Z_LVAL_P(dim);
+		case IS_STRING:
+		{
+			bool trailing_data = false;
+			/* For BC reasons we allow errors so that we can warn on leading numeric string */
+			if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+					/* allow errors */ true, NULL, &trailing_data)) {
+				if (UNEXPECTED(trailing_data) && type != BP_VAR_UNSET) {
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
 				}
-				zend_illegal_string_offset(dim);
-				return 0;
+				return offset;
 			}
-			case IS_UNDEF:
-				ZVAL_UNDEFINED_OP2();
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				zend_error(E_WARNING, "String offset cast occurred");
-				break;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_again;
-			default:
-				zend_illegal_string_offset(dim);
-				return 0;
+			zend_illegal_string_offset(dim);
+			return 0;
 		}
-
-		offset = zval_get_long_func(dim);
-	} else {
-		offset = Z_LVAL_P(dim);
+		case IS_UNDEF:
+			ZVAL_UNDEFINED_OP2();
+		case IS_DOUBLE:
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			zend_error(E_WARNING, "String offset cast occurred");
+			break;
+		case IS_REFERENCE:
+			dim = Z_REFVAL_P(dim);
+			goto try_again;
+		default:
+			zend_illegal_string_offset(dim);
+			return 0;
 	}
 
-	return offset;
+	return zval_get_long_func(dim);
 }
 
 static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
@@ -1535,17 +1531,43 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	zend_uchar c;
 	size_t string_len;
 	zend_long offset;
+	zend_string *s;
 
-	offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
-	/* Illegal offset assignment */
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-		}
-		return;
+	/* separate string */
+	if (Z_REFCOUNTED_P(str) && Z_REFCOUNT_P(str) == 1) {
+		s = Z_STR_P(str);
+	} else {
+		s = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		ZSTR_H(s) = ZSTR_H(Z_STR_P(str));
+		ZVAL_NEW_STR(str, s);
 	}
 
-	if (offset < -(zend_long)Z_STRLEN_P(str)) {
+	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
+		offset = Z_LVAL_P(dim);
+	} else {
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
+			GC_ADDREF(s);
+		}
+		offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			return;
+		}
+		/* Illegal offset assignment */
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			return;
+		}
+	}
+
+	if (UNEXPECTED(offset < -(zend_long)ZSTR_LEN(s))) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset " ZEND_LONG_FMT, offset);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1554,9 +1576,28 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		return;
 	}
 
-	if (Z_TYPE_P(value) != IS_STRING) {
+	if (offset < 0) { /* Handle negative offset */
+		offset += (zend_long)ZSTR_LEN(s);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(value) != IS_STRING)) {
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
+			GC_ADDREF(s);
+		}
+		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+			zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+		}
 		/* Convert to string, just the time to pick the 1st byte */
 		zend_string *tmp = zval_try_get_string_func(value);
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			return;
+		}
 		if (UNEXPECTED(!tmp)) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -1572,7 +1613,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
 	}
 
-	if (string_len != 1) {
+	if (UNEXPECTED(string_len != 1)) {
 		if (string_len == 0) {
 			/* Error on empty input string */
 			zend_throw_error(NULL, "Cannot assign an empty string to a string offset");
@@ -1582,24 +1623,34 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 			return;
 		}
 
+		/* The string may be destroyed while throwing the notice.
+		 * Temporarily increase the refcount to detect this situation. */
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE)) {
+			GC_ADDREF(s);
+		}
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
+		if (!(GC_FLAGS(s) & IS_ARRAY_IMMUTABLE) && GC_DELREF(s) == 0) {
+			zend_string_efree(s);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			return;
+		}
+		/* Illegal offset assignment */
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
+			}
+			return;
+		}
 	}
 
-	if (offset < 0) { /* Handle negative offset */
-		offset += (zend_long)Z_STRLEN_P(str);
-	}
-
-	if ((size_t)offset >= Z_STRLEN_P(str)) {
+	if ((size_t)offset >= ZSTR_LEN(s)) {
 		/* Extend string if needed */
-		zend_long old_len = Z_STRLEN_P(str);
-		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), (size_t)offset + 1, 0));
+		zend_long old_len = ZSTR_LEN(s);
+		ZVAL_NEW_STR(str, zend_string_extend(s, (size_t)offset + 1, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
-	} else if (!Z_REFCOUNTED_P(str)) {
-		ZVAL_NEW_STR(str, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
-	} else if (Z_REFCOUNT_P(str) > 1) {
-		Z_DELREF_P(str);
-		ZVAL_NEW_STR(str, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
 	} else {
 		zend_string_forget_hash_val(Z_STR_P(str));
 	}
