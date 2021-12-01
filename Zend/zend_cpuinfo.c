@@ -55,8 +55,15 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 #endif
 }
 # endif
-#elif defined(ZEND_WIN32) && !defined(__clang__)
-# include <intrin.h>
+#elif defined(ZEND_WIN32)
+# if defined(_M_ARM64)
+#  include <intrin.h>
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+	// TODO: use registry to do this
+	cpuinfo->eax = 0;
+}
+# elif !defined(__clang__)
+#  include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	int regs[4];
 
@@ -67,6 +74,7 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 	cpuinfo->ecx = regs[2];
 	cpuinfo->edx = regs[3];
 }
+# endif
 #else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	cpuinfo->eax = 0;
