@@ -2592,8 +2592,8 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				FREE_OP_DATA();
 				UNDEF_RESULT();
 			} else {
-				dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
-				value = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
+				dim = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+				value = GET_OP_DATA_ZVAL_PTR_UNDEF(BP_VAR_R);
 				zend_assign_to_string_offset(object_ptr, dim, value OPLINE_CC EXECUTE_DATA_CC);
 				FREE_OP_DATA();
 			}

@@ -516,6 +516,17 @@ $op_data_get_zval_ptr = array(
     "TMPVARCV" => "???",
 );
 
+$op_data_get_zval_ptr_undef = array(
+    "ANY"      => "get_op_data_zval_ptr_undef((opline+1)->op1_type, (opline+1)->op1)",
+    "TMP"      => "_get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC)",
+    "VAR"      => "_get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC)",
+    "CONST"    => "RT_CONSTANT((opline+1), (opline+1)->op1)",
+    "UNUSED"   => "NULL",
+    "CV"       => "EX_VAR((opline+1)->op1.var)",
+    "TMPVAR"   => "_get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC)",
+    "TMPVARCV" => "EX_VAR((opline+1)->op1.var)",
+);
+
 $op_data_get_zval_ptr_deref = array(
     "ANY"      => "get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1)",
     "TMP"      => "_get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC)",
@@ -721,7 +732,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         $op1_free_unfetched, $op2_free_unfetched,
         $op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
         $op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
-        $op_data_type, $op_data_get_zval_ptr,
+        $op_data_type, $op_data_get_zval_ptr, $op_data_get_zval_ptr_undef,
         $op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
         $op_data_free_op, $op_data_free_op_var_ptr, $op_data_free_unfetched;
 
@@ -765,6 +776,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/^#(\s*)elif\s+0\s*&&.*[^\\\\]$/m" => "#\\1elif 0",
         "/OP_DATA_TYPE/" => $op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+        "/GET_OP_DATA_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op_data_get_zval_ptr_undef[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA\(\)/" => $op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
