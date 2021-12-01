@@ -2470,7 +2470,7 @@ try_string_offset:
 					}
 					ZVAL_UNDEFINED_OP2();
 					if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
-						zend_string_release_ex(str, 0);
+						zend_string_efree(str);
 						ZVAL_NULL(result);
 						return;
 					}
@@ -2487,7 +2487,7 @@ try_string_offset:
 						}
 						zend_error(E_WARNING, "String offset cast occurred");
 						if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
-							zend_string_release_ex(str, 0);
+							zend_string_efree(str);
 							ZVAL_NULL(result);
 							return;
 						}
