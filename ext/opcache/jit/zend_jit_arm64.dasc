@@ -7267,7 +7267,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 					}
 					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_IS_LARGER_OR_EQUAL:
 					if (swap) {
 						|	cset REG0w, ls
 					    |	add REG0w, REG0w, #2
