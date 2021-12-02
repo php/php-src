@@ -793,7 +793,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
-        return $this->name->getLast();
+        return strtr($this->name->toString(), "\\", "_");
     }
 
     public function getDeclaration(): string {
@@ -1152,8 +1152,8 @@ class FuncInfo {
             if ($namespace) {
                 // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
-                    "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    addslashes($namespace), $declarationName, $this->getArgInfoName());
+                    "\tZEND_NS_RAW_FENTRY(\"%s\", \"%s\", ZEND_FN(%s), %s, 0)\n",
+                    addslashes($namespace), substr((string)$this->name, strlen($namespace)+1), $declarationName, $this->getArgInfoName());
             } else {
                 return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
