@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.2
 
+- Reflection:
+  . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 
 02 Dec 2021, PHP 8.1.1
 
