@@ -286,6 +286,24 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 				return 1;
 			}
 			return 0;
+		case ZEND_IS_LARGER:
+			if (op1_max > op2_min) {
+				*result = 1;
+				return 1;
+			} else if (op1_min <= op2_max) {
+				*result = 0;
+				return 1;
+			}
+			return 0;
+		case ZEND_IS_LARGER_OR_EQUAL:
+			if (op1_max >= op2_min) {
+				*result = 1;
+				return 1;
+			} else if (op1_min < op2_max) {
+				*result = 0;
+				return 1;
+			}
+			return 0;
 		default:
 			ZEND_UNREACHABLE();
 	}
@@ -3409,6 +3427,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_IS_NOT_EQUAL:
 					case ZEND_IS_SMALLER:
 					case ZEND_IS_SMALLER_OR_EQUAL:
+					case ZEND_IS_LARGER:
+					case ZEND_IS_LARGER_OR_EQUAL:
 					case ZEND_CASE: {
 						res_addr = RES_REG_ADDR();
 						if ((opline->result_type & IS_TMP_VAR)

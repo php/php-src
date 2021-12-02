@@ -6571,6 +6571,20 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 						|	cset REG0w, le
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	cset REG0w, lt
+					} else {
+						|	cset REG0w, gt
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						|	cset REG0w, le
+					} else {
+						|	cset REG0w, ge
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -6634,6 +6648,36 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 						}
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						if (exit_addr) {
+							|	bge &exit_addr
+						} else {
+							|	bge => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	ble &exit_addr
+						} else {
+							|	ble => target_label
+						}
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						if (exit_addr) {
+							|	bgt &exit_addr
+						} else {
+							|	bgt => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	blt &exit_addr
+						} else {
+							|	blt => target_label
+						}
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -6694,6 +6738,36 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 						}
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						if (exit_addr) {
+							|	blt &exit_addr
+						} else {
+							|	blt => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	bgt &exit_addr
+						} else {
+							|	bgt => target_label
+						}
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						if (exit_addr) {
+							|	ble &exit_addr
+						} else {
+							|	ble => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	bge &exit_addr
+						} else {
+							|	bge => target_label
+						}
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -6721,6 +6795,20 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 						|	blt => target_label
 					} else {
 						|	bgt => target_label
+					}
+					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	bge => target_label
+					} else {
+						|	ble => target_label
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						|	bgt => target_label
+					} else {
+						|	blt => target_label
 					}
 					break;
 				default:
@@ -6754,6 +6842,20 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 					|	cset REG0w, ge
 				} else {
 					|	cset REG0w, le
+				}
+				break;
+			case ZEND_IS_LARGER:
+				if (swap) {
+					|	cset REG0w, lt
+				} else {
+					|	cset REG0w, gt
+				}
+				break;
+			case ZEND_IS_LARGER_OR_EQUAL:
+				if (swap) {
+					|	cset REG0w, le
+				} else {
+					|	cset REG0w, ge
 				}
 				break;
 			default:
@@ -6834,6 +6936,40 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						}
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						if (exit_addr) {
+							|	bvs &exit_addr
+							|	bhs &exit_addr
+						} else {
+							|	bvs => target_label
+							|	bhs => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	bls &exit_addr
+						} else {
+							|	bls => target_label
+						}
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						if (exit_addr) {
+							|	bvs &exit_addr
+							|	bhi &exit_addr
+						} else {
+							|	bvs => target_label
+							|	bhi => target_label
+						}
+					} else {
+						if (exit_addr) {
+							|	blo &exit_addr
+						} else {
+							|	blo => target_label
+						}
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -6905,6 +7041,44 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						|1:
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	bvs >1  // Always False if involving NaN
+						if (exit_addr) {
+							|	blo &exit_addr
+						} else {
+							|	blo => target_label
+						}
+						|1:
+					} else {
+						|	bvs >1
+						if (exit_addr) {
+							|	bhi	&exit_addr
+						} else {
+							|	bhi => target_label
+						}
+						|1:
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						|	bvs >1  // Always False if involving NaN
+						if (exit_addr) {
+							|	bls &exit_addr
+						} else {
+							|	bls => target_label
+						}
+						|1:
+					} else {
+						|	bvs >1
+						if (exit_addr) {
+							|	bhs &exit_addr
+						} else {
+							|	bhs => target_label
+						}
+						|1:
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -6935,6 +7109,22 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						|	blo => target_label
 					} else {
 						|	bhi => target_label
+					}
+					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	bvs => target_label
+						|	bhs => target_label
+					} else {
+						|	bls => target_label
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						|	bvs => target_label
+						|	bhi => target_label
+					} else {
+						|	blo => target_label
 					}
 					break;
 				default:
@@ -6981,6 +7171,30 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 						|	bhi => target_label
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					}
+					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					    |	bvs => target_label
+					    |	bhs => target_label
+					    |	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					    |	bls => target_label
+					    |	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					    |	bvs => target_label
+					    |	bhi => target_label
+					    |	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					    |	blo => target_label
+					    |	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
 					}
 					break;
 				default:
@@ -7037,6 +7251,38 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (swap) {
+						|	cset REG0w, lo
+					 	|	add REG0w, REG0w, #2
+					 	|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+					    |	bvs >1  // Always False if involving NaN
+					    |	blo => target_label
+					    |1:
+					} else {
+						|	bvs >1
+					 	|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					    |	bhi => target_label
+					    |1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	cset REG0w, ls
+					    |	add REG0w, REG0w, #2
+						|	SET_ZVAL_TYPE_INFO_FROM_REG res_addr, REG0w, TMP1
+					    |	bvs >1  // Always False if involving NaN
+					    |	bls => target_label
+					    |1:
+					} else {
+						|	bvs >1
+					 	|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE, TMP1w, TMP2
+					    |	bhs => target_label
+					    |1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE, TMP1w, TMP2
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -7085,6 +7331,30 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				||	} else {
 				|		bls >2
 				||	}
+				|1:
+				|	mov REG0, #IS_FALSE
+				|2:
+				break;
+			case ZEND_IS_LARGER:
+				|	bvs >1
+			 	|	mov REG0, #IS_TRUE
+			 	||	if (swap) {
+				|		blo >2
+			 	||	} else {
+				|		bhi >2
+			 	||	}
+				|1:
+				|	mov REG0, #IS_FALSE
+				|2:
+				break;
+			case ZEND_IS_LARGER_OR_EQUAL:
+				|	bvs >1
+			 	|	mov REG0, #IS_TRUE
+			 	||	if (swap) {
+				|		bls >2
+			 	||	} else {
+				|		bhs >2
+			 	||	}
 				|1:
 				|	mov REG0, #IS_FALSE
 				|2:
@@ -7157,6 +7427,12 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 				case ZEND_IS_SMALLER_OR_EQUAL:
 					|	cset REG0w, le
 					break;
+				case ZEND_IS_LARGER:
+					|	cset REG0w, gt
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					|	cset REG0w, ge
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -7195,6 +7471,20 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 						|	bgt => target_label
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (exit_addr) {
+						|	ble &exit_addr
+					} else {
+						|	ble => target_label
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (exit_addr) {
+						|	blt &exit_addr
+					} else {
+						|	blt => target_label
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -7230,6 +7520,20 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 						|	ble => target_label
 					}
 					break;
+				case ZEND_IS_LARGER:
+					if (exit_addr) {
+						|	bgt &exit_addr
+					} else {
+						|	bgt => target_label
+					}
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					if (exit_addr) {
+						|	bge &exit_addr
+					} else {
+						|	bge => target_label
+					}
+					break;
 				default:
 					ZEND_UNREACHABLE();
 			}
@@ -7247,6 +7551,12 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 					break;
 				case ZEND_IS_SMALLER_OR_EQUAL:
 					|	bgt => target_label
+					break;
+				case ZEND_IS_LARGER:
+					|	ble => target_label
+					break;
+				case ZEND_IS_LARGER_OR_EQUAL:
+					|	blt => target_label
 					break;
 				default:
 					ZEND_UNREACHABLE();
@@ -7269,6 +7579,12 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 				break;
 			case ZEND_IS_SMALLER_OR_EQUAL:
 				|	cset REG0w, le
+				break;
+			case ZEND_IS_LARGER:
+				|	cset REG0w, gt
+				break;
+			case ZEND_IS_LARGER_OR_EQUAL:
+				|	cset REG0w, ge
 				break;
 			default:
 				ZEND_UNREACHABLE();
@@ -14924,6 +15240,8 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_QM_ASSIGN:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_IDENTICAL:
@@ -15264,6 +15582,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 			break;
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_IDENTICAL:

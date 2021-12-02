@@ -280,6 +280,8 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
 		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
 		case ZEND_ISSET_ISEMPTY_CV:
@@ -1729,6 +1731,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
 				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_IS_LARGER:
+				case ZEND_IS_LARGER_OR_EQUAL:
 				case ZEND_CASE:
 				case ZEND_IS_IDENTICAL:
 				case ZEND_IS_NOT_IDENTICAL:
@@ -3751,6 +3755,36 @@ static void zend_jit_trace_update_condition_ranges(const zend_op *opline, const 
 				}
 			}
 			break;
+		case ZEND_IS_LARGER:
+			/* op1 > op2 */
+			if (ssa_op->op1_use >= 0) {
+				zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						op2_min != ZEND_LONG_MAX ? MAX(op1_min, op2_min + 1) : op1_min,
+						op1_max);
+			}
+			if (ssa_op->op2_use >= 0) {
+				zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						op2_min,
+						op2_max != ZEND_LONG_MIN ?MIN(op2_max, op1_max - 1) : op1_max);
+			}
+			break;
+		case ZEND_IS_LARGER_OR_EQUAL:
+			/* op1 >= op2 */
+			if (ssa_op->op1_use >= 0) {
+				zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op1_use],
+						MAX(op1_min, op2_min),
+						op1_max);
+			}
+			if (ssa_op->op2_use >= 0) {
+				zend_jit_trace_set_var_range(
+						&ssa->var_info[ssa_op->op2_use],
+						op2_min,
+						MIN(op2_max, op1_max));
+			}
+			break;
 	}
 }
 
@@ -3826,6 +3860,8 @@ static bool zend_jit_may_skip_comparison(const zend_op *opline, const zend_ssa_o
 			 || prev_opcode == ZEND_IS_NOT_EQUAL
 			 || prev_opcode == ZEND_IS_SMALLER
 			 || prev_opcode == ZEND_IS_SMALLER_OR_EQUAL
+			 || prev_opcode == ZEND_IS_LARGER
+			 || prev_opcode == ZEND_IS_LARGER_OR_EQUAL
 			 || prev_opcode == ZEND_CASE
 			 || prev_opcode == ZEND_IS_IDENTICAL
 			 || prev_opcode == ZEND_IS_NOT_IDENTICAL
@@ -5098,6 +5134,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_IS_NOT_EQUAL:
 					case ZEND_IS_SMALLER:
 					case ZEND_IS_SMALLER_OR_EQUAL:
+					case ZEND_IS_LARGER:
+					case ZEND_IS_LARGER_OR_EQUAL:
 					case ZEND_CASE:
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
