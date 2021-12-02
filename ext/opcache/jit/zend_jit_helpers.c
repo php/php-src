@@ -921,7 +921,15 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	zend_long offset;
 
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+			GC_ADDREF(str);
+		}
 		offset = zend_check_string_offset(dim/*, BP_VAR_R*/);
+		if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset);
+			zend_string_efree(str);
+			return ret;
+		}
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
