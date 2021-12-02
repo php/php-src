@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2021, PHP 8.0.14
+?? ??? 2022, PHP 8.0.15
+
+
+16 Dec 2021, PHP 8.0.14
 
 - Core:
   . Fixed bug #81582 (Stringable not implicitly declared if __toString() came
