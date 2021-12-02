@@ -1136,6 +1136,9 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	} else {
 		s = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		ZSTR_H(s) = ZSTR_H(Z_STR_P(str));
+		if (Z_REFCOUNTED_P(str)) {
+			zend_string_release_ex(Z_STR_P(str), 0);
+		}
 		ZVAL_NEW_STR(str, s);
 	}
 
