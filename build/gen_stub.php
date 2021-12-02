@@ -793,7 +793,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
-        return strtr($this->name->toString(), "\\", "_");
+        return $this->name->getLast();
     }
 
     public function getDeclaration(): string {
