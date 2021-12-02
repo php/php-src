@@ -1677,7 +1677,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		s = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		ZSTR_H(s) = ZSTR_H(Z_STR_P(str));
 		if (Z_REFCOUNTED_P(str)) {
-			zend_string_release_ex(Z_STR_P(str), 0);
+			GC_DELREF(Z_STR_P(str));
 		}
 		ZVAL_NEW_STR(str, s);
 	}
@@ -1689,7 +1689,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1729,8 +1729,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		}
 		/* Convert to string, just the time to pick the 1st byte */
 		tmp = zval_try_get_string_func(value);
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
+			if (tmp) {
+				zend_string_release_ex(tmp, 0);
+			}
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
@@ -1765,7 +1768,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -2589,11 +2592,11 @@ try_string_offset:
 				case IS_UNDEF:
 					/* The string may be destroyed while throwing the notice.
 					 * Temporarily increase the refcount to detect this situation. */
-					if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE)) {
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
 						GC_ADDREF(str);
 					}
 					ZVAL_UNDEFINED_OP2();
-					if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
+					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
 						zend_string_efree(str);
 						ZVAL_NULL(result);
 						return;
@@ -2606,11 +2609,11 @@ try_string_offset:
 					if (type != BP_VAR_IS) {
 						/* The string may be destroyed while throwing the notice.
 						 * Temporarily increase the refcount to detect this situation. */
-						if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE)) {
+						if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
 							GC_ADDREF(str);
 						}
 						zend_error(E_WARNING, "String offset cast occurred");
-						if (!(GC_FLAGS(str) & IS_ARRAY_IMMUTABLE) && GC_DELREF(str) == 0) {
+						if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
 							zend_string_efree(str);
 							ZVAL_NULL(result);
 							return;

@@ -948,7 +948,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		s = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		ZSTR_H(s) = ZSTR_H(Z_STR_P(str));
 		if (Z_REFCOUNTED_P(str)) {
-			zend_string_release_ex(Z_STR_P(str), 0);
+			GC_DELREF(Z_STR_P(str));
 		}
 		ZVAL_NEW_STR(str, s);
 	}
@@ -958,7 +958,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
 			if (result) {
 				ZVAL_NULL(result);
@@ -1000,8 +1000,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		/* Convert to string, just the time to pick the 1st byte */
 		tmp = zval_try_get_string_func(value);
 
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
+			if (tmp) {
+				zend_string_release_ex(tmp, 0);
+			}
 			if (result) {
 				ZVAL_NULL(result);
 			}
@@ -1044,7 +1047,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		 * Temporarily increase the refcount to detect this situation. */
 		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
-		if (GC_DELREF(s) == 0) {
+		if (UNEXPECTED(GC_DELREF(s) == 0)) {
 			zend_string_efree(s);
 			if (result) {
 				ZVAL_NULL(result);
