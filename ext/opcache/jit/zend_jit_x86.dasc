@@ -7632,7 +7632,7 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						| jp => target_label
 					}
 					break;
-				case ZEND_LARGER:
+				case ZEND_IS_LARGER:
 					if (!swap) {
 						| jbe => target_label
 					} else {
