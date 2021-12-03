@@ -1412,6 +1412,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 				ZVAL_UNDEF(result);
 			}
 		}
+		return;
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) && EXPECTED(dim != NULL)) {
 		zend_assign_to_string_offset(object_ptr, dim, value, result);
 		return;
