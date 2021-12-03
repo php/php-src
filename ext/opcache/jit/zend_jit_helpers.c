@@ -1310,7 +1310,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 				return;
 			}
 		}
-		
+
 		z = obj->handlers->read_dimension(obj, dim, BP_VAR_R, &rv);
 		if (z != NULL) {
 
