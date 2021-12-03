@@ -304,8 +304,9 @@ ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident)
 	}
 
 	size_t length = end - ident;
-	if (length == 0) {
-		ZEND_ASSERT(ident[0] == '<' && ident[1] == '?' && ident[2] == '=');
+	ZEND_ASSERT(length > 0);
+	
+	if (ident[0] == '<' && ident[1] == '?' && ident[2] == '=') {
 		zend_throw_exception(zend_ce_parse_error, "Cannot use \"<?=\" as an identifier", 0);
 		return FAILURE;
 	}
