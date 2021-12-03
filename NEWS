@@ -10,6 +10,11 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug #81693 (mb_check_encoding(7bit) segfaults). (cmb)
 
+- MySQLi:
+  . Fixed bug #81658 (MYSQL_OPT_LOAD_DATA_LOCAL_DIR not available in MariaDB).
+    (devnexen)
+  . Introduced MYSQLI_IS_MARIADB. (devnexen)
+
 - Reflection:
   . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 
