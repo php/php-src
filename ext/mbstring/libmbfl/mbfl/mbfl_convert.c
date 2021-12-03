@@ -316,7 +316,7 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
 		return &vtbl_pass;
 	}
 
-	if (to->no_encoding == mbfl_no_encoding_wchar && from->input_filter != NULL) {
+	if (to->no_encoding == mbfl_no_encoding_wchar) {
 		return from->input_filter;
 	} else if (from->no_encoding == mbfl_no_encoding_wchar) {
 		return to->output_filter;
