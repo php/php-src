@@ -1045,7 +1045,7 @@ static zend_always_inline bool zend_check_type_slow(
 	}
 
 	type_mask = ZEND_TYPE_FULL_MASK(*type);
-	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
+	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, IS_CALLABLE_CHECK_NO_AUTOLOAD, NULL)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
@@ -3772,9 +3772,9 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 }
 /* }}} */
 
-ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_ex(zend_string *name, bool use_autoloader) /* {{{ */
 {
-	zend_function *fbc = zend_lookup_function(name);
+	zend_function *fbc = zend_lookup_function_ex(name, NULL, use_autoloader);
 
 	if (UNEXPECTED(fbc == NULL)) {
 		return NULL;
