@@ -5057,9 +5057,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 
 	if (opcode == ZEND_MOD) {
 		result_reg = ZREG_RAX;
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
-			|	mov aword T1, r0 // save
-		}
 	} else if (Z_MODE(res_addr) == IS_REG) {
 		if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR)
 		 && opline->op2_type != IS_CONST) {
@@ -5184,6 +5181,11 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	GET_ZVAL_LVAL result_reg, op1_addr
 				|	LONG_MATH ZEND_BW_AND, result_reg, tmp_addr
 			} else {
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
+					|	mov aword T1, r0 // save
+				} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RCX) {
+					|	mov aword T1, Ra(ZREG_RCX) // save
+				}
 				result_reg = ZREG_RDX;
 				if (op2_lval == -1) {
 					|	xor Ra(result_reg), Ra(result_reg)
@@ -5199,6 +5201,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				}
 				if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
 					|	mov r0, aword T1 // restore
+				} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RCX) {
+					|	mov Ra(ZREG_RCX), aword T1 // restore
 				}
 			}
 		} else {
@@ -5240,6 +5244,9 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|.code
 			}
 
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
+				|	mov aword T1, r0 // save
+			}
 			result_reg = ZREG_RDX;
 			|	GET_ZVAL_LVAL ZREG_RAX, op1_addr
 			|.if X64
