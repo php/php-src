@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.2
 
+- MBString:
+  . Fixed bug #81693 (mb_check_encoding(7bit) segfaults). (cmb)
+
 - Reflection:
   . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 
