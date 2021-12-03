@@ -307,7 +307,8 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
 		from = &mbfl_encoding_8bit;
 	} else if (from->no_encoding == mbfl_no_encoding_base64 ||
 			   from->no_encoding == mbfl_no_encoding_qprint ||
-			   from->no_encoding == mbfl_no_encoding_uuencode) {
+			   from->no_encoding == mbfl_no_encoding_uuencode ||
+			   from->no_encoding == mbfl_no_encoding_7bit) {
 		to = &mbfl_encoding_8bit;
 	}
 
@@ -315,7 +316,7 @@ const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding
 		return &vtbl_pass;
 	}
 
-	if (to->no_encoding == mbfl_no_encoding_wchar) {
+	if (to->no_encoding == mbfl_no_encoding_wchar && from->input_filter != NULL) {
 		return from->input_filter;
 	} else if (from->no_encoding == mbfl_no_encoding_wchar) {
 		return to->output_filter;
