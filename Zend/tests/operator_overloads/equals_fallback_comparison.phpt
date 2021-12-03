@@ -6,7 +6,7 @@ operator overload: equals fallback to comparison operator
 class A {
     public int $value;
 
-    public function __compareto(mixed $other): int
+    public operator <=>(mixed $other): int
     {
 		return ($this->value <=> $other);
     }
