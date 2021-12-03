@@ -6,7 +6,7 @@ operator overload: mul operator with scalars
 class A {
     public int $value;
 
-    public function __mul(int $other, bool $left): A
+    public operator *(int $other, bool $left): A
     {
     	$return = new A();
     	$return->value = $this->value * $other;

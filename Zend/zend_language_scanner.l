@@ -299,7 +299,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 ZEND_API zend_result zend_lex_tstring(zval *zv, unsigned char *ident)
 {
 	unsigned char *end = ident;
-	while ((*end >= 'a' && *end <= 'z') || (*end >= 'A' && *end <= 'Z') || *end == '_') {
+	while ((*end >= 'a' && *end <= 'z') || (*end >= 'A' && *end <= 'Z') || *end == '_' || *end == '<' || *end == '*' || *end == '+' || *end == '|' || *end == '&' || *end == '^' || *end == '>' || *end == '/' || *end == '-' || *end == '%' || *end == '=' || *end == '~') {
 		end++;
 	}
 
@@ -1388,6 +1388,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN_WITH_IDENT(T_FUNCTION);
 }
 
+<ST_IN_SCRIPTING>"operator" {
+	RETURN_TOKEN_WITH_IDENT(T_OPERATOR);
+}
+
 <ST_IN_SCRIPTING>"const" {
 	RETURN_TOKEN_WITH_IDENT(T_CONST);
 }
@@ -1772,7 +1776,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"==" {
-	RETURN_TOKEN(T_IS_EQUAL);
+	RETURN_TOKEN_WITH_IDENT(T_IS_EQUAL);
 }
 
 <ST_IN_SCRIPTING>"!="|"<>" {
@@ -1780,7 +1784,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"<=>" {
-	RETURN_TOKEN(T_SPACESHIP);
+	RETURN_TOKEN_WITH_IDENT(T_SPACESHIP);
 }
 
 <ST_IN_SCRIPTING>"<=" {
@@ -1804,7 +1808,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"*\*" {
-	RETURN_TOKEN(T_POW);
+	RETURN_TOKEN_WITH_IDENT(T_POW);
 }
 
 <ST_IN_SCRIPTING>"*\*=" {
@@ -1868,20 +1872,20 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"<<" {
-	RETURN_TOKEN(T_SL);
+	RETURN_TOKEN_WITH_IDENT(T_SL);
 }
 
 <ST_IN_SCRIPTING>">>" {
-	RETURN_TOKEN(T_SR);
+	RETURN_TOKEN_WITH_IDENT(T_SR);
 }
 
 <ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
 	yyless(1);
-	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
+	RETURN_TOKEN_WITH_IDENT(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
 
 <ST_IN_SCRIPTING>"&" {
-	RETURN_TOKEN(T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG);
+	RETURN_TOKEN_WITH_IDENT(T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG);
 }
 
 <ST_IN_SCRIPTING>"]"|")" {
@@ -1895,7 +1899,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{TOKENS} {
-	RETURN_TOKEN(yytext[0]);
+	RETURN_TOKEN_WITH_IDENT(yytext[0]);
 }
 
 

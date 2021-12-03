@@ -6,7 +6,7 @@ operator overload: equals operator
 class A {
     public int $value;
 
-    public function __equals(mixed $other): bool
+    public operator ==(mixed $other): bool
     {
 		return ($this->value == $other);
     }

@@ -6,7 +6,7 @@ operator overload: mod operator with scalars
 class A {
     public int $value;
 
-    public function __mod(int $other, bool $left): A
+    public operator %(int $other, bool $left): A
     {
     	$return = new A();
 

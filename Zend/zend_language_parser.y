@@ -137,6 +137,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_BREAK         "'break'"
 %token <ident> T_CONTINUE      "'continue'"
 %token <ident> T_GOTO          "'goto'"
+%token <ident> T_OPERATOR      "'operator'"
 %token <ident> T_FUNCTION      "'function'"
 %token <ident> T_FN            "'fn'"
 %token <ident> T_CONST         "'const'"
@@ -178,6 +179,14 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_METHOD_C        "'__METHOD__'"
 %token <ident> T_FUNC_C          "'__FUNCTION__'"
 %token <ident> T_NS_C            "'__NAMESPACE__'"
+%token <ident> '+'             "'+'"
+%token <ident> '-'             "'-'"
+%token <ident> '*'             "'*'"
+%token <ident> '/'             "'/'"
+%token <ident> '%'             "'%'"
+%token <ident> '|'             "'|'"
+%token <ident> '^'             "'^'"
+%token <ident> '~'             "'~'"
 
 %token END 0 "end of file"
 %token T_ATTRIBUTE    "'#['"
@@ -195,15 +204,15 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE_EQUAL "'??='"
 %token T_BOOLEAN_OR   "'||'"
 %token T_BOOLEAN_AND  "'&&'"
-%token T_IS_EQUAL     "'=='"
+%token <ident> T_IS_EQUAL "'=='"
 %token T_IS_NOT_EQUAL "'!='"
 %token T_IS_IDENTICAL "'==='"
 %token T_IS_NOT_IDENTICAL "'!=='"
 %token T_IS_SMALLER_OR_EQUAL "'<='"
 %token T_IS_GREATER_OR_EQUAL "'>='"
-%token T_SPACESHIP "'<=>'"
-%token T_SL "'<<'"
-%token T_SR "'>>'"
+%token <ident> T_SPACESHIP "'<=>'"
+%token <ident> T_SL "'<<'"
+%token <ident> T_SR "'>>'"
 %token T_INC "'++'"
 %token T_DEC "'--'"
 %token T_INT_CAST    "'(int)'"
@@ -230,15 +239,15 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_NS_SEPARATOR    "'\\'"
 %token T_ELLIPSIS        "'...'"
 %token T_COALESCE        "'??'"
-%token T_POW             "'**'"
+%token <ident> T_POW     "'**'"
 %token T_POW_EQUAL       "'**='"
 /* We need to split the & token in two to avoid a shift/reduce conflict. For T1&$v and T1&T2,
  * with only one token lookahead, bison does not know whether to reduce T1 as a complete type,
  * or shift to continue parsing an intersection type. */
-%token T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
+%token <ident> T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG     "'&'"
 /* Bison warns on duplicate token literals, so use a different dummy value here.
  * It will be fixed up by zend_yytnamerr() later. */
-%token T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
+%token <ident> T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG "amp"
 %token T_BAD_CHARACTER   "invalid character"
 
 /* Token used to force a parse error from the lexer */
@@ -279,7 +288,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 
-%type <num> returns_ref function fn is_reference is_variadic variable_modifiers
+%type <num> returns_ref operator function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> optional_property_modifiers property_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
@@ -287,7 +296,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
 
-%type <ident> reserved_non_modifiers semi_reserved
+%type <ident> reserved_non_modifiers semi_reserved ampersand overloadable_operator_list
 
 %% /* Rules */
 
@@ -302,12 +311,16 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM | T_OPERATOR
 ;
 
 semi_reserved:
 	  reserved_non_modifiers
 	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
+;
+
+overloadable_operator_list:
+    '+' | '-' | '*' | '/' | '%' | ampersand | '|' | '^' | '~' | T_SL | T_SR | T_POW | T_IS_EQUAL | T_SPACESHIP
 ;
 
 ampersand:
@@ -917,6 +930,12 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_METHOD, $3 | $1 | $12, $2, $5,
 				  zend_ast_get_str($4), $7, NULL, $11, $9, NULL); CG(extra_fn_flags) = $10; }
+	|	method_modifiers operator overloadable_operator_list backup_doc_comment '(' parameter_list ')'
+		return_type backup_fn_flags method_body backup_fn_flags
+			{ zval zv;
+              if (zend_lex_tstring(&zv, $3) == FAILURE) { YYABORT; }
+              $$ = zend_ast_create_decl(ZEND_AST_METHOD, $1 | $11, $2, $4, Z_STR(zv), $6, NULL, $10, $8, NULL);
+              CG(extra_fn_flags) = $9; }
 	|	enum_case { $$ = $1; }
 ;
 
@@ -1221,6 +1240,10 @@ fn:
 
 function:
 	T_FUNCTION { $$ = CG(zend_lineno); }
+;
+
+operator:
+	T_OPERATOR { $$ = CG(zend_lineno); }
 ;
 
 backup_doc_comment:
