@@ -6,7 +6,7 @@ operator overload: div operator with scalars
 class A {
     public int $value;
 
-    public function __div(int $other, bool $left): A
+    public operator /(int $other, bool $left): A
     {
     	$return = new A();
 
