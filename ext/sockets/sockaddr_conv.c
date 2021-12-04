@@ -94,7 +94,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 #endif
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
-		if (strlen(string) > MAXFQDNLEN || ! (aip = php_network_getaddrinfo(string))) {
+		if (strlen(string) > MAXFQDNLEN || ! (aip = php_network_getaddrinfo(string, AF_INET))) {
 			/* Note: < -10000 indicates a host lookup error */
 #ifdef PHP_WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());

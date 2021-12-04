@@ -326,7 +326,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);
 
-PHPAPI struct addrinfo*	php_network_getaddrinfo(const char *name);
+PHPAPI struct addrinfo*	php_network_getaddrinfo(const char *name, const int family);
 
 PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
 END_EXTERN_C()

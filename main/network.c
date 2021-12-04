@@ -1203,11 +1203,11 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 }
 #endif
 
- PHPAPI struct addrinfo* php_network_getaddrinfo(const char *name)
+ PHPAPI struct addrinfo* php_network_getaddrinfo(const char *name, const int family)
  {
 	struct addrinfo hints, *result;
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = family;
     hints.ai_socktype = SOCK_DGRAM;
 
     if (getaddrinfo(name, NULL, &hints, &result) != SUCCESS) {

@@ -694,7 +694,7 @@ int fcgi_listen(const char *path, int backlog)
 				if(strlen(host) > MAXFQDNLEN) {
 					aip = NULL;
 				} else {
-					aip = php_network_getaddrinfo(host);
+					aip = php_network_getaddrinfo(host, AF_UNSPEC);
 				}
 				if (!aip || !aip->ai_addr) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);

@@ -230,9 +230,9 @@ static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ 
 	struct addrinfo		*aip;
 
 #ifndef PHP_WIN32
-	if ((aip = php_network_getaddrinfo("0.0.0.0")) == NULL) {
+	if ((aip = php_network_getaddrinfo("0.0.0.0", AF_INET)) == NULL) {
 #else
-	if ((aip = php_network_getaddrinfo("localhost")) == NULL) {
+	if ((aip = php_network_getaddrinfo("localhost", AF_INET)) == NULL) {
 #endif
 		return 0;
 	}

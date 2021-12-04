@@ -255,7 +255,7 @@ PHP_FUNCTION(gethostbynamel)
 		RETURN_FALSE;
 	}
 
-	result = php_network_getaddrinfo(hostname);
+	result = php_network_getaddrinfo(hostname, AF_UNSPEC);
 	if (!result) {
 		RETURN_FALSE;
 	}
@@ -290,7 +290,7 @@ static zend_string *php_gethostbyname(char *name)
 	struct in6_addr in6;
 	const char *address;
 
-	result = php_network_getaddrinfo(name);
+	result = php_network_getaddrinfo(name, AF_UNSPEC);
 	if (!result) {
 		return zend_string_init(name, strlen(name), 0);
 	}
