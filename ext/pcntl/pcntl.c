@@ -446,6 +446,9 @@ static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
 #ifdef EUSERS
 	REGISTER_PCNTL_ERRNO_CONSTANT(EUSERS);
 #endif
+#ifdef ECAPMODE
+	REGISTER_PCNTL_ERRNO_CONSTANT(ECAPMODE);
+#endif
 }
 
 static PHP_GINIT_FUNCTION(pcntl)
