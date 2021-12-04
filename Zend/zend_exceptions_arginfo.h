@@ -400,12 +400,12 @@ static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *cl
 	return class_entry;
 }
 
-static zend_class_entry *register_class_InvalidOperator(zend_class_entry *class_entry_Error)
+static zend_class_entry *register_class_InvalidOperator(zend_class_entry *class_entry_TypeError)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "InvalidOperator", class_InvalidOperator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	INIT_CLASS_ENTRY(ce, "InvalidOperatorError", class_InvalidOperator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_TypeError);
 
 	return class_entry;
 }
