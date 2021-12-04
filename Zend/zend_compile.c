@@ -2258,11 +2258,9 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 
 	ZEND_ASSERT(count >= offset);
 	for (i = offset; i < count; ++i) {
-		opline = get_next_op();
-		memcpy(opline, &oplines[i], sizeof(zend_op));
-		if (opline->opcode == ZEND_JMP_NULL) {
-			uint32_t opnum = get_next_op_number() - 1;
-			zend_stack_push(&CG(short_circuiting_opnums), &opnum);
+		if (oplines[i].opcode != ZEND_NOP) {
+			opline = get_next_op();
+			memcpy(opline, &oplines[i], sizeof(zend_op));
 		}
 	}
 
@@ -2890,11 +2888,18 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 		if (nullsafe) {
-			/* We will push to the short_circuiting_opnums stack in zend_delayed_compile_end(). */
-			opline = zend_delayed_emit_op(NULL, ZEND_JMP_NULL, &obj_node, NULL);
-			if (opline->op1_type == IS_CONST) {
-				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+			/* Flush delayed oplines */
+			zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
+			uint32_t i, count = zend_stack_count(&CG(delayed_oplines_stack));
+
+			for (i = 0; i < count; ++i) {
+				if (oplines[i].opcode != ZEND_NOP) {
+					opline = get_next_op();
+					memcpy(opline, &oplines[i], sizeof(zend_op));
+					oplines[i].opcode = ZEND_NOP;
+				}
 			}
+			zend_emit_jmp_null(&obj_node);
 		}
 	}
 
