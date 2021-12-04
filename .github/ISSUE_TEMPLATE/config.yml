@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/php/doc-en/issues
     about: Please report documentation issues on the doc-en repository.
   - name: Security issue
-    url: https://bugs.php.net/report.php?bug_type=Security
+    url: https://bugs.php.net/report.php?security_bug
     about: Please report security issues in this private bug tracker.
