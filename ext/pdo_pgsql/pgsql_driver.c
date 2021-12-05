@@ -87,7 +87,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (msg) {
-		einfo->errmsg = estrdup(msg);
+		einfo->errmsg = pestrdup(msg, dbh->is_persistent);
 	}
 	else if (errmsg) {
 		einfo->errmsg = _pdo_pgsql_trim_message(errmsg, dbh->is_persistent);
