@@ -228,6 +228,12 @@ char *alloca();
 # define ZEND_ATTRIBUTE_DEPRECATED
 #endif
 
+#if ZEND_GCC_VERSION >= 3003 || __has_attribute(warn_unused_result)
+# define ZEND_ATTRIBUTE_WARN_UNUSED_RESULT  __attribute__((warn_unused_result))
+#else
+# define ZEND_ATTRIBUTE_WARN_UNUSED_RESULT
+#endif
+
 #if ZEND_GCC_VERSION >= 4003 || __has_attribute(unused)
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 #else

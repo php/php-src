@@ -26,7 +26,7 @@ BEGIN_EXTERN_C()
 typedef void (*zend_string_copy_storage_func_t)(void);
 typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
 typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, bool permanent);
-typedef zend_string *(ZEND_FASTCALL *zend_string_init_existing_interned_func_t)(const char *str, size_t size, bool permanent);
+typedef zend_string *(ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT *zend_string_init_existing_interned_func_t)(const char *str, size_t size, bool permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
@@ -35,7 +35,7 @@ ZEND_API extern zend_string_init_existing_interned_func_t zend_string_init_exist
 
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
-ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+ZEND_API zend_string* ZEND_ATTRIBUTE_WARN_UNUSED_RESULT ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
 
 ZEND_API zend_string *zend_string_concat2(
 	const char *str1, size_t str1_len,
@@ -145,7 +145,7 @@ static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 	return 1;
 }
 
-static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_alloc(size_t len, bool persistent)
 {
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
 
@@ -156,7 +156,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, bool persis
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent)
 {
 	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
 
@@ -167,7 +167,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_init(const char *str, size_t len, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_init(const char *str, size_t len, bool persistent)
 {
 	zend_string *ret = zend_string_alloc(len, persistent);
 
@@ -176,7 +176,7 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_init_fast(const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_init_fast(const char *str, size_t len)
 {
 	if (len > 1) {
 		return zend_string_init(str, len, 0);
@@ -187,7 +187,7 @@ static zend_always_inline zend_string *zend_string_init_fast(const char *str, si
 	}
 }
 
-static zend_always_inline zend_string *zend_string_copy(zend_string *s)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_copy(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		GC_ADDREF(s);
@@ -195,7 +195,7 @@ static zend_always_inline zend_string *zend_string_copy(zend_string *s)
 	return s;
 }
 
-static zend_always_inline zend_string *zend_string_dup(zend_string *s, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_dup(zend_string *s, bool persistent)
 {
 	if (ZSTR_IS_INTERNED(s)) {
 		return s;
@@ -204,7 +204,7 @@ static zend_always_inline zend_string *zend_string_dup(zend_string *s, bool pers
 	}
 }
 
-static zend_always_inline zend_string *zend_string_separate(zend_string *s, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_separate(zend_string *s, bool persistent)
 {
 	if (ZSTR_IS_INTERNED(s) || GC_REFCOUNT(s) > 1) {
 		if (!ZSTR_IS_INTERNED(s)) {
@@ -217,7 +217,7 @@ static zend_always_inline zend_string *zend_string_separate(zend_string *s, bool
 	return s;
 }
 
-static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_t len, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_realloc(zend_string *s, size_t len, bool persistent)
 {
 	zend_string *ret;
 
@@ -237,7 +237,7 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t len, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_extend(zend_string *s, size_t len, bool persistent)
 {
 	zend_string *ret;
 
@@ -258,7 +258,7 @@ static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size_t len, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_truncate(zend_string *s, size_t len, bool persistent)
 {
 	zend_string *ret;
 
@@ -279,7 +279,7 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 	return ret;
 }
 
-static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent)
 {
 	zend_string *ret;
 
@@ -341,21 +341,21 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL  ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string_equal_val(zend_string *s1, zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_string_equal_val(zend_string *s1, zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_string_equal_content(zend_string *s1, zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_string_equals(zend_string *s1, zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
@@ -402,7 +402,7 @@ static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_ulong zend_inline_hash_func(const char *str, size_t len)
 {
 	zend_ulong hash = Z_UL(5381);
 

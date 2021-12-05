@@ -45,7 +45,7 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
-ZEND_API bool zend_is_valid_class_name(zend_string *name);
+ZEND_API bool ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_is_valid_class_name(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *lcname, uint32_t flags);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);
@@ -332,17 +332,17 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(
 ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named_params);
 
 /* services */
-ZEND_API const char *get_active_class_name(const char **space);
-ZEND_API const char *get_active_function_name(void);
-ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
-ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
-ZEND_API zend_string *get_active_function_or_method_name(void);
-ZEND_API zend_string *get_function_or_method_name(const zend_function *func);
-ZEND_API const char *zend_get_executed_filename(void);
-ZEND_API zend_string *zend_get_executed_filename_ex(void);
-ZEND_API uint32_t zend_get_executed_lineno(void);
-ZEND_API zend_class_entry *zend_get_executed_scope(void);
-ZEND_API bool zend_is_executing(void);
+ZEND_API const char * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_active_class_name(const char **space);
+ZEND_API const char * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_active_function_name(void);
+ZEND_API const char * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_active_function_arg_name(uint32_t arg_num);
+ZEND_API const char * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_function_arg_name(const zend_function *func, uint32_t arg_num);
+ZEND_API zend_string * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_active_function_or_method_name(void);
+ZEND_API zend_string * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT get_function_or_method_name(const zend_function *func);
+ZEND_API const char * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_executed_filename(void);
+ZEND_API zend_string * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_executed_filename_ex(void);
+ZEND_API uint32_t  ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_executed_lineno(void);
+ZEND_API zend_class_entry * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_executed_scope(void);
+ZEND_API bool ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_is_executing(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg_num);
 
 ZEND_API void zend_set_timeout(zend_long seconds, bool reset_signals);

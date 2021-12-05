@@ -85,7 +85,9 @@ static ZEND_FUNCTION(zend_test_deprecated)
 {
 	zval *arg1;
 
-	zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 
 /* Create a string without terminating null byte. Must be terminated with
@@ -127,7 +129,9 @@ static ZEND_FUNCTION(zend_leak_bytes)
 		RETURN_THROWS();
 	}
 
+#pragma GCC diagnostic ignored "-Wunused-result"
 	emalloc(leakbytes);
+#pragma GCC diagnostic warning "-Wunused-result"
 }
 
 /* Leak a refcounted variable */

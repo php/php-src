@@ -931,7 +931,7 @@ static size_t tsrm_tls_offset;
 |				SSE_AVX_INS movsd, vmovsd, xmm(dst_reg-ZREG_XMM0), qword [((uint32_t)(uintptr_t)zv)]
 ||			}
 |			DOUBLE_SET_ZVAL_DVAL dst_addr, dst_reg
-||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
+||		} else if (dst_def_info == MAY_BE_DOUBLE && Z_TYPE_P(zv) == IS_LONG) {
 ||			zend_reg dst_reg = (Z_MODE(dst_addr) == IS_REG) ? Z_REG(dst_addr) : ZREG_XMM0;
 |			DOUBLE_GET_LONG dst_reg, Z_LVAL_P(zv), ZREG_R0
 |			DOUBLE_SET_ZVAL_DVAL dst_addr, dst_reg
@@ -959,7 +959,7 @@ static size_t tsrm_tls_offset;
 ||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 |				SET_ZVAL_TYPE_INFO dst_addr, IS_DOUBLE
 ||			}
-||		} else if (((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
+||		} else if ((dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0 || ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (1<<Z_TYPE_P(zv)))) {
 |			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv)
 ||		}
 ||	}
@@ -986,7 +986,7 @@ static size_t tsrm_tls_offset;
 ||			}
 |			DOUBLE_SET_ZVAL_DVAL dst_addr, ZREG_XMM0
 |			DOUBLE_SET_ZVAL_DVAL res_addr, ZREG_XMM0
-||		} else if (Z_TYPE_P(zv) == IS_LONG && dst_def_info == MAY_BE_DOUBLE) {
+||		} else if (dst_def_info == MAY_BE_DOUBLE && Z_TYPE_P(zv) == IS_LONG) {
 ||			if (Z_MODE(dst_addr) == IS_REG) {
 |				DOUBLE_GET_LONG Z_REG(dst_addr), Z_LVAL_P(zv), ZREG_R0
 |				DOUBLE_SET_ZVAL_DVAL res_addr, Z_REG(dst_addr)
@@ -1049,7 +1049,7 @@ static size_t tsrm_tls_offset;
 ||			if ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != MAY_BE_DOUBLE) {
 |				SET_ZVAL_TYPE_INFO dst_addr, IS_DOUBLE
 ||			}
-||		} else if (((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
+||		} else if ((dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0 || ((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) != (1<<Z_TYPE_P(zv)))) {
 |			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv)
 ||		}
 ||	}

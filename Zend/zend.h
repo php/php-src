@@ -277,23 +277,23 @@ zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
-ZEND_API size_t zend_get_page_size(void);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT size_t zend_get_page_size(void);
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
 ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
-ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap);
-ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string * zend_vstrpprintf(size_t max_len, const char *format, va_list ap);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string * zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 /* Same as zend_spprintf and zend_strpprintf, without checking of format validity.
  * For use with custom printf specifiers such as %H. */
 ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
-ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
 
-ZEND_API const char *get_zend_version(void);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT const char *get_zend_version(void);
 ZEND_API bool zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
-ZEND_API zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_print_zval_r_to_str(zval *expr, int indent);
 ZEND_API void zend_print_flat_zval_r(zval *expr);
 void zend_print_flat_zval_r_to_buf(smart_str *str, zval *expr);
 
@@ -331,8 +331,8 @@ extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
-extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
-extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
+extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len) ZEND_ATTRIBUTE_WARN_UNUSED_RESULT;
+extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename) ZEND_ATTRIBUTE_WARN_UNUSED_RESULT;
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
