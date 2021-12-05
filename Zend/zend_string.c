@@ -30,9 +30,9 @@ ZEND_API zend_string_init_existing_interned_func_t zend_string_init_existing_int
 static zend_string* ZEND_FASTCALL zend_new_interned_string_permanent(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *str);
 static zend_string* ZEND_FASTCALL zend_string_init_interned_permanent(const char *str, size_t size, bool permanent);
-static zend_string* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string_init_existing_interned_permanent(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_permanent(const char *str, size_t size, bool permanent);
 static zend_string* ZEND_FASTCALL zend_string_init_interned_request(const char *str, size_t size, bool permanent);
-static zend_string* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string_init_existing_interned_request(const char *str, size_t size, bool permanent);
+static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(const char *str, size_t size, bool permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
    won't be free'd until process exit. If we want an ability to

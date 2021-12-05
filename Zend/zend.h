@@ -289,7 +289,7 @@ ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string * zend_strpprintf(size_t 
 ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
 ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
 
-ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT const char *get_zend_version(void);
+ZEND_API const char *get_zend_version(void);
 ZEND_API bool zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
@@ -331,7 +331,7 @@ extern ZEND_API void (*zend_on_timeout)(int seconds);
 extern ZEND_API zend_result (*zend_stream_open_function)(zend_file_handle *handle);
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
-extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len) ZEND_ATTRIBUTE_WARN_UNUSED_RESULT;
+extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename) ZEND_ATTRIBUTE_WARN_UNUSED_RESULT;
 
 /* These two callbacks are especially for opcache */
