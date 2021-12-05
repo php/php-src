@@ -129,9 +129,13 @@ static ZEND_FUNCTION(zend_leak_bytes)
 		RETURN_THROWS();
 	}
 
+#if defined(__GNUC__) && !defined(__clang__) /* GCC, not Clang */
 #pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 	emalloc(leakbytes);
+#if defined(__GNUC__) && !defined(__clang__) /* GCC, not Clang */
 #pragma GCC diagnostic warning "-Wunused-result"
+#endif
 }
 
 /* Leak a refcounted variable */
