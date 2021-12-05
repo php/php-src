@@ -107,7 +107,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Non AF_INET domain returned on AF_INET socket");
 			return 0;
 		}
-		memcpy(&(sin->sin_addr.s_addr), aip->ai_addr, aip->ai_addrlen);
+		memcpy(&(sin->sin_addr.s_addr), &((struct sockaddr_in *) aip->ai_addr)->sin_addr, aip->ai_addrlen);
 	}
 
 	return 1;
