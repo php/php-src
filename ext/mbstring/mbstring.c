@@ -2491,6 +2491,23 @@ try_again:
 }
 /* }}} */
 
+static void remove_non_encodings_from_elist(const mbfl_encoding **elist, size_t *size)
+{
+	/* mbstring supports some 'text encodings' which aren't really text encodings
+	 * at all, but really 'byte encodings', like Base64, QPrint, and so on.
+	 * These should never be returned by `mb_detect_encoding`. */
+	int shift = 0;
+	for (int i = 0; i < *size; i++) {
+		const mbfl_encoding *encoding = elist[i];
+		if (encoding->no_encoding <= mbfl_no_encoding_charset_min) {
+			shift++; /* Remove this encoding from the list */
+		} else if (shift) {
+			elist[i - shift] = encoding;
+		}
+	}
+	*size -= shift;
+}
+
 /* {{{ Returns converted string in desired encoding */
 PHP_FUNCTION(mb_convert_encoding)
 {
@@ -2529,6 +2546,10 @@ PHP_FUNCTION(mb_convert_encoding)
 		from_encodings = &MBSTRG(current_internal_encoding);
 		num_from_encodings = 1;
 		free_from_encodings = 0;
+	}
+
+	if (num_from_encodings > 1) {
+		remove_non_encodings_from_elist(from_encodings, &num_from_encodings);
 	}
 
 	if (!num_from_encodings) {
@@ -2663,23 +2684,6 @@ PHP_FUNCTION(mb_strtolower)
 	efree(newstr);
 }
 /* }}} */
-
-static void remove_non_encodings_from_elist(const mbfl_encoding **elist, size_t *size)
-{
-	/* mbstring supports some 'text encodings' which aren't really text encodings
-	 * at all, but really 'byte encodings', like Base64, QPrint, and so on.
-	 * These should never be returned by `mb_detect_encoding`. */
-	int shift = 0;
-	for (int i = 0; i < *size; i++) {
-		const mbfl_encoding *encoding = elist[i];
-		if (encoding->no_encoding <= mbfl_no_encoding_charset_min) {
-			shift++; /* Remove this encoding from the list */
-		} else if (shift) {
-			elist[i - shift] = encoding;
-		}
-	}
-	*size -= shift;
-}
 
 /* {{{ Encodings of the given string is returned (as a string) */
 PHP_FUNCTION(mb_detect_encoding)
