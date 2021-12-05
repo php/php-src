@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #81216 (Nullsafe operator leaks dynamic property name). (Dmitry)
   . Fixed bug #81684 (Using null coalesce assignment with $GLOBALS["x"] produces
     opcode error). (ilutov)
+  . Fixed bug #81656 (GCC-11 silently ignores -R). (Michael Wallner)
 
 - MBString:
   . Fixed bug #81693 (mb_check_encoding(7bit) segfaults). (cmb)
