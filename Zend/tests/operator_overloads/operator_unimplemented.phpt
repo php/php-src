@@ -30,13 +30,13 @@ $obj2->value = 2;
 
 try {
 	$num1 = $obj1 + 2;
-} catch (InvalidOperator) {
+} catch (InvalidOperatorError) {
 	echo "OK!".PHP_EOL;
 }
 
 try {
 	$num2 = 2 + $obj1;
-} catch (InvalidOperator) {
+} catch (InvalidOperatorError) {
 	echo "STILL OK!".PHP_EOL;
 }
 

@@ -70,36 +70,52 @@ $obj = new A();
 
 $obj + 1;
 1 + $obj;
+$obj = $obj + 1;
 $obj += 1;
+$obj++;
+++$obj;
 $obj - 1;
 1 - $obj;
+$obj = $obj - 1;
 $obj -= 1;
+$obj--;
+--$obj;
 $obj * 1;
 1 * $obj;
+$obj = $obj * 1;
 $obj *= 1;
+-$obj;
 $obj / 1;
 1 / $obj;
+$obj = $obj / 1;
 $obj /= 1;
 $obj % 1;
 1 % $obj;
+$obj = $obj % 1;
 $obj %= 1;
 $obj ** 1;
 1 ** $obj;
+$obj = $obj ** 1;
 $obj **= 1;
 $obj & 1;
 1 & $obj;
+$obj = $obj & 1;
 $obj &= 1;
 $obj | 1;
 1 | $obj;
+$obj = $obj | 1;
 $obj |= 1;
 $obj ^ 1;
 1 ^ $obj;
+$obj = $obj ^ 1;
 $obj ^= 1;
 $obj << 1;
 1 << $obj;
+$obj = $obj << 1;
 $obj <<= 1;
 $obj >> 1;
 1 >> $obj;
+$obj = $obj >> 1;
 $obj >>= 1;
 ~$obj;
 
@@ -108,33 +124,49 @@ $obj >>= 1;
 +() called
 +() called
 +() called
++() called
++() called
++() called
+-() called
+-() called
+-() called
 -() called
 -() called
 -() called
 *() called
 *() called
 *() called
+*() called
+*() called
+/() called
 /() called
 /() called
 /() called
 %() called
 %() called
 %() called
+%() called
+**() called
 **() called
 **() called
 **() called
 &() called
 &() called
 &() called
+&() called
+|() called
 |() called
 |() called
 |() called
 ^() called
 ^() called
 ^() called
+^() called
 <<() called
 <<() called
 <<() called
+<<() called
+>>() called
 >>() called
 >>() called
 >>() called

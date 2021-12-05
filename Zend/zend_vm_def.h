@@ -1410,6 +1410,89 @@ ZEND_VM_HANDLER(26, ZEND_ASSIGN_OP, VAR|CV, CONST|TMPVAR|CV, OP)
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+
+
+	if (Z_TYPE_P(var_ptr) == IS_OBJECT) {
+		bool eager_dtor = false;
+		switch ((size_t)opline->extended_value) {
+			case ZEND_ADD:
+			if (Z_OBJCE_P(var_ptr)->__add != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_SUB:
+			if (Z_OBJCE_P(var_ptr)->__sub != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_MUL:
+			if (Z_OBJCE_P(var_ptr)->__mul != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_DIV:
+			if (Z_OBJCE_P(var_ptr)->__div != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_MOD:
+			if (Z_OBJCE_P(var_ptr)->__mod != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_POW:
+			if (Z_OBJCE_P(var_ptr)->__pow != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_BW_AND:
+			if (Z_OBJCE_P(var_ptr)->__bitwiseand != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_BW_OR:
+			if (Z_OBJCE_P(var_ptr)->__bitwiseor != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_BW_XOR:
+			if (Z_OBJCE_P(var_ptr)->__bitwisexor != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_BW_NOT:
+			if (Z_OBJCE_P(var_ptr)->__bitwisenot != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_SL:
+			if (Z_OBJCE_P(var_ptr)->__bitwiseshiftleft != NULL) {
+				eager_dtor = true;
+			}
+			break;
+
+			case ZEND_SR:
+			if (Z_OBJCE_P(var_ptr)->__bitwiseshiftright != NULL) {
+				eager_dtor = true;
+			}
+			break;
+		}
+
+		if (eager_dtor) {
+			zval_ptr_dtor(var_ptr);
+		}
+	}
+
 	FREE_OP2();
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -1641,6 +1724,10 @@ ZEND_VM_HELPER(zend_pre_inc_helper, VAR|CV, ANY)
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+	if (Z_TYPE_P(var_ptr) == IS_OBJECT && (Z_OBJCE_P(var_ptr))->__add != NULL) {
+		zval_ptr_dtor(var_ptr);
+	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -1693,6 +1780,10 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
+	if (Z_TYPE_P(var_ptr) == IS_OBJECT && (Z_OBJCE_P(var_ptr))->__sub != NULL) {
+		zval_ptr_dtor(var_ptr);
+	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -1743,6 +1834,10 @@ ZEND_VM_HELPER(zend_post_inc_helper, VAR|CV, ANY)
 		increment_function(var_ptr);
 	} while (0);
 
+	if (Z_TYPE_P(var_ptr) == IS_OBJECT && (Z_OBJCE_P(var_ptr))->__add != NULL) {
+		zval_ptr_dtor(var_ptr);
+	}
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -1790,6 +1885,10 @@ ZEND_VM_HELPER(zend_post_dec_helper, VAR|CV, ANY)
 
 		decrement_function(var_ptr);
 	} while (0);
+
+	if (Z_TYPE_P(var_ptr) == IS_OBJECT && (Z_OBJCE_P(var_ptr))->__sub != NULL) {
+		zval_ptr_dtor(var_ptr);
+	}
 
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
