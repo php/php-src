@@ -8925,7 +8925,9 @@ static void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 
 	/* Reproduce some of the zend_compile_assign() opcode fixup logic here. */
 	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
-	switch (var_ast->kind) {
+	/* Treat $GLOBALS['x'] assignment like assignment to variable. */
+	zend_ast_kind kind = is_global_var_fetch(var_ast) ? ZEND_AST_VAR : var_ast->kind;
+	switch (kind) {
 		case ZEND_AST_VAR:
 			zend_emit_op_tmp(&assign_node, ZEND_ASSIGN, &var_node_w, &default_node);
 			break;
