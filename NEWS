@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - OCI8:
   . Added oci8.prefetch_lob_size directive to tune LOB query performance
 
+- Standard:
+  . net_get_interfaces() also reports wireless network interfaces on Windows.
+    (Yurun)
+
 - Zip:
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method
