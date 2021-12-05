@@ -33,6 +33,8 @@
 #include "unicode_table_big5.h"
 
 static int mbfl_filt_conv_big5_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_big5(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const unsigned char mblen_table_big5[] = { /* 0x81-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -64,8 +66,8 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_big5_wchar,
 	&vtbl_wchar_big5,
-	NULL,
-	NULL
+	mb_big5_to_wchar,
+	mb_wchar_to_big5
 };
 
 const mbfl_encoding mbfl_encoding_cp950 = {
@@ -379,4 +381,78 @@ int mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+static size_t mb_big5_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c <= 0x7F) {
+			*out++ = c;
+		} else if (c > 0xA0 && c <= 0xF9 && c != 0xC8 && p < e) {
+			unsigned char c2 = *p++;
+
+			if ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0xA1 && c2 <= 0xFE)) {
+				unsigned int w = ((c - 0xA1)*157) + c2 - ((c2 <= 0x7E) ? 0x40 : 0xA1 - 0x3F);
+				w = (w < big5_ucs_table_size) ? big5_ucs_table[w] : 0;
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_big5(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w >= ucs_a1_big5_table_min && w < ucs_a1_big5_table_max) {
+			s = ucs_a1_big5_table[w - ucs_a1_big5_table_min];
+		} else if (w >= ucs_a2_big5_table_min && w < ucs_a2_big5_table_max) {
+			s = ucs_a2_big5_table[w - ucs_a2_big5_table_min];
+		} else if (w >= ucs_a3_big5_table_min && w < ucs_a3_big5_table_max) {
+			s = ucs_a3_big5_table[w - ucs_a3_big5_table_min];
+		} else if (w >= ucs_i_big5_table_min && w < ucs_i_big5_table_max) {
+			s = ucs_i_big5_table[w - ucs_i_big5_table_min];
+		} else if (w >= ucs_r1_big5_table_min && w < ucs_r1_big5_table_max) {
+			s = ucs_r1_big5_table[w - ucs_r1_big5_table_min];
+		} else if (w >= ucs_r2_big5_table_min && w < ucs_r2_big5_table_max) {
+			s = ucs_r2_big5_table[w - ucs_r2_big5_table_min];
+		}
+
+		if (!s) {
+			if (w == 0) {
+				out = mb_convert_buf_add(out, 0);
+			} else {
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_big5);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+			}
+		} else if (s <= 0x80) {
+			out = mb_convert_buf_add(out, s);
+		} else {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, (s >> 8) & 0xFF, s & 0xFF);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
