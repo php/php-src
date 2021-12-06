@@ -89,6 +89,11 @@ static inline bool is_var_type(zend_uchar type) {
 	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 
+static inline bool is_defined(const zend_ssa *ssa, const zend_op_array *op_array, int var) {
+	const zend_ssa_var *ssa_var = &ssa->vars[var];
+	return ssa_var->definition >= 0 || ssa_var->definition_phi || var < op_array->last_var;
+}
+
 #define FAIL(...) do { \
 	if (status == SUCCESS) { \
 		fprintf(stderr, "\nIn function %s::%s (%s):\n", \
@@ -209,6 +214,10 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 			if (ssa_op->op1_use >= ssa->vars_count) {
 				FAIL("op1 use %d out of range\n", ssa_op->op1_use);
 			}
+			if (!is_defined(ssa, op_array, ssa_op->op1_use)) {
+				FAIL("op1 use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->op1_use), INSTR(i));
+			}
 			if (!is_in_use_chain(ssa, ssa_op->op1_use, i)) {
 				FAIL("op1 use of " VARFMT " in " INSTRFMT " not in use chain\n",
 						VAR(ssa_op->op1_use), INSTR(i));
@@ -222,6 +231,10 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 			if (ssa_op->op2_use >= ssa->vars_count) {
 				FAIL("op2 use %d out of range\n", ssa_op->op2_use);
 			}
+			if (!is_defined(ssa, op_array, ssa_op->op2_use)) {
+				FAIL("op2 use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->op2_use), INSTR(i));
+			}
 			if (!is_in_use_chain(ssa, ssa_op->op2_use, i)) {
 				FAIL("op2 use of " VARFMT " in " INSTRFMT " not in use chain\n",
 						VAR(ssa_op->op2_use), INSTR(i));
@@ -234,6 +247,10 @@ void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ex
 		if (ssa_op->result_use >= 0) {
 			if (ssa_op->result_use >= ssa->vars_count) {
 				FAIL("result use %d out of range\n", ssa_op->result_use);
+			}
+			if (!is_defined(ssa, op_array, ssa_op->result_use)) {
+				FAIL("result use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->result_use), INSTR(i));
 			}
 			if (!is_in_use_chain(ssa, ssa_op->result_use, i)) {
 				FAIL("result use of " VARFMT " in " INSTRFMT " not in use chain\n",

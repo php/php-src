@@ -279,25 +279,25 @@ dnl
 dnl Checks for -R, etc. switch.
 dnl
 AC_DEFUN([PHP_RUNPATH_SWITCH],[
-AC_MSG_CHECKING([if compiler supports -R])
-AC_CACHE_VAL(php_cv_cc_dashr,[
+AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
+AC_CACHE_VAL(php_cv_cc_rpath,[
   SAVE_LIBS=$LIBS
-  LIBS="-R /usr/$PHP_LIBDIR $LIBS"
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_dashr=yes],[php_cv_cc_dashr=no])
+  LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_rpath=yes],[php_cv_cc_rpath=no])
   LIBS=$SAVE_LIBS])
-AC_MSG_RESULT([$php_cv_cc_dashr])
-if test $php_cv_cc_dashr = "yes"; then
-  ld_runpath_switch=-R
+AC_MSG_RESULT([$php_cv_cc_rpath])
+if test $php_cv_cc_rpath = "yes"; then
+  ld_runpath_switch=-Wl,-rpath,
 else
-  AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
-  AC_CACHE_VAL(php_cv_cc_rpath,[
+  AC_MSG_CHECKING([if compiler supports -R])
+  AC_CACHE_VAL(php_cv_cc_dashr,[
     SAVE_LIBS=$LIBS
-    LIBS="-Wl,-rpath,/usr/$PHP_LIBDIR $LIBS"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_rpath=yes],[php_cv_cc_rpath=no])
+    LIBS="-R /usr/$PHP_LIBDIR $LIBS"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],[php_cv_cc_dashr=yes],[php_cv_cc_dashr=no])
     LIBS=$SAVE_LIBS])
-  AC_MSG_RESULT([$php_cv_cc_rpath])
-  if test $php_cv_cc_rpath = "yes"; then
-    ld_runpath_switch=-Wl,-rpath,
+  AC_MSG_RESULT([$php_cv_cc_dashr])
+  if test $php_cv_cc_dashr = "yes"; then
+    ld_runpath_switch=-R
   else
     dnl Something innocuous.
     ld_runpath_switch=-L
@@ -935,7 +935,7 @@ dnl ---------------------------------------------- Static module
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
       [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
-      PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra,shared_objects_$1,yes)
+      PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra -DZEND_COMPILE_DL_EXT=1,shared_objects_$1,yes)
       PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
     fi

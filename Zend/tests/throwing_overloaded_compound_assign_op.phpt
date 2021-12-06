@@ -3,6 +3,7 @@ Exception in compound assign op should prevent call to overloaded object handler
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class Test {
     public function __get($k) {
         $this->$k = 42;

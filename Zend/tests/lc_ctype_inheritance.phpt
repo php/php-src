@@ -16,8 +16,8 @@ var_dump(setlocale(LC_CTYPE, "de_DE", "de-DE") !== false);
 var_dump(bin2hex(strtoupper("\xe4")));
 var_dump(preg_match('/\w/', "\xe4"));
 ?>
---EXPECT--
-string(1) "C"
+--EXPECTF--
+string(%d) "C%r(\.UTF-8)?%r"
 string(2) "e4"
 int(0)
 bool(true)

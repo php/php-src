@@ -880,6 +880,14 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		SERIALIZE_PTR(ce->iterator_funcs_ptr);
 	}
 
+	if (ce->arrayaccess_funcs_ptr) {
+		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetget);
+		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetexists);
+		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetset);
+		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetunset);
+		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr);
+	}
+
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 }
@@ -1669,6 +1677,13 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_key);
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_current);
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
+	}
+	if (ce->arrayaccess_funcs_ptr) {
+		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr);
+		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetget);
+		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetexists);
+		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetset);
+		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetunset);
 	}
 
 	if (!(script->corrupted)) {

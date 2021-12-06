@@ -211,6 +211,10 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
+#if defined(HAVE_MEMRCHR) && !defined(i386)
+	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */
+	return (const void*)memrchr(s, c, n);
+#else
 	const unsigned char *e;
 	if (0 == n) {
 		return NULL;
@@ -222,6 +226,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 		}
 	}
 	return NULL;
+#endif
 }
 
 
@@ -476,6 +481,8 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 #define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
 ZEND_API void zend_update_current_locale(void);
+
+ZEND_API void zend_reset_lc_ctype_locale(void);
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\

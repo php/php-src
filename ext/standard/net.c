@@ -190,7 +190,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	for (p = pAddresses; p; p = p->Next) {
 		zval iface, unicast;
 
-		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
+		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_IEEE80211 != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
 			continue;
 		}
 

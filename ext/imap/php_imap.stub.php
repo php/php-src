@@ -57,9 +57,9 @@ namespace {
 
     function imap_expunge(IMAP\Connection $imap): bool {}
 
-    function imap_delete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
+    function imap_delete(IMAP\Connection $imap, string $message_nums, int $flags = 0): bool {}
 
-    function imap_undelete(IMAP\Connection $imap, string $message_num, int $flags = 0): bool {}
+    function imap_undelete(IMAP\Connection $imap, string $message_nums, int $flags = 0): bool {}
 
     function imap_check(IMAP\Connection $imap): \stdClass|false {}
 

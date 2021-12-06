@@ -265,6 +265,12 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
+if test "$ac_cv_safe_to_define___extensions__" = yes ; then
+  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
+  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+  AC_MSG_RESULT(yes)
+fi
 
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
@@ -609,6 +615,7 @@ vasprintf \
 asprintf \
 nanosleep \
 memmem \
+memrchr \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R

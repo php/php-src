@@ -61,7 +61,7 @@ explained at the end of this document in
 
 ## Packaging a non stable release (alpha/beta/RC)
 
- 1. Check the tests at https://travis-ci.com/php/php-src/builds.
+ 1. Check that CI is passing (see above).
 
  2. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.
@@ -199,8 +199,7 @@ explained at the end of this document in
     7.2, merge to 7.3, 7.4 etc...). Then you can cherry-pick it in your release
     branch. Don't forget to update `NEWS` manually in an extra commit then.
 
- 3. Commit those changes. Ensure the tests at
-    https://travis-ci.com/php/php-src/builds are still passing.
+ 3. Commit those changes. Ensure that CI is still passing (see above).
 
  4. Run the `scripts/dev/credits` script in php-src and commit the changes in
     the credits files in ext/standard.

@@ -29,6 +29,7 @@ class TestBase
     private $val2;
 }
 
+#[AllowDynamicProperties] // $val2 will be dynamic now.
 class TestDerived extends TestBase
 {
     protected $row;

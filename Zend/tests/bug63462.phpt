@@ -4,6 +4,7 @@ Test script to verify that magic methods should be called only once when accessi
 Marco Pivetta <ocramius@gmail.com>
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class Test {
     public    $publicProperty;
     protected $protectedProperty;

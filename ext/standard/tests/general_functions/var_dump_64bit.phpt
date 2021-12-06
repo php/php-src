@@ -134,6 +134,7 @@ $arrays = array (
 check_vardump($arrays);
 
 echo "\n*** Testing var_dump() on object variables ***\n";
+#[AllowDynamicProperties]
 class object_class
 {
   var       $value;
@@ -166,6 +167,7 @@ class no_member_class {
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;

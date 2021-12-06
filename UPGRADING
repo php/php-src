@@ -48,6 +48,16 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Creation of dynamic properties is deprecated, unless the class opts in by
+    using the #[AllowDynamicProperties] attribute. stdClass allows dynamic
+    properties. Usage of __get()/__set() is not affected by this change. A
+    dynamic properties deprecation warning can be addressed by:
+     - Declaring the property (preferred).
+     - Adding the #[AllowDynamicProperties] attribute to the class (which also
+       applies to all child classes).
+     - Using a WeakMap if you wish to associate additional data with an object
+       you do not own.
+
   . Callables that are not accepted by the $callable() syntax (but are accepted
     by call_user_func) are deprecated. In particular:
 

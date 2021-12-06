@@ -1101,7 +1101,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 				/* Don't try to propagate assignments to (potentially) typed properties. We would
 				 * need to deal with errors and type conversions first. */
-				if (!var_info->ce || (var_info->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				// TODO: Distinguish dynamic and declared property assignments here?
+				if (!var_info->ce || (var_info->ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) ||
+						!(var_info->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
 					SET_RESULT_BOT(result);
 					SET_RESULT_BOT(op1);
 					return;
@@ -2277,6 +2279,12 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 							return 0;
 						}
 						break;
+					case ZEND_INIT_ARRAY:
+					case ZEND_ADD_ARRAY_ELEMENT:
+						if (opline->op2_type == IS_UNUSED) {
+							return 0;
+						}
+						/* break missing intentionally */
 					default:
 						if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 							return 0;

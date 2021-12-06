@@ -4,6 +4,7 @@ Bug #78589: Memory leak with GC + __destruct()
 <?php
 
 class Test {
+    public $foo;
     public function __destruct() {}
 }
 

@@ -3,6 +3,7 @@ Bug #60455: stream_get_line and 1-line followed by eol input
 --FILE--
 <?php
 class TestStream {
+    public $context;
     private $s = 0;
     function stream_open($path, $mode, $options, &$opened_path) {
             return true;

@@ -13,3 +13,8 @@ final class ReturnTypeWillChange
 {
     public function __construct() {}
 }
+
+final class AllowDynamicProperties
+{
+    public function __construct() {}
+}

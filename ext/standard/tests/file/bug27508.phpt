@@ -4,6 +4,7 @@ Bug #27508 (userspace wrappers have bogus eof indicator)
 <?php
 class FileStream {
     public $fp;
+    public $context;
 
     function stream_open($path, $mode, $options, &$opened_path)
     {
