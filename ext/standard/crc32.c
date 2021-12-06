@@ -20,9 +20,7 @@
 #include "crc32_x86.h"
 
 #ifdef HAVE_AARCH64_CRC32
-#ifdef PHP_WIN32
-# include <intrin.h>
-#else
+#ifndef PHP_WIN32
 # include <arm_acle.h>
 #endif
 # if defined(__linux__)
