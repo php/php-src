@@ -20,7 +20,9 @@
 #include "crc32_x86.h"
 
 #ifdef HAVE_AARCH64_CRC32
+#ifndef PHP_WIN32
 # include <arm_acle.h>
+#endif
 # if defined(__linux__)
 #  include <sys/auxv.h>
 #  include <asm/hwcap.h>
@@ -52,6 +54,9 @@ static inline int has_crc32_insn() {
 	size_t reslen = sizeof(res);
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
+	return res;
+# elif defined(WIN32)
+	res = (int)IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);
 	return res;
 # else
 	res = 0;

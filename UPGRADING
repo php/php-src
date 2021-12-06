@@ -475,6 +475,8 @@ PHP 8.2 UPGRADE NOTES
 - Core:
   . Windows specific error messages are no longer localized, but instead in
     English to better match PHP error messages.
+  . Preliminary and highly experimental support for building on ARM64 has been
+    added.
 
 - OCI8:
   . Since building against Oracle Client 10g is no longer supported anyway,

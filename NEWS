@@ -54,6 +54,9 @@ PHP                                                                        NEWS
     for the random_bytes. (Cristian Rodriguez)
   . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
 
+- Windows:
+  . Added preliminary support for (cross-)building for ARM64. (Yun Dou)
+
 07 Jul 2022, PHP 8.2.0alpha3
 
 - Core:
