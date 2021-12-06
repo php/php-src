@@ -11,7 +11,7 @@ $ar = [
     ['id' => 6, 'name' => 'wael', 'score' => 'A', 's' => '3'],
     ['id' => 6, 'name' => 'wael', 'score' => 'D', 's' => '1'],
 ];
-print_r(array_column($ar, 'score', 's', true));
+print_r(array_column_group($ar, 'score', 's'));
 ?>
 --EXPECT--
 Array
