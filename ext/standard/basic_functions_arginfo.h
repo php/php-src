@@ -245,7 +245,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_column, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_MASK(0, column_key, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL, NULL)
 	ZEND_ARG_TYPE_MASK(0, index_key, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL, "null")
-	ZEND_ARG_TYPE_MASK(0, group_key, MAY_BE_BOOL|MAY_BE_NULL, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_column_group, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_MASK(0, column_key, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL, NULL)
+	ZEND_ARG_TYPE_MASK(0, index_key, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_reverse, 0, 1, IS_ARRAY, 0)
@@ -2288,6 +2293,7 @@ ZEND_FUNCTION(array_key_last);
 ZEND_FUNCTION(array_values);
 ZEND_FUNCTION(array_count_values);
 ZEND_FUNCTION(array_column);
+ZEND_FUNCTION(array_column_group);
 ZEND_FUNCTION(array_reverse);
 ZEND_FUNCTION(array_pad);
 ZEND_FUNCTION(array_flip);
@@ -2916,6 +2922,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_values, arginfo_array_values)
 	ZEND_FE(array_count_values, arginfo_array_count_values)
 	ZEND_FE(array_column, arginfo_array_column)
+	ZEND_FE(array_column_group, arginfo_array_column_group)
 	ZEND_FE(array_reverse, arginfo_array_reverse)
 	ZEND_FE(array_pad, arginfo_array_pad)
 	ZEND_FE(array_flip, arginfo_array_flip)
