@@ -2341,7 +2341,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (opline->result_type != IS_UNUSED) {
 							res_use_info = -1;
 
-							if (opline->result_type == IS_CV) {
+							if (opline->result_type == IS_CV
+							 && ssa_op->result_use >= 0
+							 && !ssa->vars[ssa_op->result_use].no_val) {
 								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
 
 								if (Z_MODE(res_use_addr) != IS_REG
@@ -2403,7 +2405,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						} else {
 							res_use_info = -1;
 
-							if (opline->result_type == IS_CV) {
+							if (opline->result_type == IS_CV
+							 && ssa_op->result_use >= 0
+							 && !ssa->vars[ssa_op->result_use].no_val) {
 								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
 
 								if (Z_MODE(res_use_addr) != IS_REG
@@ -2458,7 +2462,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						} else {
 							res_use_info = -1;
 
-							if (opline->result_type == IS_CV) {
+							if (opline->result_type == IS_CV
+							 && ssa_op->result_use >= 0
+							 && !ssa->vars[ssa_op->result_use].no_val) {
 								zend_jit_addr res_use_addr = RES_USE_REG_ADDR();
 
 								if (Z_MODE(res_use_addr) != IS_REG
