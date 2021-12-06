@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 
+- Spl:
+  . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
+    Bystry)
+
 02 Dec 2021, PHP 8.1.1
 
 - IMAP:
