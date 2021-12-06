@@ -2570,7 +2570,7 @@ static zend_always_inline int _zend_update_type_info(
 				ssa, opline->extended_value, t1, t2,
 				opline->opcode == ZEND_ASSIGN_OP ? ssa_op->op1_def : -1, optimization_level);
 			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-				tmp |= MAY_BE_RC1;
+				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			}
 			if (tmp & (MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
