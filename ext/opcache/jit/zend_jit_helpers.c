@@ -1152,9 +1152,15 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 		}
 		ZVAL_UNDEF(result);
 	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-		zend_false_to_array_deprecated();
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(object_ptr, arr);
+		GC_ADDREF(arr);
+		zend_false_to_array_deprecated();
+		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+			zend_array_destroy(arr);
+			ZVAL_NULL(result);
+			return;
+		}
 		zval *var;
 		if (dim) {
 			if (type == BP_VAR_W) {
@@ -1247,12 +1253,6 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 		return;
 	}
 
-	if (dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-		const zend_op *opline = EG(current_execute_data)->opline;
-		zend_jit_undefined_op_helper(opline->op2.var);
-		dim = &EG(uninitialized_zval);
-	}
-
 	if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 		const zend_op *op_data = EG(current_execute_data)->opline + 1;
 		ZEND_ASSERT(op_data->opcode == ZEND_OP_DATA && op_data->op1_type == IS_CV);
@@ -1266,9 +1266,17 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			ZVAL_UNDEF(result);
 		}
 	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
-		zend_false_to_array_deprecated();
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(object_ptr, arr);
+		GC_ADDREF(arr);
+		zend_false_to_array_deprecated();
+		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+			zend_array_destroy(arr);
+			if (result) {
+				ZVAL_NULL(result);
+			}
+			return;
+		}
 		zval *var = dim
 			? zend_jit_fetch_dim_w_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
@@ -1284,6 +1292,11 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			ZVAL_COPY(result, var);
 		}
 	} else {
+		if (dim && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+			const zend_op *opline = EG(current_execute_data)->opline;
+			zend_jit_undefined_op_helper(opline->op2.var);
+			dim = &EG(uninitialized_zval);
+		}
 		zend_throw_error(NULL, "Cannot use a scalar value as an array");
 		if (result) {
 			ZVAL_UNDEF(result);
@@ -1335,9 +1348,14 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			zend_wrong_string_offset_error();
 		}
 	} else if (Z_TYPE_P(container) == IS_FALSE) {
-		zend_false_to_array_deprecated();
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(container, arr);
+		GC_ADDREF(arr);
+		zend_false_to_array_deprecated();
+		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+			zend_array_destroy(arr);
+			return;
+		}
 		zval *var = dim
 			? zend_jit_fetch_dim_rw_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
