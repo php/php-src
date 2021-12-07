@@ -22,7 +22,7 @@
 #endif
 #include "fopen_wrappers.h"
 #include "ext/standard/fsock.h"
-#include "image_avif/avifinfo.h"
+#include "libavifinfo/avifinfo.h"
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
