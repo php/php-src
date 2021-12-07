@@ -799,6 +799,27 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_OP_SPEC_HAN
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_assign_dim_op_obj_undef_helper_SPEC(zend_object *obj ZEND_OPCODE_HANDLER_ARGS_DC)
+{
+	USE_OPLINE
+	zval *dim;
+
+	GC_ADDREF(obj);
+	dim = ZVAL_UNDEFINED_OP2();
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_objects_store_del(obj);
+		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+	} else {
+		zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+	}
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_STATIC_PROP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22445,19 +22466,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -25124,19 +25141,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -27441,19 +27454,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = NULL;
 			if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -29306,19 +29315,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = EX_VAR(opline->op2.var);
 			if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -40038,19 +40043,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -43796,19 +43797,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -46689,19 +46686,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = NULL;
 			if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
@@ -49085,19 +49078,15 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
 			dim = EX_VAR(opline->op2.var);
 			if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
-				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
+				ZEND_VM_TAIL_CALL(zend_assign_dim_op_obj_undef_helper_SPEC(obj ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			} else if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			HashTable *ht;
 			zend_uchar old_type;
