@@ -978,18 +978,18 @@ get_chunk:
 						return NULL;
 					}
 				}
+			}
 #if ZEND_MM_STAT
-				do {
-					size_t size = heap->real_size + ZEND_MM_CHUNK_SIZE;
-					size_t peak = MAX(heap->real_peak, size);
-					heap->real_size = size;
-					heap->real_peak = peak;
-				} while (0);
+			do {
+				size_t size = heap->real_size + ZEND_MM_CHUNK_SIZE;
+				size_t peak = MAX(heap->real_peak, size);
+				heap->real_size = size;
+				heap->real_peak = peak;
+			} while (0);
 #elif ZEND_MM_LIMIT
 				heap->real_size += ZEND_MM_CHUNK_SIZE;
 
 #endif
-			}
 			heap->chunks_count++;
 			if (heap->chunks_count > heap->peak_chunks_count) {
 				heap->peak_chunks_count = heap->chunks_count;
@@ -1060,6 +1060,9 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 	chunk->next->prev = chunk->prev;
 	chunk->prev->next = chunk->next;
 	heap->chunks_count--;
+#if ZEND_MM_STAT || ZEND_MM_LIMIT
+	heap->real_size -= ZEND_MM_CHUNK_SIZE;
+#endif
 	if (heap->chunks_count + heap->cached_chunks_count < heap->avg_chunks_count + 0.1
 	 || (heap->chunks_count == heap->last_chunks_delete_boundary
 	  && heap->last_chunks_delete_count >= 4)) {
@@ -1068,9 +1071,6 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 		chunk->next = heap->cached_chunks;
 		heap->cached_chunks = chunk;
 	} else {
-#if ZEND_MM_STAT || ZEND_MM_LIMIT
-		heap->real_size -= ZEND_MM_CHUNK_SIZE;
-#endif
 		if (!heap->cached_chunks) {
 			if (heap->chunks_count != heap->last_chunks_delete_boundary) {
 				heap->last_chunks_delete_boundary = heap->chunks_count;
