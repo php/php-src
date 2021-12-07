@@ -11,7 +11,8 @@ PDOTest::skip();
 
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))){
     if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for Oracle with WE8MSWIN1252 character set');
-
+} elseif (!strncasecmp(getenv('PDOTEST_DSN'), 'dblib', strlen('dblib'))) {
+    die('skip not for pdo_dblib');
 }
 
 ?>
@@ -22,9 +23,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-if (strncasecmp(getenv('PDOTEST_DSN'), 'dblib', strlen('dblib'))) {
-    @$db->exec("SET NAMES 'LATIN1'"); // needed for PostgreSQL
-}
+@$db->exec("SET NAMES 'LATIN1'"); // needed for PostgreSQL
 $db->exec("CREATE TABLE test (id INTEGER)");
 $db->exec("INSERT INTO test (id) VALUES (1)");
 
