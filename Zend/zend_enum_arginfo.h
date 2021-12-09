@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7092f1d4ba651f077cff37050899f090f00abf22 */
+ * Stub hash: c773a3643be9fff0375f3688bfe72697a564d55a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_UnitEnum_cases, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -27,6 +27,11 @@ static const zend_function_entry class_BackedEnum_methods[] = {
 	ZEND_FE_END
 };
 
+
+static const zend_function_entry class_OperandPosition_methods[] = {
+	ZEND_FE_END
+};
+
 static zend_class_entry *register_class_UnitEnum(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -44,6 +49,17 @@ static zend_class_entry *register_class_BackedEnum(zend_class_entry *class_entry
 	INIT_CLASS_ENTRY(ce, "BackedEnum", class_BackedEnum_methods);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_UnitEnum);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OperandPosition(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("OperandPosition", IS_UNDEF, class_OperandPosition_methods);
+
+	zend_enum_add_case_cstr(class_entry, "LeftSide", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "RightSide", NULL);
 
 	return class_entry;
 }

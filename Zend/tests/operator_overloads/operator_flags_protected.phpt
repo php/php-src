@@ -6,7 +6,7 @@ operator overload: protected visibility
 class A {
     public int $value;
 
-    protected operator +($other, bool $left): self
+    protected operator +(mixed $other, OperandPosition $left): self
     {
         $return = new A();
         $return->value = $this->value + $other;

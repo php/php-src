@@ -13,3 +13,9 @@ interface BackedEnum extends UnitEnum
 
     public static function tryFrom(int|string $value): ?static;
 }
+
+enum OperandPosition
+{
+	case LeftSide;
+	case RightSide;
+}

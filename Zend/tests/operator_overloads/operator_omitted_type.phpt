@@ -6,7 +6,7 @@ operator overload: no explicit type
 class A {
     public int $value;
 
-    public operator +($other, bool $left): self
+    public operator +($other, OperandPosition $left): self
     {
     	$return = new A();
     	$return->value = $this->value + $other;

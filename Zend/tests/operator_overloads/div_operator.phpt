@@ -4,13 +4,13 @@ operator overload: div operator with scalars
 <?php
 
 class A {
-    public int $value;
+    public float $value;
 
-    public operator /(int $other, bool $left): A
+    public operator /(int|float $other, OperandPosition $left): A
     {
     	$return = new A();
 
-    	if ($left) {
+    	if ($left == OperandPosition::LeftSide) {
     		$return->value = $this->value / $other;
     	} else {
     		$return->value = $other / $this->value;

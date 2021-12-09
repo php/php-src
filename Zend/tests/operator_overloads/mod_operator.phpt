@@ -6,11 +6,11 @@ operator overload: mod operator with scalars
 class A {
     public int $value;
 
-    public operator %(int $other, bool $left): A
+    public operator %(int $other, OperandPosition $left): A
     {
     	$return = new A();
 
-    	if ($left) {
+    	if ($left == OperandPosition::LeftSide) {
     		$return->value = $this->value % $other;
     	} else {
     		$return->value = $other % $this->value;

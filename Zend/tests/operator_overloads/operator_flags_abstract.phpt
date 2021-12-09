@@ -6,11 +6,11 @@ operator overload: abstract
 abstract class A {
     public int $value;
 
-    abstract operator +(int $other, bool $left): self;
+    abstract operator +(int $other, OperandPosition $left): self;
 }
 
 class B extends A {
-    public operator +(int $other, bool $left): self
+    public operator +(int $other, OperandPosition $left): self
     {
         $return = new B();
         $return->value = $this->value + $other;

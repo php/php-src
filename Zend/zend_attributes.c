@@ -167,7 +167,8 @@ static const char *target_names[] = {
 	"method",
 	"property",
 	"class constant",
-	"parameter"
+	"parameter",
+	"operator"
 };
 
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
@@ -301,6 +302,7 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PROPERTY"), ZEND_ATTRIBUTE_TARGET_PROPERTY);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS_CONSTANT"), ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_OPERATOR"), ZEND_ATTRIBUTE_TARGET_OPERATOR);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
 

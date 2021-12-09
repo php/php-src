@@ -19,6 +19,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_compile.h"
+#include "zend_enum.h"
 #include "zend_enum_arginfo.h"
 #include "zend_interfaces.h"
 
@@ -31,6 +32,7 @@
 
 ZEND_API zend_class_entry *zend_ce_unit_enum;
 ZEND_API zend_class_entry *zend_ce_backed_enum;
+ZEND_API zend_class_entry *zend_ce_operand_position_enum;
 
 static zend_object_handlers enum_handlers;
 
@@ -155,6 +157,8 @@ void zend_register_enum_ce(void)
 
 	zend_ce_backed_enum = register_class_BackedEnum(zend_ce_unit_enum);
 	zend_ce_backed_enum->interface_gets_implemented = zend_implement_backed_enum;
+
+	zend_ce_operand_position_enum = register_class_OperandPosition();
 
 	memcpy(&enum_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enum_handlers.clone_obj = NULL;

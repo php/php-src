@@ -6,7 +6,7 @@ operator overload: static
 class A {
     public int $value;
 
-    static operator +($other, bool $left): self
+    static operator +(mixed $other, OperandPosition $left): self
     {
         $return = new A();
         $return->value = $this->value + $other;

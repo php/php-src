@@ -10,7 +10,7 @@ class A {
 class B {
 	public int $value;
 
-	public operator +(int|A $other, bool $left): B
+	public operator +(int|A $other, OperandPosition $left): B
 	{
 		$return = new B();
 		if (is_int($other)) {

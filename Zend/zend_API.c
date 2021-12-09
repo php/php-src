@@ -2542,8 +2542,18 @@ static void zend_check_magic_method_binary_operator_overload(
     zend_check_magic_method_args(2, ce, fptr, error_type);
 	zend_check_operator_overload_flags(ce, fptr, error_type);
 	zend_check_magic_method_explicit_type(0, ce, fptr, error_type);
+	zend_check_magic_method_explicit_type(1, ce, fptr, error_type);
     zend_check_magic_method_arg_type(0, ce, fptr, error_type, MAY_BE_ANY);
-    zend_check_magic_method_arg_type(1, ce, fptr, error_type, MAY_BE_BOOL);
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(fptr->common.arg_info[1].type, single_type) {
+		if (!ZEND_TYPE_HAS_NAME(*single_type)
+				|| !zend_string_equals_literal_ci(ZEND_TYPE_NAME(*single_type), "OperandPosition")) {
+			zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must be of type %s when declared",
+					   ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
+					   2, ZSTR_VAL(fptr->common.arg_info[1].name),
+					   "OperandPosition");
+		}
+	} ZEND_TYPE_FOREACH_END();
 }
 
 static void zend_check_magic_method_unary_operator_overload(

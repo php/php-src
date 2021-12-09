@@ -4,47 +4,47 @@ operator overload: overload called
 <?php
 
 class A {
-    public operator +(mixed $other, bool $left): self
+    public operator +(mixed $other, OperandPosition $left): self
     {
     	echo "+() called\n";
     	return $this;
     }
-    public operator -(mixed $other, bool $left): self
+    public operator -(mixed $other, OperandPosition $left): self
     {
     	echo "-() called\n";
     	return $this;
     }
-    public operator *(mixed $other, bool $left): self
+    public operator *(mixed $other, OperandPosition $left): self
     {
     	echo "*() called\n";
     	return $this;
     }
-    public operator /(mixed $other, bool $left): self
+    public operator /(mixed $other, OperandPosition $left): self
     {
     	echo "/() called\n";
     	return $this;
     }
-    public operator %(mixed $other, bool $left): self
+    public operator %(mixed $other, OperandPosition $left): self
     {
     	echo "%() called\n";
     	return $this;
     }
-    public operator **(mixed $other, bool $left): self
+    public operator **(mixed $other, OperandPosition $left): self
     {
     	echo "**() called\n";
     	return $this;
     }
-    public operator &(mixed $other, bool $left): self
+    public operator &(mixed $other, OperandPosition $left): self
     {
     	echo "&() called\n";
     	return $this;
     }
-    public operator |(mixed $other, bool $left): self
+    public operator |(mixed $other, OperandPosition $left): self
     {
     	echo "|() called\n";
     	return $this;
     }
-    public operator ^(mixed $other, bool $left): self
+    public operator ^(mixed $other, OperandPosition $left): self
     {
     	echo "^() called\n";
     	return $this;
@@ -54,12 +54,12 @@ class A {
     	echo "~() called\n";
     	return $this;
     }
-    public operator <<(mixed $other, bool $left): self
+    public operator <<(mixed $other, OperandPosition $left): self
     {
     	echo "<<() called\n";
     	return $this;
     }
-    public operator >>(mixed $other, bool $left): self
+    public operator >>(mixed $other, OperandPosition $left): self
     {
     	echo ">>() called\n";
     	return $this;
