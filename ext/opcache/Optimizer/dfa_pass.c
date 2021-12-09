@@ -730,9 +730,13 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 		uint32_t op_num;
 		zend_op *opline;
 		zend_ssa_op *ssa_op;
+		zend_bool can_follow = 1;
 
 		while (next_block_num < ssa->cfg.blocks_count
 			&& !(ssa->cfg.blocks[next_block_num].flags & ZEND_BB_REACHABLE)) {
+			if (ssa->cfg.blocks[next_block_num].flags & ZEND_BB_UNREACHABLE_FREE) {
+				can_follow = 0;
+			}
 			next_block_num++;
 		}
 
@@ -744,7 +748,7 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 			switch (opline->opcode) {
 				case ZEND_JMP:
 optimize_jmp:
-					if (block->successors[0] == next_block_num) {
+					if (block->successors[0] == next_block_num && can_follow) {
 						MAKE_NOP(opline);
 						removed_ops++;
 						goto optimize_nop;
@@ -765,7 +769,7 @@ optimize_jmpz:
 							goto optimize_jmp;
 						}
 					} else {
-						if (block->successors[0] == next_block_num) {
+						if (block->successors[0] == next_block_num && can_follow) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
@@ -796,7 +800,7 @@ optimize_jmpnz:
 							goto optimize_nop;
 						}
 					} else if (block->successors_count == 2) {
-						if (block->successors[0] == next_block_num) {
+						if (block->successors[0] == next_block_num && can_follow) {
 							take_successor_0(ssa, block_num, block);
 							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 								opline->opcode = ZEND_CHECK_VAR;
@@ -830,7 +834,7 @@ optimize_jmpnz:
 					} else if (block->successors_count == 2) {
 						if (block->successors[0] == block->successors[1]) {
 							take_successor_0(ssa, block_num, block);
-							if (block->successors[0] == next_block_num) {
+							if (block->successors[0] == next_block_num && can_follow) {
 								if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
 									opline->opcode = ZEND_CHECK_VAR;
 									opline->op2.num = 0;
