@@ -2258,9 +2258,11 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 
 	ZEND_ASSERT(count >= offset);
 	for (i = offset; i < count; ++i) {
-		if (oplines[i].opcode != ZEND_NOP) {
+		if (EXPECTED(oplines[i].opcode != ZEND_NOP)) {
 			opline = get_next_op();
 			memcpy(opline, &oplines[i], sizeof(zend_op));
+		} else {
+			opline = CG(active_op_array)->opcodes + oplines[i].extended_value;
 		}
 	}
 
@@ -2888,15 +2890,28 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 		if (nullsafe) {
-			/* Flush delayed oplines */
-			zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
-			uint32_t i, count = zend_stack_count(&CG(delayed_oplines_stack));
+			if (obj_node.op_type == IS_TMP_VAR) {
+				/* Flush delayed oplines */
+				zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
+				uint32_t var = obj_node.u.op.var;
+				uint32_t count = zend_stack_count(&CG(delayed_oplines_stack));
+				uint32_t i = count;
 
-			for (i = 0; i < count; ++i) {
-				if (oplines[i].opcode != ZEND_NOP) {
-					opline = get_next_op();
-					memcpy(opline, &oplines[i], sizeof(zend_op));
-					oplines[i].opcode = ZEND_NOP;
+				while (i > 0 && oplines[i-1].result_type == IS_TMP_VAR && oplines[i-1].result.var == var) {
+					i--;
+					if (oplines[i].op1_type == IS_TMP_VAR) {
+						var = oplines[i].op1.var;
+					} else {
+						break;
+					}
+				}
+				for (; i < count; ++i) {
+					if (oplines[i].opcode != ZEND_NOP) {
+						opline = get_next_op();
+						memcpy(opline, &oplines[i], sizeof(zend_op));
+						oplines[i].opcode = ZEND_NOP;
+						oplines[i].extended_value = opline - CG(active_op_array)->opcodes;
+					}
 				}
 			}
 			zend_emit_jmp_null(&obj_node);
