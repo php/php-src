@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81656 (GCC-11 silently ignores -R). (Michael Wallner)
+  . Fixed bug #81585 (cached_chunks are not counted to real_size on shutdown).
+    (cmb)
 
 - Spl:
   . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
