@@ -279,12 +279,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			fci.param_count = 2;
 			if (zobj == Z_OBJ_P(op1)) {
 				ZVAL_COPY(&params[0], op2);
-				ZVAL_OBJ_COPY(&op_pos, &left_val);
-				ZVAL_COPY(&params[1], &op_pos);
+				ZVAL_OBJ_COPY(&params[1], &left_val);
 			} else {
 				ZVAL_COPY(&params[0], op1);
-				ZVAL_OBJ_COPY(&op_pos, &right_val);
-				ZVAL_COPY(&params[1], &op_pos);
+				ZVAL_OBJ_COPY(&params[1], &right_val);
 			}
 			fci.params = params;
 		}
@@ -376,6 +374,8 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				zval_ptr_dtor(&params[0]);
 				if (opcode != ZEND_IS_EQUAL && opcode != ZEND_IS_NOT_EQUAL) {
 					zval_ptr_dtor(&params[1]);
+					GC_TRY_DELREF(&left_val);
+					GC_TRY_DELREF(&right_val);
 				}
 			}
 
@@ -404,6 +404,8 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			zval_ptr_dtor(&params[0]);
 			if (opcode != ZEND_IS_EQUAL && opcode != ZEND_IS_NOT_EQUAL) {
 				zval_ptr_dtor(&params[1]);
+				GC_TRY_DELREF(&left_val);
+				GC_TRY_DELREF(&right_val);
 			}
 		}
 
