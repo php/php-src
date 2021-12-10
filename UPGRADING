@@ -145,6 +145,9 @@ PHP 8.2 UPGRADE NOTES
 - COM_DOTNET:
   . LOCALE_NEUTRAL
 
+- Sockets:
+  . SO_INCOMING_CPU
+
 ========================================
 11. Changes to INI File Handling
 ========================================
