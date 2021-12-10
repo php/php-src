@@ -4,7 +4,7 @@ operator overload: div operator with scalars
 <?php
 
 class A {
-    public float $value;
+    public $value;
 
     public operator /(int|float $other, OperandPosition $left): A
     {
