@@ -244,7 +244,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	EG(fake_scope) = NULL;
 
 	zval params[2];
-	zval op_pos;
 
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
@@ -256,11 +255,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 	ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 	operator = "";
-	ZVAL_UNDEF(&op_pos);
 	ZVAL_UNDEF(&params[0]);
 	ZVAL_UNDEF(&params[1]);
-	zend_object left_val = *zend_enum_get_case_cstr(zend_ce_operand_position_enum, "LeftSide");
-	zend_object right_val = *zend_enum_get_case_cstr(zend_ce_operand_position_enum, "RightSide");
+	zend_object *left_val = zend_enum_get_case_cstr(zend_ce_operand_position_enum, "LeftSide");
+	zend_object *right_val = zend_enum_get_case_cstr(zend_ce_operand_position_enum, "RightSide");
 
 	do {
 		fci.object = zobj;
@@ -279,10 +277,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 			fci.param_count = 2;
 			if (zobj == Z_OBJ_P(op1)) {
 				ZVAL_COPY(&params[0], op2);
-				ZVAL_OBJ_COPY(&params[1], &left_val);
+				ZVAL_OBJ_COPY(&params[1], left_val);
 			} else {
 				ZVAL_COPY(&params[0], op1);
-				ZVAL_OBJ_COPY(&params[1], &right_val);
+				ZVAL_OBJ_COPY(&params[1], right_val);
 			}
 			fci.params = params;
 		}
@@ -359,6 +357,13 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 
 		if (fcic.function_handler == NULL)
 		{
+			if (fci.param_count > 0) {
+				zval_ptr_dtor(&params[0]);
+				if (fci.param_count > 1) {
+					zval_ptr_dtor(&params[1]);
+				}
+			}
+
 			if(zobj == Z_OBJ_P(op1) &&
 			   !is_unary &&
 			   Z_TYPE_P(op2) == IS_OBJECT &&
@@ -367,16 +372,6 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 				ce = Z_OBJCE_P(op2);
 				is_retry = 1;
 				continue;
-			}
-
-			zval_ptr_dtor(&op_pos);
-			if (!is_unary) {
-				zval_ptr_dtor(&params[0]);
-				if (opcode != ZEND_IS_EQUAL && opcode != ZEND_IS_NOT_EQUAL) {
-					zval_ptr_dtor(&params[1]);
-					GC_TRY_DELREF(&left_val);
-					GC_TRY_DELREF(&right_val);
-				}
 			}
 
 			if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
@@ -399,13 +394,10 @@ static int zend_std_call_op_override(zend_uchar opcode, zval *result, zval *op1,
 		fcic.object = zobj;
 		zend_result tmp = zend_call_function(&fci, &fcic);
 
-		zval_ptr_dtor(&op_pos);
-		if (!is_unary) {
+		if (fci.param_count > 0) {
 			zval_ptr_dtor(&params[0]);
-			if (opcode != ZEND_IS_EQUAL && opcode != ZEND_IS_NOT_EQUAL) {
+			if (fci.param_count > 1) {
 				zval_ptr_dtor(&params[1]);
-				GC_TRY_DELREF(&left_val);
-				GC_TRY_DELREF(&right_val);
 			}
 		}
 
