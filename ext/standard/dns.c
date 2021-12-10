@@ -182,14 +182,14 @@ static zend_string *php_gethostbyaddr(char *ip)
 	if (inet_pton(AF_INET6, ip, &sa6.sin6_addr)) {
 		sa6.sin6_family = AF_INET6;
 
-		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+		if (getnameinfo((struct sockaddr *)&sa6, sizeof(sa6), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);
 	} else if (inet_pton(AF_INET, ip, &sa4.sin_addr)) {
 		sa4.sin_family = AF_INET;
 
-		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) < 0) {
+		if (getnameinfo((struct sockaddr *)&sa4, sizeof(sa4), out, sizeof(out), NULL, 0, NI_NAMEREQD) != 0) {
 			return zend_string_init(ip, strlen(ip), 0);
 		}
 		return zend_string_init(out, strlen(out), 0);

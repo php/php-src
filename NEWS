@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
     Bystry)
 
+- Standard:
+  . Fixed bug GH-7748 (gethostbyaddr outputs binary string). (cmb)
+
 02 Dec 2021, PHP 8.1.1
 
 - IMAP:
