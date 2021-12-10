@@ -334,10 +334,6 @@ static void place_essa_pis(
 
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val2 = Z_LVAL_P(zv);
-					} else if (Z_TYPE_P(zv) == IS_FALSE) {
-						add_val2 = 0;
-					} else if (Z_TYPE_P(zv) == IS_TRUE) {
-						add_val2 = 1;
 					} else {
 						var1 = -1;
 					}
@@ -355,10 +351,6 @@ static void place_essa_pis(
 					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1));
-					} else if (Z_TYPE_P(zv) == IS_FALSE) {
-						add_val1 = 0;
-					} else if (Z_TYPE_P(zv) == IS_TRUE) {
-						add_val1 = 1;
 					} else {
 						var2 = -1;
 					}
