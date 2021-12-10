@@ -247,6 +247,10 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
  * consumers of the get_properties_for API. */
 ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose);
 
+/* Helper functions for operator overloads for extensions */
+ZEND_API int zend_std_has_op_overload(zend_uchar opcode, zval *obj);
+ZEND_API zend_function *zend_std_get_op_overload(zend_uchar opcode, zend_class_entry *ce);
+
 #define zend_release_properties(ht) do { \
 	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \
 		zend_array_destroy(ht); \

@@ -2000,6 +2000,180 @@ ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
 	return ZEND_UNCOMPARABLE;
 }
 
+ZEND_API int zend_std_has_op_overload(zend_uchar opcode, zval *obj)
+{
+	if (Z_TYPE_P(obj) != IS_OBJECT) {
+		return 0;
+	}
+
+	zend_class_entry *ce = Z_OBJCE_P(obj);
+
+	switch (opcode) {
+		case ZEND_ADD:
+			if (ce->__add != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_SUB:
+			if (ce->__sub != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_MUL:
+			if (ce->__mul != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_DIV:
+			if (ce->__div != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_MOD:
+			if (ce->__mod != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_POW:
+			if (ce->__pow != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_BW_AND:
+			if (ce->__bitwiseand != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_BW_OR:
+			if (ce->__bitwiseor != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_BW_XOR:
+			if (ce->__bitwisexor != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_BW_NOT:
+			if (ce->__bitwisenot != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_SL:
+			if (ce->__bitwiseshiftleft != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_SR:
+			if (ce->__bitwiseshiftright != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+			if (ce->__equals != NULL) {
+				return 1;
+			}
+			break;
+
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
+		case ZEND_SPACESHIP:
+			if (ce->__compareto != NULL) {
+				return 1;
+			}
+			break;
+
+		default:
+			return 0;
+	}
+
+	return 0;
+}
+
+ZEND_API zend_function *zend_std_get_op_overload(zend_uchar opcode, zend_class_entry *ce)
+{
+	switch (opcode) {
+		case ZEND_ADD:
+			return ce->__add;
+			break;
+
+		case ZEND_SUB:
+			return ce->__sub;
+			break;
+
+		case ZEND_MUL:
+			return ce->__mul;
+			break;
+
+		case ZEND_DIV:
+			return ce->__div;
+			break;
+
+		case ZEND_MOD:
+			return ce->__mod;
+			break;
+
+		case ZEND_POW:
+			return ce->__pow;
+			break;
+
+		case ZEND_BW_AND:
+			return ce->__bitwiseand;
+			break;
+
+		case ZEND_BW_OR:
+			return ce->__bitwiseor;
+			break;
+
+		case ZEND_BW_XOR:
+			return ce->__bitwisexor;
+			break;
+
+		case ZEND_BW_NOT:
+			return ce->__bitwisenot;
+			break;
+
+		case ZEND_SL:
+			return ce->__bitwiseshiftleft;
+			break;
+
+		case ZEND_SR:
+			return ce->__bitwiseshiftright;
+			break;
+
+		case ZEND_IS_EQUAL:
+		case ZEND_IS_NOT_EQUAL:
+			return ce->__equals;
+			break;
+
+		case ZEND_IS_SMALLER:
+		case ZEND_IS_SMALLER_OR_EQUAL:
+		case ZEND_IS_LARGER:
+		case ZEND_IS_LARGER_OR_EQUAL:
+		case ZEND_SPACESHIP:
+			return ce->__compareto;
+			break;
+
+		default:
+			return NULL;
+	}
+}
+
 ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	int result;
