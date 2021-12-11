@@ -4390,7 +4390,8 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
-	if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_OPERATOR)) {
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_OPERATOR) != 0)
+		&& UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CLOSURE) == 0)) {
 		zend_vm_stack_free_args(call);
 		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
 			zend_free_extra_named_params(call->extra_named_params);

@@ -58,6 +58,10 @@ var_dump($operatorReflector instanceof ReflectionMethod);
 var_dump($operatorReflector->isOperator());
 var_dump($testReflector->isOperator());
 
+$closure = $operatorReflector->getClosure($obj);
+
+$closure(1, OperandPosition::LeftSide);
+
 ?>
 --EXPECT--
 bool(true)
@@ -73,3 +77,4 @@ Operator A::blank() does not exist
 bool(true)
 bool(true)
 bool(false)
+The + method was called.
