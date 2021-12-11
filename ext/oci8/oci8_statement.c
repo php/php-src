@@ -117,6 +117,12 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 		php_oci_statement_set_prefetch(statement, (ub4)100); /* semi-arbitrary, "sensible default" */
 	}
 
+	if (OCI_G(prefetch_lob_size) > 0) {
+		statement->prefetch_lob_size = (ub4)OCI_G(prefetch_lob_size);
+	} else {
+		statement->prefetch_lob_size = 0;
+	}		
+	
 	PHP_OCI_REGISTER_RESOURCE(statement, le_statement);
 
 	OCI_G(num_statements)++;
@@ -173,6 +179,7 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 		GC_ADDREF(statement2->connection->id);
 
 		php_oci_statement_set_prefetch(statement2, statement->prefetch_count);
+		statement2->prefetch_lob_size = statement->prefetch_lob_size;
 
 		PHP_OCI_REGISTER_RESOURCE(statement2, le_statement);
 
@@ -186,7 +193,7 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 
 /* {{{ php_oci_statement_set_prefetch()
  Set prefetch buffer size for the statement */
-int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch )
+int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch)
 {
 	sword errstatus;
 
@@ -820,18 +827,30 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 				return 1;
 			}
 
+			/* Enable LOB data prefetching */
+			if ((outcol->data_type == SQLT_CLOB || outcol->data_type == SQLT_BLOB) && statement->prefetch_lob_size > 0) {
+				int get_lob_len = 1;  /* == true */
+
+				PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &get_lob_len, 0, OCI_ATTR_LOBPREFETCH_LENGTH, statement->err));
+				if (errstatus != OCI_SUCCESS) {
+					statement->errcode = php_oci_error(statement->err, errstatus);
+					PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
+					return 1;
+				}
+
+				PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &(statement->prefetch_lob_size), 0, OCI_ATTR_LOBPREFETCH_SIZE, statement->err));
+				if (errstatus != OCI_SUCCESS) {
+					statement->errcode = php_oci_error(statement->err, errstatus);
+					PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
+					return 1;
+				}
+			}
+
 			/* additional define setup */
 			switch (outcol->data_type) {
+				case SQLT_RSET:
 				case SQLT_BLOB:
 				case SQLT_CLOB:
-					if (OCI_G(prefetch_lob_size) > 0) {
-						int get_lob_len = 1;  /* == true */
-						ub4 prefetch_size = OCI_G(prefetch_lob_size);
-						PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &get_lob_len, 0, OCI_ATTR_LOBPREFETCH_LENGTH, statement->err));
-						PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, (outcol->oci_define, OCI_HTYPE_DEFINE, &prefetch_size, 0, OCI_ATTR_LOBPREFETCH_SIZE, statement->err));
-					}
-					ZEND_FALLTHROUGH;
-				case SQLT_RSET:
 				case SQLT_RDD:
 				case SQLT_BFILE:
 					PHP_OCI_CALL_RETURN(errstatus,
