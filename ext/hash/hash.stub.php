@@ -2,11 +2,11 @@
 
 /** @generate-function-entries */
 
-function hash(string $algo, string $data, bool $binary = false): string|false {}
+function hash(string $algo, string $data, bool $binary = false): string {}
 
 function hash_file(string $algo, string $filename, bool $binary = false): string|false {}
 
-function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string|false {}
+function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string {}
 
 function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
 

@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #81585 (cached_chunks are not counted to real_size on shutdown).
     (cmb)
 
+- Hash:
+  . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
+    (cmb)
+
 - PDO_PGSQL:
   . Fixed error message allocation of PDO PgSQL. (SATO Kentaro)
 

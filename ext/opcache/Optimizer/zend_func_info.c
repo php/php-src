@@ -581,9 +581,9 @@ static const func_info_t func_infos[] = {
 	F1("ob_gzhandler",                          MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/hash */
-	F1("hash",                                  MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash",                                  MAY_BE_STRING),
 	F1("hash_file",                             MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hash_hmac",                             MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hmac",                             MAY_BE_STRING),
 	F1("hash_hmac_algos",                       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("hash_hmac_file",                        MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_hkdf",                             MAY_BE_STRING),
