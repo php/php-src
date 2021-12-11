@@ -28,9 +28,10 @@ PHP 8.2 UPGRADE NOTES
     HTTP method in curl_getinfo() return value.
 
 - OCI8:
-  . Added an oci8.prefetch_lob_size directive to tune LOB query performance
-    by reducing the number of round-trips between PHP and Oracle Database when
-    fetching LOBS. This is usable with Oracle Database 12.2 or later.
+  . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
+    function to tune LOB query performance by reducing the number of
+    round-trips between PHP and Oracle Database when fetching LOBS. This is
+    usable with Oracle Database 12.2 or later.
 
 - PCRE:
   . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple

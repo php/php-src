@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 46ee8ce62b36639636b4f5126e20a4b4e1df2e25 */
+ * Stub hash: 9db587b5d431b9dfe7178fd843ae8907db737a04 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -299,6 +299,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ocisetprefetch arginfo_oci_set_prefetch
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_prefetch_lob, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, statement)
+	ZEND_ARG_TYPE_INFO(0, prefetch_lob_size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_set_client_identifier, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, client_id, IS_STRING, 0)
@@ -596,6 +601,7 @@ ZEND_FUNCTION(oci_num_fields);
 ZEND_FUNCTION(oci_parse);
 ZEND_FUNCTION(oci_get_implicit_resultset);
 ZEND_FUNCTION(oci_set_prefetch);
+ZEND_FUNCTION(oci_set_prefetch_lob);
 ZEND_FUNCTION(oci_set_client_identifier);
 ZEND_FUNCTION(oci_set_edition);
 ZEND_FUNCTION(oci_set_module_name);
@@ -710,6 +716,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(oci_get_implicit_resultset, arginfo_oci_get_implicit_resultset)
 	ZEND_FE(oci_set_prefetch, arginfo_oci_set_prefetch)
 	ZEND_DEP_FALIAS(ocisetprefetch, oci_set_prefetch, arginfo_ocisetprefetch)
+	ZEND_FE(oci_set_prefetch_lob, arginfo_oci_set_prefetch_lob)
 	ZEND_FE(oci_set_client_identifier, arginfo_oci_set_client_identifier)
 	ZEND_FE(oci_set_edition, arginfo_oci_set_edition)
 	ZEND_FE(oci_set_module_name, arginfo_oci_set_module_name)

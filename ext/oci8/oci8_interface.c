@@ -1633,6 +1633,30 @@ PHP_FUNCTION(oci_set_prefetch)
 }
 /* }}} */
 
+/* {{{ Sets the amount of LOB data to be prefetched when OCI LOB locators are fetched */
+PHP_FUNCTION(oci_set_prefetch_lob)
+{
+	zval *z_statement;
+	php_oci_statement *statement;
+	zend_long prefetch_lob_size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_LONG(prefetch_lob_size)
+		ZEND_PARSE_PARAMETERS_END();
+
+	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
+
+	if (prefetch_lob_size < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	statement->prefetch_lob_size = (ub4) prefetch_lob_size;
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ Sets the client identifier attribute on the connection */
 PHP_FUNCTION(oci_set_client_identifier)
 {

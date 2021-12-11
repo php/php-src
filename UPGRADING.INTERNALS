@@ -6,6 +6,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 
 3. Module changes
 
+4. OpCode changes
+
 ========================
 1. Internal API changes
 ========================
@@ -23,4 +25,15 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
+
+========================
+4. OpCode changes
+========================
+
+* The ZEND_INIT_FCALL opcode now asserts that the function exists in the symbol
+  table as the function's existence is checked at compile time.
+  For extensions modifying the function symbol table, setting
+  CG(compiler_options) |= ZEND_COMPILE_IGNORE_USER_FUNCTIONS | ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS;
+  will produce ZEND_INIT_FCALL_BY_NAME opcodes instead which check for the
+  existence of the function at runtime.
 

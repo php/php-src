@@ -2304,10 +2304,10 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 #endif
 		memset(heap->free_slot, 0, sizeof(heap->free_slot));
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
-		heap->real_size = ZEND_MM_CHUNK_SIZE;
+		heap->real_size = (heap->cached_chunks_count + 1) * ZEND_MM_CHUNK_SIZE;
 #endif
 #if ZEND_MM_STAT
-		heap->real_peak = ZEND_MM_CHUNK_SIZE;
+		heap->real_peak = (heap->cached_chunks_count + 1) * ZEND_MM_CHUNK_SIZE;
 #endif
 		heap->chunks_count = 1;
 		heap->peak_chunks_count = 1;

@@ -5057,9 +5057,6 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 
 	if (opcode == ZEND_MOD) {
 		result_reg = ZREG_RAX;
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
-			|	mov aword T1, r0 // save
-		}
 	} else if (Z_MODE(res_addr) == IS_REG) {
 		if ((opline->opcode == ZEND_SL || opline->opcode == ZEND_SR)
 		 && opline->op2_type != IS_CONST) {
@@ -5184,6 +5181,11 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|	GET_ZVAL_LVAL result_reg, op1_addr
 				|	LONG_MATH ZEND_BW_AND, result_reg, tmp_addr
 			} else {
+				if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
+					|	mov aword T1, r0 // save
+				} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RCX) {
+					|	mov aword T1, Ra(ZREG_RCX) // save
+				}
 				result_reg = ZREG_RDX;
 				if (op2_lval == -1) {
 					|	xor Ra(result_reg), Ra(result_reg)
@@ -5199,6 +5201,8 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				}
 				if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
 					|	mov r0, aword T1 // restore
+				} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RCX) {
+					|	mov Ra(ZREG_RCX), aword T1 // restore
 				}
 			}
 		} else {
@@ -5240,6 +5244,9 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				|.code
 			}
 
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
+				|	mov aword T1, r0 // save
+			}
 			result_reg = ZREG_RDX;
 			|	GET_ZVAL_LVAL ZREG_RAX, op1_addr
 			|.if X64
@@ -12235,28 +12242,28 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 			|6:
 		}
 
-		if ((opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF)) {
-			|	SET_EX_OPLINE opline, r0
-			if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
-				may_throw = 1;
-				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
-				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
-				|	mov FCARG1d, opline->op1.var
-				|	EXT_CALL zend_jit_undefined_op_helper, r0
-				|1:
-			}
-
-			if (op2_info & MAY_BE_UNDEF) {
-				may_throw = 1;
-				|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1
-				|	mov FCARG1d, opline->op2.var
-				|	EXT_CALL zend_jit_undefined_op_helper, r0
-				|1:
-			}
-		}
-
 		if ((op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))
 		 && (!exit_addr || !(op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT|may_be_string)))) {
+			if ((opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) || (op2_info & MAY_BE_UNDEF)) {
+				|	SET_EX_OPLINE opline, r0
+				if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
+					may_throw = 1;
+					|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
+					|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+					|	mov FCARG1d, opline->op1.var
+					|	EXT_CALL zend_jit_undefined_op_helper, r0
+					|1:
+				}
+
+				if (op2_info & MAY_BE_UNDEF) {
+					may_throw = 1;
+					|	IF_NOT_ZVAL_TYPE op2_addr, IS_UNDEF, >1
+					|	mov FCARG1d, opline->op2.var
+					|	EXT_CALL zend_jit_undefined_op_helper, r0
+					|1:
+				}
+			}
+
 			if (opline->opcode != ZEND_FETCH_DIM_IS && opline->opcode != ZEND_FETCH_LIST_R) {
 				may_throw = 1;
 				if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {

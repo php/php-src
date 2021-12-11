@@ -10,7 +10,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <description>
 The OCI8 extension lets you access Oracle Database.
 
-Use 'pecl install oci8' to install for PHP 8.
+Use 'pecl install oci8' to install for PHP 8.1.
+
+Use 'pecl install oci8-3.0.1' to install for PHP 8.0.
 
 Use 'pecl install oci8-2.2.0' to install for PHP 7.
 
@@ -53,7 +55,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2021-11-15</date>
+ <date>2021-12-11</date>
  <time>12:00:00</time>
 
   <version>
@@ -66,9 +68,9 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.1 only.
 
-    Added oci8.prefetch_lob_size directive to improve LOB query performance.
+    Added oci8.prefetch_lob_size directive and oci_set_prefetch_lob() function to improve LOB query performance.
   </notes>
  <contents>
   <dir name="/">
@@ -373,6 +375,8 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="lob_044.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
+    <file name="lob_prefetch.phpt" role="test" />
+    <file name="lob_prefetch_ini.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp2.phpt" role="test" />
@@ -435,7 +439,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
  <dependencies>
   <required>
    <php>
-    <min>8.0.0</min>
+    <min>8.1.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>

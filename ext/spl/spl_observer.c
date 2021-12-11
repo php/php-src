@@ -249,7 +249,7 @@ void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorag
 } /* }}} */
 
 #define SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zstr_method) \
-	(((zend_function *)zend_hash_find_ptr(&(class_type)->function_table, ZSTR_KNOWN(zstr_method)))->common.scope != spl_ce_SplObjectStorage)
+	(class_type->arrayaccess_funcs_ptr && class_type->arrayaccess_funcs_ptr->zstr_method)
 
 static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend_object *orig) /* {{{ */
 {
@@ -277,18 +277,18 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 					intern->fptr_get_hash = get_hash;
 				}
 				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, ZEND_STR_OFFSETGET) ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, ZEND_STR_OFFSETEXISTS)) {
+					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetget) ||
+					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetexists)) {
 					intern->flags |= SOS_OVERRIDDEN_READ_DIMENSION;
 				}
 
 				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, ZEND_STR_OFFSETSET)) {
+					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetset)) {
 					intern->flags |= SOS_OVERRIDDEN_WRITE_DIMENSION;
 				}
 
 				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, ZEND_STR_OFFSETUNSET)) {
+					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetunset)) {
 					intern->flags |= SOS_OVERRIDDEN_UNSET_DIMENSION;
 				}
 			}

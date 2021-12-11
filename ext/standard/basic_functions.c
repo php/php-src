@@ -528,6 +528,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	 * to the value in startup environment */
 	if (BG(locale_changed)) {
 		setlocale(LC_ALL, "C");
+		zend_reset_lc_ctype_locale();
 		zend_update_current_locale();
 		if (BG(ctype_string)) {
 			zend_string_release_ex(BG(ctype_string), 0);

@@ -35,6 +35,9 @@
 
 #ifdef HAVE_OCI8
 
+/* Note to maintainers: config.m4 should/does check the minimum PHP version so
+ * the below checks are obsolete - but are kept 'just in case' */
+
 /* PHP 5.2 is the minimum supported version for OCI8 2.0 */
 #if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
 #error Use PHP OCI8 1.4 for your version of PHP
@@ -42,8 +45,10 @@
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
 #error Use PHP OCI8 2.0 for your version of PHP
 #elif PHP_MAJOR_VERSION < 8
-/* PHP 8 is the minimum supported version for OCI8 3.0 */
+/* PHP 8 is the minimum supported version for OCI8 3 */
 #error Use PHP OCI8 2.2 for your version of PHP
+#elif PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION < 1
+#error Use PHP OCI8 3.0 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -174,7 +179,7 @@ PHP_INI_BEGIN()
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	STD_PHP_INI_BOOLEAN("oci8.events",					"0",	PHP_INI_SYSTEM,	OnUpdateBool,		events,					zend_oci_globals,	oci_globals)
 #endif
-	STD_PHP_INI_ENTRY(	"oci8.prefetch_lob_size",		"0",	PHP_INI_ALL, 	OnUpdateLong,	prefetch_lob_size,		zend_oci_globals,	oci_globals)
+	STD_PHP_INI_ENTRY(	"oci8.prefetch_lob_size",		"0",	PHP_INI_SYSTEM,	OnUpdateLong,	prefetch_lob_size,		zend_oci_globals,	oci_globals)
 PHP_INI_END()
 /* }}} */
 

@@ -40,23 +40,19 @@ PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 ZEND_GET_MODULE(spl_fixedarray)
 #endif
 
+/* Check if the object is an instance of a subclass of SplFixedArray that overrides method's implementation.
+ * Expect subclassing SplFixedArray to be rare and check that first. */
+#define HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, method) UNEXPECTED((object)->ce != spl_ce_SplFixedArray && (object)->ce->arrayaccess_funcs_ptr->method->common.scope != spl_ce_SplFixedArray)
+
 typedef struct _spl_fixedarray {
 	zend_long size;
 	/* It is possible to resize this, so this can't be combined with the object */
 	zval *elements;
 } spl_fixedarray;
 
-typedef struct _spl_fixedarray_methods {
-	zend_function       *fptr_offset_get;
-	zend_function       *fptr_offset_set;
-	zend_function       *fptr_offset_has;
-	zend_function       *fptr_offset_del;
-	zend_function       *fptr_count;
-} spl_fixedarray_methods;
-
 typedef struct _spl_fixedarray_object {
 	spl_fixedarray          array;
-	spl_fixedarray_methods *methods;
+	zend_function          *fptr_count;
 	zend_object             std;
 } spl_fixedarray_object;
 
@@ -233,9 +229,6 @@ static void spl_fixedarray_object_free_storage(zend_object *object)
 	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 	spl_fixedarray_dtor(&intern->array);
 	zend_object_std_dtor(&intern->std);
-	if (intern->methods) {
-		efree(intern->methods);
-	}
 }
 
 static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, zend_object *orig, bool clone_orig)
@@ -267,34 +260,11 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	ZEND_ASSERT(parent);
 
 	if (UNEXPECTED(inherited)) {
-		spl_fixedarray_methods methods;
-		methods.fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
-		if (methods.fptr_offset_get->common.scope == parent) {
-			methods.fptr_offset_get = NULL;
+		zend_function *fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		if (fptr_count->common.scope == parent) {
+			fptr_count = NULL;
 		}
-		methods.fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
-		if (methods.fptr_offset_set->common.scope == parent) {
-			methods.fptr_offset_set = NULL;
-		}
-		methods.fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
-		if (methods.fptr_offset_has->common.scope == parent) {
-			methods.fptr_offset_has = NULL;
-		}
-		methods.fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
-		if (methods.fptr_offset_del->common.scope == parent) {
-			methods.fptr_offset_del = NULL;
-		}
-		methods.fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
-		if (methods.fptr_count->common.scope == parent) {
-			methods.fptr_count = NULL;
-		}
-		/* Assume that most of the time in performance-sensitive code, SplFixedArray won't be subclassed with overrides for these ArrayAccess methods. */
-		/* Save 32 bytes per object on 64-bit systems by combining the 5 null pointers into 1 null pointer */
-		/* (This is already looking up 5 functions when any subclass of SplFixedArray is instantiated, which is inefficient) */
-		if (methods.fptr_offset_get || methods.fptr_offset_set || methods.fptr_offset_del || methods.fptr_offset_has || methods.fptr_count) {
-			intern->methods = emalloc(sizeof(spl_fixedarray_methods));
-			*intern->methods = methods;
-		}
+		intern->fptr_count = fptr_count;
 	}
 
 	return &intern->std;
@@ -374,27 +344,24 @@ static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset
 
 static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
-	spl_fixedarray_object *intern;
-
-	intern = spl_fixed_array_from_obj(object);
-
 	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 0)) {
 		return &EG(uninitialized_zval);
 	}
 
-	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_get)) {
+	if (HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetget)) {
 		zval tmp;
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		}
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_get, "offsetGet", rv, offset);
+		zend_call_known_instance_method_with_1_params(object->ce->arrayaccess_funcs_ptr->zf_offsetget, object, rv, offset);
 		if (!Z_ISUNDEF_P(rv)) {
 			return rv;
 		}
 		return &EG(uninitialized_zval);
 	}
 
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 	return spl_fixedarray_object_read_dimension_helper(intern, offset);
 }
 
@@ -429,20 +396,18 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 
 static void spl_fixedarray_object_write_dimension(zend_object *object, zval *offset, zval *value)
 {
-	spl_fixedarray_object *intern;
-	zval tmp;
+	if (HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetset)) {
+		zval tmp;
 
-	intern = spl_fixed_array_from_obj(object);
-
-	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_set)) {
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		}
-		zend_call_method_with_2_params(object, intern->std.ce, &intern->methods->fptr_offset_set, "offsetSet", NULL, offset, value);
+		zend_call_known_instance_method_with_2_params(object->ce->arrayaccess_funcs_ptr->zf_offsetset, object, NULL, offset, value);
 		return;
 	}
 
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 	spl_fixedarray_object_write_dimension_helper(intern, offset, value);
 }
 
@@ -467,15 +432,12 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 
 static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *offset)
 {
-	spl_fixedarray_object *intern;
-
-	intern = spl_fixed_array_from_obj(object);
-
-	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_del)) {
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_del, "offsetUnset", NULL, offset);
+	if (UNEXPECTED(HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetunset))) {
+		zend_call_known_instance_method_with_1_params(object->ce->arrayaccess_funcs_ptr->zf_offsetunset, object, NULL, offset);
 		return;
 	}
 
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 	spl_fixedarray_object_unset_dimension_helper(intern, offset);
 }
 
@@ -501,19 +463,16 @@ static bool spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *in
 
 static int spl_fixedarray_object_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
-	spl_fixedarray_object *intern;
-
-	intern = spl_fixed_array_from_obj(object);
-
-	if (UNEXPECTED(intern->methods && intern->methods->fptr_offset_has)) {
+	if (HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, zf_offsetexists)) {
 		zval rv;
-		bool result;
 
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->methods->fptr_offset_has, "offsetExists", &rv, offset);
-		result = zend_is_true(&rv);
+		zend_call_known_instance_method_with_1_params(object->ce->arrayaccess_funcs_ptr->zf_offsetexists, object, &rv, offset);
+		bool result = zend_is_true(&rv);
 		zval_ptr_dtor(&rv);
 		return result;
 	}
+
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 
 	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty);
 }
@@ -523,9 +482,9 @@ static int spl_fixedarray_object_count_elements(zend_object *object, zend_long *
 	spl_fixedarray_object *intern;
 
 	intern = spl_fixed_array_from_obj(object);
-	if (UNEXPECTED(intern->methods && intern->methods->fptr_count)) {
+	if (UNEXPECTED(intern->fptr_count)) {
 		zval rv;
-		zend_call_method_with_0_params(object, intern->std.ce, &intern->methods->fptr_count, "count", &rv);
+		zend_call_known_instance_method_with_0_params(intern->fptr_count, object, &rv);
 		if (!Z_ISUNDEF(rv)) {
 			*count = zval_get_long(&rv);
 			zval_ptr_dtor(&rv);
