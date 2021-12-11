@@ -166,6 +166,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function __toString(): string {}
 
     /** @tentative-return-type */
+    public function isOperator(): bool {}
+
+    /** @tentative-return-type */
     public function isPublic(): bool {}
 
     /** @tentative-return-type */
@@ -260,6 +263,15 @@ class ReflectionClass implements Reflector
 
     /** @tentative-return-type */
     public function getMethods(?int $filter = null): array {}
+
+    /** @tentative-return-type */
+    public function hasOperator(string $name): bool {}
+
+    /** @tentative-return-type */
+    public function getOperator(string $name): ReflectionMethod {}
+
+    /** @tentative-return-type */
+    public function getOperators(?int $filter = null): array {}
 
     /** @tentative-return-type */
     public function hasProperty(string $name): bool {}

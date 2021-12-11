@@ -3387,6 +3387,13 @@ ZEND_METHOD(ReflectionMethod, invokeArgs)
 /* }}} */
 
 /* {{{ Returns whether this method is final */
+ZEND_METHOD(ReflectionMethod, isOperator)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_OPERATOR);
+}
+/* }}} */
+
+/* {{{ Returns whether this method is final */
 ZEND_METHOD(ReflectionMethod, isFinal)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
@@ -4327,7 +4334,12 @@ ZEND_METHOD(ReflectionClass, hasMethod)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	lc_name = zend_string_tolower(name);
-	RETVAL_BOOL(zend_hash_exists(&ce->function_table, lc_name) || is_closure_invoke(ce, lc_name));
+	zend_function *fptr = zend_hash_find_ptr(&ce->function_table, lc_name);
+	if (fptr == NULL || fptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+		RETVAL_BOOL(0);
+	} else {
+		RETVAL_BOOL(zend_hash_exists(&ce->function_table, lc_name) || is_closure_invoke(ce, lc_name));
+	}
 	zend_string_release(lc_name);
 }
 /* }}} */
@@ -4347,7 +4359,11 @@ ZEND_METHOD(ReflectionClass, getMethod)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	lc_name = zend_string_tolower(name);
-	if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
+	if ((mptr = zend_hash_find_ptr(&ce->function_table, lc_name)) != NULL
+		&& mptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Operator %s::%s() is not a method, use getOperator()", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	} else if (!Z_ISUNDEF(intern->obj) && is_closure_invoke(ce, lc_name)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
@@ -4405,6 +4421,9 @@ ZEND_METHOD(ReflectionClass, getMethods)
 
 	array_init(return_value);
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
+		if (mptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+			continue;
+		}
 		_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
 	} ZEND_HASH_FOREACH_END();
 
@@ -4426,6 +4445,82 @@ ZEND_METHOD(ReflectionClass, getMethods)
 			zval_ptr_dtor(&obj_tmp);
 		}
 	}
+}
+/* }}} */
+
+/* {{{ Returns whether a method exists or not */
+ZEND_METHOD(ReflectionClass, hasOperator)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_string *name, *lc_name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+	lc_name = zend_string_tolower(name);
+	zend_function *fptr = zend_hash_find_ptr(&ce->function_table, lc_name);
+	if (fptr == NULL || fptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+		RETVAL_BOOL(1);
+	} else {
+		RETVAL_BOOL(0);
+	}
+	zend_string_release(lc_name);
+}
+/* }}} */
+
+/* {{{ Returns the class' method specified by its name */
+ZEND_METHOD(ReflectionClass, getOperator)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_function *mptr;
+	zend_string *name, *lc_name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+	lc_name = zend_string_tolower(name);
+	if ((mptr = zend_hash_find_ptr(&ce->function_table, lc_name)) != NULL
+		&& mptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+		reflection_method_factory(ce, mptr, NULL, return_value);
+	} else {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+								"Operator %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
+	}
+	zend_string_release(lc_name);
+}
+/* }}} */
+
+/* {{{ Returns an array of this class' methods */
+ZEND_METHOD(ReflectionClass, getOperators)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_function *mptr;
+	zend_long filter;
+	bool filter_is_null = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (filter_is_null) {
+		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	array_init(return_value);
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
+		if (mptr->common.fn_flags & ZEND_ACC_OPERATOR) {
+			_addmethod(mptr, ce, Z_ARRVAL_P(return_value), filter);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

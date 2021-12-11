@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 62fcf63d2f3e93537560c3a03e71fda131a31586 */
+ * Stub hash: d0d3d62766e8f6d1c6a29a685433a32f064c558f */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -131,6 +131,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod___toString arginfo_class_ReflectionFunction___toString
 
+#define arginfo_class_ReflectionMethod_isOperator arginfo_class_ReflectionFunctionAbstract_inNamespace
+
 #define arginfo_class_ReflectionMethod_isPublic arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionMethod_isPrivate arginfo_class_ReflectionFunctionAbstract_inNamespace
@@ -213,6 +215,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionClass_getMethods, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionClass_hasOperator arginfo_class_ReflectionClass_hasMethod
+
+#define arginfo_class_ReflectionClass_getOperator arginfo_class_ReflectionClass_getMethod
+
+#define arginfo_class_ReflectionClass_getOperators arginfo_class_ReflectionClass_getMethods
 
 #define arginfo_class_ReflectionClass_hasProperty arginfo_class_ReflectionClass_hasMethod
 
@@ -643,6 +651,7 @@ ZEND_METHOD(ReflectionGenerator, getThis);
 ZEND_METHOD(ReflectionGenerator, getExecutingGenerator);
 ZEND_METHOD(ReflectionMethod, __construct);
 ZEND_METHOD(ReflectionMethod, __toString);
+ZEND_METHOD(ReflectionMethod, isOperator);
 ZEND_METHOD(ReflectionMethod, isPublic);
 ZEND_METHOD(ReflectionMethod, isPrivate);
 ZEND_METHOD(ReflectionMethod, isProtected);
@@ -673,6 +682,9 @@ ZEND_METHOD(ReflectionClass, getConstructor);
 ZEND_METHOD(ReflectionClass, hasMethod);
 ZEND_METHOD(ReflectionClass, getMethod);
 ZEND_METHOD(ReflectionClass, getMethods);
+ZEND_METHOD(ReflectionClass, hasOperator);
+ZEND_METHOD(ReflectionClass, getOperator);
+ZEND_METHOD(ReflectionClass, getOperators);
 ZEND_METHOD(ReflectionClass, hasProperty);
 ZEND_METHOD(ReflectionClass, getProperty);
 ZEND_METHOD(ReflectionClass, getProperties);
@@ -901,6 +913,7 @@ static const zend_function_entry class_ReflectionGenerator_methods[] = {
 static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, __construct, arginfo_class_ReflectionMethod___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, __toString, arginfo_class_ReflectionMethod___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, isOperator, arginfo_class_ReflectionMethod_isOperator, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isPublic, arginfo_class_ReflectionMethod_isPublic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isPrivate, arginfo_class_ReflectionMethod_isPrivate, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, isProtected, arginfo_class_ReflectionMethod_isProtected, ZEND_ACC_PUBLIC)
@@ -937,6 +950,9 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, hasMethod, arginfo_class_ReflectionClass_hasMethod, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getMethod, arginfo_class_ReflectionClass_getMethod, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getMethods, arginfo_class_ReflectionClass_getMethods, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, hasOperator, arginfo_class_ReflectionClass_hasOperator, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getOperator, arginfo_class_ReflectionClass_getOperator, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, getOperators, arginfo_class_ReflectionClass_getOperators, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, hasProperty, arginfo_class_ReflectionClass_hasProperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getProperty, arginfo_class_ReflectionClass_getProperty, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getProperties, arginfo_class_ReflectionClass_getProperties, ZEND_ACC_PUBLIC)
