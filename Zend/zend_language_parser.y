@@ -934,7 +934,7 @@ attributed_class_statement:
 		return_type backup_fn_flags method_body backup_fn_flags
 			{ zval zv;
               if (zend_lex_tstring(&zv, $3) == FAILURE) { YYABORT; }
-              $$ = zend_ast_create_decl(ZEND_AST_METHOD, $1 | $11, $2, $4, Z_STR(zv), $6, NULL, $10, $8, NULL);
+              $$ = zend_ast_create_decl(ZEND_AST_METHOD, $1 | $11 | ZEND_ACC_OPERATOR, $2, $4, Z_STR(zv), $6, NULL, $10, $8, NULL);
               CG(extra_fn_flags) = $9; }
 	|	enum_case { $$ = $1; }
 ;

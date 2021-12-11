@@ -4330,6 +4330,21 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
+	if (EXPECTED(fbc->common.fn_flags & ZEND_ACC_OPERATOR)) {
+		zend_vm_stack_free_args(call);
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+			zend_free_extra_named_params(call->extra_named_params);
+		}
+
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS)) {
+			OBJ_RELEASE(Z_OBJ(call->This));
+		}
+
+		zend_vm_stack_free_call_frame(call);
+		zend_throw_error(NULL, "Operator implementations may not be called as methods");
+		HANDLE_EXCEPTION();
+	}
+
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		ret = NULL;
 		if (RETURN_VALUE_USED(opline)) {

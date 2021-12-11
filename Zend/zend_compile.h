@@ -357,6 +357,9 @@ typedef struct _zend_oparray_context {
 /* method flag used by Closure::__invoke() (int only)     |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 << 26) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* method is an operator                                  |     |     |     */
+#define ZEND_ACC_OPERATOR                (1 << 27) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
