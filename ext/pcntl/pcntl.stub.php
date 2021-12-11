@@ -83,7 +83,7 @@ function pcntl_unshare(int $flags): bool {}
 #ifdef HAVE_RFORK
 function pcntl_rfork(int $flags, int $signal = 0): int{}
 #endif
-#
-#ifdef HAVE_RFORK
+
+#ifdef HAVE_FORKX
 function pcntl_forkx(int $flags): int{}
 #endif
