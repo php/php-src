@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #81681 (ReflectionEnum throwing exceptions). (cmb)
 
+- PDO_PGSQL:
+  . Fixed error message allocation of PDO PgSQL. (SATO Kentaro)
+
 - Spl:
   . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
     Bystry)
