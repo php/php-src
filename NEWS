@@ -26,6 +26,10 @@ PHP                                                                        NEWS
     (devnexen)
   . Introduced MYSQLI_IS_MARIADB. (devnexen)
 
+- OCI8:
+  . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
+    call). (cmb)
+
 - Readline:
   . Fixed bug #81598 (Cannot input unicode characters in PHP 8 interactive
     shell). (Nikita)
