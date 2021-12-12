@@ -1605,7 +1605,7 @@ static bool do_inherit_constant_check(
 	}
 
 	zend_class_constant *old_constant = Z_PTR_P(zv);
-	if ((ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
+	if (parent_constant->ce != old_constant->ce && (ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
 			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
 			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name)
