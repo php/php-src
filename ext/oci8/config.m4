@@ -340,8 +340,8 @@ if test "$PHP_OCI8" != "no"; then
     AC_OCI8_ORACLE_VERSION($OCI8_DIR)
 
     case $OCI8_ORACLE_VERSION in
-      7.3|8.0|8.1|9.0)
-	AC_MSG_ERROR([Oracle client libraries < 10 are not supported])
+      7.3|8.0|8.1|9.0|10.1)
+	AC_MSG_ERROR([Oracle Client libraries < 11.2 are not supported])
 	;;
     esac
 
@@ -413,6 +413,11 @@ if test "$PHP_OCI8" != "no"; then
     fi
 
     AC_OCI8IC_VERSION($PHP_OCI8_INSTANT_CLIENT)
+    case $OCI8_ORACLE_VERSION in
+      10.1)
+	AC_MSG_ERROR([Oracle Client libraries < 11.2 are not supported])
+      ;;
+    esac
     PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
     PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
 

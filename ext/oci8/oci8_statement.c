@@ -36,8 +36,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-#if defined(OCI_MAJOR_VERSION) && (OCI_MAJOR_VERSION > 10) && \
-	(defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64))
+#if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
 typedef ub8 oci_phpsized_int;
 #else
 typedef ub4 oci_phpsized_int;
@@ -267,11 +266,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 		zend_hash_apply(statement->columns, php_oci_cleanup_pre_fetch);
 	}
 
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));
-#else
-	PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
-#endif
 
 	if (errstatus == OCI_NO_DATA || nrows == 0) {
 		if (statement->last_query == NULL) {
@@ -347,11 +342,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows)
 			}
 		}
 
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 		PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch2, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, 0, OCI_DEFAULT));
-#else
-		PHP_OCI_CALL_RETURN(errstatus, OCIStmtFetch, (statement->stmt, statement->err, nrows, OCI_FETCH_NEXT, OCI_DEFAULT));
-#endif
 
 		if (piecewisecols) {
 			for (i = 0; i < statement->ncolumns; i++) {
@@ -827,7 +818,8 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 				return 1;
 			}
 
-			/* Enable LOB data prefetching */
+			/* Enable LOB data prefetching. */
+#if (OCI_MAJOR_VERSION > 12 || (OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2))
 			if ((outcol->data_type == SQLT_CLOB || outcol->data_type == SQLT_BLOB) && statement->prefetch_lob_size > 0) {
 				int get_lob_len = 1;  /* == true */
 
@@ -845,6 +837,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 					return 1;
 				}
 			}
+#endif
 
 			/* additional define setup */
 			switch (outcol->data_type) {

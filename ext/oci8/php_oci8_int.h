@@ -55,6 +55,10 @@
 #include "ext/standard/php_string.h"
 #include <oci.h>
 
+#if !defined(OCI_MAJOR_VERSION) || OCI_MAJOR_VERSION < 11 || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION < 2))
+#error This version of PHP OCI8 requires Oracle Client libraries from 11.2 or later.
+#endif
+
 extern int le_connection;
 extern int le_pconnection;
 extern int le_statement;

@@ -1637,14 +1637,17 @@ PHP_FUNCTION(oci_set_prefetch)
 PHP_FUNCTION(oci_set_prefetch_lob)
 {
 	zval *z_statement;
-	php_oci_statement *statement;
 	zend_long prefetch_lob_size;
+#if (OCI_MAJOR_VERSION > 12 || (OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2))
+	php_oci_statement *statement;
+#endif	
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(z_statement)
 		Z_PARAM_LONG(prefetch_lob_size)
 		ZEND_PARSE_PARAMETERS_END();
 
+#if (OCI_MAJOR_VERSION > 12 || (OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2))
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
 	if (prefetch_lob_size < 0) {
@@ -1654,6 +1657,12 @@ PHP_FUNCTION(oci_set_prefetch_lob)
 
 	statement->prefetch_lob_size = (ub4) prefetch_lob_size;
 	RETURN_TRUE;
+#else
+	/* Although the LOB prefetch feature was available in some earlier Oracle
+	 * version, I don't consider it stable until 12.2 */
+	php_error_docref(NULL, E_NOTICE, "Unsupported with this version of Oracle Client");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
@@ -1718,7 +1727,6 @@ PHP_FUNCTION(oci_set_edition)
 		Z_PARAM_STRING(edition, edition_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
 	}
@@ -1732,10 +1740,6 @@ PHP_FUNCTION(oci_set_edition)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1751,8 +1755,6 @@ PHP_FUNCTION(oci_set_module_name)
 		Z_PARAM_STRING(module, module_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1766,10 +1768,6 @@ PHP_FUNCTION(oci_set_module_name)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1785,8 +1783,6 @@ PHP_FUNCTION(oci_set_action)
 		Z_PARAM_STRING(action, action_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1800,10 +1796,6 @@ PHP_FUNCTION(oci_set_action)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1819,8 +1811,6 @@ PHP_FUNCTION(oci_set_client_info)
 		Z_PARAM_STRING(client_info, client_info_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1834,10 +1824,6 @@ PHP_FUNCTION(oci_set_client_info)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 

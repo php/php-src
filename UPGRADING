@@ -118,6 +118,9 @@ PHP 8.2 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- OCI8:
+  . The minimum Oracle Client library version required is now 11.2.
+
 - Zip:
   . extension updated to 1.20.0 with new methods:
     ZipArchive::clearError, getStreamName and getStreamIndex
