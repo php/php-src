@@ -12,7 +12,7 @@ $ar = [
     ['id' => 6, 'name' => 'wael', 'score' => 'D', 's' => '1'],
 ];
 
-print_r(array_column_group($ar, null, 'name'));
+print_r(array_group($ar, null, 'name'));
 ?>
 --EXPECT--
 Array

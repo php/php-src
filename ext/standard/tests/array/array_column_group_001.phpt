@@ -12,7 +12,7 @@ $ar = [
     ['id' => 6, 'name' => 'wael', 'score' => 'D', 's' => '1'],
 ];
 
-var_dump(array_column_group($ar, null, 'id'));
+var_dump(array_group($ar, null, 'id'));
 ?>
 --EXPECT--
 array(6) {

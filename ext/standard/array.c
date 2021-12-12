@@ -4342,7 +4342,7 @@ PHP_FUNCTION(array_column)
 
 /* {{{ Return all the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key in an indexed array */
-PHP_FUNCTION(array_column_group)
+PHP_FUNCTION(array_group)
 {
 	HashTable *input;
 	zval *colval, *data, rv;
