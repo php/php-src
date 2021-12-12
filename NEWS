@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - OCI8:
   . Added oci8.prefetch_lob_size directive to tune LOB query performance
+  . Support for building against Oracle Client libraries 10.1 and 10.2 has been
+    dropped. Oracle Client libraries 11.2 or newer are now required.
 
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.

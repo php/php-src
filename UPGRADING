@@ -157,6 +157,11 @@ PHP 8.2 UPGRADE NOTES
   . Windows specific error messages are no longer localized, but instead in
     English to better match PHP error messages.
 
+- OCI8:
+  . Since building against Oracle Client 10g is no longer supported anyway,
+    the configuration option --with-oci8 has been dropped. --with-oci8-11g,
+    --with-oci8-12c and --with-oci8-19 are still supported.
+
 ========================================
 13. Other Changes
 ========================================
