@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
     (cmb)
 
+- OCI8:
+  . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
+    call). (cmb)
+
 - PDO_PGSQL:
   . Fixed error message allocation of PDO PgSQL. (SATO Kentaro)
 

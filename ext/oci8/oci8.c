@@ -239,24 +239,6 @@ static void php_oci_init_global_handles(void)
 }
 /* }}} */
 
-/* {{{ php_oci_cleanup_global_handles()
- *
- * Free global handles (if they were initialized before)
- */
-static void php_oci_cleanup_global_handles(void)
-{
-	if (OCI_G(err)) {
-		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) OCI_G(err), OCI_HTYPE_ERROR));
-		OCI_G(err) = NULL;
-	}
-
-	if (OCI_G(env)) {
-		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) OCI_G(env), OCI_HTYPE_ENV));
-		OCI_G(env) = NULL;
-	}
-}
-/* }}} */
-
 /* {{{ PHP_GINIT_FUNCTION
  *
  * Zerofill globals during module init
@@ -270,10 +252,23 @@ static PHP_GINIT_FUNCTION(oci)
 /* {{{ PHP_GSHUTDOWN_FUNCTION
  *
  * Called for thread shutdown in ZTS, after module shutdown for non-ZTS
+ * Free global handles (if they were initialized before)
  */
 static PHP_GSHUTDOWN_FUNCTION(oci)
 {
-	php_oci_cleanup_global_handles();
+	if (oci_globals->err) {
+		oci_globals->in_call = 1;
+		OCIHandleFree((dvoid *) oci_globals->err, OCI_HTYPE_ERROR);
+		oci_globals->in_call = 0;
+		oci_globals->err = NULL;
+	}
+
+	if (oci_globals->env) {
+		oci_globals->in_call = 1;
+		OCIHandleFree((dvoid *) oci_globals->env, OCI_HTYPE_ENV);
+		oci_globals->in_call = 0;
+		oci_globals->env = NULL;
+	}
 }
 /* }}} */
 
