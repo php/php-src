@@ -165,7 +165,7 @@ static ZEND_INI_MH(OnUpdateJit)
 static ZEND_INI_MH(OnUpdateJitDebug)
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = ZEND_ATOL(ZSTR_VAL(new_value));
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
 		*p = val;
