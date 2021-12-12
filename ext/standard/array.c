@@ -4285,15 +4285,12 @@ PHP_FUNCTION(array_column)
 	zend_string *index_str = NULL;
 	zend_long index_long;
 	bool index_is_null = 1;
-	bool group_bool = 0;
-	bool group_is_null = 1;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_ARRAY_HT(input)
 		Z_PARAM_STR_OR_LONG_OR_NULL(column_str, column_long, column_is_null)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_LONG_OR_NULL(index_str, index_long, index_is_null)
-		Z_PARAM_BOOL_OR_NULL(group_bool, group_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	void* cache_slot_column[3] = { NULL, NULL, NULL };
