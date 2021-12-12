@@ -3,13 +3,13 @@
 /** @generate-class-entries */
 
 /** @refcount 1 */
-function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
+function hash(string $algo, string $data, bool $binary = false, array $options = []): string {}
 
 /** @refcount 1 */
 function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
 
 /** @refcount 1 */
-function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string|false {}
+function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string {}
 
 /** @refcount 1 */
 function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
