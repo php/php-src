@@ -540,7 +540,7 @@ static uint32_t zend_ssa_cv_info(const zend_op_array *op_array, zend_ssa *ssa, u
 	return info;
 }
 
-static bool zend_jit_may_avoid_refcounting(const zend_op *opline)
+static bool zend_jit_may_avoid_refcounting(const zend_op *opline, uint32_t op1_info)
 {
 	switch (opline->opcode) {
 		case ZEND_FETCH_OBJ_FUNC_ARG:
@@ -552,7 +552,8 @@ static bool zend_jit_may_avoid_refcounting(const zend_op *opline)
 			/* break missing intentionally */
 		case ZEND_FETCH_OBJ_R:
 		case ZEND_FETCH_OBJ_IS:
-			if (opline->op2_type == IS_CONST
+			if ((op1_info & MAY_BE_OBJECT)
+			 && opline->op2_type == IS_CONST
 			 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING
 			 && Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] != '\0') {
 				return 1;

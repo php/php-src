@@ -11775,7 +11775,7 @@ static int zend_jit_fetch_dim_read(dasm_State        **Dst,
 		 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 		 && (ssa_op+1)->op1_use == ssa_op->result_def
 		 && !(op2_info & ((MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF) - (MAY_BE_STRING|MAY_BE_LONG)))
-		 && zend_jit_may_avoid_refcounting(opline+1)) {
+		 && zend_jit_may_avoid_refcounting(opline+1, res_info)) {
 			result_avoid_refcounting = 1;
 			ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 		}
@@ -13107,7 +13107,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			 && !(flags & ZEND_JIT_EXIT_FREE_OP1)
 			 && (res_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))
 			 && (ssa_op+1)->op1_use == ssa_op->result_def
-			 && zend_jit_may_avoid_refcounting(opline+1)) {
+			 && zend_jit_may_avoid_refcounting(opline+1, res_info)) {
 				result_avoid_refcounting = 1;
 				ssa->var_info[ssa_op->result_def].avoid_refcounting = 1;
 			}
