@@ -1203,19 +1203,19 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 			if (OP2_TYPE == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					ZEND_VM_C_GOTO(assign_dim_op_ret_null);
-				}
 			} else if (OP2_TYPE == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();

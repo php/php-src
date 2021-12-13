@@ -1295,14 +1295,12 @@ static zend_always_inline int zend_binary_op(zval *ret, zval *op1, zval *op2 OPL
 	return zend_binary_ops[opcode - ZEND_ADD](ret, op1, op2);
 }
 
-static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *value;
 	zval *z;
 	zval rv, res;
-	zend_object *obj = Z_OBJ_P(object);
 
-	GC_ADDREF(obj);
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
 	if ((z = obj->handlers->read_dimension(obj, property, BP_VAR_R, &rv)) != NULL) {
 
@@ -1323,9 +1321,6 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *
 		}
 	}
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
-	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-		zend_objects_store_del(obj);
-	}
 }
 
 static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value OPLINE_DC EXECUTE_DATA_DC)

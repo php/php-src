@@ -22288,19 +22288,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -24859,19 +24859,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -27104,19 +27104,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = NULL;
 			if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -28887,19 +28887,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = EX_VAR(opline->op2.var);
 			if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -39539,19 +39539,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = RT_CONSTANT(opline, opline->op2);
 			if (IS_CONST == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_CONST == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -43190,19 +43190,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
 			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -46012,19 +46012,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = NULL;
 			if (IS_UNUSED == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_UNUSED == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
@@ -48331,19 +48331,19 @@ assign_dim_op_new_array:
 		}
 
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			GC_ADDREF(obj);
 			dim = EX_VAR(opline->op2.var);
 			if (IS_CV == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-				zend_object *obj = Z_OBJ_P(container);
-				GC_ADDREF(obj);
 				dim = ZVAL_UNDEFINED_OP2();
-				if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-					zend_objects_store_del(obj);
-					goto assign_dim_op_ret_null;
-				}
 			} else if (IS_CV == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
 				dim++;
 			}
-			zend_binary_assign_op_obj_dim(container, dim OPLINE_CC EXECUTE_DATA_CC);
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
 		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP1();
