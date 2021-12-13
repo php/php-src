@@ -1613,15 +1613,15 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	} else {
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim, BP_VAR_W EXECUTE_DATA_CC);
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//				ZVAL_NULL(EX_VAR(opline->result.var));
+//			}
+//			return;
+//		}
 		/* Illegal offset assignment */
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1649,22 +1649,22 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 			zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
 		}
 		/* Convert to string, just the time to pick the 1st byte */
 		tmp = zval_try_get_string_func(value);
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (tmp) {
-				zend_string_release_ex(tmp, 0);
-			}
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (tmp) {
+//				zend_string_release_ex(tmp, 0);
+//			}
+//			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//				ZVAL_NULL(EX_VAR(opline->result.var));
+//			}
+//			return;
+//		}
 		if (UNEXPECTED(!tmp)) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -1692,15 +1692,15 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+//				ZVAL_NULL(EX_VAR(opline->result.var));
+//			}
+//			return;
+//		}
 		/* Illegal offset assignment */
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -2062,14 +2062,14 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_offset_write(HashTable *ht
 {
 	/* The array may be destroyed while throwing the notice.
 	 * Temporarily increase the refcount to detect this situation. */
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-		GC_ADDREF(ht);
-	}
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//		GC_ADDREF(ht);
+//	}
 	zend_undefined_offset(lval);
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-		zend_array_destroy(ht);
-		return NULL;
-	}
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//		zend_array_destroy(ht);
+//		return NULL;
+//	}
 	if (EG(exception)) {
 		return NULL;
 	}
@@ -2082,16 +2082,17 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 
 	/* The array may be destroyed while throwing the notice.
 	 * Temporarily increase the refcount to detect this situation. */
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-		GC_ADDREF(ht);
-	}
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//		GC_ADDREF(ht);
+//	}
 	/* Key may be released while throwing the undefined index warning. */
 	zend_string_addref(offset);
 	zend_undefined_index(offset);
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-		zend_array_destroy(ht);
-		retval = NULL;
-	} else if (EG(exception)) {
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//		zend_array_destroy(ht);
+//		retval = NULL;
+//	} else
+	if (EG(exception)) {
 		retval = NULL;
 	} else {
 		retval = zend_hash_add_new(ht, offset, &EG(uninitialized_zval));
@@ -2176,14 +2177,14 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 		case IS_UNDEF: {
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_ADDREF(ht);
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//				GC_ADDREF(ht);
+//			}
 			ZVAL_UNDEFINED_OP2();
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-				zend_array_destroy(ht);
-				return IS_NULL;
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//				zend_array_destroy(ht);
+//				return IS_NULL;
+//			}
 			if (EG(exception)) {
 				return IS_NULL;
 			}
@@ -2197,14 +2198,14 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), value->lval)) {
 				/* The array may be destroyed while throwing the notice.
 				 * Temporarily increase the refcount to detect this situation. */
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(ht);
-				}
+//				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//					GC_ADDREF(ht);
+//				}
 				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
-					return IS_NULL;
-				}
+//				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//					zend_array_destroy(ht);
+//					return IS_NULL;
+//				}
 				if (EG(exception)) {
 					return IS_NULL;
 				}
@@ -2213,14 +2214,14 @@ static zend_never_inline zend_uchar slow_index_convert(HashTable *ht, const zval
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_ADDREF(ht);
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//				GC_ADDREF(ht);
+//			}
 			zend_use_resource_as_offset(dim);
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-				zend_array_destroy(ht);
-				return IS_NULL;
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//				zend_array_destroy(ht);
+//				return IS_NULL;
+//			}
 			if (EG(exception)) {
 				return IS_NULL;
 			}
@@ -2438,12 +2439,12 @@ fetch_from_array:
 
 				ZVAL_ARR(container, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto return_null;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto return_null;
+//					}
 				}
 				goto fetch_from_array;
 			} else {
@@ -2533,15 +2534,15 @@ try_string_offset:
 				case IS_UNDEF:
 					/* The string may be destroyed while throwing the notice.
 					 * Temporarily increase the refcount to detect this situation. */
-					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
-						GC_ADDREF(str);
-					}
+//					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+//						GC_ADDREF(str);
+//					}
 					ZVAL_UNDEFINED_OP2();
-					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-						zend_string_efree(str);
-						ZVAL_NULL(result);
-						return;
-					}
+//					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+//						zend_string_efree(str);
+//						ZVAL_NULL(result);
+//						return;
+//					}
 					ZEND_FALLTHROUGH;
 				case IS_DOUBLE:
 				case IS_NULL:
@@ -2550,15 +2551,15 @@ try_string_offset:
 					if (type != BP_VAR_IS) {
 						/* The string may be destroyed while throwing the notice.
 						 * Temporarily increase the refcount to detect this situation. */
-						if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
-							GC_ADDREF(str);
-						}
+//						if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+//							GC_ADDREF(str);
+//						}
 						zend_error(E_WARNING, "String offset cast occurred");
-						if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-							zend_string_efree(str);
-							ZVAL_NULL(result);
-							return;
-						}
+//						if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+//							zend_string_efree(str);
+//							ZVAL_NULL(result);
+//							return;
+//						}
 					}
 					break;
 				case IS_REFERENCE:

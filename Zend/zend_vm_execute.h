@@ -23514,12 +23514,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -23652,12 +23652,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -23790,12 +23790,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -23927,12 +23927,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -26174,12 +26174,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -26312,12 +26312,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -26450,12 +26450,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -26587,12 +26587,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -27666,12 +27666,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -27804,12 +27804,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -27942,12 +27942,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -28079,12 +28079,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -30303,12 +30303,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -30441,12 +30441,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -30579,12 +30579,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -30716,12 +30716,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -41344,12 +41344,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -41482,12 +41482,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -41620,12 +41620,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -41757,12 +41757,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -45086,12 +45086,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -45224,12 +45224,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -45362,12 +45362,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -45499,12 +45499,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -47025,12 +47025,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -47163,12 +47163,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -47301,12 +47301,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -47438,12 +47438,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -50333,12 +50333,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -50471,12 +50471,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -50609,12 +50609,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}
@@ -50746,12 +50746,12 @@ try_assign_dim_array:
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						goto assign_dim_error;
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						goto assign_dim_error;
+//					}
 				}
 				goto try_assign_dim_array;
 			}

@@ -1312,6 +1312,9 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
+	zend_reference *op1_fake_ref;
+	zend_refcounted *op1_ref, *op2_ref;
+	const zend_op *opline;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1377,6 +1380,68 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			break;
 		default:
 			/* Handle the error in user space */
+			op1_fake_ref = NULL;
+			op1_ref = NULL;
+			op2_ref = NULL;
+			opline = NULL;
+			if (EG(current_execute_data)) {
+				zend_execute_data *execute_data = EG(current_execute_data);
+
+				if (EX(func) && ZEND_USER_CODE(EX(func)->type)) {
+					opline = EX(opline);
+
+					if (opline) {
+						if (opline->op1_type & (IS_VAR|IS_TMP_VAR|IS_CV)
+						 && opline->opcode != ZEND_ROPE_ADD
+						 && opline->opcode != ZEND_ROPE_END) {
+							zval *zv = EX_VAR(opline->op1.var);
+							if (opline->op1_type == IS_VAR && Z_TYPE_P(zv) == IS_INDIRECT) {
+								/* Potentially, user error handler may destroy the enclosing array or object
+								 * of the first operand of currently executed VM instruction.
+								 * This, very probably, may cause a use-after-free in VM handler.
+								 * To keep the zval we will create a fake reference and increment its refcounter.
+								 */
+								zv = Z_INDIRECT_P(zv);
+								if (!Z_REFCOUNTED_P(zv)) {
+									ZVAL_NEW_REF(zv, zv);
+									op1_fake_ref = Z_REF_P(zv);
+									GC_ADDREF(op1_fake_ref);
+									// TODO: the reference might need to be typed
+								} else {
+									if (Z_TYPE_P(zv) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(zv))) {
+										zv = Z_REFVAL_P(zv);
+									}
+									op1_ref = Z_COUNTED_P(zv);
+									GC_ADDREF(op1_ref);
+								}
+							} else if (opline->op1_type == IS_CV) {
+								if (Z_REFCOUNTED_P(zv)) {
+									if (Z_TYPE_P(zv) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(zv))) {
+										zv = Z_REFVAL_P(zv);
+									}
+									op1_ref = Z_COUNTED_P(zv);
+									GC_ADDREF(op1_ref);
+								}
+							} else if (opline->op1_type == IS_TMP_VAR && Z_REFCOUNTED_P(zv)) {
+								/* Tracing JIT may eleminate reference counting for IS_TMP_VAR */
+								op1_ref = Z_COUNTED_P(zv);
+								GC_ADDREF(op1_ref);
+							}
+						}
+						if (opline->op2_type == IS_CV) {
+							zval *zv = EX_VAR(opline->op2.var);
+							if (Z_REFCOUNTED_P(zv)) {
+								if (Z_TYPE_P(zv) == IS_REFERENCE && Z_REFCOUNTED_P(Z_REFVAL_P(zv))) {
+									zv = Z_REFVAL_P(zv);
+								}
+								op2_ref = Z_COUNTED_P(zv);
+								GC_ADDREF(op2_ref);
+							}
+						}
+					}
+				}
+			}
+
 			ZVAL_STR_COPY(&params[1], message);
 			ZVAL_LONG(&params[0], type);
 
@@ -1432,6 +1497,39 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 			} else {
 				zval_ptr_dtor(&orig_user_error_handler);
 			}
+
+			if (op1_fake_ref != NULL) {
+				if (EXPECTED(GC_DELREF(op1_fake_ref) == 1)) {
+					/* This is a life fake reference. Convert it back to regular zval. */
+					zend_execute_data *execute_data = EG(current_execute_data);
+
+					zval *zv = EX_VAR(opline->op1.var);
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_INDIRECT);
+					zv = Z_INDIRECT_P(zv);
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_REFERENCE && Z_REF_P(zv) == op1_fake_ref);
+					ZVAL_UNREF(zv);
+				} else if (UNEXPECTED(GC_REFCOUNT(op1_fake_ref) == 0)) {
+					/* This fake reference is going to be freed by user error handler. */
+					zval_ptr_dtor(&op1_fake_ref->val);
+					efree_size(op1_fake_ref, sizeof(zend_reference));
+					zend_error_noreturn(E_CORE_ERROR, "Attempt to clobber data by user error handler");
+				} else {
+					/* The fake reference is escaped */
+					ZEND_ASSERT(0 && "escaped fake reference"); // TODO:
+				}
+			} else if (op1_ref) {
+				if (UNEXPECTED(GC_DELREF(op1_ref) == 0)) {
+					rc_dtor_func(op1_ref);
+					zend_error_noreturn(E_CORE_ERROR, "Attempt to clobber data by user error handler");
+				}
+			}
+			if (op2_ref) {
+				if (UNEXPECTED(GC_DELREF(op2_ref) == 0)) {
+					rc_dtor_func(op2_ref);
+					zend_error_noreturn(E_CORE_ERROR, "Attempt to clobber data by user error handler");
+				}
+			}
+
 			break;
 	}
 

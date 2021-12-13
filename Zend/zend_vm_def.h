@@ -2651,12 +2651,12 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 
 				ZVAL_ARR(object_ptr, ht);
 				if (UNEXPECTED(old_type == IS_FALSE)) {
-					GC_ADDREF(ht);
+//					GC_ADDREF(ht);
 					zend_false_to_array_deprecated();
-					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
-						zend_array_destroy(ht);
-						ZEND_VM_C_GOTO(assign_dim_error);
-					}
+//					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+//						zend_array_destroy(ht);
+//						ZEND_VM_C_GOTO(assign_dim_error);
+//					}
 				}
 				ZEND_VM_C_GOTO(try_assign_dim_array);
 			}
