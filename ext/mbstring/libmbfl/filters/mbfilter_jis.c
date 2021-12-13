@@ -36,6 +36,7 @@
 static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_iso2022jp(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static void mb_wchar_to_jis(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 const mbfl_encoding mbfl_encoding_jis = {
 	mbfl_no_encoding_jis,
@@ -47,7 +48,7 @@ const mbfl_encoding mbfl_encoding_jis = {
 	&vtbl_jis_wchar,
 	&vtbl_wchar_jis,
 	mb_iso2022jp_to_wchar,
-	NULL
+	mb_wchar_to_jis,
 };
 
 const mbfl_encoding mbfl_encoding_2022jp = {
@@ -627,6 +628,89 @@ static void mb_wchar_to_iso2022jp(uint32_t *in, size_t len, mb_convert_buf *buf,
 			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_iso2022jp);
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
 			continue;
+		}
+
+		if (s < 0x80) { /* ASCII */
+			if (buf->state != ASCII) {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+				out = mb_convert_buf_add3(out, 0x1B, '(', 'B');
+				buf->state = ASCII;
+			}
+			out = mb_convert_buf_add(out, s);
+		} else if (s < 0x8080) { /* JIS X 0208 */
+			if (buf->state != JISX_0208) {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 5);
+				out = mb_convert_buf_add3(out, 0x1B, '$', 'B');
+				buf->state = JISX_0208;
+			}
+			out = mb_convert_buf_add2(out, (s >> 8) & 0x7F, s & 0x7F);
+		} else if (s < 0x10000) { /* JIS X 0212 */
+			if (buf->state != JISX_0212) {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 6);
+				out = mb_convert_buf_add4(out, 0x1B, '$', '(', 'D');
+				buf->state = JISX_0212;
+			}
+			out = mb_convert_buf_add2(out, (s >> 8) & 0x7F, s & 0x7F);
+		} else { /* X 0201 Latin */
+			if (buf->state != JISX_0201_LATIN) {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+				out = mb_convert_buf_add3(out, 0x1B, '(', 'J');
+				buf->state = JISX_0201_LATIN;
+			}
+			out = mb_convert_buf_add(out, s & 0x7F);
+		}
+	}
+
+	if (end && buf->state != ASCII) {
+		MB_CONVERT_BUF_ENSURE(buf, out, limit, 3);
+		out = mb_convert_buf_add3(out, 0x1B, '(', 'B');
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static void mb_wchar_to_jis(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
+			s = ucs_a1_jis_table[w - ucs_a1_jis_table_min];
+		} else if (w == 0x203E) { /* OVERLINE */
+			s = 0x1007E; /* Convert to JISX 0201 OVERLINE */
+		} else if (w >= ucs_a2_jis_table_min && w < ucs_a2_jis_table_max) {
+			s = ucs_a2_jis_table[w - ucs_a2_jis_table_min];
+		} else if (w >= ucs_i_jis_table_min && w < ucs_i_jis_table_max) {
+			s = ucs_i_jis_table[w - ucs_i_jis_table_min];
+		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
+			s = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		}
+
+		if (s == 0) {
+			if (w == 0xA5) { /* YEN SIGN */
+				s = 0x1005C;
+			} else if (w == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
+				s = 0x2140;
+			} else if (w == 0x2225) { /* PARALLEL TO */
+				s = 0x2142;
+			} else if (w == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
+				s = 0x215D;
+			} else if (w == 0xFFE0) { /* FULLWIDTH CENT SIGN */
+				s = 0x2171;
+			} else if (w == 0xFFE1) { /* FULLWIDTH POUND SIGN */
+				s = 0x2172;
+			} else if (w == 0xFFE2) { /* FULLWIDTH NOT SIGN */
+				s = 0x224C;
+			} else if (w != 0) {
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_iso2022jp);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+				continue;
+			}
 		}
 
 		if (s < 0x80) { /* ASCII */
