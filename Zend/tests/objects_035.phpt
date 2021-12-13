@@ -18,18 +18,8 @@ set_error_handler(function () {
 });
 
 $a = new A;
-$a[$c] = 'x' ;
-var_dump($a);
-
-$a = new A;
-$a[$c] .= 'x' ;
-var_dump($a);
-
-$a = new A;
-$a[$c][$c] = 'x' ;
-var_dump($a);
+$a[$c];
 ?>
+DONE
 --EXPECT--
-NULL
-NULL
-NULL
+DONE
