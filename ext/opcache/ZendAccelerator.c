@@ -4086,7 +4086,8 @@ static void preload_remove_empty_includes(void)
 					if (opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 					    opline->extended_value != ZEND_EVAL &&
 					    opline->op1_type == IS_CONST &&
-					    Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) == IS_STRING) {
+					    Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) == IS_STRING &&
+					    opline->result_type == IS_UNUSED) {
 
 						zend_string *resolved_path = preload_resolve_path(Z_STR_P(RT_CONSTANT(opline, opline->op1)));
 
@@ -4132,7 +4133,7 @@ static void preload_remove_empty_includes(void)
 
 				if (resolved_path) {
 					zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
-					if (incl && incl->empty) {
+					if (incl && incl->empty && opline->result_type == IS_UNUSED) {
 						MAKE_NOP(opline);
 					} else {
 						if (!IS_ABSOLUTE_PATH(Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), Z_STRLEN_P(RT_CONSTANT(opline, opline->op1)))) {
