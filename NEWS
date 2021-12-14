@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     (cmb)
   . Fixed bug GH-7757 (Multi-inherited final constant causes fatal error).
     (cmb)
+  . Fixed zend_fibers.c build with ZEND_FIBER_UCONTEXT. (Petr Sumbera)
 
 - Filter:
   . Fixed FILTER_FLAG_NO_RES_RANGE flag. (Yifan Tong)
