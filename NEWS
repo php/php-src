@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.27
+16 Dec 2021, PHP 7.4.27
 
 - Core:
   . Fixed bug #81626 (Error on use static:: in __сallStatic() wrapped to
