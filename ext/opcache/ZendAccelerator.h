@@ -287,6 +287,9 @@ typedef struct _zend_accel_shared_globals {
 
 	/* Interned Strings Support (must be the last element) */
 	zend_string_table interned_strings;
+
+	void *jit_traces;
+	const void **jit_exit_groups;
 } zend_accel_shared_globals;
 
 #ifdef ZEND_WIN32
