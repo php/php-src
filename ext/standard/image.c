@@ -1158,32 +1158,32 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 
 /* {{{ User struct and stream read/skip implementations for libavifinfo API */
 struct php_avif_stream {
-    php_stream* stream;
-    uint8_t buffer[AVIFINFO_MAX_NUM_READ_BYTES];
+	php_stream* stream;
+	uint8_t buffer[AVIFINFO_MAX_NUM_READ_BYTES];
 };
 
 static const uint8_t* php_avif_stream_read(void* stream, size_t num_bytes) {
-    struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
 
-    if (avif_stream == NULL || avif_stream->stream == NULL)
-        return NULL;
-    if (php_stream_read(avif_stream->stream, (char*)avif_stream->buffer,
-                        num_bytes)
-        != num_bytes) {
-        avif_stream->stream = NULL; /* fail further calls */
-        return NULL;
-    }
-    return avif_stream->buffer;
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return NULL;
+	}
+	if (php_stream_read(avif_stream->stream, (char*)avif_stream->buffer, num_bytes) != num_bytes) {
+		avif_stream->stream = NULL; /* fail further calls */
+		return NULL;
+	}
+	return avif_stream->buffer;
 }
 
 static void php_avif_stream_skip(void* stream, size_t num_bytes) {
-    struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
 
-    if (avif_stream == NULL || avif_stream->stream == NULL)
-        return;
-    if (php_stream_seek(avif_stream->stream, num_bytes, SEEK_CUR)) {
-        avif_stream->stream = NULL; /* fail further calls */
-    }
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return;
+	}
+	if (php_stream_seek(avif_stream->stream, num_bytes, SEEK_CUR)) {
+		avif_stream->stream = NULL; /* fail further calls */
+	}
 }
 /* }}} */
 
@@ -1197,21 +1197,19 @@ static void php_avif_stream_skip(void* stream, size_t num_bytes) {
  * Transforms such as mirror and rotation are not applied on width and height.
  */
 static struct gfxinfo *php_handle_avif(php_stream * stream) {
-    struct gfxinfo* result = NULL;
-    AvifInfoFeatures features;
-    struct php_avif_stream avif_stream;
-    avif_stream.stream = stream;
+	struct gfxinfo* result = NULL;
+	AvifInfoFeatures features;
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
 
-    if (AvifInfoGetFeaturesStream(&avif_stream, php_avif_stream_read,
-                                  php_avif_stream_skip, &features)
-        == kAvifInfoOk) {
-        result = (struct gfxinfo*)ecalloc(1, sizeof(struct gfxinfo));
-        result->width = features.width;
-        result->height = features.height;
-        result->bits = features.bit_depth;
-        result->channels = features.num_channels;
-    }
-    return result;
+	if (AvifInfoGetFeaturesStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip, &features) == kAvifInfoOk) {
+		result = (struct gfxinfo*)ecalloc(1, sizeof(struct gfxinfo));
+		result->width = features.width;
+		result->height = features.height;
+		result->bits = features.bit_depth;
+		result->channels = features.num_channels;
+	}
+	return result;
 }
 /* }}} */
 
@@ -1222,14 +1220,13 @@ static struct gfxinfo *php_handle_avif(php_stream * stream) {
  * For a valid file, 12 bytes are usually read, but more might be necessary.
  */
 bool php_is_image_avif(php_stream* stream) {
-    struct php_avif_stream avif_stream;
-    avif_stream.stream = stream;
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
 
-    if (AvifInfoIdentifyStream(&avif_stream, php_avif_stream_read,
-                               php_avif_stream_skip) == kAvifInfoOk) {
-        return 1;
-    }
-    return 0;
+	if (AvifInfoIdentifyStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip) == kAvifInfoOk) {
+		return 1;
+	}
+	return 0;
 }
 /* }}} */
 
