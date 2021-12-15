@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.
     (Yurun)
+  . Finished AVIF support in getimagesize(). (Yannis Guyon)
 
 - Zip:
   . add ZipArchive::clearError() method
