@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
     call). (cmb)
 
+- OPcache:
+  . Fixed bug #81679 (Tracing JIT crashes on reattaching). (cmb)
+
 - PDO_PGSQL:
   . Fixed error message allocation of PDO PgSQL. (SATO Kentaro)
 
