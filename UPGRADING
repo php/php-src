@@ -19,6 +19,14 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Standard:
+  . strtolower() and strtoupper() are no longer locale-sensitive. They now
+    perform ASCII case conversion, as if the locale were "C". Use
+    mb_strtolower() if you want localized case conversion. Similarly, stristr,
+    stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
+    array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
+    conversion.
+
 ========================================
 2. New Features
 ========================================
