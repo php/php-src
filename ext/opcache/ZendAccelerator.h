@@ -269,6 +269,10 @@ typedef struct _zend_accel_shared_globals {
 	/* uninitialized HashTable Support */
 	uint32_t uninitialized_bucket[-HT_MIN_MASK];
 
+	/* Tracing JIT */
+	void *jit_traces;
+	const void **jit_exit_groups;
+
 	/* Interned Strings Support (must be the last element) */
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;

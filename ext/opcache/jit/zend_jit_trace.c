@@ -46,20 +46,33 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 	}
 }
 
-static int zend_jit_trace_startup(void)
+static int zend_jit_trace_startup(zend_bool reattached)
 {
-	zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));
-	if (!zend_jit_traces) {
-		return FAILURE;
+	if (!reattached) {
+		zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));
+		if (!zend_jit_traces) {
+			return FAILURE;
+		}
+		zend_jit_exit_groups = (const void**)zend_shared_alloc(sizeof(void*) * (ZEND_JIT_TRACE_MAX_EXITS/ZEND_JIT_EXIT_POINTS_PER_GROUP));
+		if (!zend_jit_exit_groups) {
+			return FAILURE;
+		}
+		ZEND_JIT_TRACE_NUM = 1;
+		ZEND_JIT_COUNTER_NUM = 0;
+		ZEND_JIT_EXIT_NUM = 0;
+		ZEND_JIT_EXIT_COUNTERS = 0;
+		ZCSG(jit_traces) = zend_jit_traces;
+		ZCSG(jit_exit_groups) = zend_jit_exit_groups;
+	} else {
+		zend_jit_traces = ZCSG(jit_traces);
+		if (!zend_jit_traces) {
+			return FAILURE;
+		}
+		zend_jit_exit_groups = ZCSG(jit_exit_groups);
+		if (!zend_jit_exit_groups) {
+			return FAILURE;
+		}
 	}
-	zend_jit_exit_groups = (const void**)zend_shared_alloc(sizeof(void*) * (ZEND_JIT_TRACE_MAX_EXITS/ZEND_JIT_EXIT_POINTS_PER_GROUP));
-	if (!zend_jit_exit_groups) {
-		return FAILURE;
-	}
-	ZEND_JIT_TRACE_NUM = 1;
-	ZEND_JIT_COUNTER_NUM = 0;
-	ZEND_JIT_EXIT_NUM = 0;
-	ZEND_JIT_EXIT_COUNTERS = 0;
 
 	memset(&dummy_op_array, 0, sizeof(dummy_op_array));
 	dummy_op_array.fn_flags = ZEND_ACC_DONE_PASS_TWO;
