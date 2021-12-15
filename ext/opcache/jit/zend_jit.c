@@ -4983,7 +4983,7 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 #endif
 	}
 
-	if (zend_jit_trace_startup() != SUCCESS) {
+	if (zend_jit_trace_startup(reattached) != SUCCESS) {
 		return FAILURE;
 	}
 
