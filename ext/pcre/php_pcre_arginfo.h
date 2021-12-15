@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bc6f31ac17d4f5d1a60dd3dad5f671058f40a224 */
+ * Stub hash: 39a19378fb1f1aca34bfdd483f5d3095558f0e09 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_match, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -84,7 +84,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(preg_replace_callback, arginfo_preg_replace_callback)
 	ZEND_FE(preg_replace_callback_array, arginfo_preg_replace_callback_array)
 	ZEND_FE(preg_split, arginfo_preg_split)
-	ZEND_FE(preg_quote, arginfo_preg_quote)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(preg_quote, arginfo_preg_quote)
 	ZEND_FE(preg_grep, arginfo_preg_grep)
 	ZEND_FE(preg_last_error, arginfo_preg_last_error)
 	ZEND_FE(preg_last_error_msg, arginfo_preg_last_error_msg)

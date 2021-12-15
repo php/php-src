@@ -18,12 +18,16 @@ function func_get_args(): array {}
 
 function strlen(string $string): int {}
 
+/** @compile-time-eval */
 function strcmp(string $string1, string $string2): int {}
 
+/** @compile-time-eval */
 function strncmp(string $string1, string $string2, int $length): int {}
 
+/** @compile-time-eval */
 function strcasecmp(string $string1, string $string2): int {}
 
+/** @compile-time-eval */
 function strncasecmp(string $string1, string $string2, int $length): int {}
 
 function error_reporting(?int $error_level = null): int {}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f87d92c002674c431827895a8d8b3a5da3b95482 */
+ * Stub hash: 69dcb08ae12b6acbba872f7de5018ca5c0aaf669 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -283,10 +283,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(func_get_arg, arginfo_func_get_arg)
 	ZEND_FE(func_get_args, arginfo_func_get_args)
 	ZEND_FE(strlen, arginfo_strlen)
-	ZEND_FE(strcmp, arginfo_strcmp)
-	ZEND_FE(strncmp, arginfo_strncmp)
-	ZEND_FE(strcasecmp, arginfo_strcasecmp)
-	ZEND_FE(strncasecmp, arginfo_strncasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcmp, arginfo_strcmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncmp, arginfo_strncmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcasecmp, arginfo_strcasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncasecmp, arginfo_strncasecmp)
 	ZEND_FE(error_reporting, arginfo_error_reporting)
 	ZEND_FE(define, arginfo_define)
 	ZEND_FE(defined, arginfo_defined)
