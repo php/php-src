@@ -4864,10 +4864,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_TRUE(EX_VAR(opline->result.var));
 		}
-	} else if (EXPECTED(new_op_array != NULL)) {
+	} else if (UNEXPECTED(new_op_array == NULL)) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		}
+	} else if (new_op_array->last == 1
+			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
+			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+		if (RETURN_VALUE_USED(opline)) {
+			const zend_op *op = new_op_array->opcodes;
+
+			ZVAL_COPY(EX_VAR(opline->result.var), RT_CONSTANT(op, op->op1));
+		}
+		zend_destroy_static_vars(new_op_array);
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+	} else {
 		zval *return_value = NULL;
 		zend_execute_data *call;
-
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
 		}
@@ -4906,8 +4920,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-	} else if (RETURN_VALUE_USED(opline)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -4934,10 +4946,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_TRUE(EX_VAR(opline->result.var));
 		}
-	} else if (EXPECTED(new_op_array != NULL)) {
+	} else if (UNEXPECTED(new_op_array == NULL)) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		}
+	} else if (new_op_array->last == 1
+			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
+			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+		if (RETURN_VALUE_USED(opline)) {
+			const zend_op *op = new_op_array->opcodes;
+
+			ZVAL_COPY(EX_VAR(opline->result.var), RT_CONSTANT(op, op->op1));
+		}
+		zend_destroy_static_vars(new_op_array);
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+	} else {
 		zval *return_value = NULL;
 		zend_execute_data *call;
-
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
 		}
@@ -4976,8 +5002,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-	} else if (RETURN_VALUE_USED(opline)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE();
@@ -14502,10 +14526,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_TRUE(EX_VAR(opline->result.var));
 		}
-	} else if (EXPECTED(new_op_array != NULL)) {
+	} else if (UNEXPECTED(new_op_array == NULL)) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		}
+	} else if (new_op_array->last == 1
+			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
+			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+		if (RETURN_VALUE_USED(opline)) {
+			const zend_op *op = new_op_array->opcodes;
+
+			ZVAL_COPY(EX_VAR(opline->result.var), RT_CONSTANT(op, op->op1));
+		}
+		zend_destroy_static_vars(new_op_array);
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+	} else {
 		zval *return_value = NULL;
 		zend_execute_data *call;
-
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
 		}
@@ -14544,8 +14582,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-	} else if (RETURN_VALUE_USED(opline)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE();
@@ -38644,10 +38680,24 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_TRUE(EX_VAR(opline->result.var));
 		}
-	} else if (EXPECTED(new_op_array != NULL)) {
+	} else if (UNEXPECTED(new_op_array == NULL)) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
+		}
+	} else if (new_op_array->last == 1
+			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
+			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+		if (RETURN_VALUE_USED(opline)) {
+			const zend_op *op = new_op_array->opcodes;
+
+			ZVAL_COPY(EX_VAR(opline->result.var), RT_CONSTANT(op, op->op1));
+		}
+		zend_destroy_static_vars(new_op_array);
+		destroy_op_array(new_op_array);
+		efree_size(new_op_array, sizeof(zend_op_array));
+	} else {
 		zval *return_value = NULL;
 		zend_execute_data *call;
-
 		if (RETURN_VALUE_USED(opline)) {
 			return_value = EX_VAR(opline->result.var);
 		}
@@ -38686,8 +38736,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-	} else if (RETURN_VALUE_USED(opline)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
 	}
 
 	ZEND_VM_NEXT_OPCODE();
