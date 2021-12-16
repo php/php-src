@@ -463,5 +463,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             random.c net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
+PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
+
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])
