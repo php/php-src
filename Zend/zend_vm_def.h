@@ -2865,19 +2865,21 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 	} else if (EXPECTED((call_info & ZEND_CALL_TOP) == 0)) {
 		if (EX(func)->op_array.last_var > 0) {
 			zend_detach_symbol_table(execute_data);
+			call_info |= ZEND_CALL_NEEDS_REATTACH;
 		}
 		zend_destroy_static_vars(&EX(func)->op_array);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
-#ifdef ZEND_PREFER_RELOAD
-		call_info = EX_CALL_INFO();
-#endif
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
 		zend_vm_stack_free_call_frame_ex(call_info, old_execute_data);
 
-		if (EX(func)->op_array.last_var > 0) {
-			zend_attach_symbol_table(execute_data);
+		if (call_info & ZEND_CALL_NEEDS_REATTACH) {
+			if (EX(func)->op_array.last_var > 0) {
+				zend_attach_symbol_table(execute_data);
+			} else {
+				ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_NEEDS_REATTACH);
+			}
 		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_rethrow_exception(execute_data);
@@ -2911,17 +2913,23 @@ ZEND_VM_HOT_HELPER(zend_leave_helper, ANY, ANY)
 
 			if (EX(func)->op_array.last_var > 0) {
 				zend_detach_symbol_table(execute_data);
+				call_info |= ZEND_CALL_NEEDS_REATTACH;
 			}
-			old_execute_data = EX(prev_execute_data);
-			while (old_execute_data) {
-				if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-					if (old_execute_data->symbol_table == symbol_table
-					 && old_execute_data->func->op_array.last_var > 0) {
-						zend_attach_symbol_table(old_execute_data);
+			if (call_info & ZEND_CALL_NEEDS_REATTACH) {
+				old_execute_data = EX(prev_execute_data);
+				while (old_execute_data) {
+					if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+						if (old_execute_data->symbol_table == symbol_table) {
+							if (old_execute_data->func->op_array.last_var > 0) {
+								zend_attach_symbol_table(old_execute_data);
+							} else {
+								ZEND_ADD_CALL_FLAG(old_execute_data, ZEND_CALL_NEEDS_REATTACH);
+							}
+						}
+						break;
 					}
-					break;
+					old_execute_data = old_execute_data->prev_execute_data;
 				}
-				old_execute_data = old_execute_data->prev_execute_data;
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
 			ZEND_VM_RETURN();

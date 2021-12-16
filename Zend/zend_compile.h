@@ -556,6 +556,7 @@ struct _zend_execute_data {
                                                /* to prevent optimization in RETURN handler and    */
                                                /* keep all local variables for "fcall_end" handler */
 #define ZEND_CALL_JIT_RESERVED       (1 << 29) /* reserved for tracing JIT */
+#define ZEND_CALL_NEEDS_REATTACH     (1 << 30)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)
