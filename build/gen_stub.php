@@ -2853,7 +2853,9 @@ function generateArgInfoCode(FileInfo $fileInfo, string $stubHash): string {
                 }
 
                 $generatedFunctionDeclarations[$key] = true;
-                return $fileInfo->declarationPrefix . $funcInfo->getDeclaration();
+                if ($decl = $funcInfo->getDeclaration()) {
+                    return $fileInfo->declarationPrefix . $decl;
+                }
             }
         );
 
@@ -3299,7 +3301,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.13.0";
+    $version = "4.13.2";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
