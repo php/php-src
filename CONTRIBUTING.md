@@ -80,7 +80,7 @@ repository. Mailing list subscription is explained on the
 [mailing lists page](https://www.php.net/mailing-lists.php).
 
 You may also want to read
-[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/entry/the_mysterious_php_rfc_process)
+[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
 ## Writing tests
