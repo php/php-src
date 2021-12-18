@@ -27,7 +27,7 @@ require_once('utils.inc');
 $ffi = FFI::cdef(<<<EOC
     __vectorcall int bug78270(const char *str, size_t str_len);
 EOC, "php_zend_test.dll");
-var_dump($ffi->bug78270("17.4", 4));
+var_dump($ffi->bug78270("17", 2));
 ?>
 --EXPECT--
 int(17)

@@ -307,6 +307,17 @@ static ZEND_FUNCTION(zend_get_unit_enum)
 	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
 }
 
+static ZEND_FUNCTION(zend_test_zend_atol)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_LONG(zend_atol(ZSTR_VAL(str), ZSTR_LEN(str)));
+}
+
 static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

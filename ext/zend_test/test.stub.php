@@ -92,6 +92,8 @@ namespace {
     function zend_weakmap_dump(): array {}
 
     function zend_get_unit_enum(): ZendTestUnitEnum {}
+
+    function zend_test_zend_atol(string $str): int {}
 }
 
 namespace ZendTestNS {
