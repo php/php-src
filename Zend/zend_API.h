@@ -99,7 +99,7 @@ typedef struct _zend_fcall_info_cache {
  * Note that if you are asserting that a function is compile-time evaluable, you are asserting that
  *
  * 1. The function will always have the same result for the same arguments
- * 2. The function does not depend on global state such as ini settings or locale (e.g. mb_strtolower), float to string conversions, etc.
+ * 2. The function does not depend on global state such as ini settings or locale (e.g. mb_strtolower), number_format(), etc.
  * 3. The function does not have side effects. It is okay if they throw
  *    or warn on invalid arguments, as we detect this and will discard the evaluation result.
  * 4. The function will not take an unreasonable amount of time or memory to compute on code that may be seen in practice.
