@@ -37,7 +37,7 @@ Then, to test the JIT, e.g. with opcache.jit=tracing, an example command
 based on what is used to test in Azure CI:
 
 ```
-make test TESTS="-d opcache.jit_buffer_size=16M -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit=tracing --repeat 2 --show-diff -j$(nproc) ext/opcache"
+make test TESTS="-d opcache.jit_buffer_size=16M -d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit=tracing --repeat 2 --show-diff -j$(nproc) ext/opcache Zend"
 ```
 
 - `opcache.jit_buffer_size=16M` enables the JIT in tests by providing 16 megabytes of
@@ -45,14 +45,17 @@ make test TESTS="-d opcache.jit_buffer_size=16M -d opcache.enable=1 -d opcache.e
 - `opcache.protect_memory=1` will detect writing to memory that is meant to be
   read-only, which is sometimes the cause of opcache bugs.
 - `--repeat 2` is optional, but used in CI since some JIT bugs only show up after processing a
-  request multiple times, e.g. due to a bug in the engine or bad data in the
-  runtime cache of the interpreter.
+  request multiple times (the first request compiles the trace and the second executes it)
 - `-j$(nproc)` runs as many workers to run tests as there are CPUs.
-- `ext/opcache/` is the folder with the tests to run, in this case opcache
-  itself.  If no folders are provided, all tests are run.
+- `ext/opcache/` and `Zend` are the folders with the tests to run, in this case opcache
+  and the Zend engine itself.  If no folders are provided, all tests are run.
 
-When investigating test failures such as segmentation faults, adding
-`-m --show-mem` may be useful to test with [valgrind](https://valgrind.org/) to detect out of bounds memory accesses.
+When investigating test failures such as segmentation faults,
+configuring the build of php with `--enable-address-sanitizer` to enable
+[AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) is often useful.
+
+Some of the time, adding `-m --show-mem` to the `TESTS` configuration is also useful to test with [valgrind](https://valgrind.org/) to detect out of bounds memory accesses.
+This is less effective at detecting or explaining invalid memory accesses than AddressSanitizer, but does not require rebuilding php.
 
 Note that the JIT supports 3 different architectures: `X86_64`, `i386`, and `arm64`.
 
