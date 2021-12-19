@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7757 (Multi-inherited final constant causes fatal error).
     (cmb)
 
+- Filter:
+  . Fixed FILTER_FLAG_NO_RES_RANGE flag. (Yifan Tong)
+
 - Hash:
   . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
     (cmb)
