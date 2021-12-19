@@ -801,13 +801,10 @@ static inline zend_result ct_eval_array_key_exists(zval *result, zval *op1, zval
 
 static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32_t num_args, zval **args) {
 	/* Precondition: func->type == ZEND_INTERNAL_FUNCTION, this is a global function */
-	/* Functions in this list must always produce the same result for the same arguments,
+	/* Functions setting ZEND_ACC_COMPILE_TIME_EVAL (@compile-time-eval) must always produce the same result for the same arguments,
 	 * and have no dependence on global state (such as locales). It is okay if they throw
-	 * or warn on invalid arguments, as we detect this and will discard the evaluation result.
-	 *
-	 * In PHP 8.2, many functions stopped depending on locales due to https://wiki.php.net/rfc/strtolower-ascii */
-	zend_internal_function *internal_func = (zend_internal_function *)func;
-	if (internal_func->fn_flags & ZEND_ACC_COMPILE_TIME_EVAL) {
+	 * or warn on invalid arguments, as we detect this and will discard the evaluation result. */
+	if (func->common.fn_flags & ZEND_ACC_COMPILE_TIME_EVAL) {
 		/* This has @compile-time-eval in stub info and uses a macro such as ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE */
 		return true;
 	}
