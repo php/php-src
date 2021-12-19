@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #81585 (cached_chunks are not counted to real_size on shutdown).
     (cmb)
 
+- Filter:
+  . Fixed FILTER_FLAG_NO_RES_RANGE flag. (Yifan Tong)
+
 - Hash:
   . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
     (cmb)
