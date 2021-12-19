@@ -55,7 +55,7 @@ configuring the build of php with `--enable-address-sanitizer` to enable
 [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) is often useful.
 
 Some of the time, adding `-m --show-mem` to the `TESTS` configuration is also useful to test with [valgrind](https://valgrind.org/) to detect out of bounds memory accesses.
-This is less effective at detecting or explaining invalid memory accesses than AddressSanitizer, but does not require rebuilding php.
+Using valgrind is slower at detecting invalid memory read/writes than AddressSanitizer when running large numbers of tests, but does not require rebuilding php.
 
 Note that the JIT supports 3 different architectures: `X86_64`, `i386`, and `arm64`.
 
