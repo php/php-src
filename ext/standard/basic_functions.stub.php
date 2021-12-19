@@ -180,6 +180,8 @@ function array_merge(array ...$arrays): array {}
 
 function array_merge_recursive(array ...$arrays): array {}
 
+function array_merge_deep(array ...$arrays): array {}
+
 /** @refcount 1 */
 function array_replace(array $array, array ...$replacements): array {}
 

@@ -216,6 +216,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_array_merge_recursive arginfo_array_merge
 
+#define arginfo_array_merge_deep arginfo_array_merge
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_replace, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, replacements, IS_ARRAY, 0)
@@ -2279,6 +2281,7 @@ ZEND_FUNCTION(array_splice);
 ZEND_FUNCTION(array_slice);
 ZEND_FUNCTION(array_merge);
 ZEND_FUNCTION(array_merge_recursive);
+ZEND_FUNCTION(array_merge_deep);
 ZEND_FUNCTION(array_replace);
 ZEND_FUNCTION(array_replace_recursive);
 ZEND_FUNCTION(array_keys);
@@ -2907,6 +2910,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_slice, arginfo_array_slice)
 	ZEND_FE(array_merge, arginfo_array_merge)
 	ZEND_FE(array_merge_recursive, arginfo_array_merge_recursive)
+	ZEND_FE(array_merge_deep, arginfo_array_merge_deep)
 	ZEND_FE(array_replace, arginfo_array_replace)
 	ZEND_FE(array_replace_recursive, arginfo_array_replace_recursive)
 	ZEND_FE(array_keys, arginfo_array_keys)

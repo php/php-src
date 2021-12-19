@@ -813,6 +813,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "array_keys")
 		|| zend_string_equals_literal(name, "array_merge")
 		|| zend_string_equals_literal(name, "array_merge_recursive")
+		|| zend_string_equals_literal(name, "array_merge_deep")
 		|| zend_string_equals_literal(name, "array_replace")
 		|| zend_string_equals_literal(name, "array_replace_recursive")
 		|| zend_string_equals_literal(name, "array_unique")
