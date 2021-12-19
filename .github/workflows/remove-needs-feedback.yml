@@ -13,3 +13,6 @@ jobs:
       - uses: actions-ecosystem/action-remove-labels@v1
         with:
           labels: "Status: Needs Feedback"
+      - uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: "Status: Needs Triage"
