@@ -2349,7 +2349,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 				zend_map_ptr_extend(ZCSG(map_ptr_last));
 				return entry->ce;
 			}
-			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be posible ???
+			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be possible ???
 		}
 	}
 
@@ -3515,7 +3515,7 @@ static void preload_restart(void)
 }
 
 static size_t preload_try_strip_filename(zend_string *filename) {
-	/*FIXME: better way to hanlde eval()'d code? see COMPILED_STRING_DESCRIPTION_FORMAT */
+	/*FIXME: better way to handle eval()'d code? see COMPILED_STRING_DESCRIPTION_FORMAT */
 	if (ZSTR_LEN(filename) > sizeof(" eval()'d code")
 		&& *(ZSTR_VAL(filename) + ZSTR_LEN(filename) - sizeof(" eval()'d code")) == ':') {
 		const char *cfilename = ZSTR_VAL(filename);

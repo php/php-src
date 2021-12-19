@@ -5425,7 +5425,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			}
 			|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
 			|	EXT_CALL zend_jit_fast_assign_concat_helper, r0
-			/* concatination with itself may reduce refcount */
+			/* concatenation with itself may reduce refcount */
 			op2_info |= MAY_BE_RC1;
 		} else {
 			if (Z_REG(res_addr) != ZREG_FCARG1 || Z_OFFSET(res_addr) != 0) {
@@ -5447,7 +5447,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			|	add r4, 12
 			|.endif
 		}
-		/* concatination with empty string may increase refcount */
+		/* concatenation with empty string may increase refcount */
 		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op2_type, op2, op2_info, 0, opline
 		|5:
@@ -5481,7 +5481,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
-		/* concatination with empty string may increase refcount */
+		/* concatenation with empty string may increase refcount */
 		op1_info |= MAY_BE_RCN;
 		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL
@@ -15700,7 +15700,7 @@ static bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline,
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_INDIRECT, &exit_addr
 		|	GET_ZVAL_PTR FCARG1a, var_addr
 	} else {
-		/* May be already loaded into FCARG1a or RAX by previus FETCH_OBJ_W/DIM_W */
+		/* May be already loaded into FCARG1a or RAX by previous FETCH_OBJ_W/DIM_W */
 		if (opline->op1_type != IS_VAR ||
 				(opline-1)->result_type != IS_VAR  ||
 				(opline-1)->result.var != opline->op1.var ||

@@ -1106,7 +1106,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |			// In x64, if the range of this LONG value can be represented via INT type, only move the low 32 bits into dst_addr.
 |			// Note that imm32 is signed extended to 64 bits during mov.
 |			// In aarch64, we choose to handle both cases in the same way. Even though 4 mov's are used for 64-bit value and 2 mov's are
-|			// needed for 32-bit value, an extra ext insn is needed for 32-bit vlaue.
+|			// needed for 32-bit value, an extra ext insn is needed for 32-bit value.
 |			SET_ZVAL_LVAL dst_addr, Z_LVAL_P(zv), Rx(tmp_reg1), Rx(tmp_reg2)
 ||		}
 ||	}
@@ -1794,7 +1794,7 @@ static int zend_jit_interrupt_handler_stub(dasm_State **Dst)
 		|	ldp x29, x30, [sp], # SPAD // stack alignment
 		|	JMP_IP TMP1
 	} else {
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #1               // ZEND_VM_ENTER
 		|	ret
@@ -1821,7 +1821,7 @@ static int zend_jit_exception_handler_stub(dasm_State **Dst)
 		} else {
 			|	mov FCARG1x, FP
 			|	EXT_CALL handler, REG0
-			|	ldp FP, RX, T2                // retore FP and IP
+			|	ldp FP, RX, T2                // restore FP and IP
 			|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 			|	tbnz RETVALw, #31, >1
 			|	mov RETVALw, #1               // ZEND_VM_ENTER
@@ -1909,7 +1909,7 @@ static int zend_jit_leave_function_stub(dasm_State **Dst)
 			|	ldp x29, x30, [sp], # SPAD    // stack alignment
 		} else {
 			|	mov FCARG2x, FP
-			|	ldp FP, RX, T2                // retore FP and IP
+			|	ldp FP, RX, T2                // restore FP and IP
 			|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		}
 		|	TST_32_WITH_CONST FCARG1w, ZEND_CALL_TOP, TMP1w
@@ -1947,7 +1947,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|5:
 		|	// opline = EG(exception_op);
 		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #2               // ZEND_VM_LEAVE
 		|	ret
@@ -2418,7 +2418,7 @@ static int zend_jit_trace_halt_stub(dasm_State **Dst)
 		|	mov IP, xzr                   // PC must be zero
 		|	ret
 	} else {
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	movn RETVALx, #0              // ZEND_VM_RETURN (-1)
 		|	ret
@@ -2492,7 +2492,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	ldp x29, x30, [sp], # SPAD    // stack alignment
 		|	JMP_IP TMP1
 	} else {
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #1               // ZEND_VM_ENTER
 		|	ret
@@ -2536,7 +2536,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 		|	tst RETVALw, RETVALw
 		|	blt ->trace_halt
 		|
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #1               // ZEND_VM_ENTER
 		|	ret
@@ -2556,7 +2556,7 @@ static int zend_jit_trace_escape_stub(dasm_State **Dst)
 		|	ldp x29, x30, [sp], # SPAD    // stack alignment
 		|	JMP_IP, TMP1
 	} else {
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #1               // ZEND_VM_ENTER
 		|	ret
@@ -3038,7 +3038,7 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 			if (((ins ^ (uint32_t)delta) & 0x01ffffffu) == 0) {
 				delta = (uint32_t*)to_addr - ins_ptr;
 				if (((delta + 0x02000000) >> 26) != 0) {
-					abort(); // brnach target out of range
+					abort(); // branch target out of range
 				}
 				*ins_ptr = (ins & 0xfc000000u) | ((uint32_t)delta & 0x03ffffffu);
 				ret++;
@@ -3056,10 +3056,10 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 					if (veneer) {
 						delta = (uint32_t*)veneer - ins_ptr;
 						if (((delta + 0x40000) >> 19) != 0) {
-							abort(); // brnach target out of range
+							abort(); // branch target out of range
 						}
 					} else {
-						abort(); // brnach target out of range
+						abort(); // branch target out of range
 					}
 				}
 				*ins_ptr = (ins & 0xff00001fu) | (((uint32_t)delta & 0x7ffffu) << 5);
@@ -3074,10 +3074,10 @@ static int zend_jit_patch(const void *code, size_t size, uint32_t jmp_table_size
 					if (veneer) {
 						delta = (uint32_t*)veneer - ins_ptr;
 						if (((delta + 0x2000) >> 14) != 0) {
-							abort(); // brnach target out of range
+							abort(); // branch target out of range
 						}
 					} else {
-						abort(); // brnach target out of range
+						abort(); // branch target out of range
 					}
 				}
 				*ins_ptr = (ins & 0xfff8001fu) | (((uint32_t)delta & 0x3fffu) << 5);
@@ -3169,7 +3169,7 @@ static int zend_jit_trace_return(dasm_State **Dst, bool original_handler, const 
 			|	ldr REG0, [IP, REG0]
 			|	blr REG0
 		}
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		if (!original_handler || !opline ||
 		    (opline->opcode != ZEND_RETURN
@@ -3452,7 +3452,7 @@ static int zend_jit_tail_handler(dasm_State **Dst, const zend_op *opline)
 			|	ldp x29, x30, [sp], # SPAD // stack alignment
 		} else {
 			|	mov FCARG1x, FP
-			|	ldp FP, RX, T2                // retore FP and IP
+			|	ldp FP, RX, T2                // restore FP and IP
 			|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		}
 		|	EXT_JMP handler, REG0
@@ -4972,7 +4972,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 			}
 			|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
 			|	EXT_CALL zend_jit_fast_assign_concat_helper, REG0
-			/* concatination with itself may reduce refcount */
+			/* concatenation with itself may reduce refcount */
 			op2_info |= MAY_BE_RC1;
 		} else {
 			if (Z_REG(res_addr) != ZREG_FCARG1 || Z_OFFSET(res_addr) != 0) {
@@ -4986,7 +4986,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 				|	EXT_CALL zend_jit_fast_concat_tmp_helper, REG0
 			}
 		}
-		/* concatination with empty string may increase refcount */
+		/* concatenation with empty string may increase refcount */
 		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op2_type, op2, op2_info, 0, opline, ZREG_TMP1, ZREG_TMP2
 		|5:
@@ -5011,7 +5011,7 @@ static int zend_jit_concat_helper(dasm_State    **Dst,
 		|	LOAD_ZVAL_ADDR CARG3, op2_addr
 		|	SET_EX_OPLINE opline, REG0
 		|	EXT_CALL concat_function, REG0
-		/* concatination with empty string may increase refcount */
+		/* concatenation with empty string may increase refcount */
 		op1_info |= MAY_BE_RCN;
 		op2_info |= MAY_BE_RCN;
 		|	FREE_OP op1_type, op1, op1_info, 0, NULL, ZREG_TMP1, ZREG_TMP2
@@ -9528,7 +9528,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	ldp x29, x30, [sp], # SPAD // stack alignment
 				|	JMP_IP TMP1
 			} else {
-				|	ldp FP, RX, T2                // retore FP and IP
+				|	ldp FP, RX, T2                // restore FP and IP
 				|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 				|	mov RETVALx, #1     // ZEND_VM_ENTER
 				|	ret
@@ -10865,7 +10865,7 @@ static int zend_jit_leave_func(dasm_State          **Dst,
 		//       the value of execute_data in execute_ex()
 		|	NIY	// TODO
 #else
-		|	ldp FP, RX, T2                // retore FP and IP
+		|	ldp FP, RX, T2                // restore FP and IP
 		|	ldp x29, x30, [sp], # NR_SPAD // stack alignment
 		|	mov RETVALx, #2               // ZEND_VM_LEAVE ????
 		|	ret
@@ -14832,7 +14832,7 @@ static bool zend_jit_fetch_indirect_var(dasm_State **Dst, const zend_op *opline,
 		|	IF_NOT_ZVAL_TYPE var_addr, IS_INDIRECT, &exit_addr, ZREG_TMP1
 		|	GET_ZVAL_PTR FCARG1x, var_addr, TMP1
 	} else {
-		/* May be already loaded into FCARG1a or RAX by previus FETCH_OBJ_W/DIM_W */
+		/* May be already loaded into FCARG1a or RAX by previous FETCH_OBJ_W/DIM_W */
 		if (opline->op1_type != IS_VAR ||
 				(opline-1)->result_type != IS_VAR  ||
 				(opline-1)->result.var != opline->op1.var ||
