@@ -3440,7 +3440,7 @@ static int zend_jit_trace_link_to_root(dasm_State **Dst, zend_jit_trace_info *t,
 #if defined(__x86_64__) || defined(_M_X64)
 		prologue_size = 17;
 #else
-		prologue_size = 12;
+		prologue_size = 13;
 #endif
 	}
 	link_addr = (const void*)((const char*)t->code_start + prologue_size);
