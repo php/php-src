@@ -3002,7 +3002,9 @@ static zend_always_inline int _zend_update_type_info(
 				if (ssa_op->result_use >= 0) {
 					tmp |= ssa_var_info[ssa_op->result_use].type;
 				}
-				if (opline->op1_type != IS_UNUSED) {
+				if (opline->op1_type != IS_UNUSED
+				 && (opline->op2_type == IS_UNUSED
+				  || (t2 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE|MAY_BE_STRING)))) {
 					tmp |= (t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
 					if (t1 & MAY_BE_UNDEF) {
 						tmp |= MAY_BE_ARRAY_OF_NULL;
