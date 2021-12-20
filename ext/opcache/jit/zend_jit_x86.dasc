@@ -4428,6 +4428,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 				tmp_reg = ZREG_R1;
 			}
 			|	LONG_MATH opcode, result_reg, op2_addr, tmp_reg
+			(void)tmp_reg;
 		}
 	}
 	if (may_overflow) {
@@ -5192,6 +5193,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				}
 				|	GET_ZVAL_LVAL result_reg, op1_addr
 				|	LONG_MATH ZEND_BW_AND, result_reg, tmp_addr, tmp_reg
+				(void)tmp_reg;
 			} else {
 				if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_RAX) {
 					|	mov aword T1, r0 // save
@@ -5290,6 +5292,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		}
 		|	GET_ZVAL_LVAL result_reg, op1_addr
 		|	LONG_MATH opcode, result_reg, op2_addr, tmp_reg
+		(void)tmp_reg;
 	}
 
 	if (Z_MODE(res_addr) != IS_REG || Z_REG(res_addr) != result_reg) {
