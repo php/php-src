@@ -959,6 +959,8 @@ class FuncInfo {
     /** @var bool */
     public $isDeprecated;
     /** @var bool */
+    public $supportsCompileTimeEval;
+    /** @var bool */
     public $verify;
     /** @var ArgInfo[] */
     public $args;
@@ -979,6 +981,7 @@ class FuncInfo {
         ?string $aliasType,
         ?FunctionOrMethodName $alias,
         bool $isDeprecated,
+        bool $supportsCompileTimeEval,
         bool $verify,
         array $args,
         ReturnInfo $return,
@@ -991,6 +994,7 @@ class FuncInfo {
         $this->aliasType = $aliasType;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
+        $this->supportsCompileTimeEval = $supportsCompileTimeEval;
         $this->verify = $verify;
         $this->args = $args;
         $this->return = $return;
@@ -1155,6 +1159,10 @@ class FuncInfo {
                     "\tZEND_NS_FE(\"%s\", %s, %s)\n",
                     addslashes($namespace), $declarationName, $this->getArgInfoName());
             } else {
+                if ($this->supportsCompileTimeEval) {
+                    return sprintf(
+                        "\tZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
+                }
                 return sprintf("\tZEND_FE(%s, %s)\n", $declarationName, $this->getArgInfoName());
             }
         } else {
@@ -2232,6 +2240,7 @@ function parseFunctionLike(
         $aliasType = null;
         $alias = null;
         $isDeprecated = false;
+        $supportsCompileTimeEval = false;
         $verify = true;
         $docReturnType = null;
         $tentativeReturnType = false;
@@ -2267,6 +2276,8 @@ function parseFunctionLike(
                     $docParamTypes[$tag->getVariableName()] = $tag->getType();
                 } else if ($tag->name === 'refcount') {
                     $refcount = $tag->getValue();
+                } else if ($tag->name === 'compile-time-eval') {
+                    $supportsCompileTimeEval = true;
                 }
             }
         }
@@ -2355,6 +2366,7 @@ function parseFunctionLike(
             $aliasType,
             $alias,
             $isDeprecated,
+            $supportsCompileTimeEval,
             $verify,
             $args,
             $return,

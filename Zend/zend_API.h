@@ -95,6 +95,17 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_NS_FENTRY(ns, zend_name, name, arg_info, flags)		ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, #zend_name), name, arg_info, flags)
 
 #define ZEND_NS_RAW_FENTRY(ns, zend_name, name, arg_info, flags)	ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, zend_name), name, arg_info, flags)
+/**
+ * Note that if you are asserting that a function is compile-time evaluable, you are asserting that
+ *
+ * 1. The function will always have the same result for the same arguments
+ * 2. The function does not depend on global state such as ini settings or locale (e.g. mb_strtolower), number_format(), etc.
+ * 3. The function does not have side effects. It is okay if they throw
+ *    or warn on invalid arguments, as we detect this and will discard the evaluation result.
+ * 4. The function will not take an unreasonable amount of time or memory to compute on code that may be seen in practice.
+ *    (e.g. str_repeat is special cased to check the length instead of using this)
+ */
+#define ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(name, arg_info) ZEND_RAW_FENTRY(#name, zif_##name, arg_info, ZEND_ACC_COMPILE_TIME_EVAL)
 
 /* Same as ZEND_NS_NAMED_FE */
 #define ZEND_NS_RAW_NAMED_FE(ns, zend_name, name, arg_info)			ZEND_NS_RAW_FENTRY(ns, #zend_name, name, arg_info, 0)

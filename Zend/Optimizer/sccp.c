@@ -799,59 +799,21 @@ static inline zend_result ct_eval_array_key_exists(zval *result, zval *op1, zval
 	return SUCCESS;
 }
 
-static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **args) {
-	/* Functions in this list must always produce the same result for the same arguments,
+static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32_t num_args, zval **args) {
+	/* Precondition: func->type == ZEND_INTERNAL_FUNCTION, this is a global function */
+	/* Functions setting ZEND_ACC_COMPILE_TIME_EVAL (@compile-time-eval) must always produce the same result for the same arguments,
 	 * and have no dependence on global state (such as locales). It is okay if they throw
 	 * or warn on invalid arguments, as we detect this and will discard the evaluation result. */
-	if (false
-		|| zend_string_equals_literal(name, "array_diff")
-		|| zend_string_equals_literal(name, "array_diff_assoc")
-		|| zend_string_equals_literal(name, "array_diff_key")
-		|| zend_string_equals_literal(name, "array_flip")
-		|| zend_string_equals_literal(name, "array_is_list")
-		|| zend_string_equals_literal(name, "array_key_exists")
-		|| zend_string_equals_literal(name, "array_keys")
-		|| zend_string_equals_literal(name, "array_merge")
-		|| zend_string_equals_literal(name, "array_merge_recursive")
-		|| zend_string_equals_literal(name, "array_replace")
-		|| zend_string_equals_literal(name, "array_replace_recursive")
-		|| zend_string_equals_literal(name, "array_unique")
-		|| zend_string_equals_literal(name, "array_values")
-		|| zend_string_equals_literal(name, "base64_decode")
-		|| zend_string_equals_literal(name, "base64_encode")
-#ifndef ZEND_WIN32
-		/* On Windows this function may be code page dependent. */
-		|| zend_string_equals_literal(name, "dirname")
-#endif
-		|| zend_string_equals_literal(name, "explode")
-		|| zend_string_equals_literal(name, "imagetypes")
-		|| zend_string_equals_literal(name, "in_array")
-		|| zend_string_equals_literal(name, "implode")
-		|| zend_string_equals_literal(name, "ltrim")
-		|| zend_string_equals_literal(name, "php_sapi_name")
-		|| zend_string_equals_literal(name, "php_uname")
-		|| zend_string_equals_literal(name, "phpversion")
-		|| zend_string_equals_literal(name, "pow")
-		|| zend_string_equals_literal(name, "preg_quote")
-		|| zend_string_equals_literal(name, "rawurldecode")
-		|| zend_string_equals_literal(name, "rawurlencode")
-		|| zend_string_equals_literal(name, "rtrim")
-		|| zend_string_equals_literal(name, "serialize")
-		|| zend_string_equals_literal(name, "str_contains")
-		|| zend_string_equals_literal(name, "str_ends_with")
-		|| zend_string_equals_literal(name, "str_replace")
-		|| zend_string_equals_literal(name, "str_split")
-		|| zend_string_equals_literal(name, "str_starts_with")
-		|| zend_string_equals_literal(name, "strpos")
-		|| zend_string_equals_literal(name, "strstr")
-		|| zend_string_equals_literal(name, "substr")
-		|| zend_string_equals_literal(name, "trim")
-		|| zend_string_equals_literal(name, "urldecode")
-		|| zend_string_equals_literal(name, "urlencode")
-		|| zend_string_equals_literal(name, "version_compare")
-	) {
+	if (func->common.fn_flags & ZEND_ACC_COMPILE_TIME_EVAL) {
+		/* This has @compile-time-eval in stub info and uses a macro such as ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE */
 		return true;
 	}
+#ifndef ZEND_WIN32
+	/* On Windows this function may be code page dependent. */
+	if (zend_string_equals_literal(name, "dirname")) {
+		return true;
+	}
+#endif
 
 	if (num_args == 2) {
 		if (zend_string_equals_literal(name, "str_repeat")) {
@@ -918,7 +880,7 @@ static inline zend_result ct_eval_func_call(
 		}
 	}
 
-	if (!can_ct_eval_func_call(name, num_args, args)) {
+	if (!can_ct_eval_func_call(func, name, num_args, args)) {
 		return FAILURE;
 	}
 
