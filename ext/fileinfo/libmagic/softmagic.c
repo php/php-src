@@ -220,6 +220,10 @@ match(struct magic_set *ms, struct magic *magic, uint32_t nmagic,
 	if (found_match == NULL)
 		found_match = &found_matchv;
 
+	if (*found_match && !print) {
+		return 0;
+	}
+
 	if (file_check_mem(ms, cont_level) == -1)
 		return -1;
 
