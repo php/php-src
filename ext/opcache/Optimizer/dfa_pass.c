@@ -323,7 +323,7 @@ static inline zend_bool can_elide_return_type_check(
 }
 
 static zend_bool opline_supports_assign_contraction(
-		zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
+		zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int src_var, uint32_t cv_var) {
 	if (opline->opcode == ZEND_NEW) {
 		/* see Zend/tests/generators/aborted_yield_during_new.phpt */
 		return 0;
@@ -355,6 +355,13 @@ static zend_bool opline_supports_assign_contraction(
 		/* CAST to array/object may initialize the result to an empty array/object before
 		 * reading the expression. */
 		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
+	}
+
+	if (opline->opcode == ZEND_ASSIGN_OP
+	 && opline->op1_type == IS_CV
+	 && opline->op1.var == cv_var
+	 && zend_may_throw(opline, &ssa->ops[ssa->vars[src_var].definition], op_array, ssa)) {
+		return 0;
 	}
 
 	return 1;
@@ -1310,7 +1317,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				 && !ssa->vars[src_var].phi_use_chain
 				 && !ssa->vars[src_var].sym_use_chain
 				 && opline_supports_assign_contraction(
-					 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
+					 op_array, ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 					 src_var, opline->result.var)
 				 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->result.var),
 						ssa->vars[src_var].definition+1, op_1)
@@ -1467,7 +1474,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && !ssa->vars[src_var].phi_use_chain
 					 && !ssa->vars[src_var].sym_use_chain
 					 && opline_supports_assign_contraction(
-						 ssa, &op_array->opcodes[ssa->vars[src_var].definition],
+						 op_array, ssa, &op_array->opcodes[ssa->vars[src_var].definition],
 						 src_var, opline->op1.var)
 					 && !variable_defined_or_used_in_range(ssa, EX_VAR_TO_NUM(opline->op1.var),
 							ssa->vars[src_var].definition+1, op_1)
