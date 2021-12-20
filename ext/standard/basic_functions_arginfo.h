@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 96393b26861733e5c7fc9a12095a29c07ed73928 */
+ * Stub hash: 57b39034cfe4b7421db6a6cc09ba4b086e95d646 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1166,6 +1166,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_shell_exec, 0, 1, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, result_code, "null")
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_NICE)
