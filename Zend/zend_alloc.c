@@ -464,9 +464,16 @@ static void *zend_mm_mmap(size_t size)
 #else
 	void *ptr;
 
-#ifdef MAP_HUGETLB
+#if defined(MAP_HUGETLB) || defined(VM_FLAGS_SUPERPAGE_SIZE_2MB)
 	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
-		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
+		int fd = -1;
+		int mflags = MAP_PRIVATE | MAP_ANON;
+#if defined(MAP_HUGETLB)
+		mflags |= MAP_HUGETLB;
+#else
+		fd = VM_FLAGS_SUPERPAGE_SIZE_2MB;
+#endif
+		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, mflags, fd, 0);
 		if (ptr != MAP_FAILED) {
 			return ptr;
 		}
@@ -671,7 +678,7 @@ static zend_always_inline void zend_mm_hugepage(void* ptr, size_t size)
 #elif defined(HAVE_MEMCNTL)
 	struct memcntl_mha m = {.mha_cmd = MHA_MAPSIZE_VA, .mha_pagesize = ZEND_MM_CHUNK_SIZE, .mha_flags = 0};
 	(void)memcntl(ptr, size, MC_HAT_ADVISE, (char *)&m, 0, 0);
-#else
+#elif !defined(VM_FLAGS_SUPERPAGE_SIZE_2MB) && !defined(MAP_ALIGNED_SUPER)
 	zend_error_noreturn(E_WARNING, "huge_pages: thp unsupported on this platform");
 #endif
 }
