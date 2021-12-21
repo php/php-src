@@ -120,7 +120,7 @@ file_checkfmt(char *msg, size_t mlen, const char *fmt)
 				return -1;
 		}
 
-		if (!isalpha((unsigned char)*p)) {
+		if (!zend_isalpha_ascii((unsigned char)*p)) {
 			if (msg)
 				snprintf(msg, mlen, "bad format char: %c", *p);
 			return -1;

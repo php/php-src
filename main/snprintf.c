@@ -288,7 +288,7 @@ PHPAPI char * php_conv_fp(char format, double num,
 	/*
 	 * Check for Infinity and NaN
 	 */
-	if (isalpha((int)*p)) {
+	if (zend_isalpha_ascii((int)*p)) {
 		*len = strlen(p);
 		memcpy(buf, p, *len + 1);
 		*is_negative = false;

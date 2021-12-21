@@ -895,7 +895,7 @@ finish:
 		ZSTR_LEN(val) = php_url_decode(ZSTR_VAL(val), ZSTR_LEN(val)); \
 		s = (unsigned char*)ZSTR_VAL(val); e = s + ZSTR_LEN(val); \
 		while (s < e) { \
-			if (iscntrl(*s)) { \
+			if (zend_iscntrl_ascii(*s)) { \
 				php_stream_wrapper_log_error(wrapper, options, "Invalid redirect URL! %s", new_path); \
 				goto out; \
 			} \

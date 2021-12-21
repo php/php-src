@@ -2405,10 +2405,10 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				break;
 
 			default:
-				if (isalnum(ch)) {
+				if (zend_isalnum_ascii(ch)) {
 					md->token_len = 0;
 					buff[(md->token_len)++] = ch;
-					while (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)) && (isalnum(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
+					while (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)) && (zend_isalnum_ascii(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
 						buff[(md->token_len)++] = ch;
 
 						if (md->token_len == META_DEF_BUFSIZE) {
@@ -2417,7 +2417,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 					}
 
 					/* This is ugly, but we have to replace ungetc */
-					if (!isalpha(ch) && ch != '-') {
+					if (!zend_isalnum_ascii(ch) && ch != '-') {
 						md->ulc = 1;
 						md->lc = ch;
 					}

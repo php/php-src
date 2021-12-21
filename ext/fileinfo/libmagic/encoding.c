@@ -536,7 +536,7 @@ looks_ucs32(const unsigned char *bf, size_t nbytes, file_unichar_t *ubf,
 			    | (CAST(file_unichar_t, bf[i]) << 24);
 		else
 			ubf[(*ulen)++] = CAST(file_unichar_t, bf[i + 0])
-			    | (CAST(file_unichar_t, bf[i + 1]) << 8) 
+			    | (CAST(file_unichar_t, bf[i + 1]) << 8)
 			    | (CAST(file_unichar_t, bf[i + 2]) << 16)
 			    | (CAST(file_unichar_t, bf[i + 3]) << 24);
 

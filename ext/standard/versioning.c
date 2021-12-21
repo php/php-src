@@ -59,7 +59,7 @@ php_canonicalize_version(const char *version)
 				*q++ = '.';
 			}
 			*q++ = *p;
-		} else if (!isalnum(*p)) {
+		} else if (!zend_isalnum_ascii(*p)) {
 			if (lq != '.') {
 				*q++ = '.';
 			}

@@ -77,8 +77,8 @@ static const char _codes[26] =
 /*  a  b c  d e f g  h i j k l m n o p q r s t u v w x y z */
 };
 
-
-#define ENCODE(c) (isalpha(c) ? _codes[((toupper(c)) - 'A')] : 0)
+/* Here, this avoids locale dependency to ensure the index is a valid index of _codes. */
+#define ENCODE(c) (zend_isalpha_ascii(c) ? _codes[((zend_toupper_ascii(c)) - 'A')] : 0)
 
 #define isvowel(c)  (ENCODE(c) & 1)		/* AEIOU */
 

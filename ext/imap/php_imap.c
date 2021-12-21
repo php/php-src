@@ -2306,7 +2306,7 @@ PHP_FUNCTION(imap_utf8)
 #define SPECIAL(c) ((c) <= 0x1f || (c) >= 0x7f)
 
 /* validate a modified-base64 character */
-#define B64CHAR(c) (isalnum(c) || (c) == '+' || (c) == ',')
+#define B64CHAR(c) (zend_isalnum_ascii(c) || (c) == '+' || (c) == ',')
 
 /* map the low 64 bits of `n' to the modified-base64 characters */
 #define B64(n)	("ABCDEFGHIJKLMNOPQRSTUVWXYZ" \

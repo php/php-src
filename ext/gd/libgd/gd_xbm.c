@@ -190,8 +190,8 @@ void gdImageXbmCtx(gdImagePtr image, char* file_name, int fg, gdIOCtx * out)
 		name = estrdup("image");
 	} else {
 		for (i=0; i<l; i++) {
-			/* only in C-locale isalnum() would work */
-			if (!isupper(name[i]) && !islower(name[i]) && !isdigit(name[i])) {
+			/* Locale-independent check */
+			if (!zend_isalnum_ascii(name[i])) {
 				name[i] = '_';
 			}
 		}

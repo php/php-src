@@ -466,7 +466,7 @@ php_formatted_print(char *format, size_t format_len, zval *args, int argc, int n
 
 			PRINTF_DEBUG(("sprintf: first looking at '%c', inpos=%d\n",
 						  *format, format - Z_STRVAL_P(z_format)));
-			if (isalpha((int)*format)) {
+			if (zend_isalpha_ascii((int)*format)) {
 				width = precision = 0;
 				argnum = ARG_NUM_NEXT;
 			} else {

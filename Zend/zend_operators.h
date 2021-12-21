@@ -435,9 +435,15 @@ ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
 
 ZEND_API extern const unsigned char zend_tolower_map[256];
 ZEND_API extern const unsigned char zend_toupper_map[256];
+ZEND_API extern const bool zend_isalpha_map[256];
+ZEND_API extern const bool zend_isalnum_map[256];
+ZEND_API extern const bool zend_iscntrl_map[256];
 
 #define zend_tolower_ascii(c) (zend_tolower_map[(unsigned char)(c)])
 #define zend_toupper_ascii(c) (zend_toupper_map[(unsigned char)(c)])
+#define zend_isalpha_ascii(c) (zend_isalpha_map[(unsigned char)(c)])
+#define zend_isalnum_ascii(c) (zend_isalnum_map[(unsigned char)(c)])
+#define zend_iscntrl_ascii(c) (zend_iscntrl_map[(unsigned char)(c)])
 
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
 ZEND_API void         ZEND_FASTCALL zend_str_toupper(char *str, size_t length);

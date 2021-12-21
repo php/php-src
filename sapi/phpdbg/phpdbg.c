@@ -1216,7 +1216,7 @@ phpdbg_main:
 
 				if ((val = strchr(php_optarg, '='))) {
 				  val++;
-				  if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+				  if (!zend_isalnum_ascii(*val) && *val != '"' && *val != '\'' && *val != '\0') {
 					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
 					  memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
 					  ini_entries_len += (val - php_optarg);

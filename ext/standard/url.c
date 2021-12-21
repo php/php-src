@@ -61,7 +61,7 @@ PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
 
 	while (s < e) {
 
-		if (iscntrl(*s)) {
+		if (zend_iscntrl_ascii(*s)) {
 			*s='_';
 		}
 		s++;
@@ -117,7 +117,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 		p = s;
 		while (p < e) {
 			/* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
-			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
+			if (!zend_isalnum_ascii(*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
 				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */

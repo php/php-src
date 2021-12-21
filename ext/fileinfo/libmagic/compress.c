@@ -237,7 +237,7 @@ format_decompression_error(struct magic_set *ms, size_t i, unsigned char *buf)
 		return file_printf(ms, "ERROR:[%s: %s]", methodname(i), buf);
 
 	for (p = buf; *p; p++)
-		if (!isalnum(*p))
+		if (!zend_isalnum_ascii(*p))
 			*p = '-';
 
 	return file_printf(ms, "application/x-decompression-error-%s-%s",

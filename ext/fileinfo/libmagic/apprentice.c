@@ -299,7 +299,7 @@ get_standard_integer_type(const char *l, const char **t)
 {
 	int type;
 
-	if (isalpha(CAST(unsigned char, l[1]))) {
+	if (zend_isalpha_ascii(CAST(unsigned char, l[1]))) {
 		switch (l[1]) {
 		case 'C':
 			/* "dC" and "uC" */
@@ -1187,7 +1187,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 					continue;
 				}
 				if ((*bang[i].fun)(ms, &me,
-				    line + bang[i].len + 2, 
+				    line + bang[i].len + 2,
 				    len - bang[i].len - 2) != 0) {
 					(*errs)++;
 					continue;
@@ -1419,7 +1419,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 		/* coalesce per file arrays into a single one, if needed */
 		if (mset[j].count == 0)
 			continue;
-		      
+
 		if (coalesce_entries(ms, mset[j].me, mset[j].count,
 		    &map->magic[j], &map->nmagic[j]) == -1) {
 			errs++;
@@ -2071,7 +2071,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 			if (*l == 'd')
 				m->type = get_standard_integer_type(l, &l);
 			else if (*l == 's'
-			    && !isalpha(CAST(unsigned char, l[1]))) {
+			    && !zend_isalpha_ascii(CAST(unsigned char, l[1]))) {
 				m->type = FILE_STRING;
 				++l;
 			}
@@ -2287,7 +2287,7 @@ out:
 private int
 goodchar(unsigned char x, const char *extra)
 {
-	return (isascii(x) && isalnum(x)) || strchr(extra, x);
+	return (zend_isalnum_ascii(x)) || strchr(extra, x);
 }
 
 private int

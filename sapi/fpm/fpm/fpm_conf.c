@@ -933,7 +933,7 @@ static int fpm_conf_process_all_pools(void) /* {{{ */
 			}
 
 			for (i = 0; i < strlen(status); i++) {
-				if (!isalnum(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.' && status[i] != '~') {
+				if (!zend_isalnum_ascii(status[i]) && status[i] != '/' && status[i] != '-' && status[i] != '_' && status[i] != '.' && status[i] != '~') {
 					zlog(ZLOG_ERROR, "[pool %s] the status path '%s' must contain only the following characters '[alphanum]/_-.~'", wp->config->name, status);
 					return -1;
 				}
@@ -956,7 +956,7 @@ static int fpm_conf_process_all_pools(void) /* {{{ */
 			}
 
 			for (i = 0; i < strlen(ping); i++) {
-				if (!isalnum(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.' && ping[i] != '~') {
+				if (!zend_isalnum_ascii(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.' && ping[i] != '~') {
 					zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must contain only the following characters '[alphanum]/_-.~'", wp->config->name, ping);
 					return -1;
 				}
