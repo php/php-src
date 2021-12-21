@@ -103,6 +103,7 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 
 	REGISTER_LONG_CONSTANT("SORT_REGULAR", PHP_SORT_REGULAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_STRICT", PHP_SORT_STRICT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
@@ -349,6 +350,104 @@ static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucke
 }
 /* }}} */
 
+/* return int to be compatible with compare_func_t */
+static int hash_zval_strict_function(zval *z1, zval *z2) /* {{{ */
+{
+	ZVAL_DEREF(z1);
+	ZVAL_DEREF(z2);
+	// If the types are different, compare based on type.
+	// (Values of different types can't be identical.)
+	int t1 = Z_TYPE_P(z1);
+	int t2 = Z_TYPE_P(z2);
+	if ( t1 != t2 ) {
+		return (t1 > t2 ) ? 1 : -1;
+	}
+	// The most important thing about this comparison mode is that the result
+	// is 0 when zend_is_identical, and non-zero otherwise.  This test is
+	// done first to make it easier to verify this property by inspection.
+	// (Arrays are excluded as an optimization, to avoid a redudant
+	//  deep inspection.)
+	if (t1 != IS_ARRAY && zend_is_identical(z1, z2)) {
+		return 0;
+	}
+	// Both types are the same *but the values are not identical*
+	// Below this point, the return value for non-array values
+	// should always be non-zero.
+	switch (t1) {
+	case IS_LONG:
+		return Z_LVAL_P(z1) > Z_LVAL_P(z2) ? 1 : -1;
+
+	case IS_DOUBLE:
+		return Z_DVAL_P(z1) > Z_DVAL_P(z2) ? 1 : -1;
+
+	case IS_STRING:
+		return zend_binary_strcmp(
+			Z_STRVAL_P(z1), Z_STRLEN_P(z1),
+			Z_STRVAL_P(z2), Z_STRLEN_P(z2)
+		);
+
+	case IS_ARRAY:
+		// Do a recursive comparison.  This is consistent with the test
+		// for arrays in zend_is_identical, but unlike that method it
+		// provides a meaningful ordering in the case of non-identity
+		// as well.
+		return zend_hash_compare(
+			Z_ARRVAL_P(z1), Z_ARRVAL_P(z2),
+			(compare_func_t) hash_zval_strict_function, 1 /* ordered */
+		);
+
+	case IS_OBJECT:
+	{
+		// Start with a recursive comparison like for arrays, for consistency.
+		// (This is deliberately not using the user-defined `compare` handler,
+		// nor is it using zend_std_compare_objects() because that uses
+		// zend_compare when examining properties, not a strict comparison.)
+		zend_object *zobj1 = Z_OBJ_P(z1);
+		zend_object *zobj2 = Z_OBJ_P(z2);
+		rebuild_object_properties(zobj1);
+		rebuild_object_properties(zobj2);
+		// zend_std_compare_objects() uses unordered comparison, but that
+		// leads to a unpredictable sort: with unordered the properties are
+		// compared in the order they appear in the *first* object so
+		// `compare(a,b)` is not guaranteed to be the same as `-compare(b,a)`.
+		int c = zend_hash_compare(
+			zobj1->properties, zobj2->properties,
+			(compare_func_t) hash_zval_strict_function, 1 /* ordered */
+		);
+		if (c != 0) {
+			return (c > 0) ? 1 : -1;
+		}
+		// Fall back on spl_object_id() value, which will probably vary
+		// non-deterministically between runs (alas).
+		ZEND_ASSERT(zobj1->handle != zobj2->handle);
+		return (zobj1->handle > zobj2->handle) ? 1 : -1;
+	}
+
+	case IS_RESOURCE:
+		// This will also likely vary non-deterministically between runs.
+		return Z_RES_HANDLE_P(z1) > Z_RES_HANDLE_P(z2) ? 1 : -1;
+
+	case IS_REFERENCE:
+		ZEND_ASSERT(0 && "Should have been dereferenced above");
+
+	case IS_UNDEF:
+	case IS_NULL:
+	case IS_FALSE:
+	case IS_TRUE:
+	default:
+		ZEND_ASSERT(0 && "Values w/ same type should be identical");
+		return 0;
+	}
+}
+/* }}} */
+
+
+static zend_always_inline int php_array_data_compare_strict_unstable_i(Bucket *f, Bucket *s) /* {{{ */
+{
+	return hash_zval_strict_function(&f->val, &s->val);
+}
+/* }}} */
+
 static zend_always_inline int php_array_data_compare_numeric_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	return numeric_compare_function(&f->val, &s->val);
@@ -405,6 +504,7 @@ DEFINE_SORT_VARIANTS(key_compare_string_case);
 DEFINE_SORT_VARIANTS(key_compare_string);
 DEFINE_SORT_VARIANTS(key_compare_string_locale);
 DEFINE_SORT_VARIANTS(data_compare);
+DEFINE_SORT_VARIANTS(data_compare_strict);
 DEFINE_SORT_VARIANTS(data_compare_numeric);
 DEFINE_SORT_VARIANTS(data_compare_string_case);
 DEFINE_SORT_VARIANTS(data_compare_string);
@@ -527,6 +627,14 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 			}
 			break;
 
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_data_compare_strict;
+			} else {
+				return php_array_data_compare_strict;
+			}
+			break;
+
 		case PHP_SORT_REGULAR:
 		default:
 			if (reverse) {
@@ -588,6 +696,14 @@ static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_t
 				return php_array_reverse_data_compare_string_locale_unstable;
 			} else {
 				return php_array_data_compare_string_locale_unstable;
+			}
+			break;
+
+		case PHP_SORT_STRICT:
+			if (reverse) {
+				return php_array_reverse_data_compare_strict_unstable;
+			} else {
+				return php_array_data_compare_strict_unstable;
 			}
 			break;
 
