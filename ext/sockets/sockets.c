@@ -223,7 +223,7 @@ ZEND_GET_MODULE(sockets)
 int inet_ntoa_lock = 0;
 #endif
 
-static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
+static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la;
 	struct hostent		*hp;
@@ -266,7 +266,7 @@ static int php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ 
 }
 /* }}} */
 
-static int php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
+static bool php_accept_connect(php_socket *in_sock, php_socket *out_sock, struct sockaddr *la, socklen_t *la_len) /* {{{ */
 {
 	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, la_len);
 
@@ -2179,7 +2179,7 @@ PHP_FUNCTION(socket_clear_error)
 }
 /* }}} */
 
-int socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
+bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket *retsock)
 {
 #ifdef SO_DOMAIN
 	int						type;
