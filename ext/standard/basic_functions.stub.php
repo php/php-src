@@ -89,6 +89,12 @@ const SORT_FLAG_CASE = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue PHP_ARRAY_UNIQUE_IDENTICAL
+ */
+const ARRAY_UNIQUE_IDENTICAL = UNKNOWN;
+
+/**
+ * @var int
  * @cvalue PHP_CASE_LOWER
  */
 const CASE_LOWER = UNKNOWN;

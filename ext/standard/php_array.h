@@ -54,7 +54,11 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 #define PHP_SORT_ASC                4
 #define PHP_SORT_LOCALE_STRING      5
 #define PHP_SORT_NATURAL            6
+//#define PHP_DONT_USE              7
 #define PHP_SORT_FLAG_CASE          8
+
+// Must not clash with the PHP_SORT_ flags
+#define PHP_ARRAY_UNIQUE_IDENTICAL  7
 
 #define PHP_COUNT_NORMAL      0
 #define PHP_COUNT_RECURSIVE   1

@@ -42,6 +42,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 #include "ext/random/php_random.h"
+#include "Zend/zend_strictmap.h"
 
 /* {{{ defines */
 
@@ -4556,6 +4557,42 @@ PHP_FUNCTION(array_unique)
 		} ZEND_HASH_FOREACH_END();
 
 		zend_hash_destroy(&seen);
+		return;
+	}
+
+	if (sort_type == PHP_ARRAY_UNIQUE_IDENTICAL) {
+		zend_long num_key;
+		zend_string *str_key;
+		zval *val;
+		zend_strictmap seen;
+
+		zend_strictmap_init(&seen);
+
+		array_init(return_value);
+
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, str_key, val) {
+			zval dummy;
+			ZVAL_TRUE(&dummy);
+			zval *val_deref = val;
+			ZVAL_DEREF(val_deref);
+			bool added = zend_strictmap_insert(&seen, val_deref, &dummy);
+
+			if (added) {
+				/* First occurrence of the value */
+				if (UNEXPECTED(Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1)) {
+					ZVAL_DEREF(val);
+				}
+				Z_TRY_ADDREF_P(val);
+
+				if (str_key) {
+					zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, val);
+				} else {
+					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, val);
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		zend_strictmap_dtor(&seen);
 		return;
 	}
 
