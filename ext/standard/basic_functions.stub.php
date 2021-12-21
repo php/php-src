@@ -86,6 +86,11 @@ const SORT_NATURAL = UNKNOWN;
  * @cvalue PHP_SORT_FLAG_CASE
  */
 const SORT_FLAG_CASE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ARRAY_UNIQUE_IDENTICAL
+ */
+const ARRAY_UNIQUE_IDENTICAL = UNKNOWN;
 
 /**
  * @var int

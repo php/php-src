@@ -294,6 +294,56 @@ static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucke
 }
 /* }}} */
 
+static int php_zval_compare_strict_function(zval *z1, zval *z2)
+{
+	ZVAL_DEREF(z1);
+	ZVAL_DEREF(z2);
+
+	zend_uchar t1 = Z_TYPE_P(z1);
+	zend_uchar t2 = Z_TYPE_P(z2);
+	if (t1 != t2) {
+		return (t1 < t2) ? -1 : 1;
+	}
+
+	switch (t1) {
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			return 0;
+		case IS_LONG:
+			return ZEND_THREEWAY_COMPARE(Z_LVAL_P(z1), Z_LVAL_P(z2));
+		case IS_DOUBLE: {
+			double d1 = Z_DVAL_P(z1);
+			double d2 = Z_DVAL_P(z2);
+			if (isnan(d1)) {
+				return -1;
+			} else if (isnan(d2)) {
+				return 1;
+			} else {
+				return ZEND_THREEWAY_COMPARE(d1, d2);
+			}
+		}
+		case IS_STRING:
+			return zend_binary_zval_strcmp(z1, z2);
+		case IS_ARRAY:
+			return zend_hash_compare(
+				Z_ARRVAL_P(z1), Z_ARRVAL_P(z2),
+				(compare_func_t) php_zval_compare_strict_function,
+				/* ordered */ true
+			);
+		case IS_OBJECT:
+			return ZEND_THREEWAY_COMPARE(Z_OBJ_P(z1)->handle, Z_OBJ_P(z2)->handle);
+		case IS_RESOURCE:
+			return ZEND_THREEWAY_COMPARE(Z_RES_HANDLE_P(z1), Z_RES_HANDLE_P(z2));
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static zend_always_inline int php_array_data_compare_strict_unstable_i(Bucket *f, Bucket *s)
+{
+	return php_zval_compare_strict_function(&f->val, &s->val);
+}
+
 static zend_always_inline int php_array_data_compare_numeric_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	return numeric_compare_function(&f->val, &s->val);
@@ -356,6 +406,11 @@ DEFINE_SORT_VARIANTS(data_compare_string);
 DEFINE_SORT_VARIANTS(data_compare_string_locale);
 DEFINE_SORT_VARIANTS(natural_compare);
 DEFINE_SORT_VARIANTS(natural_case_compare);
+
+// Declare without macro since we don't need the other variants
+static zend_never_inline int php_array_data_compare_strict_unstable(Bucket *a, Bucket *b) {
+	return php_array_data_compare_strict_unstable_i(a, b);
+}
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
 {
@@ -4559,7 +4614,9 @@ PHP_FUNCTION(array_unique)
 		return;
 	}
 
-	cmp = php_get_data_compare_func_unstable(sort_type, 0);
+	cmp = sort_type == PHP_ARRAY_UNIQUE_IDENTICAL
+		? php_array_data_compare_strict_unstable
+		: php_get_data_compare_func_unstable(sort_type, 0);
 
 	RETVAL_ARR(zend_array_dup(Z_ARRVAL_P(array)));
 
