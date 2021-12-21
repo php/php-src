@@ -31,6 +31,11 @@ PHP 8.2 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Core:
+  . Added the #\[\SensitiveParameter] attribute to redact sensitive data in
+    backtraces.
+    RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
+
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
