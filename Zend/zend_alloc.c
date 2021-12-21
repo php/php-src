@@ -662,6 +662,18 @@ static zend_always_inline int zend_mm_bitset_is_free_range(zend_mm_bitset *bitse
 /* Chunks */
 /**********/
 
+static zend_always_inline void zend_mm_hugepage(void* ptr, size_t size)
+{
+#if defined(MADV_HUGEPAGE)
+	(void)madvise(ptr, size, MADV_HUGEPAGE);
+#elif defined(HAVE_MEMCNTL)
+	struct memcntl_mha m = {.mha_cmd = MHA_MAPSIZE_VA, .mha_pagesize = ZEND_MM_CHUNK_SIZE, .mha_flags = 0};
+	(void)memcntl(ptr, size, MC_HAT_ADVISE, (char *)&m, 0, 0);
+#else
+	zend_error_noreturn(E_WARNING, "huge_pages: thp unsupported on this platform");
+#endif
+}
+
 static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 {
 	void *ptr = zend_mm_mmap(size);
@@ -669,11 +681,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 	if (ptr == NULL) {
 		return NULL;
 	} else if (ZEND_MM_ALIGNED_OFFSET(ptr, alignment) == 0) {
-#ifdef MADV_HUGEPAGE
 		if (zend_mm_use_huge_pages) {
-			madvise(ptr, size, MADV_HUGEPAGE);
+			zend_mm_hugepage(ptr, size);
 		}
-#endif
 		return ptr;
 	} else {
 		size_t offset;
@@ -702,11 +712,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (alignment > REAL_PAGE_SIZE) {
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
-# ifdef MADV_HUGEPAGE
 		if (zend_mm_use_huge_pages) {
-			madvise(ptr, size, MADV_HUGEPAGE);
+			zend_mm_hugepage(ptr, size);
 		}
-# endif
 #endif
 		return ptr;
 	}
