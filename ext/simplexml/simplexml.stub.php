@@ -44,7 +44,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null): ?SimpleXMLElement {}
 
     /** @tentative-return-type */
-    public function addAttribute(string $qualifiedName, ?string $value = null, ?string $namespace = null): void {}
+    public function addAttribute(string $qualifiedName, string $value, ?string $namespace = null): void {}
 
     /** @tentative-return-type */
     public function getName(): string {}
