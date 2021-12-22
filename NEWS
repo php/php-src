@@ -53,6 +53,7 @@ PHP                                                                        NEWS
 - Spl:
   . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
     Bystry)
+  . Fixed bug GH-7809 (Cloning a faked SplFileInfo object may segfault). (cmb)
 
 - Standard:
   . Fixed bug GH-7748 (gethostbyaddr outputs binary string). (cmb)
