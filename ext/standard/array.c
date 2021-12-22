@@ -2915,7 +2915,6 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			uint32_t i = hash->nNumUsed;
 
 			for (; i > 0; p++, i--) {
-				if (Z_ISUNDEF(p->val)) continue;
 				if (p->key) {
 					zend_string_release(p->key);
 					p->key = NULL;
