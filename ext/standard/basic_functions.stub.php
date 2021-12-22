@@ -1433,7 +1433,7 @@ function rawurlencode(string $string): string {}
 
 function rawurldecode(string $string): string {}
 
-/** @param resource $context */
+/** @param resource|null $context */
 function get_headers(string $url, bool $associative = false, $context = null): array|false {}
 
 /* user_filters.c */
