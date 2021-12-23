@@ -2978,6 +2978,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						}
 						return;
 					}
+					flags &= ZEND_FETCH_OBJ_FLAGS;
 					if (flags) {
 						zend_handle_fetch_obj_flags(result, ptr, NULL, prop_info, flags);
 					}
@@ -3023,6 +3024,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 
 	ZVAL_INDIRECT(result, ptr);
+	flags &= ZEND_FETCH_OBJ_FLAGS;
 	if (flags) {
 		zend_property_info *prop_info;
 
@@ -3220,6 +3222,7 @@ static zend_always_inline zend_result zend_fetch_static_property_address(zval **
 		}
 	}
 
+	flags &= ZEND_FETCH_OBJ_FLAGS;
 	if (flags && ZEND_TYPE_IS_SET(property_info->type)) {
 		zend_handle_fetch_obj_flags(NULL, *retval, NULL, property_info, flags);
 	}

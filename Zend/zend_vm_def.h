@@ -1837,7 +1837,7 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, ANY, ANY, int type)
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type, opline->extended_value & ZEND_FETCH_OBJ_FLAGS OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type, opline->extended_value OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
 		prop = &EG(uninitialized_zval);
 	}
@@ -2165,7 +2165,7 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, FETCH
 	zend_fetch_property_address(
 		result, container, OP1_TYPE, property, OP2_TYPE,
 		((OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) : NULL),
-		BP_VAR_W, opline->extended_value & ZEND_FETCH_OBJ_FLAGS, 1 OPLINE_CC EXECUTE_DATA_CC);
+		BP_VAR_W, opline->extended_value, 1 OPLINE_CC EXECUTE_DATA_CC);
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
