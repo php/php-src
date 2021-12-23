@@ -385,8 +385,12 @@ static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 
 	switch (source->type) {
 		case SPL_FS_INFO:
-			intern->path = zend_string_copy(source->path);
-			intern->file_name = zend_string_copy(source->file_name);
+			if (source->path != NULL) {
+				intern->path = zend_string_copy(source->path);
+			}
+			if (source->file_name != NULL) {
+				intern->file_name = zend_string_copy(source->file_name);
+			}
 			break;
 		case SPL_FS_DIR:
 			spl_filesystem_dir_open(intern, source->path);
