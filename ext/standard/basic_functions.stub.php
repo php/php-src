@@ -1993,7 +1993,7 @@ function rawurlencode(string $string): string {}
 function rawurldecode(string $string): string {}
 
 /**
- * @param resource $context
+ * @param resource|null $context
  * @return array<int|string, string|array>|false
  * @refcount 1
  */
