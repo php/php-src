@@ -75,7 +75,7 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 
 #if defined(__i386__) || defined(__x86_64__)
 /* Function based on compiler-rt implementation. */
-static unsigned get_xcr0_eax() {
+static unsigned get_xcr0_eax(void) {
 # if defined(__GNUC__) || defined(__clang__)
 	// Check xgetbv; this uses a .byte sequence instead of the instruction
 	// directly because older assemblers do not include support for xgetbv and
@@ -90,7 +90,7 @@ static unsigned get_xcr0_eax() {
 # endif
 }
 
-static bool is_avx_supported() {
+static bool is_avx_supported(void) {
 	if (!(cpuinfo.ecx & ZEND_CPU_FEATURE_AVX)) {
 		/* No support for AVX */
 		return 0;

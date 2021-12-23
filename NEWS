@@ -47,6 +47,9 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed error message allocation of PDO PgSQL. (SATO Kentaro)
 
+- Sockets:
+  . Avoid void* arithmetic in sockets/multicast.c on NetBSD. (David Carlier)
+
 - Spl:
   . Fixed bug #75917 (SplFileObject::seek broken with CSV flags). (Aliaksandr
     Bystry)
