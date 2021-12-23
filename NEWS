@@ -59,6 +59,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-7748 (gethostbyaddr outputs binary string). (cmb)
+  . Fixed bug GH-7815 (php_uname doesn't recognise latest Windows versions).
+    (David Warner)
 
 02 Dec 2021, PHP 8.1.1
 

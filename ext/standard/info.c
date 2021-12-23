@@ -268,11 +268,34 @@ char* php_get_windows_name()
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows 10";
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
+					if (osvi.dwBuildNumber >= 22000) {
+						major = "Windows 11";
+					} else {
+						major = "Windows 10";
+					}
 				} else {
-					major = "Windows Server 2016";
+					if (osvi.dwBuildNumber >= 20348) {
+						major = "Windows Server 2022";
+					} else if (osvi.dwBuildNumber >= 19042) {
+						major = "Windows Server, version 20H2";
+					} else if (osvi.dwBuildNumber >= 19041) {
+						major = "Windows Server, version 2004";
+					} else if (osvi.dwBuildNumber >= 18363) {
+						major = "Windows Server, version 1909";
+					} else if (osvi.dwBuildNumber >= 18362) {
+						major = "Windows Server, version 1903";
+					} else if (osvi.dwBuildNumber >= 17763) {
+						// could also be Windows Server, version 1809, but there's no easy way to tell
+						major = "Windows Server 2019";
+					} else if (osvi.dwBuildNumber >= 17134) {
+						major = "Windows Server, version 1803";
+					} else if (osvi.dwBuildNumber >= 16299) {
+						major = "Windows Server, version 1709";
+					} else {
+						major = "Windows Server 2016";
+					}
 				}
 			}
 		}
