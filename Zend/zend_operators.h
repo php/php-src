@@ -414,6 +414,13 @@ ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
 
+/* NOTE: The locale-independent alternatives to ctype(isalpha/isalnum) were added to fix bugs in php 7.3 patch releases, and should not be used externally until php 8.2 */
+ZEND_API extern const bool zend_isalpha_map[256];
+ZEND_API extern const bool zend_isalnum_map[256];
+
+#define zend_isalpha_ascii(c) (zend_isalpha_map[(unsigned char)(c)])
+#define zend_isalnum_ascii(c) (zend_isalnum_map[(unsigned char)(c)])
+
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup(const char *source, size_t length);
