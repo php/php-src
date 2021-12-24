@@ -35,6 +35,10 @@
 #  include <sys/random.h>
 # endif
 #endif
+#if HAVE_COMMONCRYPTO_COMMONRANDOM_H
+# include <CommonCrypto/CommonCryptoError.h>
+# include <CommonCrypto/CommonRandom.h>
+#endif
 
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
@@ -91,6 +95,19 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		if (should_throw) {
 			zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", 0);
+		}
+		return FAILURE;
+	}
+#elif HAVE_COMMONCRYPTO_COMMONRANDOM_H
+	/*
+	 * Purposely prioritized upon arc4random_buf for modern macOs releases
+	 * arc4random api on this platform uses `ccrng_generate` which returns
+	 * a status but silented to respect the "no fail" arc4random api interface
+	 * the vast majority of the time, it works fine ; but better make sure we catch failures
+	 */
+	if (CCRandomGenerateBytes(bytes, size) != kCCSuccess) {
+		if (should_throw) {
+			zend_throw_exception(zend_ce_exception, "Error generating bytes", 0);
 		}
 		return FAILURE;
 	}

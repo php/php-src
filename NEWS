@@ -35,7 +35,8 @@ PHP                                                                        NEWS
     syntaxe of a valid file). (Dmitry)
 
 - Standard:
-  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carier)
+  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
+  . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
 
 07 Jul 2022, PHP 8.0.21
 
