@@ -1547,6 +1547,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						if (opline->opcode == ZEND_PRE_INC_OBJ
 								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
+							zval_ptr_dtor_nogc(&tmp1);
 						} else {
 							SET_RESULT(result, &tmp1);
 						}
