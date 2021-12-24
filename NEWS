@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
   . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
 
+- Curl:
+  . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+
 - FPM:
   . Emit error for invalid port setting. (David Carlier)
   . Added extra check for FPM proc dumpable on SELinux based systems.
