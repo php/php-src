@@ -301,7 +301,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 27-30)                         |     |     |     */
+/* Function Flags (unused: 28-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -356,6 +356,9 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* method flag used by Closure::__invoke() (int only)     |     |     |     */
 #define ZEND_ACC_USER_ARG_INFO           (1 << 26) /*     |  X  |     |     */
+/*                                                        |     |     |     */
+/* supports opcache compile-time evaluation (funcs)       |     |     |     */
+#define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
@@ -556,6 +559,7 @@ struct _zend_execute_data {
                                                /* to prevent optimization in RETURN handler and    */
                                                /* keep all local variables for "fcall_end" handler */
 #define ZEND_CALL_JIT_RESERVED       (1 << 29) /* reserved for tracing JIT */
+#define ZEND_CALL_NEEDS_REATTACH     (1 << 30)
 #define ZEND_CALL_SEND_ARG_BY_REF    (1u << 31)
 
 #define ZEND_CALL_NESTED_FUNCTION    (ZEND_CALL_FUNCTION | ZEND_CALL_NESTED)

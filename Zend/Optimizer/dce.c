@@ -620,7 +620,10 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 		while ((i = zend_bitset_pop_first(ctx.instr_worklist, ctx.instr_worklist_len)) >= 0) {
 			zend_bitset_excl(ctx.instr_dead, i);
 			add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], ssa, 1);
-			if (i < op_array->last && op_array->opcodes[i+1].opcode == ZEND_OP_DATA) {
+			if (i < op_array->last
+			 && (op_array->opcodes[i+1].opcode == ZEND_OP_DATA
+			  || (op_array->opcodes[i].opcode == ZEND_NEW
+			   && op_array->opcodes[i+1].opcode == ZEND_DO_FCALL))) {
 				zend_bitset_excl(ctx.instr_dead, i+1);
 				add_operands_to_worklists(&ctx, &op_array->opcodes[i+1], &ssa->ops[i+1], ssa, 1);
 			}

@@ -49,7 +49,9 @@ const mbfl_encoding mbfl_encoding_utf8_docomo = {
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_docomo_wchar,
-	&vtbl_wchar_utf8_docomo
+	&vtbl_wchar_utf8_docomo,
+	NULL,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
@@ -60,7 +62,9 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_a = {
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_kddi_a_wchar,
-	&vtbl_wchar_utf8_kddi_a
+	&vtbl_wchar_utf8_kddi_a,
+	NULL,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
@@ -71,7 +75,9 @@ const mbfl_encoding mbfl_encoding_utf8_kddi_b = {
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_kddi_b_wchar,
-	&vtbl_wchar_utf8_kddi_b
+	&vtbl_wchar_utf8_kddi_b,
+	NULL,
+	NULL
 };
 
 const mbfl_encoding mbfl_encoding_utf8_sb = {
@@ -82,7 +88,9 @@ const mbfl_encoding mbfl_encoding_utf8_sb = {
 	mblen_table_utf8,
 	0,
 	&vtbl_utf8_sb_wchar,
-	&vtbl_wchar_utf8_sb
+	&vtbl_wchar_utf8_sb,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_docomo_wchar = {

@@ -1,5 +1,5 @@
 --TEST--
-JIT ASSIGN: incorrect assumption about in-memeory zval type
+JIT ASSIGN: incorrect assumption about in-memory zval type
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

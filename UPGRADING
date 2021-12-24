@@ -19,6 +19,14 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Standard:
+  . strtolower() and strtoupper() are no longer locale-sensitive. They now
+    perform ASCII case conversion, as if the locale were "C". Use
+    mb_strtolower() if you want localized case conversion. Similarly, stristr,
+    stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
+    array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
+    conversion.
+
 ========================================
 2. New Features
 ========================================
@@ -28,9 +36,10 @@ PHP 8.2 UPGRADE NOTES
     HTTP method in curl_getinfo() return value.
 
 - OCI8:
-  . Added an oci8.prefetch_lob_size directive to tune LOB query performance
-    by reducing the number of round-trips between PHP and Oracle Database when
-    fetching LOBS. This is usable with Oracle Database 12.2 or later.
+  . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
+    function to tune LOB query performance by reducing the number of
+    round-trips between PHP and Oracle Database when fetching LOBS. This is
+    usable with Oracle Database 12.2 or later.
 
 - PCRE:
   . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
@@ -117,6 +126,14 @@ PHP 8.2 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- OCI8:
+  . The minimum Oracle Client library version required is now 11.2.
+
+- Standard:
+  . getimagesize() now reports the actual image dimensions, bits and channels
+    of AVIF images. Previously, the dimensions have been reported as 0x0, and
+    bits and channels have not been reported at all.
+
 - Zip:
   . extension updated to 1.20.0 with new methods:
     ZipArchive::clearError, getStreamName and getStreamIndex
@@ -127,6 +144,9 @@ PHP 8.2 UPGRADE NOTES
 
 - COM_DOTNET:
   . LOCALE_NEUTRAL
+
+- Sockets:
+  . SO_INCOMING_CPU
 
 ========================================
 11. Changes to INI File Handling
@@ -139,6 +159,11 @@ PHP 8.2 UPGRADE NOTES
 - Core:
   . Windows specific error messages are no longer localized, but instead in
     English to better match PHP error messages.
+
+- OCI8:
+  . Since building against Oracle Client 10g is no longer supported anyway,
+    the configuration option --with-oci8 has been dropped. --with-oci8-11g,
+    --with-oci8-12c and --with-oci8-19 are still supported.
 
 ========================================
 13. Other Changes

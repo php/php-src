@@ -429,25 +429,25 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 			((chunk >> (8 * 7)) & 0xff);
 # else
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[4] * 33 * 33 * 33 +
-			str[5] * 33 * 33 +
-			str[6] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[4] * Z_L(33 * 33 * 33) +
+			str[5] * Z_L(33 * 33) +
+			str[6] * Z_L(33) +
 			str[7];
 # endif
 	}
 	if (len >= 4) {
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		len -= 4;
 		str += 4;
@@ -455,18 +455,18 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 	if (len >= 2) {
 		if (len > 2) {
 			hash =
-				hash   * 33 * 33 * 33 +
-				str[0] * 33 * 33 +
-				str[1] * 33 +
+				hash   * Z_L(33 * 33 * 33) +
+				str[0] * Z_L(33 * 33) +
+				str[1] * Z_L(33) +
 				str[2];
 		} else {
 			hash =
-				hash   * 33 * 33 +
-				str[0] * 33 +
+				hash   * Z_L(33 * 33) +
+				str[0] * Z_L(33) +
 				str[1];
 		}
 	} else if (len != 0) {
-		hash = hash * 33 + *str;
+		hash = hash * Z_L(33) + *str;
 	}
 #else
 	/* variant with the hash unrolled eight times */

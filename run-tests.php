@@ -1091,7 +1091,9 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
         }
 
         // Otherwise we're only interested in *.phpt files.
-        if (substr($name, -5) == '.phpt') {
+        // (but not those starting with a dot, which are hidden on
+        // many platforms)
+        if (substr($name, -5) == '.phpt' && substr($name, 0, 1) !== '.') {
             if ($ignore) {
                 $ignored_by_ext++;
             } else {

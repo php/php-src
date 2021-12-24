@@ -11,7 +11,6 @@ steps:
                        openssl \
                        slapd \
                        language-pack-de \
-                       re2c \
                        libgmp-dev \
                        libicu-dev \
                        libtidy-dev \
@@ -44,7 +43,6 @@ steps:
                        unixodbc-dev \
                        llvm \
                        libc-client-dev \
-                       libkrb5-dev \
                        dovecot-core \
                        dovecot-pop3d \
                        dovecot-imapd \
@@ -54,6 +52,9 @@ steps:
                        libtokyocabinet-dev \
                        libdb-dev \
                        libqdbm-dev \
+                       libjpeg-dev \
+                       libpng-dev \
+                       libfreetype6-dev \
                        ${{ parameters.packages }}
     displayName: 'APT'
   - script: |

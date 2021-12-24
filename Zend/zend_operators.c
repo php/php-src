@@ -126,9 +126,9 @@ ZEND_API const unsigned char zend_toupper_map[256] = {
  * Functions using locale lowercase:
  	 	zend_binary_strncasecmp_l
  	 	zend_binary_strcasecmp_l
+ * Functions using ascii lowercase:
 		string_compare_function_ex
 		string_case_compare_function
- * Functions using ascii lowercase:
   		zend_str_tolower_copy
 		zend_str_tolower_dup
 		zend_str_tolower
@@ -1997,7 +1997,7 @@ ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, bool
 	int ret;
 
 	if (case_insensitive) {
-		ret = zend_binary_strcasecmp_l(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1));
+		ret = zend_binary_strcasecmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1));
 	} else {
 		ret = zend_binary_strcmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2));
 	}
@@ -2037,13 +2037,13 @@ ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2) /*
 		if (Z_STR_P(op1) == Z_STR_P(op2)) {
 			return 0;
 		} else {
-			return zend_binary_strcasecmp_l(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+			return zend_binary_strcasecmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		}
 	} else {
 		zend_string *tmp_str1, *tmp_str2;
 		zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
 		zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
-		int ret = zend_binary_strcasecmp_l(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1));
+		int ret = zend_binary_strcasecmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1));
 
 		zend_tmp_string_release(tmp_str1);
 		zend_tmp_string_release(tmp_str2);

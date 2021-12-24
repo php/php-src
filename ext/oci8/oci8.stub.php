@@ -381,6 +381,9 @@ function oci_set_prefetch($statement, int $rows): bool {}
  */
 function ocisetprefetch($statement, int $rows): bool {}
 
+/** @param resource $statement */
+function oci_set_prefetch_lob($statement, int $prefetch_lob_size): bool {}
+
 /** @param resource $connection */
 function oci_set_client_identifier($connection, string $client_id): bool {}
 

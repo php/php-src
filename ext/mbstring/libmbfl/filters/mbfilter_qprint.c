@@ -41,6 +41,8 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
+	NULL,
+	NULL,
 	NULL
 };
 

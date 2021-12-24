@@ -1,5 +1,5 @@
 --TEST--
-JIT ASSIGN_DIM_OP 006: Cloberring array be user error handler
+JIT ASSIGN_DIM_OP 006: Clobbering array be user error handler
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

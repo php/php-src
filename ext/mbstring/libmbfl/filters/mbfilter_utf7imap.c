@@ -91,7 +91,9 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	NULL,
 	0,
 	&vtbl_utf7imap_wchar,
-	&vtbl_wchar_utf7imap
+	&vtbl_wchar_utf7imap,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {

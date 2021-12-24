@@ -32,6 +32,10 @@
 # include <valgrind/valgrind.h>
 #endif
 
+#ifdef ZEND_FIBER_UCONTEXT
+# include <ucontext.h>
+#endif
+
 #ifndef ZEND_WIN32
 # include <unistd.h>
 # include <sys/mman.h>
@@ -118,7 +122,6 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
 }
 
 #ifdef ZEND_FIBER_UCONTEXT
-# include <ucontext.h>
 ZEND_TLS zend_fiber_transfer *transfer_data;
 #else
 /* boost_context_data is our customized definition of struct transfer_t as

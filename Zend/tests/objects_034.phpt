@@ -2,7 +2,17 @@
 Array object clobbering by user error handler
 --FILE--
 <?php
-class A {
+class A implements ArrayAccess {
+    public function &offsetGet($n): mixed {
+    	return null;
+    }
+    public function offsetSet($n, $v): void {
+    }
+    public function offsetUnset($n): void {
+    }
+    public function offsetExists($n): bool {
+    	return false;
+    }
 }
 
 set_error_handler(function () {

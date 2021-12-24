@@ -39,6 +39,8 @@ const mbfl_encoding mbfl_encoding_7bit = {
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	NULL,
+	NULL,
+	NULL,
 	NULL
 };
 

@@ -2349,7 +2349,7 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 				zend_map_ptr_extend(ZCSG(map_ptr_last));
 				return entry->ce;
 			}
-			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be posible ???
+			ZEND_ASSERT(0); // entry = entry->next; // This shouldn't be possible ???
 		}
 	}
 
@@ -3515,7 +3515,7 @@ static void preload_restart(void)
 }
 
 static size_t preload_try_strip_filename(zend_string *filename) {
-	/*FIXME: better way to hanlde eval()'d code? see COMPILED_STRING_DESCRIPTION_FORMAT */
+	/*FIXME: better way to handle eval()'d code? see COMPILED_STRING_DESCRIPTION_FORMAT */
 	if (ZSTR_LEN(filename) > sizeof(" eval()'d code")
 		&& *(ZSTR_VAL(filename) + ZSTR_LEN(filename) - sizeof(" eval()'d code")) == ':') {
 		const char *cfilename = ZSTR_VAL(filename);
@@ -4079,7 +4079,8 @@ static void preload_remove_empty_includes(void)
 					if (opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 					    opline->extended_value != ZEND_EVAL &&
 					    opline->op1_type == IS_CONST &&
-					    Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) == IS_STRING) {
+					    Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) == IS_STRING &&
+					    opline->result_type == IS_UNUSED) {
 
 						zend_string *resolved_path = preload_resolve_path(Z_STR_P(RT_CONSTANT(opline, opline->op1)));
 
@@ -4125,7 +4126,7 @@ static void preload_remove_empty_includes(void)
 
 				if (resolved_path) {
 					zend_persistent_script *incl = zend_hash_find_ptr(preload_scripts, resolved_path);
-					if (incl && incl->empty) {
+					if (incl && incl->empty && opline->result_type == IS_UNUSED) {
 						MAKE_NOP(opline);
 					} else {
 						if (!IS_ABSOLUTE_PATH(Z_STRVAL_P(RT_CONSTANT(opline, opline->op1)), Z_STRLEN_P(RT_CONSTANT(opline, opline->op1)))) {

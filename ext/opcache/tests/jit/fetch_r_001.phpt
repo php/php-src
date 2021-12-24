@@ -1,5 +1,5 @@
 --TEST--
-FETCH_R: 001 result reference counter may be decremented befor use
+FETCH_R: 001 result reference counter may be decremented before use
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

@@ -587,6 +587,7 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
+memcntl \
 memmove \
 mkstemp \
 mmap \
