@@ -1431,11 +1431,11 @@ static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint32_t idx, Bu
 		}
 	}
 
-	_zend_hash_del_el_ex(ht, idx, p, prev);
 	if (p->key) {
 		zend_string_release(p->key);
 		p->key = NULL;
 	}
+	_zend_hash_del_el_ex(ht, idx, p, prev);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_packed_del_val(HashTable *ht, zval *zv)
@@ -1476,9 +1476,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key
 			(p->h == h &&
 		     p->key &&
 		     zend_string_equal_content(p->key, key))) {
-			_zend_hash_del_el_ex(ht, idx, p, prev);
 			zend_string_release(p->key);
 			p->key = NULL;
+			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
 		prev = p;
@@ -1525,9 +1525,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string 
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
-				_zend_hash_del_el_ex(ht, idx, p, prev);
 				zend_string_release(p->key);
 				p->key = NULL;
+				_zend_hash_del_el_ex(ht, idx, p, prev);
 			}
 			return SUCCESS;
 		}
@@ -1571,9 +1571,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const ch
 					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
-				_zend_hash_del_el_ex(ht, idx, p, prev);
 				zend_string_release(p->key);
 				p->key = NULL;
+				_zend_hash_del_el_ex(ht, idx, p, prev);
 			}
 			return SUCCESS;
 		}
@@ -1604,9 +1604,9 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *
 			 && p->key
 			 && (ZSTR_LEN(p->key) == len)
 			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
-			_zend_hash_del_el_ex(ht, idx, p, prev);
 			zend_string_release(p->key);
 			p->key = NULL;
+			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
 		prev = p;
