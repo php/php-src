@@ -40,16 +40,11 @@ struct {
 	int last;
 } zend_optimizer_registered_passes = {{NULL}, 0};
 
-static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
-{
-	zval_ptr_dtor_nogc(zvalue);
-}
-
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value)
 {
 	if (!ctx->constants) {
 		ctx->constants = zend_arena_alloc(&ctx->arena, sizeof(HashTable));
-		zend_hash_init(ctx->constants, 16, NULL, zend_optimizer_zval_dtor_wrapper, 0);
+		zend_hash_init(ctx->constants, 16, NULL, zval_ptr_dtor_nogc, 0);
 	}
 
 	if (zend_hash_add(ctx->constants, Z_STR_P(name), value)) {
