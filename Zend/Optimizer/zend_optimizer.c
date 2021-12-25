@@ -210,6 +210,9 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_RETURN_BY_REF:
 		case ZEND_INSTANCEOF:
 		case ZEND_MAKE_REF:
+		case ZEND_SEPARATE:
+		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
 			return 0;
 		case ZEND_CATCH:
 			REQUIRES_STRING(val);
@@ -289,10 +292,6 @@ bool zend_optimizer_update_op1_const(zend_op_array *op_array,
 			opline->opcode = ZEND_IS_IDENTICAL;
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 			break;
-		case ZEND_SEPARATE:
-		case ZEND_SEND_VAR_NO_REF:
-		case ZEND_SEND_VAR_NO_REF_EX:
-			return 0;
 		case ZEND_VERIFY_RETURN_TYPE:
 			/* This would require a non-local change.
 			 * zend_optimizer_replace_by_const() supports this. */
@@ -540,26 +539,11 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 		if (opline->op1_type == type &&
 			opline->op1.var == var) {
 			switch (opline->opcode) {
-				case ZEND_FETCH_DIM_W:
-				case ZEND_FETCH_DIM_RW:
-				case ZEND_FETCH_DIM_FUNC_ARG:
-				case ZEND_FETCH_DIM_UNSET:
-				case ZEND_FETCH_LIST_W:
-				case ZEND_ASSIGN_DIM:
-				case ZEND_SEPARATE:
-				case ZEND_RETURN_BY_REF:
-					return 0;
-				case ZEND_SEND_VAR:
-					opline->extended_value = 0;
-					opline->opcode = ZEND_SEND_VAL;
-					break;
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_FUNC_ARG:
 					opline->extended_value = 0;
 					opline->opcode = ZEND_SEND_VAL_EX;
 					break;
-				case ZEND_SEND_VAR_NO_REF:
-					return 0;
 				case ZEND_SEND_VAR_NO_REF_EX:
 					opline->opcode = ZEND_SEND_VAL;
 					break;
