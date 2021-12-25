@@ -297,23 +297,6 @@ static bool try_replace_op1(
 		} else {
 			// TODO: check the following special cases ???
 			switch (opline->opcode) {
-				case ZEND_CASE:
-					opline->opcode = ZEND_IS_EQUAL;
-					goto replace_op1_simple;
-				case ZEND_CASE_STRICT:
-					opline->opcode = ZEND_IS_IDENTICAL;
-					goto replace_op1_simple;
-				case ZEND_FETCH_LIST_R:
-				case ZEND_SWITCH_STRING:
-				case ZEND_SWITCH_LONG:
-				case ZEND_MATCH:
-replace_op1_simple:
-					if (Z_TYPE(zv) == IS_STRING) {
-						zend_string_hash_val(Z_STR(zv));
-					}
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op1_type = IS_CONST;
-					return 1;
 				case ZEND_INSTANCEOF:
 					zval_ptr_dtor_nogc(&zv);
 					ZVAL_FALSE(&zv);
