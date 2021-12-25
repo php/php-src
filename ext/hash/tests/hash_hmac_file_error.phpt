@@ -43,4 +43,4 @@ hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algo
 hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
-hash_hmac_file(): Argument #2 ($data) must not contain any null bytes
+hash_hmac_file(): Argument #2 ($filename) must not contain any null bytes
