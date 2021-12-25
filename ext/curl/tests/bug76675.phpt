@@ -1,5 +1,7 @@
 --TEST--
 Bug #76675 (Segfault with H2 server push write/writeheader handlers)
+--XFAIL--
+http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
 include 'skipif.inc';

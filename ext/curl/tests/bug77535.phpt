@@ -1,5 +1,7 @@
 --TEST--
 Bug #77535 (Invalid callback, h2 server push)
+--XFAIL--
+http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
 include 'skipif.inc';
