@@ -160,7 +160,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
 					zend_class_entry *ce = zend_optimizer_get_class_entry(
-						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
+						script, op_array, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					uint32_t forbidden_flags =
 						/* These flags will always cause an exception */
 						ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
@@ -228,7 +228,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				/* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
 					zend_class_entry *ce = zend_optimizer_get_class_entry(
-						script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
+						script, op_array, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set && !ce->parent) {
 						return 1;

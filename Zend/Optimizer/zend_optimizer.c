@@ -694,7 +694,8 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 	}
 }
 
-zend_class_entry *zend_optimizer_get_class_entry(const zend_script *script, zend_string *lcname) {
+zend_class_entry *zend_optimizer_get_class_entry(
+		const zend_script *script, const zend_op_array *op_array, zend_string *lcname) {
 	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 	if (ce) {
 		return ce;
@@ -705,6 +706,10 @@ zend_class_entry *zend_optimizer_get_class_entry(const zend_script *script, zend
 		return ce;
 	}
 
+	if (op_array && op_array->scope && zend_string_equals_ci(op_array->scope->name, lcname)) {
+		return op_array->scope;
+	}
+
 	return NULL;
 }
 
@@ -713,7 +718,7 @@ static zend_class_entry *get_class_entry_from_op1(
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
-			return zend_optimizer_get_class_entry(script, Z_STR_P(op1 + 1));
+			return zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
