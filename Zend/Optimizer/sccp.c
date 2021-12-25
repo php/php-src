@@ -294,28 +294,8 @@ static bool try_replace_op1(
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
-		} else {
-			// TODO: check the following special cases ???
-			switch (opline->opcode) {
-				case ZEND_INSTANCEOF:
-					zval_ptr_dtor_nogc(&zv);
-					ZVAL_FALSE(&zv);
-					opline->opcode = ZEND_QM_ASSIGN;
-					opline->op1_type = IS_CONST;
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op2_type = IS_UNUSED;
-					if (ssa_op->op2_use >= 0) {
-						ZEND_ASSERT(ssa_op->op2_def == -1);
-						zend_ssa_unlink_use_chain(ctx->scdf.ssa, ssa_op - ctx->scdf.ssa->ops, ssa_op->op2_use);
-						ssa_op->op2_use = -1;
-						ssa_op->op2_use_chain = -1;
-					}
-					return 1;
-				default:
-					break;
-			}
-			zval_ptr_dtor_nogc(&zv);
 		}
+		zval_ptr_dtor_nogc(&zv);
 	}
 	return 0;
 }
