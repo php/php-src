@@ -713,8 +713,8 @@ zend_class_entry *zend_optimizer_get_class_entry(
 	return NULL;
 }
 
-static zend_class_entry *get_class_entry_from_op1(
-		zend_script *script, zend_op_array *op_array, zend_op *opline) {
+zend_class_entry *zend_optimizer_get_class_entry_from_op1(
+		const zend_script *script, const zend_op_array *op_array, const zend_op *opline) {
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
@@ -770,7 +770,7 @@ zend_function *zend_optimizer_get_called_func(
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
-				zend_class_entry *ce = get_class_entry_from_op1(
+				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				if (ce) {
 					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
@@ -812,7 +812,7 @@ zend_function *zend_optimizer_get_called_func(
 			break;
 		case ZEND_NEW:
 		{
-			zend_class_entry *ce = get_class_entry_from_op1(
+			zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 				script, op_array, opline);
 			if (ce && ce->type == ZEND_USER_CLASS) {
 				return ce->constructor;

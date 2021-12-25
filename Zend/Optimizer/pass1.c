@@ -174,23 +174,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 
-				zend_class_entry *ce = NULL;
-
-				if (opline->op1_type == IS_CONST &&
-			        Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
-					/* for A::B */
-					ce = zend_optimizer_get_class_entry(
-						ctx->script, op_array, Z_STR(op_array->literals[opline->op1.constant + 1]));
-					if (!ce) {
-						break;
-					}
-				} else if (op_array->scope &&
-					opline->op1_type == IS_UNUSED &&
-					(opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
-					/* for self::B */
-					ce = op_array->scope;
-				}
-
+				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
+					ctx->script, op_array, opline);
 				if (ce) {
 					zend_class_constant *cc;
 					zval *c, t;
