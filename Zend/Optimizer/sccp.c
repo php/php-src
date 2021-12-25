@@ -305,20 +305,6 @@ static bool try_replace_op2(
 	if (ssa_op->op2_use == var && can_replace_op2(ctx->scdf.op_array, opline, ssa_op)) {
 		zval zv;
 		ZVAL_COPY(&zv, value);
-
-		if (opline->opcode == ZEND_FETCH_CLASS && (opline + 1)->opcode == ZEND_INSTANCEOF &&
-				ssa_op->result_def == (ssa_op + 1)->op2_use && Z_TYPE(zv) == IS_STRING) {
-			if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline + 1, &zv)) {
-				zend_ssa_op *next_op = ssa_op + 1;
-				zend_ssa_unlink_use_chain(ctx->scdf.ssa, next_op - ctx->scdf.ssa->ops, next_op->op2_use);
-				next_op->op2_use = -1;
-				next_op->op2_use_chain = -1;
-				zend_ssa_remove_result_def(ctx->scdf.ssa, ssa_op);
-				MAKE_NOP(opline);
-				return 1;
-			}
-		}
-
 		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
 		}
@@ -1624,15 +1610,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT(result, &zv);
 			break;
-#if 0
 		case ZEND_FETCH_CLASS:
-			if (!op1) {
-				SET_RESULT_BOT(result);
-				break;
-			}
-			SET_RESULT(result, op1);
+			SET_RESULT(result, op2);
 			break;
-#endif
 		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
 			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {
@@ -2138,6 +2118,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (value
 						&& (opline->result_type & (IS_VAR|IS_TMP_VAR))
 						&& opline->opcode != ZEND_QM_ASSIGN
+						&& opline->opcode != ZEND_FETCH_CLASS
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
