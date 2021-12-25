@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
     (cmb)
+  . Fixed bug GH-7826 (Inconsistent argument name in hash_hmac_file and
+    hash_file). (cmb)
 
 - OCI8:
   . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
