@@ -194,14 +194,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					(opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
 					/* for self::B */
 					ce = op_array->scope;
-				} else if (op_array->scope &&
-					opline->op1_type == IS_VAR &&
-					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
-					((opline - 1)->op2_type == IS_UNUSED &&
-					((opline - 1)->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
-					(opline - 1)->result.var == opline->op1.var) {
-					/* for self::B */
-					ce = op_array->scope;
 				}
 
 				if (ce) {
@@ -225,8 +217,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 						if (opline->op1_type == IS_CONST) {
 							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						} else if (opline->op1_type == IS_VAR) {
-							MAKE_NOP((opline - 1));
 						}
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						replace_by_const_or_qm_assign(op_array, opline, &t);
