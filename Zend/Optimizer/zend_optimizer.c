@@ -539,17 +539,6 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 		if (opline->op1_type == type &&
 			opline->op1.var == var) {
 			switch (opline->opcode) {
-				case ZEND_SEND_VAR_EX:
-				case ZEND_SEND_FUNC_ARG:
-					opline->extended_value = 0;
-					opline->opcode = ZEND_SEND_VAL_EX;
-					break;
-				case ZEND_SEND_VAR_NO_REF_EX:
-					opline->opcode = ZEND_SEND_VAL;
-					break;
-				case ZEND_SEND_USER:
-					opline->opcode = ZEND_SEND_VAL_EX;
-					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
 				 * However, there are some exception which keep the operand alive. In that case
