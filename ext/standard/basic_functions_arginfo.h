@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cbba5dd593bba640750378c7d668b9e4ea6c979d */
+ * Stub hash: ed5328c35c17c591847feba6cb00f5badb2b446c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2870,7 +2870,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(array_push, arginfo_array_push)
 	ZEND_FE(krsort, arginfo_krsort)
 	ZEND_FE(ksort, arginfo_ksort)
-	ZEND_FE(count, arginfo_count)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(count, arginfo_count)
 	ZEND_FALIAS(sizeof, count, arginfo_sizeof)
 	ZEND_FE(natsort, arginfo_natsort)
 	ZEND_FE(natcasesort, arginfo_natcasesort)

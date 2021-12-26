@@ -787,23 +787,7 @@ static inline zend_result ct_eval_func_call(
 
 	if (num_args == 1) {
 		/* Handle a few functions for which we manually implement evaluation here. */
-		if (zend_string_equals_literal(name, "chr")) {
-			zend_long c;
-			if (Z_TYPE_P(args[0]) != IS_LONG) {
-				return FAILURE;
-			}
-
-			c = Z_LVAL_P(args[0]) & 0xff;
-			ZVAL_CHAR(result, c);
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "count")) {
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-
-			ZVAL_LONG(result, zend_hash_num_elements(Z_ARRVAL_P(args[0])));
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "ini_get")) {
+		if (zend_string_equals_literal(name, "ini_get")) {
 			zend_ini_entry *ini_entry;
 
 			if (Z_TYPE_P(args[0]) != IS_STRING) {
