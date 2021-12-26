@@ -527,7 +527,7 @@ static void place_essa_pis(
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2) + 1);
-			zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
+			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			if (!ce) {
 				continue;
 			}

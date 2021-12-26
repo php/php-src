@@ -294,45 +294,8 @@ static bool try_replace_op1(
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
-		} else {
-			// TODO: check the following special cases ???
-			switch (opline->opcode) {
-				case ZEND_CASE:
-					opline->opcode = ZEND_IS_EQUAL;
-					goto replace_op1_simple;
-				case ZEND_CASE_STRICT:
-					opline->opcode = ZEND_IS_IDENTICAL;
-					goto replace_op1_simple;
-				case ZEND_FETCH_LIST_R:
-				case ZEND_SWITCH_STRING:
-				case ZEND_SWITCH_LONG:
-				case ZEND_MATCH:
-replace_op1_simple:
-					if (Z_TYPE(zv) == IS_STRING) {
-						zend_string_hash_val(Z_STR(zv));
-					}
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op1_type = IS_CONST;
-					return 1;
-				case ZEND_INSTANCEOF:
-					zval_ptr_dtor_nogc(&zv);
-					ZVAL_FALSE(&zv);
-					opline->opcode = ZEND_QM_ASSIGN;
-					opline->op1_type = IS_CONST;
-					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
-					opline->op2_type = IS_UNUSED;
-					if (ssa_op->op2_use >= 0) {
-						ZEND_ASSERT(ssa_op->op2_def == -1);
-						zend_ssa_unlink_use_chain(ctx->scdf.ssa, ssa_op - ctx->scdf.ssa->ops, ssa_op->op2_use);
-						ssa_op->op2_use = -1;
-						ssa_op->op2_use_chain = -1;
-					}
-					return 1;
-				default:
-					break;
-			}
-			zval_ptr_dtor_nogc(&zv);
 		}
+		zval_ptr_dtor_nogc(&zv);
 	}
 	return 0;
 }
@@ -344,27 +307,8 @@ static bool try_replace_op2(
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline, &zv)) {
 			return 1;
-		} else {
-			switch (opline->opcode) {
-				case ZEND_FETCH_CLASS:
-					if (Z_TYPE(zv) == IS_STRING) {
-						ZEND_ASSERT((opline + 1)->opcode == ZEND_INSTANCEOF);
-						ZEND_ASSERT(ssa_op->result_def == (ssa_op + 1)->op2_use);
-						if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline + 1, &zv)) {
-							zend_ssa_op *next_op = ssa_op + 1;
-							zend_ssa_unlink_use_chain(ctx->scdf.ssa, next_op - ctx->scdf.ssa->ops, next_op->op2_use);
-							next_op->op2_use = -1;
-							next_op->op2_use_chain = -1;
-							zend_ssa_remove_result_def(ctx->scdf.ssa, ssa_op);
-							MAKE_NOP(opline);
-							return 1;
-						}
-					}
-				default:
-					break;
-			}
-			zval_ptr_dtor_nogc(&zv);
 		}
+		zval_ptr_dtor_nogc(&zv);
 	}
 	return 0;
 }
@@ -843,23 +787,7 @@ static inline zend_result ct_eval_func_call(
 
 	if (num_args == 1) {
 		/* Handle a few functions for which we manually implement evaluation here. */
-		if (zend_string_equals_literal(name, "chr")) {
-			zend_long c;
-			if (Z_TYPE_P(args[0]) != IS_LONG) {
-				return FAILURE;
-			}
-
-			c = Z_LVAL_P(args[0]) & 0xff;
-			ZVAL_CHAR(result, c);
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "count")) {
-			if (Z_TYPE_P(args[0]) != IS_ARRAY) {
-				return FAILURE;
-			}
-
-			ZVAL_LONG(result, zend_hash_num_elements(Z_ARRVAL_P(args[0])));
-			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "ini_get")) {
+		if (zend_string_equals_literal(name, "ini_get")) {
 			zend_ini_entry *ini_entry;
 
 			if (Z_TYPE_P(args[0]) != IS_STRING) {
@@ -1471,6 +1399,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						if (opline->opcode == ZEND_PRE_INC_OBJ
 								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
+							zval_ptr_dtor_nogc(&tmp1);
 						} else {
 							SET_RESULT(result, &tmp1);
 						}
@@ -1665,15 +1594,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT(result, &zv);
 			break;
-#if 0
 		case ZEND_FETCH_CLASS:
-			if (!op1) {
-				SET_RESULT_BOT(result);
-				break;
-			}
-			SET_RESULT(result, op1);
+			SET_RESULT(result, op2);
 			break;
-#endif
 		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
 			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {
@@ -2179,6 +2102,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				if (value
 						&& (opline->result_type & (IS_VAR|IS_TMP_VAR))
 						&& opline->opcode != ZEND_QM_ASSIGN
+						&& opline->opcode != ZEND_FETCH_CLASS
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY

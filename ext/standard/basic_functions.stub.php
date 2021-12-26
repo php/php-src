@@ -82,6 +82,7 @@ function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
 /** @return true */
 function ksort(array &$array, int $flags = SORT_REGULAR): bool {}
 
+/** @compile-time-eval */
 function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 
 /** @alias count */
