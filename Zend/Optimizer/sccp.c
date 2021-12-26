@@ -785,27 +785,9 @@ static inline zend_result ct_eval_func_call(
 		return FAILURE;
 	}
 
-	if (num_args == 1) {
-		/* Handle a few functions for which we manually implement evaluation here. */
-		if (zend_string_equals_literal(name, "ini_get")) {
-			zend_ini_entry *ini_entry;
-
-			if (Z_TYPE_P(args[0]) != IS_STRING) {
-				return FAILURE;
-			}
-
-			ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
-			if (!ini_entry) {
-				ZVAL_FALSE(result);
-			} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
-				return FAILURE;
-			} else if (ini_entry->value) {
-				ZVAL_STR_COPY(result, ini_entry->value);
-			} else {
-				ZVAL_EMPTY_STRING(result);
-			}
-			return SUCCESS;
-		}
+	if (num_args == 1 && Z_TYPE_P(args[0]) == IS_STRING &&
+			zend_optimizer_eval_special_func_call(result, name, Z_STR_P(args[0])) == SUCCESS) {
+		return SUCCESS;
 	}
 
 	if (!can_ct_eval_func_call(func, name, num_args, args)) {

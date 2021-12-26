@@ -181,6 +181,19 @@ zend_result zend_optimizer_eval_special_func_call(
 		zend_string_release_ex(dirname, 0);
 		return FAILURE;
 	}
+	if (zend_string_equals_literal(name, "ini_get")) {
+		zend_ini_entry *ini_entry = zend_hash_find_ptr(EG(ini_directives), arg);
+		if (!ini_entry) {
+			ZVAL_FALSE(result);
+		} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
+			return FAILURE;
+		} else if (ini_entry->value) {
+			ZVAL_STR_COPY(result, ini_entry->value);
+		} else {
+			ZVAL_EMPTY_STRING(result);
+		}
+		return SUCCESS;
+	}
 	return FAILURE;
 }
 
