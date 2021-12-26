@@ -72,7 +72,7 @@ zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *
 zend_object* php_com_object_new(zend_class_entry *ce);
 zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
-zend_object_handlers php_com_object_handlers;
+extern zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
 
 /* com_saproxy.c */
