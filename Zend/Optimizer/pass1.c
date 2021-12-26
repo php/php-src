@@ -36,6 +36,12 @@
 #include "zend_vm.h"
 
 static void replace_by_const_or_qm_assign(zend_op_array *op_array, zend_op *opline, zval *result) {
+	if (opline->op1_type == IS_CONST) {
+		literal_dtor(&ZEND_OP1_LITERAL(opline));
+	}
+	if (opline->op2_type == IS_CONST) {
+		literal_dtor(&ZEND_OP2_LITERAL(opline));
+	}
 	if (zend_optimizer_replace_by_const(op_array, opline + 1, opline->result_type, opline->result.var, result)) {
 		MAKE_NOP(opline);
 	} else {
@@ -52,6 +58,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_op *end = opline + op_array->last;
 	bool collect_constants = (ZEND_OPTIMIZER_PASS_15 & ctx->optimization_level)?
 		(op_array == &ctx->script->main_op_array) : 0;
+	zval result;
 
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -85,16 +92,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_SPACESHIP:
 		case ZEND_CASE:
 		case ZEND_CASE_STRICT:
-			if (opline->op1_type == IS_CONST &&
-				opline->op2_type == IS_CONST) {
-				/* binary operation with constant operands */
-				zval result;
-
-				if (zend_optimizer_eval_binary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {
-					literal_dtor(&ZEND_OP1_LITERAL(opline));
-					literal_dtor(&ZEND_OP2_LITERAL(opline));
-					replace_by_const_or_qm_assign(op_array, opline, &result);
-				}
+			if (opline->op1_type == IS_CONST && opline->op2_type == IS_CONST &&
+					zend_optimizer_eval_binary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline)) == SUCCESS) {
+				replace_by_const_or_qm_assign(op_array, opline, &result);
 			}
 			break;
 
@@ -106,28 +106,17 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			break;
 
 		case ZEND_CAST:
-			if (opline->op1_type == IS_CONST) {
-				/* cast of constant operand */
-				zval result;
-
-				if (zend_optimizer_eval_cast(&result, opline->extended_value, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
-					literal_dtor(&ZEND_OP1_LITERAL(opline));
-					replace_by_const_or_qm_assign(op_array, opline, &result);
-					break;
-				}
+			if (opline->op1_type == IS_CONST &&
+					zend_optimizer_eval_cast(&result, opline->extended_value, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+				replace_by_const_or_qm_assign(op_array, opline, &result);
 			}
 			break;
 
 		case ZEND_BW_NOT:
 		case ZEND_BOOL_NOT:
-			if (opline->op1_type == IS_CONST) {
-				/* unary operation on constant operand */
-				zval result;
-
-				if (zend_optimizer_eval_unary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
-					literal_dtor(&ZEND_OP1_LITERAL(opline));
-					replace_by_const_or_qm_assign(op_array, opline, &result);
-				}
+			if (opline->op1_type == IS_CONST &&
+					zend_optimizer_eval_unary_op(&result, opline->opcode, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+				replace_by_const_or_qm_assign(op_array, opline, &result);
 			}
 			break;
 
@@ -155,18 +144,15 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			if (opline->op2_type == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
-				zval c;
-
-				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &c, 1)) {
-					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &c)) {
+				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP2_LITERAL(opline)), &result, 1)) {
+					if (!ctx->constants || !zend_optimizer_get_collected_constant(ctx->constants, &ZEND_OP2_LITERAL(opline), &result)) {
 						break;
 					}
 				}
-				if (Z_TYPE(c) == IS_CONSTANT_AST) {
+				if (Z_TYPE(result) == IS_CONSTANT_AST) {
 					break;
 				}
-				literal_dtor(&ZEND_OP2_LITERAL(opline));
-				replace_by_const_or_qm_assign(op_array, opline, &c);
+				replace_by_const_or_qm_assign(op_array, opline, &result);
 			}
 			break;
 
@@ -177,29 +163,22 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					ctx->script, op_array, opline);
 				if (ce) {
-					zend_class_constant *cc;
-					zval *c, t;
-
-					if ((cc = zend_hash_find_ptr(&ce->constants_table,
-							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL &&
-						(ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
-						c = &cc->value;
+					zend_class_constant *cc = zend_hash_find_ptr(
+						&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
+					if (cc && (ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+						zval *c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							zend_ast *ast = Z_ASTVAL_P(c);
 							if (ast->kind != ZEND_AST_CONSTANT
-							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &t, 1)
-							 || Z_TYPE(t) == IS_CONSTANT_AST) {
+							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
+							 || Z_TYPE(result) == IS_CONSTANT_AST) {
 								break;
 							}
 						} else {
-							ZVAL_COPY_OR_DUP(&t, c);
+							ZVAL_COPY_OR_DUP(&result, c);
 						}
 
-						if (opline->op1_type == IS_CONST) {
-							literal_dtor(&ZEND_OP1_LITERAL(opline));
-						}
-						literal_dtor(&ZEND_OP2_LITERAL(opline));
-						replace_by_const_or_qm_assign(op_array, opline, &t);
+						replace_by_const_or_qm_assign(op_array, opline, &result);
 					}
 				}
 			}
@@ -294,18 +273,16 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						 && func->module->handle == NULL
 #endif
 						) {
-						zval t;
-						ZVAL_TRUE(&t);
+						ZVAL_TRUE(&result);
 						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
 						MAKE_NOP(init_opline);
 						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
 						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &t);
+						replace_by_const_or_qm_assign(op_array, opline, &result);
 					}
 					zend_string_release_ex(lc_name, 0);
 					break;
 				} else if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "extension_loaded")) {
-					zval t;
 					zend_string *lc_name = zend_string_tolower(
 							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
@@ -316,7 +293,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						if (PG(enable_dl)) {
 							break;
 						} else {
-							ZVAL_FALSE(&t);
+							ZVAL_FALSE(&result);
 						}
 					} else {
 						if (m->type == MODULE_PERSISTENT
@@ -324,7 +301,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						 && m->handle == NULL
 #endif
 						) {
-							ZVAL_TRUE(&t);
+							ZVAL_TRUE(&result);
 						} else {
 							break;
 						}
@@ -334,17 +311,15 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					MAKE_NOP(init_opline);
 					literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
 					MAKE_NOP(send1_opline);
-					replace_by_const_or_qm_assign(op_array, opline, &t);
+					replace_by_const_or_qm_assign(op_array, opline, &result);
 					break;
 				} else if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "constant")) {
-					zval t;
-
-					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &t, 1)) {
+					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &result, 1)) {
 						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
 						MAKE_NOP(init_opline);
 						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
 						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &t);
+						replace_by_const_or_qm_assign(op_array, opline, &result);
 					}
 					break;
 				/* dirname(IS_CONST/IS_STRING) -> IS_CONST/IS_STRING */
@@ -353,14 +328,12 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
 					ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
 					if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
-						zval t;
-
-						ZVAL_STR(&t, dirname);
+						ZVAL_STR(&result, dirname);
 						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
 						MAKE_NOP(init_opline);
 						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
 						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &t);
+						replace_by_const_or_qm_assign(op_array, opline, &result);
 					} else {
 						zend_string_release_ex(dirname, 0);
 					}
@@ -372,25 +345,18 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			break;
 		}
 		case ZEND_STRLEN:
-			if (opline->op1_type == IS_CONST) {
-				zval t;
-
-				if (zend_optimizer_eval_strlen(&t, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
-					literal_dtor(&ZEND_OP1_LITERAL(opline));
-					replace_by_const_or_qm_assign(op_array, opline, &t);
-				}
+			if (opline->op1_type == IS_CONST &&
+					zend_optimizer_eval_strlen(&result, &ZEND_OP1_LITERAL(opline)) == SUCCESS) {
+				replace_by_const_or_qm_assign(op_array, opline, &result);
 			}
 			break;
 		case ZEND_DEFINED:
-			{
-				zval c;
-				if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &c, 0)) {
-					break;
-				}
-				ZVAL_TRUE(&c);
-				literal_dtor(&ZEND_OP1_LITERAL(opline));
-				replace_by_const_or_qm_assign(op_array, opline, &c);
+			if (!zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(opline)), &result, 0)) {
+				break;
 			}
+			ZVAL_TRUE(&result);
+			literal_dtor(&ZEND_OP1_LITERAL(opline));
+			replace_by_const_or_qm_assign(op_array, opline, &result);
 			break;
 		case ZEND_DECLARE_CONST:
 			if (collect_constants &&
