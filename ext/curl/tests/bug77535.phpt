@@ -1,5 +1,7 @@
 --TEST--
 Bug #77535 (Invalid callback, h2 server push)
+--XFAIL--
+http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
 include 'skipif.inc';
@@ -10,6 +12,7 @@ $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x073d00) {
     exit("skip: test may crash with curl < 7.61.0");
 }
+die("skip test is slow due to timeout, and XFAILs anyway");
 ?>
 --FILE--
 <?php
