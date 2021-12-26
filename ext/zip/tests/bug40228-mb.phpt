@@ -13,6 +13,7 @@ if (is_dir($dest . '/test/empty')) {
     echo "Ok\n";
     rmdir($dest . '/test/empty');
     rmdir($dest . '/test');
+    rmdir($dest);
 } else {
     echo "Failed.\n";
 }
