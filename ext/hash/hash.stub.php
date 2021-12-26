@@ -12,7 +12,7 @@ function hash_file(string $algo, string $filename, bool $binary = false, array $
 function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string {}
 
 /** @refcount 1 */
-function hash_hmac_file(string $algo, string $data, string $key, bool $binary = false): string|false {}
+function hash_hmac_file(string $algo, string $filename, string $key, bool $binary = false): string|false {}
 
 /** @refcount 1 */
 function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
