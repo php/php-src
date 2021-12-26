@@ -27,7 +27,6 @@
  * - pre-evaluate constant function calls
  */
 
-#include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
@@ -252,94 +251,16 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 			}
 
-			/* pre-evaluate constant functions:
-			   constant(x)
-			   function_exists(x)
-			   is_callable(x)
-			   extension_loaded(x)
-			*/
-			if (!send2_opline &&
-			    Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING) {
-				if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "function_exists") ||
-					zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "is_callable")) {
-					zend_internal_function *func;
-					zend_string *lc_name = zend_string_tolower(
-							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
-
-					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL
-						 && func->type == ZEND_INTERNAL_FUNCTION
-						 && func->module->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
-						 && func->module->handle == NULL
-#endif
-						) {
-						ZVAL_TRUE(&result);
-						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-						MAKE_NOP(init_opline);
-						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &result);
-					}
-					zend_string_release_ex(lc_name, 0);
-					break;
-				} else if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "extension_loaded")) {
-					zend_string *lc_name = zend_string_tolower(
-							Z_STR(ZEND_OP1_LITERAL(send1_opline)));
-					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
-							lc_name);
-
-					zend_string_release_ex(lc_name, 0);
-					if (!m) {
-						if (PG(enable_dl)) {
-							break;
-						} else {
-							ZVAL_FALSE(&result);
-						}
-					} else {
-						if (m->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
-						 && m->handle == NULL
-#endif
-						) {
-							ZVAL_TRUE(&result);
-						} else {
-							break;
-						}
-					}
-
-					literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-					MAKE_NOP(init_opline);
-					literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-					MAKE_NOP(send1_opline);
-					replace_by_const_or_qm_assign(op_array, opline, &result);
-					break;
-				} else if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "constant")) {
-					if (zend_optimizer_get_persistent_constant(Z_STR(ZEND_OP1_LITERAL(send1_opline)), &result, 1)) {
-						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-						MAKE_NOP(init_opline);
-						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &result);
-					}
-					break;
-				/* dirname(IS_CONST/IS_STRING) -> IS_CONST/IS_STRING */
-				} else if (zend_string_equals_literal(Z_STR(ZEND_OP2_LITERAL(init_opline)), "dirname") &&
-					IS_ABSOLUTE_PATH(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
-					zend_string *dirname = zend_string_init(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)), 0);
-					ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
-					if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
-						ZVAL_STR(&result, dirname);
-						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
-						MAKE_NOP(init_opline);
-						literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
-						MAKE_NOP(send1_opline);
-						replace_by_const_or_qm_assign(op_array, opline, &result);
-					} else {
-						zend_string_release_ex(dirname, 0);
-					}
-					break;
-				}
+			if (!send2_opline && Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING &&
+					zend_optimizer_eval_special_func_call(&result, Z_STR(ZEND_OP2_LITERAL(init_opline)), Z_STR(ZEND_OP1_LITERAL(send1_opline))) == SUCCESS) {
+				literal_dtor(&ZEND_OP2_LITERAL(init_opline));
+				MAKE_NOP(init_opline);
+				literal_dtor(&ZEND_OP1_LITERAL(send1_opline));
+				MAKE_NOP(send1_opline);
+				replace_by_const_or_qm_assign(op_array, opline, &result);
+				break;
 			}
+
 			/* don't collect constants after any other function call */
 			collect_constants = 0;
 			break;

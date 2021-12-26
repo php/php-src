@@ -30,6 +30,7 @@
 #include "zend_call_graph.h"
 #include "zend_inference.h"
 #include "zend_dump.h"
+#include "php.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
@@ -120,6 +121,68 @@ zend_result zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
+
+zend_result zend_optimizer_eval_special_func_call(
+		zval *result, zend_string *name, zend_string *arg) {
+	if (zend_string_equals_literal(name, "function_exists") ||
+			zend_string_equals_literal(name, "is_callable")) {
+		zend_string *lc_name = zend_string_tolower(arg);
+		zend_internal_function *func = zend_hash_find_ptr(EG(function_table), lc_name);
+		zend_string_release_ex(lc_name, 0);
+
+		if (func && func->type == ZEND_INTERNAL_FUNCTION
+				&& func->module->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+				&& func->module->handle == NULL
+#endif
+		) {
+			ZVAL_TRUE(result);
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+	if (zend_string_equals_literal(name, "extension_loaded")) {
+		zend_string *lc_name = zend_string_tolower(arg);
+		zend_module_entry *m = zend_hash_find_ptr(&module_registry, lc_name);
+		zend_string_release_ex(lc_name, 0);
+
+		if (!m) {
+			if (PG(enable_dl)) {
+				return FAILURE;
+			}
+			ZVAL_FALSE(result);
+			return SUCCESS;
+		}
+
+		if (m->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+			&& m->handle == NULL
+#endif
+		) {
+			ZVAL_TRUE(result);
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+	if (zend_string_equals_literal(name, "constant")) {
+		return zend_optimizer_get_persistent_constant(arg, result, 1) ? SUCCESS : FAILURE;
+	}
+	if (zend_string_equals_literal(name, "dirname")) {
+		if (!IS_ABSOLUTE_PATH(ZSTR_VAL(arg), ZSTR_LEN(arg))) {
+			return FAILURE;
+		}
+
+		zend_string *dirname = zend_string_init(ZSTR_VAL(arg), ZSTR_LEN(arg), 0);
+		ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+		if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
+			ZVAL_STR(result, dirname);
+			return SUCCESS;
+		}
+		zend_string_release_ex(dirname, 0);
+		return FAILURE;
+	}
+	return FAILURE;
+}
 
 bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {
