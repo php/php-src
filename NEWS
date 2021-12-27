@@ -14,8 +14,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-7757 (Multi-inherited final constant causes fatal error).
     (cmb)
   . Fixed zend_fibers.c build with ZEND_FIBER_UCONTEXT. (Petr Sumbera)
-  . Fixed zend_observer_fcall_end_all() accessing dangling pointers. (Florian
-    Sowade)
 
 - Filter:
   . Fixed FILTER_FLAG_NO_RES_RANGE flag. (Yifan Tong)
