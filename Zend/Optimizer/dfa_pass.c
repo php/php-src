@@ -1293,30 +1293,52 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
 				 && opline->op1_type != IS_CONST
 				 && ssa->ops[op_1].op1_def == v
-				 && ssa->ops[op_1].op1_use >= 0
-				 && ssa->ops[op_1].op1_use_chain == -1
-				 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
+				 && ssa->ops[op_1].op1_use >= 0) {
+					int orig_var = ssa->ops[op_1].op1_use;
+					int ret = ssa->vars[v].use_chain;
+
+					if (ssa->ops[op_1].op1_use_chain == -1
+					 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
 
 // op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
 
-					int orig_var = ssa->ops[op_1].op1_use;
-					zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
+						zend_ssa_unlink_use_chain(ssa, op_1, orig_var);
 
-					int ret = ssa->vars[v].use_chain;
-					if (ret >= 0) {
+						if (ret >= 0) {
+							ssa->ops[ret].op1_use = orig_var;
+							ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+							ssa->vars[orig_var].use_chain = ret;
+						}
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
+					} else if (ret >= 0
+					 && ssa->ops[ret].op1_use == v
+					 && ssa->ops[ret].op1_use_chain == -1
+					 && can_elide_return_type_check(ctx->script, op_array, ssa, &ssa->ops[op_1])) {
+
+// op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
+
+						zend_ssa_replace_use_chain(ssa, op_1, ret, orig_var);
+
 						ssa->ops[ret].op1_use = orig_var;
-						ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
-						ssa->vars[orig_var].use_chain = ret;
+						ssa->ops[ret].op1_use_chain = ssa->ops[op_1].op1_use_chain;
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
 					}
-
-					ssa->vars[v].definition = -1;
-					ssa->vars[v].use_chain = -1;
-
-					ssa->ops[op_1].op1_def = -1;
-					ssa->ops[op_1].op1_use = -1;
-
-					MAKE_NOP(opline);
-					remove_nops = 1;
 				}
 			}
 
