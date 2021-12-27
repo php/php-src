@@ -3478,7 +3478,7 @@ function junit_mark_test_as(
     $type,
     string $file_name,
     string $test_name,
-    ?int $time = null,
+    ?float $time = null,
     string $message = '',
     string $details = ''
 ): void {
@@ -3533,7 +3533,7 @@ function junit_mark_test_as(
     $JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
 }
 
-function junit_suite_record(string $suite, string $param, int $value = 1): void
+function junit_suite_record(string $suite, string $param, float $value = 1): void
 {
     global $JUNIT;
 
@@ -3541,7 +3541,7 @@ function junit_suite_record(string $suite, string $param, int $value = 1): void
     $JUNIT['suites'][$suite][$param] += $value;
 }
 
-function junit_get_timer(string $file_name): int
+function junit_get_timer(string $file_name): float
 {
     global $JUNIT;
     if (!junit_enabled()) {
