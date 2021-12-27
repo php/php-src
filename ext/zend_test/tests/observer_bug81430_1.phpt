@@ -17,6 +17,7 @@ function B() {}
 
 $r = new \ReflectionFunction("B");
 call_user_func([$r->getAttributes(A::class)[0], 'newInstance']);
+?>
 --EXPECTF--
 <!-- init '%s' -->
 <file '%s'>
