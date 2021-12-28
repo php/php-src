@@ -110,9 +110,15 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 	*has_port = 0;
 	s = str;
 	ue = s + length;
+	char const *ps = memchr(s, '?', length);
+
+	if (! ps) {
+		ps = s;
+	}
 
 	/* parse scheme */
-	if ((e = memchr(s, ':', length)) && e != s) {
+	if ((e = memchr(ps, ':', strlen(ps))) && e != s) {
+		
 		/* validate scheme */
 		p = s;
 		while (p < e) {
