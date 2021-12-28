@@ -1,5 +1,5 @@
 --TEST--
-Fix value that is bigger than INT64_MAX will be casted to INT64_MAX rather than string.
+Fixed value that is bigger than INT64_MAX will be casted to INT64_MAX rather than string.
 --EXTENSIONS--
 pdo
 pdo_mysql
