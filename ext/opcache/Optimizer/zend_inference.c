@@ -2191,6 +2191,25 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	return MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
 }
 
+static zend_bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
+{
+	int tmp_var = ssa_op->result_def;
+
+	if (ssa->vars[tmp_var].use_chain >= 0
+	 && !ssa->vars[tmp_var].phi_use_chain) {
+		zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
+
+		/* TODO: analize instructions between ssa_op and use_op */
+		if (use_op == ssa_op + 1) {
+			if ((use_op->op1_use == tmp_var && use_op->op1_use_chain < 0)
+			 || (use_op->op2_use == tmp_var && use_op->op2_use_chain < 0)) {
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 static zend_always_inline int _zend_update_type_info(
 			const zend_op_array *op_array,
 			zend_ssa            *ssa,
@@ -3307,11 +3326,11 @@ static zend_always_inline int _zend_update_type_info(
 					if (prop_info) {
 						/* FETCH_OBJ_R/IS for plain property increments reference counter,
 						   so it can't be 1 */
-						if (ce && !ce->create_object) {
+						if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					} else {
-						if (ce && !ce->create_object && !ce->__get) {
+						if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					}
@@ -3336,7 +3355,7 @@ static zend_always_inline int _zend_update_type_info(
 				zend_fetch_static_prop_info(script, op_array, ssa, opline), &ce);
 			if (opline->result_type != IS_TMP_VAR) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
-			} else {
+			} else if (!result_may_be_separated(ssa, ssa_op)) {
 				tmp &= ~MAY_BE_RC1;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
