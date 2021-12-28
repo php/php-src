@@ -150,11 +150,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				p++;
 			}
 
-			if ((p == ue || *p == '/') && (p - e) < 7) {
-				goto parse_port;
-			}
-
-			if (*p == '?') {
+			if ((p == ue || *p == '/' || *p == '?') && (p - e) < 7) {
 				goto parse_port;
 			}
 
