@@ -24,8 +24,10 @@ function testValid($from, $to, $bothWays = true) {
       $from = substr($from, 1, strlen($from) - 1);
     /* If the string switches to a different charset, it should switch back to
      * ASCII at the end */
-    if (strpos($from, "\x1B\$C") !== false)
+    if (strpos($from, "\x0E") !== false && $from[-1] !== "\x0F")
       $from .= "\x0F";
+    if (strpos($from, "\x1B\$)C") === false && $from !== '')
+      $from = "\x1B\$)C" . $from;
 
     convertValidString($to, $from, 'UTF-16BE', 'ISO-2022-KR', false);
   }
@@ -95,6 +97,14 @@ for ($i = 0; $i < 256; $i++) {
 testValid("\x0E\x0E\x0F\x0E\x0Fabc", "\x00a\x00b\x00c", false);
 
 echo "Escapes behave as expected\n";
+
+// Test switching between KS X 1001 and ASCII when converting Unicode -> ISO-2022-KR
+convertValidString("\x76\x20\x00a\x00b", "\x1B$)C\x0E\x74\x30\x0Fab", "UTF-16BE", "ISO-2022-KR", false);
+
+// Regression test: Our conversion table for KS X 1001 only goes up to 0x7D7E, but
+// we previously accepted and tried to convert two-byte sequences starting with
+// 0x7E, resulting in a failed assertion
+convertInvalidString("\x0E~/", "%", "ISO-2022-KR", "UTF-8");
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
