@@ -154,10 +154,6 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 				goto parse_port;
 			}
 
-			// if (*p == '?') {
-			// 	goto parse_port;
-			// }
-
 			ret->scheme = zend_string_init(s, (e-s), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
 
