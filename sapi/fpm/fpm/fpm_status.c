@@ -430,7 +430,8 @@ int fpm_status_handle_request(void) /* {{{ */
 				"phpfpm_max_children_reached %u\n"
 				"# HELP phpfpm_slow_requests The number of requests that exceeded your 'request_slowlog_timeout' value.\n"
 				"# TYPE phpfpm_slow_requests counter\n"
-				"phpfpm_slow_requests %lu\n";
+				"phpfpm_slow_requests %lu\n"
+				"# EOF\n";
 
 			has_start_time = 0;
 			if (!full) {

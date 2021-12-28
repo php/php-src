@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed FILTER_FLAG_NO_RES_RANGE flag. (Yifan Tong)
 
+- FPM:
+  . Fixed bug GH-7842 (Invalid OpenMetrics response format returned by FPM
+    status page. (Stefano Arlandini)
+
 - Hash:
   . Fixed bug GH-7759 (Incorrect return types for hash() and hash_hmac()).
     (cmb)
