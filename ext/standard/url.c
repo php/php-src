@@ -110,15 +110,9 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 	*has_port = 0;
 	s = str;
 	ue = s + length;
-	char const *ps = memchr(s, '?', length);
-
-	if (! ps) {
-		ps = s;
-	}
 
 	/* parse scheme */
-	if ((e = memchr(ps, ':', strlen(ps))) && e != s) {
-		
+	if ((e = memchr(s, ':', length)) && e != s) {
 		/* validate scheme */
 		p = s;
 		while (p < e) {
@@ -126,6 +120,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			if (!isalpha(*p) && !isdigit(*p) && *p != '+' && *p != '.' && *p != '-') {
 				if (e + 1 < ue && e < binary_strcspn(s, ue, "?#")) {
 					goto parse_port;
+				} else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 					s += 2;
 					e = 0;
 					goto parse_host;
@@ -158,6 +153,10 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			if ((p == ue || *p == '/') && (p - e) < 7) {
 				goto parse_port;
 			}
+
+			// if (*p == '?') {
+			// 	goto parse_port;
+			// }
 
 			ret->scheme = zend_string_init(s, (e-s), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->scheme), ZSTR_LEN(ret->scheme));
@@ -195,7 +194,7 @@ PHPAPI php_url *php_url_parse_ex2(char const *str, size_t length, bool *has_port
 			pp++;
 		}
 
-		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
+		if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/' || *pp == '?')) {
 			zend_long port;
 			char *end;
 			memcpy(port_buf, p, (pp - p));
