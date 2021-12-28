@@ -4,10 +4,13 @@
 
 final class mysqli_driver
 {
+    /** @readonly */
     public string $client_info;
 
+    /** @readonly */
     public int $client_version;
 
+    /** @readonly */
     public int $driver_version;
 
     public bool $reconnect = false;
