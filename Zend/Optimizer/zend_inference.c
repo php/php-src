@@ -2258,6 +2258,25 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	return zend_convert_type(script, prop_info->type, pce);
 }
 
+static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
+{
+	int tmp_var = ssa_op->result_def;
+
+	if (ssa->vars[tmp_var].use_chain >= 0
+	 && !ssa->vars[tmp_var].phi_use_chain) {
+		zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
+
+		/* TODO: analize instructions between ssa_op and use_op */
+		if (use_op == ssa_op + 1) {
+			if ((use_op->op1_use == tmp_var && use_op->op1_use_chain < 0)
+			 || (use_op->op2_use == tmp_var && use_op->op2_use_chain < 0)) {
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 static zend_always_inline zend_result _zend_update_type_info(
 			const zend_op_array *op_array,
 			zend_ssa            *ssa,
@@ -3366,11 +3385,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 					if (prop_info) {
 						/* FETCH_OBJ_R/IS for plain property increments reference counter,
 						   so it can't be 1 */
-						if (ce && !ce->create_object) {
+						if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					} else {
-						if (ce && !ce->create_object && !ce->__get) {
+						if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					}
@@ -3396,7 +3415,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			if (opline->result_type == IS_VAR) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 			} else {
-				tmp &= ~MAY_BE_RC1;
+				if (!result_may_be_separated(ssa, ssa_op)) {
+					tmp &= ~MAY_BE_RC1;
+				}
 				if (opline->opcode == ZEND_FETCH_STATIC_PROP_IS) {
 					tmp |= MAY_BE_UNDEF;
 				}
