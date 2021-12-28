@@ -2,8 +2,8 @@
 Stream wrappers should not be locale dependent
 --SKIPIF--
 <?php  // try to activate a single-byte german locale
-if (!setlocale(LC_ALL, "de_DE")) {
-    print "skip Can't find german locale";
+if (!setlocale(LC_ALL, 'de_DE','de_DE.ISO8859-1','de_DE.ISO_8859-1')) {
+    print "skip Can't find german locale\n";
 }
 ?>
 --INI--
@@ -11,7 +11,7 @@ allow_url_fopen=1
 display_errors=stderr
 --FILE--
 <?php
-setlocale(LC_ALL, "de_DE");
+setlocale(LC_ALL, 'de_DE', 'de_DE.ISO8859-1', 'de_DE.ISO_8859-1');
 class testwrapper {
 }
 
