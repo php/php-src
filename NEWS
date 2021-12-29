@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   . net_get_interfaces() also reports wireless network interfaces on Windows.
     (Yurun)
   . Finished AVIF support in getimagesize(). (Yannis Guyon)
+  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
+    (ilutov)
 
 - Zip:
   . add ZipArchive::clearError() method
