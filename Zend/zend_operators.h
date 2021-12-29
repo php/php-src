@@ -421,7 +421,7 @@ static zend_always_inline bool zend_isalpha_ascii(unsigned char c) {
 	/* Returns true for a-z and A-Z in a locale-independent way.
 	 * This is implemented in a way that can avoid branching. Note that ASCII 'a' == 'A' | 0x20. */
 	c = (c | 0x20) - 'a';
-	return c <= ('z' - 'a' + 1);
+	return c <= ('z' - 'a');
 }
 #define zend_isalnum_ascii(c) (zend_isalnum_map[(unsigned char)(c)])
 

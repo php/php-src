@@ -520,21 +520,21 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 	}
 
 	/* First char must be alphanumeric */
-	if(*s == '.' || (hostname && !zend_isalnum_ascii((int)*(unsigned char *)s))) {
+	if(*s == '.' || (hostname && !zend_isalnum_ascii(*(unsigned char *)s))) {
 		return 0;
 	}
 
 	while (s < e) {
 		if (*s == '.') {
 			/* The first and the last character of a label must be alphanumeric */
-			if (*(s + 1) == '.' || (hostname && (!zend_isalnum_ascii((int)*(unsigned char *)(s - 1)) || !zend_isalnum_ascii((int)*(unsigned char *)(s + 1))))) {
+			if (*(s + 1) == '.' || (hostname && (!zend_isalnum_ascii(*(unsigned char *)(s - 1)) || !zend_isalnum_ascii(*(unsigned char *)(s + 1))))) {
 				return 0;
 			}
 
 			/* Reset label length counter */
 			i = 1;
 		} else {
-			if (i > 63 || (hostname && *s != '-' && !zend_isalnum_ascii((int)*(unsigned char *)s))) {
+			if (i > 63 || (hostname && *s != '-' && !zend_isalnum_ascii(*(unsigned char *)s))) {
 				return 0;
 			}
 
