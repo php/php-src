@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7826 (Inconsistent argument name in hash_hmac_file and
     hash_file). (cmb)
 
+- MySQLnd:
+  . Fixed bug where large bigints may be truncated. (Nathan Freeman, cmb)
+
 - OCI8:
   . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
     call). (cmb)

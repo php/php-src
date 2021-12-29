@@ -1634,9 +1634,9 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_ROW_BUFFER * row_buffer, zval * 
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
-						(uint64_t) atoll((char *) p);
+						strtoull((char *) p, NULL, 10);
 #else
-						(uint64_t) _atoi64((char *) p);
+						_strtoui64((char *) p, NULL, 10);
 #endif
 					zend_bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
