@@ -1604,10 +1604,20 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				*(p + len) = '\0';
 				if (perm_bind.pack_len < SIZEOF_ZEND_LONG) {
 					/* direct conversion */
-					int64_t v = ZEND_ATOL((char *) p);
+					int64_t v =
+#ifndef PHP_WIN32
+						atoll((char *) p);
+#else
+						_atoi64((char *) p);
+#endif
 					ZVAL_LONG(current_field, (zend_long) v); /* the cast is safe */
 				} else {
-					uint64_t v = ZEND_STRTOUL((char *) p, NULL, 10);
+					uint64_t v =
+#ifndef PHP_WIN32
+						strtoull((char *) p, NULL, 10);
+#else
+						_strtoui64((char *) p, NULL, 10);
+#endif
 					bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */
 #if SIZEOF_ZEND_LONG==8
