@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
     non-relative items are present). (Derick)
+  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
+    Year). (Pavel Djundik)
 
 - FPM:
   . Emit error for invalid port setting. (David Carlier)
