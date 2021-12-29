@@ -17,6 +17,9 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   zend_binary_str(n)casecmp() as one would expect. Call the appropriate
   wrapped function directly instead.
 * Removed the (ZEND_)WRONG_PARAM_COUNT_WITH_RETVAL() macros.
+* php_stristr() no longer lowercases the haystack and needle as a side effect.
+  Call zend_str_tolower() yourself if necessary. You no longer need to copy
+  the haystack and needle before passing them to php_stristr().
 
 ========================
 2. Build system changes
