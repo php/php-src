@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.16
 
+- Sockets:
+  . Fixed ext/sockets build on Haiku. (David Carlier)
 
 20 Jan 2022, PHP 8.0.15
 
