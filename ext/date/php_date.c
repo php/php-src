@@ -882,6 +882,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 		/* day */
 		case 'd': case 'j': retval = (int) t->d; break;
 
+		case 'N': retval = (int) timelib_iso_day_of_week(t->y, t->m, t->d); break;
 		case 'w': retval = (int) timelib_day_of_week(t->y, t->m, t->d); break;
 		case 'z': retval = (int) timelib_day_of_year(t->y, t->m, t->d); break;
 
@@ -896,6 +897,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 		case 'L': retval = (int) timelib_is_leap((int) t->y); break;
 		case 'y': retval = (int) (t->y % 100); break;
 		case 'Y': retval = (int) t->y; break;
+		case 'o': retval = (int) isoyear; break; /* iso year */
 
 		/* Swatch Beat a.k.a. Internet Time */
 		case 'B':

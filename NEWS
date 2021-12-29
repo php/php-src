@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - FPM:
   . Emit error for invalid port setting. (David Carlier)
 
+- Date:
+  . idate() now accepts format specifiers "N" and "o"
+
 - Intl:
   . Update all grandfathered language tags with preferred values
   . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
