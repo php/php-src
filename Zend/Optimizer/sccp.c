@@ -1786,7 +1786,6 @@ static void sccp_mark_feasible_successors(
 
 	switch (opline->opcode) {
 		case ZEND_JMPZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		{
 			if (ct_eval_bool_cast(&zv, op1) == FAILURE) {

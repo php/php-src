@@ -257,7 +257,6 @@ static void place_essa_pis(
 		 */
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
-			case ZEND_JMPZNZ:
 				bf = blocks[j].successors[0];
 				bt = blocks[j].successors[1];
 				break;

@@ -128,7 +128,6 @@ END_EXTERN_C()
 #define ZEND_JMP                         42
 #define ZEND_JMPZ                        43
 #define ZEND_JMPNZ                       44
-#define ZEND_JMPZNZ                      45
 #define ZEND_JMPZ_EX                     46
 #define ZEND_JMPNZ_EX                    47
 #define ZEND_CASE                        48
