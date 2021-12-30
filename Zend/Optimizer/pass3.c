@@ -340,15 +340,6 @@ optimize_jmpznz:
 					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
 				}
 
-				if (ZEND_OP2_JMP_ADDR(opline) == target &&
-				    !(opline->op1_type & (IS_VAR|IS_TMP_VAR))) {
-					/* JMPZNZ(?,L,L) -> JMP(L) */
-					opline->opcode = ZEND_JMP;
-					ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
-					SET_UNUSED(opline->op1);
-					SET_UNUSED(opline->op2);
-					opline->extended_value = 0;
-				}
 				/* Don't convert JMPZNZ back to JMPZ/JMPNZ, because the
 				   following JMP is not removed yet. */
 				break;
