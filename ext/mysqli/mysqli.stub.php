@@ -613,6 +613,8 @@ final class mysqli_warning
 final class mysqli_sql_exception extends RuntimeException
 {
     protected string $sqlstate = "00000";
+
+    public function getSqlState(): string {}
 }
 
 /** @refcount 1 */

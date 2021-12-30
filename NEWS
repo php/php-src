@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . Fixed bug #81658 (MYSQL_OPT_LOAD_DATA_LOCAL_DIR not available in MariaDB).
     (devnexen)
   . Introduced MYSQLI_IS_MARIADB. (devnexen)
+  . Fixed bug GH-7746 (mysqli_sql_exception->getSqlState()). (Kamil Tekiela)
 
 - OCI8:
   . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
