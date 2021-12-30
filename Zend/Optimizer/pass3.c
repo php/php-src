@@ -116,15 +116,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				            (opline-1)->opcode == ZEND_JMPNZ)) {
 				    if (ZEND_OP2_JMP_ADDR(opline-1) == target) {
 						/* JMPZ(X,L1), JMP(L1) -> NOP, JMP(L1) */
-						if ((opline-1)->op1_type == IS_CV) {
-							(opline-1)->opcode = ZEND_CHECK_VAR;
-							(opline-1)->op2.num = 0;
-						} else if ((opline-1)->op1_type & (IS_TMP_VAR|IS_VAR)) {
-							(opline-1)->opcode = ZEND_FREE;
-							(opline-1)->op2.num = 0;
-						} else {
-							MAKE_NOP(opline-1);
-						}
+						zend_optimizer_convert_to_free_op1(op_array, opline - 1);
 				    } else {
 						/* JMPZ(X,L1), JMP(L2) -> JMPZNZ(X,L1,L2) */
 						if ((opline-1)->opcode == ZEND_JMPZ) {
@@ -194,15 +186,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				/* convert L: JMPZ L+1 to NOP */
 				if (target == opline + 1) {
-					if (opline->op1_type == IS_CV) {
-						opline->opcode = ZEND_CHECK_VAR;
-						opline->op2.num = 0;
-					} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-						opline->opcode = ZEND_FREE;
-						opline->op2.num = 0;
-					} else {
-						MAKE_NOP(opline);
-					}
+					zend_optimizer_convert_to_free_op1(op_array, opline);
 				}
 				break;
 

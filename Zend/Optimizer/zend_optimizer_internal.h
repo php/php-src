@@ -76,6 +76,7 @@ static inline bool zend_optimizer_is_loop_var_free(const zend_op *opline) {
 		|| (opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH);
 }
 
+void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline);
 int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
 bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);

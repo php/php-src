@@ -208,6 +208,25 @@ bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zva
 	return 0;
 }
 
+void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline)
+{
+	if (opline->op1_type == IS_CV) {
+		opline->opcode = ZEND_CHECK_VAR;
+		SET_UNUSED(opline->op2);
+		SET_UNUSED(opline->result);
+		opline->extended_value = 0;
+	} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+		opline->opcode = ZEND_FREE;
+		SET_UNUSED(opline->op2);
+		SET_UNUSED(opline->result);
+		opline->extended_value = 0;
+	} else {
+		ZEND_ASSERT(opline->op1_type == IS_CONST);
+		literal_dtor(&ZEND_OP1_LITERAL(opline));
+		MAKE_NOP(opline);
+	}
+}
+
 int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
 {
 	int i = op_array->last_literal;

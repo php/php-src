@@ -1327,14 +1327,8 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 			follow_block = get_follow_block(cfg, block, 1, opt_count);
 			if (target_block == follow_block) {
 				/* L: JMP[N]Z(X, L+1) -> NOP or FREE(X) */
-				if (last_op->op1_type == IS_CV) {
-					last_op->opcode = ZEND_CHECK_VAR;
-					last_op->op2.num = 0;
-				} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
-					last_op->opcode = ZEND_FREE;
-					last_op->op2.num = 0;
-				} else {
-					MAKE_NOP(last_op);
+				zend_optimizer_convert_to_free_op1(op_array, last_op);
+				if (last_op->opcode == ZEND_NOP) {
 					block->len--;
 				}
 				block->successors_count = 1;
@@ -1344,14 +1338,8 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 				if (target->opcode == ZEND_JMP) {
 				    if (block->successors[0] == follow_block->successors[0]) {
 						/* JMPZ(X,L1), JMP(L1) -> NOP, JMP(L1) */
-						if (last_op->op1_type == IS_CV) {
-							last_op->opcode = ZEND_CHECK_VAR;
-							last_op->op2.num = 0;
-						} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
-							last_op->opcode = ZEND_FREE;
-							last_op->op2.num = 0;
-						} else {
-							MAKE_NOP(last_op);
+						zend_optimizer_convert_to_free_op1(op_array, last_op);
+						if (last_op->opcode == ZEND_NOP) {
 							block->len--;
 						}
 						block->successors[0] = follow_block - cfg->blocks;
@@ -1704,18 +1692,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_QM_ASSIGN:
 						case ZEND_BOOL:
 						case ZEND_BOOL_NOT:
-							if (opline->op1_type == IS_CV) {
-								opline->opcode = ZEND_CHECK_VAR;
-								SET_UNUSED(opline->result);
-							} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-								opline->opcode = ZEND_FREE;
-								SET_UNUSED(opline->result);
-							} else {
-								if (opline->op1_type == IS_CONST) {
-									literal_dtor(&ZEND_OP1_LITERAL(opline));
-								}
-								MAKE_NOP(opline);
-							}
+							zend_optimizer_convert_to_free_op1(op_array, opline);
 							break;
 						case ZEND_JMPZ_EX:
 						case ZEND_JMPNZ_EX:

@@ -43,7 +43,7 @@ typedef struct _optimizer_call_info {
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 
-static void zend_delete_call_instructions(zend_op *opline)
+static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opline)
 {
 	int call = 0;
 
@@ -73,17 +73,7 @@ static void zend_delete_call_instructions(zend_op *opline)
 			case ZEND_SEND_VAL:
 			case ZEND_SEND_VAR:
 				if (call == 0) {
-					if (opline->op1_type == IS_CONST) {
-						MAKE_NOP(opline);
-					} else if (opline->op1_type == IS_CV) {
-						opline->opcode = ZEND_CHECK_VAR;
-						opline->extended_value = 0;
-						opline->result.var = 0;
-					} else {
-						opline->opcode = ZEND_FREE;
-						opline->extended_value = 0;
-						opline->result.var = 0;
-					}
+					zend_optimizer_convert_to_free_op1(op_array, opline);
 				}
 				break;
 		}
@@ -144,7 +134,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				MAKE_NOP(opline);
 			}
 
-			zend_delete_call_instructions(opline-1);
+			zend_delete_call_instructions(op_array, opline-1);
 		}
 	}
 }
