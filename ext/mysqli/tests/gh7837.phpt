@@ -2,15 +2,15 @@
 Bug GH-7837 (large bigints may be truncated)
 --SKIPIF--
 <?php
-require_once("skipif.inc");
-if (strpos(mysqli_get_client_info(), "mysqlnd") === false) {
+require_once "skipif.inc";
+require_once 'skipifconnectfailure.inc';
+if (!$IS_MYSQLND) {
     die("skip requires mysqlnd");
 }
-require_once("skipifconnectfailure.inc");
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 
 $mysql = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $mysql->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true);
@@ -21,6 +21,10 @@ $mysql->query("INSERT INTO test (`ubigint`) VALUES (9223372036854775808)");
 $mysql->query("INSERT INTO test (`ubigint`) VALUES (1)");
 $result = $mysql->query("SELECT ubigint FROM test");
 var_dump($result->fetch_all());
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 array(3) {
