@@ -1,16 +1,17 @@
 --TEST--
-Test parse_url() function: The url is 127.0.0.1:9999?
+Test parse_url() function: can not recognize port without scheme
 --FILE--
 <?php
-echo "*** Testing parse_url() :The url is 127.0.0.1:9999? ***\n";
-$url = '127.0.0.1:9999?';
-
-var_dump(parse_url($url));
+echo "*** Testing parse_url() :can not recognize port without scheme ***\n";
+echo 'parse 127.0.0.1:9999?';
+var_dump(parse_url('127.0.0.1:9999?'));
+echo 'parse 127.0.0.1:9999#';
+var_dump(parse_url('127.0.0.1:9999#'));
 echo "Done"
 ?>
 --EXPECT--
-*** Testing parse_url() :The url is 127.0.0.1:9999? ***
-array(3) {
+*** Testing parse_url() :can not recognize port without scheme ***
+parse 127.0.0.1:9999?array(3) {
   ["host"]=>
   string(9) "127.0.0.1"
   ["port"]=>
@@ -18,4 +19,15 @@ array(3) {
   ["query"]=>
   string(0) ""
 }
+parse 127.0.0.1:9999#array(3) {
+  ["host"]=>
+  string(9) "127.0.0.1"
+  ["port"]=>
+  int(9999)
+  ["fragment"]=>
+  string(0) ""
+}
 Done
+
+
+
