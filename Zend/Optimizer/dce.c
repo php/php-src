@@ -139,7 +139,6 @@ static inline bool may_have_side_effects(
 		case ZEND_JMP:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMP_SET:

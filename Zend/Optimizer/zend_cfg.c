@@ -76,7 +76,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 					}
 				} else {
 					ZEND_ASSERT(b->successors_count == 2);
-					if (i == 0 || opcode == ZEND_JMPZNZ) {
+					if (i == 0) {
 						succ->flags |= ZEND_BB_TARGET;
 					} else {
 						succ->flags |= ZEND_BB_FOLLOW;
@@ -361,13 +361,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 					BB_START(i + 1);
 				}
 				break;
-			case ZEND_JMPZNZ:
-				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
-				BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-				if (i + 1 < op_array->last) {
-					BB_START(i + 1);
-				}
-				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -518,11 +511,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_JMP:
 				block->successors_count = 1;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes];
-				break;
-			case ZEND_JMPZNZ:
-				block->successors_count = 2;
-				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
-				block->successors[1] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:

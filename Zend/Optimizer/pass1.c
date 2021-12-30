@@ -335,23 +335,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			collect_constants = 0;
 			break;
 
-		case ZEND_JMPZNZ:
-			if (opline->op1_type == IS_CONST) {
-				zend_op *target_opline;
-
-				if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
-					target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value); /* JMPNZ */
-				} else {
-					target_opline = ZEND_OP2_JMP_ADDR(opline); /* JMPZ */
-				}
-				literal_dtor(&ZEND_OP1_LITERAL(opline));
-				ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-				opline->op1_type = IS_UNUSED;
-				opline->opcode = ZEND_JMP;
-			}
-			collect_constants = 0;
-			break;
-
 		case ZEND_RETURN:
 		case ZEND_RETURN_BY_REF:
 		case ZEND_GENERATOR_RETURN:

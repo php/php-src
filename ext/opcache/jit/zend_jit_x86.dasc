@@ -3660,11 +3660,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 							OP_JMP_ADDR(opline, opline->op2) :
 							opline + 1;
 						break;
-					case ZEND_JMPZNZ:
-						exit_opline = (trace->opline == OP_JMP_ADDR(opline, opline->op2)) ?
-							ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) :
-							OP_JMP_ADDR(opline, opline->op2);
-						break;
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						if (opline->op2_type == IS_CV) {
@@ -7048,12 +7043,6 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 				if (result) {
 					| jmp => target_label
 				}
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				if (!result) {
-					| jmp => target_label
-				} else {
-					| jmp => target_label2
-				}
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -7250,36 +7239,6 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_IDENTICAL:
-				case ZEND_CASE:
-				case ZEND_CASE_STRICT:
-					| jne => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-				    if (swap) {
-						| jle => target_label
-				    } else {
-						| jge => target_label
-					}
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					if (swap) {
-						| jl => target_label
-					} else {
-						| jg => target_label
-					}
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -7463,40 +7422,6 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_IDENTICAL:
-				case ZEND_CASE:
-				case ZEND_CASE_STRICT:
-					| jne => target_label
-					| jp => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
-					| jp => target_label2
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-					if (swap) {
-						| jbe => target_label
-					} else {
-						| jae => target_label
-						| jp => target_label
-					}
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					if (swap) {
-						| jb => target_label
-					} else {
-						| ja => target_label
-						| jp => target_label
-					}
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else if (smart_branch_opcode == ZEND_JMPZ_EX) {
 			switch (opline->opcode) {
 				case ZEND_IS_EQUAL:
@@ -7793,25 +7718,6 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_CASE:
-					| jne => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-					| jge => target_label
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					| jg => target_label
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -8110,9 +8016,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 				not_identical_label = target_label;
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				identical_label = target_label;
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				not_identical_label = target_label;
-				identical_label = target_label2;
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -8121,9 +8024,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 				identical_label = target_label;
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				not_identical_label = target_label;
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				identical_label = target_label;
-				not_identical_label = target_label2;
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -8501,9 +8401,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 		false_label = target_label;
 	} else if (branch_opcode == ZEND_JMPNZ) {
 		true_label = target_label;
-	} else if (branch_opcode == ZEND_JMPZNZ) {
-		true_label = target_label2;
-		false_label = target_label;
 	} else if (branch_opcode == ZEND_JMPZ_EX) {
 		set_bool = 1;
 		false_label = target_label;
@@ -10846,8 +10743,6 @@ static int zend_jit_smart_true(dasm_State **Dst, const zend_op *opline, int jmp,
 			}
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			|	jmp =>target_label
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jmp =>target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -10872,8 +10767,6 @@ static int zend_jit_smart_false(dasm_State **Dst, const zend_op *opline, int jmp
 			if (jmp) {
 				|	jmp >7
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jmp =>target_label
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -10901,9 +10794,6 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 			undefined_label = target_label;
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			defined_label = target_label;
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			undefined_label = target_label;
-			defined_label = target_label2;
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -11141,9 +11031,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 						|	je =>target_label
 					} else if (smart_branch_opcode == ZEND_JMPNZ) {
 						|	jne =>target_label
-					} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-						|	je =>target_label
-						|	jmp =>target_label2
 					} else {
 						ZEND_UNREACHABLE();
 					}
@@ -11225,9 +11112,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 							|	je =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPNZ) {
 							|	jne =>target_label
-						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-							|	je =>target_label
-							|	jmp =>target_label2
 						} else {
 							ZEND_UNREACHABLE();
 						}
@@ -11236,9 +11120,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 							|	jne =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPNZ) {
 							|	je =>target_label
-						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-							|	jne =>target_label
-							|	jmp =>target_label2
 						} else {
 							ZEND_UNREACHABLE();
 						}
@@ -12452,8 +12333,6 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 					|	jmp =>target_label2
 				} else if (smart_branch_opcode == ZEND_JMPNZ) {
 					|	jmp =>target_label
-				} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-					|	jmp =>target_label2
 				} else {
 					ZEND_UNREACHABLE();
 				}
@@ -12485,8 +12364,6 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 			if (smart_branch_opcode == ZEND_JMPZ) {
 				|	jmp =>target_label
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jmp =>target_label
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -15196,8 +15073,6 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 		} else if (smart_branch_opcode) {
 			if (smart_branch_opcode == ZEND_JMPNZ) {
 				|	jmp =>target_label
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jmp =>target_label2
 			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
@@ -15226,9 +15101,6 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 				|	jle =>target_label
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				|	jg =>target_label
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jle =>target_label
-				|	jmp =>target_label2
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -15580,9 +15452,6 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 			|	jz =>target_label
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			|	jnz =>target_label
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jz =>target_label
-			|	jmp =>target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -15875,7 +15744,6 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			ZEND_FALLTHROUGH;
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			return 1;
@@ -16263,7 +16131,6 @@ bw_op:
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			op1_info = OP1_INFO();

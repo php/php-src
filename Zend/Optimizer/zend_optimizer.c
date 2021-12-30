@@ -704,9 +704,6 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		case ZEND_FAST_CALL:
 			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op1, ZEND_OP1_JMP_ADDR(opline));
 			break;
-		case ZEND_JMPZNZ:
-			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -750,9 +747,6 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		case ZEND_FAST_CALL:
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op1, ZEND_OP1_JMP_ADDR(opline) - shiftlist[ZEND_OP1_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
-		case ZEND_JMPZNZ:
-			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -1139,9 +1133,6 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
 				break;
-			case ZEND_JMPZNZ:
-				/* relative extended_value don't have to be changed */
-				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -1262,9 +1253,6 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
 				break;
-			case ZEND_JMPZNZ:
-				/* relative extended_value don't have to be changed */
-				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

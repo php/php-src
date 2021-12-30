@@ -542,9 +542,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FAST_CALL:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
@@ -1369,9 +1366,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_FAST_CALL:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
