@@ -4,7 +4,6 @@ Bug #GH-7746 mysqli_sql_exception->sqlstate is inaccessible
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
 require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--

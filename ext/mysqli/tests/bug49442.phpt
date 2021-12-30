@@ -4,14 +4,14 @@ Bug #49422 (mysqlnd: mysqli_real_connect() and LOAD DATA INFILE crash)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
 $link = mysqli_init();
-if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf("skip Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+if (!@my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 
-include_once("local_infile_tools.inc");
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_support($link, $engine))
     die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
@@ -23,7 +23,7 @@ mysqli.allow_persistent=1
 mysqli.max_persistent=1
 --FILE--
 <?php
-    include ("connect.inc");
+    include "connect.inc";
 
     $link = mysqli_init();
     if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
@@ -107,7 +107,7 @@ mysqli.max_persistent=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 array(2) {

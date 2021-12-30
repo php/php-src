@@ -4,14 +4,13 @@ mysqli_get_warnings() - TODO
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 if (!$TEST_EXPERIMENTAL)
     die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
     $tmp    = NULL;
     $link   = NULL;
@@ -142,7 +141,7 @@ if (!$TEST_EXPERIMENTAL)
     print "done!";
 ?>
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
