@@ -449,7 +449,8 @@ ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {
 ZEND_API zend_uchar zend_get_opcode_id(const char *name, size_t length) {
 	zend_uchar opcode;
 	for (opcode = 0; opcode < (sizeof(zend_vm_opcodes_names) / sizeof(zend_vm_opcodes_names[0])) - 1; opcode++) {
-		if (strncmp(zend_vm_opcodes_names[opcode], name, length) == 0) {
+		const char *opcode_name = zend_vm_opcodes_names[opcode];
+		if (opcode_name && strncmp(opcode_name, name, length) == 0) {
 			return opcode;
 		}
 	}
