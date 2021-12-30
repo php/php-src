@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Introduced MYSQLI_IS_MARIADB. (devnexen)
   . Fixed bug GH-7746 (mysqli_sql_exception->getSqlState()). (Kamil Tekiela)
 
+- MySQLnd:
+  . Fixed bug where large bigints may be truncated. (Nathan Freeman, cmb)
+
 - OCI8:
   . Fixed bug GH-7765 (php_oci_cleanup_global_handles segfaults at second
     call). (cmb)
