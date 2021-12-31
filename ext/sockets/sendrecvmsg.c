@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __sun
+/* to enable 'new' ancillary data layout instead */
+# define _XPG4_2
+#endif
 #include <php.h>
 #include "php_sockets.h"
 #include "sendrecvmsg.h"
