@@ -461,6 +461,30 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	return OK;
 }
 
+static int php_apache_startup_php()
+{
+#ifdef ZTS
+	int expected_threads;
+	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
+		expected_threads = 1;
+	}
+
+	php_tsrm_startup_ex(expected_threads);
+# ifdef PHP_WIN32
+	ZEND_TSRMLS_CACHE_UPDATE();
+# endif
+#endif
+
+	zend_signal_startup();
+
+	sapi_startup(&apache2_sapi_module);
+	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
+		return DONE;
+	}
+
+	return OK;
+}
+
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
@@ -484,26 +508,13 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 	if (apache2_php_ini_path_override) {
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
-#ifdef ZTS
-	int expected_threads;
-	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
-		expected_threads = 1;
-	}
-
-	php_tsrm_startup_ex(expected_threads);
-# ifdef PHP_WIN32
-	ZEND_TSRMLS_CACHE_UPDATE();
-# endif
-#endif
-
-	zend_signal_startup();
-
-	sapi_startup(&apache2_sapi_module);
-	if (apache2_sapi_module.startup(&apache2_sapi_module) != SUCCESS) {
+#ifndef PHP_WIN32
+	if (php_apache_startup_php() != OK) {
 		return DONE;
 	}
 	apr_pool_cleanup_register(pconf, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
 	php_apache_add_version(pconf);
+#endif
 
 	return OK;
 }
@@ -750,7 +761,13 @@ zend_first_try {
 
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 {
+#ifndef PHP_WIN32
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
+#else
+	php_apache_startup_php();
+	php_apache_add_version(pchild);
+	apr_pool_cleanup_register(pchild, NULL, php_apache_server_shutdown, apr_pool_cleanup_null);
+#endif
 }
 
 #ifdef ZEND_SIGNALS
