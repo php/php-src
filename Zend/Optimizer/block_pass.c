@@ -150,6 +150,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 	while (opline < end) {
 		/* Constant Propagation: strip X = QM_ASSIGN(const) */
 		if (opline->op1_type == IS_TMP_VAR &&
+		    opline->opcode != ZEND_FETCH_LIST_R &&
 		    opline->opcode != ZEND_FREE) {
 			src = VAR_SOURCE(opline->op1);
 			if (src &&
