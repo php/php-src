@@ -4,8 +4,6 @@ PAM: SHA-256, option: MYSQLI_SERVER_PUBLIC_KEY
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-
 ob_start();
 phpinfo(INFO_MODULES);
 $tmp = ob_get_contents();
@@ -13,9 +11,9 @@ ob_end_clean();
 if (!stristr($tmp, "auth_plugin_sha256_password"))
     die("skip SHA256 auth plugin not built-in to mysqlnd");
 
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-        die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50606)
     die("skip: SHA-256 requires MySQL 5.6.6+");
@@ -88,7 +86,7 @@ echo "nocache";
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
     $file = sprintf("%s%s%s_%s", sys_get_temp_dir(), DIRECTORY_SEPARATOR, "test_sha256_" , @date("Ymd"));
     if (file_exists($file) && is_readable($file)) {
@@ -121,7 +119,7 @@ echo "nocache";
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once "clean_table.inc";
     $link->query('DROP USER shatest');
     $link->query('DROP USER shatest@localhost');
     $file = sprintf("%s%s%s_%s", sys_get_temp_dir(), DIRECTORY_SEPARATOR, "test_sha256_" , @date("Ymd"));
