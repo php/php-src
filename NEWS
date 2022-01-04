@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed ext/sockets build on Haiku. (David Carlier)
 
+- Standard:
+  . Fixed bug GH-7875 (mails are sent even if failure to log throws exception).
+    (cmb)
+
 20 Jan 2022, PHP 8.0.15
 
 - Core:
