@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.2
+06 Jan 2022, PHP 8.1.2RC1
 
 - Core:
   . Fixed bug #81216 (Nullsafe operator leaks dynamic property name). (Dmitry)
