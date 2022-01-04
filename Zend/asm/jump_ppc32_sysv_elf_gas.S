@@ -52,12 +52,12 @@
 
 .file "jump_ppc32_sysv_elf_gas.S"
 .text
-.globl jump_fcontext
+.globl zend_jump_fcontext
 .align 2
-.type jump_fcontext,@function
-jump_fcontext:
-    # Linux: jump_fcontext( hidden transfer_t * R3, R4, R5)
-    # Other: transfer_t R3:R4 = jump_fcontext( R3, R4)
+.type zend_jump_fcontext,@function
+zend_jump_fcontext:
+    # Linux: zend_jump_fcontext( hidden transfer_t * R3, R4, R5)
+    # Other: transfer_t R3:R4 = zend_jump_fcontext( R3, R4)
 
     mflr  %r0  # return address from LR
     mffs  %f0  # FPSCR
@@ -195,7 +195,7 @@ jump_fcontext:
 
     # jump to context
     bctr
-.size jump_fcontext, .-jump_fcontext
+.size zend_jump_fcontext, .-zend_jump_fcontext
 
 /* Mark that we don't need executable stack.  */
 .section .note.GNU-stack,"",%progbits

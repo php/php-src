@@ -74,9 +74,9 @@
  *******************************************************/
 
 .text
-.globl _jump_fcontext
+.globl _zend_jump_fcontext
 .align 2
-_jump_fcontext:
+_zend_jump_fcontext:
     ; reserve space on stack
     subi  r1, r1, 244
 

@@ -54,16 +54,16 @@
 .file "make_arm64_aapcs_elf_gas.S"
 .text
 .align  2
-.global make_fcontext
-.type   make_fcontext, %function
-make_fcontext:
+.global zend_make_fcontext
+.type   zend_make_fcontext, %function
+zend_make_fcontext:
     # shift address in x0 (allocated stack) to lower 16 byte boundary
     and x0, x0, ~0xF
 
     # reserve space for context-data on context-stack
     sub  x0, x0, #0xb0
 
-    # third arg of make_fcontext() == address of context-function
+    # third arg of zend_make_fcontext() == address of context-function
     # store address as a PC to jump in
     str  x2, [x0, #0xa0]
 
@@ -80,6 +80,6 @@ finish:
     # exit application
     bl  _exit
 
-.size   make_fcontext,.-make_fcontext
+.size   zend_make_fcontext,.-zend_make_fcontext
 # Mark that we don't need executable stack.
 .section .note.GNU-stack,"",%progbits

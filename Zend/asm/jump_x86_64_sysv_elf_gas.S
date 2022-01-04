@@ -26,10 +26,10 @@
 
 .file "jump_x86_64_sysv_elf_gas.S"
 .text
-.globl jump_fcontext
-.type jump_fcontext,@function
+.globl zend_jump_fcontext
+.type zend_jump_fcontext,@function
 .align 16
-jump_fcontext:
+zend_jump_fcontext:
     leaq  -0x38(%rsp), %rsp /* prepare stack */
 
 #if !defined(BOOST_USE_TSX)
@@ -85,7 +85,7 @@ jump_fcontext:
 
     /* indirect jump to context */
     jmp  *%r8
-.size jump_fcontext,.-jump_fcontext
+.size zend_jump_fcontext,.-zend_jump_fcontext
 
 /* Mark that we don't need executable stack.  */
 .section .note.GNU-stack,"",%progbits

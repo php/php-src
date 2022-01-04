@@ -39,9 +39,9 @@
  *******************************************************/
 
 .text
-.globl _jump_fcontext
+.globl _zend_jump_fcontext
 .align 2
-_jump_fcontext:
+_zend_jump_fcontext:
     @ save LR as PC
     push {lr}
     @ save hidden,V1-V8,LR

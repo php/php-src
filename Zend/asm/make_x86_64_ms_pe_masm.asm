@@ -87,11 +87,11 @@ EXTERN  _exit:PROC
 .code
 
 ; generate function table entry in .pdata and unwind information in
-make_fcontext PROC BOOST_CONTEXT_EXPORT FRAME
+zend_make_fcontext PROC BOOST_CONTEXT_EXPORT FRAME
     ; .xdata for a function's structured exception handling unwind behavior
     .endprolog
 
-    ; first arg of make_fcontext() == top of context-stack
+    ; first arg of zend_make_fcontext() == top of context-stack
     mov  rax, rcx
 
     ; shift address in RAX to lower 16 byte boundary
@@ -102,14 +102,14 @@ make_fcontext PROC BOOST_CONTEXT_EXPORT FRAME
     ; on context-function entry: (RSP -0x8) % 16 == 0
     sub  rax, 0150h
 
-    ; third arg of make_fcontext() == address of context-function
+    ; third arg of zend_make_fcontext() == address of context-function
     ; stored in RBX
     mov  [rax+0100h], r8
 
-    ; first arg of make_fcontext() == top of context-stack
+    ; first arg of zend_make_fcontext() == top of context-stack
     ; save top address of context stack as 'base'
     mov  [rax+0c8h], rcx
-    ; second arg of make_fcontext() == size of context-stack
+    ; second arg of zend_make_fcontext() == size of context-stack
     ; negate stack size for LEA instruction (== substraction)
     neg  rdx
     ; compute bottom address of context stack (limit)
@@ -135,7 +135,7 @@ make_fcontext PROC BOOST_CONTEXT_EXPORT FRAME
     ; compute abs address of label trampoline
     lea  rcx, trampoline
     ; save address of trampoline as return-address for context-function
-    ; will be entered after calling jump_fcontext() first time
+    ; will be entered after calling zend_jump_fcontext() first time
     mov  [rax+0118h], rcx
 
     ; compute abs address of label finish
@@ -159,5 +159,5 @@ finish:
     ; exit application
     call  _exit
     hlt
-make_fcontext ENDP
+zend_make_fcontext ENDP
 END

@@ -140,8 +140,8 @@ typedef struct {
 } boost_context_data;
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
-extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+extern void *zend_make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
+extern boost_context_data zend_jump_fcontext(void *to, zend_fiber_transfer *transfer);
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
@@ -335,11 +335,11 @@ ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, z
 
 	context->handle = handle;
 #else
-	// Stack grows down, calculate the top of the stack. make_fcontext then shifts pointer to lower 16-byte boundary.
+	// Stack grows down, calculate the top of the stack. zend_make_fcontext then shifts pointer to lower 16-byte boundary.
 	void *stack = (void *) ((uintptr_t) context->stack->pointer + context->stack->size);
 
-	context->handle = make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
-	ZEND_ASSERT(context->handle != NULL && "make_fcontext() never returns NULL");
+	context->handle = zend_make_fcontext(stack, context->stack->size, zend_fiber_trampoline);
+	ZEND_ASSERT(context->handle != NULL && "zend_make_fcontext() never returns NULL");
 #endif
 
 	context->kind = kind;
@@ -411,7 +411,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
 	*transfer = *transfer_data;
 #else
-	boost_context_data data = jump_fcontext(to->handle, transfer);
+	boost_context_data data = zend_jump_fcontext(to->handle, transfer);
 
 	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
 	*transfer = *data.transfer;
