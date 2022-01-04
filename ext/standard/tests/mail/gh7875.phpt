@@ -17,8 +17,8 @@ touch(__DIR__ . "/gh7875.mail.log");
 chmod(__DIR__ . "/gh7875.mail.log", 0444);
 
 try {
-	$return = mail('recipient@example.com', 'Subject', 'Body', []);
-	var_dump($return);
+	mail('recipient@example.com', 'Subject', 'Body', []);
+	echo 'Not Reached';
 } catch (\Exception $e) {
 	echo $e->getMessage(), PHP_EOL;
     var_dump(file_exists(__DIR__ . "/gh7875.mail.out"));
