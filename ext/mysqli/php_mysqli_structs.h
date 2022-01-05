@@ -26,20 +26,8 @@
 #undef LIST
 #endif
 
-#ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd.h"
 #include "mysqli_mysqlnd.h"
-#else
-
-#include <mysql.h>
-#if MYSQL_VERSION_ID >= 80000 &&  MYSQL_VERSION_ID < 100000
-typedef _Bool		my_bool;
-#endif
-#include <errmsg.h>
-#include <mysqld_error.h>
-#include "mysqli_libmysql.h"
-
-#endif /* MYSQLI_USE_MYSQLND */
 
 
 #define MYSQLI_VERSION_ID		101009
