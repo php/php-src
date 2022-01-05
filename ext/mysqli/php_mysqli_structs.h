@@ -57,10 +57,6 @@ typedef struct {
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
 	char		*query;
-#ifndef MYSQLI_USE_MYSQLND
-	/* used to manage refcount with libmysql (already implement in mysqlnd) */
-	zval		link_handle;
-#endif
 } MY_STMT;
 
 typedef struct {
@@ -70,9 +66,7 @@ typedef struct {
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	bool		persistent;
-#ifdef MYSQLI_USE_MYSQLND
 	int				async_result_fetch_type;
-#endif
 } MY_MYSQL;
 
 typedef struct {

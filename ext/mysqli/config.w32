@@ -21,7 +21,6 @@ if (PHP_MYSQLI != "no") {
 
 	if (PHP_MYSQLI != "no") {
 		EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'Using MySQL native driver');
 		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
 		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
 	}
