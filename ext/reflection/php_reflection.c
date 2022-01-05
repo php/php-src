@@ -6315,6 +6315,7 @@ static int call_attribute_constructor(
 		dummy_func.type = ZEND_USER_FUNCTION;
 		dummy_func.common.fn_flags =
 			attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+		dummy_func.common.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
 		dummy_func.op_array.filename = filename;
 
 		dummy_opline.opcode = ZEND_DO_FCALL;
