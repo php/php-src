@@ -214,14 +214,12 @@ class mysqli
      */
     public function get_client_info(): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @return array<string, mixed>
      * @tentative-return-type
      * @alias mysqli_get_connection_stats
      */
     public function get_connection_stats(): array {}
-#endif
 
     /**
      * @tentative-return-type
@@ -271,13 +269,11 @@ class mysqli
      */
     public function ping(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_poll
      */
     public static function poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
     /**
      * @tentative-return-type
@@ -311,13 +307,11 @@ class mysqli
      */
     public function real_escape_string(string $string): string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_reap_async_query
      */
     public function reap_async_query(): mysqli_result|bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -665,13 +659,11 @@ class mysqli_stmt
      */
     public function result_metadata(): mysqli_result|false {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_more_results
      */
     public function more_results(): bool {}
-#endif
 
     /**
      * @tentative-return-type
@@ -715,13 +707,11 @@ class mysqli_stmt
      */
     public function store_result(): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
     /**
      * @tentative-return-type
      * @alias mysqli_stmt_get_result
      */
     public function get_result(): mysqli_result|false {}
-#endif
 }
 
 final class mysqli_warning
@@ -854,7 +844,6 @@ function mysqli_field_tell(mysqli_result $result): int {}
 
 function mysqli_free_result(mysqli_result $result): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /**
  * @return array<string, mixed>
  * @refcount 1
@@ -866,7 +855,6 @@ function mysqli_get_connection_stats(mysqli $mysql): array {}
  * @refcount 1
  */
 function mysqli_get_client_stats(): array {}
-#endif
 
 /** @refcount 1 */
 function mysqli_get_charset(mysqli $mysql): ?object {}
@@ -928,9 +916,7 @@ function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
 function mysqli_ping(mysqli $mysql): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
@@ -959,10 +945,8 @@ function mysqli_escape_string(mysqli $mysql, string $string): string {}
 
 function mysqli_real_query(mysqli $mysql, string $query): bool {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_reap_async_query(mysqli $mysql): mysqli_result|bool {}
-#endif
 
 function mysqli_release_savepoint(mysqli $mysql, string $name): bool {}
 
@@ -1007,10 +991,8 @@ function mysqli_stmt_field_count(mysqli_stmt $statement): int {}
 
 function mysqli_stmt_free_result(mysqli_stmt $statement): void {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 /** @refcount 1 */
 function mysqli_stmt_get_result(mysqli_stmt $statement): mysqli_result|false {}
-#endif
 
 /** @refcount 1 */
 function mysqli_stmt_get_warnings(mysqli_stmt $statement): mysqli_warning|false {}
@@ -1021,9 +1003,7 @@ function mysqli_stmt_init(mysqli $mysql): mysqli_stmt|false {}
 /** @refcount 1 */
 function mysqli_stmt_insert_id(mysqli_stmt $statement): int|string {}
 
-#if defined(MYSQLI_USE_MYSQLND)
 function mysqli_stmt_more_results(mysqli_stmt $statement): bool {}
-#endif
 
 function mysqli_stmt_next_result(mysqli_stmt $statement): bool {}
 
