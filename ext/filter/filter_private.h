@@ -46,10 +46,11 @@
 #define FILTER_FLAG_PATH_REQUIRED           0x040000
 #define FILTER_FLAG_QUERY_REQUIRED          0x080000
 
-#define FILTER_FLAG_IPV4                    0x100000
-#define FILTER_FLAG_IPV6                    0x200000
-#define FILTER_FLAG_NO_RES_RANGE            0x400000
-#define FILTER_FLAG_NO_PRIV_RANGE           0x800000
+#define FILTER_FLAG_IPV4                    0x00100000
+#define FILTER_FLAG_IPV6                    0x00200000
+#define FILTER_FLAG_NO_RES_RANGE            0x00400000
+#define FILTER_FLAG_NO_PRIV_RANGE           0x00800000
+#define FILTER_FLAG_GLOBAL_RANGE            0x10000000
 
 #define FILTER_FLAG_HOSTNAME               0x100000
 
