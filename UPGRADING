@@ -76,6 +76,8 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/true-type
   . Added support for Disjoint Normal Form (DNF) types.
     RFC: https://wiki.php.net/rfc/dnf_types
+  . Added error_log_mode ini setting that allows setting of permissions for
+    error log file.
 
 
 - Curl:

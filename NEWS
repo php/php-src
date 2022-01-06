@@ -15,6 +15,7 @@ PHP                                                                        NEWS
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
   . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
     (Tobias Bachert)
+  . Added error_log_mode ini setting. (Mikhail Galanin)
 
 - COM:
   . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
