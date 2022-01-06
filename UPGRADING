@@ -349,6 +349,9 @@ PHP 8.2 UPGRADE NOTES
   . CURL_VERSION_UNICODE (libcurl >= 7.72.0)
   . CURL_VERSION_ZSTD (libcurl >= 7.72.0)
 
+- Filter
+  . FILTER_FLAG_GLOBAL_RANGE
+
 - Sockets:
   . SO_INCOMING_CPU
   . SO_MEMINFO

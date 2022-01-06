@@ -276,6 +276,11 @@ const FILTER_FLAG_NO_RES_RANGE = UNKNOWN;
  * @cname FILTER_FLAG_NO_PRIV_RANGE
  */
 const FILTER_FLAG_NO_PRIV_RANGE = UNKNOWN;
+/**
+ * @var int
+ * @cname FILTER_FLAG_GLOBAL_RANGE
+ */
+const FILTER_FLAG_GLOBAL_RANGE = UNKNOWN;
 
 /**
  * @var int

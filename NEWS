@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
 
+- Filter:
+  . Added FILTER_FLAG_GLOBAL_RANGE to filter Global IPs. (vnsavage)
+
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
   . Added access.suppress_path pool option to filter access log entries.
