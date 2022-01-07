@@ -1406,6 +1406,8 @@ class PropertyInfo
     public $defaultValueString;
     /** @var bool */
     public $isDocReadonly;
+    /** @var string|null */
+    public $link;
 
     public function __construct(
         PropertyName $name,
@@ -1414,7 +1416,8 @@ class PropertyInfo
         ?Type $phpDocType,
         ?Expr $defaultValue,
         ?string $defaultValueString,
-        bool $isDocReadonly
+        bool $isDocReadonly,
+        ?string $link
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -1423,6 +1426,7 @@ class PropertyInfo
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
+        $this->link = $link;
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -1550,7 +1554,11 @@ class PropertyInfo
 
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
         $varnameElement = $doc->createElement("varname", $this->name->property);
-        $varnameElement->setAttribute("linkend", "$className.props." . strtolower(str_replace("_", "-", $this->name->property)));
+        if ($this->link) {
+            $varnameElement->setAttribute("linkend", $this->link);
+        } else {
+            $varnameElement->setAttribute("linkend", "$className.props." . strtolower(str_replace("_", "-", $this->name->property)));
+        }
         $fieldsynopsisElement->appendChild(new DOMText("\n     "));
         $fieldsynopsisElement->appendChild($varnameElement);
 
@@ -2384,6 +2392,7 @@ function parseProperty(
 ): PropertyInfo {
     $phpDocType = null;
     $isDocReadonly = false;
+    $link = null;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -2392,6 +2401,8 @@ function parseProperty(
                 $phpDocType = $tag->getType();
             } elseif ($tag->name === 'readonly') {
                 $isDocReadonly = true;
+            } elseif ($tag->name === 'link') {
+                $link = $tag->value;
             }
         }
     }
@@ -2419,7 +2430,8 @@ function parseProperty(
         $phpDocType ? Type::fromString($phpDocType) : null,
         $property->default,
         $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
-        $isDocReadonly
+        $isDocReadonly,
+        $link
     );
 }
 
