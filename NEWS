@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - pcntl:
   . Fixed pcntl_rfork build for DragonFlyBSD. (David Carlier)
 
+- Standard:
+  . Fixed bug GH-7899 (Regression in unpack for negative int value). (Remi)
+
 06 Jan 2022, PHP 8.1.2RC1
 
 - Core:
