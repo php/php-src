@@ -22,11 +22,11 @@ mb_send_mail($to, $subject, $message, $header);
 $stream = fopen(__DIR__ . "/gh7902.eml", "rb");
 $eml = stream_get_contents($stream);
 fclose($stream);
-var_dump(preg_match('/BASE64\r\n/', $eml));
+var_dump(preg_match_all('/(?<!\r)\n/', $eml));
 ?>
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/gh7902.eml");
 ?>
 --EXPECT--
-int(1)
+int(0)

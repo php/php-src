@@ -3601,7 +3601,7 @@ PHP_FUNCTION(mb_send_mail)
 			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
 		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
-	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\r\n", sizeof("Subject: [PHP-jp nnnnnnnn]") + 1);
 	if (pstr != NULL) {
 		subject_buf = subject = (char *)pstr->val;
 	}
@@ -3640,14 +3640,14 @@ PHP_FUNCTION(mb_send_mail)
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, "\n", 1);
+			mbfl_memory_device_strncat(&device, "\r\n", 2);
 		}
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, "\r\n", 2);
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
@@ -3658,7 +3658,7 @@ PHP_FUNCTION(mb_send_mail)
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
 		}
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, "\r\n", 2);
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
@@ -3667,9 +3667,10 @@ PHP_FUNCTION(mb_send_mail)
 			p = "7bit";
 		}
 		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, "\r\n", 2);
 	}
 
+	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
 	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
