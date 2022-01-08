@@ -3101,9 +3101,11 @@ function toolset_get_compiler_name(short)
 
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
-		if (version >= 1930) {
+		if (version >= 1940) {
 			return name;
-		} if (version >= 1920) {
+		} else if (version >= 1930) {
+			name = short ? "VS17" : "Visual C++ 2022";
+		} else if (version >= 1920) {
 			/* NOTE - VS is intentional. Due to changes in recent Visual Studio
 						versioning scheme referring to the exact VC++ version is
 						hardly predictable. From this version on, it refers to
