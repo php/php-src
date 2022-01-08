@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.16
 
+- FPM:
+  . Fixed memory leak on invalid port. (David Carlier)
+
 - Sockets:
   . Fixed ext/sockets build on Haiku. (David Carlier)
 
