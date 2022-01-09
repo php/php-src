@@ -1020,7 +1020,7 @@ static void php_cgi_usage(char *argv0)
 	if (prog) {
 		prog++;
 	} else {
-		prog = "php";
+		prog = "php-cgi";
 	}
 
 	php_printf(	"Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>]\n"
