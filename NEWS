@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed memory leak on invalid port. (David Carlier)
 
+- pcntl:
+  . Fixed pcntl_rfork build for DragonFlyBSD. (David Carlier)
+
 06 Jan 2022, PHP 8.1.2RC1
 
 - Core:
