@@ -183,7 +183,8 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 	}
 
 #if ZEND_DEBUG
-	ZEND_ASSERT(zend_is_identical(value, new));
+	ZEND_ASSERT(zend_is_identical(value, new) ||
+		(Z_TYPE_P(value) == IS_DOUBLE && Z_TYPE_P(new) == IS_DOUBLE && isnan(Z_DVAL_P(value)) && isnan(Z_DVAL_P(new))));
 #endif
 }
 
