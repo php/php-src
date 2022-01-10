@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #81430 (Attribute instantiation leaves dangling pointer).
     (beberlei)
 
+- FFI:
+  . Fixed bug GH-7867 (FFI::cast() from pointer to array is broken). (cmb,
+    dmitry)
+
 - FPM:
   . Fixed memory leak on invalid port. (David Carlier)
 
