@@ -2690,7 +2690,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			if (ssa_op->result_def >= 0) {
 				tmp = 0;
 				if (t1 & MAY_BE_STRING) {
-					tmp |= MAY_BE_STRING;
+					tmp |= MAY_BE_STRING | MAY_BE_NULL;
 				}
 				if (t1 & (MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL|MAY_BE_UNDEF)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
