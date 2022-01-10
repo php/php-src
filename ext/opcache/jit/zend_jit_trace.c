@@ -3404,8 +3404,9 @@ static void zend_jit_trace_setup_ret_counter(const zend_op *opline, size_t offse
 	}
 }
 
-static bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ssa_opcodes, int var)
+static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ssa *ssa, const zend_op **ssa_opcodes, const zend_ssa_op *ssa_op)
 {
+	int var = ssa_op->result_def;
 	int i;
 	int use = ssa->vars[var].use_chain;
 	const zend_op *opline;
@@ -3444,6 +3445,19 @@ static bool zend_jit_may_delay_fetch_this(zend_ssa *ssa, const zend_op **ssa_opc
 	 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 	 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 		return 0;
+	}
+
+	if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
+		if (opline->op1_type == IS_CV
+		 && (opline+1)->op1_type == IS_CV
+		 && (opline+1)->op1.var == opline->op1.var) {
+			/* skip $a->prop += $a; */
+			return 0;
+		}
+		if (!zend_jit_supported_binary_op(
+				opline->extended_value, MAY_BE_ANY, OP1_DATA_INFO())) {
+			return 0;
+		}
 	}
 
 	for (i = ssa->vars[var].definition; i < use; i++) {
@@ -5871,7 +5885,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_THIS:
 						delayed_fetch_this = 0;
 						if (ssa_op->result_def >= 0 && opline->result_type != IS_CV) {
-							if (zend_jit_may_delay_fetch_this(ssa, ssa_opcodes, ssa_op->result_def)) {
+							if (zend_jit_may_delay_fetch_this(op_array, ssa, ssa_opcodes, ssa_op)) {
 								ssa->var_info[ssa_op->result_def].delayed_fetch_this = 1;
 								delayed_fetch_this = 1;
 							}
