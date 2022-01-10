@@ -361,14 +361,14 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 
 	/* The array may be destroyed while throwing the notice.
 	 * Temporarily increase the refcount to detect this situation. */
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-		GC_ADDREF(ht);
-	}
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//		GC_ADDREF(ht);
+//	}
 	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-		zend_array_destroy(ht);
-		return 0;
-	}
+//	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//		zend_array_destroy(ht);
+//		return 0;
+//	}
 	return EG(exception) == NULL;
 }
 
@@ -802,23 +802,23 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			if (!zend_is_long_compatible(Z_DVAL_P(dim), hval)) {
 				/* The array may be destroyed while throwing the notice.
 				 * Temporarily increase the refcount to detect this situation. */
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-					GC_ADDREF(ht);
-				}
+//				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//					GC_ADDREF(ht);
+//				}
 				execute_data = EG(current_execute_data);
 				opline = EX(opline);
 				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
-					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
-						if (EG(exception)) {
-							ZVAL_UNDEF(EX_VAR(opline->result.var));
-						} else {
-							ZVAL_NULL(EX_VAR(opline->result.var));
-						}
-					}
-					return NULL;
-				}
+//				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//					zend_array_destroy(ht);
+//					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+//						if (EG(exception)) {
+//							ZVAL_UNDEF(EX_VAR(opline->result.var));
+//						} else {
+//							ZVAL_NULL(EX_VAR(opline->result.var));
+//						}
+//					}
+//					return NULL;
+//				}
 				if (EG(exception)) {
 					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -830,23 +830,23 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 		case IS_RESOURCE:
 			/* The array may be destroyed while throwing the notice.
 			 * Temporarily increase the refcount to detect this situation. */
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-				GC_ADDREF(ht);
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+//				GC_ADDREF(ht);
+//			}
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
 			zend_use_resource_as_offset(dim);
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-				zend_array_destroy(ht);
-				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
-					if (EG(exception)) {
-						ZVAL_UNDEF(EX_VAR(opline->result.var));
-					} else {
-						ZVAL_NULL(EX_VAR(opline->result.var));
-					}
-				}
-				return NULL;
-			}
+//			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+//				zend_array_destroy(ht);
+//				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+//					if (EG(exception)) {
+//						ZVAL_UNDEF(EX_VAR(opline->result.var));
+//					} else {
+//						ZVAL_NULL(EX_VAR(opline->result.var));
+//					}
+//				}
+//				return NULL;
+//			}
 			if (EG(exception)) {
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -1080,15 +1080,15 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	zend_long offset;
 
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
-			GC_ADDREF(str);
-		}
+//		if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+//			GC_ADDREF(str);
+//		}
 		offset = zend_check_string_offset(dim/*, BP_VAR_R*/);
-		if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset);
-			zend_string_efree(str);
-			return ret;
-		}
+//		if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+//			zend_string *ret = zend_jit_fetch_dim_str_offset(str, offset);
+//			zend_string_efree(str);
+//			return ret;
+//		}
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1221,15 +1221,15 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 		offset = zend_check_string_offset(dim/*, BP_VAR_W*/);
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (result) {
-				ZVAL_NULL(result);
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (result) {
+//				ZVAL_NULL(result);
+//			}
+//			return;
+//		}
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (UNEXPECTED(result)) {
 				ZVAL_UNDEF(result);
@@ -1253,7 +1253,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 			const zend_op *op_data = EG(current_execute_data)->opline + 1;
@@ -1265,16 +1265,16 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		/* Convert to string, just the time to pick the 1st byte */
 		tmp = zval_try_get_string_func(value);
 
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (tmp) {
-				zend_string_release_ex(tmp, 0);
-			}
-			if (result) {
-				ZVAL_NULL(result);
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (tmp) {
+//				zend_string_release_ex(tmp, 0);
+//			}
+//			if (result) {
+//				ZVAL_NULL(result);
+//			}
+//			return;
+//		}
 		if (UNEXPECTED(!tmp)) {
 			if (result) {
 				ZVAL_UNDEF(result);
@@ -1310,15 +1310,15 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		/* The string may be destroyed while throwing the notice.
 		 * Temporarily increase the refcount to detect this situation. */
-		GC_ADDREF(s);
+//		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
-		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
-			if (result) {
-				ZVAL_NULL(result);
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(s) == 0)) {
+//			zend_string_efree(s);
+//			if (result) {
+//				ZVAL_NULL(result);
+//			}
+//			return;
+//		}
 		/* Illegal offset assignment */
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (result) {
@@ -1406,13 +1406,13 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(object_ptr, arr);
-		GC_ADDREF(arr);
+//		GC_ADDREF(arr);
 		zend_false_to_array_deprecated();
-		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
-			zend_array_destroy(arr);
-			ZVAL_NULL(result);
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+//			zend_array_destroy(arr);
+//			ZVAL_NULL(result);
+//			return;
+//		}
 		zval *var;
 		if (dim) {
 			if (type == BP_VAR_W) {
@@ -1508,15 +1508,15 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 	} else if (Z_TYPE_P(object_ptr) == IS_FALSE) {
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(object_ptr, arr);
-		GC_ADDREF(arr);
+//		GC_ADDREF(arr);
 		zend_false_to_array_deprecated();
-		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
-			zend_array_destroy(arr);
-			if (result) {
-				ZVAL_NULL(result);
-			}
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+//			zend_array_destroy(arr);
+//			if (result) {
+//				ZVAL_NULL(result);
+//			}
+//			return;
+//		}
 		zval *var = dim
 			? zend_jit_fetch_dim_w_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
@@ -1589,12 +1589,12 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 	} else if (Z_TYPE_P(container) == IS_FALSE) {
 		zend_array *arr = zend_new_array(0);
 		ZVAL_ARR(container, arr);
-		GC_ADDREF(arr);
+//		GC_ADDREF(arr);
 		zend_false_to_array_deprecated();
-		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
-			zend_array_destroy(arr);
-			return;
-		}
+//		if (UNEXPECTED(GC_DELREF(arr) == 0)) {
+//			zend_array_destroy(arr);
+//			return;
+//		}
 		zval *var = dim
 			? zend_jit_fetch_dim_rw_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
