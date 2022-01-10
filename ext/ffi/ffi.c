@@ -3903,9 +3903,14 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 		/* automatically dereference void* pointers ??? */
 		cdata->ptr = *(void**)ptr;
 	} else if (old_type->kind == ZEND_FFI_TYPE_ARRAY
-	 && type->kind == ZEND_FFI_TYPE_POINTER) {
-		cdata->ptr = &cdata->ptr_holder;
-		cdata->ptr_holder = old_cdata->ptr;
+	 && type->kind == ZEND_FFI_TYPE_POINTER
+	 && zend_ffi_is_compatible_type(ZEND_FFI_TYPE(old_type->array.type), ZEND_FFI_TYPE(type->pointer.type))) {		cdata->ptr = &cdata->ptr_holder;
+ 		cdata->ptr = &cdata->ptr_holder;
+ 		cdata->ptr_holder = old_cdata->ptr;
+	} else if (old_type->kind == ZEND_FFI_TYPE_POINTER
+	 && type->kind == ZEND_FFI_TYPE_ARRAY
+	 && zend_ffi_is_compatible_type(ZEND_FFI_TYPE(old_type->pointer.type), ZEND_FFI_TYPE(type->array.type))) {
+		cdata->ptr = old_cdata->ptr_holder;
 	} else if (type->size > old_type->size) {
 		zend_object_release(&cdata->std);
 		zend_throw_error(zend_ffi_exception_ce, "attempt to cast to larger type");
