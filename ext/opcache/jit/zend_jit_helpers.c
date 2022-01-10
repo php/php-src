@@ -1413,6 +1413,8 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 			ZVAL_NULL(result);
 			return;
 		}
+		SEPARATE_ARRAY(object_ptr);
+		arr = Z_ARRVAL_P(object_ptr);
 		zval *var;
 		if (dim) {
 			if (type == BP_VAR_W) {
@@ -1517,6 +1519,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 			}
 			return;
 		}
+		SEPARATE_ARRAY(object_ptr);
+		arr = Z_ARRVAL_P(object_ptr);
 		zval *var = dim
 			? zend_jit_fetch_dim_w_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
@@ -1595,6 +1599,8 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			zend_array_destroy(arr);
 			return;
 		}
+		SEPARATE_ARRAY(container);
+		arr = Z_ARRVAL_P(container);
 		zval *var = dim
 			? zend_jit_fetch_dim_rw_helper(arr, dim)
 			: zend_hash_next_index_insert_new(arr, &EG(uninitialized_zval));
@@ -2366,9 +2372,11 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 			return NULL;
 		}
 		if (Z_TYPE_P(val) == IS_FALSE) {
+			ZVAL_ARR(val, zend_new_array(8));
 			zend_false_to_array_deprecated();
+		} else {
+			ZVAL_ARR(val, zend_new_array(8));
 		}
-		ZVAL_ARR(val, zend_new_array(8));
 	}
 	return val;
 }
