@@ -1563,9 +1563,11 @@ PHP_FUNCTION(pcntl_rfork)
 		flags |= RFPROC;
 	}
 
+#ifdef RFTSIGZMB
 	if ((flags & RFTSIGZMB) != 0) {
 		flags |= RFTSIGFLAGS(csignal);
 	}
+#endif
 
 	pid = rfork(flags);
 
