@@ -38,6 +38,8 @@ PHP                                                                        NEWS
 - Standard:
   . Added support for rounding negative places in number_format().
     (Marc Bennewitz)
+  . Added usage of posix_spawn for proc_open when supported by OS. 
+    (Cristian Rodriguez)
 
 - Streams:
   . Implemented GH-11242 (_php_stream_copy_to_mem: Allow specifying a maximum
