@@ -1,5 +1,9 @@
 --TEST--
 GH-7896 (Environment vars may be mangled on Windows)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY !== "Windows") die("skip for Windows only");
+?>
 --ENV--
 FÖÖ=GüИter传
 --FILE--
