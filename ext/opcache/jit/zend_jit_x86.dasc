@@ -6135,7 +6135,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				if (tmp_reg == ZREG_R0) {
 					|	IF_NOT_REFCOUNTED ah, >3
 				} else {
-					|	IF_NOT_FLAGS Rd(tmp_reg), IS_TYPE_REFCOUNTED, >3
+					|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >3
 				}
 				|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
 
@@ -6150,7 +6150,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					if (tmp_reg == ZREG_R0) {
 						|	IF_NOT_REFCOUNTED ah, >2
 					} else {
-						|	IF_NOT_FLAGS Rd(tmp_reg), IS_TYPE_REFCOUNTED, >2
+						|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >2
 					}
 					|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
 					|	GC_ADDREF Ra(tmp_reg)
