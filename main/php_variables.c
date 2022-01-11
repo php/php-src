@@ -571,11 +571,15 @@ void _php_import_environment_variables(zval *array_ptr)
 		import_environment_variable(Z_ARRVAL_P(array_ptr), *env);
 	}
 #else
-	char *environment = GetEnvironmentStringsA();
-	for (char *env = environment; env != NULL && *env; env += strlen(env) + 1) {
-		import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+	wchar_t *environmentw = GetEnvironmentStringsW();
+	for (wchar_t *envw = environmentw; envw != NULL && *envw; envw += wcslen(envw) + 1) {
+		char *env = php_win32_cp_w_to_any(envw);
+		if (env != NULL) {
+			import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+			free(env);
+		}
 	}
-	FreeEnvironmentStringsA(environment);
+	FreeEnvironmentStringsW(environmentw);
 #endif
 
 	tsrm_env_unlock();
