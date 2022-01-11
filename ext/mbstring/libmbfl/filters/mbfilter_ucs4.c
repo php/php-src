@@ -320,10 +320,10 @@ static size_t mb_ucs4_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 		return mb_ucs4le_to_wchar(in, in_len, buf, bufsize, NULL);
 	} else if (*in_len >= 4) {
 		unsigned char *p = *in;
-		unsigned char c1 = *p++;
-		unsigned char c2 = *p++;
-		unsigned char c3 = *p++;
-		unsigned char c4 = *p++;
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
 		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
 
 		if (w == 0xFFFE0000) {
@@ -349,10 +349,10 @@ static size_t mb_ucs4be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *b
 	uint32_t *out = buf, *limit = buf + bufsize;
 
 	while (p < e && out < limit) {
-		unsigned char c1 = *p++;
-		unsigned char c2 = *p++;
-		unsigned char c3 = *p++;
-		unsigned char c4 = *p++;
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
 		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
 		*out++ = w;
 	}
@@ -393,10 +393,10 @@ static size_t mb_ucs4le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *b
 	uint32_t *out = buf, *limit = buf + bufsize;
 
 	while (p < e && out < limit) {
-		unsigned char c1 = *p++;
-		unsigned char c2 = *p++;
-		unsigned char c3 = *p++;
-		unsigned char c4 = *p++;
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
 		uint32_t w = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
 		*out++ = w;
 	}
