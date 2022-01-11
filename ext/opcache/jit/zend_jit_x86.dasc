@@ -6112,6 +6112,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 0);
 			} else {
 				zend_jit_addr ref_addr;
+				zend_reg type_reg = tmp_reg;
 
 				if (in_cold) {
 					|	IF_NOT_ZVAL_TYPE val_addr, IS_REFERENCE, >1
@@ -6120,21 +6121,24 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|.cold_code
 					|1:
 				}
-				if (Z_REG(val_addr) == ZREG_R2) {
-					|	mov aword T1, r2 // save
-				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 				|	GET_ZVAL_PTR r2, val_addr
 				|	GC_DELREF r2
 				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
 				ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 8);
 				if (!res_addr) {
-					|	ZVAL_COPY_VALUE var_addr, var_info, ref_addr, val_info, ZREG_R2, tmp_reg
+					|	ZVAL_COPY_VALUE var_addr, var_info, ref_addr, val_info, type_reg, tmp_reg
 				} else {
-					|	ZVAL_COPY_VALUE_2 var_addr, var_info, res_addr, ref_addr, val_info, ZREG_R2, tmp_reg
+					|	ZVAL_COPY_VALUE_2 var_addr, var_info, res_addr, ref_addr, val_info, type_reg, tmp_reg
 				}
 				|	je >2
-				|	IF_NOT_REFCOUNTED dh, >3
+				if (tmp_reg == ZREG_R0) {
+					|	IF_NOT_REFCOUNTED ah, >3
+				} else {
+					|	IF_NOT_FLAGS Rd(tmp_reg), IS_TYPE_REFCOUNTED, >3
+				}
+				|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
+
 				if (!res_addr) {
 					|	GC_ADDREF Ra(tmp_reg)
 				} else {
@@ -6143,17 +6147,19 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|	jmp >3
 				|2:
 				if (res_addr) {
-					|	IF_NOT_REFCOUNTED dh, >2
+					if (tmp_reg == ZREG_R0) {
+						|	IF_NOT_REFCOUNTED ah, >2
+					} else {
+						|	IF_NOT_FLAGS Rd(tmp_reg), IS_TYPE_REFCOUNTED, >2
+					}
+					|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
 					|	GC_ADDREF Ra(tmp_reg)
 					|2:
-				}
-				if (Z_REG(val_addr) == ZREG_R2) {
-					|	mov r2, aword T1 // restore
 				}
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
 				}
-				|	EFREE_REFERENCE aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
+				|	EFREE_REFERENCE r2
 				if (save_r1) {
 					|	mov FCARG1a, aword T1 // restore
 				}
