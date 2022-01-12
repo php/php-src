@@ -6290,9 +6290,7 @@ static int call_attribute_constructor(
 	zval *args, uint32_t argc, HashTable *named_params, zend_string *filename)
 {
 	zend_function *ctor = ce->constructor;
-	zend_execute_data *prev_execute_data, dummy_frame;
-	zend_function dummy_func;
-	zend_op dummy_opline;
+	zend_execute_data *call = NULL;
 	ZEND_ASSERT(ctor != NULL);
 
 	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
@@ -6303,31 +6301,43 @@ static int call_attribute_constructor(
 	if (filename) {
 		/* Set up dummy call frame that makes it look like the attribute was invoked
 		 * from where it occurs in the code. */
-		memset(&dummy_frame, 0, sizeof(zend_execute_data));
+		zend_function dummy_func;
+		zend_op *opline;
+
 		memset(&dummy_func, 0, sizeof(zend_function));
-		memset(&dummy_opline, 0, sizeof(zend_op));
 
-		prev_execute_data = EG(current_execute_data);
-		dummy_frame.prev_execute_data = prev_execute_data;
-		dummy_frame.func = &dummy_func;
-		dummy_frame.opline = &dummy_opline;
+		call = zend_vm_stack_push_call_frame_ex(
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
+			0, &dummy_func, 0, NULL);
 
-		dummy_func.type = ZEND_USER_FUNCTION;
-		dummy_func.common.fn_flags =
+		opline = (zend_op*)(call + 1);
+		memset(opline, 0, sizeof(zend_op));
+		opline->opcode = ZEND_DO_FCALL;
+		opline->lineno = attr->lineno;
+
+		call->opline = opline;
+		call->call = NULL;
+		call->return_value = NULL;
+		call->func = (zend_function*)(call->opline + 1);
+		call->prev_execute_data = EG(current_execute_data);
+
+		memset(call->func, 0, sizeof(zend_function));
+		call->func->type = ZEND_USER_FUNCTION;
+		call->func->op_array.fn_flags =
 			attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
-		dummy_func.common.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
-		dummy_func.op_array.filename = filename;
+		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
+		call->func->op_array.filename = filename;
 
-		dummy_opline.opcode = ZEND_DO_FCALL;
-		dummy_opline.lineno = attr->lineno;
-
-		EG(current_execute_data) = &dummy_frame;
+		EG(current_execute_data) = call;
 	}
 
 	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
 
 	if (filename) {
-		EG(current_execute_data) = prev_execute_data;
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
 	}
 
 	if (EG(exception)) {
