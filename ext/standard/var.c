@@ -406,6 +406,24 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
+/**
+ * Append a parseable string representation of a zend_string to the
+ * given smart_str.
+ */
+static void php_append_string_export(zend_string *src, smart_str *dest)
+{
+	zend_string *tmp_str;
+	zend_string *c = php_addcslashes(src, "'\\", 2);
+	tmp_str = php_str_to_str(ZSTR_VAL(c), ZSTR_LEN(c), "\0", 1, "' . \"\\0\" . '", 12);
+
+	smart_str_appendc(dest, '\'');
+	smart_str_append(dest, tmp_str);
+	smart_str_appendc(dest, '\'');
+
+	zend_string_free(tmp_str);
+	zend_string_free(c);
+}
+
 static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
@@ -414,18 +432,10 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
-		zend_string *tmp_str;
-		zend_string *ckey = php_addcslashes(key, "'\\", 2);
-		tmp_str = php_str_to_str(ZSTR_VAL(ckey), ZSTR_LEN(ckey), "\0", 1, "' . \"\\0\" . '", 12);
-
 		buffer_append_spaces(buf, level + 1);
 
-		smart_str_appendc(buf, '\'');
-		smart_str_append(buf, tmp_str);
-		smart_str_appendl(buf, "' => ", 5);
-
-		zend_string_free(ckey);
-		zend_string_free(tmp_str);
+		php_append_string_export(key, buf);
+		smart_str_appendl(buf, " => ", 4);
 	}
 	php_var_export_ex(zv, level + 2, buf);
 
@@ -463,7 +473,6 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
 	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
-	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
@@ -503,15 +512,7 @@ again:
 			}
 			break;
 		case IS_STRING:
-			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
-			ztmp2 = php_str_to_str(ZSTR_VAL(ztmp), ZSTR_LEN(ztmp), "\0", 1, "' . \"\\0\" . '", 12);
-
-			smart_str_appendc(buf, '\'');
-			smart_str_append(buf, ztmp2);
-			smart_str_appendc(buf, '\'');
-
-			zend_string_free(ztmp);
-			zend_string_free(ztmp2);
+			php_append_string_export(Z_STR_P(struc), buf);
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
