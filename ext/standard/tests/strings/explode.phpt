@@ -35,11 +35,11 @@ var_dump(explode(":^:","a lazy dog:^:jumps::over:^:",-2));
 --EXPECT--
 array (
   0 => 'a',
-  1 => 'b' . "\0" . 'd',
+  1 => "b\000d",
   2 => 'f',
   3 => '1',
   4 => 'd',
-)d6bee42a771449205344c0938ad4f035
+)569c3bc20f9c968527ba34d9bcd44e9b
 bool(false)
 bool(false)
 bool(false)

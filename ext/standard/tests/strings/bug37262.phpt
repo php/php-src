@@ -7,4 +7,4 @@ var_export($func);
 ?>
 --EXPECTF--
 Deprecated: Function create_function() is deprecated in %s on line %d
-'' . "\0" . 'lambda_%d'
+"\000lambda_%d"

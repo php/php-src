@@ -7,7 +7,7 @@ var_export($a);
 ?>
 --EXPECT--
 array (
-  '' . "\0" . '' => 'null',
+  "\000" => 'null',
   '' => 'empty',
   0 => 'nul',
 )
