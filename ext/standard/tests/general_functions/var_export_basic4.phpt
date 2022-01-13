@@ -78,9 +78,9 @@ string(8) "'string'"
 
 
 -- Iteration: "\0Hello\0 World\0" --
-'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''
-'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''
-string(49) "'' . "\0" . 'Hello' . "\0" . ' World' . "\0" . ''"
+"\000Hello\000 World\000"
+"\000Hello\000 World\000"
+string(25) ""\000Hello\000 World\000""
 
 
 -- Iteration: "NULL" --
@@ -114,9 +114,9 @@ string(3) "''"
 
 
 -- Iteration: "\0" --
-'' . "\0" . ''
-'' . "\0" . ''
-string(14) "'' . "\0" . ''"
+"\000"
+"\000"
+string(6) ""\000""
 
 
 -- Iteration: '\0' --

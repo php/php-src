@@ -5,4 +5,4 @@ Bug #37262 (var_export() does not escape \0 character)
 var_export("foo\0bar");
 ?>
 --EXPECT--
-'foo' . "\0" . 'bar'
+"foo\000bar"

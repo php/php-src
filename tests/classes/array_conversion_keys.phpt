@@ -12,7 +12,7 @@ var_export((array) new foo);
 ?>
 --EXPECT--
 array (
-  '' . "\0" . 'foo' . "\0" . 'private' => 'private',
-  '' . "\0" . '*' . "\0" . 'protected' => 'protected',
+  "\000foo\000private" => 'private',
+  "\000*\000protected" => 'protected',
   'public' => 'public',
 )
