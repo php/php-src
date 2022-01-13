@@ -412,16 +412,40 @@ PHP_FUNCTION(debug_zval_dump)
  */
 static void php_append_string_export(zend_string *src, smart_str *dest)
 {
-	zend_string *tmp_str;
-	zend_string *c = php_addcslashes(src, "'\\", 2);
-	tmp_str = php_str_to_str(ZSTR_VAL(c), ZSTR_LEN(c), "\0", 1, "' . \"\\0\" . '", 12);
+	if (memchr(ZSTR_VAL(src), '\0', ZSTR_LEN(src)) == NULL) {
+		/* there are no NUL bytes: we can use single quotes,
+		   and escape only backslashes and single quotes
+		   within the value */
 
-	smart_str_appendc(dest, '\'');
-	smart_str_append(dest, tmp_str);
-	smart_str_appendc(dest, '\'');
+		zend_string *c = php_addcslashes(src, "'\\", 2);
 
-	zend_string_free(tmp_str);
-	zend_string_free(c);
+		smart_str_appendc(dest, '\'');
+		smart_str_append(dest, c);
+		smart_str_appendc(dest, '\'');
+
+		zend_string_free(c);
+	} else {
+		/* there is at least one NUL byte: as these cannot be
+		   represented in single-quoted strings, we need to
+		   use double quotes, which requires escaping the
+		   dollar sign, and of course all NUL bytes */
+
+		zend_string *tmp_str;
+		zend_string *c = php_addcslashes(src, "\"\\$", 3);
+
+		/* NUL bytes are a special case; usually, they can be
+		   escaped with just "\0", but that abbreviation only
+		   works only if no digit follows; to be safe, we use
+		   the full octal representation with three digits */
+		tmp_str = php_str_to_str(ZSTR_VAL(c), ZSTR_LEN(c), "\0", 1, "\\000", 4);
+
+		smart_str_appendc(dest, '"');
+		smart_str_append(dest, tmp_str);
+		smart_str_appendc(dest, '"');
+
+		zend_string_free(tmp_str);
+		zend_string_free(c);
+	}
 }
 
 static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
