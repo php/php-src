@@ -1665,6 +1665,11 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->result_type != IS_UNUSED) {
 						break;
 					}
+					if (op3_type != IS_UNKNOWN
+					 && !zend_jit_supported_binary_op(
+							opline->extended_value, MAY_BE_ANY, (1<<op3_type))) {
+						break;
+					}
 					ZEND_FALLTHROUGH;
 				case ZEND_ASSIGN_DIM:
 					if (opline->op1_type == IS_CV) {
