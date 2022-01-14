@@ -3332,7 +3332,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 						intervals[use]->used_as_hint = NULL;
 						intervals[use]->list_next = NULL;
 					}
-				} else if (intervals[use] && !ssa->vars[phi->ssa_var].no_val) {
+				} else if (intervals[use]
+						&& (!ssa->vars[def].no_val
+							|| ssa->var_info[def].type != ssa->var_info[use].type)) {
 					if (ssa->vars[use].use_chain >= 0) {
 						intervals[use]->flags |= ZREG_STORE;
 					} else {
