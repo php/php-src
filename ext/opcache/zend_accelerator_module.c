@@ -165,7 +165,12 @@ static ZEND_INI_MH(OnUpdateJit)
 static ZEND_INI_MH(OnUpdateJitDebug)
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
 		*p = val;
@@ -176,7 +181,13 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 
 static ZEND_INI_MH(OnUpdateCounter)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
 	if (val >= 0 && val < 256) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -188,7 +199,13 @@ static ZEND_INI_MH(OnUpdateCounter)
 
 static ZEND_INI_MH(OnUpdateUnrollC)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -201,7 +218,13 @@ static ZEND_INI_MH(OnUpdateUnrollC)
 
 static ZEND_INI_MH(OnUpdateUnrollR)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
 	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -214,7 +237,13 @@ static ZEND_INI_MH(OnUpdateUnrollR)
 
 static ZEND_INI_MH(OnUpdateUnrollL)
 {
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_LOOPS_UNROLL) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;

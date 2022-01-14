@@ -1268,6 +1268,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
 	int int_value;
 	char *ini_value;
+	zend_string *errstr = NULL;
 	if (new_value == NULL) {
 		return FAILURE;
 	}
@@ -1277,7 +1278,11 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else if (zend_string_equals_literal_ci(new_value, "on")) {
 		int_value = 1;
 	} else {
-		int_value = zend_atoi(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		int_value = (int) zend_ini_parse_quantity(new_value, &errstr);
+		if (errstr) {
+			zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+			zend_string_release(errstr);
+		}
 	}
 	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
 

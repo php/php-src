@@ -262,8 +262,13 @@ static PHP_INI_MH(OnSetSerializePrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
+	zend_string *errstr;
 	if (new_value) {
-		value = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		value = zend_ini_parse_quantity(new_value, &errstr);
+		if (errstr) {
+			zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+			zend_string_release(errstr);
+		}
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}

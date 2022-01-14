@@ -546,7 +546,10 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 
 	/* Ignore trailing whitespace */
 	while (str_len && ZEND_IS_WHITESPACE(str[str_len-1])) --str_len;
-	if (!str_len) return 0;
+	if (!str_len) {
+		*errstr = NULL;
+		return 0;
+	}
 
 	/* Perform following multiplications on unsigned to avoid overflow UB.
 	 * For now overflow is silently ignored -- not clear what else can be
@@ -565,7 +568,10 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	while (ZEND_IS_WHITESPACE(*digits_end)) ++digits_end;
 
 	/* No exponent suffix. */
-	if (!*digits_end) return retval;
+	if (!*digits_end) {
+		*errstr = NULL;
+		return retval;
+	}
 
 	if (str_len>0) {
 		switch (str[str_len-1]) {
@@ -593,8 +599,10 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 		/* More than one character in suffix */
 		*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s', interpreting as '%.*s%c' for backwards compatibility",
 						(int)str_len, str, (int)(digits_end - str), str, str[str_len-1]);
+		return (zend_long) retval;
 	}
 
+	*errstr = NULL;
 	return (zend_long) retval;
 }
 /* }}} */
@@ -687,14 +695,24 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
-	*p = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	*p = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
-	zend_long tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_string *errstr;
+	zend_long tmp = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 	if (tmp < 0) {
 		return FAILURE;
 	}

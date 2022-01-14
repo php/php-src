@@ -99,16 +99,16 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str);
  * The digits are parsed as decimal unless the first character is '0', in which
  * case they are parsed as octal.
  *
- * Whitespaces before and after the digits portion are ignored.
+ * Whitespaces before and after the multiplier are ignored.
  *
- * For backwards compatibility, invalid values are handled as follows:
+ * For backwards compatibility, ill-formatted values are handled as follows:
  * - No leading digits: value is treated as '0'
  * - Invalid multiplier: multiplier is ignored
  * - Invalid characters between digits and multiplier: invalid characters are
  *   ignored
  *
- * In all of these cases an error string is stored in *errstr (caller must
- * release it).
+ * In any of these cases an error string is stored in *errstr (caller must
+ * release it), otherwise *errstr is set to NULL.
  */
 ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
 

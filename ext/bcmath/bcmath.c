@@ -61,8 +61,13 @@ ZEND_INI_MH(OnUpdateScale)
 {
 	int *p;
 	zend_long tmp;
+	zend_string *errstr;
 
-	tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	tmp = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 	if (tmp < 0 || tmp > INT_MAX) {
 		return FAILURE;
 	}

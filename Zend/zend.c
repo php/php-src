@@ -145,8 +145,13 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+	zend_string *errstr;
 
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity(new_value, &errstr);
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -175,8 +180,13 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
+	zend_string *errstr;
 	if (new_value) {
-		EG(fiber_stack_size) = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		EG(fiber_stack_size) = zend_ini_parse_quantity(new_value, &errstr);
+		if (errstr) {
+			zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
+			zend_string_release(errstr);
+		}
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
