@@ -30,6 +30,8 @@ static HashTable *registered_zend_ini_directives;
 #define NO_VALUE_PLAINTEXT		"no value"
 #define NO_VALUE_HTML			"<i>no value</i>"
 
+#define ZEND_IS_WHITESPACE(c) (((c) == ' ') || ((c) == '\t') || ((c) == '\n') || ((c) == '\r') || ((c) == '\v') || ((c) == '\f'))
+
 /*
  * hash_apply functions
  */
@@ -535,6 +537,67 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str)
 		return atoi(ZSTR_VAL(str)) != 0;
 	}
 }
+
+ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
+{
+	char *digits_end = NULL;
+	char *str = ZSTR_VAL(value);
+	size_t str_len = ZSTR_LEN(value);
+
+	/* Ignore trailing whitespace */
+	while (str_len && ZEND_IS_WHITESPACE(str[str_len-1])) --str_len;
+	if (!str_len) return 0;
+
+	/* Perform following multiplications on unsigned to avoid overflow UB.
+	 * For now overflow is silently ignored -- not clear what else can be
+	 * done here, especially as the final result of this function may be
+	 * used in an unsigned context (e.g. "memory_limit=3G", which overflows
+	 * zend_long on 32-bit, but not size_t). */
+	zend_ulong retval = (zend_ulong) ZEND_STRTOL(str, &digits_end, 0);
+
+	if (digits_end == str) {
+		*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s': no valid leading digits, interpreting as '0' for backwards compatibility",
+						(int)str_len, str);
+		return 0;
+	}
+
+	/* Allow for whitespace between integer portion and any suffix character */
+	while (ZEND_IS_WHITESPACE(*digits_end)) ++digits_end;
+
+	/* No exponent suffix. */
+	if (!*digits_end) return retval;
+
+	if (str_len>0) {
+		switch (str[str_len-1]) {
+			case 'g':
+			case 'G':
+				retval *= 1024;
+				ZEND_FALLTHROUGH;
+			case 'm':
+			case 'M':
+				retval *= 1024;
+				ZEND_FALLTHROUGH;
+			case 'k':
+			case 'K':
+				retval *= 1024;
+				break;
+		default:
+			/* Unknown suffix */
+			*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s': unknown multipler '%c', interpreting as '%.*s' for backwards compatibility",
+						(int)str_len, str, str[str_len-1], (int)(digits_end - str), str);
+			return retval;
+		}
+	}
+
+	if (digits_end < &str[str_len-1]) {
+		/* More than one character in suffix */
+		*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s', interpreting as '%.*s%c' for backwards compatibility",
+						(int)str_len, str, (int)(digits_end - str), str, str[str_len-1]);
+	}
+
+	return (zend_long) retval;
+}
+/* }}} */
 
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {

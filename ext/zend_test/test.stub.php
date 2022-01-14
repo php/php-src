@@ -125,6 +125,8 @@ namespace {
     function zend_get_current_func_name(): string {}
 
     function zend_call_method(object|string $obj_or_class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
+
+    function zend_test_zend_ini_parse_quantity(string $str): int {}
 }
 
 namespace ZendTestNS {

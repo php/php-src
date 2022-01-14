@@ -380,6 +380,23 @@ static ZEND_FUNCTION(zend_get_unit_enum)
 	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
 }
 
+static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
+{
+	zend_string *str;
+	zend_string *errstr = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_ini_parse_quantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", errstr);
+		zend_string_release(errstr);
+	}
+}
+
 static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

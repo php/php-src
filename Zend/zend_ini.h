@@ -90,6 +90,28 @@ ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API bool zend_ini_parse_bool(zend_string *str);
 
+/**
+ * Parses a quantity
+ *
+ * value must be a string of digits optionally followed by a multiplier
+ * character K, M, or G (for 2**10, 2**20, and 2**30, respectively).
+ *
+ * The digits are parsed as decimal unless the first character is '0', in which
+ * case they are parsed as octal.
+ *
+ * Whitespaces before and after the digits portion are ignored.
+ *
+ * For backwards compatibility, invalid values are handled as follows:
+ * - No leading digits: value is treated as '0'
+ * - Invalid multiplier: multiplier is ignored
+ * - Invalid characters between digits and multiplier: invalid characters are
+ *   ignored
+ *
+ * In all of these cases an error string is stored in *errstr (caller must
+ * release it).
+ */
+ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr);
+
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
