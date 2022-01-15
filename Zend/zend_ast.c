@@ -495,7 +495,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 		case ZEND_AST_CONCAT_LIST: {
 			/* Handle `a . b . ...` */
 			zend_ast_list *ast_list = (zend_ast_list *)ast;
-			if (UNEXPECTED(zend_ast_evaluate(&op2, ast_list->child[0], scope) != SUCCESS)) {
+			if (UNEXPECTED(zend_ast_evaluate(&op1, ast_list->child[0], scope) != SUCCESS)) {
 				return FAILURE;
 			}
 			zval tmp;
