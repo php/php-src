@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlTimeZone
 {
     private function __construct() {}
