@@ -489,8 +489,33 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 {
 	zval op1, op2;
 	zend_result ret = SUCCESS;
+	uint32_t i;
 
 	switch (ast->kind) {
+		case ZEND_AST_CONCAT_LIST: {
+			/* Handle `a . b . ...` */
+			zend_ast_list *ast_list = (zend_ast_list *)ast;
+			if (UNEXPECTED(zend_ast_evaluate(&op2, ast_list->child[0], scope) != SUCCESS)) {
+				return FAILURE;
+			}
+			zval tmp;
+			for (i = 1; i < ast_list->children; i++) {
+				if (UNEXPECTED(zend_ast_evaluate(&op2, ast_list->child[i], scope) != SUCCESS)) {
+					zval_ptr_dtor_nogc(&op1);
+					return FAILURE;
+				}
+				/* TODO: Optimize once the approach is reviewed/approved to avoid repeated string copies for many concatenations. */
+				ret = concat_function(&tmp, &op1, &op2);
+				zval_ptr_dtor_nogc(&op1);
+				zval_ptr_dtor_nogc(&op2);
+				if (ret == FAILURE) {
+					return FAILURE;
+				}
+				ZVAL_COPY_VALUE(&op1, &tmp);
+			}
+			ZVAL_COPY_VALUE(result, &tmp);
+			break;
+		}
 		case ZEND_AST_BINARY_OP:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
@@ -1983,6 +2008,16 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_ASSIGN_COALESCE: BINARY_OP(" \?\?= ", 90, 91, 90);
+		case ZEND_AST_CONCAT_LIST: {
+			zend_ast_list *list = (zend_ast_list *)ast;
+			for (uint32_t i = 0; i < list->children; i++) {
+				if (i != 0) {
+					smart_str_appends(str, " . ");
+				}
+				zend_ast_export_ex(str, list->child[i], priority, indent);
+			}
+			break;
+		}
 		case ZEND_AST_BINARY_OP:
 			switch (ast->attr) {
 				case ZEND_ADD:                 BINARY_OP(" + ",   200, 200, 201);

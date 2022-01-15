@@ -8591,6 +8591,27 @@ static void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static zend_ast *zend_compile_create_balanced_binary_op_tree(zend_ast **children, uint32_t n) {
+	if (n == 1) {
+		return children[0];
+	} else if (n == 2) {
+		return zend_ast_create_binary_op(ZEND_CONCAT, children[0], children[1]);
+	}
+	ZEND_ASSERT(n > 1);
+
+	uint32_t midpoint = n/2;
+	return zend_ast_create_binary_op(ZEND_CONCAT,
+			zend_compile_create_balanced_binary_op_tree(children, midpoint),
+			zend_compile_create_balanced_binary_op_tree(&children[midpoint], n - midpoint));
+}
+
+static void zend_compile_concat_list(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+	zend_ast *node = zend_compile_create_balanced_binary_op_tree(list->child, list->children);
+	zend_compile_binary_op(result, node);
+}
+
 /* We do not use zend_compile_binary_op for this because we want to retain the left-to-right
  * evaluation order. */
 static void zend_compile_greater(znode *result, zend_ast *ast) /* {{{ */
@@ -9628,6 +9649,7 @@ static void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 {
 	return kind == ZEND_AST_ZVAL || kind == ZEND_AST_BINARY_OP
+		|| kind == ZEND_AST_CONCAT_LIST
 		|| kind == ZEND_AST_GREATER || kind == ZEND_AST_GREATER_EQUAL
 		|| kind == ZEND_AST_AND || kind == ZEND_AST_OR
 		|| kind == ZEND_AST_UNARY_OP
@@ -10049,6 +10071,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ASSIGN_OP:
 			zend_compile_compound_assign(result, ast);
 			return;
+		case ZEND_AST_CONCAT_LIST:
+			zend_compile_concat_list(result, ast);
+			return;
 		case ZEND_AST_BINARY_OP:
 			zend_compile_binary_op(result, ast);
 			return;
@@ -10236,6 +10261,28 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	switch (ast->kind) {
+		case ZEND_AST_CONCAT_LIST: {
+			zend_ast_list *list = zend_ast_get_list(ast);
+			ZEND_ASSERT(list->children >= 2);
+			for (uint32_t i = 0; i < list->children; i++) {
+				ZEND_ASSERT(list->child[i] != NULL);
+				zend_eval_const_expr(&list->child[i]);
+				if (list->child[i]->kind != ZEND_AST_ZVAL) {
+					return;
+				}
+			}
+			zval op1;
+			ZVAL_COPY(&op1, zend_ast_get_zval(list->child[0]));
+			for (uint32_t i = 1; i < list->children; i++) {
+				bool success = zend_try_ct_eval_binary_op(&result, ZEND_CONCAT, &op1, zend_ast_get_zval(list->child[i]));
+				zval_ptr_dtor_nogc(&op1);
+				if (!success) {
+					return;
+				}
+				ZVAL_COPY_VALUE(&op1, &result);
+			}
+			break;
+		}
 		case ZEND_AST_BINARY_OP:
 			zend_eval_const_expr(&ast->child[0]);
 			zend_eval_const_expr(&ast->child[1]);

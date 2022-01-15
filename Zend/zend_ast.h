@@ -66,6 +66,7 @@ enum _zend_ast_kind {
 	ZEND_AST_ATTRIBUTE_LIST,
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
+	ZEND_AST_CONCAT_LIST,
 
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -360,6 +361,13 @@ static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, z
 }
 static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast *op0) {
 	return zend_ast_create_ex(ZEND_AST_CAST, type, op0);
+}
+static zend_always_inline zend_ast *zend_ast_create_concat_list(zend_ast *op0, zend_ast *op1) {
+	if (op0->kind == ZEND_AST_CONCAT_LIST) {
+		/* Reallocate this list with more elements */
+		return zend_ast_list_add(op0, op1);
+	}
+	return zend_ast_create_list_2(ZEND_AST_CONCAT_LIST, op0, op1);
 }
 static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	zend_ast_list *list = zend_ast_get_list(ast);
