@@ -424,18 +424,12 @@ zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1) {
 	if (op0->kind == ZEND_AST_ZVAL && op1->kind == ZEND_AST_ZVAL) {
 		zval *zv0 = zend_ast_get_zval(op0);
 		zval *zv1 = zend_ast_get_zval(op1);
-		if (zend_binary_op_produces_error(ZEND_CONCAT, zv0, zv1)) {
-			goto create_binary_op;
+		if (!zend_binary_op_produces_error(ZEND_CONCAT, zv0, zv1) &&
+				concat_function(zv0, zv0, zv1) == SUCCESS) {
+			zval_ptr_dtor_nogc(zv1);
+			return zend_ast_create_zval(zv0);
 		}
-
-		/* concat_function is optimized for result == op1 and will extend the already created string. */
-		if (concat_function(zv0, zv0, zv1) == FAILURE) {
-			goto create_binary_op;
-		}
-		zval_ptr_dtor_nogc(zv1);
-		return zend_ast_create_zval(zv0);
 	}
-create_binary_op:
 	return zend_ast_create_binary_op(ZEND_CONCAT, op0, op1);
 }
 
