@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-7899 (Regression in unpack for negative int value). (Remi)
+  . Fixed bug GH-7875 (mails are sent even if failure to log throws exception).
+    (cmb)
 
 06 Jan 2022, PHP 8.1.2RC1
 
