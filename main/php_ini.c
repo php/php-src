@@ -686,8 +686,9 @@ int php_init_config(void)
 					if (VCWD_STAT(ini_file, &sb) == 0) {
 						if (S_ISREG(sb.st_mode)) {
 							zend_file_handle fh;
-							zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
-							if (fh.handle.fp) {
+							FILE *file = VCWD_FOPEN(ini_file, "r");
+							if (file) {
+								zend_stream_init_fp(&fh, file, ini_file);
 								if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash) == SUCCESS) {
 									/* Here, add it to the list of ini files read */
 									l = (int)strlen(ini_file);
@@ -695,8 +696,8 @@ int php_init_config(void)
 									p = estrndup(ini_file, l);
 									zend_llist_add_element(&scanned_ini_list, &p);
 								}
+								zend_destroy_file_handle(&fh);
 							}
-							zend_destroy_file_handle(&fh);
 						}
 					}
 					free(namelist[i]);
