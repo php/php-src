@@ -214,7 +214,10 @@ static void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
 	switch (fh->type) {
 		case ZEND_HANDLE_FP:
-			fclose(fh->handle.fp);
+			if (fh->handle.fp) {
+				fclose(fh->handle.fp);
+				fh->handle.fp = NULL;
+			}
 			break;
 		case ZEND_HANDLE_STREAM:
 			if (fh->handle.stream.closer && fh->handle.stream.handle) {
