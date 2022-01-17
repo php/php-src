@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81430 (Attribute instantiation leaves dangling pointer).
     (beberlei)
+  . Fixed bug GH-7896 (Environment vars may be mangled on Windows). (cmb)
 
 - FFI:
   . Fixed bug GH-7867 (FFI::cast() from pointer to array is broken). (cmb,
