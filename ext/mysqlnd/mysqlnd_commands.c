@@ -647,7 +647,14 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 
 	conn->thread_id			= greet_packet.thread_id;
 	conn->protocol_version	= greet_packet.protocol_version;
-	conn->server_version	= mnd_pestrdup(greet_packet.server_version, conn->persistent);
+
+#define MARIA_DB_VERSION_HACK_PREFIX "5.5.5-"
+	char *p = greet_packet.server_version;
+	if (!strncmp(p, MARIA_DB_VERSION_HACK_PREFIX, sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1)) {
+		p += sizeof(MARIA_DB_VERSION_HACK_PREFIX)-1;
+	}
+	conn->server_version	= mnd_pestrdup(p, conn->persistent);
+#undef MARIA_DB_VERSION_HACK_PREFIX
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	if (!conn->greet_charset) {
