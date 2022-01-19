@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 267199a0a3532b5acf1d700f14329cdb2f2db0e1 */
+ * Stub hash: f72f108e37541ac042bb25249ef226211c344189 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, IntlBreakIterator, 0)
 ZEND_END_ARG_INFO()
@@ -24,6 +24,7 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 
 	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlIterator);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

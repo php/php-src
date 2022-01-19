@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class Spoofchecker
 {
     public function __construct() {}

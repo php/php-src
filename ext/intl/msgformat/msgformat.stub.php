@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class MessageFormatter
 {
     public function __construct(string $locale, string $pattern) {}
