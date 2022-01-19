@@ -33,7 +33,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true): array|false {}
 
     /** @tentative-return-type */
-    public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false): ?SimpleXMLElement {}
+    public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false): SimpleXMLElement {}
 
     /** @tentative-return-type */
     public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false): ?SimpleXMLElement {}
