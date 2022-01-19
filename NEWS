@@ -26,7 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-7875 (mails are sent even if failure to log throws exception).
     (cmb)
 
-06 Jan 2022, PHP 8.1.2RC1
+20 Jan 2022, PHP 8.1.2
 
 - Core:
   . Fixed bug #81216 (Nullsafe operator leaks dynamic property name). (Dmitry)
