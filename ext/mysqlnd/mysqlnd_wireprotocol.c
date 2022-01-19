@@ -41,6 +41,8 @@ const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
 #define ERROR_MARKER 0xFF
 #define EODATA_MARKER 0xFE
 
+#define MARIADB_RPL_VERSION_HACK "5.5.5-"
+
 /* {{{ mysqlnd_command_to_text */
 const char * const mysqlnd_command_to_text[COM_END] =
 {
@@ -368,6 +370,11 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		}
 		DBG_RETURN(PASS);
 	}
+
+	/* MariaDB always sends 5.5.5 before version string: 5.5.5 was never released,
+		so just ignore it */
+	if (!strncmp((char *) p, MARIADB_RPL_VERSION_HACK, sizeof(MARIADB_RPL_VERSION_HACK) - 1))
+		p+= sizeof(MARIADB_RPL_VERSION_HACK) - 1;
 
 	packet->server_version = estrdup((char *)p);
 	p+= strlen(packet->server_version) + 1; /* eat the '\0' */

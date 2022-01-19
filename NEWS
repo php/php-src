@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-7902 (mb_send_mail may delimit headers with LF only). (cmb)
 
+- MySQLnd:
+  . Fixed bug GH-7972 (MariaDB version prefix 5.5.5- is not stripped). (Kamil Tekiela)
+
 - pcntl:
   . Fixed pcntl_rfork build for DragonFlyBSD. (David Carlier)
 
