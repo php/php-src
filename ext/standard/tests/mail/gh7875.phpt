@@ -1,5 +1,18 @@
 --TEST--
 GH-7875 (mails are sent even if failure to log throws exception)
+--SKIPIF--
+<?php
+$filename = __DIR__ . "/gh7875.mail.log";
+touch($filename);
+chmod($filename, 0444);
+if (@file_put_contents($filename, "foo")) {
+    unlink($filename);
+}
+$contents = file_get_contents($filename);
+chmod($filename, 0644);
+unlink($filename);
+if ($contents === "foo") die("skip cannot make file read-only");
+?>
 --INI--
 sendmail_path={MAIL:{PWD}/gh7875.mail.out}
 mail.log={PWD}/gh7875.mail.log
