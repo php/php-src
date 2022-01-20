@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 44bc7b87c0b6c674bf94764b3f036006e3933713 */
+ * Stub hash: d595f5c582996ebb96ab39df8cb56c4cf6c8dfcf */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MessageFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -81,6 +81,7 @@ static zend_class_entry *register_class_MessageFormatter(void)
 
 	INIT_CLASS_ENTRY(ce, "MessageFormatter", class_MessageFormatter_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7be0e49d2b898587c4bbefaaf613932ae4786c52 */
+ * Stub hash: 0096dc9e60e2256054d23344e024df1d6527a5fa */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -291,6 +291,7 @@ static zend_class_entry *register_class_IntlCalendar(void)
 
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", class_IntlCalendar_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -301,6 +302,7 @@ static zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *
 
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", class_IntlGregorianCalendar_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlCalendar);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3f945431687a2f45b0ec8c3a6435ef68008c75ad */
+ * Stub hash: 2ec7a46ca205dfeb9ef0dc3c8e8d78bce1cf43be */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -169,6 +169,7 @@ static zend_class_entry *register_class_IntlTimeZone(void)
 
 	INIT_CLASS_ENTRY(ce, "IntlTimeZone", class_IntlTimeZone_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

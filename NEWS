@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Update all grandfathered language tags with preferred values
+  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
 
 - OCI8:
   . Added oci8.prefetch_lob_size directive to tune LOB query performance

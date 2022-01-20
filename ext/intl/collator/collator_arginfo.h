@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4baf9586ab91f37facc865cf1b3aa6a87e5d732d */
+ * Stub hash: c2e08f16cdc3d64e82fc277b4a59250d4b19c84e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -96,6 +96,7 @@ static zend_class_entry *register_class_Collator(void)
 
 	INIT_CLASS_ENTRY(ce, "Collator", class_Collator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
