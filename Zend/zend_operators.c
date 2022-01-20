@@ -2137,7 +2137,6 @@ ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar e
 	zval ret;
 	int retVal;
 	int result;
-	zend_function *op_handler;
 	if (Z_TYPE_P(op1) == IS_OBJECT &&
 		Z_TYPE_P(op2) == IS_OBJECT &&
 		Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
