@@ -5,9 +5,7 @@ GH-7875 (mails are sent even if failure to log throws exception)
 $filename = __DIR__ . "/gh7875.mail.log";
 touch($filename);
 chmod($filename, 0444);
-if (@file_put_contents($filename, "foo")) {
-    unlink($filename);
-}
+@file_put_contents($filename, "foo");
 $contents = file_get_contents($filename);
 chmod($filename, 0644);
 unlink($filename);
