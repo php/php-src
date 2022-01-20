@@ -5,6 +5,7 @@ chmod(0444) makes a file read-only
 $filename = __DIR__ . "/what.txt";
 var_dump(touch($filename));
 var_dump(chmod($filename, 0444));
+clearstatcache();
 var_dump(decoct(fileperms($filename)));
 var_dump(file_put_contents($filename, "foo"));
 var_dump(file_get_contents($filename));
