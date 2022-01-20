@@ -9,6 +9,7 @@ clearstatcache();
 var_dump(decoct(fileperms($filename)));
 var_dump(file_put_contents($filename, "foo"));
 var_dump(file_get_contents($filename));
+var_dump(file_get_contents("/etc/rc.conf"));
 ?>
 --CLEAN--
 <?php
