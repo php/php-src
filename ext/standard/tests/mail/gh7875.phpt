@@ -14,7 +14,10 @@ function exception_error_handler($severity, $message, $file, $line) {
 set_error_handler("exception_error_handler");
 
 touch(__DIR__ . "/gh7875.mail.log");
-chmod(__DIR__ . "/gh7875.mail.log", 0444);
+var_dump(chmod(__DIR__ . "/gh7875.mail.log", 0444));
+var_dump(fileperms(__DIR__ . "/gh7875.mail.log"));
+var_dump(file_put_contents(__DIR__ . "/gh7875.mail.log", "foo"));
+var_dump(file_get_contents(__DIR__ . "/gh7875.mail.log"));
 
 try {
 	mail('recipient@example.com', 'Subject', 'Body', []);
