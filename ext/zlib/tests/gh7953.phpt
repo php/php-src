@@ -1,5 +1,5 @@
 --TEST--
-GH-7953 (ob_clean() only does not set Content-Encoding)
+GH-7953 (ob_clean() only may not set Content-* header)
 --SKIPIF--
 <?php
 if (!extension_loaded("zlib")) die("skip zlib extension not available");
