@@ -2168,11 +2168,7 @@ op2_equals_handler:
 			}
 			return retVal;
 		} else {
-			if (Z_TYPE_P(op2) == IS_OBJECT) {
-				goto op2_equals_handler;
-			} else {
-				goto default_equals_handler;
-			}
+			goto default_equals_handler;
 		}
 	} else {
 default_equals_handler:
