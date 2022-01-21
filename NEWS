@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed ext/sockets build on Haiku. (David Carlier)
+  . Fixed bug GH-7978 (sockets extension compilation errors). (David Carlier)
 
 - Standard:
   . Fixed bug GH-7875 (mails are sent even if failure to log throws exception).
