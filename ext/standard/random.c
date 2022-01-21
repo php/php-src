@@ -36,6 +36,7 @@
 # endif
 #endif
 #if HAVE_COMMONCRYPTO_COMMONRANDOM_H
+# include <CommonCrypto/CommonCryptoError.h>
 # include <CommonCrypto/CommonRandom.h>
 #endif
 
