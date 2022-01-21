@@ -7,9 +7,10 @@ var_dump(touch($filename));
 var_dump(chmod($filename, 0444));
 clearstatcache();
 var_dump(decoct(fileperms($filename)));
+clearstatcache();
+var_dump(is_writable($filename));
 var_dump(file_put_contents($filename, "foo"));
 var_dump(file_get_contents($filename));
-var_dump(file_get_contents("/etc/rc.conf"));
 ?>
 --CLEAN--
 <?php
@@ -20,6 +21,7 @@ var_dump(file_get_contents("/etc/rc.conf"));
 bool(true)
 bool(true)
 string(6) "100444"
+bool(false)
 
 Warning: file_put_contents(%swhat.txt): Failed to open stream: Permission denied in %s on line %d
 bool(false)
