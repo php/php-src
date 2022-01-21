@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9316 ($http_response_header is wrong for long status line).
     (cmb, timwolla)
 
+- XML:
+  . Added libxml_get_external_entity_loader() function. (Tim Starling)
+
 18 Aug 2022, PHP 8.2.0beta3
 
 - Core:

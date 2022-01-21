@@ -251,6 +251,9 @@ PHP 8.2 UPGRADE NOTES
     ini_parse_quantity(). The `memory_limit` setting accepts values higher than
     PHP_INT_MAX, than can not be parsed by ini_parse_quantity().
 
+- XML:
+  . libxml_get_external_entity_loader()
+
 ========================================
 7. New Classes and Interfaces
 ========================================

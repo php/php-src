@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d0c03ca63f0403ea38a59bde94510715e993b423 */
+ * Stub hash: 8fa6f4fa2f3eb8db944626b5b3d814f5e3ae04a3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -26,6 +26,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_external_entity_loade
 	ZEND_ARG_TYPE_INFO(0, resolver_function, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_get_external_entity_loader, 0, 0, IS_CALLABLE, 1)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(libxml_set_streams_context);
 ZEND_FUNCTION(libxml_use_internal_errors);
@@ -34,6 +37,7 @@ ZEND_FUNCTION(libxml_get_errors);
 ZEND_FUNCTION(libxml_clear_errors);
 ZEND_FUNCTION(libxml_disable_entity_loader);
 ZEND_FUNCTION(libxml_set_external_entity_loader);
+ZEND_FUNCTION(libxml_get_external_entity_loader);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -44,6 +48,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
 	ZEND_DEP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
 	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
+	ZEND_FE(libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader)
 	ZEND_FE_END
 };
 
