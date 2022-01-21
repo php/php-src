@@ -221,6 +221,9 @@ PHP 8.2 UPGRADE NOTES
 - Curl:
   . curl_upkeep() (libcurl >= 7.62.0)
 
+- libxml:
+  . libxml_get_external_entity_loader()
+
 - mysqli:
   . mysqli_execute_query()
 
