@@ -300,6 +300,30 @@ testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');
 testSJISVariant($kddi,     $nonInvertible,         'SJIS-Mobile#KDDI');
 testSJISVariant($softbank, $nonInvertibleSoftbank, 'SJIS-Mobile#SOFTBANK');
 
+// Regression test for problem with not allocating enough space in output buffer
+// This occurred when the input string was shorter than the output
+convertValidString("\xA9\xA9\xA9\xA9", "\xF9\xD6\xF9\xD6\xF9\xD6\xF9\xD6", '8bit', 'SJIS-Mobile#DOCOMO');
+convertValidString("\xA9\xA9\xA9\xA9", "\xF7\x74\xF7\x74\xF7\x74\xF7\x74", '8bit', 'SJIS-Mobile#KDDI');
+convertValidString("\xA9\xA9\xA9\xA9", "\xF7\xEE\xF7\xEE\xF7\xEE\xF7\xEE", '8bit', 'SJIS-Mobile#SOFTBANK');
+
+// Regression test: Old implementation used to drop digits (0-9) and hash (#) if
+// they appeared at end of input string
+for ($i = ord('0'); $i <= ord('9'); $i++) {
+  convertValidString("abc" . chr($i), "abc" . chr($i), 'UTF-8', 'SJIS-Mobile#DOCOMO');
+  convertValidString("abc" . chr($i), "abc" . chr($i), 'UTF-8', 'SJIS-Mobile#KDDI');
+  convertValidString("abc" . chr($i), "abc" . chr($i), 'UTF-8', 'SJIS-Mobile#SOFTBANK');
+}
+
+// Regression test: Originally, new implementation also did not handle 0-9 and hash
+// followed by U+20E3 (keycap modifier) correctly if the 0-9 or hash occurred at
+// the very end of one buffer of wchars, and the keycap modifier was at the
+// beginning of the following buffer of wchars
+for ($i = 0; $i <= 256; $i++) {
+  convertValidString(str_repeat("\x00a", $i) . "\x00\x30\x20\xE3", str_repeat('a', $i) . "\xF9\x90", 'UTF-16BE', 'SJIS-Mobile#DOCOMO');
+  convertValidString(str_repeat("\x00a", $i) . "\x00\x30\x20\xE3", str_repeat('a', $i) . "\xF7\xC9", 'UTF-16BE', 'SJIS-Mobile#KDDI');
+  convertValidString(str_repeat("\x00a", $i) . "\x00\x30\x20\xE3", str_repeat('a', $i) . "\xF7\xC5", 'UTF-16BE', 'SJIS-Mobile#SOFTBANK');
+}
+
 ?>
 --EXPECT--
 SJIS-Mobile#DOCOMO verification and conversion works on all valid characters
