@@ -5039,11 +5039,11 @@ static const int jisx0213_u2_tbl_len = sizeof(jisx0213_u2_key)/sizeof(unsigned s
 
 
 static const unsigned short jisx0213_p2_ofst[] = {
-	1, 8, 3, 4, 5, 12, 13, 14, 15, 78, 79, 80, 81, 82,
-	83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94};
+	0, 7, 2, 3, 4, 11, 12, 13, 14, 77, 78, 79, 80, 81,
+	82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93
+};
 
-static const int jisx0213_p2_ofst_len =
-	sizeof(jisx0213_p2_ofst)/sizeof(unsigned short);
+static const int jisx0213_p2_ofst_len = sizeof(jisx0213_p2_ofst)/sizeof(unsigned short);
 
 static const int uni2jis_tbl_range[][2] = {
 	{0x0000, 0x045f},
