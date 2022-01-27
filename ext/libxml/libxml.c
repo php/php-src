@@ -378,9 +378,9 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 				const char buf[] = "Content-Type:";
 				if (Z_TYPE_P(header) == IS_STRING &&
 						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-					char *needle = estrdup("charset=");
+					char needle[] = "charset=";
 					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
-					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), sizeof("charset=")-1);
+					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), strlen(needle));
 
 					if (encoding) {
 						char *end;
@@ -408,7 +408,6 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 						}
 					}
 					efree(haystack);
-					efree(needle);
 					break; /* found content-type */
 				}
 			} ZEND_HASH_FOREACH_END();

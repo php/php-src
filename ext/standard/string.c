@@ -1687,16 +1687,9 @@ PHP_FUNCTION(pathinfo)
    case insensitive strstr */
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 {
-	zend_str_tolower(s, s_len);
-	zend_str_tolower(t, t_len);
-	return (char*)php_memnstr(s, t, t_len, s + s_len);
+	return (char*)php_memnistr(s, t, t_len, s + s_len);
 }
 /* }}} */
-
-PHPAPI const char *php_stristr_no_tolower(const char *s, const char *t, size_t s_len, size_t t_len)
-{
-	return (const char*)php_memnistr(s, t, t_len, s + s_len);
-}
 
 /* {{{ php_strspn */
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
@@ -1749,7 +1742,7 @@ PHP_FUNCTION(stristr)
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
-	found = php_stristr_no_tolower(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(haystack), ZSTR_LEN(needle));
+	found = php_stristr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(haystack), ZSTR_LEN(needle));
 
 	if (found) {
 		found_offset = found - ZSTR_VAL(haystack);
