@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d10dbdfd55eb4a4dc779cbf4fa000cdf4fb3539 */
+ * Stub hash: 5d26f6875ff2704506a9f94b171adbe13aa40483 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
@@ -94,6 +94,11 @@ static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, setAttribute, arginfo_class_PDO_setAttribute, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_pdo_dbh_symbols(int module_number, zend_class_entry *class_entry_PDO)
+{
+    zend_mark_function_parameter_as_sensitive(&class_entry_PDO->function_table, "__construct", 2);
+}
 
 static zend_class_entry *register_class_PDO(void)
 {
