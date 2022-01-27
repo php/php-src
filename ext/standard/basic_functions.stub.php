@@ -1636,8 +1636,8 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
 function password_get_info(string $hash): array {}
 
 /**
- * @refcount 1
  * @sensitive-param $password
+ * @refcount 1
  */
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
