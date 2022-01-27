@@ -252,7 +252,7 @@ PHP_MINIT_FUNCTION(pdo)
 
 	pdo_exception_ce = register_class_PDOException(spl_ce_RuntimeException);
 
-	pdo_dbh_init();
+	pdo_dbh_init(module_number);
 	pdo_stmt_init();
 
 	return SUCCESS;
