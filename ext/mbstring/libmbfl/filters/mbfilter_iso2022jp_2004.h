@@ -36,8 +36,4 @@ extern const mbfl_encoding mbfl_encoding_2022jp_2004;
 extern const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar;
 extern const struct mbfl_convert_vtbl vtbl_wchar_2022jp_2004;
 
-int mbfl_filt_conv_2022jp_2004_wchar(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_wchar_2022jp_2004(int c, mbfl_convert_filter *filter);
-int mbfl_filt_conv_any_2022jp_2004_flush(mbfl_convert_filter *filter);
-
 #endif /* MBFL_MBFILTER_2022JP_2004_H */

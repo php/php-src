@@ -124,6 +124,12 @@ for ($i = 0; $i <= 0x7F; $i++) {
 
 echo "Encoding verification and conversion works for all ASCII characters\n";
 
+for ($i = 0x80; $i <= 0x9F; $i++) {
+	convertInvalidString("\x00" . chr($i), "%", 'UTF-16BE', 'ISO-2022-JP-2004');
+}
+
+echo "Codepoints from U+0080-009F are rejected\n";
+
 /* Try a bare ESC */
 identifyInvalidString("\x1B", 'ISO-2022-JP-2004');
 
@@ -330,6 +336,7 @@ echo "All done!\n";
 ?>
 --EXPECT--
 Encoding verification and conversion works for all ASCII characters
+Codepoints from U+0080-009F are rejected
 Encoding verification and conversion rejects all invalid single bytes
 Encoding verification and conversion work on JISX-0208 characters
 Encoding verification and conversion work on JISX-0213:2004 plane 1 characters
