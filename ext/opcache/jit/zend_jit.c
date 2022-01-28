@@ -1394,13 +1394,17 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 								if (ssa->ops[line].op1_use >= 0 &&
 								    intervals[ssa->ops[line].op1_use] &&
 								    ssa->ops[line].op1_use_chain < 0 &&
-								    !ssa->vars[ssa->ops[line].op1_use].phi_use_chain) {
+								    !ssa->vars[ssa->ops[line].op1_use].phi_use_chain &&
+								    (ssa->var_info[i].type & MAY_BE_ANY) ==
+								        (ssa->var_info[ssa->ops[line].op1_use].type & MAY_BE_ANY)) {
 									zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
 								} else if (opline->opcode != ZEND_SUB &&
 								    ssa->ops[line].op2_use >= 0 &&
 								    intervals[ssa->ops[line].op2_use] &&
 								    ssa->ops[line].op2_use_chain < 0 &&
-								    !ssa->vars[ssa->ops[line].op2_use].phi_use_chain) {
+								    !ssa->vars[ssa->ops[line].op2_use].phi_use_chain &&
+								    (ssa->var_info[i].type & MAY_BE_ANY) ==
+								        (ssa->var_info[ssa->ops[line].op2_use].type & MAY_BE_ANY)) {
 									zend_jit_add_hint(intervals, i, ssa->ops[line].op2_use);
 								}
 							}
