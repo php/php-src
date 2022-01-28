@@ -4867,14 +4867,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						op2_addr = OP2_REG_ADDR();
+						op2_info = OP2_INFO();
 						if (ra
 						 && ssa_op->op2_def >= 0
-						 && !ssa->vars[ssa_op->op2_def].no_val) {
+						 && (!ssa->vars[ssa_op->op2_def].no_val
+						  || (zend_jit_trace_type_to_info(STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var))) & MAY_BE_ANY) !=
+						      (op2_info & MAY_BE_ANY))) {
 							op2_def_addr = OP2_DEF_REG_ADDR();
 						} else {
 							op2_def_addr = op2_addr;
 						}
-						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
 						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG
