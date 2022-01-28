@@ -37,6 +37,8 @@
 extern const unsigned char mblen_table_sjis[];
 extern const unsigned char mblen_table_eucjp[];
 
+static size_t mb_sjis2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_sjis2004(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 static size_t mb_eucjp2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_eucjp2004(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
@@ -55,8 +57,8 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjis2004_wchar,
 	&vtbl_wchar_sjis2004,
-	NULL,
-	NULL
+	mb_sjis2004_to_wchar,
+	mb_wchar_to_sjis2004
 };
 
 const struct mbfl_convert_vtbl vtbl_sjis2004_wchar = {
@@ -697,6 +699,179 @@ int mbfl_filt_conv_wchar_jis2004_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+static size_t mb_sjis2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize - 1;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c <= 0x7F) {
+			if (c == 0x5C) {
+				*out++ = 0xA5;
+			} else if (c == 0x7E) {
+				*out++ = 0x203E;
+			} else {
+				*out++ = c;
+			}
+		} else if (c >= 0xA1 && c <= 0xDF) {
+			*out++ = 0xFEC0 + c;
+		} else if (c > 0x80 && c < 0xFD && c != 0xA0) {
+			if (p == e) {
+				*out++ = MBFL_BAD_INPUT;
+				break;
+			}
+			unsigned char c2 = *p++;
+
+			if (c2 < 0x40 || c2 > 0xFC || c2 == 0x7F) {
+				*out++ = MBFL_BAD_INPUT;
+				continue;
+			}
+
+			unsigned int s1, s2;
+			SJIS_DECODE(c, c2, s1, s2);
+			unsigned int w1 = (s1 << 8) | s2, w = 0;
+
+			/* Conversion for combining characters */
+			if ((w1 >= 0x2477 && w1 <= 0x2479) || (w1 >= 0x2479 && w1 <= 0x247B) || (w1 >= 0x2577 && w1 <= 0x257E) || w1 == 0x2678 || w1 == 0x2B44 || (w1 >= 0x2B48 && w1 <= 0x2B4F) || (w1 >= 0x2B65 && w1 <= 0x2B66)) {
+				int k = mbfl_bisec_srch2(w1, jisx0213_u2_key, jisx0213_u2_tbl_len);
+				if (k >= 0) {
+					*out++ = jisx0213_u2_tbl[2*k];
+					*out++ = jisx0213_u2_tbl[2*k+1];
+					continue;
+				}
+			}
+
+			/* Conversion for BMP */
+			w1 = (s1 - 0x21)*94 + s2 - 0x21;
+			if (w1 < jisx0213_ucs_table_size) {
+				w = jisx0213_ucs_table[w1];
+			}
+
+			/* Conversion for CJK Unified Ideographs extension B (U+2XXXX) */
+			if (!w) {
+				w1 = (s1 << 8) | s2;
+				int k = mbfl_bisec_srch2(w1, jisx0213_jis_u5_key, jisx0213_u5_tbl_len);
+				if (k >= 0) {
+					w = jisx0213_jis_u5_tbl[k] + 0x20000;
+				}
+			}
+
+			*out++ = w ? w : MBFL_BAD_INPUT;
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	 *in_len = e - p;
+	 *in = p;
+	 return out - buf;
+}
+
+static void mb_wchar_to_sjis2004(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	uint32_t w;
+	if (buf->state) {
+		w = buf->state;
+		buf->state = 0;
+		goto process_codepoint;
+	}
+
+	while (len--) {
+		w = *in++;
+process_codepoint: ;
+		unsigned int s = 0;
+
+		if (w == 0xE6 || (w >= 0x254 && w <= 0x2E9) || (w >= 0x304B && w <= 0x3053) || (w >= 0x30AB && w <= 0x30C8) || w == 0x31F7) {
+			for (int k = 0; k < jisx0213_u2_tbl_len; k++) {
+				if (w == jisx0213_u2_tbl[2*k]) {
+					if (!len) {
+						if (!end) {
+							buf->state = w;
+							MB_CONVERT_BUF_STORE(buf, out, limit);
+							return;
+						}
+					} else {
+						uint32_t w2 = *in++; len--;
+						if ((w == 0x254 || w == 0x28C || w == 0x259 || w == 0x25A) && w2 == 0x301) {
+							k++;
+						}
+						if (w2 == jisx0213_u2_tbl[2*k+1]) {
+							s = jisx0213_u2_key[k];
+							break;
+						}
+						in--; len++;
+					}
+
+					/* Fallback */
+					s = jisx0213_u2_fb_tbl[k];
+					break;
+				}
+			}
+		}
+
+		/* Check for major Japanese chars: U+4E00-U+9FFF */
+		if (!s) {
+			for (int k = 0; k < uni2jis_tbl_len; k++) {
+				if (w >= uni2jis_tbl_range[k][0] && w <= uni2jis_tbl_range[k][1]) {
+					s = uni2jis_tbl[k][w - uni2jis_tbl_range[k][0]];
+					break;
+				}
+			}
+		}
+
+		/* Check for Japanese chars in compressed mapping area: U+1E00-U+4DBF */
+		if (!s && w >= ucs_c1_jisx0213_min && w <= ucs_c1_jisx0213_max) {
+			int k = mbfl_bisec_srch(w, ucs_c1_jisx0213_tbl, ucs_c1_jisx0213_tbl_len);
+			if (k >= 0) {
+				s = ucs_c1_jisx0213_ofst[k] + w - ucs_c1_jisx0213_tbl[2*k];
+			}
+		}
+
+		/* Check for Japanese chars in CJK Unified Ideographs ext.B (U+2XXXX) */
+		if (!s && w >= jisx0213_u5_tbl_min && w <= jisx0213_u5_tbl_max) {
+			int k = mbfl_bisec_srch2(w - 0x20000, jisx0213_u5_jis_key, jisx0213_u5_tbl_len);
+			if (k >= 0) {
+				s = jisx0213_u5_jis_tbl[k];
+			}
+		}
+
+		if (!s) {
+			/* CJK Compatibility Forms: U+FE30-U+FE4F */
+			if (w == 0xFE45) {
+				s = 0x233E;
+			} else if (w == 0xFE46) {
+				s = 0x233D;
+			} else if (w >= 0xF91D && w <= 0xF9DC) {
+				/* CJK Compatibility Ideographs: U+F900-U+F92A */
+				int k = mbfl_bisec_srch2(w, ucs_r2b_jisx0213_cmap_key, ucs_r2b_jisx0213_cmap_len);
+				if (k >= 0) {
+					s = ucs_r2b_jisx0213_cmap_val[k];
+				}
+			}
+		}
+
+		if (!s && w) {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_sjis2004);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+		} else if (s <= 0xFF) {
+			out = mb_convert_buf_add(out, s);
+		} else {
+			unsigned int c1 = (s >> 8) & 0xFF, c2 = s & 0xFF, s1, s2;
+			SJIS_ENCODE(c1, c2, s1, s2);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, s1, s2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
 static size_t mb_eucjp2004_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
