@@ -3202,7 +3202,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 							if (ssa->ops[line].op1_use >= 0 &&
 							    intervals[ssa->ops[line].op1_use] &&
 							    ssa->ops[line].op1_use_chain < 0 &&
-							    !ssa->vars[ssa->ops[line].op1_use].phi_use_chain) {
+							    !ssa->vars[ssa->ops[line].op1_use].phi_use_chain &&
+							    (ssa->var_info[i].type & MAY_BE_ANY) ==
+							        (ssa->var_info[ssa->ops[line].op1_use].type & MAY_BE_ANY)) {
 
 								zend_ssa_phi *phi = ssa->vars[ssa->ops[line].op1_use].definition_phi;
 								if (phi &&
@@ -3215,7 +3217,9 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 							    ssa->ops[line].op2_use >= 0 &&
 							    intervals[ssa->ops[line].op2_use] &&
 							    ssa->ops[line].op2_use_chain < 0 &&
-							    !ssa->vars[ssa->ops[line].op2_use].phi_use_chain) {
+							    !ssa->vars[ssa->ops[line].op2_use].phi_use_chain &&
+							    (ssa->var_info[i].type & MAY_BE_ANY) ==
+							        (ssa->var_info[ssa->ops[line].op2_use].type & MAY_BE_ANY)) {
 
 								zend_ssa_phi *phi = ssa->vars[ssa->ops[line].op2_use].definition_phi;
 								if (phi &&
