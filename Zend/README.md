@@ -126,14 +126,13 @@ definitions. It is included from `zend_compile.h`. The second one is an executor
 code itself. It is included from `zend_execute.c`.
 
 `zend_vm_gen.php` can produce different kind of executors. You can select
-different opcode threading model using `--with-vm-kind=CALL|SWITCH|GOTO`. You
-can disable opcode specialization using `--without-specializer`. You can include
-or exclude old executor together with specialized one using
-`--without-old-executor`. At last you can debug executor using original
-`zend_vm_def.h` or generated file `zend_vm_execute.h`. Debugging with original
-file requires `--with-lines` option. By default ZE2 uses the following command
-to generate executor:
+different opcode threading model using `--with-vm-kind=CALL|SWITCH|GOTO|HYBRID`.
+You can disable opcode specialization using `--without-specializer`.
+At last you can debug executor using original `zend_vm_def.h` or generated file
+`zend_vm_execute.h`. Debugging with original file requires `--with-lines` option.
+By default ZE3 (since PHP 7) uses the following command to generate executor:
 
 ```bash
-php zend_vm_gen.php --with-vm-kind=CALL
+# Default VM kind is HYBRID
+php zend_vm_gen.php --with-vm-kind=HYBRID
 ```
