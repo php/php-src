@@ -113,7 +113,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
 class ReflectionFunction extends ReflectionFunctionAbstract
 {
-    public function __construct(Closure|string $function) {}
+    public function __construct(callable $function) {}
 
     public function __toString(): string {}
 
