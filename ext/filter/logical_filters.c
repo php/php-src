@@ -436,10 +436,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
-			zval_ptr_dtor(value);
 			if ((min_range_set && (lval < min_range)) || (max_range_set && (lval > max_range))) {
 				goto error;
 			}
+			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
