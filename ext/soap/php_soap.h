@@ -67,6 +67,7 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_schema.h"
 #include "php_http.h"
 #include "php_packet_soap.h"
+#include "php_wss.h"
 
 struct _soapMapping {
 	zval to_xml;
@@ -252,5 +253,13 @@ static zend_always_inline zval *php_soap_deref(zval *zv) {
 #define Z_CLIENT_LAST_RESPONSE_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 33))
 #define Z_CLIENT_LAST_REQUEST_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 34))
 #define Z_CLIENT_LAST_RESPONSE_HEADERS_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 35))
+#define Z_CLIENT_WSS_SET_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 36))
+#define Z_CLIENT_WSS_SIGNFUNC_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 37))
+#define Z_CLIENT_WSS_X509_BINSECTOKEN_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 38))
+#define Z_CLIENT_WSS_ADD_TIMESTAMP_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 39))
+#define Z_CLIENT_WSS_TIMESTAMP_EXPIRES_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 40))
+#define Z_CLIENT_WSS_DIGEST_METHOD_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 41))
+#define Z_CLIENT_WSS_VERSION_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 42))
+#define Z_CLIENT_WSS_RANDOM_ID_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 43))
 
 #endif

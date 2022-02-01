@@ -522,6 +522,14 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv3",  SOAP_SSL_METHOD_SSLv3,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_CS | CONST_PERSISTENT);
 
+	/* SOAP WSS Constants */
+	REGISTER_LONG_CONSTANT("SOAP_WSS_DIGEST_METHOD_SHA1",   SOAP_WSS_DIGEST_METHOD_SHA1,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_WSS_DIGEST_METHOD_SHA256", SOAP_WSS_DIGEST_METHOD_SHA256,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_WSS_DIGEST_METHOD_SHA512",	SOAP_WSS_DIGEST_METHOD_SHA512,	CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("SOAP_WSS_VERSION_1_0",	SOAP_WSS_VERSION_1_0,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_WSS_VERSION_1_1",	SOAP_WSS_VERSION_1_1,	CONST_CS | CONST_PERSISTENT);
+
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
 
@@ -2805,6 +2813,169 @@ PHP_METHOD(SoapClient, __setLocation)
 }
 /* }}} */
 
+/* {{{ Sets SOAP WSS headers for subsequent calls (replaces any previous
+   values).
+   If no value is specified, SOAP WSS headers are removed. */
+PHP_METHOD(SoapClient, __setWSS)
+{
+	zval *options = NULL;
+	zval *this_ptr = ZEND_THIS;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	bool processed = 0, success = 1, wss_set = 0;
+	
+	cleanup:
+	if (!processed || wss_set) {
+		ZVAL_FALSE(Z_CLIENT_WSS_SET_P(this_ptr));
+		convert_to_null(Z_CLIENT_WSS_SIGNFUNC_P(this_ptr));
+		convert_to_null(Z_CLIENT_WSS_X509_BINSECTOKEN_P(this_ptr));
+		ZVAL_FALSE(Z_CLIENT_WSS_ADD_TIMESTAMP_P(this_ptr));
+		convert_to_null(Z_CLIENT_WSS_TIMESTAMP_EXPIRES_P(this_ptr));
+		convert_to_null(Z_CLIENT_WSS_DIGEST_METHOD_P(this_ptr));
+		convert_to_null(Z_CLIENT_WSS_VERSION_P(this_ptr));
+		ZVAL_TRUE(Z_CLIENT_WSS_RANDOM_ID_P(this_ptr));
+	}
+
+	if (options != NULL && !processed) {
+		HashTable *ht = Z_ARRVAL_P(options);
+		zval *tmp = NULL;
+		processed = 1;
+
+		if ((tmp = zend_hash_str_find(ht, "signfunc", sizeof("signfunc")-1)) != NULL
+			&& Z_TYPE_P(tmp) != IS_NULL) {
+			char *is_callable_error = NULL;
+			zend_fcall_info fci;
+			zend_fcall_info_cache fcc;
+			
+			if (zend_fcall_info_init(tmp, 0, &fci, &fcc, NULL, &is_callable_error) == SUCCESS) {
+				ZEND_ASSERT(!is_callable_error);
+				zend_release_fcall_info_cache(&fcc);
+				ZVAL_COPY(Z_CLIENT_WSS_SIGNFUNC_P(this_ptr), tmp);
+				wss_set = 1;
+				
+				if ((tmp = zend_hash_str_find(ht, "x509_binsectoken", sizeof("x509_binsectoken")-1)) != NULL) {
+					if (Z_TYPE_P(tmp) == IS_STRING) {
+						if (Z_STRLEN_P(tmp) != 0) {
+							ZVAL_COPY(Z_CLIENT_WSS_X509_BINSECTOKEN_P(this_ptr), tmp);
+						}
+					} else if (Z_TYPE_P(tmp) != IS_NULL) {
+						zend_type_error("%s(): \"x509_binsectoken\" must be of type string or null, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+						success = 0;
+						goto cleanup;
+					}
+				}
+
+				if ((tmp = zend_hash_str_find(ht, "digest_method", sizeof("digest_method")-1)) != NULL) {
+					if (Z_TYPE_P(tmp) == IS_LONG) {
+						zend_long digest_method = Z_LVAL_P(tmp);
+						switch (digest_method) {
+							case SOAP_WSS_DIGEST_METHOD_SHA1:
+							case SOAP_WSS_DIGEST_METHOD_SHA256:
+							case SOAP_WSS_DIGEST_METHOD_SHA512:
+								ZVAL_LONG(Z_CLIENT_WSS_DIGEST_METHOD_P(this_ptr), digest_method);
+								break;
+							default:
+								zend_value_error("%s(): invalid \"digest_method\" value, %d given", get_active_function_name(), (int)digest_method);
+								success = 0;
+								goto cleanup;
+						}
+					} else {
+						zend_type_error("%s(): \"digest_method\" must be of type int, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+						success = 0;
+						goto cleanup;
+					}
+				} else {
+					ZVAL_LONG(Z_CLIENT_WSS_DIGEST_METHOD_P(this_ptr), SOAP_WSS_DIGEST_METHOD_SHA1);
+				}
+			} else {
+				if (is_callable_error != NULL) {
+					zend_type_error("%s(): \"signfunc\" must be a valid callback or null, %s", get_active_function_name(), is_callable_error);
+					efree(is_callable_error);
+				} else {
+					zend_type_error("%s(): \"signfunc\" must be a valid callback or null", get_active_function_name());
+				}
+				success = 0;
+				goto cleanup;
+			}
+		}
+
+		if ((tmp = zend_hash_str_find(ht, "add_timestamp", sizeof("add_timestamp")-1)) != NULL) {
+			if (Z_TYPE_P(tmp) == IS_TRUE) {
+				ZVAL_TRUE(Z_CLIENT_WSS_ADD_TIMESTAMP_P(this_ptr));
+				wss_set = 1;
+
+				if ((tmp = zend_hash_str_find(ht, "timestamp_expires", sizeof("timestamp_expires")-1)) != NULL) {
+					if (Z_TYPE_P(tmp) == IS_LONG) {
+						zend_long timestamp_expires = Z_LVAL_P(tmp);
+						if (timestamp_expires >= 0 && timestamp_expires <= 7200) {
+							ZVAL_LONG(Z_CLIENT_WSS_TIMESTAMP_EXPIRES_P(this_ptr), timestamp_expires);
+						} else {
+							zend_value_error("%s(): invalid \"timestamp_expires\" value, %d given", get_active_function_name(), (int)timestamp_expires);
+							success = 0;
+							goto cleanup;
+						}
+					} else {
+						zend_type_error("%s(): \"timestamp_expires\" must be of type int, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+						success = 0;
+						goto cleanup;
+					}
+				} else {
+					ZVAL_LONG(Z_CLIENT_WSS_TIMESTAMP_EXPIRES_P(this_ptr), SOAP_WSS_TIMESTAMP_EXPIRES);
+				}
+			} else if (Z_TYPE_P(tmp) != IS_FALSE) {
+				zend_type_error("%s(): \"add_timestamp\" must be of type bool, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+				success = 0;
+				goto cleanup;
+			}
+		}
+
+		if ((tmp = zend_hash_str_find(ht, "random_id", sizeof("random_id")-1)) != NULL) {
+			if (Z_TYPE_P(tmp) == IS_FALSE) {
+				ZVAL_FALSE(Z_CLIENT_WSS_RANDOM_ID_P(this_ptr));
+			} else if (Z_TYPE_P(tmp) != IS_TRUE) {
+				zend_type_error("%s(): \"random_id\" must be of type bool, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+				success = 0;
+				goto cleanup;
+			}
+		}
+
+		if (success && wss_set) {
+			if ((tmp = zend_hash_str_find(ht, "wss_version", sizeof("wss_version")-1)) != NULL) {
+				if (Z_TYPE_P(tmp) == IS_LONG) {
+					zend_long wss_version = Z_LVAL_P(tmp);
+					switch (wss_version) {
+						case SOAP_WSS_VERSION_1_0:
+						case SOAP_WSS_VERSION_1_1:
+							ZVAL_LONG(Z_CLIENT_WSS_VERSION_P(this_ptr), wss_version);
+							break;
+						default:
+							zend_value_error("%s(): invalid \"wss_version\" value, %d given", get_active_function_name(), (int)wss_version);
+							success = 0;
+							goto cleanup;
+					}
+				} else {
+					zend_type_error("%s(): \"wss_version\" must be of type int, %s given", get_active_function_name(), zend_zval_type_name(tmp));
+					success = 0;
+					goto cleanup;
+				}
+			} else {
+				ZVAL_LONG(Z_CLIENT_WSS_VERSION_P(this_ptr), SOAP_WSS_VERSION_1_0);
+			}
+			ZVAL_TRUE(Z_CLIENT_WSS_SET_P(this_ptr));
+		}
+	}
+
+	if (success) {
+		RETURN_TRUE;
+	} else {
+		RETURN_THROWS();
+	}
+}
+/* }}} */
+
 static void clear_soap_fault(zval *obj) /* {{{ */
 {
 	ZEND_ASSERT(instanceof_function(Z_OBJCE_P(obj), soap_class_entry));
@@ -3794,6 +3965,11 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 	zval *zstyle, *zuse;
 	int i, style, use;
 	HashTable *hdrs = NULL;
+	bool wss_set = 0;
+
+	if (Z_TYPE_P(Z_CLIENT_WSS_SET_P(this_ptr)) == IS_TRUE) {
+		wss_set = 1;
+	}
 
 	encode_reset_ns();
 
@@ -3815,7 +3991,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 	}
 	xmlDocSetRootElement(doc, envelope);
 
-	if (soap_headers) {
+	if (soap_headers || wss_set) {
 		head = xmlNewChild(envelope, ns, BAD_CAST("Header"), NULL);
 	}
 
@@ -3911,9 +4087,13 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 		}
 	}
 
-	if (head) {
-		zval* header;
+	if (head && wss_set) {
+		add_wss_to_function_call(this_ptr, version, envelope, head, body);
+	}
 
+	if (head && soap_headers) {
+		zval* header;
+		
 		ZEND_HASH_FOREACH_VAL(soap_headers, header) {
 			if (Z_TYPE_P(header) != IS_OBJECT
 					|| !instanceof_function(Z_OBJCE_P(header), soap_header_class_entry)) {

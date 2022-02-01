@@ -130,6 +130,14 @@ class SoapClient
     private ?string $__last_response = null;
     private ?string $__last_request_headers = null;
     private ?string $__last_response_headers = null;
+    private bool $_wss_set = false;
+    private ?callable $_wss_signfunc = null;
+    private ?string $_wss_x509_binsectoken = null;
+    private bool $_wss_add_timestamp = false;
+    private ?int $_wss_timestamp_expires = null;
+    private ?int $_wss_digest_method = null;
+    private ?int $_wss_version = null;
+    private bool $_wss_random_id = true;
 
     public function __construct(?string $wsdl, array $options = []) {}
 
@@ -178,4 +186,7 @@ class SoapClient
 
     /** @tentative-return-type */
     public function __setLocation(?string $location = null): ?string {}
+
+    /** @tentative-return-type */
+    public function __setWSS(?array $options = null): bool {}
 }

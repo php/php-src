@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 96c82014f1fe922cee14d0cd55dd14a6ba3ffe5f */
+ * Stub hash: 653d3384207f336026346fcfc531ee40cf0fa5dd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -136,6 +136,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapClient___set
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, location, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapClient___setWSS, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(use_soap_error_handler);
 ZEND_FUNCTION(is_soap_fault);
@@ -167,6 +171,7 @@ ZEND_METHOD(SoapClient, __setCookie);
 ZEND_METHOD(SoapClient, __getCookies);
 ZEND_METHOD(SoapClient, __setSoapHeaders);
 ZEND_METHOD(SoapClient, __setLocation);
+ZEND_METHOD(SoapClient, __setWSS);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -230,6 +235,7 @@ static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_ME(SoapClient, __getCookies, arginfo_class_SoapClient___getCookies, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __setSoapHeaders, arginfo_class_SoapClient___setSoapHeaders, ZEND_ACC_PUBLIC)
 	ZEND_ME(SoapClient, __setLocation, arginfo_class_SoapClient___setLocation, ZEND_ACC_PUBLIC)
+	ZEND_ME(SoapClient, __setWSS, arginfo_class_SoapClient___setWSS, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -633,6 +639,54 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string *property___last_response_headers_name = zend_string_init("__last_response_headers", sizeof("__last_response_headers") - 1, 1);
 	zend_declare_typed_property(class_entry, property___last_response_headers_name, &property___last_response_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property___last_response_headers_name);
+
+	zval property__wss_set_default_value;
+	ZVAL_BOOL(&property__wss_set_default_value, 0);
+	zend_string *property__wss_set_name = zend_string_init("_wss_set", sizeof("_wss_set") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_set_name, &property__wss_set_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__wss_set_name);
+
+	zval property__wss_signfunc_default_value;
+	ZVAL_NULL(&property__wss_signfunc_default_value);
+	zend_string *property__wss_signfunc_name = zend_string_init("_wss_signfunc", sizeof("_wss_signfunc") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_signfunc_name, &property__wss_signfunc_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_CALLABLE|MAY_BE_NULL));
+	zend_string_release(property__wss_signfunc_name);
+
+	zval property__wss_x509_binsectoken_default_value;
+	ZVAL_NULL(&property__wss_x509_binsectoken_default_value);
+	zend_string *property__wss_x509_binsectoken_name = zend_string_init("_wss_x509_binsectoken", sizeof("_wss_x509_binsectoken") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_x509_binsectoken_name, &property__wss_x509_binsectoken_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property__wss_x509_binsectoken_name);
+
+	zval property__wss_add_timestamp_default_value;
+	ZVAL_BOOL(&property__wss_add_timestamp_default_value, 0);
+	zend_string *property__wss_add_timestamp_name = zend_string_init("_wss_add_timestamp", sizeof("_wss_add_timestamp") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_add_timestamp_name, &property__wss_add_timestamp_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__wss_add_timestamp_name);
+
+	zval property__wss_timestamp_expires_default_value;
+	ZVAL_NULL(&property__wss_timestamp_expires_default_value);
+	zend_string *property__wss_timestamp_expires_name = zend_string_init("_wss_timestamp_expires", sizeof("_wss_timestamp_expires") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_timestamp_expires_name, &property__wss_timestamp_expires_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__wss_timestamp_expires_name);
+
+	zval property__wss_digest_method_default_value;
+	ZVAL_NULL(&property__wss_digest_method_default_value);
+	zend_string *property__wss_digest_method_name = zend_string_init("_wss_digest_method", sizeof("_wss_digest_method") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_digest_method_name, &property__wss_digest_method_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__wss_digest_method_name);
+
+	zval property__wss_version_default_value;
+	ZVAL_NULL(&property__wss_version_default_value);
+	zend_string *property__wss_version_name = zend_string_init("_wss_version", sizeof("_wss_version") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_version_name, &property__wss_version_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property__wss_version_name);
+
+	zval property__wss_random_id_default_value;
+	ZVAL_BOOL(&property__wss_random_id_default_value, 1);
+	zend_string *property__wss_random_id_name = zend_string_init("_wss_random_id", sizeof("_wss_random_id") - 1, 1);
+	zend_declare_typed_property(class_entry, property__wss_random_id_name, &property__wss_random_id_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property__wss_random_id_name);
 
 	return class_entry;
 }
