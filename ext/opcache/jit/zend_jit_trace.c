@@ -4119,7 +4119,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 						ssa->var_info[i].type &= ~MAY_BE_GUARD;
 						op_type = concrete_type(ssa->var_info[i].type);
-						if (!zend_jit_type_guard(&dasm_state, opline, i, op_type)) {
+						if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), op_type)) {
 							goto jit_failure;
 						}
 						SET_STACK_TYPE(stack, i, op_type, 1);
@@ -4152,7 +4152,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
 						if (info & MAY_BE_GUARD) {
-							if (!zend_jit_type_guard(&dasm_state, opline, phi->var, concrete_type(info))) {
+							if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(phi->var), concrete_type(info))) {
 								goto jit_failure;
 							}
 							info &= ~MAY_BE_GUARD;
@@ -6270,8 +6270,7 @@ done:
 								 || opline->opcode == ZEND_COALESCE
 								 || opline->opcode == ZEND_JMP_NULL
 								 || opline->opcode == ZEND_FE_RESET_R) {
-									if (!ra[ssa_op->op1_use]
-									 || ra[ssa_op->op1_use]->reg != ra[ssa_op->op1_def]->reg) {
+									if (!ra[ssa_op->op1_use]) {
 										flags |= ZREG_LOAD;
 									}
 								}
