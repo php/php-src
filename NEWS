@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2022, PHP 8.0.16
+?? ??? 2022, PHP 8.0.17
+
+
+17 Feb 2022, PHP 8.0.16
 
 - Core:
   . Fixed bug #81430 (Attribute instantiation leaves dangling pointer).
