@@ -42,13 +42,11 @@
 #include "dl.h"
 #include "php_crypt.h"
 #include "head.h"
-#include "php_lcg.h"
 #include "php_output.h"
 #include "php_array.h"
 #include "php_assert.h"
 #include "php_versioning.h"
 #include "php_password.h"
-#include "php_random.h"
 
 #include "php_version.h"
 #define PHP_STANDARD_VERSION PHP_VERSION

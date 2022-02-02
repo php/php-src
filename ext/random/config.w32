@@ -1,0 +1,4 @@
+EXTENSION('random', 'random.c', false /* never shared */, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+PHP_RANDOM="yes";
+PHP_INSTALL_HEADERS("ext/random", "php_random.h");
+ADD_MAKEFILE_FRAGMENT();

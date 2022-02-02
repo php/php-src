@@ -21,12 +21,11 @@
 
 #include "fcntl.h"
 #include "php_password.h"
-#include "php_rand.h"
 #include "php_crypt.h"
 #include "base64.h"
 #include "zend_interfaces.h"
 #include "info.h"
-#include "php_random.h"
+#include "ext/random/php_random.h"
 #if HAVE_ARGON2LIB
 #include "argon2.h"
 #endif

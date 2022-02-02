@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
 #include <locale.h>
@@ -45,6 +44,7 @@
 #include "ext/standard/file.h"
 /* For php_next_utf8_char() */
 #include "ext/standard/html.h"
+#include "ext/random/php_random.h"
 
 #ifdef __SSE2__
 #include <emmintrin.h>
