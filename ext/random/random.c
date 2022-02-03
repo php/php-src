@@ -741,7 +741,11 @@ zend_module_entry random_module_entry = {
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
 	NULL,						/* PHP_MINFO - Module info */
 	PHP_VERSION,				/* Version */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(random),
+	NULL,
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
