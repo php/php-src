@@ -31,7 +31,7 @@
 #  define RAND_MAX PHP_MT_RAND_MAX
 # endif
 
-#define PHP_RAND_MAX PHP_MT_RAND_MAX
+# define PHP_RAND_MAX PHP_MT_RAND_MAX
 
 /*
  * A bit of tricky math here.  We want to avoid using a modulus because
