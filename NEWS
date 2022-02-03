@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - Iconv:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
+  . Fixed bug GH-7980 (Unexpected result for iconv_mime_decode). (cmb)
 
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
