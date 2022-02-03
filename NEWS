@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.4
 
+- Iconv:
+  . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
+
+- Zlib:
+  . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
+
 03 Feb 2022, PHP 8.1.3
 
 - Core:
