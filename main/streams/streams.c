@@ -706,7 +706,11 @@ PHPAPI ssize_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			break;
 		}
 
-		if (!stream->readfilters.head && ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) || stream->chunk_size == 1)) {
+		/* if the read buffer is currently empty, don't buffer
+		 * large reads (larger than chunk_size), because
+		 * buffering would only hurt performance in such an
+		 * edge case */
+		if (!stream->readfilters.head && ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) || stream->chunk_size == 1 || (stream->writepos == stream->readpos && size >= stream->chunk_size))) {
 			toread = stream->ops->read(stream, buf, size);
 			if (toread < 0) {
 				/* Report an error if the read failed and we did not read any data
