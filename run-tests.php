@@ -1729,11 +1729,46 @@ escape:
     }
 }
 
+/**
+ * Calls fwrite and retries when network writes fail with errors such as "Resource temporarily unavailable"
+ *
+ * @param resource $stream the stream to fwrite to
+ * @param string $data
+ * @return int|false
+ */
+function safe_fwrite($stream, string $data)
+{
+    // safe_fwrite was tested by adding $message['unused'] = str_repeat('a', 20_000_000); in send_message()
+    // fwrites on tcp sockets can return false or less than strlen if the recipient is busy.
+    // (e.g. fwrite(): Send of 577 bytes failed with errno=35 Resource temporarily unavailable)
+    $bytesWritten = 0;
+    $retryAttempts = 0;
+    while ($bytesWritten < strlen($data)) {
+        $n = @fwrite($stream, substr($data, $bytesWritten));
+        if ($n === false) {
+            if ($retryAttempts >= 10) {
+                echo "ERROR: send_message() Failed to write chunk after 10 retries: " . error_get_last()['message'] . "\n";
+                return false;
+            }
+            $writeSockets = [$stream];
+            $readSockets = [];
+            $exceptSockets = [];
+            /* Wait for a second and retry up to 10 times. Use a finite timeout and retry count in case stream_select returns inaccurate values or returns immediately. */
+            stream_select($readSockets, $writeSockets, $exceptSockets, 1);
+            $retryAttempts++;
+            continue;
+        }
+        $bytesWritten += $n;
+        $retryAttempts = 0;
+    }
+    return $bytesWritten;
+}
+
 function send_message($stream, array $message): void
 {
     $blocking = stream_get_meta_data($stream)["blocked"];
     stream_set_blocking($stream, true);
-    fwrite($stream, base64_encode(serialize($message)) . "\n");
+    safe_fwrite($stream, base64_encode(serialize($message)) . "\n");
     stream_set_blocking($stream, $blocking);
 }
 
