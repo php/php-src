@@ -566,6 +566,12 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
+	/* disabling the read buffer allows doing the whole transfer
+	   in just one read() system call */
+	if (php_stream_is(stream, PHP_STREAM_IS_STDIO)) {
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER, PHP_STREAM_BUFFER_NONE, NULL);
+	}
+
 	if (offset != 0 && php_stream_seek(stream, offset, ((offset > 0) ? SEEK_SET : SEEK_END)) < 0) {
 		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		php_stream_close(stream);
