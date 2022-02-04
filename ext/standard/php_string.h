@@ -18,6 +18,8 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
+# include "ext/random/php_random.h"
+
 #if defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
@@ -62,6 +64,8 @@ PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, co
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
+
+PHPAPI void php_string_shuffle(const php_random_numbergenerator_algo *algo, void *state, char *str, zend_long len);
 
 #if defined(_REENTRANT)
 # ifdef PHP_WIN32

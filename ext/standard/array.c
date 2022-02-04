@@ -2892,7 +2892,7 @@ err:
 #undef RANGE_CHECK_DOUBLE_INIT_ARRAY
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
-static void php_array_data_shuffle(zval *array) /* {{{ */
+PHPAPI void php_array_data_shuffle(const php_random_numbergenerator_algo *algo, void *state, zval *array) /* {{{ */
 {
 	uint32_t idx, j, n_elems;
 	zval *zv, temp;
@@ -2936,7 +2936,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = php_random_numbergenerator_range(algo, state, 0, n_left);
 			if (rnd_idx != n_left) {
 				ZVAL_COPY_VALUE(&temp, &hash->arPacked[n_left]);
 				ZVAL_COPY_VALUE(&hash->arPacked[n_left], &hash->arPacked[rnd_idx]);
@@ -2961,7 +2961,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 			}
 		}
 		while (--n_left) {
-			rnd_idx = php_mt_rand_range(0, n_left);
+			rnd_idx = php_random_numbergenerator_range(algo, state, 0, n_left);
 			if (rnd_idx != n_left) {
 				ZVAL_COPY_VALUE(&temp, &hash->arPacked[n_left]);
 				ZVAL_COPY_VALUE(&hash->arPacked[n_left], &hash->arPacked[rnd_idx]);
@@ -2985,7 +2985,7 @@ PHP_FUNCTION(shuffle)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_data_shuffle(array);
+	php_array_data_shuffle(php_random_numbergenerator_get_default_algo(), php_random_numbergenerater_get_default_state(), array);
 
 	RETURN_TRUE;
 }

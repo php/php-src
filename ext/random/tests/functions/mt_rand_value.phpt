@@ -17,7 +17,7 @@ for ($i=0; $i<1024; $i++) {
 echo $x.PHP_EOL;
 echo PHP_EOL;
 
-mt_srand(12345678 /*, MT_RAND_MT19937 */);
+mt_srand(12345678 /*, MT_RAND_MersenneTwister */);
 
 for ($i=0; $i<16; $i++) {
     echo mt_rand().PHP_EOL;
@@ -31,7 +31,7 @@ for ($i=0; $i<1024; $i++) {
 echo $x.PHP_EOL;
 
 /*
- * Note that the output will be different from the original mt19937ar.c,
+ * Note that the output will be different from the original MersenneTwisterar.c,
  * because PHP's implementation contains a bug. Thus, this test actually
  * checks to make sure that PHP's behaviour is wrong, but consistently so.
  */
