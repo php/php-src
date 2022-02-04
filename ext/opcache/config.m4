@@ -88,7 +88,7 @@ if test "$PHP_OPCACHE" != "no"; then
     PHP_SUBST(DASM_ARCH)
   fi
 
-  AC_CHECK_FUNCS([mprotect memfd_create])
+  AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[

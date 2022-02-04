@@ -13,6 +13,9 @@ DOM:
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
+Opcache:
+  . Added large shared segments support for FreeBSD. (David Carlier)
+
 PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
 
