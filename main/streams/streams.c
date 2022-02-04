@@ -1474,6 +1474,26 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		return ZSTR_EMPTY_ALLOC();
 	}
 
+	if (php_stream_is(src, PHP_STREAM_IS_STDIO) &&
+	    src->readfilters.head == NULL &&
+	    php_stream_stat(src, &ssbuf) == 0 &&
+#ifdef S_ISREG
+	    S_ISREG(ssbuf.sb.st_mode) &&
+#endif
+	    ssbuf.sb.st_size >= 0) {
+		/* optimized code path for unfiltered regular files:
+		 * if we know the exact size, we can allocate the
+		 * right buffer size and issue only one read() system
+		 * call */
+
+		if (ssbuf.sb.st_size <= src->position)
+			return ZSTR_EMPTY_ALLOC();
+
+		const size_t remaining = ssbuf.sb.st_size - src->position;
+		if (remaining < maxlen)
+			maxlen = remaining;
+	}
+
 	if (maxlen == PHP_STREAM_COPY_ALL) {
 		maxlen = 0;
 	}
