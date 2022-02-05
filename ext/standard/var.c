@@ -552,9 +552,16 @@ again:
 			break;
 
 		case IS_OBJECT:
+			if (Z_IS_RECURSIVE_P(struc)) {
+				smart_str_appendl(buf, "NULL", 4);
+				zend_error(E_WARNING, "var_export does not handle circular references");
+				return;
+			}
+			Z_PROTECT_RECURSION_P(struc);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (myht) {
 				if (GC_IS_RECURSIVE(myht)) {
+					Z_UNPROTECT_RECURSION_P(struc);
 					smart_str_appendl(buf, "NULL", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					zend_release_properties(myht);
@@ -595,6 +602,7 @@ again:
 				GC_TRY_UNPROTECT_RECURSION(myht);
 				zend_release_properties(myht);
 			}
+			Z_UNPROTECT_RECURSION_P(struc);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
