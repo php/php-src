@@ -192,6 +192,9 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
+
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -462,6 +465,8 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
+
+		ZEND_ASSERT(EG(filename_override) == NULL);
 	}
 
 #if ZEND_DEBUG
@@ -591,21 +596,18 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 
 ZEND_API const char *zend_get_executed_filename(void) /* {{{ */
 {
-	zend_execute_data *ex = EG(current_execute_data);
-
-	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-		ex = ex->prev_execute_data;
-	}
-	if (ex) {
-		return ZSTR_VAL(ex->func->op_array.filename);
-	} else {
-		return "[no active file]";
-	}
+	zend_string *filename = zend_get_executed_filename_ex();
+	return filename != NULL ? ZSTR_VAL(filename) : "[no active file]";
 }
 /* }}} */
 
 ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 {
+	zend_string *filename_override = EG(filename_override);
+	if (filename_override != NULL) {
+		return filename_override;
+	}
+
 	zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
@@ -621,6 +623,11 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 
 ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
+	zend_long lineno_override = EG(lineno_override);
+	if (lineno_override != -1) {
+		return lineno_override;
+	}
+
 	zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {

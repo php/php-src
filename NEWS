@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
