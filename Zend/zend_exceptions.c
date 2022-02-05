@@ -822,6 +822,17 @@ static zend_object *zend_throw_exception_zstr(zend_class_entry *exception_ce, ze
 		zend_update_property_ex(exception_ce, Z_OBJ(ex), ZSTR_KNOWN(ZEND_STR_CODE), &tmp);
 	}
 
+	zend_string *exception_filename = EG(exception_filename);
+	if (exception_filename != NULL) {
+		ZVAL_STR(&tmp, exception_filename);
+		zend_update_property_ex(exception_ce, Z_OBJ(ex), ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
+
+		zend_long exception_filename = EG(exception_lineno);
+		ZEND_ASSERT(exception_filename != -1);
+		ZVAL_LONG(&tmp, exception_filename);
+		zend_update_property_ex(exception_ce, Z_OBJ(ex), ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
+	}
+
 	zend_throw_exception_internal(Z_OBJ(ex));
 
 	return Z_OBJ(ex);

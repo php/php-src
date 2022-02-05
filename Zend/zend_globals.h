@@ -266,6 +266,10 @@ struct _zend_executor_globals {
 	uint32_t num_errors;
 	zend_error_info **errors;
 
+	/* Overwrite filename or line number of thrown exceptions */
+	zend_string *exception_filename;
+	zend_long exception_lineno;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

@@ -192,6 +192,9 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	EG(exception_filename) = NULL;
+	EG(exception_lineno) = -1;
+
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -450,6 +453,8 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
+
+		ZEND_ASSERT(EG(exception_filename) == NULL);
 	}
 
 #if ZEND_DEBUG
