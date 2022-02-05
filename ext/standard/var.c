@@ -343,11 +343,22 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		PUTS("}\n");
 		break;
 	case IS_OBJECT:
+		/* Check if this is already recursing on the object before calling zend_get_properties_for,
+		 * to allow infinite recursion detection to work even if classes return temporary arrays,
+		 * and to avoid the need to update the properties table in place to reflect the state
+		 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
+		if (Z_IS_RECURSIVE_P(struc)) {
+			PUTS("*RECURSION*\n");
+			return;
+		}
+		Z_PROTECT_RECURSION_P(struc);
+
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 		if (myht) {
 			if (GC_IS_RECURSIVE(myht)) {
 				PUTS("*RECURSION*\n");
 				zend_release_properties(myht);
+				Z_UNPROTECT_RECURSION_P(struc);
 				return;
 			}
 			GC_PROTECT_RECURSION(myht);
@@ -377,6 +388,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS("}\n");
+		Z_UNPROTECT_RECURSION_P(struc);
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
@@ -552,9 +564,20 @@ again:
 			break;
 
 		case IS_OBJECT:
+			/* Check if this is already recursing on the object before calling zend_get_properties_for,
+			 * to allow infinite recursion detection to work even if classes return temporary arrays,
+			 * and to avoid the need to update the properties table in place to reflect the state
+			 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
+			if (Z_IS_RECURSIVE_P(struc)) {
+				smart_str_appendl(buf, "NULL", 4);
+				zend_error(E_WARNING, "var_export does not handle circular references");
+				return;
+			}
+			Z_PROTECT_RECURSION_P(struc);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (myht) {
 				if (GC_IS_RECURSIVE(myht)) {
+					Z_UNPROTECT_RECURSION_P(struc);
 					smart_str_appendl(buf, "NULL", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					zend_release_properties(myht);
@@ -596,6 +619,7 @@ again:
 				GC_TRY_UNPROTECT_RECURSION(myht);
 				zend_release_properties(myht);
 			}
+			Z_UNPROTECT_RECURSION_P(struc);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
