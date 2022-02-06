@@ -6,8 +6,6 @@ mysqli
 <?php
 require_once('skipifconnectfailure.inc');
 ?>
---INI--
-mysqli.reconnect=0
 --FILE--
 <?php
     require_once("connect.inc");
