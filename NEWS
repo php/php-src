@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.17
 
+- Core:
+  . Fixed Haiku ZTS build. (David Carlier)
+
 - Iconv:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
 
