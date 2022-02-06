@@ -41,9 +41,6 @@ require_once('skipifconnectfailure.inc');
     if (!stristr($phpinfo, "mysqli.max_links"))
         printf("[008] php.ini setting mysqli.max_links not shown.\n");
 
-    if (!stristr($phpinfo, "mysqli.reconnect"))
-        printf("[009] php.ini setting mysqli.reconnect not shown.\n");
-
     if ($IS_MYSQLND) {
         $expected = array(
             'size',
