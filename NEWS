@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.4
 
+- Core:
+  . Fixed Haiku ZTS build. (David Carlier)
+
 - Iconv:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
 
