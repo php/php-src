@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.18
 
+- Standard:
+  . Fixed bug GH-8048 (Force macOS to use statfs). (risner)
 
 17 Mar 2022, PHP 8.0.17
 
