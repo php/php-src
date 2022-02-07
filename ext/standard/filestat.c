@@ -43,11 +43,13 @@
 #endif
 
 #if defined(__APPLE__)
-// Apple statvfs has an interger overflow in libc copying to statvfs.
-//  cvt_statfs_to_statvfs(struct statfs *from, struct statvfs *to) {
-//  to->f_blocks = (fsblkcnt_t)from->f_blocks;
-#undef HAVE_SYS_STATVFS_H
-#undef HAVE_STATVFS
+  /*
+   Apple statvfs has an interger overflow in libc copying to statvfs.
+   cvt_statfs_to_statvfs(struct statfs *from, struct statvfs *to) {
+   to->f_blocks = (fsblkcnt_t)from->f_blocks;
+   */
+#  undef HAVE_SYS_STATVFS_H
+#  undef HAVE_STATVFS
 #endif
 
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
