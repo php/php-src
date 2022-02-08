@@ -130,7 +130,7 @@ different opcode threading model using `--with-vm-kind=CALL|SWITCH|GOTO|HYBRID`.
 You can disable opcode specialization using `--without-specializer`.
 At last you can debug the executor using the original `zend_vm_def.h` or the
 generated `zend_vm_execute.h` file. Debugging with the original file requires
-the `--with-lines` option. By default ZE3 (since PHP 7) uses the following
+the `--with-lines` option. By default, Zend Engine uses the following
 command to generate the executor:
 
 ```bash
