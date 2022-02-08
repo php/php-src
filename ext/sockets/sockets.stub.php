@@ -1678,6 +1678,27 @@ const SCM_CREDS = UNKNOWN;
  */
 const LOCAL_CREDS = UNKNOWN;
 #endif
+#if defined(SO_ATTACH_REUSEPORT_CBPF)
+/**
+ * @var int
+ * @cvalue SO_ATTACH_REUSEPORT_CBPF
+ */
+const SO_ATTACH_REUSEPORT_CBPF = UNKNOWN;
+#endif
+#if defined(SO_DETACH_FILTER)
+/**
+ * @var int
+ * @cvalue SO_DETACH_FILTER
+ */
+const SO_DETACH_FILTER = UNKNOWN;
+#endif
+#if defined(SO_DETACH_BPF)
+/**
+ * @var int
+ * @cvalue SO_DETACH_BPF
+ */
+const SO_DETACH_BPF = UNKNOWN;
+#endif
 
 /**
  * @strict-properties

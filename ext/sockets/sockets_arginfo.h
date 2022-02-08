@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d28c6b566f4739b1eaefb82032e620aeb59728dc */
+ * Stub hash: 546bd6fd43a68c8b6a95b4145afa94c04e36364a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -966,6 +966,15 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if (!defined(LOCAL_CREDS_PERSISTENT) && defined(LOCAL_CREDS))
 	REGISTER_LONG_CONSTANT("LOCAL_CREDS", LOCAL_CREDS, CONST_PERSISTENT);
+#endif
+#if defined(SO_ATTACH_REUSEPORT_CBPF)
+	REGISTER_LONG_CONSTANT("SO_ATTACH_REUSEPORT_CBPF", SO_ATTACH_REUSEPORT_CBPF, CONST_PERSISTENT);
+#endif
+#if defined(SO_DETACH_FILTER)
+	REGISTER_LONG_CONSTANT("SO_DETACH_FILTER", SO_DETACH_FILTER, CONST_PERSISTENT);
+#endif
+#if defined(SO_DETACH_BPF)
+	REGISTER_LONG_CONSTANT("SO_DETACH_BPF", SO_DETACH_BPF, CONST_PERSISTENT);
 #endif
 }
 
