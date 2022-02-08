@@ -502,9 +502,9 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 
 fail:
 	if (stmt_to_prepare != stmt && s_to_prepare) {
+		COPY_CLIENT_ERROR(stmt->error_info, *stmt_to_prepare->error_info);
 		s_to_prepare->m->dtor(s_to_prepare, TRUE);
 	}
-	stmt->state = MYSQLND_STMT_INITTED;
 
 	DBG_INF("FAIL");
 	DBG_RETURN(FAIL);
