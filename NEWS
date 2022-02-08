@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0alpha1
 
+- CLI:
+  . Added pdeathsig to builtin server to terminate workers when the master
+    process is killed. (ilutov)
+
 - Core:
   . Fixed bug GH-9388 (Improve unset property and __get type incompatibility
     error message). (ilutov)
@@ -17,9 +21,8 @@ PHP                                                                        NEWS
 - Posix:
   . Added posix_sysconf. (David Carlier)
 
-- CLI:
-  . Added pdeathsig to builtin server to terminate workers when the master
-    process is killed. (ilutov)
-
+- Sockets:
+  . Added SO_ATTACH_REUSEPORT_CBPF socket option, to give tighter control
+  over socket binding for a cpu core. (David Carlier)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

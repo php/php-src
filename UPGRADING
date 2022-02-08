@@ -64,6 +64,9 @@ PHP 8.3 UPGRADE NOTES
   . POSIX_SC_NPROCESSORS_CONF
   . POSIX_SC_NPROCESSORS_ONLN
 
+- Sockets:
+  . SO_ATTACH_REUSEPORT_CBPF (Linux only).
+
 ========================================
 11. Changes to INI File Handling
 ========================================
