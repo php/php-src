@@ -194,9 +194,9 @@ require_once('skipifconnectfailure.inc');
 
     /* try to use stmt_affected_rows like stmt_num_rows */
     /* stmt_affected_rows is not really meant for SELECT! */
-    if (mysqli_stmt_prepare($stmt, 'SELECT unknown_column FROM this_table_does_not_exist') ||
+    if (mysqli_stmt_prepare($stmt, 'SELECT unknown_column FROM this_table_does_not_exist') &&
         mysqli_stmt_execute($stmt))
-        printf("[041] The invalid SELECT statement is issued on purpose\n");
+        printf("[041] Expecting SELECT statement to fail on purpose\n");
 
     if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[042] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
