@@ -2661,7 +2661,20 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
-	if (UNEXPECTED(memory_limit < AG(mm_heap)->real_size)) {
+	zend_mm_heap *heap = AG(mm_heap);
+
+	if (UNEXPECTED(memory_limit < heap->real_size)) {
+		if (memory_limit >= heap->real_size - heap->cached_chunks_count * ZEND_MM_CHUNK_SIZE) {
+			/* free some cached chunks to fit into new memory limit */
+			do {
+				zend_mm_chunk *p = heap->cached_chunks;
+				heap->cached_chunks = p->next;
+				zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
+				heap->cached_chunks_count--;
+				heap->real_size -= ZEND_MM_CHUNK_SIZE;
+			} while (memory_limit < heap->real_size);
+			return SUCCESS;
+		}
 		return FAILURE;
 	}
 	AG(mm_heap)->limit = memory_limit;
