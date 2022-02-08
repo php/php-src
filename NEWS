@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed Haiku ZTS build. (David Carlier)
+  . Fixed bug GH-8059 arginfo not regenerated for extension. (Remi)
 
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)
