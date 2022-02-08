@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed Haiku ZTS build. (David Carlier)
 
+- GD:
+  . Fixed libpng warning when loading interlaced images. (Brett)
+
 - Iconv:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
   . Fixed bug GH-7980 (Unexpected result for iconv_mime_decode). (cmb)
