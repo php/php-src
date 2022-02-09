@@ -3083,8 +3083,8 @@ PHP_FUNCTION(pg_copy_to)
 	ExecStatusType status;
 	char *csv = (char *)NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|Sss", &pgsql_link, pgsql_link_ce,
-		&table_name, &pg_delimiter, &pg_escape, &pg_null_as, &pg_null_as_len) == FAILURE
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|SsS", &pgsql_link, pgsql_link_ce,
+		&table_name, &pg_delimiter, &pg_null_as, &pg_null_as_len, &pg_escape) == FAILURE
 	) {
 		RETURN_THROWS();
 	}
@@ -3186,8 +3186,8 @@ PHP_FUNCTION(pg_copy_from)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OPa|Sss", &pgsql_link, pgsql_link_ce,
-		&table_name, &pg_rows, &pg_delimiter, &pg_escape, &pg_null_as, &pg_null_as_len) == FAILURE
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OPa|SsS", &pgsql_link, pgsql_link_ce,
+		&table_name, &pg_rows, &pg_delimiter, &pg_null_as, &pg_null_as_len, &pg_escape) == FAILURE
 	) {
 		RETURN_THROWS();
 	}
