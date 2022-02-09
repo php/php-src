@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed handling of single-key connection strings. (Calvin Buckley)
 
+- OpenSSL:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
+
 - PCRE:
   . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
 
@@ -36,6 +39,9 @@ PHP                                                                        NEWS
 
 - Standard:
   . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
+
+- Streams:
+  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
 
 09 Jun 2022, PHP 8.2.0alpha1
 
