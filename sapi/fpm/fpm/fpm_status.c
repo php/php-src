@@ -136,8 +136,8 @@ int fpm_status_export_to_zval(zval *status)
 
 int fpm_status_handle_request(void) /* {{{ */
 {
-	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
-	struct fpm_scoreboard_proc_s proc;
+	struct fpm_scoreboard_s *scoreboard_p;
+	struct fpm_scoreboard_proc_s *proc;
 	char *buffer, *time_format, time_buffer[64];
 	time_t now_epoch;
 	int full, encode, has_start_time;
@@ -170,9 +170,17 @@ int fpm_status_handle_request(void) /* {{{ */
 	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
 		fpm_request_executing();
 
+		/* full status ? */
+		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
+		short_syntax = short_post = NULL;
+		full_separator = full_pre = full_syntax = full_post = NULL;
+		encode = 0;
+		has_start_time = 1;
+
 		scoreboard_p = fpm_scoreboard_get();
-		if (scoreboard_p->shared) {
-			scoreboard_p = scoreboard_p->shared;
+		if (scoreboard_p) {
+			scoreboard_p = fpm_scoreboard_copy(scoreboard_p->shared ? scoreboard_p->shared : scoreboard_p, full);
 		}
 		if (!scoreboard_p) {
 			zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
@@ -184,21 +192,9 @@ int fpm_status_handle_request(void) /* {{{ */
 			return 1;
 		}
 
-		if (!fpm_spinlock(&scoreboard_p->lock, 1)) {
-			zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
-			SG(sapi_headers).http_response_code = 503;
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
-			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
-			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
-			PUTS("Server busy. Please try again later.");
-			return 1;
-		}
-		/* copy the scoreboard not to bother other processes */
-		scoreboard = *scoreboard_p;
-		fpm_unlock(scoreboard_p->lock);
-
-		if (scoreboard.idle < 0 || scoreboard.active < 0) {
-			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard.pool);
+		if (scoreboard_p->idle < 0 || scoreboard_p->active < 0) {
+			fpm_scoreboard_free_copy(scoreboard_p);
+			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard_p->pool);
 			SG(sapi_headers).http_response_code = 500;
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
 			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
@@ -214,16 +210,9 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* handle HEAD */
 		if (SG(request_info).headers_only) {
+			fpm_scoreboard_free_copy(scoreboard_p);
 			return 1;
 		}
-
-		/* full status ? */
-		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
-		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
-		short_syntax = short_post = NULL;
-		full_separator = full_pre = full_syntax = full_post = NULL;
-		encode = 0;
-		has_start_time = 1;
 
 		/* HTML */
 		if (fpm_php_get_string_from_table(_GET_str, "html")) {
@@ -486,37 +475,37 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		now_epoch = time(NULL);
 		if (has_start_time) {
-			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
+			strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard_p->start_epoch));
 			spprintf(&buffer, 0, short_syntax,
-					scoreboard.pool,
-					PM2STR(scoreboard.pm),
+					scoreboard_p->pool,
+					PM2STR(scoreboard_p->pm),
 					time_buffer,
-					(unsigned long) (now_epoch - scoreboard.start_epoch),
-					scoreboard.requests,
-					scoreboard.lq,
-					scoreboard.lq_max,
-					scoreboard.lq_len,
-					scoreboard.idle,
-					scoreboard.active,
-					scoreboard.idle + scoreboard.active,
-					scoreboard.active_max,
-					scoreboard.max_children_reached,
-					scoreboard.slow_rq);
+					(unsigned long) (now_epoch - scoreboard_p->start_epoch),
+					scoreboard_p->requests,
+					scoreboard_p->lq,
+					scoreboard_p->lq_max,
+					scoreboard_p->lq_len,
+					scoreboard_p->idle,
+					scoreboard_p->active,
+					scoreboard_p->idle + scoreboard_p->active,
+					scoreboard_p->active_max,
+					scoreboard_p->max_children_reached,
+					scoreboard_p->slow_rq);
 		} else {
 			spprintf(&buffer, 0, short_syntax,
-					scoreboard.pool,
-					PM2STR(scoreboard.pm),
-					(unsigned long) (now_epoch - scoreboard.start_epoch),
-					scoreboard.requests,
-					scoreboard.lq,
-					scoreboard.lq_max,
-					scoreboard.lq_len,
-					scoreboard.idle,
-					scoreboard.active,
-					scoreboard.idle + scoreboard.active,
-					scoreboard.active_max,
-					scoreboard.max_children_reached,
-					scoreboard.slow_rq);
+					scoreboard_p->pool,
+					PM2STR(scoreboard_p->pm),
+					(unsigned long) (now_epoch - scoreboard_p->start_epoch),
+					scoreboard_p->requests,
+					scoreboard_p->lq,
+					scoreboard_p->lq_max,
+					scoreboard_p->lq_len,
+					scoreboard_p->idle,
+					scoreboard_p->active,
+					scoreboard_p->idle + scoreboard_p->active,
+					scoreboard_p->active_max,
+					scoreboard_p->max_children_reached,
+					scoreboard_p->slow_rq);
 		}
 
 		PUTS(buffer);
@@ -547,7 +536,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				if (!scoreboard_p->procs[i].used) {
 					continue;
 				}
-				proc = scoreboard_p->procs[i];
+				proc = &scoreboard_p->procs[i];
 
 				if (first) {
 					first = 0;
@@ -559,44 +548,44 @@ int fpm_status_handle_request(void) /* {{{ */
 
 				query_string = NULL;
 				tmp_query_string = NULL;
-				if (proc.query_string[0] != '\0') {
+				if (proc->query_string[0] != '\0') {
 					if (!encode) {
-						query_string = proc.query_string;
+						query_string = proc->query_string;
 					} else {
-						tmp_query_string = php_escape_html_entities_ex((const unsigned char *) proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, /* double_encode */ 1, /* quiet */ 0);
+						tmp_query_string = php_escape_html_entities_ex((const unsigned char *) proc->query_string, strlen(proc->query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, /* double_encode */ 1, /* quiet */ 0);
 						query_string = ZSTR_VAL(tmp_query_string);
 					}
 				}
 
 				/* prevent NaN */
-				if (proc.cpu_duration.tv_sec == 0 && proc.cpu_duration.tv_usec == 0) {
+				if (proc->cpu_duration.tv_sec == 0 && proc->cpu_duration.tv_usec == 0) {
 					cpu = 0.;
 				} else {
-					cpu = (proc.last_request_cpu.tms_utime + proc.last_request_cpu.tms_stime + proc.last_request_cpu.tms_cutime + proc.last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.;
+					cpu = (proc->last_request_cpu.tms_utime + proc->last_request_cpu.tms_stime + proc->last_request_cpu.tms_cutime + proc->last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc->cpu_duration.tv_sec + proc->cpu_duration.tv_usec / 1000000.) * 100.;
 				}
 
-				if (proc.request_stage == FPM_REQUEST_ACCEPTING) {
-					duration = proc.duration;
+				if (proc->request_stage == FPM_REQUEST_ACCEPTING) {
+					duration = proc->duration;
 				} else {
-					timersub(&now, &proc.accepted, &duration);
+					timersub(&now, &proc->accepted, &duration);
 				}
-				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
+				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc->start_epoch));
 				spprintf(&buffer, 0, full_syntax,
-					(int) proc.pid,
-					fpm_request_get_stage_name(proc.request_stage),
+					(int) proc->pid,
+					fpm_request_get_stage_name(proc->request_stage),
 					time_buffer,
-					(unsigned long) (now_epoch - proc.start_epoch),
-					proc.requests,
+					(unsigned long) (now_epoch - proc->start_epoch),
+					proc->requests,
 					duration.tv_sec * 1000000UL + duration.tv_usec,
-					proc.request_method[0] != '\0' ? proc.request_method : "-",
-					proc.request_uri[0] != '\0' ? proc.request_uri : "-",
+					proc->request_method[0] != '\0' ? proc->request_method : "-",
+					proc->request_uri[0] != '\0' ? proc->request_uri : "-",
 					query_string ? "?" : "",
 					query_string ? query_string : "",
-					proc.content_length,
-					proc.auth_user[0] != '\0' ? proc.auth_user : "-",
-					proc.script_filename[0] != '\0' ? proc.script_filename : "-",
-					proc.request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
-					proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
+					proc->content_length,
+					proc->auth_user[0] != '\0' ? proc->auth_user : "-",
+					proc->script_filename[0] != '\0' ? proc->script_filename : "-",
+					proc->request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
+					proc->request_stage == FPM_REQUEST_ACCEPTING ? proc->memory : 0);
 				PUTS(buffer);
 				efree(buffer);
 
@@ -610,6 +599,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			}
 		}
 
+		fpm_scoreboard_free_copy(scoreboard_p);
 		return 1;
 	}
 
