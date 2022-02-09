@@ -22,22 +22,11 @@ schedules:
         - master
 
 jobs:
-  - template: azure/job.yml
-    parameters:
-      configurationName: DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
-  - template: azure/job.yml
-    parameters:
-      configurationName: RELEASE_ZTS
-      configurationParameters: '--disable-debug --enable-zts'
-  - template: azure/i386/job.yml
-    parameters:
-      configurationName: I386_DEBUG_ZTS
-      configurationParameters: '--enable-debug --enable-zts'
-  - template: azure/macos/job.yml
-    parameters:
-      configurationName: MACOS_DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
+  # Azure pipelines don't work atm
+  # - template: azure/i386/job.yml
+  #   parameters:
+  #     configurationName: I386_DEBUG_ZTS
+  #     configurationParameters: '--enable-debug --enable-zts'
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: azure/job.yml
       parameters:
