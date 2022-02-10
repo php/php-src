@@ -3720,8 +3720,8 @@ class SkipCache
 
         save_text($checkFile, $code, $tempFile);
         $result = trim(system_with_timeout("$php \"$checkFile\"", $env));
-        if (strpos($result, 'nocache') === 0) {
-            $result = '';
+        if (!strncasecmp('nocache', $result, 7)) {
+            $result = ltrim(substr($result, 7));
         } else if ($this->enable) {
             $this->skips[$key][$code] = $result;
         }
