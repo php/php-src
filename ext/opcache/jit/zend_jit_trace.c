@@ -3864,7 +3864,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 							info &= ~MAY_BE_GUARD;
 							ssa->var_info[phi->ssa_var].type = info;
-							SET_STACK_TYPE(stack, i, concrete_type(info), 1);
+							SET_STACK_TYPE(stack, phi->var, concrete_type(info), 1);
 						}
 						SET_STACK_REG_EX(stack, phi->var, ival->reg, ZREG_LOAD);
 						if (!zend_jit_load_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
