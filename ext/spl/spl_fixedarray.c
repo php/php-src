@@ -214,6 +214,10 @@ static HashTable* spl_fixedarray_object_get_properties(zend_object *obj)
 	if (!spl_fixedarray_empty(&intern->array)) {
 		zend_long j = zend_hash_num_elements(ht);
 
+		if (GC_REFCOUNT(ht) > 1) {
+			intern->std.properties = zend_array_dup(ht);
+			GC_TRY_DELREF(ht);
+		}
 		for (zend_long i = 0; i < intern->array.size; i++) {
 			zend_hash_index_update(ht, i, &intern->array.elements[i]);
 			Z_TRY_ADDREF(intern->array.elements[i]);
