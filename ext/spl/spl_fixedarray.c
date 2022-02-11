@@ -223,6 +223,10 @@ static HashTable* spl_fixedarray_object_get_properties(zend_object *obj)
 				zend_hash_index_del(ht, i);
 			}
 		}
+		if (HT_IS_PACKED(ht)) {
+			/* Engine doesn't expet packed array */
+			zend_hash_packed_to_hash(ht);
+		}
 	}
 
 	return ht;
