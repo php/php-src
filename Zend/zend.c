@@ -1215,8 +1215,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
 
-	zend_observer_deactivate();
-
 	zend_try {
 		shutdown_scanner();
 	} zend_end_try();

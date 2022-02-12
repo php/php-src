@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed Haiku ZTS build. (David Carlier)
+  . Fixed bug GH-8082 (op_arrays with temporary run_time_cache leak memory
+    when observed). (Bob)
 
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)
