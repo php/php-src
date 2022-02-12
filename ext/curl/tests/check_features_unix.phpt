@@ -54,7 +54,6 @@ PSL => %s
 HTTPS_PROXY => Yes
 MULTI_SSL => No
 %A
-BROTLI => %s
 Protocols => dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3, pop3s, rtmp, rtsp, %Ssmb, smbs, smtp, smtps, telnet, tftp
 Host => %s
 SSL Version => %s/%s
