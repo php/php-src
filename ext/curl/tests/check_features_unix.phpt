@@ -54,7 +54,7 @@ PSL => %s
 HTTPS_PROXY => Yes
 MULTI_SSL => No
 %A
-Protocols => dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3, pop3s, rtmp, rtsp, %Ssmb, smbs, smtp, smtps, telnet, tftp
+Protocols => dict, file, ftp, ftps, gopher, http, https, imap, imaps%s
 Host => %s
 SSL Version => %s/%s
 ZLib Version => %s
