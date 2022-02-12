@@ -267,8 +267,17 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
 
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
+	int handle = zend_op_array_extension_handles++;
 	zend_add_system_entropy(module_name, "zend_get_op_array_extension_handle", &zend_op_array_extension_handles, sizeof(int));
-	return zend_op_array_extension_handles++;
+	return handle;
+}
+
+ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int handles)
+{
+	int handle = zend_op_array_extension_handles;
+	zend_op_array_extension_handles += handles;
+	zend_add_system_entropy(module_name, "zend_get_op_array_extension_handle", &zend_op_array_extension_handles, sizeof(int));
+	return handle;
 }
 
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)
