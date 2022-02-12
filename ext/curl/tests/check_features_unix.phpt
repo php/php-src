@@ -53,11 +53,7 @@ UNIX_SOCKETS => Yes
 PSL => %s
 HTTPS_PROXY => Yes
 MULTI_SSL => No
-Alt-Svc => %s
-HTTP3 => %s
-Unicode => %s
-Zstandard => %s
-HSTS => %s
+%A
 BROTLI => %s
 Protocols => %s
 Host => %s
