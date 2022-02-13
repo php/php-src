@@ -1748,7 +1748,7 @@ class ClassInfo {
         }
 
         if ($this->alias) {
-            $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "_", $this->alias) . "\", class_entry);\n";
+            $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "\\\\", $this->alias) . "\", class_entry);\n";
         }
 
         foreach ($this->enumCaseInfos as $enumCase) {
