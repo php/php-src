@@ -1,5 +1,7 @@
 --TEST--
 Check libcurl features list
+--EXTENSIONS--
+curl
 --SKIPIF--
 <?php
 
