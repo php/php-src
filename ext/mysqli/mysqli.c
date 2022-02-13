@@ -461,7 +461,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->default_user = NULL;
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
-	mysqli_globals->reconnect = 0;
 	mysqli_globals->report_mode = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;;
 	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->local_infile_directory = NULL;

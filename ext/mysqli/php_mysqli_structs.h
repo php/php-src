@@ -247,7 +247,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	char				*default_user;
 	char				*default_pw;
 	char				*default_socket;
-	zend_long			reconnect;
 	zend_long			allow_local_infile;
 	char				*local_infile_directory;
 	zend_long			error_no;

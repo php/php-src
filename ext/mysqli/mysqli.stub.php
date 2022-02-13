@@ -13,8 +13,6 @@ final class mysqli_driver
     /** @readonly */
     public int $driver_version;
 
-    public bool $reconnect = false;
-
     public int $report_mode = 0;
 }
 
