@@ -1,12 +1,14 @@
 --TEST--
 Check libcurl features list
---EXTENSIONS--
-curl
 --SKIPIF--
 <?php
 
 if (substr(PHP_OS, 0, 3) !== 'WIN') {
     exit('skip: test only works with Windows');
+}
+
+if (!extension_loaded('curl')) {
+    exit('skip: test requires the curl extension');
 }
 
 $version = curl_version();
