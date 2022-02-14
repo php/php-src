@@ -197,18 +197,13 @@ require_once('skipifconnectfailure.inc');
     /* stmt_affected_rows is not really meant for SELECT! */
     if (mysqli_stmt_prepare($stmt, 'SELECT unknown_column FROM this_table_does_not_exist') ||
         mysqli_stmt_execute($stmt))
-        printf("[041] The invalid SELECT statement is issued on purpose\n");
+        printf("[041] Expecting SELECT statement to fail on purpose\n");
 
     if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
         printf("[042] Expecting int/-1, got %s/%s\n", gettype($tmp), $tmp);
 
-    if ($IS_MYSQLND) {
-        if (false !== ($tmp = mysqli_stmt_store_result($stmt)))
-            printf("[043] Expecting boolean/false, got %s\%s\n", gettype($tmp), $tmp);
-    } else {
-        if (true !== ($tmp = mysqli_stmt_store_result($stmt)))
-            printf("[043] Libmysql does not care if the previous statement was bogus, expecting boolean/true, got %s\%s\n", gettype($tmp), $tmp);
-    }
+    if (true !== ($tmp = mysqli_stmt_store_result($stmt)))
+        printf("[043] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
     if (0 !== ($tmp = mysqli_stmt_num_rows($stmt)))
         printf("[044] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
