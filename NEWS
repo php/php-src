@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.28
 
+- Filter:
+  . Fix #81708: UAF due to php_filter_float() failing for ints
+
 
 16 Dec 2021, PHP 7.4.27
 
