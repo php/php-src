@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed bug GH-8074 (Wrong type inference of range() result). (cmb)
 
+- Reflection:
+  . Fixed bug GH-8080 (ReflectionClass::getConstants() depends on def. order).
+    (cmb)
+
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
 
