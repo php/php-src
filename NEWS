@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7896 (Environment vars may be mangled on Windows). (cmb)
   . Fixed bug GH-7883 (Segfault when INI file is not readable). (Remi)
 
+- Filter:
+  . Fix #81708: UAF due to php_filter_float() failing for ints. (CVE-2021-21708) (cmb)
+
 - FFI:
   . Fixed bug GH-7867 (FFI::cast() from pointer to array is broken). (cmb,
     dmitry)
