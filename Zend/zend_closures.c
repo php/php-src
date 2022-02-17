@@ -697,6 +697,13 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			}
 			ZEND_MAP_PTR_INIT(closure->func.op_array.static_variables_ptr,
 				&closure->func.op_array.static_variables);
+		} else if (func->op_array.static_variables) {
+			HashTable *ht = ZEND_MAP_PTR_GET(func->op_array.static_variables_ptr);
+
+			if (!ht) {
+				ht = zend_array_dup(func->op_array.static_variables);
+				ZEND_MAP_PTR_SET(closure->func.op_array.static_variables_ptr, ht);
+			}
 		}
 
 		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
