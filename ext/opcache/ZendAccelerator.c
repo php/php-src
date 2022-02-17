@@ -2195,6 +2195,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				zend_hash_index_del(EG(zend_constants), new_const_num);
 			}
 		}
+		persistent_script->dynamic_members.last_used = ZCG(request_time);
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else {
 
 #if !ZEND_WIN32
@@ -2231,15 +2234,15 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				}
 			}
 		}
+
+		persistent_script->dynamic_members.last_used = ZCG(request_time);
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+
 		replay_warnings(persistent_script);
 		zend_file_handle_dtor(file_handle);
 		from_shared_memory = 1;
 	}
-
-	persistent_script->dynamic_members.last_used = ZCG(request_time);
-
-	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
     /* Fetch jit auto globals used in the script before execution */
     if (persistent_script->ping_auto_globals_mask) {
