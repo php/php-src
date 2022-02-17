@@ -12,6 +12,7 @@ var_dump(preg_match('~a', ''));
 var_dump(preg_match('@\@\@@', '@@'));
 var_dump(preg_match('//z', '@@'));
 var_dump(preg_match('{', ''));
+var_dump(preg_match("\0\0", ''));
 
 ?>
 --EXPECTF--
@@ -34,4 +35,7 @@ Warning: preg_match(): Unknown modifier 'z' in %sdelimiters.php on line 10
 bool(false)
 
 Warning: preg_match(): No ending matching delimiter '}' found in %sdelimiters.php on line 11
+bool(false)
+
+Warning: preg_match(): Delimiter must not be a null character in %sdelimiters.php on line 12
 bool(false)

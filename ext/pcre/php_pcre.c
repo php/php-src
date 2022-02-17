@@ -615,7 +615,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	char				 delimiter;
 	char				 start_delimiter;
 	char				 end_delimiter;
-	char				*p, *pp;
+	char				*p, *pp, *end_p;
 	char				*pattern;
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
@@ -624,7 +624,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	pcre_cache_entry	 new_entry;
 	int					 rc;
 	zend_string 		*key;
-	pcre_cache_entry *ret;
+	pcre_cache_entry	*ret;
 
 	if (locale_aware && BG(ctype_string)) {
 		key = zend_string_concat2(
@@ -645,16 +645,16 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	}
 
 	p = ZSTR_VAL(regex);
+	end_p = ZSTR_VAL(regex) + ZSTR_LEN(regex);
 
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
-	if (*p == 0) {
+	if (p >= end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL, E_WARNING,
-						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
+		php_error_docref(NULL, E_WARNING, "Empty regular expression");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -662,11 +662,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	/* Get the delimiter and display a warning if it is alphanumeric
 	   or a backslash. */
 	delimiter = *p++;
-	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
+	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\' || delimiter == '\0') {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
+		php_error_docref(NULL, E_WARNING, delimiter == '\0' ?
+			"Delimiter must not be a null character" :
+			"Delimiter must not be alphanumeric or backslash");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -682,8 +684,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		/* We need to iterate through the pattern, searching for the ending delimiter,
 		   but skipping the backslashed delimiters.  If the ending delimiter is not
 		   found, display a warning. */
-		while (*pp != 0) {
-			if (*pp == '\\' && pp[1] != 0) pp++;
+		while (pp < end_p) {
+			if (*pp == '\\' && pp + 1 < end_p) pp++;
 			else if (*pp == delimiter)
 				break;
 			pp++;
@@ -695,8 +697,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		 * reach the end of the pattern without matching, display a warning.
 		 */
 		int brackets = 1; 	/* brackets nesting level */
-		while (*pp != 0) {
-			if (*pp == '\\' && pp[1] != 0) pp++;
+		while (pp < end_p) {
+			if (*pp == '\\' && pp + 1 < end_p) pp++;
 			else if (*pp == end_delimiter && --brackets <= 0)
 				break;
 			else if (*pp == start_delimiter)
@@ -705,13 +707,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		}
 	}
 
-	if (*pp == 0) {
+	if (pp == end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		if (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
-			php_error_docref(NULL,E_WARNING, "Null byte in regex");
-		} else if (start_delimiter == end_delimiter) {
+		if (start_delimiter == end_delimiter) {
 			php_error_docref(NULL,E_WARNING, "No ending delimiter '%c' found", delimiter);
 		} else {
 			php_error_docref(NULL,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
@@ -729,7 +729,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */
-	while (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
+	while (pp < end_p) {
 		switch (*pp++) {
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE2_CASELESS;		break;
@@ -763,9 +763,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 			default:
 				if (pp[-1]) {
-					php_error_docref(NULL,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
 				} else {
-					php_error_docref(NULL,E_WARNING, "Null byte in regex");
+					php_error_docref(NULL, E_WARNING, "Null character is not a valid modifier");
 				}
 				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
