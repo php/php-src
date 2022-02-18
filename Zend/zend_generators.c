@@ -938,6 +938,7 @@ ZEND_METHOD(Generator, send)
 	root = zend_generator_get_current(generator);
 	/* Put sent value in the target VAR slot, if it is used */
 	if (root->send_target) {
+		zval_ptr_dtor(root->send_target);
 		ZVAL_COPY(root->send_target, value);
 	}
 
