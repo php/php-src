@@ -185,11 +185,8 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	if (!Z_ISUNDEF(iter->it.data)) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &iter->it.data);
-	}
-	zend_get_gc_buffer_use(gc_buffer, table, n);
+	*table = &iter->it.data;
+	*n = 1;
 	return NULL;
 }
 
