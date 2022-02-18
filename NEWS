@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.5
 
+- Intl:
+  . Fixed bug GH-8115 (Can't catch arg type deprecation when instantiating Intl
+    classes). (ilutov)
 
 17 Mar 2022, PHP 8.1.4
 
