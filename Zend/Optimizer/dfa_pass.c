@@ -1304,6 +1304,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 
 				if (src_var >= 0
 				 && !(ssa->var_info[src_var].type & MAY_BE_REF)
+				 && (ssa->var_info[src_var].type & (MAY_BE_UNDEF|MAY_BE_ANY))
 				 && ssa->vars[src_var].definition >= 0
 				 && ssa->ops[ssa->vars[src_var].definition].result_def == src_var
 				 && ssa->ops[ssa->vars[src_var].definition].result_use < 0
@@ -1463,6 +1464,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
 					 && src_var >= 0
 					 && !(ssa->var_info[src_var].type & MAY_BE_REF)
+					 && (ssa->var_info[src_var].type & (MAY_BE_UNDEF|MAY_BE_ANY))
 					 && ssa->vars[src_var].definition >= 0
 					 && ssa->ops[ssa->vars[src_var].definition].result_def == src_var
 					 && ssa->ops[ssa->vars[src_var].definition].result_use < 0
