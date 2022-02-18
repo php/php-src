@@ -6,6 +6,7 @@ on:
 
 jobs:
   stale:
+    if: github.repository_owner == 'php'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v4
