@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    if: github.repository_owner == 'php'
     runs-on: ubuntu-latest
     steps:
       - name: Close old issues that need feedback
