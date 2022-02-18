@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-8059 arginfo not regenerated for extension. (Remi)
   . Fixed bug GH-8083 Segfault when dumping uncalled fake closure with static
     variables. (ilutov)
+  . Fixed bug GH-7958 (Nested CallbackFilterIterator is leaking memory). (cmb)
 
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)

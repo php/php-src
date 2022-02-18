@@ -182,6 +182,14 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 }
 /* }}} */
 
+ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
+{
+	zend_user_iterator *iter = (zend_user_iterator*)_iter;
+	*table = &iter->it.data;
+	*n = 1;
+	return NULL;
+}
+
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
 	zend_user_it_valid,
@@ -190,7 +198,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 	zend_user_it_move_forward,
 	zend_user_it_rewind,
 	zend_user_it_invalidate_current,
-	NULL, /* get_gc */
+	zend_user_it_get_gc,
 };
 
 /* {{{ zend_user_it_get_iterator */
