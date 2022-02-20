@@ -13,6 +13,7 @@ $functions = [
     function(): callable {},
     function(): iterable {},
     function(): null {},
+    function(): false {},
     function(): StdClass {}
 ];
 
@@ -32,4 +33,5 @@ string(5) "array"
 string(8) "callable"
 string(8) "iterable"
 string(4) "null"
+string(5) "false"
 string(8) "StdClass"

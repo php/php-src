@@ -6343,14 +6343,6 @@ static zend_type zend_compile_typename(
 		zend_error_noreturn(E_COMPILE_ERROR, "null cannot be marked as nullable");
 	}
 
-	if ((type_mask & MAY_BE_FALSE) && !ZEND_TYPE_IS_COMPLEX(type) && !(type_mask & ~MAY_BE_FALSE)) {
-		if (is_marked_nullable) {
-			zend_error_noreturn(E_COMPILE_ERROR, "false cannot be marked as nullable since false is not a standalone type");
-		} else {
-			zend_error_noreturn(E_COMPILE_ERROR, "false cannot be used as a standalone type");
-		}
-	}
-
 	if (is_marked_nullable || force_allow_null) {
 		ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
 		type_mask = ZEND_TYPE_PURE_MASK(type);

@@ -16,6 +16,7 @@ function dumpType(ReflectionUnionType $rt) {
 function test1(): X|Y|int|float|false|null { }
 function test2(): X|iterable|bool { }
 function test3(): null|false { }
+function test4(): ?false { }
 
 class Test {
     public X|Y|int $prop;
@@ -24,6 +25,7 @@ class Test {
 dumpType((new ReflectionFunction('test1'))->getReturnType());
 dumpType((new ReflectionFunction('test2'))->getReturnType());
 dumpType((new ReflectionFunction('test3'))->getReturnType());
+dumpType((new ReflectionFunction('test4'))->getReturnType());
 
 $rc = new ReflectionClass(Test::class);
 $rp = $rc->getProperty('prop');
@@ -77,6 +79,14 @@ Allows null: false
   Name: bool
   String: bool
   Allows Null: false
+Type false|null:
+Allows null: true
+  Name: false
+  String: false
+  Allows Null: false
+  Name: null
+  String: null
+  Allows Null: true
 Type false|null:
 Allows null: true
   Name: false
