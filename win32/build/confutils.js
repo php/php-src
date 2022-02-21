@@ -184,10 +184,10 @@ function condense_path(path)
 {
 	path = FSO.GetAbsolutePathName(path);
 
-	if (path.substr(0, CWD.length).toLowerCase()
+	if (path.slice(0, CWD.length).toLowerCase()
 			== CWD.toLowerCase() &&
 			(path.charCodeAt(CWD.length) == 92 || path.charCodeAt(CWD.length) == 47)) {
-		return path.substr(CWD.length + 1);
+		return path.slice(CWD.length + 1);
 	}
 
 	var a = CWD.split("\\");
@@ -613,7 +613,7 @@ function search_paths(thing_to_find, explicit_path, env_name)
 			if (file) {
 				found = true;
 				place = file[0];
-				place = place.substr(0, place.length - thing_to_find.length - 1);
+				place = place.substring(0, place.length - thing_to_find.length - 1);
 				break;
 			}
 		}
@@ -1004,7 +1004,7 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 		add_dir_part = false;
 	} else if (add_dir_part) {
 		var basename = FSO.GetFileName(header_name);
-		dir_part_to_add = "\\" + header_name.substr(0, header_name.length - basename.length - 1);
+		dir_part_to_add = "\\" + header_name.substring(0, header_name.length - basename.length - 1);
 	}
 
 	if (path_to_check == null) {
@@ -2073,7 +2073,7 @@ function generate_files()
 
 		build_dir = get_define('BUILD_DIR');
 		build_dir = build_dir.replace(new RegExp("\\\\", "g"), "\\\\");
-		if (build_dir.substr(build_dir.Length - 2, 2) != '\\\\') {
+		if (build_dir.slice(-2) != '\\\\') {
 			build_dir += '\\\\';
 		}
 		ADD_FLAG("BUILD_DIRS_SUB", bd.replace(new RegExp(build_dir), ''));
@@ -2300,9 +2300,9 @@ function generate_config_h()
 				while (stuff_to_crack.charCodeAt(j) != 32 && j < stuff_to_crack.length)
 					j++;
 
-				chunk = stuff_to_crack.substr(0, j);
+				chunk = stuff_to_crack.slice(0, j);
 				pieces += chunk;
-				stuff_to_crack = stuff_to_crack.substr(chunk.length);
+				stuff_to_crack = stuff_to_crack.slice(chunk.length);
 				if (stuff_to_crack.length)
 					pieces += '" "';
 			}
@@ -2841,7 +2841,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
 	headers_list.sort();
-	if (dir.length > 0 && dir.substr(dir.length - 1) != '/' && dir.substr(dir.length - 1) != '\\') {
+	if (dir.length > 0 && dir.slice(-1) != '/' && dir.slice(-1) != '\\') {
 		dir += '/';
 	}
 	dir = dir.replace(new RegExp("/", "g"), "\\");
@@ -2853,7 +2853,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 		isdir = FSO.FolderExists(dir + src);
 		isfile = FSO.FileExists(dir + src);
 		if (isdir) {
-			if (src.length > 0 && src.substr(src.length - 1) != '/' && src.substr(src.length - 1) != '\\') {
+			if (src.length > 0 && src.slice(-1) != '/' && src.slice(-1) != '\\') {
 				src += '\\';
 			}
 			headers_install[headers_install.length] = [dir + src, 'dir',''];
@@ -2869,7 +2869,7 @@ function PHP_INSTALL_HEADERS(dir, headers_list)
 			isdir = FSO.FolderExists(path);
 			isfile = FSO.FileExists(path);
 			if (isdir) {
-				if (src.length > 0 && src.substr(src.length - 1) != '/' && src.substr(src.length - 1) != '\\') {
+				if (src.length > 0 && src.slice(-1) != '/' && src.slice(-1) != '\\') {
 					src += '\\';
 				}
 				headers_install[headers_install.length] = [path, 'dir',''];
@@ -3055,7 +3055,7 @@ function toolset_get_compiler_version()
 	var version;
 
 	if (VS_TOOLSET) {
-		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
+		version = probe_binary(PHP_CL).slice(0, 5).replace('.', '');
 
 		return version;
 	} else if (CLANG_TOOLSET) {
@@ -3094,7 +3094,7 @@ function toolset_get_compiler_name(short)
 	if (VS_TOOLSET) {
 		var name = "unknown";
 
-		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
+		version = probe_binary(PHP_CL).slice(0, 5).replace('.', '');
 
 		if (version >= 1930) {
 			return name;
@@ -3198,8 +3198,8 @@ function toolset_setup_linker()
 
 	var ver = probe_binary(lnk);
 
-	var major = ver.substr(0, 2);
-	var minor = ver.substr(3, 2);
+	var major = ver.slice(0, 2);
+	var minor = ver.slice(3, 5);
 
 	AC_DEFINE('PHP_LINKER_MAJOR', major, "Linker major version", false);
 	AC_DEFINE('PHP_LINKER_MINOR', minor, "Linker minor version", false);
@@ -3246,7 +3246,7 @@ function toolset_setup_common_cflags()
 				/* Mitigations for CVE-2017-5753.
 			  	   TODO backport for all supported VS versions when they release it. */
 				if (VCVERS >= 1912) {
-					var subver1912 = probe_binary(PHP_CL).substr(6);
+					var subver1912 = probe_binary(PHP_CL).slice(6);
 					if (VCVERS >= 1913 || 1912 == VCVERS && subver1912 >= 25835) {
 						ADD_FLAG('CFLAGS', "/Qspectre");
 					} else {
@@ -3254,7 +3254,7 @@ function toolset_setup_common_cflags()
 						ADD_FLAG('CFLAGS', "/d2guardspecload");
 					}
 				} else if (1900 == VCVERS) {
-					var subver1900 = probe_binary(PHP_CL).substr(6);
+					var subver1900 = probe_binary(PHP_CL).slice(6);
 					if (subver1900 >= 24241) {
 						ADD_FLAG('CFLAGS', "/Qspectre");
 					}
