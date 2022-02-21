@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-8058 (NULL pointer dereference in mysqlnd package). (Kamil Tekiela)
 
+- OPcache:
+  . Fixed bug GH-8074 (Wrong type inference of range() result). (cmb)
+
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
 
