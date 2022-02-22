@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-8083 Segfault when dumping uncalled fake closure with static
     variables. (ilutov)
   . Fixed bug GH-7958 (Nested CallbackFilterIterator is leaking memory). (cmb)
+  . Fixed bug GH-8074 (Wrong type inference of range() result). (cmb)
 
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)
