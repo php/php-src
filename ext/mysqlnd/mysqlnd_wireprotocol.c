@@ -1188,6 +1188,8 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	char *root_ptr;
 	zend_ulong len;
 	MYSQLND_FIELD *meta;
+	static const int max_interned = 1024;
+	static int interned = 0;
 
 	DBG_ENTER("php_mysqlnd_rset_field_read");
 
@@ -1289,7 +1291,12 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	meta->root_len = total_len;
 
 	if (EXPECTED(meta->name_length != 0)) {
-		meta->sname = zend_string_init_interned(meta->name, meta->name_length, 0);
+		if (interned < max_interned) {
+			meta->sname = zend_string_init_interned(meta->name, meta->name_length, 0);
+			interned++;
+		} else {
+			meta->sname = zend_string_init(meta->name, meta->name_length, 0);
+		}
 		meta->name = ZSTR_VAL(meta->sname);
 	} else {
 		meta->sname = ZSTR_EMPTY_ALLOC();
