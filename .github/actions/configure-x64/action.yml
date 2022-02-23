@@ -78,4 +78,7 @@ runs:
           --with-oci8=shared,instantclient,/opt/oracle/instantclient \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
+          --with-pdo-firebird \
+          --with-pdo-dblib \
+          --enable-werror \
           ${{ inputs.configurationParameters }}
