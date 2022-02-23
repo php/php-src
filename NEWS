@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
   . Fixed bug GH-7980 (Unexpected result for iconv_mime_decode). (cmb)
 
+- MBString:
+  . Fixed bug GH-8128 (mb_check_encoding wrong result for 7bit). (alexdowad)
+
 - MySQLnd:
   . Fixed bug GH-8058 (NULL pointer dereference in mysqlnd package). (Kamil Tekiela)
 
