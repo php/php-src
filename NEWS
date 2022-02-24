@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Finished AVIF support in getimagesize(). (Yannis Guyon)
   . Fixed bug GH-7847 (stripos with large haystack has bad performance).
     (ilutov)
+  . New function memory_reset_peak_usage(). (Patrick Allaert)
 
 - Zip:
   . add ZipArchive::clearError() method

@@ -114,6 +114,10 @@ PHP 8.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Standard:
+  . The peak memory usage can now be reset to the current usage thanks to
+    memory_reset_peak_usage().
+
 ========================================
 7. New Classes and Interfaces
 ========================================

@@ -229,6 +229,7 @@ ZEND_API bool is_zend_ptr(const void *ptr);
 
 ZEND_API size_t zend_memory_usage(bool real_usage);
 ZEND_API size_t zend_memory_peak_usage(bool real_usage);
+ZEND_API void zend_memory_reset_peak_usage(void);
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
