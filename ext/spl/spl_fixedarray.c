@@ -44,6 +44,8 @@ typedef struct _spl_fixedarray {
 	zend_long size;
 	/* It is possible to resize this, so this can't be combined with the object */
 	zval *elements;
+	/* True if this was modified after the last call to get_properties or the hash table wasn't rebuilt. */
+	bool                 should_rebuild_properties;
 } spl_fixedarray;
 
 typedef struct _spl_fixedarray_methods {
@@ -110,6 +112,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 		array->size = 0; /* reset size in case ecalloc() fails */
 		array->elements = safe_emalloc(size, sizeof(zval), 0);
 		array->size = size;
+		array->should_rebuild_properties = true;
 		spl_fixedarray_init_elems(array, 0, size);
 	} else {
 		spl_fixedarray_default_ctor(array);
@@ -173,6 +176,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		/* nothing to do */
 		return;
 	}
+	array->should_rebuild_properties = true;
 
 	/* first initialization */
 	if (array->size == 0) {
@@ -212,6 +216,22 @@ static HashTable* spl_fixedarray_object_get_properties(zend_object *obj)
 	HashTable *ht = zend_std_get_properties(obj);
 
 	if (!spl_fixedarray_empty(&intern->array)) {
+		/*
+		 * Usually, the reference count of the hash table is 1,
+		 * except during cyclic reference cycles.
+		 *
+		 * Maintain the DEBUG invariant that a hash table isn't modified during iteration,
+		 * and avoid unnecessary work rebuilding a hash table for unmodified properties.
+		 *
+		 * See https://github.com/php/php-src/issues/8079 and ext/spl/tests/fixedarray_022.phpt
+		 * Also see https://github.com/php/php-src/issues/8044 for alternate considered approaches.
+		 */
+		if (!intern->array.should_rebuild_properties) {
+			/* Return the same hash table so that recursion cycle detection works in internal functions. */
+			return ht;
+		}
+		intern->array.should_rebuild_properties = false;
+
 		zend_long j = zend_hash_num_elements(ht);
 
 		if (GC_REFCOUNT(ht) > 1) {
@@ -398,6 +418,9 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 		}
 		return &EG(uninitialized_zval);
 	}
+	if (type != BP_VAR_IS && type != BP_VAR_R) {
+		intern->array.should_rebuild_properties = true;
+	}
 
 	return spl_fixedarray_object_read_dimension_helper(intern, offset);
 }
@@ -422,6 +445,7 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
+		intern->array.should_rebuild_properties = true;
 		/* Fix #81429 */
 		zval *ptr = &(intern->array.elements[index]);
 		zval tmp;
@@ -464,6 +488,7 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
+		intern->array.should_rebuild_properties = true;
 		zval_ptr_dtor(&(intern->array.elements[index]));
 		ZVAL_NULL(&intern->array.elements[index]);
 	}
