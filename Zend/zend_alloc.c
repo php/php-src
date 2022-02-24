@@ -2816,7 +2816,7 @@ static void *tracked_realloc(void *ptr, size_t new_size) {
 	return ptr;
 }
 
-static void tracked_free_all() {
+static void tracked_free_all(void) {
 	HashTable *tracked_allocs = AG(mm_heap)->tracked_allocs;
 	zend_ulong h;
 	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {

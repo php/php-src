@@ -203,7 +203,7 @@ static int zend_extension_startup(zend_extension *extension)
 }
 
 
-void zend_startup_extensions_mechanism()
+void zend_startup_extensions_mechanism(void)
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
@@ -212,7 +212,7 @@ void zend_startup_extensions_mechanism()
 }
 
 
-void zend_startup_extensions()
+void zend_startup_extensions(void)
 {
 	zend_llist_apply_with_del(&zend_extensions, (int (*)(void *)) zend_extension_startup);
 }
