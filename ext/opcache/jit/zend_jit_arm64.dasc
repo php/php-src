@@ -6325,7 +6325,12 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 				|	LOAD_ZVAL_ADDR FCARG2x, op3_addr
 				|	LOAD_ADDR CARG3, binary_op
 				|	SET_EX_OPLINE opline, REG0
-				|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+				if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+				 && (op1_data_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, REG0
+				} else {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+				}
 				|	b >9
 				|.code
 				|1:
@@ -6446,7 +6451,12 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 		|	LOAD_ZVAL_ADDR FCARG2x, op2_addr
 		|	LOAD_ADDR CARG3, binary_op
 		|	SET_EX_OPLINE opline, REG0
-		|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
+		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, REG0
+		} else {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+		}
 		zend_jit_check_exception(Dst);
 		|	b >9
 		|.code
@@ -13231,7 +13241,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	LOAD_ZVAL_ADDR FCARG2x, val_addr
 			}
 			|	LOAD_ADDR CARG3, binary_op
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+			if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, REG0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+			}
 			|	b >9
 			|.code
 
@@ -13292,7 +13307,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	SET_EX_OPLINE opline, REG0
 			}
 			|	LOAD_ADDR CARG3, binary_op
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+			if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, REG0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, REG0
+			}
 			|	b >9
 			|.code
 			|2:

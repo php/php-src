@@ -2321,6 +2321,20 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref(zend_reference *ref, z
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref_tmp(zend_reference *ref, zval *val, binary_op_type binary_op)
+{
+	zval z_copy;
+
+	binary_op(&z_copy, &ref->val, val);
+	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(&ref->val);
+		ZVAL_COPY_VALUE(&ref->val, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
+	}
+	zval_ptr_dtor_nogc(val);
+}
+
 static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 {
 	ZVAL_NEW_REF(arg, arg);

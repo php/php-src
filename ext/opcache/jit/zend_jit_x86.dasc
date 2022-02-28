@@ -6863,7 +6863,12 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 					|	PUSH_ADDR binary_op, r0
 				|.endif
 				|	SET_EX_OPLINE opline, r0
-				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+				if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+				 && (op1_data_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+				} else {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+				}
 				|.if not(X64)
 				|	add r4, 12
 				|.endif
@@ -7001,7 +7006,12 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 			|	PUSH_ADDR binary_op, r0
 		|.endif
 		|	SET_EX_OPLINE opline, r0
-		|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
+		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+		} else {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		}
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
@@ -14006,7 +14016,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	sub r4, 12
 				|	PUSH_ADDR binary_op, r0
 			|.endif
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			}
 			|.if not(X64)
 				|	add r4, 12
 			|.endif
@@ -14085,7 +14100,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	sub r4, 12
 				|	PUSH_ADDR binary_op, r0
 			|.endif
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			}
 			|.if not(X64)
 				|	add r4, 12
 			|.endif
