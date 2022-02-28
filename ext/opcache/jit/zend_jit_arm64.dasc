@@ -3811,7 +3811,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				|	LOAD_64BIT_VAL TMP1, val
 				|	fmov Rd(Z_REG(op1_def_addr)-ZREG_V0), TMP1
 			} else {
-				|	SET_ZVAL_LVAL op1_def_addr, val, REG0, TMP1
+				|	SET_ZVAL_LVAL op1_def_addr, val, TMP2, TMP1
 			}
 		} else {
 			uint64_t val = 0xc3e0000000000000;
@@ -3819,7 +3819,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				|	LOAD_64BIT_VAL TMP1, val
 				|	fmov Rd(Z_REG(op1_def_addr)-ZREG_V0), TMP1
 			} else {
-				|	SET_ZVAL_LVAL op1_def_addr, val, REG0, TMP1
+				|	SET_ZVAL_LVAL op1_def_addr, val, TMP2, TMP1
 			}
 		}
 		if (Z_MODE(op1_def_addr) == IS_MEM_ZVAL) {
@@ -4150,7 +4150,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 						|	LOAD_64BIT_VAL TMP1, val
 						|	fmov Rd(Z_REG(res_addr)-ZREG_V0), TMP1
 					} else {
-						|	SET_ZVAL_LVAL res_addr, val, REG0, TMP1
+						|	SET_ZVAL_LVAL res_addr, val, TMP2, TMP1
 					}
 					break;
 				} else if (opcode == ZEND_SUB) {
@@ -4159,7 +4159,7 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 						|	LOAD_64BIT_VAL TMP1, val
 						|	fmov Rd(Z_REG(res_addr)-ZREG_V0), TMP1
 					} else {
-						|	SET_ZVAL_LVAL res_addr, val, REG0, TMP1
+						|	SET_ZVAL_LVAL res_addr, val, TMP2, TMP1
 					}
 					break;
 				}
@@ -12799,20 +12799,20 @@ static int zend_jit_incdec_obj(dasm_State          **Dst,
 			|3:
 			if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_POST_INC_OBJ) {
 				uint64_t val = 0x43e0000000000000;
-				|	LOAD_64BIT_VAL REG0, val
-				|	SET_ZVAL_LVAL_FROM_REG var_addr, REG0, TMP1
+				|	LOAD_64BIT_VAL TMP2, val
+				|	SET_ZVAL_LVAL_FROM_REG var_addr, TMP2, TMP1
 				|	SET_ZVAL_TYPE_INFO var_addr, IS_DOUBLE, TMP1w, TMP2
 				if (opline->opcode == ZEND_PRE_INC_OBJ && opline->result_type != IS_UNUSED) {
-					|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+					|	SET_ZVAL_LVAL_FROM_REG res_addr, TMP2, TMP1
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, TMP1w, TMP2
 				}
 			} else {
 				uint64_t val = 0xc3e0000000000000;
-				|	LOAD_64BIT_VAL REG0, val
-				|	SET_ZVAL_LVAL_FROM_REG var_addr, REG0, TMP1
+				|	LOAD_64BIT_VAL TMP2, val
+				|	SET_ZVAL_LVAL_FROM_REG var_addr, TMP2, TMP1
 				|	SET_ZVAL_TYPE_INFO var_addr, IS_DOUBLE, TMP1w, TMP2
 				if (opline->opcode == ZEND_PRE_DEC_OBJ && opline->result_type != IS_UNUSED) {
-					|	SET_ZVAL_LVAL_FROM_REG res_addr, REG0, TMP1
+					|	SET_ZVAL_LVAL_FROM_REG res_addr, TMP2, TMP1
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_DOUBLE, TMP1w, TMP2
 				}
 			}
