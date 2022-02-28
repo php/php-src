@@ -391,7 +391,9 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 
 	/* We mark FREEs as dead, but they're only really dead if the destroyed var is dead */
-	if (opline->opcode == ZEND_FREE && may_be_refcounted(ssa->var_info[ssa_op->op1_use].type)
+	if (opline->opcode == ZEND_FREE
+			&& ((ssa->var_info[ssa_op->op1_use].type & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == 0
+				|| may_be_refcounted(ssa->var_info[ssa_op->op1_use].type))
 			&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		return 0;
 	}
