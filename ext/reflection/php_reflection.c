@@ -4637,7 +4637,7 @@ ZEND_METHOD(ReflectionClass, getConstants)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), key, constant) {
-		if (UNEXPECTED(zval_update_constant_ex(&constant->value, ce) != SUCCESS)) {
+		if (UNEXPECTED(zval_update_constant_ex(&constant->value, constant->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 
@@ -4696,7 +4696,7 @@ ZEND_METHOD(ReflectionClass, getConstant)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	constants_table = CE_CONSTANTS_TABLE(ce);
 	ZEND_HASH_FOREACH_PTR(constants_table, c) {
-		if (UNEXPECTED(zval_update_constant_ex(&c->value, ce) != SUCCESS)) {
+		if (UNEXPECTED(zval_update_constant_ex(&c->value, c->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	} ZEND_HASH_FOREACH_END();

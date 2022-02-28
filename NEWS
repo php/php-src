@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-8058 (NULL pointer dereference in mysqlnd package). (Kamil Tekiela)
 
+- Reflection:
+  . Fixed bug GH-8080 (ReflectionClass::getConstants() depends on def. order).
+    (cmb)
+
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
 
