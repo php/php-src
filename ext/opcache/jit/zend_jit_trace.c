@@ -6389,6 +6389,22 @@ done:
 	if (p->stop == ZEND_JIT_TRACE_STOP_LOOP
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 	 || p->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
+		if (ra) {
+			zend_ssa_phi *phi = ssa->blocks[1].phis;
+
+			while (phi) {
+				if (ra[phi->ssa_var]
+				 && ra[phi->sources[1]]
+				 && STACK_MEM_TYPE(stack, phi->var) != STACK_TYPE(stack, phi->var)
+				 && (ra[phi->ssa_var]->flags & (ZREG_LOAD|ZREG_STORE)) == 0
+				 && (ra[phi->sources[1]]->flags & (ZREG_LOAD|ZREG_STORE)) == 0) {
+					/* Store actual type to memory to avoid deoptimization mistakes */
+					/* TODO: Alternatively, we may try to update alredy generated deoptimization info */
+					zend_jit_store_var_type(&dasm_state, phi->var, STACK_TYPE(stack, phi->var));
+				}
+				phi = phi->next;
+			}
+		}
 		if (p->stop != ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 			if ((t->flags & ZEND_JIT_TRACE_USES_INITIAL_IP)
 			 && !zend_jit_set_ip(&dasm_state, p->opline)) {
