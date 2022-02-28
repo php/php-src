@@ -283,7 +283,13 @@ static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
 	zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
 		ZSTR_VAL(obj->ce->name), ZSTR_VAL(member));
 	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_class_entry *ce = obj->ce;
 		zend_objects_store_del(obj);
+		if (!EG(exception)) {
+			/* We cannot continue execution and have to throw an exception */
+			zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+				ZSTR_VAL(ce->name), ZSTR_VAL(member));
+		}
 		return 0;
 	}
 	return 1;
