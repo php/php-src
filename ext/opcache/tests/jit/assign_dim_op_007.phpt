@@ -5,8 +5,6 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
 opcache.jit_buffer_size=1M
---XFAIL--
-See https://github.com/php/php-src/issues/8147
 --FILE--
 <?php
 class test {
