@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - Pcntl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
+- SPL:
+  . Fixed bug GH-8121 (SplFileObject - seek and key with csv file inconsistent).
+    (cmb)
+
 - Standard:
   . Fixed bug GH-8048 (Force macOS to use statfs). (risner)
 
