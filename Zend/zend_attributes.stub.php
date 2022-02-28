@@ -29,6 +29,7 @@ final class SensitiveParameter
 
 /**
  * @strict-properties
+ * @not-serializable
  */
 final class SensitiveParameterValue
 {
@@ -37,10 +38,6 @@ final class SensitiveParameterValue
     public function __construct(mixed $value) {}
 
     public function getValue(): mixed {}
-
-    public function __serialize(): array {}
-
-    public function __unserialize(array $data): void {}
 
     public function __debugInfo(): array {}
 }

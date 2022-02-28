@@ -14,9 +14,8 @@ echo "# var_export()", PHP_EOL;
 echo var_export($v, true), PHP_EOL;
 echo PHP_EOL;
 
-echo "# (array) / serialize() / json_encode()", PHP_EOL;
+echo "# (array) / json_encode()", PHP_EOL;
 var_dump((array)$v);
-var_dump(serialize($v));
 var_dump(json_encode($v));
 echo PHP_EOL;
 
@@ -35,10 +34,9 @@ object(SensitiveParameterValue)#%d (%d) refcount(%d){
 SensitiveParameterValue::__set_state(array(
 ))
 
-# (array) / serialize() / json_encode()
+# (array) / json_encode()
 array(0) {
 }
-string(35) "O:23:"SensitiveParameterValue":0:{}"
 string(2) "{}"
 
 # ->getValue()

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c29c4a0e2df3e7975553c819743befd97bfd4070 */
+ * Stub hash: 5d9a092c1f0da5f32d9a161cc5166ed794ffe8e9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -19,14 +19,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SensitiveParameterValue_getValue, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SensitiveParameterValue___serialize, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SensitiveParameterValue___debugInfo, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SensitiveParameterValue___unserialize, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_SensitiveParameterValue___debugInfo arginfo_class_SensitiveParameterValue___serialize
 
 
 ZEND_METHOD(Attribute, __construct);
@@ -35,8 +29,6 @@ ZEND_METHOD(AllowDynamicProperties, __construct);
 ZEND_METHOD(SensitiveParameter, __construct);
 ZEND_METHOD(SensitiveParameterValue, __construct);
 ZEND_METHOD(SensitiveParameterValue, getValue);
-ZEND_METHOD(SensitiveParameterValue, __serialize);
-ZEND_METHOD(SensitiveParameterValue, __unserialize);
 ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 
 
@@ -67,8 +59,6 @@ static const zend_function_entry class_SensitiveParameter_methods[] = {
 static const zend_function_entry class_SensitiveParameterValue_methods[] = {
 	ZEND_ME(SensitiveParameterValue, __construct, arginfo_class_SensitiveParameterValue___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SensitiveParameterValue, getValue, arginfo_class_SensitiveParameterValue_getValue, ZEND_ACC_PUBLIC)
-	ZEND_ME(SensitiveParameterValue, __serialize, arginfo_class_SensitiveParameterValue___serialize, ZEND_ACC_PUBLIC)
-	ZEND_ME(SensitiveParameterValue, __unserialize, arginfo_class_SensitiveParameterValue___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SensitiveParameterValue, __debugInfo, arginfo_class_SensitiveParameterValue___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -129,7 +119,7 @@ static zend_class_entry *register_class_SensitiveParameterValue(void)
 
 	INIT_CLASS_ENTRY(ce, "SensitiveParameterValue", class_SensitiveParameterValue_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);

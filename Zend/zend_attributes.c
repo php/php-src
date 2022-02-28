@@ -126,25 +126,6 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 	RETURN_EMPTY_ARRAY();
 }
 
-ZEND_METHOD(SensitiveParameterValue, __serialize)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	RETURN_EMPTY_ARRAY();
-}
-
-ZEND_METHOD(SensitiveParameterValue, __unserialize)
-{
-	HashTable *data;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	zend_throw_exception(NULL, "Unserializing objects of class SensitiveParameterValue is not supported.", 0);
-	RETURN_THROWS();
-}
-
 static zend_object *attributes_sensitive_parameter_value_new(zend_class_entry *ce)
 {
 	zend_object *object;
