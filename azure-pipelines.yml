@@ -49,11 +49,6 @@ jobs:
             CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
         timeoutInMinutes: 90
-    - template: azure/coverage_job.yml
-      parameters:
-        configurationName: COVERAGE_DEBUG_ZTS
-        configurationParameters: '--enable-debug --disable-zts'
-        timeoutInMinutes: 90
     - template: azure/file_cache_job.yml
       parameters:
         configurationName: DEBUG_NTS_FILE_CACHE
