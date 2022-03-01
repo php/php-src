@@ -57,6 +57,7 @@ typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_da
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
 
 ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
+ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs
 ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_deactivate(void);
 ZEND_API void zend_observer_shutdown(void);

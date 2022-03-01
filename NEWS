@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-7958 (Nested CallbackFilterIterator is leaking memory). (cmb)
   . Fixed bug GH-8074 (Wrong type inference of range() result). (cmb)
   . Fixed bug GH-8140 (Wrong first class callable by name optimization). (cmb)
+  . Fixed bug GH-8082 (op_arrays with temporary run_time_cache leak memory
+    when observed). (Bob)
 
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)

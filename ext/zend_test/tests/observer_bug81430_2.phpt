@@ -1,7 +1,7 @@
 --TEST--
 Bug #81430 (Attribute instantiation leaves dangling execute_data pointer)
 --EXTENSIONS--
-zend_test
+zend-test
 --INI--
 memory_limit=20M
 zend_test.observer.enabled=1
