@@ -1,9 +1,7 @@
 --TEST--
 Bug #69024 (imagescale segfault with palette based image)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreate(256, 256);

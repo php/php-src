@@ -1,22 +1,22 @@
 --TEST--
 Bug #66124 (mysqli under mysqlnd loses precision when bind_param with 'i')
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-$table_drop = "DROP TABLE IF EXISTS `bug66124`";
-$table_create = "CREATE TABLE `bug66124` (
+$table_drop = "DROP TABLE IF EXISTS `test`";
+$table_create = "CREATE TABLE `test` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
-$table_insert = "INSERT INTO `bug66124` SET `id`=?";
-$table_select = "SELECT * FROM `bug66124`";
-$table_delete = "DELETE FROM `bug66124`";
+$table_insert = "INSERT INTO `test` SET `id`=?";
+$table_select = "SELECT * FROM `test`";
+$table_delete = "DELETE FROM `test`";
 $id = '1311200011005001566';
 
 
@@ -91,6 +91,10 @@ if ($result){
 $link->close();
 ?>
 done
+--CLEAN--
+<?php
+require_once "clean_table.inc";
+?>
 --EXPECT--
 Using 'i':
 insert id:1311200011005001566=>1311200011005001566

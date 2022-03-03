@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 Truncate Existing File open("n")
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

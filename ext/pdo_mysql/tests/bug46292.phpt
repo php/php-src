@@ -1,8 +1,9 @@
 --TEST--
 Bug #46292 (PDO::setFetchMode() shouldn't requires the 2nd arg when using FETCH_CLASSTYPE)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -13,19 +14,11 @@ MySQLPDOTest::skip();
     $pdoDb = MySQLPDOTest::factory();
 
 
-    class myclass implements Serializable {
+    class myclass {
+        public $value;
+
         public function __construct() {
             printf("%s()\n", __METHOD__);
-        }
-
-        public function serialize() {
-            printf("%s()\n", __METHOD__);
-            return "any data from serialize()";
-        }
-
-        public function unserialize($dat) {
-            printf("%s(%s)\n", __METHOD__, var_export($dat, true));
-            return $dat;
         }
     }
 

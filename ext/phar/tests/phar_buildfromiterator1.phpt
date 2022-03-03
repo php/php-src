@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() readonly
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -16,11 +16,6 @@ try {
     var_dump(get_class($e));
     echo $e->getMessage() . "\n";
 }
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromiterator1.phar');
-__HALT_COMPILER();
 ?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"

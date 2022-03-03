@@ -38,6 +38,8 @@ const mbfl_encoding mbfl_encoding_uuencode = {
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	NULL,
+	NULL,
+	NULL,
 	NULL
 };
 
@@ -145,5 +147,5 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			/* skip newline */
 			filter->status = uudec_state_size;
 	}
-	return c;
+	return 0;
 }

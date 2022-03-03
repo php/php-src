@@ -1,5 +1,7 @@
 --TEST--
 Set and get connection attributes with scope end.
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

@@ -3,10 +3,8 @@ Testing wrong parameter passing in imageantialias() of GD library
 --CREDITS--
 Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded("gd")) die("skip GD not present");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 /*

@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_bind_param() - checking whether the parameters are modified (bug#44390)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -30,7 +31,7 @@ require_once('skipifconnectfailure.inc');
     echo("$one\n\n");
 
     // it is getting worse. Binding the same var twice with different
-    // types you can get unexpected results (e.g. binary trash for the
+    // types you can get unexpected results e.g. binary trash for the
     // string and misc data for the integer. See next 2 tests.
 
     echo "Test 2:\n";

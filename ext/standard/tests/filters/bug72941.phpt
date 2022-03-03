@@ -4,7 +4,7 @@ Bug #72941 (Modifying bucket->data by-ref has no effect any longer)
 <?php
 class rotate_filter_nw extends php_user_filter
 {
-    function filter($in, $out, &$consumed, $closing)
+    function filter($in, $out, &$consumed, $closing): int
     {
         while ($bucket = stream_bucket_make_writeable($in)) {
             $this->rotate($bucket->data);

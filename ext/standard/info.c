@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -34,7 +34,6 @@
 #include <sys/utsname.h>
 #endif
 #include "url.h"
-#include "php_string.h"
 
 #ifdef PHP_WIN32
 # include "winver.h"
@@ -100,20 +99,22 @@ static ZEND_COLD void php_info_print_stream_hash(const char *name, HashTable *ht
 				php_info_printf("\nRegistered %s => ", name);
 			}
 
-			ZEND_HASH_FOREACH_STR_KEY(ht, key) {
-				if (key) {
-					if (first) {
-						first = 0;
-					} else {
-						php_info_print(", ");
+			if (!HT_IS_PACKED(ht)) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY(ht, key) {
+					if (key) {
+						if (first) {
+							first = 0;
+						} else {
+							php_info_print(", ");
+						}
+						if (!sapi_module.phpinfo_as_text) {
+							php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
+						} else {
+							php_info_print(ZSTR_VAL(key));
+						}
 					}
-					if (!sapi_module.phpinfo_as_text) {
-						php_info_print_html_esc(ZSTR_VAL(key), ZSTR_LEN(key));
-					} else {
-						php_info_print(ZSTR_VAL(key));
-					}
-				}
-			} ZEND_HASH_FOREACH_END();
+				} ZEND_HASH_FOREACH_END();
+			}
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -135,7 +136,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 		if (!sapi_module.phpinfo_as_text) {
 			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name));
 
-			php_strtolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
+			zend_str_tolower(ZSTR_VAL(url_name), ZSTR_LEN(url_name));
 			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", ZSTR_VAL(url_name), zend_module->name);
 
 			efree(url_name);
@@ -269,11 +270,34 @@ char* php_get_windows_name()
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
-					major = "Windows 10";
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
+					if (osvi.dwBuildNumber >= 22000) {
+						major = "Windows 11";
+					} else {
+						major = "Windows 10";
+					}
 				} else {
-					major = "Windows Server 2016";
+					if (osvi.dwBuildNumber >= 20348) {
+						major = "Windows Server 2022";
+					} else if (osvi.dwBuildNumber >= 19042) {
+						major = "Windows Server, version 20H2";
+					} else if (osvi.dwBuildNumber >= 19041) {
+						major = "Windows Server, version 2004";
+					} else if (osvi.dwBuildNumber >= 18363) {
+						major = "Windows Server, version 1909";
+					} else if (osvi.dwBuildNumber >= 18362) {
+						major = "Windows Server, version 1903";
+					} else if (osvi.dwBuildNumber >= 17763) {
+						// could also be Windows Server, version 1809, but there's no easy way to tell
+						major = "Windows Server 2019";
+					} else if (osvi.dwBuildNumber >= 17134) {
+						major = "Windows Server, version 1803";
+					} else if (osvi.dwBuildNumber >= 16299) {
+						major = "Windows Server, version 1709";
+					} else {
+						major = "Windows Server 2016";
+					}
 				}
 			}
 		}
@@ -776,7 +800,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -799,11 +823,11 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_PROVIDER
 		php_info_print_table_row(2, "Build Provider", PHP_BUILD_PROVIDER);
 #endif
-#ifdef COMPILER
-		php_info_print_table_row(2, "Compiler", COMPILER);
+#ifdef PHP_BUILD_COMPILER
+		php_info_print_table_row(2, "Compiler", PHP_BUILD_COMPILER);
 #endif
-#ifdef ARCHITECTURE
-		php_info_print_table_row(2, "Architecture", ARCHITECTURE);
+#ifdef PHP_BUILD_ARCH
+		php_info_print_table_row(2, "Architecture", PHP_BUILD_ARCH);
 #endif
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
@@ -865,7 +889,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			} else {
 				descr = estrdup("disabled");
 			}
-            php_info_print_table_row(2, "Zend Multibyte Support", descr);
+			php_info_print_table_row(2, "Zend Multibyte Support", descr);
 			efree(descr);
 		}
 
@@ -927,7 +951,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
 		zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 
-		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
 			if (module->info_func || module->version) {
 				php_info_print_module(module);
 			}
@@ -936,7 +960,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
 			if (!module->info_func && !module->version) {
 				php_info_print_module(module);
 			}
@@ -962,7 +986,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			php_info_print_table_row(2, tmp1, tmp2);
 			efree(tmp1);
 		}
-        tsrm_env_unlock();
+		tsrm_env_unlock();
 		php_info_print_table_end();
 	}
 

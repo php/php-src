@@ -43,11 +43,13 @@ const mbfl_encoding mbfl_encoding_8bit = {
 	mbfl_no_encoding_8bit,
 	"8bit",
 	"8bit",
-	(const char *(*)[])&mbfl_encoding_8bit_aliases,
+	mbfl_encoding_8bit_aliases,
 	NULL,
 	MBFL_ENCTYPE_SBCS,
 	&vtbl_8bit_wchar,
-	&vtbl_wchar_8bit
+	&vtbl_wchar_8bit,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_wchar = {
@@ -85,5 +87,5 @@ static int mbfl_filt_conv_wchar_8bit(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }

@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 /**
  * @param string|resource $file
@@ -14,29 +14,36 @@ function bzread($bz, int $length = 1024): string|false {}
 /**
  * @param resource $bz
  * @implementation-alias fwrite
+ * @no-verify Uses different parameter name
  */
 function bzwrite($bz, string $data, ?int $length = null): int|false {}
 
 /**
  * @param resource $bz
  * @implementation-alias fflush
+ * @no-verify Uses different parameter name
  */
 function bzflush($bz): bool {}
 
 /**
  * @param resource $bz
  * @implementation-alias fclose
+ * @no-verify Uses different parameter name
  */
 function bzclose($bz): bool {}
 
 /** @param resource $bz */
-function bzerrno($bz): int|false {}
+function bzerrno($bz): int {}
 
 /** @param resource $bz */
-function bzerrstr($bz): string|false {}
+function bzerrstr($bz): string {}
 
-/** @param resource $bz */
-function bzerror($bz): array|false {}
+/**
+ * @param resource $bz
+ * @return array<string, int|string>
+ * @refcount 1
+ */
+function bzerror($bz): array {}
 
 function bzcompress(string $data, int $block_size = 4, int $work_factor = 0): string|int {}
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #48240 (DBA Segmentation fault dba_nextkey)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'db4';

@@ -1,21 +1,26 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @refcount 1 */
 function session_name(?string $name = null): string|false {}
 
+/** @refcount 1 */
 function session_module_name(?string $module = null): string|false {}
 
+/** @refcount 1 */
 function session_save_path(?string $path = null): string|false {}
 
 function session_id(?string $id = null): string|false {}
 
+/** @refcount 1 */
 function session_create_id(string $prefix = ""): string|false {}
 
 function session_regenerate_id(bool $delete_old_session = false): bool {}
 
 function session_decode(string $data): bool {}
 
+/** @refcount 1 */
 function session_encode(): string|false {}
 
 function session_destroy(): bool {}
@@ -24,6 +29,10 @@ function session_unset(): bool {}
 
 function session_gc(): int|false {}
 
+/**
+ * @return array<string, mixed>
+ * @refcount 1
+ */
 function session_get_cookie_params(): array {}
 
 function session_write_close(): bool {}
@@ -55,6 +64,7 @@ function session_set_save_handler(
     callable $update_timestamp = UNKNOWN
 ): bool {}
 
+/** @refcount 1 */
 function session_cache_limiter(?string $value = null): string|false {}
 
 function session_cache_expire(?int $value = null): int|false {}
@@ -65,60 +75,60 @@ function session_start(array $options = []): bool {}
 
 interface SessionHandlerInterface
 {
-    /** @return bool */
-    public function open(string $path, string $name);
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool;
 
-    /** @return bool */
-    public function close();
+    /** @tentative-return-type */
+    public function close(): bool;
 
-    /** @return string|false */
-    public function read(string $id);
+    /** @tentative-return-type */
+    public function read(string $id): string|false;
 
-    /** @return bool */
-    public function write(string $id, string $data);
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool;
 
-    /** @return bool */
-    public function destroy(string $id);
+    /** @tentative-return-type */
+    public function destroy(string $id): bool;
 
-    /** @return int|false */
-    public function gc(int $max_lifetime);
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false;
 }
 
 interface SessionIdInterface
 {
-    /** @return string */
-    public function create_sid();
+    /** @tentative-return-type */
+    public function create_sid(): string;
 }
 
 interface SessionUpdateTimestampHandlerInterface
 {
-    /** @return bool */
-    public function validateId(string $id);
+    /** @tentative-return-type */
+    public function validateId(string $id): bool;
 
-    /** @return bool */
-    public function updateTimestamp(string $id, string $data);
+    /** @tentative-return-type */
+    public function updateTimestamp(string $id, string $data): bool;
 }
 
 class SessionHandler implements SessionHandlerInterface, SessionIdInterface
 {
-    /** @return bool */
-    public function open(string $path, string $name) {}
+    /** @tentative-return-type */
+    public function open(string $path, string $name): bool {}
 
-    /** @return bool */
-    public function close() {}
+    /** @tentative-return-type */
+    public function close(): bool {}
 
-    /** @return string|false */
-    public function read(string $id) {}
+    /** @tentative-return-type */
+    public function read(string $id): string|false {}
 
-    /** @return bool */
-    public function write(string $id, string $data) {}
+    /** @tentative-return-type */
+    public function write(string $id, string $data): bool {}
 
-    /** @return bool */
-    public function destroy(string $id) {}
+    /** @tentative-return-type */
+    public function destroy(string $id): bool {}
 
-    /** @return int|false */
-    public function gc(int $max_lifetime) {}
+    /** @tentative-return-type */
+    public function gc(int $max_lifetime): int|false {}
 
-    /** @return string */
-    public function create_sid() {}
+    /** @tentative-return-type */
+    public function create_sid(): string {}
 }

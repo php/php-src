@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,	  |
-   | that is bundled with this package in the file LICENSE, and is		  |
-   | available through the world-wide-web at the following url:			  |
-   | http://www.php.net/license/3_01.txt								  |
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to		  |
-   | license@php.net so we can mail you a copy immediately.				  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Ed Batutis <ed@batutis.com>								  |
    +----------------------------------------------------------------------+
@@ -26,8 +26,6 @@
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
-
-#include "ext/standard/php_string.h"
 
 /* }}} */
 
@@ -179,9 +177,9 @@ PHP_FUNCTION(grapheme_stripos)
 		char *haystack_dup, *needle_dup;
 		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
-		php_strtolower(needle_dup, needle_len);
+		zend_str_tolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
-		php_strtolower(haystack_dup, haystack_len);
+		zend_str_tolower(haystack_dup, haystack_len);
 
 		found = php_memnstr(haystack_dup + noffset, needle_dup, needle_len, haystack_dup + haystack_len);
 
@@ -295,9 +293,9 @@ PHP_FUNCTION(grapheme_strripos)
 		char *needle_dup, *haystack_dup;
 
 		needle_dup = estrndup(needle, needle_len);
-		php_strtolower(needle_dup, needle_len);
+		zend_str_tolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
-		php_strtolower(haystack_dup, haystack_len);
+		zend_str_tolower(haystack_dup, haystack_len);
 
 		ret_pos = grapheme_strrpos_ascii(haystack_dup, haystack_len, needle_dup, needle_len, offset);
 
@@ -345,7 +343,7 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
-	zend_bool no_length = 1;
+	bool no_length = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
 		RETURN_THROWS();
@@ -546,7 +544,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	const char *found;
 	size_t haystack_len, needle_len;
 	int32_t ret_pos, uchar_pos;
-	zend_bool part = 0;
+	bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
 		RETURN_THROWS();
@@ -739,7 +737,7 @@ PHP_FUNCTION(grapheme_extract)
 			ZVAL_DEREF(next);
 			/* initialize next */
 			zval_ptr_dtor(next);
-            ZVAL_LONG(next, lstart);
+			ZVAL_LONG(next, lstart);
 		}
 	}
 
@@ -794,7 +792,7 @@ PHP_FUNCTION(grapheme_extract)
 	 */
 
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
-        size_t nsize = MIN(size, str_len);
+		size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}

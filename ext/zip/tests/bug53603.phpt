@@ -1,13 +1,12 @@
 --TEST--
 Bug #53603 (ZipArchive should quiet stat errors)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 
 class TestStream {
+    public $context;
     function url_stat($path, $flags) {
         if (!($flags & STREAM_URL_STAT_QUIET))
             trigger_error("not quiet");

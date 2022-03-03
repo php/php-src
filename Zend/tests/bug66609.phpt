@@ -10,6 +10,7 @@ class Bar {
         return $foo->foo;
     }
 }
+#[AllowDynamicProperties]
 class Foo {
     public function __get($x) {
         global $bar;

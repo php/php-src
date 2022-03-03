@@ -1,5 +1,7 @@
 --TEST--
 Test collection Oracle error handling collections and numbers (2)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -7,6 +9,8 @@ require(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 require __DIR__."/connect.inc";
 

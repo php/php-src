@@ -1,9 +1,7 @@
 --TEST--
 Bind with NUMBER column variants
---SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die("skip no oci8 extension");
-?>
+--EXTENSIONS--
+oci8
 --INI--
 precision = 14
 --FILE--

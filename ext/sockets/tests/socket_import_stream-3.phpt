@@ -1,10 +1,10 @@
 --TEST--
 socket_import_stream: Test with multicasting
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 $br = @socket_bind($s, '0.0.0.0', 58379);
 if ($br === false)

@@ -85,7 +85,7 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing round() : usage variations ***
 
 -- Iteration 1 --
@@ -119,9 +119,13 @@ float(1.23457E-9)
 float(0.5)
 
 -- Iteration 11 --
+
+Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 12 --
+
+Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 13 --
@@ -158,9 +162,13 @@ round(): Argument #1 ($num) must be of type int|float, string given
 round(): Argument #1 ($num) must be of type int|float, classA given
 
 -- Iteration 24 --
+
+Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 25 --
+
+Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
 float(0)
 
 -- Iteration 26 --

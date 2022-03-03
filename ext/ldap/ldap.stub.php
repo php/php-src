@@ -1,312 +1,226 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
-#ifdef HAVE_ORALDAP
-/** @return resource|false */
-function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH) {}
-#else
-/** @return resource|false */
-function ldap_connect(?string $uri = null, int $port = 389) {}
-#endif
+namespace LDAP {
 
-/** @param resource $ldap */
-function ldap_unbind($ldap): bool {}
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
 
-/**
- * @param resource $ldap
- * @alias ldap_unbind
- */
-function ldap_close($ldap): bool {}
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Result
+    {
+    }
 
-/** @param resource $ldap */
-function ldap_bind($ldap, ?string $dn = null, ?string $password = null): bool {}
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class ResultEntry
+    {
+    }
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_bind_ext($ldap, ?string $dn = null, ?string $password = null, ?array $controls = null) {}
+}
 
-#ifdef HAVE_LDAP_SASL
-/** @param resource $ldap */
-function ldap_sasl_bind($ldap, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
-#endif
+namespace {
 
-/**
- * @param resource|array $ldap
- * @return resource|array|false
- */
-function ldap_read($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
+    #ifdef HAVE_ORALDAP
+    function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
+    #else
+    function ldap_connect(?string $uri = null, int $port = 389): LDAP\Connection|false {}
+    #endif
 
-/**
- * @param resource|array $ldap
- * @return resource|array|false
- */
-function ldap_list($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
+    function ldap_unbind(LDAP\Connection $ldap): bool {}
 
-/**
- * @param resource|array $ldap
- * @return resource|array|false
- */
-function ldap_search($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null) {}
+    /** @alias ldap_unbind */
+    function ldap_close(LDAP\Connection $ldap): bool {}
 
-/** @param resource $ldap */
-function ldap_free_result($ldap): bool {}
+    function ldap_bind(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null): bool {}
 
+    function ldap_bind_ext(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null, ?array $controls = null): LDAP\Result|false {}
 
-/**
- * @param resource $ldap
- * @param resource $result
- */
-function ldap_count_entries($ldap, $result): int {}
+    #ifdef HAVE_LDAP_SASL
+    function ldap_sasl_bind(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
+    #endif
 
-/**
- * @param resource $ldap
- * @param resource $result
- * @return resource|false
- */
-function ldap_first_entry($ldap, $result) {}
+    /** @param LDAP\Connection|array $ldap */
+    function ldap_read($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null): LDAP\Result|array|false {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- * @return resource|false
- */
-function ldap_next_entry($ldap, $entry) {}
+    /** @param LDAP\Connection|array $ldap */
+    function ldap_list($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null): LDAP\Result|array|false {}
 
-/**
- * @param resource $ldap
- * @param resource $result
- */
-function ldap_get_entries($ldap, $result): array|false {}
+    /** @param LDAP\Connection|array $ldap */
+    function ldap_search($ldap, array|string $base, array|string $filter, array $attributes = [], int $attributes_only = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, ?array $controls = null): LDAP\Result|array|false {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- */
-function ldap_first_attribute($ldap, $entry): string|false {}
+    function ldap_free_result(LDAP\Result $result): bool {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- */
-function ldap_next_attribute($ldap, $entry): string|false {}
+    function ldap_count_entries(LDAP\Connection $ldap, LDAP\Result $result): int {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- */
-function ldap_get_attributes($ldap, $entry): array {}
+    function ldap_first_entry(LDAP\Connection $ldap, LDAP\Result $result): LDAP\ResultEntry|false {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- */
-function ldap_get_values_len($ldap, $entry, string $attribute): array|false {}
+    function ldap_next_entry(LDAP\Connection $ldap, LDAP\ResultEntry $entry): LDAP\ResultEntry|false {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- * @alias ldap_get_values_len
- */
-function ldap_get_values($ldap, $entry, string $attribute): array|false {}
+    /**
+     * @return array<int|string, int|array>|false
+     * @refcount 1
+     */
+    function ldap_get_entries(LDAP\Connection $ldap, LDAP\Result $result): array|false {}
 
-/**
- * @param resource $ldap
- * @param resource $entry
- */
-function ldap_get_dn($ldap, $entry): string|false {}
+    function ldap_first_attribute(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
-function ldap_explode_dn(string $dn, int $with_attrib): array|false {}
+    function ldap_next_attribute(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
-function ldap_dn2ufn(string $dn): string|false {}
+    /**
+     * @return array<int|string, int|string|array>
+     * @refcount 1
+     */
+    function ldap_get_attributes(LDAP\Connection $ldap, LDAP\ResultEntry $entry): array {}
 
-/** @param resource $ldap */
-function ldap_add($ldap, string $dn, array $entry, ?array $controls = null): bool {}
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     */
+    function ldap_get_values_len(LDAP\Connection $ldap, LDAP\ResultEntry $entry, string $attribute): array|false {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_add_ext($ldap, string $dn, array $entry, ?array $controls = null) {}
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     * @alias ldap_get_values_len
+     */
+    function ldap_get_values(LDAP\Connection $ldap, LDAP\ResultEntry $entry, string $attribute): array|false {}
 
-/** @param resource $ldap */
-function ldap_delete($ldap, string $dn, ?array $controls = null): bool {}
+    function ldap_get_dn(LDAP\Connection $ldap, LDAP\ResultEntry $entry): string|false {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_delete_ext($ldap, string $dn, ?array $controls = null) {}
+    /**
+     * @return array<int|string, int|string>|false
+     * @refcount 1
+     */
+    function ldap_explode_dn(string $dn, int $with_attrib): array|false {}
 
-/** @param resource $ldap */
-function ldap_modify_batch($ldap, string $dn, array $modifications_info, ?array $controls = null): bool {}
+    function ldap_dn2ufn(string $dn): string|false {}
 
-/** @param resource $ldap */
-function ldap_mod_add($ldap, string $dn, array $entry, ?array $controls = null): bool {}
+    function ldap_add(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): bool {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_mod_add_ext($ldap, string $dn, array $entry, ?array $controls = null) {}
+    function ldap_add_ext(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): LDAP\Result|false {}
 
-/** @param resource $ldap */
-function ldap_mod_replace($ldap, string $dn, array $entry, ?array $controls = null): bool {}
+    function ldap_delete(LDAP\Connection $ldap, string $dn, ?array $controls = null): bool {}
 
-/**
- * @param resource $ldap
- * @alias ldap_mod_replace
- */
-function ldap_modify($ldap, string $dn, array $entry, ?array $controls = null): bool {}
+    function ldap_delete_ext(LDAP\Connection $ldap, string $dn, ?array $controls = null): LDAP\Result|false {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_mod_replace_ext($ldap, string $dn, array $entry, ?array $controls = null) {}
+    function ldap_modify_batch(LDAP\Connection $ldap, string $dn, array $modifications_info, ?array $controls = null): bool {}
 
-/** @param resource $ldap */
-function ldap_mod_del($ldap, string $dn, array $entry, ?array $controls = null): bool {}
+    function ldap_mod_add(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): bool {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_mod_del_ext($ldap, string $dn, array $entry, ?array $controls = null) {}
+    function ldap_mod_add_ext(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): LDAP\Result|false {}
 
-/** @param resource $ldap */
-function ldap_errno($ldap): int {}
+    function ldap_mod_replace(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): bool {}
 
-/** @param resource $ldap */
-function ldap_error($ldap): string {}
+    /** @alias ldap_mod_replace */
+    function ldap_modify(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): bool {}
 
-function ldap_err2str(int $errno): string {}
+    function ldap_mod_replace_ext(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): LDAP\Result|false {}
 
-/** @param resource $ldap */
-function ldap_compare($ldap, string $dn, string $attribute, string $value, ?array $controls = null): bool|int {}
+    function ldap_mod_del(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): bool {}
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
-/** @param resource $ldap */
-function ldap_rename($ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): bool {}
+    function ldap_mod_del_ext(LDAP\Connection $ldap, string $dn, array $entry, ?array $controls = null): LDAP\Result|false {}
 
-/**
- * @param resource $ldap
- * @return resource|false
- */
-function ldap_rename_ext($ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null) {}
+    function ldap_errno(LDAP\Connection $ldap): int {}
+
+    function ldap_error(LDAP\Connection $ldap): string {}
+
+    function ldap_err2str(int $errno): string {}
+
+    function ldap_compare(LDAP\Connection $ldap, string $dn, string $attribute, string $value, ?array $controls = null): bool|int {}
+
+    #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+    function ldap_rename(LDAP\Connection $ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): bool {}
+
+    function ldap_rename_ext(LDAP\Connection $ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): LDAP\Result|false {}
+
+    /** @param array|string|int $value */
+    function ldap_get_option(LDAP\Connection $ldap, int $option, &$value = null): bool {}
+
+    /** @param array|string|int|bool $value */
+    function ldap_set_option(?LDAP\Connection $ldap, int $option, $value): bool {}
+
+    function ldap_count_references(LDAP\Connection $ldap, LDAP\Result $result): int {}
+
+    function ldap_first_reference(LDAP\Connection $ldap, LDAP\Result $result): LDAP\ResultEntry|false {}
+
+    function ldap_next_reference(LDAP\Connection $ldap, LDAP\ResultEntry $entry): LDAP\ResultEntry|false {}
+
+    #ifdef HAVE_LDAP_PARSE_REFERENCE
+    /** @param array $referrals */
+    function ldap_parse_reference(LDAP\Connection $ldap, LDAP\ResultEntry $entry, &$referrals): bool {}
+    #endif
+
+    #ifdef HAVE_LDAP_PARSE_RESULT
+    /**
+     * @param int $error_code
+     * @param string $matched_dn
+     * @param string $error_message
+     * @param array $referrals
+     * @param array $controls
+     */
+    function ldap_parse_result(LDAP\Connection $ldap, LDAP\Result $result, &$error_code, &$matched_dn = null, &$error_message = null, &$referrals = null, &$controls = null): bool {}
+    #endif
+    #endif
+
+    #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+    function ldap_set_rebind_proc(LDAP\Connection $ldap, ?callable $callback): bool {}
+    #endif
+
+    #ifdef HAVE_LDAP_START_TLS_S
+    function ldap_start_tls(LDAP\Connection $ldap): bool {}
+    #endif
+
+    function ldap_escape(string $value, string $ignore = "", int $flags = 0): string {}
+
+    #ifdef STR_TRANSLATION
+    function ldap_t61_to_8859(string $value): string|false {}
+
+    function ldap_8859_to_t61(string $value): string|false {}
+    #endif
 
 
-/**
- * @param resource $ldap
- * @param array|string|int $value
- */
-function ldap_get_option($ldap, int $option, &$value = null): bool {}
+    #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
+    /**
+     * @param string $response_data
+     * @param string $response_oid
+     */
+    function ldap_exop(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = NULL, &$response_data = UNKNOWN, &$response_oid = null): LDAP\Result|bool {}
+    #endif
 
-/**
- * @param resource|null $ldap
- * @param array|string|int|bool $value
- */
-function ldap_set_option($ldap, int $option, $value): bool {}
-
-/**
- * @param resource $ldap
- * @param resource $result
- */
-function ldap_count_references($ldap, $result): int {}
-
-/**
- * @param resource $ldap
- * @param resource $result
- * @return resource|false
- */
-function ldap_first_reference($ldap, $result) {}
-
-/**
- * @param resource $ldap
- * @param resource $entry
- * @return resource|false
- */
-function ldap_next_reference($ldap, $entry) {}
-
-#ifdef HAVE_LDAP_PARSE_REFERENCE
-/**
- * @param resource $ldap
- * @param resource $entry
- * @param array $referrals
- */
-function ldap_parse_reference($ldap, $entry, &$referrals): bool {}
-#endif
-
-#ifdef HAVE_LDAP_PARSE_RESULT
-/**
- * @param resource $ldap
- * @param resource $result
- * @param int $error_code
- * @param string $matched_dn
- * @param string $error_message
- * @param array $referrals
- * @param array $controls
- */
-function ldap_parse_result($ldap, $result, &$error_code, &$matched_dn = null, &$error_message = null, &$referrals = null, &$controls = null): bool {}
-#endif
-#endif
-
-#if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/** @param resource $ldap */
-function ldap_set_rebind_proc($ldap, ?callable $callback): bool {}
-#endif
-
-#ifdef HAVE_LDAP_START_TLS_S
-/** @param resource $ldap */
-function ldap_start_tls($ldap): bool {}
-#endif
-
-function ldap_escape(string $value, string $ignore = "", int $flags = 0): string {}
-
-#ifdef STR_TRANSLATION
-function ldap_t61_to_8859(string $value): string|false {}
-
-function ldap_8859_to_t61(string $value): string|false {}
-#endif
+    #ifdef HAVE_LDAP_PASSWD
+    /**
+     * @param array $controls
+     */
+    function ldap_exop_passwd(LDAP\Connection $ldap, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
+    #endif
 
 
-#ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/**
- * @param resource $ldap
- * @param string $response_data
- * @param string $response_oid
- * @return resource|bool
- */
-function ldap_exop($ldap, string $request_oid, ?string $request_data = null, ?array $controls = NULL, &$response_data = UNKNOWN, &$response_oid = null) {}
-#endif
+    #ifdef HAVE_LDAP_WHOAMI_S
+    function ldap_exop_whoami(LDAP\Connection $ldap): string|false {}
+    #endif
 
-#ifdef HAVE_LDAP_PASSWD
-/**
- * @param resource $ldap
- * @param array $controls
- */
-function ldap_exop_passwd($ldap, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
-#endif
+    #ifdef HAVE_LDAP_REFRESH_S
+    function ldap_exop_refresh(LDAP\Connection $ldap, string $dn, int $ttl): int|false {}
+    #endif
 
+    #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
+    /**
+     * @param string $response_data
+     * @param string $response_oid
+     */
+    function ldap_parse_exop(LDAP\Connection $ldap, LDAP\Result $result, &$response_data = null, &$response_oid = null): bool {}
+    #endif
 
-#ifdef HAVE_LDAP_WHOAMI_S
-/** @param resource $ldap */
-function ldap_exop_whoami($ldap): string|false {}
-#endif
-
-#ifdef HAVE_LDAP_REFRESH_S
-/** @param resource $ldap */
-function ldap_exop_refresh($ldap, string $dn, int $ttl): int|false {}
-#endif
-
-#ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-/**
- * @param resource $ldap
- * @param resource $result
- * @param string $response_data
- * @param string $response_oid
- */
-function ldap_parse_exop($ldap, $result, &$response_data = null, &$response_oid = null): bool {}
-#endif
+}

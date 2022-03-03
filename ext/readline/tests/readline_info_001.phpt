@@ -1,8 +1,10 @@
 --TEST--
 readline_info(): Basic test
+--EXTENSIONS--
+readline
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
+<?php if (READLINE_LIB == "libedit") die("skip readline only");
+if (getenv('SKIP_REPEAT')) die("skip readline has global state");
 ?>
 --FILE--
 <?php

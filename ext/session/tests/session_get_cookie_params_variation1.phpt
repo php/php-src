@@ -1,5 +1,7 @@
 --TEST--
 Test session_get_cookie_params() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

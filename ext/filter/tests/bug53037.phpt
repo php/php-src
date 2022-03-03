@@ -1,7 +1,7 @@
 --TEST--
 Bug #53037 (FILTER_FLAG_EMPTY_STRING_NULL is not implemented)
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(

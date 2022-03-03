@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -73,8 +73,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 		ZEND_ASSERT(INTL_G(current_collator) != NULL);
 		ZVAL_LONG(result, ucol_strcoll(
 					INTL_G(current_collator),
-					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
-					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
+					INTL_ZSTR_VAL(Z_STR_P(str1_p)), INTL_ZSTR_LEN(Z_STR_P(str1_p)),
+					INTL_ZSTR_VAL(Z_STR_P(str2_p)), INTL_ZSTR_LEN(Z_STR_P(str2_p)) ));
 	}
 	else
 	{
@@ -167,23 +167,19 @@ static int collator_numeric_compare_function(zval *result, zval *op1, zval *op2)
 */
 static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 {
-	zval str1, str2;
-	int rc              = SUCCESS;
-	zval *str1_p        = NULL;
-	zval *str2_p        = NULL;
-
-	str1_p = collator_make_printable_zval( op1, &str1);
-	str2_p = collator_make_printable_zval( op2, &str2 );
+	int rc = SUCCESS;
+	zend_string *str1 = collator_zval_to_string(op1);
+	zend_string *str2 = collator_zval_to_string(op2);
 
 	/* Compare the strings using ICU. */
 	ZEND_ASSERT(INTL_G(current_collator) != NULL);
 	ZVAL_LONG(result, ucol_strcoll(
 				INTL_G(current_collator),
-				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
-				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
+				INTL_ZSTR_VAL(str1), INTL_ZSTR_LEN(str1),
+				INTL_ZSTR_VAL(str2), INTL_ZSTR_LEN(str2) ));
 
-	zval_ptr_dtor( str1_p );
-	zval_ptr_dtor( str2_p );
+	zend_string_release(str1);
+	zend_string_release(str2);
 
 	return rc;
 }

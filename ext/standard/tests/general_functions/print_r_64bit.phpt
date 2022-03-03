@@ -140,6 +140,7 @@ $arrays = array (
 check_printr($arrays);
 
 echo "\n*** Testing print_r() on object variables ***\n";
+#[AllowDynamicProperties]
 class object_class
 {
   var       $value;
@@ -172,6 +173,7 @@ class no_member_class {
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;
@@ -275,7 +277,7 @@ closedir($dir_handle);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing print_r() on integer variables ***
 
 -- Iteration 1 --
@@ -569,9 +571,9 @@ Array
 0
 0
 -- Iteration 6 --
- 
- 
- 
+%0
+%0
+%0
 -- Iteration 7 --
 \0
 \0
@@ -593,13 +595,13 @@ PHP
 PHP
 PHP
 -- Iteration 12 --
-abcd n1234 05678 00efgh\xijkl
-abcd n1234 05678 00efgh\xijkl
-abcd n1234 05678 00efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
+abcd%0n1234%005678%000efgh\xijkl
 -- Iteration 13 --
-abcd efgh ijkl mnop 0qrst uvwx 0yz
-abcd efgh ijkl mnop 0qrst uvwx 0yz
-abcd efgh ijkl mnop 0qrst uvwx 0yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
+abcd%0efgh%0ijkl%0mnop%00qrst%0uvwx%00yz
 -- Iteration 14 --
 1234	
 5678

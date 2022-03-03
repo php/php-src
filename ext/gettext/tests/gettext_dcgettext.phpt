@@ -1,10 +1,10 @@
 --TEST--
 Test dcgettext() functionality
+--EXTENSIONS--
+gettext
 --SKIPIF--
 <?php
-if (!extension_loaded("gettext")) {
-    die("skip gettext extension is not loaded.\n");
-}
+
 if (!setlocale(LC_ALL, 'en_US.UTF-8')) {
     die("skip en_US.UTF-8 locale not supported.");
 }

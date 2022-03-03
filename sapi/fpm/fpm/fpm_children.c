@@ -38,7 +38,7 @@ static void fpm_children_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static struct fpm_child_s *fpm_child_alloc() /* {{{ */
+static struct fpm_child_s *fpm_child_alloc(void) /* {{{ */
 {
 	struct fpm_child_s *ret;
 
@@ -256,9 +256,9 @@ void fpm_children_bury() /* {{{ */
 				if (!fpm_pctl_can_spawn_children()) {
 					severity = ZLOG_DEBUG;
 				}
-				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", wp->config->name, (int) pid, buf, (long)tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", wp->config->name, (int) pid, (long)tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
@@ -393,7 +393,7 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	 *   - fpm_pctl_can_spawn_children : FPM is running in a NORMAL state (aka not restart, stop or reload)
 	 *   - wp->running_children < max  : there is less than the max process for the current pool
 	 *   - (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max):
-	 *     if fpm_global_config.process_max is set, FPM has not fork this number of processes (globaly)
+	 *     if fpm_global_config.process_max is set, FPM has not fork this number of processes (globally)
 	 */
 	while (fpm_pctl_can_spawn_children() && wp->running_children < max && (fpm_global_config.process_max < 1 || fpm_globals.running_children < fpm_global_config.process_max)) {
 
@@ -440,10 +440,10 @@ int fpm_children_make(struct fpm_worker_pool_s *wp, int in_event_loop, int nb_to
 	}
 
 	if (!warned && fpm_global_config.process_max > 0 && fpm_globals.running_children >= fpm_global_config.process_max) {
-               if (wp->running_children < max) {
-                       warned = 1;
-                       zlog(ZLOG_WARNING, "The maximum number of processes has been reached. Please review your configuration and consider raising 'process.max'");
-               }
+		if (wp->running_children < max) {
+			warned = 1;
+			zlog(ZLOG_WARNING, "The maximum number of processes has been reached. Please review your configuration and consider raising 'process.max'");
+		}
 	}
 
 	return 1; /* we are done */

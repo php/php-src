@@ -5,6 +5,7 @@ zend.enable_gc = 1
 --FILE--
 <?php
 $bar = NULL;
+#[AllowDynamicProperties]
 class bad {
     public function __destruct() {
         global $bar;

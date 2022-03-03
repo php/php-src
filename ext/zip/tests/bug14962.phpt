@@ -1,9 +1,7 @@
 --TEST--
 Bug #14962 (::extractTo second argument is not really optional)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 

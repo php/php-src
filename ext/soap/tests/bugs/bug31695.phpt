@@ -1,7 +1,7 @@
 --TEST--
 Bug #31695 (Cannot redefine endpoint when using WSDL)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set("soap.wsdl_cache_enabled", 0);
@@ -11,13 +11,15 @@ function Test($x) {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $options=array()) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
-        $this->server->addFunction("Test");
+    $this->server->addFunction("Test");
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     echo "$location\n";
     ob_start();
     $this->server->handle($request);

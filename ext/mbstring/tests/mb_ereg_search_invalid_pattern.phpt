@@ -1,5 +1,7 @@
 --TEST--
 mb_ereg_search() with invalid pattern should discard old matches
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php if (!function_exists("mb_ereg")) print "skip requires mbregex"; ?>
 --FILE--

@@ -1,8 +1,9 @@
 --TEST--
 Bug #75018 Data corruption when reading fields of bit type
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -11,7 +12,7 @@ require_once("connect.inc");
 
 $mysqli = new mysqli("$host:$port", $user, $passwd, $db);
 
-$tbl = "test_bug75018";
+$tbl = "test";
 $sql = "DROP TABLE IF EXISTS $tbl";
 $mysqli->query($sql);
 
@@ -30,6 +31,10 @@ while ($row = $result->fetch_assoc()) {
     var_dump($row['bit_column_1']);
 }
 
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 string(1) "0"

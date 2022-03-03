@@ -43,10 +43,6 @@ $arrays = array (
        array(1 => "1"),
        array(1 => "1", 2 => "2", 3 => "3", 4 => "4"),
 
-       // arrays with float keys
-/*5*/  array(2.3333 => "float"),
-       array(1.2 => "f1", 3.33 => "f2", 4.89999922839999 => "f3", 33333333.333333 => "f4"),
-
        // arrays with string keys
        array('\tHello' => 111, 're\td' => 'color', '\v\fworld' => 2.2, 'pen\n' => 33),
 /*8*/  array("\tHello" => 111, "re\td" => "color", "\v\fworld" => 2.2, "pen\n" => 33),
@@ -57,7 +53,7 @@ $arrays = array (
 
        // array with mixed values
 /*11*/ array('hello' => 1, "fruit" => 2.2,
-              $fp => 'resource', 133 => "int", 444.432 => "float",
+              $fp => 'resource', 133 => "int",
               @$unset_var => "unset", $heredoc => "heredoc")
 );
 
@@ -102,22 +98,6 @@ array(4) {
   string(1) "4"
 }
 -- Iteration 5 --
-array(1) {
-  [2]=>
-  string(5) "float"
-}
--- Iteration 6 --
-array(4) {
-  [1]=>
-  string(2) "f1"
-  [3]=>
-  string(2) "f2"
-  [4]=>
-  string(2) "f3"
-  [33333333]=>
-  string(2) "f4"
-}
--- Iteration 7 --
 array(4) {
   ["\tHello"]=>
   int(111)
@@ -128,7 +108,7 @@ array(4) {
   ["pen\n"]=>
   int(33)
 }
--- Iteration 8 --
+-- Iteration 6 --
 array(4) {
   ["	Hello"]=>
   int(111)
@@ -140,22 +120,22 @@ array(4) {
 "]=>
   int(33)
 }
--- Iteration 9 --
+-- Iteration 7 --
 array(2) {
   [0]=>
   string(5) "hello"
   ["Hello world"]=>
   string(6) "string"
 }
--- Iteration 10 --
+-- Iteration 8 --
 array(2) {
   [""]=>
   string(5) "hello"
   [5]=>
   string(8) "resource"
 }
--- Iteration 11 --
-array(7) {
+-- Iteration 9 --
+array(6) {
   ["hello"]=>
   int(1)
   ["fruit"]=>
@@ -164,8 +144,6 @@ array(7) {
   string(8) "resource"
   [133]=>
   string(3) "int"
-  [444]=>
-  string(5) "float"
   [""]=>
   string(5) "unset"
   ["Hello world"]=>

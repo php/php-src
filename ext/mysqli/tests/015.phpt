@@ -1,20 +1,21 @@
 --TEST--
 mysqli autocommit/commit/rollback with innodb
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
-    require_once('skipifconnectfailure.inc');
+require_once "connect.inc";
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
 
-    require_once('connect.inc');
-    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-        die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
-
-    if (!have_innodb($link))
-        die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+if (!have_innodb($link)) {
+    die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+}
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
     if (!$link)
@@ -76,7 +77,7 @@ mysqli autocommit/commit/rollback with innodb
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 array(2) {

@@ -68,7 +68,7 @@ function fill_buffer(&$buffer, $fill_type, $fill_size) {
     return false;
   }
 
-  $tmp_buff = str_repeat($data, ($fill_size/$size_divider) + $add_value );
+  $tmp_buff = str_repeat($data, (int)(($fill_size/$size_divider) + $add_value) );
 
   if ( strlen($tmp_buff) > $fill_size ) {
     $buffer = substr($tmp_buff, 0, $fill_size);
@@ -128,7 +128,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       if ( $size <= $chunk_size ) {
         $chunk_size = $size;
       }
-      $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+      $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
       $bytes_written = fwrite($file_handle, $num_values, $chunk_size);
       if ( $bytes_written != $chunk_size ) {
             return false;
@@ -136,7 +136,7 @@ function fill_file($file_handle, $fill_type, $file_size) {
       $size -= $chunk_size;
     } while ( $size > 0 );
   } else {
-    $num_values = str_repeat($data, ($chunk_size/$size_divider) + $add_value );
+    $num_values = str_repeat($data, (int) (($chunk_size/$size_divider) + $add_value) );
     $bytes_written = fwrite($file_handle, $num_values, $file_size);
     if ( $bytes_written != $file_size ) {
       return false;

@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDOStatement->fetch(), PDO::FETCH_SERIALIZE
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -13,6 +14,7 @@ MySQLPDOTest::skip();
 
     try {
 
+        #[AllowDynamicProperties]
         class myclass implements Serializable {
 
             private static $instance = null;
@@ -120,6 +122,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 Creating an object, serializing it and writing it to DB...
 myclass::singleton(Creating object)
 myclass::__construct(Creating object)
@@ -133,6 +136,10 @@ object(myclass)#4 (1) {
 }
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
+
+Deprecated: PDOStatement::setFetchMode(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
+
+Deprecated: PDOStatement::fetch(): The PDO::FETCH_SERIALIZE mode is deprecated in %s on line %d
 myclass::unserialize('C:7:"myclass":19:{Data from serialize}')
 object(myclass)#%d (1) {
   ["myprotected":protected]=>

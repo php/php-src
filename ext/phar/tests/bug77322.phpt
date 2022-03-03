@@ -1,9 +1,7 @@
 --TEST--
 Bug #77322 (PharData::addEmptyDir('/') Possible integer overflow)
---SKIPIF--
-<?php
-if (!extension_loaded('phar')) die('skip phar extension not available');
-?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $zip = new PharData(__DIR__ . '/bug77322.zip');

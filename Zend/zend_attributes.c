@@ -24,6 +24,8 @@
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
+ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
+ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 
 static HashTable internal_attributes;
 
@@ -55,6 +57,18 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 	}
 }
 
+static void validate_allow_dynamic_properties(
+		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to trait");
+	}
+	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface");
+	}
+	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+}
+
 ZEND_METHOD(Attribute, __construct)
 {
 	zend_long flags = ZEND_ATTRIBUTE_TARGET_ALL;
@@ -67,12 +81,22 @@ ZEND_METHOD(Attribute, __construct)
 	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), flags);
 }
 
+ZEND_METHOD(ReturnTypeWillChange, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(AllowDynamicProperties, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, lcname)) {
 				return attr;
 			}
@@ -87,7 +111,7 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 	if (attributes) {
 		zend_attribute *attr;
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && ZSTR_LEN(attr->lcname) == len) {
 				if (0 == memcmp(ZSTR_VAL(attr->lcname), str, len)) {
 					return attr;
@@ -163,11 +187,11 @@ ZEND_API zend_string *zend_get_attribute_target_names(uint32_t flags)
 	return smart_str_extract(&str);
 }
 
-ZEND_API zend_bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr)
+ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr)
 {
 	zend_attribute *other;
 
-	ZEND_HASH_FOREACH_PTR(attributes, other) {
+	ZEND_HASH_PACKED_FOREACH_PTR(attributes, other) {
 		if (other != attr && other->offset == attr->offset) {
 			if (zend_string_equals(other->lcname, attr->lcname)) {
 				return 1;
@@ -264,15 +288,12 @@ ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcnam
 void zend_register_attribute_ce(void)
 {
 	zend_internal_attribute *attr;
-	zend_class_entry ce;
-	zend_string *str;
-	zval tmp;
 
 	zend_hash_init(&internal_attributes, 8, NULL, free_internal_attribute, 1);
 
-	INIT_CLASS_ENTRY(ce, "Attribute", class_Attribute_methods);
-	zend_ce_attribute = zend_register_internal_class(&ce);
-	zend_ce_attribute->ce_flags |= ZEND_ACC_FINAL;
+	zend_ce_attribute = register_class_Attribute();
+	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr->validator = validate_attribute;
 
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS"), ZEND_ATTRIBUTE_TARGET_CLASS);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_FUNCTION"), ZEND_ATTRIBUTE_TARGET_FUNCTION);
@@ -283,13 +304,12 @@ void zend_register_attribute_ce(void)
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
 
-	ZVAL_UNDEF(&tmp);
-	str = zend_string_init(ZEND_STRL("flags"), 1);
-	zend_declare_typed_property(zend_ce_attribute, str, &tmp, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CODE(IS_LONG, 0, 0));
-	zend_string_release(str);
+	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
+	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
 
-	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
-	attr->validator = validate_attribute;
+	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
+	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr->validator = validate_allow_dynamic_properties;
 }
 
 void zend_attributes_shutdown(void)

@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -29,7 +29,7 @@
 
 static inline ub4 pdo_oci_sanitize_prefetch(long prefetch);
 
-static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static void pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
@@ -48,8 +48,6 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
-
-	return 1;
 }
 /* }}} */
 
@@ -177,7 +175,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	}
 
 	/* little mini hack so that we can use this code from the dbh ctor */
-	if (!dbh->methods) {
+	if (!dbh->methods && status != OCI_SUCCESS_WITH_INFO) {
 		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
 	}
 
@@ -185,7 +183,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 }
 /* }}} */
 
-static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -233,18 +231,15 @@ static int oci_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	pefree(H, dbh->is_persistent);
-
-	return 0;
 }
 /* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
+static bool oci_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *stmt, zval *driver_options) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
 	ub4 prefetch;
-	char *nsql = NULL;
-	size_t nsql_len = 0;
+	zend_string *nsql = NULL;
 	int ret;
 
 #ifdef HAVE_OCISTMTFETCH2
@@ -257,17 +252,16 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 
 	S->H = H;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
-	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
+	ret = pdo_parse_params(stmt, sql, &nsql);
 
 	if (ret == 1) {
 		/* query was re-written */
 		sql = nsql;
-		sql_len = nsql_len;
 	} else if (ret == -1) {
 		/* couldn't grok it */
 		strcpy(dbh->error_code, stmt->error_code);
 		efree(S);
-		return 0;
+		return false;
 	}
 
 	/* create an OCI statement handle */
@@ -276,10 +270,10 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 	/* and our own private error handle */
 	OCIHandleAlloc(H->env, (dvoid*)&S->err, OCI_HTYPE_ERROR, 0, NULL);
 
-	if (sql_len) {
-		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*)sql, (ub4) sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
+	if (ZSTR_LEN(sql) != 0) {
+		H->last_err = OCIStmtPrepare(S->stmt, H->err, (text*) ZSTR_VAL(sql), (ub4) ZSTR_LEN(sql), OCI_NTV_SYNTAX, OCI_DEFAULT);
 		if (nsql) {
-			efree(nsql);
+			zend_string_release(nsql);
 			nsql = NULL;
 		}
 		if (H->last_err) {
@@ -287,7 +281,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 			OCIHandleFree(S->stmt, OCI_HTYPE_STMT);
 			OCIHandleFree(S->err, OCI_HTYPE_ERROR);
 			efree(S);
-			return 0;
+			return false;
 		}
 
 	}
@@ -304,15 +298,15 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, 
 	stmt->driver_data = S;
 	stmt->methods = &oci_stmt_methods;
 	if (nsql) {
-		efree(nsql);
+		zend_string_release(nsql);
 		nsql = NULL;
 	}
 
-	return 1;
+	return true;
 }
 /* }}} */
 
-static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long oci_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -322,7 +316,7 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 
 	OCIHandleAlloc(H->env, (dvoid*)&stmt, OCI_HTYPE_STMT, 0, NULL);
 
-	H->last_err = OCIStmtPrepare(stmt, H->err, (text*)sql, (ub4) sql_len, OCI_NTV_SYNTAX, OCI_DEFAULT);
+	H->last_err = OCIStmtPrepare(stmt, H->err, (text*)ZSTR_VAL(sql), (ub4) ZSTR_LEN(sql), OCI_NTV_SYNTAX, OCI_DEFAULT);
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCIStmtPrepare");
 		OCIHandleFree(stmt, OCI_HTYPE_STMT);
@@ -342,9 +336,13 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	H->last_err = OCIStmtExecute(H->svc, stmt, H->err, 1, 0, NULL, NULL,
 			(dbh->auto_commit && !dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT);
 
-	if (H->last_err) {
+	sword last_err = H->last_err;
+
+	if (last_err) {
 		H->last_err = oci_drv_error("OCIStmtExecute");
-	} else {
+	}
+
+	if (!last_err || last_err == OCI_SUCCESS_WITH_INFO) {
 		/* return the number of affected rows */
 		H->last_err = OCIAttrGet(stmt, OCI_HTYPE_STMT, &rowcount, 0, OCI_ATTR_ROW_COUNT, H->err);
 		ret = rowcount;
@@ -356,51 +354,52 @@ static zend_long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 }
 /* }}} */
 
-static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype ) /* {{{ */
+static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype ) /* {{{ */
 {
 	int qcount = 0;
 	char const *cu, *l, *r;
-	char *c;
+	char *c, *quoted;
+	size_t quotedlen;
+	zend_string *quoted_str;
 
-	if (!unquotedlen) {
-		*quotedlen = 2;
-		*quoted = emalloc(*quotedlen+1);
-		strcpy(*quoted, "''");
-		return 1;
+	if (ZSTR_LEN(unquoted) == 0) {
+		return zend_string_init("''", 2, 0);
 	}
 
 	/* count single quotes */
-	for (cu = unquoted; (cu = strchr(cu,'\'')); qcount++, cu++)
+	for (cu = ZSTR_VAL(unquoted); (cu = strchr(cu,'\'')); qcount++, cu++)
 		; /* empty loop */
 
-	*quotedlen = unquotedlen + qcount + 2;
-	*quoted = c = emalloc(*quotedlen+1);
+	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
+	quoted = c = emalloc(quotedlen+1);
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
+	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
 		strncpy(c, l, r-l+1);
 		c += (r-l+1);
 		*c++ = '\'';			/* add second quote */
 	}
 
-    /* Copy remainder and add enclosing quote */
-	strncpy(c, l, *quotedlen-(c-*quoted)-1);
-	(*quoted)[*quotedlen-1] = '\'';
-	(*quoted)[*quotedlen]   = '\0';
+	/* Copy remainder and add enclosing quote */
+	strncpy(c, l, quotedlen-(c-quoted)-1);
+	quoted[quotedlen-1] = '\'';
+	quoted[quotedlen]   = '\0';
 
-	return 1;
+	quoted_str = zend_string_init(quoted, quotedlen, 0);
+	efree(quoted);
+	return quoted_str;
 }
 /* }}} */
 
-static int oci_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	/* with Oracle, there is nothing special to be done */
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -408,13 +407,13 @@ static int oci_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCITransCommit");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static bool oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -422,45 +421,54 @@ static int oci_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->last_err) {
 		H->last_err = oci_drv_error("OCITransRollback");
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
-static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static bool oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
-	zend_long lval = zval_get_long(val);
+	zend_long lval;
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 		{
+			bool bval;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+
 			if (dbh->in_txn) {
 				/* Assume they want to commit whatever is outstanding */
 				H->last_err = OCITransCommit(H->svc, H->err, 0);
 
 				if (H->last_err) {
 					H->last_err = oci_drv_error("OCITransCommit");
-					return 0;
+					return false;
 				}
-				dbh->in_txn = 0;
+				dbh->in_txn = false;
 			}
 
-			dbh->auto_commit = (unsigned int)lval? 1 : 0;
-			return 1;
+			dbh->auto_commit = (unsigned int) bval;
+			return true;
 		}
 		case PDO_ATTR_PREFETCH:
 		{
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
+
 			H->prefetch = pdo_oci_sanitize_prefetch(lval);
-			return 1;
+			return true;
 		}
 		case PDO_OCI_ATTR_ACTION:
 		{
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *action = zval_try_get_string(val);
 			if (UNEXPECTED(!action)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -468,12 +476,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_ACTION, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_ACTION");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CLIENT_INFO:
@@ -481,7 +489,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *client_info = zval_try_get_string(val);
 			if (UNEXPECTED(!client_info)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -489,12 +497,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CLIENT_INFO, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_INFO");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CLIENT_IDENTIFIER:
@@ -502,7 +510,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *identifier = zval_try_get_string(val);
 			if (UNEXPECTED(!identifier)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -510,12 +518,12 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CLIENT_IDENTIFIER, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CLIENT_IDENTIFIER");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_MODULE:
@@ -523,7 +531,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 #if (OCI_MAJOR_VERSION >= 10)
 			zend_string *module = zval_try_get_string(val);
 			if (UNEXPECTED(!module)) {
-				return 0;
+				return false;
 			}
 
 			H->last_err = OCIAttrSet(H->session, OCI_HTYPE_SESSION,
@@ -531,17 +539,20 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_MODULE, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_MODULE");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		case PDO_OCI_ATTR_CALL_TIMEOUT:
 		{
 #if (OCI_MAJOR_VERSION >= 18)
+			if (!pdo_get_long_param(&lval, val)) {
+				return false;
+			}
 			ub4 timeout = (ub4) lval;
 
 			H->last_err = OCIAttrSet(H->svc, OCI_HTYPE_SVCCTX,
@@ -549,16 +560,16 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 				OCI_ATTR_CALL_TIMEOUT, H->err);
 			if (H->last_err) {
 				oci_drv_error("OCIAttrSet: OCI_ATTR_CALL_TIMEOUT");
-				return 0;
+				return false;
 			}
-			return 1;
+			return true;
 #else
 			oci_drv_error("Unsupported attribute type");
-			return 0;
+			return false;
 #endif
 		}
 		default:
-			return 0;
+			return false;
 	}
 
 }
@@ -653,7 +664,7 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 }
 /* }}} */
 
-static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
+static zend_result pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	sb4 error_code = 0;
@@ -701,13 +712,14 @@ static const struct pdo_dbh_methods oci_methods = {
 	oci_handle_commit,
 	oci_handle_rollback,
 	oci_handle_set_attribute,
-	NULL,
+	NULL, /* last_id not supported */
 	pdo_oci_fetch_error_func,
 	oci_handle_get_attribute,
 	pdo_oci_check_liveness,	/* check_liveness */
-	NULL,	/* get_driver_methods */
-	NULL,
-	NULL
+	NULL, /* get_driver_methods */
+	NULL, /* request_shutdown */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
+	NULL /* get_gc */
 };
 
 static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
@@ -823,7 +835,12 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	H->last_err = OCISessionBegin(H->svc, H->err, H->session, OCI_CRED_RDBMS, OCI_DEFAULT);
 	if (H->last_err) {
 		oci_drv_error("OCISessionBegin");
-		goto cleanup;
+		/* OCISessionBegin returns OCI_SUCCESS_WITH_INFO when
+		 * user's password has expired, but is still usable.
+		 */
+		if (H->last_err != OCI_SUCCESS_WITH_INFO) {
+			goto cleanup;
+		}
 	}
 
 	/* set the server handle into service handle */
@@ -834,11 +851,11 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 	}
 
 	/* Get max character width */
- 	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
- 	if (H->last_err) {
- 		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
- 		goto cleanup;
- 	}
+	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
+	if (H->last_err) {
+		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
+		goto cleanup;
+	}
 
 	dbh->methods = &oci_methods;
 	dbh->alloc_own_columns = 1;

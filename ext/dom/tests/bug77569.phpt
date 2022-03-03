@@ -1,9 +1,7 @@
 --TEST--
 Bug #77569 (Write Access Violation in DomImplementation)
---SKIPIF--
-<?php
-if (!extension_loaded('dom')) die('skip dom extension not available');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $imp = new DOMImplementation;

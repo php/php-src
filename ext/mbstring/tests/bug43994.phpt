@@ -1,8 +1,9 @@
 --TEST--
 Test mb_ereg() function : mb_ereg 'successfully' matching incorrectly
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build");
 ?>
 --FILE--
@@ -13,10 +14,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
  * pattern is supplied to mb_ereg. Similar error message to ereg().
  */
 
-$unset_var = 10;
-unset ($unset_var);
-$inputs = array(NULL, null, false, FALSE, "", '', @$undefined_var,
-@$unset_var);
+$inputs = array(false, FALSE, "", '');
 
 $iterator = 1;
 foreach($inputs as $input) {
@@ -65,34 +63,6 @@ mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 
 -- Iteration 4 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 5 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 6 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 7 --
-Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-With $regs arg:
-mb_ereg(): Argument #1 ($pattern) must not be empty
-NULL
-
--- Iteration 8 --
 Without $regs arg:
 mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:

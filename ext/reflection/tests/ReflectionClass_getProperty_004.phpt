@@ -110,7 +110,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public property C::$protA
+string(10) "protA in A"
 --- (Reflecting on privA) ---
 Property C::$privA does not exist
 --- (Reflecting on pubB) ---
@@ -128,7 +128,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public property C::$protB
+string(10) "protB in B"
 --- (Reflecting on privB) ---
 Property C::$privB does not exist
 --- (Reflecting on pubC) ---
@@ -146,7 +146,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public property C::$protC
+string(10) "protC in C"
 --- (Reflecting on privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -154,7 +154,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public property C::$privC
+string(10) "privC in C"
 --- (Reflecting on doesNotExist) ---
 Property C::$doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
@@ -172,7 +172,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public property A::$protC
+string(10) "protC in C"
 --- (Reflecting on A::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -180,7 +180,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "A"
 }
-Cannot access non-public property A::$privC
+string(10) "privC in A"
 --- (Reflecting on B::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -196,7 +196,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public property B::$protC
+string(10) "protC in C"
 --- (Reflecting on B::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -204,7 +204,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "B"
 }
-Cannot access non-public property B::$privC
+string(10) "privC in B"
 --- (Reflecting on c::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -230,7 +230,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public property C::$protC
+string(10) "protC in C"
 --- (Reflecting on C::privC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -238,7 +238,7 @@ object(ReflectionProperty)#%d (2) {
   ["class"]=>
   string(1) "C"
 }
-Cannot access non-public property C::$privC
+string(10) "privC in C"
 --- (Reflecting on X::pubC) ---
 Fully qualified property name X::$pubC does not specify a base class of C
 --- (Reflecting on X::protC) ---

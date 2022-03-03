@@ -1,8 +1,9 @@
 --TEST--
 PDO::ATTR_ORACLE_NULLS
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -23,7 +24,6 @@ MySQLPDOTest::skip();
         echo $e->getMessage(), \PHP_EOL;
     }
     try {
-        /* Currently passes... */
         $db->setAttribute(PDO::ATTR_ORACLE_NULLS, 'pdo');
     } catch (\TypeError $e) {
         echo $e->getMessage(), \PHP_EOL;
@@ -72,6 +72,7 @@ MySQLPDOTest::skip();
 --EXPECTF--
 Attribute value must be of type int for selected attribute, array given
 Attribute value must be of type int for selected attribute, stdClass given
+Attribute value must be of type int for selected attribute, string given
 array(1) {
   [0]=>
   array(6) {
@@ -112,11 +113,11 @@ array(1) {
     ["z"]=>
     NULL
     ["a"]=>
-    string(0) ""
+    NULL
     ["b"]=>
     string(1) " "
     ["c"]=>
-    string(0) ""
+    NULL
     ["d"]=>
     string(2) " d"
     ["e"]=>
@@ -131,11 +132,11 @@ array(1) {
     ["z"]=>
     NULL
     ["a"]=>
-    string(0) ""
+    NULL
     ["b"]=>
     string(1) " "
     ["c"]=>
-    string(0) ""
+    NULL
     ["d"]=>
     string(2) " d"
     ["e"]=>

@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_open() function : basic functionality
---SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+--EXTENSIONS--
+fileinfo
 --FILE--
 <?php
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
@@ -25,14 +25,21 @@ var_dump( new finfo() );
 ?>
 --EXPECTF--
 *** Testing finfo_open() : basic functionality ***
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-resource(%d) of type (file_info)
-object(finfo)#%d (%d) {
+object(finfo)#%d (0) {
 }
-object(finfo)#%d (%d) {
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
+}
+object(finfo)#%d (0) {
 }

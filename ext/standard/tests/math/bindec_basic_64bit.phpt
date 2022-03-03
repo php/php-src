@@ -26,7 +26,7 @@ $values = array(111000111,
                 011237,
                 true,
                 false,
-                null);
+                );
 
 for ($i = 0; $i < count($values); $i++) {
     $res = bindec($values[$i]);
@@ -73,5 +73,4 @@ int(6)
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 int(0)
 int(1)
-int(0)
 int(0)

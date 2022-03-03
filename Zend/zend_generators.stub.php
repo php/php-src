@@ -1,7 +1,11 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Generator implements Iterator
 {
     public function rewind(): void {}

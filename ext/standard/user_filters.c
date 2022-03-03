@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -33,7 +33,6 @@ struct php_user_filter_data {
 };
 
 /* to provide context for calling into the next filter from user-space */
-static int le_userfilters;
 static int le_bucket_brigade;
 static int le_bucket;
 
@@ -42,10 +41,12 @@ static int le_bucket;
 PHP_METHOD(php_user_filter, filter)
 {
 	zval *in, *out, *consumed;
-	zend_bool closing;
+	bool closing;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrzb", &in, &out, &consumed, &closing) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	RETURN_LONG(PSFS_ERR_FATAL);
 }
 
 PHP_METHOD(php_user_filter, onCreate)
@@ -60,7 +61,7 @@ PHP_METHOD(php_user_filter, onClose)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
-static zend_class_entry user_filter_class_entry;
+static zend_class_entry *user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
@@ -73,22 +74,8 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 
 PHP_MINIT_FUNCTION(user_filters)
 {
-	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
-	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", class_php_user_filter_methods);
-	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry)) == NULL) {
-		return FAILURE;
-	}
-	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC);
-	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC);
-
-	/* init the filter resource; it has no dtor, as streams will always clean it up
-	 * at the correct time */
-	le_userfilters = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_FILTER_RES_NAME, 0);
-
-	if (le_userfilters == FAILURE) {
-		return FAILURE;
-	}
+	user_filter_class_entry = register_class_php_user_filter();
 
 	/* Filters will dispose of their brigades */
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
@@ -124,24 +111,18 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 static void userfilter_dtor(php_stream_filter *thisfilter)
 {
 	zval *obj = &thisfilter->abstract;
-	zval func_name;
 	zval retval;
 
-	if (obj == NULL) {
+	if (Z_ISUNDEF_P(obj)) {
 		/* If there's no object associated then there's nothing to dispose of */
 		return;
 	}
 
-	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1);
-
-	call_user_function(NULL,
-			obj,
-			&func_name,
-			&retval,
-			0, NULL);
+	zend_string *func_name = zend_string_init("onclose", sizeof("onclose")-1, 0);
+	zend_call_method_if_exists(Z_OBJ_P(obj), func_name, &retval, 0, NULL);
+	zend_string_release(func_name);
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func_name);
 
 	/* kill the object */
 	zval_ptr_dtor(obj);
@@ -161,7 +142,6 @@ php_stream_filter_status_t userfilter_filter(
 	zval func_name;
 	zval retval;
 	zval args[4];
-	zend_string *propname;
 	int call_result;
 
 	/* the userfilter object probably doesn't exist anymore */
@@ -173,15 +153,12 @@ php_stream_filter_status_t userfilter_filter(
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
-	if (!zend_hash_str_exists_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1)) {
-		zval tmp;
-
+	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	if (stream_prop) {
 		/* Give the userfilter class a hook back to the stream */
-		php_stream_to_zval(stream, &tmp);
-		Z_ADDREF(tmp);
-		add_property_zval(obj, "stream", &tmp);
-		/* add_property_zval increments the refcount which is unwanted here */
-		zval_ptr_dtor(&tmp);
+		zval_ptr_dtor(stream_prop);
+		php_stream_to_zval(stream, stream_prop);
+		Z_ADDREF_P(stream_prop);
 	}
 
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
@@ -219,7 +196,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_stream_bucket *bucket = buckets_in->head;
+		php_stream_bucket *bucket;
 
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		while ((bucket = buckets_in->head)) {
@@ -240,9 +217,9 @@ php_stream_filter_status_t userfilter_filter(
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
-	propname = zend_string_init("stream", sizeof("stream")-1, 0);
-	Z_OBJ_HANDLER_P(obj, unset_property)(Z_OBJ_P(obj), propname, NULL);
-	zend_string_release_ex(propname, 0);
+	if (stream_prop) {
+		convert_to_null(stream_prop);
+	}
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
@@ -266,8 +243,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
-	zval obj, zfilter;
-	zval func_name;
+	zval obj;
 	zval retval;
 	size_t len;
 
@@ -343,15 +319,9 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1);
-
-	call_user_function(NULL,
-			&obj,
-			&func_name,
-			&retval,
-			0, NULL);
-
-	zval_ptr_dtor(&func_name);
+	zend_string *func_name = zend_string_init("oncreate", sizeof("oncreate")-1, 0);
+	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
+	zend_string_release(func_name);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
@@ -371,12 +341,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		zval_ptr_dtor(&retval);
 	}
 
-	/* set the filter property, this will be used during cleanup */
-	ZVAL_RES(&zfilter, zend_register_resource(filter, le_userfilters));
 	ZVAL_OBJ(&filter->abstract, Z_OBJ(obj));
-	add_property_zval(&obj, "filter", &zfilter);
-	/* add_property_zval increments the refcount which is unwanted here */
-	zval_ptr_dtor(&zfilter);
 
 	return filter;
 }
@@ -532,8 +497,8 @@ PHP_FUNCTION(stream_get_filters)
 
 	filters_hash = php_get_stream_filters_hash();
 
-	if (filters_hash) {
-		ZEND_HASH_FOREACH_STR_KEY(filters_hash, filter_name) {
+	if (filters_hash && !HT_IS_PACKED(filters_hash)) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(filters_hash, filter_name) {
 			if (filter_name) {
 				add_next_index_str(return_value, zend_string_copy(filter_name));
 			}

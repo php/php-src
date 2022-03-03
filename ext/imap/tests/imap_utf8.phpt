@@ -1,7 +1,7 @@
 --TEST--
 imap_utf8() tests
---SKIPIF--
-<?php if (!extension_loaded("imap")) print "skip"; ?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 

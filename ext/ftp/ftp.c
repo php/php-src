@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -237,7 +237,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 	SSL_CTX	*ctx = NULL;
 	long ssl_ctx_options = SSL_OP_ALL;
 	int err, res;
-	zend_bool retry;
+	bool retry;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -1108,8 +1108,6 @@ bail:
 zend_long
 ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len)
 {
-	zend_long res;
-
 	if (ftp == NULL) {
 		return -1;
 	}
@@ -1122,8 +1120,7 @@ ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	if (!ftp_getresp(ftp) || ftp->resp != 213) {
 		return -1;
 	}
-	ZEND_ATOL(res, ftp->inbuf);
-	return res;
+	return ZEND_ATOL(ftp->inbuf);
 }
 /* }}} */
 
@@ -1369,7 +1366,7 @@ ftp_getresp(ftpbuf_t *ftp)
 int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 #ifdef HAVE_FTP_SSL
 	int err;
-	zend_bool retry = 0;
+	bool retry = 0;
 	SSL *handle = NULL;
 	php_socket_t fd;
 	size_t sent;
@@ -1428,8 +1425,8 @@ int single_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t size) {
 int
 my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	zend_long		size, sent;
-    int         n;
+	zend_long size, sent;
+	int       n;
 
 	size = len;
 	while (size) {
@@ -1468,7 +1465,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 	int		n, nr_bytes;
 #ifdef HAVE_FTP_SSL
 	int err;
-	zend_bool retry = 0;
+	bool retry = 0;
 	SSL *handle = NULL;
 	php_socket_t fd;
 #endif
@@ -1752,7 +1749,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	SSL_CTX		*ctx;
 	SSL_SESSION *session;
 	int err, res;
-	zend_bool retry;
+	bool retry;
 #endif
 
 	if (data->fd != -1) {

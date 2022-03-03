@@ -1,9 +1,7 @@
 --TEST--
 GH-7953 (ob_clean() only may not set Content-* header)
---SKIPIF--
-<?php
-if (!extension_loaded("iconv")) die("skip iconv extension not available");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 input_encoding=UTF-8
 output_encoding=ISO-8859-1

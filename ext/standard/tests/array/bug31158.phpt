@@ -14,7 +14,8 @@ __();
 echo "ok\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable $GLOBALS in %s on line %d
-
-Warning: Trying to access array offset on value of type null in %s on line %d
-ok
+Fatal error: Uncaught Error: array_splice(): Argument #1 ($array) cannot be passed by reference in %s:%d
+Stack trace:
+#0 %s(%d): __()
+#1 {main}
+  thrown in %s on line %d

@@ -24,8 +24,8 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SLJIT_LIR_H_
-#define _SLJIT_LIR_H_
+#ifndef SLJIT_LIR_H_
+#define SLJIT_LIR_H_
 
 /*
    ------------------------------------------------------------------------
@@ -70,15 +70,21 @@
       - pass --smc-check=all argument to valgrind, since JIT is a "self-modifying code"
 */
 
-#if !(defined SLJIT_NO_DEFAULT_CONFIG && SLJIT_NO_DEFAULT_CONFIG)
+#if (defined SLJIT_HAVE_CONFIG_PRE && SLJIT_HAVE_CONFIG_PRE)
+#include "sljitConfigPre.h"
+#endif /* SLJIT_HAVE_CONFIG_PRE */
+
 #include "sljitConfig.h"
-#endif
 
 /* The following header file defines useful macros for fine tuning
 sljit based code generators. They are listed in the beginning
 of sljitConfigInternal.h */
 
 #include "sljitConfigInternal.h"
+
+#if (defined SLJIT_HAVE_CONFIG_POST && SLJIT_HAVE_CONFIG_POST)
+#include "sljitConfigPost.h"
+#endif /* SLJIT_HAVE_CONFIG_POST */
 
 #ifdef __cplusplus
 extern "C" {
@@ -385,6 +391,7 @@ struct sljit_compiler {
 	struct sljit_put_label *last_put_label;
 
 	void *allocator_data;
+	void *exec_allocator_data;
 	struct sljit_memory_fragment *buf;
 	struct sljit_memory_fragment *abuf;
 
@@ -404,6 +411,10 @@ struct sljit_compiler {
 	sljit_uw executable_offset;
 	/* Executable size for statistical purposes. */
 	sljit_uw executable_size;
+
+#if (defined SLJIT_HAS_STATUS_FLAGS_STATE && SLJIT_HAS_STATUS_FLAGS_STATE)
+	sljit_s32 status_flags_state;
+#endif
 
 #if (defined SLJIT_CONFIG_X86_32 && SLJIT_CONFIG_X86_32)
 	sljit_s32 args;
@@ -451,9 +462,9 @@ struct sljit_compiler {
 	sljit_sw cache_argw;
 #endif
 
-#if (defined SLJIT_CONFIG_TILEGX && SLJIT_CONFIG_TILEGX)
-	sljit_s32 cache_arg;
-	sljit_sw cache_argw;
+#if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
+	/* Need to allocate register save area to make calls. */
+	sljit_s32 mode;
 #endif
 
 #if (defined SLJIT_VERBOSE && SLJIT_VERBOSE)
@@ -485,10 +496,12 @@ struct sljit_compiler {
    custom memory managers. This pointer is passed to SLJIT_MALLOC
    and SLJIT_FREE macros. Most allocators (including the default
    one) ignores this value, and it is recommended to pass NULL
-   as a dummy value for allocator_data.
+   as a dummy value for allocator_data. The exec_allocator_data
+   has the same purpose but this one is passed to SLJIT_MALLOC_EXEC /
+   SLJIT_MALLOC_FREE functions.
 
    Returns NULL if failed. */
-SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data);
+SLJIT_API_FUNC_ATTRIBUTE struct sljit_compiler* sljit_create_compiler(void *allocator_data, void *exec_allocator_data);
 
 /* Frees everything except the compiled machine code. */
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_compiler(struct sljit_compiler *compiler);
@@ -535,7 +548,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 
 /* Free executable code. */
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code);
+SLJIT_API_FUNC_ATTRIBUTE void sljit_free_code(void* code, void *exec_allocator_data);
 
 /*
    When the protected executable allocator is used the JIT code is mapped
@@ -699,7 +712,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
 */
 
 /*
-   IMPORATNT NOTE: memory access MUST be naturally aligned except
+   IMPORTANT NOTE: memory access MUST be naturally aligned unless
                    SLJIT_UNALIGNED macro is defined and its value is 1.
 
      length | alignment
@@ -741,6 +754,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_fast_enter(struct sljit_compiler *
    mips:   [reg+imm], -65536 <= imm <= 65535
    sparc:  [reg+imm], -4096 <= imm <= 4095
            [reg+reg] is supported
+   s390x:  [reg+imm], -2^19 <= imm < 2^19
+           [reg+reg] is supported
+           Write-back is not supported
 */
 
 /* Macros for specifying operand types. */
@@ -984,7 +1000,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 #define SLJIT_SUBC			(SLJIT_OP2_BASE + 3)
 #define SLJIT_SUBC32			(SLJIT_SUBC | SLJIT_I32_OP)
 /* Note: integer mul
-   Flags: MUL_OVERFLOW */
+   Flags: OVERFLOW */
 #define SLJIT_MUL			(SLJIT_OP2_BASE + 4)
 #define SLJIT_MUL32			(SLJIT_MUL | SLJIT_I32_OP)
 /* Flags: Z */
@@ -1129,89 +1145,69 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 
 /* Integer comparison types. */
 #define SLJIT_EQUAL			0
-#define SLJIT_EQUAL32			(SLJIT_EQUAL | SLJIT_I32_OP)
-#define SLJIT_ZERO			0
-#define SLJIT_ZERO32			(SLJIT_ZERO | SLJIT_I32_OP)
+#define SLJIT_ZERO			SLJIT_EQUAL
 #define SLJIT_NOT_EQUAL			1
-#define SLJIT_NOT_EQUAL32		(SLJIT_NOT_EQUAL | SLJIT_I32_OP)
-#define SLJIT_NOT_ZERO			1
-#define SLJIT_NOT_ZERO32		(SLJIT_NOT_ZERO | SLJIT_I32_OP)
+#define SLJIT_NOT_ZERO			SLJIT_NOT_EQUAL
 
 #define SLJIT_LESS			2
-#define SLJIT_LESS32			(SLJIT_LESS | SLJIT_I32_OP)
 #define SLJIT_SET_LESS			SLJIT_SET(SLJIT_LESS)
 #define SLJIT_GREATER_EQUAL		3
-#define SLJIT_GREATER_EQUAL32		(SLJIT_GREATER_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SET_GREATER_EQUAL		SLJIT_SET(SLJIT_GREATER_EQUAL)
 #define SLJIT_GREATER			4
-#define SLJIT_GREATER32			(SLJIT_GREATER | SLJIT_I32_OP)
 #define SLJIT_SET_GREATER		SLJIT_SET(SLJIT_GREATER)
 #define SLJIT_LESS_EQUAL		5
-#define SLJIT_LESS_EQUAL32		(SLJIT_LESS_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SET_LESS_EQUAL		SLJIT_SET(SLJIT_LESS_EQUAL)
 #define SLJIT_SIG_LESS			6
-#define SLJIT_SIG_LESS32		(SLJIT_SIG_LESS | SLJIT_I32_OP)
 #define SLJIT_SET_SIG_LESS		SLJIT_SET(SLJIT_SIG_LESS)
 #define SLJIT_SIG_GREATER_EQUAL		7
-#define SLJIT_SIG_GREATER_EQUAL32	(SLJIT_SIG_GREATER_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SET_SIG_GREATER_EQUAL	SLJIT_SET(SLJIT_SIG_GREATER_EQUAL)
 #define SLJIT_SIG_GREATER		8
-#define SLJIT_SIG_GREATER32		(SLJIT_SIG_GREATER | SLJIT_I32_OP)
 #define SLJIT_SET_SIG_GREATER		SLJIT_SET(SLJIT_SIG_GREATER)
 #define SLJIT_SIG_LESS_EQUAL		9
-#define SLJIT_SIG_LESS_EQUAL32		(SLJIT_SIG_LESS_EQUAL | SLJIT_I32_OP)
 #define SLJIT_SET_SIG_LESS_EQUAL	SLJIT_SET(SLJIT_SIG_LESS_EQUAL)
 
 #define SLJIT_OVERFLOW			10
-#define SLJIT_OVERFLOW32		(SLJIT_OVERFLOW | SLJIT_I32_OP)
 #define SLJIT_SET_OVERFLOW		SLJIT_SET(SLJIT_OVERFLOW)
 #define SLJIT_NOT_OVERFLOW		11
-#define SLJIT_NOT_OVERFLOW32		(SLJIT_NOT_OVERFLOW | SLJIT_I32_OP)
-
-#define SLJIT_MUL_OVERFLOW		12
-#define SLJIT_MUL_OVERFLOW32		(SLJIT_MUL_OVERFLOW | SLJIT_I32_OP)
-#define SLJIT_SET_MUL_OVERFLOW		SLJIT_SET(SLJIT_MUL_OVERFLOW)
-#define SLJIT_MUL_NOT_OVERFLOW		13
-#define SLJIT_MUL_NOT_OVERFLOW32	(SLJIT_MUL_NOT_OVERFLOW | SLJIT_I32_OP)
 
 /* There is no SLJIT_CARRY or SLJIT_NOT_CARRY. */
-#define SLJIT_SET_CARRY			SLJIT_SET(14)
+#define SLJIT_SET_CARRY			SLJIT_SET(12)
 
 /* Floating point comparison types. */
-#define SLJIT_EQUAL_F64			16
+#define SLJIT_EQUAL_F64			14
 #define SLJIT_EQUAL_F32			(SLJIT_EQUAL_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_EQUAL_F		SLJIT_SET(SLJIT_EQUAL_F64)
-#define SLJIT_NOT_EQUAL_F64		17
+#define SLJIT_NOT_EQUAL_F64		15
 #define SLJIT_NOT_EQUAL_F32		(SLJIT_NOT_EQUAL_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_NOT_EQUAL_F		SLJIT_SET(SLJIT_NOT_EQUAL_F64)
-#define SLJIT_LESS_F64			18
+#define SLJIT_LESS_F64			16
 #define SLJIT_LESS_F32			(SLJIT_LESS_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_LESS_F		SLJIT_SET(SLJIT_LESS_F64)
-#define SLJIT_GREATER_EQUAL_F64		19
+#define SLJIT_GREATER_EQUAL_F64		17
 #define SLJIT_GREATER_EQUAL_F32		(SLJIT_GREATER_EQUAL_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_GREATER_EQUAL_F	SLJIT_SET(SLJIT_GREATER_EQUAL_F64)
-#define SLJIT_GREATER_F64		20
+#define SLJIT_GREATER_F64		18
 #define SLJIT_GREATER_F32		(SLJIT_GREATER_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_GREATER_F		SLJIT_SET(SLJIT_GREATER_F64)
-#define SLJIT_LESS_EQUAL_F64		21
+#define SLJIT_LESS_EQUAL_F64		19
 #define SLJIT_LESS_EQUAL_F32		(SLJIT_LESS_EQUAL_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_LESS_EQUAL_F		SLJIT_SET(SLJIT_LESS_EQUAL_F64)
-#define SLJIT_UNORDERED_F64		22
+#define SLJIT_UNORDERED_F64		20
 #define SLJIT_UNORDERED_F32		(SLJIT_UNORDERED_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_UNORDERED_F		SLJIT_SET(SLJIT_UNORDERED_F64)
-#define SLJIT_ORDERED_F64		23
+#define SLJIT_ORDERED_F64		21
 #define SLJIT_ORDERED_F32		(SLJIT_ORDERED_F64 | SLJIT_F32_OP)
 #define SLJIT_SET_ORDERED_F		SLJIT_SET(SLJIT_ORDERED_F64)
 
 /* Unconditional jump types. */
-#define SLJIT_JUMP			24
+#define SLJIT_JUMP			22
 	/* Fast calling method. See sljit_emit_fast_enter / SLJIT_FAST_RETURN. */
-#define SLJIT_FAST_CALL			25
+#define SLJIT_FAST_CALL			23
 	/* Called function must be declared with the SLJIT_FUNC attribute. */
-#define SLJIT_CALL			26
+#define SLJIT_CALL			24
 	/* Called function must be declared with cdecl attribute.
 	   This is the default attribute for C functions. */
-#define SLJIT_CALL_CDECL		27
+#define SLJIT_CALL_CDECL		25
 
 /* The target can be changed during runtime (see: sljit_set_jump_addr). */
 #define SLJIT_REWRITABLE_JUMP		0x1000
@@ -1405,12 +1401,6 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void);
 /* Portable helper function to get an offset of a member. */
 #define SLJIT_OFFSETOF(base, member) ((sljit_sw)(&((base*)0x10)->member) - 0x10)
 
-#if (defined SLJIT_UTIL_GLOBAL_LOCK && SLJIT_UTIL_GLOBAL_LOCK)
-/* This global lock is useful to compile common functions. */
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void);
-SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_release_lock(void);
-#endif
-
 #if (defined SLJIT_UTIL_STACK && SLJIT_UTIL_STACK)
 
 /* The sljit_stack structure and its manipulation functions provides
@@ -1528,8 +1518,22 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_get_float_register_index(sljit_s32 reg)
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_custom(struct sljit_compiler *compiler,
 	void *instruction, sljit_s32 size);
 
-/* Define the currently available CPU status flags. It is usually used after an
-   sljit_emit_op_custom call to define which flags are set. */
+/* Flags were set by a 32 bit operation. */
+#define SLJIT_CURRENT_FLAGS_I32_OP		SLJIT_I32_OP
+
+/* Flags were set by an ADD, ADDC, SUB, SUBC, or NEG operation. */
+#define SLJIT_CURRENT_FLAGS_ADD_SUB		0x01
+
+/* Flags were set by a SUB with unused destination.
+   Must be combined with SLJIT_CURRENT_FLAGS_ADD_SUB. */
+#define SLJIT_CURRENT_FLAGS_COMPARE		0x02
+
+/* Define the currently available CPU status flags. It is usually used after
+   an sljit_emit_label or sljit_emit_op_custom operations to define which CPU
+   status flags are available.
+
+   The current_flags must be a valid combination of SLJIT_SET_* and
+   SLJIT_CURRENT_FLAGS_* constants. */
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *compiler,
 	sljit_s32 current_flags);
@@ -1538,4 +1542,4 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_set_current_flags(struct sljit_compiler *com
 } /* extern "C" */
 #endif
 
-#endif /* _SLJIT_LIR_H_ */
+#endif /* SLJIT_LIR_H_ */

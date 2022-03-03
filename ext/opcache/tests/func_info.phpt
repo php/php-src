@@ -4,8 +4,8 @@ Test that return types in zend_func_info.c match return types in stubs
 opcache.enable=1
 opcache.enable_cli=1
 opcache.optimization_level=-1
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

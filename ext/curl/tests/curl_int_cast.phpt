@@ -1,5 +1,7 @@
 --TEST--
 Casting CurlHandle to int returns object ID
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

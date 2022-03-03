@@ -10,7 +10,7 @@ if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 $ds = array(array('pipe', 'r'));
 
 $cat = proc_open(
-    '/bin/sleep 2',
+    ['/bin/sleep', '2'],
     $ds,
     $pipes
 );
@@ -34,7 +34,7 @@ echo "Done!\n";
 bool(true)
 array(8) {
   ["command"]=>
-  string(12) "/bin/sleep 2"
+  string(10) "/bin/sleep"
   ["pid"]=>
   int(%d)
   ["running"]=>
@@ -53,7 +53,7 @@ array(8) {
 bool(true)
 array(8) {
   ["command"]=>
-  string(12) "/bin/sleep 2"
+  string(10) "/bin/sleep"
   ["pid"]=>
   int(%d)
   ["running"]=>

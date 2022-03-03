@@ -2,8 +2,8 @@
 Test curl_error() & curl_errno() function without url
 --CREDITS--
 TestFest 2009 - AFUP - Perrick Penet <perrick@noparking.net>
---SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

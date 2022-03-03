@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -35,18 +35,13 @@ Since:
 */
 PHP_METHOD(DOMImplementation, hasFeature)
 {
-	size_t feature_len, version_len;
-	char *feature, *version;
+	zend_string *feature, *version;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &feature, &version) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (dom_has_feature(feature, version)) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(dom_has_feature(feature, version));
 }
 /* }}} end dom_domimplementation_has_feature */
 

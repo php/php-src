@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -18,6 +18,16 @@
 
 #ifndef HAVE_JIT_H
 #define HAVE_JIT_H
+
+#if defined(__x86_64__) || defined(i386) || defined(ZEND_WIN32)
+# define ZEND_JIT_TARGET_X86   1
+# define ZEND_JIT_TARGET_ARM64 0
+#elif defined (__aarch64__)
+# define ZEND_JIT_TARGET_X86   0
+# define ZEND_JIT_TARGET_ARM64 1
+#else
+# error "JIT not supported on this platform"
+#endif
 
 #define ZEND_JIT_LEVEL_NONE        0     /* no JIT */
 #define ZEND_JIT_LEVEL_MINIMAL     1     /* minimal JIT (subroutine threading) */
@@ -53,6 +63,7 @@
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
 #define ZEND_JIT_DEBUG_SIZE      (1<<9)
+#define ZEND_JIT_DEBUG_ASM_ADDR  (1<<10)
 
 #define ZEND_JIT_DEBUG_TRACE_START     (1<<12)
 #define ZEND_JIT_DEBUG_TRACE_STOP      (1<<13)
@@ -64,7 +75,7 @@
 #define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
 #define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
 
-#define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debbuger flags can't be changed at run-time */
+#define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 
 #define ZEND_JIT_TRACE_MAX_LENGTH        1024 /* max length of single trace */
 #define ZEND_JIT_TRACE_MAX_EXITS          512 /* max number of side exits per trace */
@@ -81,8 +92,8 @@ typedef struct _zend_jit_trace_stack_frame zend_jit_trace_stack_frame;
 typedef struct _sym_node zend_sym_node;
 
 typedef struct _zend_jit_globals {
-	zend_bool enabled;
-	zend_bool on;
+	bool enabled;
+	bool on;
 	uint8_t   trigger;
 	uint8_t   opt_level;
 	uint32_t  opt_flags;
@@ -108,7 +119,7 @@ typedef struct _zend_jit_globals {
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 
-	zend_bool tracing;
+	bool tracing;
 
 	zend_jit_trace_rec *current_trace;
 	zend_jit_trace_stack_frame *current_frame;
@@ -137,7 +148,7 @@ ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
 ZEND_EXT_API int  zend_jit_check_support(void);
-ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, zend_bool reattached);
+ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);

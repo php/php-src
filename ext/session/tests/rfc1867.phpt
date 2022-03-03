@@ -15,18 +15,20 @@ session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=1%
 session.upload_progress.min_freq=0.000000001
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --COOKIE--
-PHPSESSID=rfc1867-tests
+PHPSESSID=rfc1867
 --GET--
-PHPSESSID=rfc1867-tests-get
+PHPSESSID=rfc1867-get
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHPSESSID"
 
-rfc1867-tests-post
+rfc1867-post
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="PHP_SESSION_UPLOAD_PROGRESS"
 
@@ -50,12 +52,14 @@ var_dump($_SESSION["upload_progress_" . basename(__FILE__)]);
 session_destroy();
 ?>
 --EXPECTF--
-string(%d) "rfc1867-tests"
+string(%d) "rfc1867"
 bool(true)
 array(2) {
   ["file1"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file1.txt"
+    ["full_path"]=>
     string(9) "file1.txt"
     ["type"]=>
     string(0) ""
@@ -67,8 +71,10 @@ array(2) {
     int(1)
   }
   ["file2"]=>
-  array(5) {
+  array(6) {
     ["name"]=>
+    string(9) "file2.txt"
+    ["full_path"]=>
     string(9) "file2.txt"
     ["type"]=>
     string(0) ""

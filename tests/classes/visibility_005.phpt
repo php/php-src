@@ -3,6 +3,7 @@ ZE2 foreach and property visibility
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class base
 {
     public $a=1;

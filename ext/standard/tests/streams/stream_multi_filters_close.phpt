@@ -4,7 +4,7 @@ Check if multiple filters are closed correctly and never called again after clos
 <?php
 
 class FirstFilter extends php_user_filter {
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing): int {
         static $closed = 0;
 
         while ($bucket = stream_bucket_make_writeable($in)) {
@@ -23,7 +23,7 @@ class FirstFilter extends php_user_filter {
 }
 
 class SecondFilter extends php_user_filter {
-    public function filter($in, $out, &$consumed, $closing) {
+    public function filter($in, $out, &$consumed, $closing): int {
         static $closed = 0;
 
         while ($bucket = stream_bucket_make_writeable($in)) {

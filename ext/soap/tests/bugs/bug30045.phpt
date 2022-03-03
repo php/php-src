@@ -1,10 +1,8 @@
 --TEST--
 Bug #30045 (Cannot pass big integers (> 2147483647) in SOAP requests)
---SKIPIF--
-<?php
-  if (!extension_loaded('soap')) die('skip soap extension not available');
-  if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
-?>
+--EXTENSIONS--
+soap
+simplexml
 --INI--
 soap.wsdl_cache_enabled=1
 --FILE--
@@ -15,6 +13,7 @@ function foo($type, $num) {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -22,7 +21,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('foo');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     $xml = simplexml_load_string($request);
     echo $xml->children("http://schemas.xmlsoap.org/soap/envelope/")->Body->children("http://test-uri")->children()->param1->asXML(),"\n";
     unset($xml);

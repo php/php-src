@@ -2,6 +2,8 @@
 Function snmp_get_quick_print / snmp_set_quick_print
 --CREDITS--
 Olivier Doucet
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

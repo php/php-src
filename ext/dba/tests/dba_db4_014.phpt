@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 File open("wl") & Insert Test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";
@@ -28,5 +30,5 @@ require(__DIR__ .'/clean.inc');
 --EXPECTF--
 database handler: db4
 
-Warning: dba_open(%stest0.dbm,wl): Driver initialization failed for handler: db4: No such file or directory in %sdba_db4_014.php on line %d
+Warning: dba_open(): Driver initialization failed for handler: db4: No such file or directory in %sdba_db4_014.php on line %d
 Error creating %stest0.dbm

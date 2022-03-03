@@ -1,8 +1,9 @@
 --TEST--
 Interface of the class mysqli_result
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -27,6 +28,7 @@ require_once('skipifconnectfailure.inc');
         '__construct'           => true,
         'close'                 => true,
         'data_seek'             => true,
+        'fetch_all'             => true,
         'fetch_array'           => true,
         'fetch_assoc'           => true,
         'fetch_field'           => true,
@@ -34,13 +36,12 @@ require_once('skipifconnectfailure.inc');
         'fetch_fields'          => true,
         'fetch_object'          => true,
         'fetch_row'             => true,
+        'fetch_column'          => true,
         'field_seek'            => true,
         'free'                  => true,
         'free_result'           => true,
         'getIterator'           => true,
     );
-    if ($IS_MYSQLND)
-        $expected_methods['fetch_all'] = true;
 
     foreach ($methods as $k => $method) {
         if (isset($expected_methods[$method])) {
@@ -163,11 +164,6 @@ num_rows
 type
 
 Object variables:
-current_field
-field_count
-lengths
-num_rows
-type
 
 Magic, magic properties:
 mysqli_result->current_field = '0'/integer ('0'/integer)

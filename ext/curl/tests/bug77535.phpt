@@ -1,10 +1,11 @@
 --TEST--
 Bug #77535 (Invalid callback, h2 server push)
+--EXTENSIONS--
+curl
 --XFAIL--
 http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
-include 'skipif.inc';
 if (getenv("SKIP_ONLINE_TESTS")) {
     die("skip online test");
 }

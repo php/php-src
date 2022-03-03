@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $namespace_or_prefix = "", bool $is_prefix = false): SimpleXMLElement|false {}
 
@@ -8,71 +8,72 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 
 function simplexml_import_dom(SimpleXMLElement|DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
+/** @not-serializable */
 class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
-    /** @return array|null|false */
-    public function xpath(string $expression) {}
+    /** @tentative-return-type */
+    public function xpath(string $expression): array|null|false {}
 
-    /** @return bool */
-    public function registerXPathNamespace(string $prefix, string $namespace) {}
+    /** @tentative-return-type */
+    public function registerXPathNamespace(string $prefix, string $namespace): bool {}
 
-    /** @return string|bool */
-    public function asXML(?string $filename = null) {}
+    /** @tentative-return-type */
+    public function asXML(?string $filename = null): string|bool {}
 
     /**
-     * @return string|bool
+     * @tentative-return-type
      * @alias SimpleXMLElement::asXML
      */
-    public function saveXML(?string $filename = null) {}
+    public function saveXML(?string $filename = null): string|bool {}
 
-    /** @return array */
-    public function getNamespaces(bool $recursive = false) {}
+    /** @tentative-return-type */
+    public function getNamespaces(bool $recursive = false): array {}
 
-    /** @return array|false */
-    public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true) {}
+    /** @tentative-return-type */
+    public function getDocNamespaces(bool $recursive = false, bool $fromRoot = true): array|false {}
 
-    /** @return SimpleXMLElement|null */
-    public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
+    /** @tentative-return-type */
+    public function children(?string $namespaceOrPrefix = null, bool $isPrefix = false): ?SimpleXMLElement {}
 
-    /** @return SimpleXMLElement|null */
-    public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false) {}
+    /** @tentative-return-type */
+    public function attributes(?string $namespaceOrPrefix = null, bool $isPrefix = false): ?SimpleXMLElement {}
 
     public function __construct(string $data, int $options = 0, bool $dataIsURL = false, string $namespaceOrPrefix = "", bool $isPrefix = false) {}
 
-    /** @return SimpleXMLElement|null */
-    public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null) {}
+    /** @tentative-return-type */
+    public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null): ?SimpleXMLElement {}
 
-    /** @return void */
-    public function addAttribute(string $qualifiedName, string $value, ?string $namespace = null) {}
+    /** @tentative-return-type */
+    public function addAttribute(string $qualifiedName, string $value, ?string $namespace = null): void {}
 
-    /** @return string */
-    public function getName() {}
+    /** @tentative-return-type */
+    public function getName(): string {}
 
     public function __toString(): string {}
 
-    /** @return int */
-    public function count() {}
+    /** @tentative-return-type */
+    public function count(): int {}
 
-    /** @return void */
-    public function rewind() {}
+    /** @tentative-return-type */
+    public function rewind(): void {}
 
-    /** @return bool */
-    public function valid() {}
+    /** @tentative-return-type */
+    public function valid(): bool {}
 
-    /** @return SimpleXMLElement|null */
-    public function current() {}
+    /** @tentative-return-type */
+    public function current(): SimpleXMLElement {}
 
-    /** @return string|false */
-    public function key() {}
+    /** @tentative-return-type */
+    public function key(): string {}
 
-    /** @return void */
-    public function next() {}
+    /** @tentative-return-type */
+    public function next(): void {}
 
-    /** @return bool */
-    public function hasChildren() {}
+    /** @tentative-return-type */
+    public function hasChildren(): bool {}
 
-    /** @return SimpleXMLElement|null */
-    public function getChildren() {}
+    /** @tentative-return-type */
+    public function getChildren(): ?SimpleXMLElement {}
 }
 
 class SimpleXMLIterator extends SimpleXMLElement

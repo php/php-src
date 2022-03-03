@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 function variant_set(variant $variant, mixed $value): void {}
 
@@ -62,27 +62,32 @@ function com_event_sink(variant $variant, object $sink_object, array|string|null
 
 function com_print_typeinfo(variant|string $variant, ?string $dispatch_interface = null, bool $display_sink = false): bool {}
 
-function com_message_pump(int $timeout_milliseconds  = 0): bool {}
+function com_message_pump(int $timeout_milliseconds = 0): bool {}
 
 function com_load_typelib(string $typelib, bool $case_insensitive = true): bool {}
 
+/** @not-serializable */
 class variant
 {
     public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
 }
 
-class com
+class com extends variant
 {
     public function __construct(string $module_name, array|string|null $server_name = null, int $codepage = CP_ACP, string $typelib = "") {}
 }
 
 #if HAVE_MSCOREE_H
-class dotnet
+class dotnet extends variant
 {
     public function __construct(string $assembly_name, string $datatype_name, int $codepage = CP_ACP) {}
 }
 #endif
 
-final class com_exception extends exception
+final class com_safearray_proxy
+{
+}
+
+final class com_exception extends Exception
 {
 }

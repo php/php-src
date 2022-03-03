@@ -1,7 +1,7 @@
 --TEST--
 Bug #42692 (Procedure 'int1' not present with doc/lit SoapServer)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set('soap.wsdl_cache_enabled','0');
@@ -11,6 +11,7 @@ function checkAuth($peid,$auth) {
 }
 
 class TestSoap extends SoapClient {
+    private $server;
 
     function __construct($wsdl, $options) {
         parent::__construct($wsdl, $options);
@@ -18,7 +19,7 @@ class TestSoap extends SoapClient {
         $this->server->addFunction("checkAuth");
     }
 
-    function __doRequest($request, $location, $action, $version, $one_way = 0) {
+    function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
         ob_start();
         $this->server->handle($request);
         $response = ob_get_contents();

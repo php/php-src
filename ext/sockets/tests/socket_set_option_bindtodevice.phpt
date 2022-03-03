@@ -3,11 +3,11 @@ Test if socket_set_option() works, option:SO_BINDTODEVICE
 --DESCRIPTION--
 -Bind to loopback 'lo' device (should exist)
 -Bind to unexisting device
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
+
 if (!defined("SO_BINDTODEVICE")) {
     die('SKIP SO_BINDTODEVICE not supported on this platform.');
 }

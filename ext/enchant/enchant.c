@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -22,7 +22,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 #include "../spl/spl_exceptions.h"
 #include <enchant.h>
@@ -186,14 +185,8 @@ static void php_enchant_dict_free(zend_object *object) /* {{{ */
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(enchant)
 {
-	zend_class_entry bce, dce;
-
-	INIT_CLASS_ENTRY(bce, "EnchantBroker", class_EnchantBroker_methods);
-	enchant_broker_ce = zend_register_internal_class(&bce);
-	enchant_broker_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
-	enchant_broker_ce->serialize = zend_class_serialize_deny;
-	enchant_broker_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
@@ -201,12 +194,8 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_broker_handlers.clone_obj = NULL;
 	enchant_broker_handlers.compare = zend_objects_not_comparable;
 
-	INIT_CLASS_ENTRY(dce, "EnchantDictionary", class_EnchantDictionary_methods);
-	enchant_dict_ce = zend_register_internal_class(&dce);
-	enchant_dict_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
-	enchant_dict_ce->serialize = zend_class_serialize_deny;
-	enchant_dict_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);

@@ -1,14 +1,14 @@
 --TEST--
 Bug #44882 (SOAP extension object decoding bug)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestSoapClient extends SoapClient
 {
-    public function __doRequest($req, $loc, $act, $ver, $one_way = 0)
+    public function __doRequest($req, $loc, $act, $ver, $one_way = 0): ?string
     {
         return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>

@@ -6,8 +6,6 @@ Don't want an XFAIL here to cause confusion if a real bug comes up.
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 # TestFest 2010 BKTK
---SKIPIF--
-<?php if (!method_exists('DateInterval', 'format')) die("skip: method doesn't exist"); ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');

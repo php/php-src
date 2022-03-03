@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -34,7 +34,6 @@
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
 #endif
 
-
 static void pdo_mysql_free_result(pdo_mysql_stmt *S)
 {
 	if (S->result) {
@@ -52,8 +51,16 @@ static void pdo_mysql_free_result(pdo_mysql_stmt *S)
 			efree(S->out_length);
 			S->bound_result = NULL;
 		}
+#else
+		if (S->current_row) {
+			unsigned column_count = mysql_num_fields(S->result);
+			for (unsigned i = 0; i < column_count; i++) {
+				zval_ptr_dtor_nogc(&S->current_row[i]);
+			}
+			efree(S->current_row);
+			S->current_row = NULL;
+		}
 #endif
-
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
@@ -103,12 +110,6 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 			}
 		}
 	}
-
-#ifdef PDO_USE_MYSQLND
-	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
-	}
-#endif /* PDO_USE_MYSQLND */
 
 	efree(S);
 	PDO_DBG_RETURN(1);
@@ -314,10 +315,19 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	S->done = 0;
 
 	if (S->stmt) {
+		uint32_t num_bound_params =
+			stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0;
+		if (num_bound_params < (uint32_t) S->num_params) {
+			/* too few parameter bound */
+			PDO_DBG_ERR("too few parameters bound");
+			strcpy(stmt->error_code, "HY093");
+			PDO_DBG_RETURN(0);
+		}
+
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
 
-	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
+	if (mysql_real_query(H->server, ZSTR_VAL(stmt->active_query_string), ZSTR_LEN(stmt->active_query_string)) != 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	}
@@ -402,13 +412,6 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				PDO_DBG_RETURN(1);
 
 			case PDO_PARAM_EVT_EXEC_PRE:
-				if (zend_hash_num_elements(stmt->bound_params) < (unsigned int) S->num_params) {
-					/* too few parameter bound */
-					PDO_DBG_ERR("too few parameters bound");
-					strcpy(stmt->error_code, "HY093");
-					PDO_DBG_RETURN(0);
-				}
-
 				if (!Z_ISREF(param->parameter)) {
 					parameter = &param->parameter;
 				} else {
@@ -554,12 +557,12 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 
 #ifdef PDO_USE_MYSQLND
-	zend_bool fetched_anything;
+	bool fetched_anything;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_fetch");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (S->stmt) {
-		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || fetched_anything == FALSE) {
+		if (FAIL == mysqlnd_stmt_fetch(S->stmt, &fetched_anything) || !fetched_anything) {
 			pdo_mysql_error_stmt(stmt);
 			PDO_DBG_RETURN(0);
 		}
@@ -567,9 +570,24 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		PDO_DBG_RETURN(1);
 	}
 
-	if (!S->stmt && S->current_data) {
-		mnd_free(S->current_data);
+	zval *row_data;
+	if (mysqlnd_fetch_row_zval(S->result, &row_data, &fetched_anything) == FAIL) {
+		pdo_mysql_error_stmt(stmt);
+		PDO_DBG_RETURN(0);
 	}
+
+	if (!fetched_anything) {
+		PDO_DBG_RETURN(0);
+	}
+
+	if (!S->current_row) {
+		S->current_row = ecalloc(sizeof(zval), stmt->column_count);
+	}
+	for (unsigned i = 0; i < stmt->column_count; i++) {
+		zval_ptr_dtor_nogc(&S->current_row[i]);
+		ZVAL_COPY_VALUE(&S->current_row[i], &row_data[i]);
+	}
+	PDO_DBG_RETURN(1);
 #else
 	int ret;
 
@@ -591,7 +609,6 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 
 		PDO_DBG_RETURN(1);
 	}
-#endif /* PDO_USE_MYSQLND */
 
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
 		if (!S->H->buffered && mysql_errno(S->H->server)) {
@@ -602,6 +619,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 
 	S->current_lengths = mysql_fetch_lengths(S->result);
 	PDO_DBG_RETURN(1);
+#endif /* PDO_USE_MYSQLND */
 }
 /* }}} */
 
@@ -642,21 +660,13 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 
 		cols[i].precision = S->fields[i].decimals;
 		cols[i].maxlen = S->fields[i].length;
-
-#ifdef PDO_USE_MYSQLND
-		if (S->stmt) {
-			cols[i].param_type = PDO_PARAM_ZVAL;
-		} else
-#endif
-		{
-			cols[i].param_type = PDO_PARAM_STR;
-		}
 	}
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees) /* {{{ */
+static int pdo_mysql_stmt_get_col(
+		pdo_stmt_t *stmt, int colno, zval *result, enum pdo_param_type *type) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -666,94 +676,89 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_
 		PDO_DBG_RETURN(0);
 	}
 
-	/* With mysqlnd data is stored inside mysqlnd, not S->current_data */
-	if (!S->stmt) {
-		if (S->current_data == NULL || !S->result) {
-			PDO_DBG_RETURN(0);
-		}
-	}
-
 	if (colno >= stmt->column_count) {
 		/* error invalid column */
 		PDO_DBG_RETURN(0);
 	}
 #ifdef PDO_USE_MYSQLND
 	if (S->stmt) {
-		Z_TRY_ADDREF(S->stmt->data->result_bind[colno].zv);
-		*ptr = (char*)&S->stmt->data->result_bind[colno].zv;
-		*len = sizeof(zval);
-		PDO_DBG_RETURN(1);
+		ZVAL_COPY(result, &S->stmt->data->result_bind[colno].zv);
+	} else {
+		ZVAL_COPY(result, &S->current_row[colno]);
 	}
+	PDO_DBG_RETURN(1);
 #else
 	if (S->stmt) {
 		if (S->out_null[colno]) {
-			*ptr = NULL;
-			*len = 0;
 			PDO_DBG_RETURN(1);
 		}
-		*ptr = S->bound_result[colno].buffer;
-		if (S->out_length[colno] > S->bound_result[colno].buffer_length) {
+
+		size_t length = S->out_length[colno];
+		if (length > S->bound_result[colno].buffer_length) {
 			/* mysql lied about the column width */
 			strcpy(stmt->error_code, "01004"); /* truncated */
-			S->out_length[colno] = S->bound_result[colno].buffer_length;
-			*len = S->out_length[colno];
-			PDO_DBG_RETURN(0);
+			length = S->out_length[colno] = S->bound_result[colno].buffer_length;
 		}
-		*len = S->out_length[colno];
+		ZVAL_STRINGL_FAST(result, S->bound_result[colno].buffer, length);
 		PDO_DBG_RETURN(1);
 	}
-#endif
-	*ptr = S->current_data[colno];
-	*len = S->current_lengths[colno];
+
+	if (S->current_data == NULL) {
+		PDO_DBG_RETURN(0);
+	}
+	if (S->current_data[colno]) {
+		ZVAL_STRINGL_FAST(result, S->current_data[colno], S->current_lengths[colno]);
+	}
 	PDO_DBG_RETURN(1);
+#endif
 } /* }}} */
 
 static char *type_to_name_native(int type) /* {{{ */
 {
 #define PDO_MYSQL_NATIVE_TYPE_NAME(x)	case FIELD_TYPE_##x: return #x;
 
-    switch (type) {
-        PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
-        PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
+	switch (type) {
+		PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
+		PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
 #ifdef FIELD_TYPE_TINY
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
 #endif
 #ifdef FIELD_TYPE_BIT
-        PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
-        PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
-        PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
+		PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONGLONG)
+		PDO_MYSQL_NATIVE_TYPE_NAME(INT24)
+		PDO_MYSQL_NATIVE_TYPE_NAME(FLOAT)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DOUBLE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DECIMAL)
 #ifdef FIELD_TYPE_NEWDECIMAL
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDECIMAL)
 #endif
 #ifdef FIELD_TYPE_GEOMETRY
-        PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
+		PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
 #ifdef FIELD_TYPE_YEAR
-        PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
+		PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(SET)
-        PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(SET)
+		PDO_MYSQL_NATIVE_TYPE_NAME(ENUM)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DATE)
 #ifdef FIELD_TYPE_NEWDATE
-        PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NEWDATE)
 #endif
-        PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
-        PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
-        PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
-        default:
-            return NULL;
-    }
+		PDO_MYSQL_NATIVE_TYPE_NAME(TIME)
+		PDO_MYSQL_NATIVE_TYPE_NAME(DATETIME)
+		PDO_MYSQL_NATIVE_TYPE_NAME(TINY_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(MEDIUM_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(LONG_BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(BLOB)
+		PDO_MYSQL_NATIVE_TYPE_NAME(NULL)
+		default:
+			return NULL;
+	}
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
 } /* }}} */
 
@@ -802,7 +807,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 		add_assoc_string(return_value, "native_type", str);
 	}
 
-#ifdef PDO_USE_MYSQLND
+	enum pdo_param_type param_type;
 	switch (F->type) {
 		case MYSQL_TYPE_BIT:
 		case MYSQL_TYPE_YEAR:
@@ -813,13 +818,13 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 #if SIZEOF_ZEND_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
+			param_type = PDO_PARAM_INT;
 			break;
 		default:
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+			param_type = PDO_PARAM_STR;
 			break;
 	}
-#endif
+	add_assoc_long(return_value, "pdo_type", param_type);
 
 	add_assoc_zval(return_value, "flags", &flags);
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));

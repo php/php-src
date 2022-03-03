@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -50,39 +50,39 @@ grapheme_close_global_iterator( void )
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
 	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
-    *sub_str = NULL;
+	*sub_str = NULL;
 
-    if(str_len > INT32_MAX) {
-    	/* We can not return long strings from ICU functions, so we won't here too */
-    	return;
-    }
+	if(str_len > INT32_MAX) {
+		/* We cannot return long strings from ICU functions, so we won't here too */
+		return;
+	}
 
-    /* if "from" position is negative, count start position from the end
-     * of the string
-     */
-    if (f < 0) {
-        f = str_len2 + f;
-        if (f < 0) {
-            f = 0;
-        }
-    } else if (f > str_len2) {
+	/* if "from" position is negative, count start position from the end
+	 * of the string
+	 */
+	if (f < 0) {
+		f = str_len2 + f;
+		if (f < 0) {
+			f = 0;
+		}
+	} else if (f > str_len2) {
 		f = str_len2;
 	}
 
-    /* if "length" position is negative, set it to the length
-     * needed to stop that many chars from the end of the string
-     */
-    if (l < 0) {
-        l = (str_len2 - f) + l;
-        if (l < 0) {
-            l = 0;
-        }
-    } else if (l > str_len2 - f) {
+	/* if "length" position is negative, set it to the length
+	 * needed to stop that many chars from the end of the string
+	 */
+	if (l < 0) {
+		l = (str_len2 - f) + l;
+		if (l < 0) {
+			l = 0;
+		}
+	} else if (l > str_len2 - f) {
 		l = str_len2 - f;
 	}
 
-    *sub_str = str + f;
-    *sub_str_len = l;
+	*sub_str = str + f;
+	*sub_str_len = l;
 }
 /* }}} */
 
@@ -330,8 +330,7 @@ int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 /* }}} */
 
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
- zend_long
-grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
+zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
 	char *p, *e;
 

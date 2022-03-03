@@ -34,36 +34,57 @@ foreach ($supported_hash_al as $hash=>$wanted) {
     echo "\n";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_MD5
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_SHA1
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL256
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL192
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL224
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_HAVAL160
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_RIPEMD160
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_GOST
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_TIGER
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_CRC32
 ok
 
+
+Deprecated: Function mhash() is deprecated in %s on line %d
 MHASH_CRC32B
 ok

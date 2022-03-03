@@ -1,5 +1,7 @@
 --TEST--
 Bug #79357: SOAP request segfaults when any request parameter is missing
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 

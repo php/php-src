@@ -1,5 +1,7 @@
 --TEST--
 DBA DB3 handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'db3';

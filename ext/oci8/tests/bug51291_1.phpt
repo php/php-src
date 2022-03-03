@@ -1,7 +1,7 @@
 --TEST--
 Bug #51291 (oci_error() doesn't report last error when called two times)
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

@@ -34,6 +34,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 int(2)
+
+Deprecated: Implicit conversion from float 0.0836 to int loses precision in %s on line %d
 int(1)
 
 Warning: Undefined array key "" in %s on line %d

@@ -7,7 +7,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 
 $array = array('foo', 'bar', 'baz');
 $iterator = new ArrayIterator($array);
-$regexIterator = new RegexIterator($iterator, "/f/", null, RegexIterator::USE_KEY);
+$regexIterator = new RegexIterator($iterator, "/f/", RegexIterator::MATCH, RegexIterator::USE_KEY);
 
 var_dump($regexIterator->getFlags() === RegexIterator::USE_KEY);
 

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -30,7 +30,7 @@ PHPAPI void make_sha1_digest(char *sha1str, const unsigned char *digest)
 PHP_FUNCTION(sha1)
 {
 	zend_string *arg;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 
@@ -60,7 +60,7 @@ PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
 	size_t           arg_len;
-	zend_bool raw_output = 0;
+	bool raw_output = 0;
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
@@ -152,7 +152,7 @@ static const unsigned char PADDING[64] =
 /* {{{ PHP_SHA1Init
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
  */
-PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
+PHPAPI void PHP_SHA1InitArgs(PHP_SHA1_CTX * context, ZEND_ATTRIBUTE_UNUSED HashTable *args)
 {
 	context->count[0] = context->count[1] = 0;
 	/* Load magic initialization constants.

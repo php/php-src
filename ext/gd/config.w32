@@ -2,6 +2,7 @@
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("libwebp", "webp support", "yes");
+ARG_WITH("libavif", "avif support", "yes");
 
 if (PHP_GD != "no") {
 	if (
@@ -31,6 +32,18 @@ if (PHP_GD != "no") {
 				WARNING("libwebp not enabled; libraries and headers not found");
 			}
 		}
+		if (PHP_LIBAVIF != "no") {
+			if (CHECK_LIB("avif_a.lib", "gd", PHP_GD) &&
+				CHECK_LIB("aom_a.lib", "gd", PHP_GD) &&
+				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
+			} else if (CHECK_LIB("avif.lib", "gd", PHP_GD) &&
+				CHECK_HEADER_ADD_INCLUDE("avif.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\avif")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBAVIF /D HAVE_GD_AVIF");
+			} else {
+				WARNING("libavif not enabled; libraries and headers not found");
+			}
+		}
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
@@ -40,7 +53,7 @@ if (PHP_GD != "no") {
 			gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
 			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
 			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c gd_xbm.c gd_security.c gd_transform.c \
-			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c \
+			gd_filter.c gd_pixelate.c gd_rotate.c gd_color_match.c gd_webp.c gd_avif.c \
 			gd_crop.c gd_interpolation.c gd_matrix.c gd_bmp.c gd_tga.c", "gd");
 		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 		AC_DEFINE('HAVE_GD_BUNDLED', 1, "Bundled GD");
@@ -56,27 +69,7 @@ if (PHP_GD != "no") {
 		AC_DEFINE('HAVE_GD_FREETYPE', 1, "Freetype support");
 		ADD_FLAG("CFLAGS_GD", " \
 /D PHP_GD_EXPORTS=1 \
-/D HAVE_GD_DYNAMIC_CTX_EX=1 \
-/D HAVE_GD_GD2  \
-/D HAVE_GD_GIF_READ=1  \
-/D HAVE_GD_GIF_CREATE=1  \
-/D HAVE_GDIMAGECOLORRESOLVE=1  \
-/D HAVE_GD_IMAGESETBRUSH=1  \
-/D HAVE_GD_IMAGESETTILE=1 \
-/D HAVE_GD_FONTCACHESHUTDOWN=1 \
-/D HAVE_GD_FONTMUTEX=1 \
-/D HAVE_GD_STRINGFTEX=1  \
-/D HAVE_GD_STRINGTTF=1  \
-/D HAVE_GD_WBMP  \
-/D HAVE_GD_XBM  \
-/D HAVE_LIBGD13=1  \
-/D HAVE_LIBGD15=1  \
-/D HAVE_LIBGD20=1  \
-/D HAVE_LIBGD204=1 \
-/D HAVE_COLORCLOSESTHWB  \
 /D HAVE_GD_GET_INTERPOLATION \
-/D USE_GD_IOCTX \
-/D MSWIN32 \
 		");
 		if (ICC_TOOLSET) {
 			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");

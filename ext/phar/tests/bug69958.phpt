@@ -2,8 +2,8 @@
 Phar: bug #69958: Segfault in Phar::convertToData on invalid file
 --XFAIL--
 Still has memory leaks, see https://bugs.php.net/bug.php?id=70005
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 $tarphar = new PharData(__DIR__.'/bug69958.tar');

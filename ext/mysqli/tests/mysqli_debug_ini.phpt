@@ -1,9 +1,10 @@
 --TEST--
 mysqli_debug() - enabling trace with ini setting
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip mysqli_debug() not available");
@@ -14,7 +15,6 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
 
-require_once('connect.inc');
 if (!$IS_MYSQLND)
     die("skip needs mysqlnd");
 
@@ -28,8 +28,7 @@ else
 mysqlnd.debug="t:O,/tmp/mysqli_debug_phpt.trace"
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'table.inc';
 
     var_dump(ini_get('mysqlnd.debug'));
 
@@ -46,6 +45,10 @@ mysqlnd.debug="t:O,/tmp/mysqli_debug_phpt.trace"
     unlink($trace_file);
 
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 string(32) "t:O,/tmp/mysqli_debug_phpt.trace"

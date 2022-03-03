@@ -1,7 +1,7 @@
 --TEST--
 tidyNode tests
---SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+--EXTENSIONS--
+tidy
 --FILE--
 <?php
 

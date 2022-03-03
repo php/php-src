@@ -170,7 +170,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //          2) appname: Name of the application to use in the X-mailer
 //                      field of the message. if NULL is given the application
 //                      name is used as given by the GetCommandLine() function
-//                      max accespted length of name = 100
+//                      max accepted length of name = 100
 // Output:  1) error:   Returns the error code if something went wrong or
 //                      SUCCESS otherwise.
 //
@@ -235,7 +235,7 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			found = 1;
 
 			/* Real offset is memaddress from the original headers + difference of
-			 * string found in the lowercase headrs + 5 characters to jump over
+			 * string found in the lowercase headers + 5 characters to jump over
 			 * the from: */
 			pos1 = headers + (pos1 - lookup) + 5;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -305,8 +305,8 @@ PHPAPI void TSMClose(void)
 	Post("QUIT\r\n");
 	Ack(NULL);
 	/* to guarantee that the cleanup is not made twice and
-	   compomise the rest of the application if sockets are used
-	   elesewhere
+	   compromise the rest of the application if sockets are used
+	   elsewhere
 	*/
 
 	shutdown(PW32G(mail_socket), 0);
@@ -316,7 +316,7 @@ PHPAPI void TSMClose(void)
 
 /*********************************************************************
 // Name:  char *GetSMErrorText
-// Input:   Error index returned by the menber functions
+// Input:   Error index returned by the member functions
 // Output:  pointer to a string containing the error description
 // Description:
 // Author/Date:  jcar 20/9/96
@@ -336,7 +336,7 @@ PHPAPI char *GetSMErrorText(int index)
 /* strtok_r like, but recognizes quoted-strings */
 static char *find_address(char *list, char **state)
 {
-	zend_bool in_quotes = 0;
+	bool in_quotes = 0;
 	char *p = list;
 
 	if (list == NULL) {
@@ -484,7 +484,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	/* Send mail to all Cc rcpt's */
 	else if (headers && (pos1 = strstr(headers_lc, "cc:")) && ((pos1 == headers_lc) || (*(pos1-1) == '\n'))) {
 		/* Real offset is memaddress from the original headers + difference of
-		 * string found in the lowercase headrs + 3 characters to jump over
+		 * string found in the lowercase headers + 3 characters to jump over
 		 * the cc: */
 		pos1 = headers + (pos1 - headers_lc) + 3;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -549,7 +549,7 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 	else if (headers) {
 		if ((pos1 = strstr(headers_lc, "bcc:")) && (pos1 == headers_lc || *(pos1-1) == '\n')) {
 			/* Real offset is memaddress from the original headers + difference of
-			 * string found in the lowercase headrs + 4 characters to jump over
+			 * string found in the lowercase headers + 4 characters to jump over
 			 * the bcc: */
 			pos1 = headers + (pos1 - headers_lc) + 4;
 			if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -1013,7 +1013,7 @@ static unsigned long GetAddr(LPSTR szHost)
 /* returns the contents of an angle-addr (caller needs to efree) or NULL */
 static char *get_angle_addr(char *address)
 {
-	zend_bool in_quotes = 0;
+	bool in_quotes = 0;
 	char *p1 = address, *p2;
 
 	while ((p1 = strpbrk(p1, "<\"\\")) != NULL) {

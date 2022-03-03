@@ -2,6 +2,7 @@
 date_sunrise() and date_sunset() functions
 --INI--
 precision=13
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 date_default_timezone_set('Asia/Jerusalem');

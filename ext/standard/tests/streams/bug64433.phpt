@@ -9,8 +9,6 @@ if(!$res) {
     die("skip could not open cli server script");
 }
 ?>
---CONFLICTS--
-server
 --FILE--
 <?php
 include __DIR__."/../../../../sapi/cli/tests/php_cli_server.inc";

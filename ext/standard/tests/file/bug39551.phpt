@@ -5,8 +5,8 @@ Bug #39551 (Segfault with stream_bucket_new in user filter)
 
 $bucket = stream_bucket_new(fopen('php://temp', 'w+'), '');
 
-class bucketFilter {
-    public function filter($in, $out, &$consumed, $closing ){
+class bucketFilter extends php_user_filter {
+    public function filter($in, $out, &$consumed, $closing ): int {
 
         $bucket = stream_bucket_new(fopen('php://temp', 'w+'), '');
         stream_bucket_append($out, $bucket);

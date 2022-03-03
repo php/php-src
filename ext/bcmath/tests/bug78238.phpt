@@ -1,9 +1,7 @@
 --TEST--
 Bug #78238 (BCMath returns "-0")
---SKIPIF--
-<?php
-if (!extension_loaded('bcmath')) die("sikp bcmath extension not available");
-?>
+--EXTENSIONS--
+bcmath
 --FILE--
 <?php
 var_dump(bcadd("0", "-0.1"));

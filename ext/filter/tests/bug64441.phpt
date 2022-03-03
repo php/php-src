@@ -1,7 +1,7 @@
 --TEST--
 bug 64441, FILTER_VALIDATE_URL will invalidate a hostname that ended by dot
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var('http://example.com./', FILTER_VALIDATE_URL));

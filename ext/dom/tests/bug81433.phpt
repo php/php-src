@@ -1,9 +1,7 @@
 --TEST--
 Bug #81433 (DOMElement::setIdAttribute(attr, true) called twice removes ID)
---SKIPIF--
-<?php
-require_once('skipif.inc');
-?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $dom = new DOMDocument('1.0', 'utf-8');

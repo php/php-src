@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -662,6 +662,8 @@ int odbc_bindcols(odbc_result *result)
 #else
 				charextraalloc = 1;
 #endif
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			default:
 				rc = PHP_ODBC_SQLCOLATTRIBUTE(result->stmt, (SQLUSMALLINT)(i+1), colfieldid,
 								NULL, 0, NULL, &displaysize);
@@ -1148,7 +1150,7 @@ PHP_FUNCTION(odbc_cursor)
 	SQLUSMALLINT max_len;
 	SQLSMALLINT len;
 	char *cursorname;
-   	odbc_result *result;
+	odbc_result *result;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
@@ -1419,6 +1421,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (result->binmode == 1) {
 					sql_c_type = SQL_C_BINARY;
 				}
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1580,6 +1583,8 @@ PHP_FUNCTION(odbc_fetch_into)
 				}
 				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
 
+				/* TODO: Check this is the intended behaviour */
+				ZEND_FALLTHROUGH;
 			case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 			case SQL_WLONGVARCHAR:
@@ -1675,7 +1680,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	RETCODE rc;
 	zval *pv_res;
 	zend_long pv_row;
-	zend_bool pv_row_is_null = 1;
+	bool pv_row_is_null = 1;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
 	SQLUSMALLINT RowStatus[1];
@@ -1811,6 +1816,9 @@ PHP_FUNCTION(odbc_result)
 			if (result->binmode <= 0) {
 				break;
 			}
+			/* TODO: Check this is the intended behaviour */
+			ZEND_FALLTHROUGH;
+
 		case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 		case SQL_WLONGVARCHAR:
@@ -1994,6 +2002,9 @@ PHP_FUNCTION(odbc_result_all)
 						break;
 					}
 					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY;
+
+					/* TODO: Check this is the intended behaviour */
+					ZEND_FALLTHROUGH;
 				case SQL_LONGVARCHAR:
 #if defined(ODBCVER) && (ODBCVER >= 0x0300)
 				case SQL_WLONGVARCHAR:
@@ -2052,7 +2063,7 @@ PHP_FUNCTION(odbc_result_all)
 					break;
 			}
 		}
-   		php_printf("</tr>\n");
+		php_printf("</tr>\n");
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 		if (result->fetch_abs)
@@ -2575,7 +2586,7 @@ PHP_FUNCTION(odbc_autocommit)
 	odbc_connection *conn;
 	RETCODE rc;
 	zval *pv_conn;
-	zend_bool pv_onoff = 0;
+	bool pv_onoff = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &pv_conn, &pv_onoff) == FAILURE) {
 		RETURN_THROWS();

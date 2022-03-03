@@ -1,8 +1,9 @@
 --TEST--
 ZipArchive::setEncryption*() functions
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
-if (!extension_loaded('zip')) die('skip');
 if (!method_exists('ZipArchive', 'setEncryptionName')) die('skip encryption not supported');
 ?>
 --FILE--

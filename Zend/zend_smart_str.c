@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -112,6 +112,17 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char 
 	}
 }
 
+ZEND_API void ZEND_FASTCALL smart_str_append_double(
+		smart_str *str, double num, int precision, bool zero_fraction) {
+	char buf[ZEND_DOUBLE_MAX_LENGTH];
+	/* Model snprintf precision behavior. */
+	zend_gcvt(num, precision ? precision : 1, '.', 'E', buf);
+	smart_str_appends(str, buf);
+	if (zero_fraction && zend_finite(num) && !strchr(buf, '.')) {
+		smart_str_appendl(str, ".0", 2);
+	}
+}
+
 ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...) {
 	va_list arg;
 	va_start(arg, format);
@@ -167,5 +178,46 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
 		str->c = erealloc2(str->c, str->a + 1, str->len);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, zend_string *value, size_t length)
+{
+	smart_str_append_escaped(str, ZSTR_VAL(value), MIN(length, ZSTR_LEN(value)));
+
+	if (ZSTR_LEN(value) > length) {
+		smart_str_appendl(str, "...", sizeof("...")-1);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value, size_t truncate) {
+	ZEND_ASSERT(Z_TYPE_P(value) <= IS_STRING);
+
+	switch (Z_TYPE_P(value)) {
+		case IS_UNDEF:
+		case IS_NULL:
+			smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
+		break;
+
+		case IS_TRUE:
+		case IS_FALSE:
+			smart_str_appends(dest, Z_TYPE_P(value) == IS_TRUE ? "true" : "false");
+		break;
+
+		case IS_DOUBLE:
+			smart_str_append_double(dest, Z_DVAL_P(value), (int) EG(precision), true);
+		break;
+
+		case IS_LONG:
+			smart_str_append_long(dest, Z_LVAL_P(value));
+		break;
+
+		case IS_STRING:
+			smart_str_appendc(dest, '\'');
+			smart_str_append_escaped_truncated(dest, Z_STR_P(value), truncate);
+			smart_str_appendc(dest, '\'');
+		break;
+
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }

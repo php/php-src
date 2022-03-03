@@ -1,7 +1,7 @@
 --TEST--
 mb_output_handler() and mbstring.http_output_conv_mimetypes (9)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 mbstring.http_output_conv_mimetypes=html
 --FILE--

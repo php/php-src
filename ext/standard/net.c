@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -83,7 +83,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 #ifdef AF_INET6
 		case AF_INET6:
 			addrlen = sizeof(struct sockaddr_in6);
-			/* fallthrough */
+			ZEND_FALLTHROUGH;
 #endif
 		case AF_INET: {
 			zend_string *ret = zend_string_alloc(NI_MAXHOST, 0);
@@ -190,7 +190,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	for (p = pAddresses; p; p = p->Next) {
 		zval iface, unicast;
 
-		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
+		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_IEEE80211 != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
 			continue;
 		}
 

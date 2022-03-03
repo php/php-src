@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -208,7 +208,7 @@ const php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *mode STREAMS_DC)
+php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
 
@@ -220,7 +220,7 @@ php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *
 	}
 
 	if (arch) {
-		zf = zip_fopen(arch, path, 0);
+		zf = zip_fopen_index(arch, sb->index, flags);
 		if (zf) {
 			self = emalloc(sizeof(*self));
 
@@ -229,7 +229,7 @@ php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
-			stream->orig_path = estrdup(path);
+			stream->orig_path = estrdup(sb->name);
 		}
 	}
 

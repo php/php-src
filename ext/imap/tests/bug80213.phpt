@@ -1,9 +1,7 @@
 --TEST--
 Bug #80213 (imap_mail_compose() segfaults on certain $bodies)
---SKIPIF--
-<?php
-if (!extension_loaded('imap')) die('skip imap extension not available');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $envelope = [];

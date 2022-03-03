@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -52,14 +52,14 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 		size_t needle_len, const char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, const char *what, size_t what_len, int mode);
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len);
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, bool allow_tag_spaces);
 PHPAPI void php_implode(const zend_string *delim, HashTable *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 

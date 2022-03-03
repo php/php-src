@@ -1,9 +1,7 @@
 --TEST--
 Testing several callbacks using PDO::FETCH_FUNC
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 
@@ -128,6 +126,8 @@ function "" not found or invalid function name
 PDOStatement::fetchAll(): Argument #2 must be a callable, null given
 no array or string given
 cannot access "self" when no class scope is active
+
+Deprecated: Callables of the form ["bar", "parent::method"] are deprecated in %s on line %d
 array(2) {
   [0]=>
   string(9) "--- 1 ---"

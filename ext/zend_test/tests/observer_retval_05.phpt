@@ -1,7 +1,7 @@
 --TEST--
 Observer: Retvals are observable that are: IS_CV, IS_UNDEF
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1

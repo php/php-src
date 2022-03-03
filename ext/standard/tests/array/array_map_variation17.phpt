@@ -76,62 +76,62 @@ echo "Done";
 *** Testing array_map() : unexpected values for 'callback' argument ***
 
 -- Iteration 1 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 2 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 3 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 4 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 5 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 6 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 7 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 8 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 9 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 10 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 11 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 12 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 13 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 14 --
-array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
 
 -- Iteration 15 --
-array_map(): Argument #1 ($callback) must be a valid callback, function "" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "" not found or invalid function name
 
 -- Iteration 16 --
-array_map(): Argument #1 ($callback) must be a valid callback, array must have exactly two members
+array_map(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 
 -- Iteration 17 --
-array_map(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
+array_map(): Argument #1 ($callback) must be a valid callback or null, first array member is not a valid class name or object
 
 -- Iteration 18 --
-array_map(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
+array_map(): Argument #1 ($callback) must be a valid callback or null, first array member is not a valid class name or object
 
 -- Iteration 19 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 
 -- Iteration 20 --
-array_map(): Argument #1 ($callback) must be a valid callback, no array or string given
+array_map(): Argument #1 ($callback) must be a valid callback or null, no array or string given
 Done

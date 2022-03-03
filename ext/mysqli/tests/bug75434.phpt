@@ -1,10 +1,7 @@
 --TEST--
 Bug #75434 Wrong reflection for mysqli_fetch_all function
---SKIPIF--
-<?php
-require_once('skipif.inc');
-if (!stristr(mysqli_get_client_info(), 'mysqlnd')) die("skip: only available in mysqlnd");
-?>
+--EXTENSIONS--
+mysqli
 --FILE--
 <?php
 $rf = new ReflectionFunction('mysqli_fetch_all');

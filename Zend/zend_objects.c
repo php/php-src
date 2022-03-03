@@ -97,6 +97,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 	if (destructor) {
 		zend_object *old_exception;
+		const zend_op *old_opline_before_exception;
 
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -155,7 +156,13 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			if (EG(exception) == object) {
 				zend_error_noreturn(E_CORE_ERROR, "Attempt to destruct pending exception");
 			} else {
+				if (EG(current_execute_data)
+				 && EG(current_execute_data)->func
+				 && ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+					zend_rethrow_exception(EG(current_execute_data));
+				}
 				old_exception = EG(exception);
+				old_opline_before_exception = EG(opline_before_exception);
 				EG(exception) = NULL;
 			}
 		}
@@ -163,6 +170,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 		zend_call_known_instance_method_with_0_params(destructor, object, NULL);
 
 		if (old_exception) {
+			EG(opline_before_exception) = old_opline_before_exception;
 			if (EG(exception)) {
 				zend_exception_set_previous(EG(exception), old_exception);
 			} else {
@@ -230,7 +238,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		HT_FLAGS(new_object->properties) |=
 			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
 
-		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
+		ZEND_HASH_MAP_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
 				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
 			} else {

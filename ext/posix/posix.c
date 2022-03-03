@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -138,6 +138,12 @@ static PHP_MINIT_FUNCTION(posix)
 #ifdef RLIMIT_STACK
 	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_STACK", RLIMIT_STACK, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef RLIMIT_KQUEUES
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_KQUEUES", RLIMIT_KQUEUES, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef RLIMIT_NPTS
+	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_NPTS", RLIMIT_NPTS, CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef HAVE_SETRLIMIT
 	REGISTER_LONG_CONSTANT("POSIX_RLIMIT_INFINITY", RLIM_INFINITY, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -200,7 +206,7 @@ PHP_FUNCTION(posix_kill)
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
-  	}
+	}
 
 	RETURN_TRUE;
 }
@@ -1104,6 +1110,14 @@ static const struct limitlist {
 
 #ifdef RLIMIT_OFILE
 	{ RLIMIT_OFILE, "openfiles" },
+#endif
+
+#ifdef RLIMIT_KQUEUES
+	{ RLIMIT_KQUEUES, "kqueues" },
+#endif
+
+#ifdef RLIMIT_NPTS
+	{ RLIMIT_NPTS, "npts" },
 #endif
 
 	{ 0, NULL }

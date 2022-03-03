@@ -11,7 +11,7 @@ object(SplTempFileObject)#1 (5) {
   ["fileName":"SplFileInfo":private]=>
   string(25) "php://temp/maxmemory:1024"
   ["openMode":"SplFileObject":private]=>
-  string(1) "w"
+  string(2) "wb"
   ["delimiter":"SplFileObject":private]=>
   string(1) ","
   ["enclosure":"SplFileObject":private]=>

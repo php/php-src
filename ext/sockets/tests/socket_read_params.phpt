@@ -3,12 +3,8 @@ ext/sockets - socket_read- test with incorrect parameter
 --CREDITS--
 Florian Anderiasch
 fa@php.net
---SKIPIF--
-<?php
-    if (!extension_loaded('sockets')) {
-        die('skip sockets extension not available.');
-    }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
     $s_c_l = socket_create_listen(0);

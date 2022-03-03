@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -18,7 +18,9 @@
 #include "config.h"
 #endif
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 
 #include "php.h"
 #include "zend_exceptions.h"
@@ -29,7 +31,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*, isc_stmt_handle*,
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
 
 const char CHR_LETTER = 1;
@@ -171,10 +173,11 @@ static const char classes_array[] = {
 	/* 127     */ 0
 };
 
-inline char classes(char idx)
+static inline char classes(char idx)
 {
-	if (idx > 127) return 0;
-	return classes_array[idx];
+	unsigned char uidx = (unsigned char) idx;
+	if (uidx > 127) return 0;
+	return classes_array[uidx];
 }
 
 typedef enum {
@@ -290,13 +293,13 @@ static FbTokenType getToken(const char** begin, const char* end)
 	return ret;
 }
 
-int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_params)
+int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 {
-	zend_bool passAsIs = 1, execBlock = 0;
+	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
 	char pname[254], ident[253], ident2[253];
 	unsigned int l;
-	const char* p = sql, * end = sql + sql_len;
+	const char* p = ZSTR_VAL(sql), * end = ZSTR_VAL(sql) + ZSTR_LEN(sql);
 	const char* start = p;
 	FbTokenType tok = getToken(&p, end);
 
@@ -362,7 +365,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 
 	if (passAsIs)
 	{
-		strcpy(sql_out, sql);
+		strcpy(sql_out, ZSTR_VAL(sql));
 		return 1;
 	}
 
@@ -388,7 +391,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 				}
 				strncpy(pname, start, l);
 				pname[l] = '\0';
-				
+
 				if (named_params) {
 					zval tmp;
 					ZVAL_LONG(&tmp, pindex);
@@ -428,6 +431,8 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 					return 1;
 				}
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case ttWhite:
 		case ttComment:
@@ -466,7 +471,7 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_lo
 #define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
 
 /* called by PDO to close a db handle */
-static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
+static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -497,13 +502,11 @@ static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	pefree(H, dbh->is_persistent);
-
-	return 0;
 }
 /* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -523,7 +526,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 		zend_hash_init(np, 8, NULL, NULL, 0);
 
 		/* allocate and prepare statement */
-		if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &num_sqlda, &s, np)) {
+		if (!firebird_alloc_prepare_stmt(dbh, sql, &num_sqlda, &s, np)) {
 			break;
 		}
 
@@ -531,7 +534,6 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 		S = ecalloc(1, sizeof(*S)-sizeof(XSQLDA) + XSQLDA_LENGTH(num_sqlda.sqld));
 		S->H = H;
 		S->stmt = s;
-		S->fetch_buf = ecalloc(1,sizeof(char*) * num_sqlda.sqld);
 		S->out_sqlda.version = PDO_FB_SQLDA_VERSION;
 		S->out_sqlda.sqln = stmt->column_count = num_sqlda.sqld;
 		S->named_params = np;
@@ -568,7 +570,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 		stmt->methods = &firebird_stmt_methods;
 		stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
-		return 1;
+		return true;
 
 	} while (0);
 
@@ -584,12 +586,12 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_
 		efree(S);
 	}
 
-	return 0;
+	return false;
 }
 /* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
+static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = PDO_FIREBIRD_HANDLE_INITIALIZER;
@@ -604,7 +606,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 	out_sqlda.sqln = 1;
 
 	/* allocate and prepare statement */
-	if (!firebird_alloc_prepare_stmt(dbh, sql, sql_len, &out_sqlda, &stmt, 0)) {
+	if (!firebird_alloc_prepare_stmt(dbh, sql, &out_sqlda, &stmt, 0)) {
 		return -1;
 	}
 
@@ -660,30 +662,29 @@ free_statement:
 /* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
-	char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
+static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	int qcount = 0;
 	char const *co, *l, *r;
 	char *c;
+	size_t quotedlen;
+	zend_string *quoted_str;
 
-	if (!unquotedlen) {
-		*quotedlen = 2;
-		*quoted = emalloc(*quotedlen+1);
-		strcpy(*quoted, "''");
-		return 1;
+	if (ZSTR_LEN(unquoted) == 0) {
+		return zend_string_init("''", 2, 0);
 	}
 
 	/* Firebird only requires single quotes to be doubled if string lengths are used */
 	/* count the number of ' characters */
-	for (co = unquoted; (co = strchr(co,'\'')); qcount++, co++);
+	for (co = ZSTR_VAL(unquoted); (co = strchr(co,'\'')); qcount++, co++);
 
-	*quotedlen = unquotedlen + qcount + 2;
-	*quoted = c = emalloc(*quotedlen+1);
+	quotedlen = ZSTR_LEN(unquoted) + qcount + 2;
+	quoted_str = zend_string_alloc(quotedlen, 0);
+	c = ZSTR_VAL(quoted_str);
 	*c++ = '\'';
 
 	/* foreach (chunk that ends in a quote) */
-	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
+	for (l = ZSTR_VAL(unquoted); (r = strchr(l,'\'')); l = r+1) {
 		strncpy(c, l, r-l+1);
 		c += (r-l+1);
 		/* add the second quote */
@@ -691,16 +692,16 @@ static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t u
 	}
 
 	/* copy the remainder */
-	strncpy(c, l, *quotedlen-(c-*quoted)-1);
-	(*quoted)[*quotedlen-1] = '\'';
-	(*quoted)[*quotedlen]   = '\0';
+	strncpy(c, l, quotedlen-(c-ZSTR_VAL(quoted_str))-1);
+	ZSTR_VAL(quoted_str)[quotedlen-1] = '\'';
+	ZSTR_VAL(quoted_str)[quotedlen]   = '\0';
 
-	return 1;
+	return quoted_str;
 }
 /* }}} */
 
 /* called by PDO to start a transaction */
-static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
@@ -746,47 +747,47 @@ static int firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 #endif
 	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* called by PDO to commit a transaction */
-static int firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_commit_transaction(H->isc_status, &H->tr)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* called by PDO to rollback a transaction */
-static int firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
 		RECORD_ERROR(dbh);
-		return 0;
+		return false;
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
 
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > 65536) {
+	if (ZSTR_LEN(sql) > 65536) {
 		strcpy(dbh->error_code, "01004");
 		return 0;
 	}
@@ -798,7 +799,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 		if (!firebird_handle_begin(dbh)) {
 			return 0;
 		}
-		dbh->in_txn = 1;
+		dbh->in_txn = true;
 	}
 
 	/* allocate the statement */
@@ -809,11 +810,11 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 
 	/* in order to support named params, which Firebird itself doesn't,
 	   we need to replace :foo by ?, and store the name we just replaced */
-	new_sql = emalloc(sql_len+1);
+	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
-	if (!preprocess(sql, sql_len, new_sql, named_params)) {
+	if (!preprocess(sql, new_sql, named_params)) {
 		strcpy(dbh->error_code, "07000");
-		efree(new_sql);			
+		efree(new_sql);
 		return 0;
 	}
 
@@ -827,17 +828,19 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 	efree(new_sql);
 	return 1;
 }
-/* }}} */
 
 /* called by PDO to set a driver-specific dbh attribute */
-static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	bool bval;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			{
-				zend_bool bval = zval_get_long(val)? 1 : 0;
+				if (!pdo_get_bool_param(&bval, val)) {
+					return false;
+				}
 
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
@@ -846,29 +849,32 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 							/* turning on auto_commit with an open transaction is illegal, because
 							   we won't know what to do with it */
 							H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
-							return 0;
+							return false;
 						} else {
 							/* close the transaction */
 							if (!firebird_handle_commit(dbh)) {
 								break;
 							}
-							dbh->in_txn = 0;
+							dbh->in_txn = false;
 						}
 					}
 					dbh->auto_commit = bval;
 				}
 			}
-			return 1;
+			return true;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
-			H->fetch_table_names = zval_get_long(val)? 1 : 0;
-			return 1;
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->fetch_table_names = bval;
+			return true;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->date_format) {
 					efree(H->date_format);
@@ -876,13 +882,13 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->time_format) {
 					efree(H->time_format);
@@ -890,13 +896,13 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			{
 				zend_string *str = zval_try_get_string(val);
 				if (UNEXPECTED(!str)) {
-					return 0;
+					return false;
 				}
 				if (H->timestamp_format) {
 					efree(H->timestamp_format);
@@ -904,9 +910,9 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
 			}
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -971,6 +977,8 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
@@ -981,7 +989,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 /* }}} */
 
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
-static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
+static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	const ISC_STATUS *s = H->isc_status;
@@ -1000,7 +1008,6 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 		add_next_index_long(info, -999);
 		add_next_index_string(info, const_cast(H->last_app_error));
 	}
-	return 1;
 }
 /* }}} */
 
@@ -1016,7 +1023,11 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	firebird_handle_get_attribute,
-	NULL /* check_liveness */
+	NULL, /* check_liveness */
+	NULL, /* get driver methods */
+	NULL, /* request shutdown */
+	NULL, /* in transaction, use PDO's internal tracking mechanism */
+	NULL /* get gc */
 };
 /* }}} */
 
@@ -1092,7 +1103,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		char errmsg[512];
 		const ISC_STATUS *s = H->isc_status;
 		fb_interpret(errmsg, sizeof(errmsg),&s);
-		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
 

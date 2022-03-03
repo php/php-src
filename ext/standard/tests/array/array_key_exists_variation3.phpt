@@ -28,23 +28,29 @@ foreach($keys as $key) {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_key_exists() : usage variations ***
 
 -- Iteration 1 --
 Pass float as $key:
+
+Deprecated: Implicit conversion from float 1.23456789E-10 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
+
+Deprecated: Implicit conversion from float 1.00000000000001 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
+
+Deprecated: Implicit conversion from float 1.99999999999999 to int loses precision in %s on line %d
 bool(true)
 Cast float to int:
 bool(true)

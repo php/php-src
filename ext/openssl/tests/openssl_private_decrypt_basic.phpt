@@ -1,7 +1,7 @@
 --TEST--
 openssl_private_decrypt() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $data = "Testing openssl_public_decrypt()";

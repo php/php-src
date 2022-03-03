@@ -11,27 +11,25 @@ q
 [Successful compilation of %s]
 prompt> [Breakpoint #0 added at %s:4]
 prompt> [Breakpoint #0 at %s:4, hits: 1]
->00004: 	echo 0;
+>00004: 	echo 0 . PHP_EOL;
  00005: }
  00006: 
 prompt> 0
-[L5 %s RETURN<-1>              null                                                           %s]
 >00005: }
  00006: 
  00007: foo();
-prompt> [L8 %s ECHO                    1                                                              %s]
->00008: echo 1;
+prompt> >00008: echo 1 . PHP_EOL;
  00009: 
 prompt> 1
-[L9 %s RETURN<-1>              1                                                              %s]
 >00009: 
-prompt> 
+prompt>
+
 --FILE--
 <?php
 
 function foo() {
-	echo 0;
+	echo 0 . PHP_EOL;
 }
 
 foo();
-echo 1;
+echo 1 . PHP_EOL;

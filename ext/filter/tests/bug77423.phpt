@@ -1,5 +1,7 @@
 --TEST--
 Bug #77423 (parse_url() will deliver a wrong host to user)
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $urls = array(

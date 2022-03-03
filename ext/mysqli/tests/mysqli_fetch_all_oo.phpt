@@ -1,12 +1,10 @@
 --TEST--
 $mysqli->fetch_all() (introduced with mysqlnd)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-
-if (!function_exists('mysqli_fetch_all'))
-    die("skip: function only available with mysqlnd");
 ?>
 --FILE--
 <?php
@@ -309,7 +307,7 @@ if (!function_exists('mysqli_fetch_all'))
 <?php
     require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(2) {
   [0]=>
@@ -435,6 +433,6 @@ array(1) {
     string(1) "1"
   }
 }
-mysqli_result::fetch_all(): Argument #1 ($mode) must be one of MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH
+mysqli_result::fetch_all(): Argument #1 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!

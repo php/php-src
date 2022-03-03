@@ -1,6 +1,6 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
 /** @param resource $statement */
 function oci_define_by_name($statement, string $column, mixed &$var, int $type = 0): bool {}
@@ -326,11 +326,16 @@ function oci_pconnect(string $username, string $password, ?string $connection_st
  */
 function ociplogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
-/** @param resource|null $connection_or_statement */
+/**
+ * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function oci_error($connection_or_statement = null): array|false {}
 
 /**
  * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
  * @alias oci_error
  * @deprecated
  */
@@ -375,6 +380,9 @@ function oci_set_prefetch($statement, int $rows): bool {}
  * @deprecated
  */
 function ocisetprefetch($statement, int $rows): bool {}
+
+/** @param resource $statement */
+function oci_set_prefetch_lob($statement, int $prefetch_lob_size): bool {}
 
 /** @param resource $connection */
 function oci_set_client_identifier($connection, string $client_id): bool {}
@@ -545,177 +553,177 @@ function oci_unregister_taf_callback($connection): bool {}
 class OCILob {
     /**
      * @alias oci_lob_save
-     * @return bool
+     * @tentative-return-type
      */
-    public function save(string $data, int $offset = 0) {}
+    public function save(string $data, int $offset = 0): bool {}
 
     /**
      * @alias oci_lob_import
-     * @return bool
+     * @tentative-return-type
      */
-    public function import(string $filename) {}
+    public function import(string $filename): bool {}
 
     /**
      * @alias oci_lob_import
-     * @return bool
+     * @tentative-return-type
      */
-    public function saveFile(string $filename) {}
+    public function saveFile(string $filename): bool {}
 
     /**
      * @alias oci_lob_load
-     * @return string|false
+     * @tentative-return-type
      */
-    public function load() {}
+    public function load(): string|false {}
 
     /**
      * @alias oci_lob_read
-     * @return string|false
+     * @tentative-return-type
      */
-    public function read(int $length) {}
+    public function read(int $length): string|false {}
 
     /**
      * @alias oci_lob_eof
-     * @return bool
+     * @tentative-return-type
      */
-    public function eof() {}
+    public function eof(): bool {}
 
     /**
      * @alias oci_lob_tell
-     * @return int|false
+     * @tentative-return-type
      */
-    public function tell() {}
+    public function tell(): int|false {}
 
     /**
      * @alias oci_lob_rewind
-     * @return bool
+     * @tentative-return-type
      */
-    public function rewind() {}
+    public function rewind(): bool {}
 
     /**
      * @alias oci_lob_seek
-     * @return bool
+     * @tentative-return-type
      */
-    public function seek(int $offset, int $whence = OCI_SEEK_SET) {}
+    public function seek(int $offset, int $whence = OCI_SEEK_SET): bool {}
 
     /**
      * @alias oci_lob_size
-     * @return int|false
+     * @tentative-return-type
      */
-    public function size() {}
+    public function size(): int|false {}
 
     /**
      * @alias oci_lob_write
-     * @return int|false
+     * @tentative-return-type
      */
-    public function write(string $data, ?int $length = null) {}
+    public function write(string $data, ?int $length = null): int|false {}
 
     /**
      * @alias oci_lob_append
-     * @return bool
+     * @tentative-return-type
      */
-    public function append(OCILob $from) {}
+    public function append(OCILob $from): bool {}
 
     /**
      * @alias oci_lob_truncate
-     * @return bool
+     * @tentative-return-type
      */
-    public function truncate(int $length = 0) {}
+    public function truncate(int $length = 0): bool {}
 
     /**
      * @alias oci_lob_erase
-     * @return int|false
+     * @tentative-return-type
      */
-    public function erase(?int $offset = null, ?int $length = null) {}
+    public function erase(?int $offset = null, ?int $length = null): int|false {}
 
     /**
      * @alias oci_lob_flush
-     * @return bool
+     * @tentative-return-type
      */
     public function flush(int $flag = 0): bool {}
 
     /**
      * @alias ocisetbufferinglob
-     * @return bool
+     * @tentative-return-type
      */
-    public function setBuffering(bool $mode) {}
+    public function setBuffering(bool $mode): bool {}
 
     /**
      * @alias ocigetbufferinglob
-     * @return bool
+     * @tentative-return-type
      */
-    public function getBuffering() {}
+    public function getBuffering(): bool {}
 
     /**
      * @alias oci_lob_export
-     * @return bool
+     * @tentative-return-type
      */
-    public function writeToFile(string $filename, ?int $offset = null, ?int $length = null) {}
+    public function writeToFile(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
     /**
      * @alias oci_lob_export
-     * @return bool
+     * @tentative-return-type
      */
-    public function export(string $filename, ?int $offset = null, ?int $length = null) {}
+    public function export(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
-    /** @return bool */
-    public function writeTemporary(string $data, int $type = OCI_TEMP_CLOB) {}
+    /** @tentative-return-type */
+    public function writeTemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
 
-    /** @return bool */
-    public function close() {}
+    /** @tentative-return-type */
+    public function close(): bool {}
 
     /**
      * @alias oci_free_descriptor
-     * @return bool
+     * @tentative-return-type
      */
-    public function free() {}
+    public function free(): bool {}
 }
 
 class OCICollection {
     /**
      * @alias oci_free_collection
-     * @return bool
+     * @tentative-return-type
      */
-    public function free() {}
+    public function free(): bool {}
 
     /**
      * @alias oci_collection_append
-     * @return bool
+     * @tentative-return-type
      */
-    public function append(string $value) {}
+    public function append(string $value): bool {}
 
     /**
      * @alias oci_collection_element_get
-     * @return string|float|null|false
+     * @tentative-return-type
      */
-    public function getElem(int $index) {}
+    public function getElem(int $index): string|float|null|false {}
 
     /**
      * @alias oci_collection_assign
-     * @return bool
+     * @tentative-return-type
      */
-    public function assign(OCICollection $from) {}
+    public function assign(OCICollection $from): bool {}
 
     /**
      * @alias oci_collection_element_assign
-     * @return bool
+     * @tentative-return-type
      */
-    public function assignElem(int $index, string $value) {}
+    public function assignElem(int $index, string $value): bool {}
 
     /**
      * @alias oci_collection_size
-     * @return int|false
+     * @tentative-return-type
      */
-    public function size() {}
+    public function size(): int|false {}
 
     /**
      * @alias oci_collection_max
-     * @return int|false
+     * @tentative-return-type
      */
-    public function max() {}
+    public function max(): int|false {}
 
     /**
      * @alias oci_collection_trim
-     * @return bool
+     * @tentative-return-type
      */
-    public function trim(int $num) {}
+    public function trim(int $num): bool {}
 }

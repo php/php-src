@@ -14,6 +14,7 @@ $it2 = new CallbackFilterIterator($it, function($elem) use(&$it2) {
 
 // Callback object
 new class {
+    private $it;
     public function __construct() {
         $it = new ArrayIterator([1, 2, 3]);
         $this->it = new CallbackFilterIterator($it, function($elem) {
@@ -31,13 +32,13 @@ $it2 = new RecursiveCallbackFilterIterator($it, function($elem) use(&$it2) {
 // Cache
 $it = new ArrayIterator();
 $it2 = new CachingIterator($it, CachingIterator::FULL_CACHE);
-$it2[] = $it2;
+$it2['x'] = $it2;
 $it2->next();
 
 // Recursive cache
 $it = new RecursiveArrayIterator();
 $it2 = new RecursiveCachingIterator($it, CachingIterator::FULL_CACHE);
-$it2[] = $it2;
+$it2['x'] = $it2;
 $it2->next();
 
 // Append
@@ -45,6 +46,17 @@ $it = new ArrayIterator();
 $it2 = new AppendIterator();
 $it[] = $it2;
 $it2->append($it);
+
+// Recursive iterator
+$it = new RecursiveArrayIterator([1, 2, 3]);
+$it2 = new RecursiveIteratorIterator($it);
+$it[] = $it2;
+
+// Recursive iterator at level>0.
+$it = new RecursiveArrayIterator([[1]]);
+$it2 = new RecursiveIteratorIterator($it);
+$it[] = $it2;
+$it2->next();
 
 ?>
 ===DONE===

@@ -1,8 +1,9 @@
 --TEST--
 Bug #80268 (loadHTML() truncates at NUL bytes)
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
 ?>
 --FILE--

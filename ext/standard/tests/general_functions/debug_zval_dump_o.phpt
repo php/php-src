@@ -2,6 +2,8 @@
 Test debug_zval_dump() function : working on objects
 --SKIPIF--
 <?php if (PHP_ZTS) { print "skip only for no-zts build"; }
+--INI--
+opcache.enable=0
 --FILE--
 <?php
 function zval_dump( $values ) {
@@ -15,6 +17,7 @@ function zval_dump( $values ) {
 
 /* checking on objects type */
 echo "*** Testing debug_zval_dump() on objects ***\n";
+#[AllowDynamicProperties]
 class object_class {
   var $value1 = 1;
   private $value2 = 10;
@@ -43,6 +46,7 @@ class no_member_class{
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;
@@ -343,26 +347,30 @@ object(object_class)#%d (7) refcount(%d){
   ["object_class1"]=>
   *RECURSION*
   ["obj"]=>
-  &object(object_class)#%d (7) refcount(%d){
-    ["value1"]=>
-    int(5)
-    ["value2":"object_class":private]=>
-    int(10)
-    ["value3":protected]=>
-    int(20)
-    ["value4"]=>
-    int(30)
-    ["array_var"]=>
-    array(2) refcount(%d){
-      ["key1"]=>
-      int(1)
-      ["key2 "]=>
-      int(3)
+  reference refcount(2) {
+    object(object_class)#8 (7) refcount(2){
+      ["value1"]=>
+      int(5)
+      ["value2":"object_class":private]=>
+      int(10)
+      ["value3":protected]=>
+      int(20)
+      ["value4"]=>
+      int(30)
+      ["array_var"]=>
+      array(2) refcount(7){
+        ["key1"]=>
+        int(1)
+        ["key2 "]=>
+        int(3)
+      }
+      ["object_class1"]=>
+      *RECURSION*
+      ["obj"]=>
+      reference refcount(2) {
+        *RECURSION*
+      }
     }
-    ["object_class1"]=>
-    *RECURSION*
-    ["obj"]=>
-    *RECURSION*
   }
 }
 Done

@@ -1,47 +1,49 @@
 <?php
 
-/** @generate-function-entries */
+/** @generate-class-entries */
 
+/** @not-serializable */
 class ResourceBundle implements IteratorAggregate, Countable
 {
     public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
 
     /**
-     * @return ResourceBundle|null
+     * @tentative-return-type
      * @alias resourcebundle_create
      */
-    public static function create(?string $locale, ?string $bundle, bool $fallback = true) {}
+    public static function create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
     /**
      * @param string|int $index
-     * @return mixed
+     * @tentative-return-type
      * @alias resourcebundle_get
      */
-    public function get($index, bool $fallback = true) {}
+    public function get($index, bool $fallback = true): mixed {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias resourcebundle_count
      */
-    public function count() {}
+    public function count(): int {}
 
     /**
-     * @return array|false
+     * @return array<int, string>|false
+     * @tentative-return-type
      * @alias resourcebundle_locales
      */
-    public static function getLocales(string $bundle) {}
+    public static function getLocales(string $bundle): array|false {}
 
     /**
-     * @return int
+     * @tentative-return-type
      * @alias resourcebundle_get_error_code
      */
-    public function getErrorCode() {}
+    public function getErrorCode(): int {}
 
     /**
-     * @return string
+     * @tentative-return-type
      * @alias resourcebundle_get_error_message
      */
-    public function getErrorMessage() {}
+    public function getErrorMessage(): string {}
 
     public function getIterator(): Iterator {}
 }

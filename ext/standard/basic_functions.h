@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -49,7 +49,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap);
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, const char *message, const char *opt, const char *headers);
 PHPAPI int _php_error_log_ex(int opt_err, const char *message, size_t message_len, const char *opt, const char *headers);
-PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore);
+PHPAPI int php_prefix_varname(zval *result, zend_string *prefix, const char *var_name, size_t var_name_len, bool add_underscore);
 
 #define MT_N (624)
 
@@ -62,12 +62,10 @@ typedef struct _php_basic_globals {
 	HashTable putenv_ht;
 	zend_string *strtok_string;
 	zend_string *ctype_string; /* current LC_CTYPE locale (or NULL for 'C') */
-	zend_bool locale_changed;   /* locale was changed and has to be restored */
+	bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;
 	char strtok_table[256];
 	size_t strtok_len;
-	zend_fcall_info array_walk_fci;
-	zend_fcall_info_cache array_walk_fci_cache;
 	zend_fcall_info user_compare_fci;
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;
@@ -81,7 +79,7 @@ typedef struct _php_basic_globals {
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
-	char *CurrentStatFile, *CurrentLStatFile;
+	zend_string *CurrentStatFile, *CurrentLStatFile;
 	php_stream_statbuf ssb, lssb;
 
 	/* mt_rand.c */
@@ -89,7 +87,7 @@ typedef struct _php_basic_globals {
 	uint32_t *next;       /* next random value is computed from here */
 	int      left;        /* can *next++ this many times before reloading */
 
-	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
+	bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
 	zend_long mt_rand_mode;
 
 	/* syslog.c */
@@ -130,27 +128,19 @@ PHPAPI extern int basic_globals_id;
 PHPAPI extern php_basic_globals basic_globals;
 #endif
 
-#if HAVE_PUTENV
-typedef struct {
-	char *putenv_string;
-	char *previous_value;
-	char *key;
-	size_t key_len;
-} putenv_entry;
-#endif
+PHPAPI zend_string *php_getenv(const char *str, size_t str_len);
 
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zval function_name;
-	zval *arguments;
-	int arg_count;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache;
 } php_shutdown_function_entry;
 
-PHPAPI extern zend_bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);
-PHPAPI extern zend_bool remove_user_shutdown_function(const char *function_name, size_t function_len);
-PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_function_entry);
+PHPAPI extern bool register_user_shutdown_function(const char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry);
+PHPAPI extern bool remove_user_shutdown_function(const char *function_name, size_t function_len);
+PHPAPI extern bool append_user_shutdown_function(php_shutdown_function_entry *shutdown_function_entry);
 
 PHPAPI void php_call_shutdown_functions(void);
 PHPAPI void php_free_shutdown_functions(void);

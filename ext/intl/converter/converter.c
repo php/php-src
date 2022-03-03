@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -72,15 +72,15 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 			char chars[127];
 			int8_t chars_len = sizeof(chars);
 			UErrorCode uerror = U_ZERO_ERROR;
-            if(!objval->src) {
-                php_converter_throw_failure(objval, U_INVALID_STATE_ERROR, "Source Converter has not been initialized yet");
+			if(!objval->src) {
+				php_converter_throw_failure(objval, U_INVALID_STATE_ERROR, "Source Converter has not been initialized yet");
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
 				ZEND_TRY_ASSIGN_REF_LONG(error, U_INVALID_STATE_ERROR);
-                RETVAL_STRINGL(chars, chars_len);
-                return;
-            }
+				RETVAL_STRINGL(chars, chars_len);
+				return;
+			}
 
 			/* Yes, this is fairly wasteful at first glance,
 			 * but considering that the alternative is to store
@@ -134,7 +134,7 @@ PHP_METHOD(UConverter, fromUCallback) {
 /* }}} */
 
 /* {{{ php_converter_check_limits */
-static inline zend_bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
+static inline bool php_converter_check_limits(php_converter_object *objval, zend_long available, zend_long needed) {
 	if (available < needed) {
 		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR, "Buffer overrun " ZEND_LONG_FMT " bytes needed, " ZEND_LONG_FMT " available", needed, available);
 		return 0;
@@ -197,7 +197,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		}
 		default:
 			php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR,
-                                                    "toUCallback() specified illegal type for substitution character");
+			                            "toUCallback() specified illegal type for substitution character");
 	}
 }
 /* }}} */
@@ -333,8 +333,8 @@ static void php_converter_from_u_callback(const void *context,
 /* }}} */
 
 /* {{{ php_converter_set_callbacks */
-static inline zend_bool php_converter_set_callbacks(php_converter_object *objval, UConverter *cnv) {
-	zend_bool ret = 1;
+static inline bool php_converter_set_callbacks(php_converter_object *objval, UConverter *cnv) {
+	bool ret = 1;
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (objval->obj.ce == php_converter_ce) {
@@ -345,7 +345,7 @@ static inline zend_bool php_converter_set_callbacks(php_converter_object *objval
 	}
 
 	ucnv_setToUCallBack(cnv, (UConverterToUCallback)php_converter_to_u_callback, (const void*)objval,
-                                 NULL, NULL, &error);
+	                    NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_setToUCallBack", error);
 		ret = 0;
@@ -353,7 +353,7 @@ static inline zend_bool php_converter_set_callbacks(php_converter_object *objval
 
 	error = U_ZERO_ERROR;
 	ucnv_setFromUCallBack(cnv, (UConverterFromUCallback)php_converter_from_u_callback, (const void*)objval,
-                                    NULL, NULL, &error);
+	                      NULL, NULL, &error);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_setFromUCallBack", error);
 		ret = 0;
@@ -363,10 +363,9 @@ static inline zend_bool php_converter_set_callbacks(php_converter_object *objval
 /* }}} */
 
 /* {{{ php_converter_set_encoding */
-static zend_bool php_converter_set_encoding(php_converter_object *objval,
-                                            UConverter **pcnv,
-                                            const char *enc, size_t enc_len
-                                           ) {
+static bool php_converter_set_encoding(php_converter_object *objval,
+                                       UConverter **pcnv,
+                                       const char *enc, size_t enc_len) {
 	UErrorCode error = U_ZERO_ERROR;
 	UConverter *cnv = ucnv_open(enc, &error);
 
@@ -461,8 +460,8 @@ PHP_METHOD(UConverter, getSourceEncoding) {
 
 /* {{{ */
 PHP_METHOD(UConverter, getDestinationEncoding) {
-        php_converter_object *objval = CONV_GET(ZEND_THIS);
-        php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_converter_object *objval = CONV_GET(ZEND_THIS);
+	php_converter_do_get_encoding(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -701,11 +700,11 @@ PHP_METHOD(UConverter, reasonText) {
 
 /* {{{ */
 PHP_METHOD(UConverter, convert) {
-        php_converter_object *objval = CONV_GET(ZEND_THIS);
+	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *str;
 	size_t str_len;
 	zend_string *ret;
-	zend_bool reverse = 0;
+	bool reverse = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {
@@ -888,7 +887,7 @@ PHP_METHOD(UConverter, getStandards) {
 /* }}} */
 
 /* {{{ Converter create/clone/destroy */
-static void php_converter_dtor_object(zend_object *obj) {
+static void php_converter_free_object(zend_object *obj) {
 	php_converter_object *objval = php_converter_fetch_object(obj);
 
 	if (objval->src) {
@@ -899,7 +898,8 @@ static void php_converter_dtor_object(zend_object *obj) {
 		ucnv_close(objval->dest);
 	}
 
-	intl_error_reset(&(objval->error));
+	intl_error_reset(&objval->error);
+	zend_object_std_dtor(obj);
 }
 
 static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval) {
@@ -966,15 +966,12 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 
 /* {{{ php_converter_minit */
 int php_converter_minit(INIT_FUNC_ARGS) {
-	zend_class_entry ce;
-
-	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
-	php_converter_ce = zend_register_internal_class(&ce);
+	php_converter_ce = register_class_UConverter();
 	php_converter_ce->create_object = php_converter_create_object;
 	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
-	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;
+	php_converter_object_handlers.free_obj = php_converter_free_object;
 
 	/* enum UConverterCallbackReason */
 	CONV_REASON_CONST(UNASSIGNED);

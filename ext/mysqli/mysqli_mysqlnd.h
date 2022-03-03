@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -39,6 +39,6 @@
 #define mysqli_stmt_close(c, implicit)	mysqlnd_stmt_close((c), (implicit))
 #define mysqli_free_result(r, implicit)	mysqlnd_free_result((r), (implicit))
 #define mysqli_async_query(c, q, l)		mysqlnd_async_query((c), (q), (l))
-#define mysqli_change_user_silent(c, u, p, d, p_len)   mysqlnd_change_user_ex((c), (u), (p), (d), TRUE, (size_t)(p_len))
+#define mysqli_change_user_silent(c, u, p, d, p_len)   mysqlnd_change_user_ex((c), (u), (p), (d), true, (size_t)(p_len))
 
 #endif

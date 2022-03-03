@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -34,12 +34,11 @@
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
 #if SIZEOF_ZEND_LONG == 8 && !defined(PHP_WIN32)
-# define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
-# define LL_MASK "ll"
 # define LL_LIT(lit) lit ## LL
 #endif
+#define LL_MASK "ll"
 
 /* Firebird API has a couple of missing const decls in its API */
 #define const_cast(s) ((char*)(s))
@@ -113,9 +112,6 @@ typedef struct {
 
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;
-
-	/* allocated space to convert fields values to other types */
-	char **fetch_buf;
 
 	/* the input SQLDA */
 	XSQLDA *in_sqlda;

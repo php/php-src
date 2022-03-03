@@ -1,48 +1,58 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c6ef101bd3881348a74b60cecd22d1d7f80017c8 */
+ * Stub hash: a9c915c11e5989d8c7cf2d704ada09ca765670c3 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, Traversable, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Iterator_current arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Iterator_current, 0, 0, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Iterator_next arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Iterator_next, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Iterator_key arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_Iterator_key arginfo_class_Iterator_current
 
-#define arginfo_class_Iterator_valid arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Iterator_valid, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Iterator_rewind arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_Iterator_rewind arginfo_class_Iterator_next
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ArrayAccess_offsetGet arginfo_class_ArrayAccess_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ArrayAccess_offsetUnset arginfo_class_ArrayAccess_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Serializable_serialize arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Serializable_serialize, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Serializable_unserialize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Countable_count arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Countable_count, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Stringable___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_InternalIterator___construct arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_InternalIterator___construct arginfo_class_Serializable_serialize
 
-#define arginfo_class_InternalIterator_current arginfo_class_IteratorAggregate_getIterator
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_InternalIterator_current, 0, 0, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_InternalIterator_key arginfo_class_IteratorAggregate_getIterator
+#define arginfo_class_InternalIterator_key arginfo_class_InternalIterator_current
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_InternalIterator_next, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -119,3 +129,87 @@ static const zend_function_entry class_InternalIterator_methods[] = {
 	ZEND_ME(InternalIterator, rewind, arginfo_class_InternalIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_Traversable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Traversable", class_Traversable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_IteratorAggregate(zend_class_entry *class_entry_Traversable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "IteratorAggregate", class_IteratorAggregate_methods);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 1, class_entry_Traversable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_Traversable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Iterator", class_Iterator_methods);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 1, class_entry_Traversable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ArrayAccess(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Serializable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Serializable", class_Serializable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Countable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Countable", class_Countable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Stringable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Stringable", class_Stringable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_InternalIterator(zend_class_entry *class_entry_Iterator)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "InternalIterator", class_InternalIterator_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	return class_entry;
+}

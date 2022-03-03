@@ -1,9 +1,7 @@
 --TEST--
 Stringable should be automatically implemented for internal classes
---SKIPIF--
-<?php
-if (!extension_loaded('zend-test')) die('skip');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

@@ -7,15 +7,9 @@ Source code: ext/posix/posix.c
 --CREDITS--
 Falko Menge, mail at falko-menge dot de
 PHP Testfest Berlin 2009-05-10
---SKIPIF--
-<?php
-    if (!extension_loaded('posix')) {
-        die('SKIP - POSIX extension not available');
-    }
-    if (!extension_loaded('standard')) {
-        die('SKIP - Standard extension not available');
-    }
-?>
+--EXTENSIONS--
+posix
+standard
 --FILE--
 <?php
 

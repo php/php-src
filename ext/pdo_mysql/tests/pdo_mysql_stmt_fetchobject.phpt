@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO: PDOStatement->fetchObject()
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -21,6 +22,7 @@ if (!$ok)
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 MySQLPDOTest::createTestTable($db);
 
 try {
@@ -28,6 +30,7 @@ try {
     $query = "SELECT id, '', NULL, \"\" FROM test ORDER BY id ASC LIMIT 3";
     $stmt = $db->prepare($query);
 
+    #[AllowDynamicProperties]
     class myclass {
 
         private $set_calls = 0;

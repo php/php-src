@@ -1,9 +1,7 @@
 --TEST--
 Bug #61700 (FILTER_FLAG_IPV6/FILTER_FLAG_NO_PRIV|RES_RANGE failing)
---SKIPIF--
-<?php
-if (!extension_loaded("filter")) die("skip filter extension not available");
-?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 var_dump(filter_var('::ffff:192.168.1.1', FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));

@@ -11,10 +11,8 @@ $a = null;
 $a[] .= $a;
 var_dump($a);
 ?>
---EXPECTF--
-Warning: Array to string conversion in %sassign_dim_op_004.php on line 3
+--EXPECT--
 array(1) {
   [0]=>
-  string(5) "Array"
+  string(0) ""
 }
-

@@ -1,8 +1,9 @@
 --TEST--
 Bug #79571 (FFI: var_dumping unions may segfault)
+--EXTENSIONS--
+ffi
 --SKIPIF--
 <?php
-if (!extension_loaded('ffi')) die('skip ffi extension not available');
 if (pack('S', 0xABCD) !== pack('v', 0xABCD)) {
     die('skip for little-endian architectures only');
 }

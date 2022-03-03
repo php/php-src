@@ -1,7 +1,7 @@
 --TEST--
 Don't add array value type is key type is illegal
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 
@@ -15,6 +15,12 @@ function test(\SplObjectStorage $definitions = null) {
 }
 function test2() {
     $a[[]] = $undef;
+}
+function test3() {
+    foreach (range(0, $undef) as $v) { }
+}
+function test4() {
+    var_dump(range(0, ~$u));
 }
 
 ?>

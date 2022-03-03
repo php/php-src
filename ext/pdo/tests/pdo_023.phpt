@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: extending PDO
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -13,6 +14,7 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
+#[AllowDynamicProperties]
 class PDOStatementX extends PDOStatement
 {
     public $test1 = 1;
@@ -30,6 +32,7 @@ class PDOStatementX extends PDOStatement
     }
 }
 
+#[AllowDynamicProperties]
 class PDODatabaseX extends PDO
 {
     public $test1 = 1;
@@ -47,7 +50,7 @@ class PDODatabaseX extends PDO
         $this->test2 = 22;
     }
 
-    function query($sql, ...$rest)
+    function query($sql, ...$rest): PDOStatement|false
     {
         echo __METHOD__ . "()\n";
         $stmt = parent::prepare($sql, array(PDO::ATTR_STATEMENT_CLASS=>array('PDOStatementx')));
@@ -95,10 +98,10 @@ PDOStatementX::__destruct()
 PDODatabaseX::query()
 PDOStatementX::__construct()
 object(PDOStatementX)#%d (3) {
-  ["test1"]=>
-  int(1)
   ["queryString"]=>
   string(24) "SELECT val, id FROM test"
+  ["test1"]=>
+  int(1)
   ["test2"]=>
   int(22)
 }

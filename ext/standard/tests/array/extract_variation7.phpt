@@ -8,8 +8,8 @@ echo "\n*** Testing for EXTR_PREFIX_ALL called twice with same prefix string ***
 $a = array( "1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five" );
 var_dump ( extract($a, EXTR_PREFIX_ALL, "same"));
 
-$b = array( "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-             "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 );
+$b = array( "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+             "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 );
 var_dump ( extract($b, EXTR_PREFIX_ALL, "same"));
 var_dump ( extract($b, EXTR_PREFIX_ALL, "diff"));
 

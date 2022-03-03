@@ -6,7 +6,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -95,10 +95,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 0;
+	var PHP_MINOR_VERSION = 2;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.0.0";
+	var PHP_VERSION_STRING = "8.2.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -1432,7 +1432,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 	if (shared) {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing + " [shared]");
-		cflags = "/D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
+		cflags = "/D ZEND_COMPILE_DL_EXT=1 /D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
 		STDOUT.WriteLine("Enabling extension " + extname_for_printing);
@@ -1544,7 +1544,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 			var _tmp = FSO.CreateTextFile(PHP_DIR + "/include/main/config.pickle.h", true);
 			_tmp.Close();
 		}
-		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
@@ -2209,7 +2208,7 @@ function generate_config_pickle_h()
 			var ln = outfile.ReadLine();
 
 			for (var i in keys) {
-				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*", "g");
+				var reg = new RegExp("#define[\s ]+" + keys[i] + "[\s ]*.*|#undef[\s ]+" + keys[i], "g");
 
 				if (ln.match(reg)) {
 					found = true;
@@ -2235,6 +2234,7 @@ function generate_config_pickle_h()
 			continue;
 		}*/
 
+		lines.push("#undef " + keys[i]);
 		lines.push("#define " + keys[i] + " " + item[0]);
 	}
 
@@ -2310,6 +2310,11 @@ function generate_config_h()
 
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
+
+	outfile.WriteBlankLines(1);
+	outfile.WriteLine("#if __has_include(\"main/config.pickle.h\")");
+	outfile.WriteLine("#include \"main/config.pickle.h\"");
+	outfile.WriteLine("#endif");
 
 	outfile.Close();
 }
@@ -2939,25 +2944,25 @@ function toolset_setup_compiler()
 
 			WARNING("Using unknown MSVC version " + tmp);
 
-			AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 			DEFINE("PHP_COMPILER_SHORT", tmp);
 			AC_DEFINE('PHP_COMPILER_ID', tmp, "Compiler compatibility ID");
 		} else {
-			AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 			DEFINE("PHP_COMPILER_SHORT", COMPILER_NAME_SHORT.toLowerCase());
 			AC_DEFINE('PHP_COMPILER_ID', COMPILER_NAME_SHORT.toUpperCase(), "Compiler compatibility ID");
 		}
 	} else if (CLANG_TOOLSET) {
 		CLANGVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 		DEFINE("PHP_COMPILER_SHORT", "clang");
 		AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
 
 	} else if (ICC_TOOLSET) {
 		INTELVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
 		DEFINE("PHP_COMPILER_SHORT", "icc");
 		AC_DEFINE('PHP_COMPILER_ID', "icc"); /* XXX something better were to write here */
 	}
@@ -3096,9 +3101,11 @@ function toolset_get_compiler_name(short)
 
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
-		if (version >= 1930) {
+		if (version >= 1940) {
 			return name;
-		} if (version >= 1920) {
+		} else if (version >= 1930) {
+			name = short ? "VS17" : "Visual C++ 2022";
+		} else if (version >= 1920) {
 			/* NOTE - VS is intentional. Due to changes in recent Visual Studio
 						versioning scheme referring to the exact VC++ version is
 						hardly predictable. From this version on, it refers to
@@ -3157,7 +3164,7 @@ function toolset_setup_arch()
 	} else {
 		STDOUT.WriteLine("  Detected 32-bit compiler");
 	}
-	AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+	AC_DEFINE('PHP_BUILD_ARCH', X64 ? 'x64' : 'x86', "Detected compiler architecture");
 	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 }
 
@@ -3399,6 +3406,12 @@ function toolset_setup_common_ldlags()
 				ADD_FLAG('LDFLAGS', "/GUARD:CF");
 			}
 		}
+		if (PHP_VS_LINK_COMPAT != "no") {
+			// Allow compatible IL versions, do not require an exact match.
+			// Prevents build failures where different libs were built with different (but compatible) IL versions.
+			// See fatal error C1047.
+			ADD_FLAG("LDFLAGS", "/d2:-AllowCompatibleILVersions ");
+		}
 	}
 }
 
@@ -3428,7 +3441,7 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
-			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /GF /D ZEND_DEBUG=0");
 		}
 
 		// if you have VS.Net /GS hardens the binary against buffer overruns
@@ -3747,4 +3760,10 @@ function setup_verbosity()
 		CMD_MOD1 = "@";
 		CMD_MOD2 = "@";
 	}
+}
+
+try {
+	ARG_ENABLE('vs-link-compat', 'Allow linking of libraries built with compatible versions of VS toolset', 'yes');
+} catch (e) {
+	STDOUT.WriteLine("problem: " + e);
 }

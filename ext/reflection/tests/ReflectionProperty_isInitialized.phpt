@@ -3,6 +3,7 @@ Test ReflectionProperty::isInitialized()
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class A {
     public static ?string $ssv = null;
     public static ?string $ss;
@@ -44,12 +45,7 @@ var_dump($rp->isInitialized($a));
 
 echo "Visibility handling:\n";
 $rp = new ReflectionProperty('A', 'p');
-try {
-    var_dump($rp->isInitialized($a));
-} catch (ReflectionException $e) {
-    echo $e->getMessage(), "\n";
-}
-$rp->setAccessible(true);
+var_dump($rp->isInitialized($a));
 var_dump($rp->isInitialized($a));
 
 echo "Object type:\n";
@@ -109,7 +105,7 @@ Dynamic properties:
 bool(true)
 bool(false)
 Visibility handling:
-Cannot access non-public property A::$p
+bool(false)
 bool(false)
 Object type:
 bool(false)

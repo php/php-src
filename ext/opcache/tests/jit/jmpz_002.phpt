@@ -13,7 +13,7 @@ function test($b) {
         echo "Not taken\n";
     }
 }
-test(true); 
+test(true);
 ?>
 DONE
 --EXPECT--

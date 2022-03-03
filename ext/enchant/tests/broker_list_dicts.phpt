@@ -2,13 +2,10 @@
 enchant_broker_list_dicts() function
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
+--EXTENSIONS--
+enchant
 --SKIPIF--
 <?php
-if (!extension_loaded('enchant')) {
-    echo "skip: Enchant extension not enabled\n";
-    exit;
-}
-
 $broker = enchant_broker_init();
 
 if (!$broker) {

@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,7 +29,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "Zend/zend_interfaces.h"
 #include "php_ini.h"
 
 /* SysvSharedMemory class */
@@ -90,7 +89,8 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-THREAD_LS sysvshm_module php_sysvshm;
+/* TODO: Make this thread-safe. */
+sysvshm_module php_sysvshm;
 
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
@@ -99,13 +99,8 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvshm)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
-	sysvshm_ce = zend_register_internal_class(&ce);
-	sysvshm_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
-	sysvshm_ce->serialize = zend_class_serialize_deny;
-	sysvshm_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);
@@ -137,7 +132,7 @@ PHP_FUNCTION(shm_attach)
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
 	zend_long shm_key, shm_id, shm_size, shm_flag = 0666;
-	zend_bool shm_size_is_null = 1;
+	bool shm_size_is_null = 1;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|l!l", &shm_key, &shm_size, &shm_size_is_null, &shm_flag)) {
 		RETURN_THROWS();
@@ -150,7 +145,7 @@ PHP_FUNCTION(shm_attach)
 	if (shm_size < 1) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
-  	}
+	}
 
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {

@@ -5,8 +5,8 @@ Mathieu Kooiman <mathieuk@gmail.com>
 Dutch UG, TestFest 2009, Utrecht
 --DESCRIPTION--
 Hit the host and determine that the headers are sent to the callback specified for CURLOPT_HEADERFUNCTION. Different test servers might return different sets of headers. Just test for HTTP/1.1 200 OK.
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

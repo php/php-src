@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -63,7 +63,6 @@ static void _breakiter_factory(const char *func_name,
 
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status);
-	// Todo check if this can happen?
 	if (U_FAILURE(status)) {
 		spprintf(&msg, 0, "%s: error creating BreakIterator",
 				func_name);
@@ -174,7 +173,6 @@ static void _breakiter_no_args_ret_int32(
 		int32_t (BreakIterator::*func)(),
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	char	*msg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 

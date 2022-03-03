@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_select() (9.0+)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");
@@ -12,7 +14,7 @@ error_reporting(E_ALL);
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-pg_query("SET bytea_output = 'hex'");
+pg_query($db, "SET bytea_output = 'hex'");
 
 $fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
 $ids = array('num'=>'1234');
@@ -80,5 +82,5 @@ Array of values must be an associative array with string keys
 Array of values must be an associative array with string keys
 Values must be of type string|int|float|bool|null, array given
 Values must be of type string|int|float|bool|null, stdClass given
-Values must be of type string|int|float|bool|null, resource given
+Values must be of type string|int|float|bool|null, PgSql\Connection given
 Ok

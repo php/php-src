@@ -1,10 +1,8 @@
 --TEST--
 FB payload server satisfies connection attempt
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_firebird')) die("skip pdo_firebird extension not available");
-if (!extension_loaded('sockets')) die("skip sockets extension not available");
-?>
+--EXTENSIONS--
+pdo_firebird
+sockets
 --ENV--
 LSAN_OPTIONS=detect_leaks=0
 --FILE--

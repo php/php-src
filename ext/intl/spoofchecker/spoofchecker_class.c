@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -66,8 +66,8 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 	zend_object *new_obj_val;
 	Spoofchecker_object *sfo, *new_sfo;
 
-    sfo = php_intl_spoofchecker_fetch_object(object);
-    intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
+	sfo = php_intl_spoofchecker_fetch_object(object);
+	intl_error_reset(SPOOFCHECKER_ERROR_P(sfo));
 
 	new_obj_val = Spoofchecker_ce_ptr->create_object(object->ce);
 	new_sfo = php_intl_spoofchecker_fetch_object(new_obj_val);
@@ -90,12 +90,9 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
  */
 void spoofchecker_register_Spoofchecker_class(void)
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Spoofchecker' class. */
-	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
-	ce.create_object = Spoofchecker_object_create;
-	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
+	Spoofchecker_ce_ptr = register_class_Spoofchecker();
+	Spoofchecker_ce_ptr->create_object = Spoofchecker_object_create;
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);

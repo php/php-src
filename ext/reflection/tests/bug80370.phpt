@@ -2,6 +2,7 @@
 Bug #80370: Segfault on ReflectionProperty::getAttributes of dynamic property
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class Foobar {
 
 }

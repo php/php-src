@@ -3,10 +3,8 @@ XMLWriter: libxml2 XML Writer, fullEndElement method
 --CREDITS--
 Mauricio Vieira <mauricio [at] @mauriciovieira [dot] net>
 #testfest PHPSP on 2014-07-05
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 

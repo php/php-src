@@ -6,15 +6,15 @@ Covariant return-by-ref constraints
 class A implements ArrayAccess {
     public $foo = array();
 
-    public function &offsetGet($n) {
+    public function &offsetGet($n): mixed {
         return $this->foo[$n];
     }
 
-    public function offsetSet($n, $v) {
+    public function offsetSet($n, $v): void {
     }
-    public function offsetUnset($n) {
+    public function offsetUnset($n): void {
     }
-    public function offsetExists($n) {
+    public function offsetExists($n): bool {
     }
 }
 

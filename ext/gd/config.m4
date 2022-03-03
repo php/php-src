@@ -13,6 +13,15 @@ PHP_ARG_WITH([external-gd],
   [no],
   [no])
 
+if test -z "$PHP_AVIF"; then
+  PHP_ARG_WITH([avif],
+    [for libavif],
+    [AS_HELP_STRING([--with-avif],
+      [GD: Enable AVIF support (only for bundled libgd)])],
+    [no],
+    [no])
+fi
+
 if test -z "$PHP_WEBP"; then
   PHP_ARG_WITH([webp],
     [for libwebp],
@@ -71,9 +80,19 @@ AC_DEFUN([PHP_GD_PNG],[
   AC_DEFINE(HAVE_LIBPNG, 1, [ ])
 ])
 
+AC_DEFUN([PHP_GD_AVIF],[
+  if test "$PHP_AVIF" != "no"; then
+    PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
+    PHP_EVAL_LIBLINE($AVIF_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($AVIF_CFLAGS)
+    AC_DEFINE(HAVE_LIBAVIF, 1, [ ])
+    AC_DEFINE(HAVE_GD_AVIF, 1, [ ])
+  fi
+])
+
 AC_DEFUN([PHP_GD_WEBP],[
   if test "$PHP_WEBP" != "no"; then
-    PKG_CHECK_MODULES([WEBP], [libwebp])
+    PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
     PHP_EVAL_LIBLINE($WEBP_LIBS, GD_SHARED_LIBADD)
     PHP_EVAL_INCLINE($WEBP_CFLAGS)
     AC_DEFINE(HAVE_LIBWEBP, 1, [ ])
@@ -121,6 +140,7 @@ AC_DEFUN([PHP_GD_JISX0208],[
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,          [AC_DEFINE(HAVE_GD_PNG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromAvif,         [AC_DEFINE(HAVE_GD_AVIF,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,         [AC_DEFINE(HAVE_GD_WEBP,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,         [AC_DEFINE(HAVE_GD_JPG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,          [AC_DEFINE(HAVE_GD_XPM,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
@@ -138,9 +158,8 @@ dnl
 if test "$PHP_GD" != "no"; then
 
   if test "$PHP_EXTERNAL_GD" = "no"; then
-    GD_CFLAGS=""
     extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-                  libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c \
+                  libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c libgd/gd_avif.c \
                   libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
                   libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
                   libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
@@ -161,6 +180,7 @@ dnl These are always available with bundled library
 dnl Various checks for GD features
     PHP_GD_ZLIB
     PHP_GD_PNG
+    PHP_GD_AVIF
     PHP_GD_WEBP
     PHP_GD_JPEG
     PHP_GD_XPM

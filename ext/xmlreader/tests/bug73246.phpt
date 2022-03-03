@@ -1,9 +1,7 @@
 --TEST--
 Bug #73246 (XMLReader: encoding length not checked)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlreader")) die("skip xmlreader extension not available");
-?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $reader = new XMLReader();

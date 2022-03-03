@@ -3,7 +3,7 @@ Bug #21478 (Zend/zend_alloc.c :: shutdown_memory_manager produces segfault)
 --FILE--
 <?php
 class debugfilter extends php_user_filter {
-  function filter($in, $out, &$consumed, $closing) {
+  function filter($in, $out, &$consumed, $closing): int {
     while ($bucket = stream_bucket_make_writeable($in)) {
       $bucket->data = strtoupper($bucket->data);
       stream_bucket_append($out, $bucket);

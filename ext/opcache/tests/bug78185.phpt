@@ -6,8 +6,8 @@ opcache.optimization_level=-1
 opcache.file_cache={PWD}
 opcache.file_cache_only=1
 opcache.jit=0
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 if (substr(PHP_OS, 0, 3) !== 'WIN') {

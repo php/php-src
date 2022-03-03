@@ -60,7 +60,7 @@ class myClass
     $this->public_var = 10;
     $this->public_var1 = new foo();
     $this->private_var = new foo();
-    $this->proected_var = new foo();
+    $this->protected_var = new foo();
   }
 }
 
@@ -157,8 +157,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))
@@ -173,12 +172,11 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(266) "myClass::__set_state(array(
    'foo_object' => 
   foo::__set_state(array(
   )),
@@ -189,8 +187,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))"
@@ -208,8 +205,7 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))
@@ -224,12 +220,11 @@ myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(266) "myClass::__set_state(array(
    'foo_object' => 
   foo::__set_state(array(
   )),
@@ -240,8 +235,7 @@ string(293) "myClass::__set_state(array(
    'private_var' => 
   foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
+   'protected_var' => 
   foo::__set_state(array(
   )),
 ))"
@@ -299,4 +293,3 @@ concreteClass::__set_state(array(
 ))
 string(36) "concreteClass::__set_state(array(
 ))"
-

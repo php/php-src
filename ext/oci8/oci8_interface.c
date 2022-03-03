@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -528,7 +528,7 @@ PHP_FUNCTION(oci_lob_write)
 	php_oci_descriptor *descriptor;
 	size_t data_len;
 	zend_long write_len;
-	zend_bool write_len_is_null = 1;
+	bool write_len_is_null = 1;
 	ub4 bytes_written;
 	char *data;
 
@@ -628,7 +628,7 @@ PHP_FUNCTION(oci_lob_erase)
 	php_oci_descriptor *descriptor;
 	ub4 bytes_erased;
 	zend_long offset, length;
-	zend_bool offset_is_null = 1, length_is_null = 1;
+	bool offset_is_null = 1, length_is_null = 1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l!l!", &z_descriptor, oci_lob_class_entry_ptr, &offset, &offset_is_null, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -697,7 +697,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 {
 	zval *tmp, *z_descriptor;
 	php_oci_descriptor *descriptor;
-	zend_bool flag;
+	bool flag;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &z_descriptor, oci_lob_class_entry_ptr, &flag) == FAILURE) {
 		RETURN_THROWS();
@@ -747,7 +747,7 @@ PHP_FUNCTION(oci_lob_copy)
 	zval *tmp_dest, *tmp_from, *z_descriptor_dest, *z_descriptor_from;
 	php_oci_descriptor *descriptor_dest, *descriptor_from;
 	zend_long length;
-	zend_bool length_is_null = 1;
+	bool length_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO|l!", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length, &length_is_null) == FAILURE) {
 		RETURN_THROWS();
@@ -824,7 +824,7 @@ PHP_FUNCTION(oci_lob_export)
 	char *buffer;
 	size_t filename_len;
 	zend_long start, length, block_length;
-	zend_bool start_is_null = 1, length_is_null = 1;
+	bool start_is_null = 1, length_is_null = 1;
 	php_stream *stream;
 	ub4 lob_length;
 
@@ -1274,7 +1274,7 @@ PHP_FUNCTION(oci_fetch_all)
 	zval **outarrs;
 	ub4 nrows = 1;
 	int i;
-	zend_long rows = 0, flags = PHP_OCI_FETCHSTATEMENT_BY_COLUMN, skip = 0, maxrows = -1;
+	zend_long rows = 0, flags = PHP_OCI_FETCHSTATEMENT_BY_COLUMN | PHP_OCI_ASSOC, skip = 0, maxrows = -1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_RESOURCE(z_statement)
@@ -1633,6 +1633,39 @@ PHP_FUNCTION(oci_set_prefetch)
 }
 /* }}} */
 
+/* {{{ Sets the amount of LOB data to be prefetched when OCI LOB locators are fetched */
+PHP_FUNCTION(oci_set_prefetch_lob)
+{
+	zval *z_statement;
+	zend_long prefetch_lob_size;
+#if (OCI_MAJOR_VERSION > 12 || (OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2))
+	php_oci_statement *statement;
+#endif	
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(z_statement)
+		Z_PARAM_LONG(prefetch_lob_size)
+		ZEND_PARSE_PARAMETERS_END();
+
+#if (OCI_MAJOR_VERSION > 12 || (OCI_MAJOR_VERSION == 12 && OCI_MINOR_VERSION >= 2))
+	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
+
+	if (prefetch_lob_size < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+
+	statement->prefetch_lob_size = (ub4) prefetch_lob_size;
+	RETURN_TRUE;
+#else
+	/* Although the LOB prefetch feature was available in some earlier Oracle
+	 * version, I don't consider it stable until 12.2 */
+	php_error_docref(NULL, E_NOTICE, "Unsupported with this version of Oracle Client");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
 /* {{{ Sets the client identifier attribute on the connection */
 PHP_FUNCTION(oci_set_client_identifier)
 {
@@ -1694,7 +1727,6 @@ PHP_FUNCTION(oci_set_edition)
 		Z_PARAM_STRING(edition, edition_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
 	}
@@ -1708,10 +1740,6 @@ PHP_FUNCTION(oci_set_edition)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1727,8 +1755,6 @@ PHP_FUNCTION(oci_set_module_name)
 		Z_PARAM_STRING(module, module_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1742,10 +1768,6 @@ PHP_FUNCTION(oci_set_module_name)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1761,8 +1783,6 @@ PHP_FUNCTION(oci_set_action)
 		Z_PARAM_STRING(action, action_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1776,10 +1796,6 @@ PHP_FUNCTION(oci_set_action)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -1795,8 +1811,6 @@ PHP_FUNCTION(oci_set_client_info)
 		Z_PARAM_STRING(client_info, client_info_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if (OCI_MAJOR_VERSION >= 10)
-
 	php_oci_connection *connection;
 	sword errstatus;
 
@@ -1810,10 +1824,6 @@ PHP_FUNCTION(oci_set_client_info)
 	}
 
 	RETURN_TRUE;
-#else
-	php_error_docref(NULL, E_NOTICE, "Unsupported attribute type");
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 

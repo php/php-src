@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 12f78387e5b7c436b608dbecc4c6b3eec82b6db1 */
+ * Stub hash: 93677b78d9aaa4d6dbb5d1dcf3e79a8418add5c0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shm_attach, 0, 1, SysvSharedMemory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -56,3 +56,14 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_SysvSharedMemory_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_SysvSharedMemory(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SysvSharedMemory", class_SysvSharedMemory_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}

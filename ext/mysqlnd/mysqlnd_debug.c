@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -26,7 +26,7 @@ static const char * const mysqlnd_debug_empty_string = "";
 
 /* {{{ mysqlnd_debug::open */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, zend_bool reopen)
+MYSQLND_METHOD(mysqlnd_debug, open)(MYSQLND_DEBUG * self, bool reopen)
 {
 	if (!self->file_name) {
 		return FAIL;
@@ -239,7 +239,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 
 /* FALSE - The DBG_ calls won't be traced, TRUE - will be traced */
 /* {{{ mysqlnd_debug::func_enter */
-static zend_bool
+static bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
 										  const char * const func_name, unsigned int func_name_len)
@@ -313,7 +313,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	char **func_name;
 	uint64_t * parent_non_own_time_ptr = NULL, * mine_non_own_time_ptr = NULL;
 	uint64_t mine_non_own_time = 0;
-	zend_bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
+	bool profile_calls = self->flags & MYSQLND_DEBUG_PROFILE_CALLS? TRUE:FALSE;
 
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
@@ -430,12 +430,21 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 
 			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",
 					"number of functions: %d", zend_hash_num_elements(&self->function_profiles));
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
 				self->m->log_va(self, __LINE__, __FILE__, -1, "info : ",
-						"%-40s\tcalls=%5llu  own_slow=%5llu  in_calls_slow=%5llu  total_slow=%5llu"
-						"   min_own=%5llu  max_own=%7llu  avg_own=%7llu   "
-						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
-						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
+						"%-40s\tcalls=%5" PRIu64
+						"  own_slow=%5" PRIu64
+						"  in_calls_slow=%5" PRIu64
+						"  total_slow=%5" PRIu64
+						"   min_own=%5" PRIu64
+						"  max_own=%7" PRIu64
+						"  avg_own=%7" PRIu64
+						"      min_in_calls=%5" PRIu64
+						"  max_in_calls=%7" PRIu64
+						"  avg_in_calls=%7" PRIu64
+						"   min_total=%5" PRIu64
+						"  max_total=%7" PRIu64
+						"  avg_total=%7" PRIu64
 						,ZSTR_VAL(string_key)
 						,(uint64_t) f_profile->calls
 						,(uint64_t) f_profile->own_underporm_calls
@@ -515,6 +524,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 			case 'O':
 			case 'A':
 				self->flags |= MYSQLND_DEBUG_FLUSH;
+				ZEND_FALLTHROUGH;
 			case 'a':
 			case 'o':
 				if (mode[i] == 'a' || mode[i] == 'A') {

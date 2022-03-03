@@ -1,9 +1,9 @@
 --TEST--
 Protect against null bytes in LOB filenames
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8'))
-    die ("skip no oci8 extension");
 if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4))
     die ("skip Test only valid for PHP 5.4 onwards");
 ?>
@@ -37,7 +37,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1: Import
 OCILob::saveFile(): Argument #1 ($filename) must not contain any null bytes
 Test 2: Export

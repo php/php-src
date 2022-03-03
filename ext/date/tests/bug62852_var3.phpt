@@ -9,7 +9,7 @@ $s2 = 'O:3:"Foo":3:{s:4:"date";s:19:"0000-00-00 00:00:00";s:13:"timezone_type";i
 global $foo;
 
 class Foo extends DateTime {
-    function __wakeup() {
+    function __wakeup(): void {
         global $foo;
         $foo = $this;
         parent::__wakeup();

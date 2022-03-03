@@ -1,8 +1,9 @@
 --TEST--
 locale_filter_matches.phpt() for ICU >= 70.1
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if( !extension_loaded( 'intl' ) ) die('skip');
 if (version_compare(INTL_ICU_VERSION, '70.1') < 0) die('skip for ICU >= 70.1');
 ?>
 --FILE--

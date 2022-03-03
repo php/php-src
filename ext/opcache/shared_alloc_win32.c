@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,14 +54,14 @@ static void zend_win_error_message(int type, char *msg, int err)
 	ev_msgs[0] = msg;
 	ev_msgs[1] = buf;
 	ReportEvent(h,				  // event log handle
-            EVENTLOG_ERROR_TYPE,  // event type
-            0,                    // category zero
-            err,				  // event identifier
-            NULL,                 // no user security identifier
-            2,                    // one substitution string
-            0,                    // no data
-            ev_msgs,              // pointer to string array
-            NULL);                // pointer to data
+	        EVENTLOG_ERROR_TYPE,  // event type
+	        0,                    // category zero
+	        err,				  // event identifier
+	        NULL,                 // no user security identifier
+	        2,                    // one substitution string
+	        0,                    // no data
+	        ev_msgs,              // pointer to string array
+	        NULL);                // pointer to data
 	DeregisterEventSource(h);
 
 	zend_accel_error(type, "%s", msg);
@@ -153,7 +153,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 			}
 
 			pre_size = ZEND_ALIGNED_SIZE(sizeof(zend_smm_shared_globals)) + ZEND_ALIGNED_SIZE(sizeof(zend_shared_segment)) + ZEND_ALIGNED_SIZE(sizeof(void *)) + ZEND_ALIGNED_SIZE(sizeof(int));
-			/* Map only part of SHM to have access opcache shared globals */
+			/* Map only part of SHM to have access to opcache shared globals */
 			mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, pre_size + ZEND_ALIGNED_SIZE(sizeof(zend_accel_shared_globals)), NULL);
 			if (mapping_base == NULL) {
 				err = GetLastError();
@@ -221,7 +221,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 	zend_shared_alloc_lock_win32();
 	/* Mapping retries: When Apache2 restarts, the parent process startup routine
-	   can be called before the child process is killed. In this case, the map will fail
+	   can be called before the child process is killed. In this case, the mapping will fail
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
 		memfile = OpenFileMapping(FILE_MAP_READ|FILE_MAP_WRITE|FILE_MAP_EXECUTE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
@@ -278,15 +278,15 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		return ALLOC_FAILURE;
 	}
 
-	/* Starting from windows Vista, heap randomization occurs which might cause our mapping base to
-	   be taken (fail to map). So under Vista, we try to map into a hard coded predefined addresses
+	/* Starting from Windows Vista, heap randomization occurs which might cause our mapping base to
+	   be taken (fail to map). So we try to map into one of the hard coded predefined addresses
 	   in high memory. */
 	if (!ZCG(accel_directives).mmap_base || !*ZCG(accel_directives).mmap_base) {
 		wanted_mapping_base = vista_mapping_base_set;
 	} else {
 		char *s = ZCG(accel_directives).mmap_base;
 
-		/* skip leading 0x, %p assumes hexdeciaml format anyway */
+		/* skip leading 0x, %p assumes hexdecimal format anyway */
 		if (*s == '0' && *(s + 1) == 'x') {
 			s += 2;
 		}

@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,13 +27,6 @@ static zend_object_handlers IntlDateFormatter_handlers;
 /*
  * Auxiliary functions needed by objects of 'IntlDateFormatter' class
  */
-
-/* {{{ IntlDateFormatter_objects_dtor */
-static void IntlDateFormatter_object_dtor(zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
 
 /* {{{ IntlDateFormatter_objects_free */
 void IntlDateFormatter_object_free( zend_object *object )
@@ -108,18 +101,14 @@ zend_object *IntlDateFormatter_object_clone(zend_object *object)
  */
 void dateformat_register_IntlDateFormatter_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'IntlDateFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "IntlDateFormatter", class_IntlDateFormatter_methods );
-	ce.create_object = IntlDateFormatter_object_create;
-	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce );
+	IntlDateFormatter_ce_ptr = register_class_IntlDateFormatter();
+	IntlDateFormatter_ce_ptr->create_object = IntlDateFormatter_object_create;
 
 	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
 	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;
-	IntlDateFormatter_handlers.dtor_obj = IntlDateFormatter_object_dtor;
 	IntlDateFormatter_handlers.free_obj = IntlDateFormatter_object_free;
 }
 /* }}} */

@@ -5,7 +5,7 @@ Bug #50005 (Throwing through Reflection modified Exception object makes segmenta
 
 class a extends exception {
     public function __construct() {
-        $this->file = null;
+        $this->file = "";
     }
 }
 

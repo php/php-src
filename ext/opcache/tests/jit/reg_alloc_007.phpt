@@ -11,7 +11,7 @@ function test() {
     for ($i = 0; $i < 100; $i++) {
         $a = $a + $a = $a + !$a = $a;
         $aZ = $a;
-        $aZ %= $a;
+        @$aZ %= $a;
     }
 }
 test();

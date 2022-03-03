@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,20 +27,20 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    size_t len = strlen(version);
-    char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
-    const char *p;
+	size_t len = strlen(version);
+	char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
+	const char *p;
 
-    if (len == 0) {
-        *buf = '\0';
-        return buf;
-    }
+	if (len == 0) {
+		*buf = '\0';
+		return buf;
+	}
 
-    p = version;
-    q = buf;
-    *q++ = lp = *p++;
+	p = version;
+	q = buf;
+	*q++ = lp = *p++;
 
-    while (*p) {
+	while (*p) {
 /*  s/[-_+]/./g;
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
@@ -67,9 +67,9 @@ php_canonicalize_version(const char *version)
 			*q++ = *p;
 		}
 		lp = *p++;
-    }
-    *q++ = '\0';
-    return buf;
+	}
+	*q++ = '\0';
+	return buf;
 }
 
 /* }}} */
@@ -203,37 +203,38 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 
 PHP_FUNCTION(version_compare)
 {
-	char *v1, *v2, *op = NULL;
-	size_t v1_len, v2_len, op_len = 0;
+	char *v1, *v2;
+	zend_string *op = NULL;
+	size_t v1_len, v2_len;
 	int compare;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(v1, v1_len)
 		Z_PARAM_STRING(v2, v2_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(op, op_len)
+		Z_PARAM_STR_OR_NULL(op)
 	ZEND_PARSE_PARAMETERS_END();
 
 	compare = php_version_compare(v1, v2);
 	if (!op) {
 		RETURN_LONG(compare);
 	}
-	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
+	if (zend_string_equals_literal(op, "<") || zend_string_equals_literal(op, "lt")) {
 		RETURN_BOOL(compare == -1);
 	}
-	if (!strncmp(op, "<=", op_len) || !strncmp(op, "le", op_len)) {
+	if (zend_string_equals_literal(op, "<=") || zend_string_equals_literal(op, "le")) {
 		RETURN_BOOL(compare != 1);
 	}
-	if (!strncmp(op, ">", op_len) || !strncmp(op, "gt", op_len)) {
+	if (zend_string_equals_literal(op, ">") || zend_string_equals_literal(op, "gt")) {
 		RETURN_BOOL(compare == 1);
 	}
-	if (!strncmp(op, ">=", op_len) || !strncmp(op, "ge", op_len)) {
+	if (zend_string_equals_literal(op, ">=") || zend_string_equals_literal(op, "ge")) {
 		RETURN_BOOL(compare != -1);
 	}
-	if (!strncmp(op, "==", op_len) || !strncmp(op, "=", op_len) || !strncmp(op, "eq", op_len)) {
+	if (zend_string_equals_literal(op, "==") || zend_string_equals_literal(op, "=") || zend_string_equals_literal(op, "eq")) {
 		RETURN_BOOL(compare == 0);
 	}
-	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
+	if (zend_string_equals_literal(op, "!=") || zend_string_equals_literal(op, "<>") || zend_string_equals_literal(op, "ne")) {
 		RETURN_BOOL(compare != 0);
 	}
 

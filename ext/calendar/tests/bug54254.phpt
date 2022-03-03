@@ -1,7 +1,7 @@
 --TEST--
 Bug #54254 (cal_days_in_month incompatible with jdtojewish in non-leap-years)
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+calendar
 --FILE--
 <?php
 var_dump(cal_days_in_month(CAL_JEWISH, 1, 5771));

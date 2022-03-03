@@ -1,5 +1,7 @@
 --TEST--
 DBA LMDB handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'lmdb';

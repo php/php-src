@@ -27,7 +27,6 @@ class Bar extends Foo
 
 $r = new ReflectionProperty(Foo::class, 'bar');
 
-$r->setAccessible(true);
 echo "OK\n";
 ?>
 --EXPECT--

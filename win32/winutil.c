@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -29,7 +29,7 @@ PHP_WINUTIL_API char *php_win32_error_to_msg(HRESULT error)
 
 	DWORD ret = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPWSTR)&bufw, 0, NULL
+		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),	(LPWSTR)&bufw, 0, NULL
 	);
 
 	if (!ret || !bufw) {
@@ -448,7 +448,7 @@ static zend_always_inline BOOL is_compatible(HMODULE handle, BOOL is_smaller, ch
 	DWORD minor = pNTHeader->OptionalHeader.MinorLinkerVersion;
 
 #if PHP_LINKER_MAJOR == 14
-	/* VS 2015, 2017 and 2019 are binary compatible, but only forward compatible.
+	/* VS 2015, 2017, 2019 and 2022 are binary compatible, but only forward compatible.
 		It should be fine, if we load a module linked with an older one into
 		the core linked with the newer one, but not the otherway round.
 		Analogously, it should be fine, if a PHP build linked with an older version

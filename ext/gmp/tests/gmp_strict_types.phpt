@@ -1,5 +1,7 @@
 --TEST--
 GMP functions with strict_types=1
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 

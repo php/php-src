@@ -1,14 +1,12 @@
 --TEST--
-Test function pcntl_fork() by testing the process isolation in the forking hierarchy father -> son -> grandson where father can not knows his grandson
+Test function pcntl_fork() by testing the process isolation in the forking hierarchy father -> son -> grandson where father cannot know his grandson
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
---SKIPIF--
-<?php
-    if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
-    elseif (!extension_loaded('posix')) die('skip posix extension not available');
-?>
+--EXTENSIONS--
+pcntl
+posix
 --FILE--
 <?php
 echo "*** Testing the process isolations between a process and its forks ***\n";

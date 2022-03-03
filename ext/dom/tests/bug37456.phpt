@@ -1,7 +1,7 @@
 --TEST--
 Bug #37456 (DOMElement->setAttribute() loops forever)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

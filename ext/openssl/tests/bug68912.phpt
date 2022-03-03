@@ -1,8 +1,9 @@
 --TEST--
 Bug #68912 (Segmentation fault at openssl_spki_new)
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--

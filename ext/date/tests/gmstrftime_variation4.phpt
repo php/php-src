@@ -27,13 +27,25 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Abbreviated month name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(3) "Aug"
 
 --Full month name--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(6) "August"
 
 --Month as decimal--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"

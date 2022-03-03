@@ -1,5 +1,5 @@
 --TEST--
-Passing undefined variabled to named arg
+Passing undefined variable to named arg
 --FILE--
 <?php
 

@@ -1,11 +1,10 @@
 --TEST--
 mysqli_fetch_all()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
-if (!function_exists('mysqli_fetch_all'))
-    die("skip: function only available with mysqlnd");
 ?>
 --FILE--
 <?php
@@ -442,6 +441,6 @@ array(1) {
     string(1) "1"
   }
 }
-mysqli_fetch_all(): Argument #2 ($mode) must be one of MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC, or MYSQLI_FETCH_BOTH
+mysqli_fetch_all(): Argument #2 ($mode) must be one of MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH
 mysqli_result object is already closed
 done!

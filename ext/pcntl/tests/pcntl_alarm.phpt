@@ -1,5 +1,7 @@
 --TEST--
 pcntl_alarm()
+--EXTENSIONS--
+pcntl
 --SKIPIF--
 <?php if (!function_exists("pcntl_sigtimedwait")) die("skip pcntl_sigtimedwait() not available"); ?>
 --INI--

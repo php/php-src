@@ -3,8 +3,8 @@ Test curl_copy_handle() with User Agent
 --CREDITS--
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 
@@ -26,7 +26,7 @@ Rick Buitenman <rick@meritos.nl>
   var_dump( curl_exec($ch) );
   var_dump( curl_exec($copy) );
 
-  curl_close($ch); // can not close original handle before curl_exec($copy) since it causes char * inputs to be invalid (see also: http://curl.haxx.se/libcurl/c/curl_easy_duphandle.html)
+  curl_close($ch); // cannot close original handle before curl_exec($copy) since it causes char * inputs to be invalid (see also: http://curl.haxx.se/libcurl/c/curl_easy_duphandle.html)
   curl_close($copy);
 
 ?>

@@ -1,9 +1,10 @@
 --TEST--
 pcntl_unshare() with CLONE_NEWNET
+--EXTENSIONS--
+pcntl
+posix
 --SKIPIF--
 <?php
-if (!extension_loaded("pcntl")) die("skip");
-if (!extension_loaded("posix")) die("skip posix extension not available");
 if (!function_exists("pcntl_unshare")) die("skip pcntl_unshare is not available");
 if (!defined("CLONE_NEWNET")) die("skip flag unavailable");
 if (posix_getuid() !== 0 &&
@@ -15,6 +16,7 @@ if (@pcntl_unshare(CLONE_NEWNET) == false && pcntl_get_last_error() == PCNTL_EPE
     die("skip Insufficient privileges for CLONE_NEWPID");
 }
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
+if (getenv("SKIP_REPEAT")) die("skip cannot be repeated");
 ?>
 --FILE--
 <?php

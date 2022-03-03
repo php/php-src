@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -35,6 +35,10 @@
 
 #ifdef HAVE_OCI8
 
+/* Note to maintainers: config.m4 should/does check the minimum PHP version so
+ * the below checks are obsolete - but are kept 'just in case'.  Also bump the
+ * minimum version in package.xml, as appropriate. */
+
 /* PHP 5.2 is the minimum supported version for OCI8 2.0 */
 #if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
 #error Use PHP OCI8 1.4 for your version of PHP
@@ -42,8 +46,10 @@
 /* PHP 7 is the minimum supported version for OCI8 2.1 */
 #error Use PHP OCI8 2.0 for your version of PHP
 #elif PHP_MAJOR_VERSION < 8
-/* PHP 8 is the minimum supported version for OCI8 3.0 */
+/* PHP 8 is the minimum supported version for OCI8 3 */
 #error Use PHP OCI8 2.2 for your version of PHP
+#elif PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION < 1
+#error Use PHP OCI8 3.0 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -127,6 +133,18 @@ ZEND_GET_MODULE(oci8)
 
 #include "oci8_arginfo.h"
 
+static PHP_INI_MH(OnUpdateOldCloseSemantics)
+{
+	bool *p = (bool *) ZEND_INI_GET_ADDR();
+	*p = zend_ini_parse_bool(new_value);
+
+	if (*p) {
+		zend_error(E_DEPRECATED, "Directive oci8.old_oci_close_semantics is deprecated");
+	}
+
+	return SUCCESS;
+}
+
 /* {{{ extension definition structures */
 
 zend_module_entry oci8_module_entry = {
@@ -155,13 +173,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("oci8.privileged_connect",		"0",	PHP_INI_SYSTEM,	OnUpdateBool,		privileged_connect,		zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.statement_cache_size",	"20",	PHP_INI_SYSTEM,	OnUpdateLong,	statement_cache_size,	zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.default_prefetch",		"100",	PHP_INI_SYSTEM,	OnUpdateLong,	default_prefetch,		zend_oci_globals,	oci_globals)
-	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateBool,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
-#if (OCI_MAJOR_VERSION >= 11)
+	STD_PHP_INI_BOOLEAN("oci8.old_oci_close_semantics",	"0",	PHP_INI_SYSTEM,	OnUpdateOldCloseSemantics,		old_oci_close_semantics,zend_oci_globals,	oci_globals)
 	STD_PHP_INI_ENTRY(	"oci8.connection_class",		"",		PHP_INI_ALL,	OnUpdateString,		connection_class,		zend_oci_globals,	oci_globals)
-#endif
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	STD_PHP_INI_BOOLEAN("oci8.events",					"0",	PHP_INI_SYSTEM,	OnUpdateBool,		events,					zend_oci_globals,	oci_globals)
-#endif
+	STD_PHP_INI_ENTRY(	"oci8.prefetch_lob_size",		"0",	PHP_INI_SYSTEM,	OnUpdateLong,	prefetch_lob_size,		zend_oci_globals,	oci_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -198,23 +213,7 @@ static void php_oci_init_global_handles(void)
 
 	errstatus = OCIHandleAlloc (OCI_G(env), (dvoid **)&OCI_G(err), OCI_HTYPE_ERROR, 0, NULL);
 
-	if (errstatus == OCI_SUCCESS) {
-#if !defined(OCI_MAJOR_VERSION) || (OCI_MAJOR_VERSION < 11)
-		/* This fixes PECL bug 15988 (sqlnet.ora not being read).  The
-		 * root cause was fixed in Oracle 10.2.0.4 but there is no
-		 * compile time method to check for that precise patch level,
-		 * nor can it be guaranteed that runtime will use the same
-		 * patch level the code was compiled with.  So, we do this
-		 * code for all non 11g versions.
-		 */
-		OCICPool *cpoolh;
-		ub4 cpoolmode = 0x80000000;	/* Pass invalid mode to OCIConnectionPoolCreate */
-		PHP_OCI_CALL(OCIHandleAlloc, (OCI_G(env), (dvoid **) &cpoolh, OCI_HTYPE_CPOOL, (size_t) 0, (dvoid **) 0));
-		PHP_OCI_CALL(OCIConnectionPoolCreate, (OCI_G(env), OCI_G(err), cpoolh, NULL, 0, NULL, 0, 0, 0, 0, NULL, 0, NULL, 0, cpoolmode));
-		PHP_OCI_CALL(OCIConnectionPoolDestroy, (cpoolh, OCI_G(err), OCI_DEFAULT));
-		PHP_OCI_CALL(OCIHandleFree, (cpoolh, OCI_HTYPE_CPOOL));
-#endif
-	} else {
+	if (errstatus != OCI_SUCCESS) {
 		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR);
 
 		if (ora_error_code) {
@@ -274,9 +273,6 @@ static PHP_GSHUTDOWN_FUNCTION(oci)
 
 PHP_MINIT_FUNCTION(oci)
 {
-	zend_class_entry oci_lob_class_entry;
-	zend_class_entry oci_coll_class_entry;
-
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
@@ -286,11 +282,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_descriptor = zend_register_list_destructors_ex(php_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
 	le_collection = zend_register_list_destructors_ex(php_oci_collection_list_dtor, NULL, "oci8 collection", module_number);
 
-	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCILob", class_OCILob_methods);
-	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCICollection", class_OCICollection_methods);
-
-	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry);
-	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry);
+	oci_lob_class_entry_ptr = register_class_OCILob();
+	oci_coll_class_entry_ptr = register_class_OCICollection();
 
 /* thies@thieso.net 990203 i do not think that we will need all of them - just in here for completeness for now! */
 	REGISTER_LONG_CONSTANT("OCI_DEFAULT",OCI_DEFAULT, CONST_CS | CONST_PERSISTENT);
@@ -331,11 +324,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_LBI",SQLT_LBI, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_BIN",SQLT_BIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_ODT",SQLT_ODT, CONST_CS | CONST_PERSISTENT);
-#if defined(HAVE_OCI_INSTANT_CLIENT) || (defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 10)
 	REGISTER_LONG_CONSTANT("SQLT_BDOUBLE",SQLT_BDOUBLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_BFLOAT",SQLT_BFLOAT, CONST_CS | CONST_PERSISTENT);
-#endif
-#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+#if OCI_MAJOR_VERSION >= 12
 	REGISTER_LONG_CONSTANT("SQLT_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -352,7 +343,7 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_B_BIN",SQLT_BIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_INT",SQLT_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_NUM",SQLT_NUM, CONST_CS | CONST_PERSISTENT);
-#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+#if OCI_MAJOR_VERSION >= 12
 	REGISTER_LONG_CONSTANT("OCI_B_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -433,9 +424,7 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 PHP_MINFO_FUNCTION(oci)
 {
 	char buf[32];
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	char ver[256];
-#endif
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
@@ -446,19 +435,9 @@ PHP_MINFO_FUNCTION(oci)
 #endif
 	php_info_print_table_row(2, "OCI8 Version", PHP_OCI8_VERSION);
 
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	php_oci_client_get_version(ver, sizeof(ver));
 	php_info_print_table_row(2, "Oracle Run-time Client Library Version", ver);
-#else
-	php_info_print_table_row(2, "Oracle Run-time Client Library Version", "Unknown");
-#endif
-#if	defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
 	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
-#elif defined(PHP_OCI8_ORACLE_VERSION)
-	snprintf(buf, sizeof(buf), "%s", PHP_OCI8_ORACLE_VERSION);
-#else
-	snprintf(buf, sizeof(buf), "Unknown");
-#endif
 #if defined(HAVE_OCI_INSTANT_CLIENT)
 	php_info_print_table_row(2, "Oracle Compile-time Instant Client Version", buf);
 #else
@@ -641,7 +620,7 @@ void php_oci_define_hash_dtor(zval *data)
 
 	zval_ptr_dtor(&define->val);
 
-    efree(define);
+	efree(define);
 }
 /* }}} */
 
@@ -918,8 +897,8 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str hashed_details = {0};
 	time_t timestamp;
 	php_oci_spool *session_pool = NULL;
-	zend_bool use_spool = 1;	   /* Default is to use client-side session pool */
-	zend_bool ping_done = 0;
+	bool use_spool = 1;	   /* Default is to use client-side session pool */
+	bool ping_done = 0;
 
 	ub2 charsetid = 0;
 	ub2 charsetid_nls_lang = 0;
@@ -1034,10 +1013,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_0(&hashed_details);
 
 	/* make it lowercase */
-	php_strtolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(hashed_details.s), ZSTR_LEN(hashed_details.s));
 
 	if (!exclusive && !new_password) {
-		zend_bool found = 0;
+		bool found = 0;
 
 		if (persistent && ((zvp = zend_hash_find(&EG(persistent_list), hashed_details.s))) != NULL) {
 			zend_resource *le = Z_RES_P(zvp);
@@ -1185,7 +1164,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	 * a last resort, return a non-persistent connection.
 	 */
 	if (persistent) {
-		zend_bool alloc_non_persistent = 0;
+		bool alloc_non_persistent = 0;
 
 		if (OCI_G(max_persistent) != -1 && OCI_G(num_persistent) >= OCI_G(max_persistent)) {
 			/* try to find an idle connection and kill it */
@@ -1325,23 +1304,14 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 static int php_oci_connection_ping(php_oci_connection *connection)
 {
 	sword errstatus;
-#if (!((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2))))
-	char version[256];
-#endif
 
 	OCI_G(errcode) = 0;  		/* assume ping is successful */
 
-	/* Use OCIPing instead of OCIServerVersion. If OCIPing returns ORA-1010 (invalid OCI operation)
-	 * such as from Pre-10.1 servers, the error is still from the server and we would have
-	 * successfully performed a roundtrip and validated the connection. Use OCIServerVersion for
-	 * Pre-10.2 clients
+	/* If OCIPing returns ORA-1010 (invalid OCI operation) such as from
+	 * pre-10.1 servers, the error is still from the server and we would have
+	 * successfully performed a roundtrip and validated the connection.
 	 */
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
 	PHP_OCI_CALL_RETURN(errstatus, OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
-#else
-	/* use good old OCIServerVersion() */
-	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, OCI_G(err), (text *)version, sizeof(version), OCI_HTYPE_SVCCTX));
-#endif
 
 	if (errstatus == OCI_SUCCESS) {
 		return 1;
@@ -1431,7 +1401,7 @@ int php_oci_connection_commit(php_oci_connection *connection)
 static int php_oci_connection_close(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECTION_CLOSE_ENABLED()) {
@@ -1523,7 +1493,7 @@ static int php_oci_connection_close(php_oci_connection *connection)
 int php_oci_connection_release(php_oci_connection *connection)
 {
 	int result = 0;
-	zend_bool in_call_save = OCI_G(in_call);
+	bool in_call_save = OCI_G(in_call);
 	time_t timestamp = time(NULL);
 
 	if (connection->is_stub) {
@@ -1565,16 +1535,6 @@ int php_oci_connection_release(php_oci_connection *connection)
 		if (result) {
 			rlsMode |= OCI_SESSRLS_DROPSESS;
 		}
-
-		/* Sessions for non-persistent connections should be dropped.  For 11 and above, the session
-		 * pool has its own mechanism for doing so for purity NEW connections. We need to do so
-		 * explicitly for 10.2 and earlier.
-		 */
-#if (!(OCI_MAJOR_VERSION >= 11))
-		if (!connection->is_persistent) {
-			rlsMode |= OCI_SESSRLS_DROPSESS;
-		}
-#endif
 
 		if (connection->svc) {
 			PHP_OCI_CALL(OCISessionRelease, (connection->svc, connection->err, NULL,
@@ -1637,7 +1597,6 @@ int php_oci_password_change(php_oci_connection *connection, char *user, int user
  */
 void php_oci_client_get_version(char *version, size_t version_size)
 {
-#if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIClientVersion only available 10.2 onwards */
 	sword major_version = 0;
 	sword minor_version = 0;
 	sword update_num = 0;
@@ -1646,9 +1605,6 @@ void php_oci_client_get_version(char *version, size_t version_size)
 
 	PHP_OCI_CALL(OCIClientVersion, (&major_version, &minor_version, &update_num, &patch_num, &port_update_num));
 	snprintf(version, version_size, "%d.%d.%d.%d.%d", major_version, minor_version, update_num, patch_num, port_update_num);
-#else
-	memcpy(version, "Unknown", sizeof("Unknown"));
-#endif
 }
 /* }}} */
 
@@ -1700,7 +1656,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			descriptor = (php_oci_descriptor *) column->descid->ptr;
 
 			if (!descriptor) {
-				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #%d", column->descid->handle);
+				php_error_docref(NULL, E_WARNING, "Unable to find LOB descriptor #" ZEND_LONG_FMT, column->descid->handle);
 				return 1;
 			}
 
@@ -1886,7 +1842,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		} else {
 			RETURN_FALSE;
 		}
-    }
+	}
 #endif /* OCI_MAJOR_VERSION */
 
 	if (placeholder == NULL) {
@@ -1984,7 +1940,7 @@ static int php_oci_persistent_helper(zval *zv)
 static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid)
 {
 	php_oci_spool *session_pool = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	ub4 poolmode = OCI_DEFAULT;	/* Mode to be passed to OCISessionPoolCreate */
 	OCIAuthInfo *spoolAuth = NULL;
 	sword errstatus;
@@ -2033,13 +1989,8 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	}
 
 /* Disable RLB as we mostly have single-connection pools */
-#if (OCI_MAJOR_VERSION > 10)
 	poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
-#else
-	poolmode = OCI_SPC_HOMOGENEOUS;
-#endif
 
-#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	/* {{{ Allocate auth handle for session pool */
 	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, (session_pool->env, (dvoid **)&(spoolAuth), OCI_HTYPE_AUTHINFO, 0, NULL));
 
@@ -2047,7 +1998,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus);
 		iserror = 1;
 		goto exit_create_spool;
- 	}
+	}
 	/* }}} */
 
 	/* {{{ Set the edition attribute on the auth handle */
@@ -2081,7 +2032,6 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		goto exit_create_spool;
 	}
 	/* }}} */
-#endif
 
 	/* Create the homogeneous session pool - We have different session pools for every different
 	 * username, password, charset and dbname.
@@ -2123,7 +2073,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
 	zend_resource *spool_out_le = NULL;
-	zend_bool iserror = 0;
+	bool iserror = 0;
 	zval *spool_out_zv = NULL;
 
 	/* {{{ Create the spool hash key */
@@ -2152,7 +2102,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	/* Session Pool Hash Key : oci8spool***username**edition**hashedpassword**dbname**charset */
 
 	smart_str_0(&spool_hashed_details);
-	php_strtolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
+	zend_str_tolower(ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s));
 	/* }}} */
 
 	spool_out_zv = zend_hash_find(&EG(persistent_list), spool_hashed_details.s);
@@ -2310,7 +2260,6 @@ static int php_oci_old_create_session(php_oci_connection *connection, char *dbna
 	/* }}} */
 
 	/* {{{ Set the edition attribute on the session handle */
-#if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	if (OCI_G(edition)) {
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) OCI_G(edition), (ub4) (strlen(OCI_G(edition))), (ub4) OCI_ATTR_EDITION, OCI_G(err)));
 
@@ -2319,18 +2268,15 @@ static int php_oci_old_create_session(php_oci_connection *connection, char *dbna
 			return 1;
 		}
 	}
-#endif
 /* }}} */
 
 	/* {{{ Set the driver name attribute on the session handle */
-#if (OCI_MAJOR_VERSION >= 11)
 	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) PHP_OCI8_DRIVER_NAME, (ub4) sizeof(PHP_OCI8_DRIVER_NAME)-1, (ub4) OCI_ATTR_DRIVER_NAME, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode));
 		return 1;
 	}
-#endif
 /* }}} */
 
 	/* {{{ Set the server handle in the service handle */
@@ -2418,9 +2364,7 @@ static int php_oci_old_create_session(php_oci_connection *connection, char *dbna
 static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode)
 {
 	php_oci_spool *actual_spool = NULL;
-#if (OCI_MAJOR_VERSION > 10)
 	ub4 purity = -2;				/* Illegal value to initialize */
-#endif
 	time_t timestamp = time(NULL);
 	ub4 statement_cache_size = 0;
 
@@ -2476,7 +2420,6 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		}
 
 		/* Set the Connection class and purity if OCI client version >= 11g */
-#if (OCI_MAJOR_VERSION > 10)
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->authinfo,(ub4) OCI_HTYPE_SESSION, (dvoid *) OCI_G(connection_class), (ub4)(strlen(OCI_G(connection_class))), (ub4)OCI_ATTR_CONNECTION_CLASS, OCI_G(err)));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
@@ -2495,7 +2438,6 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 			php_oci_error(OCI_G(err), OCI_G(errcode));
 			return 1;
 		}
-#endif
 	}
 	/* }}} */
 

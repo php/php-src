@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <assert.h>
+#include <limits.h>
 
 #if defined(_MSC_VER)
 # define strtoll(s, f, b) _atoi64(s)
@@ -165,6 +166,14 @@ static const timelib_tz_lookup_table timelib_timezone_fallbackmap[] = {
 static const timelib_tz_lookup_table timelib_timezone_utc[] = {
 	{ "utc", 0, 0, "UTC" },
 };
+
+#if defined(_POSIX_TZNAME_MAX)
+# define MAX_ABBR_LEN _POSIX_TZNAME_MAX
+#elif defined(TZNAME_MAX)
+# define MAX_ABBR_LEN TZNAME_MAX
+#else
+# define MAX_ABBR_LEN 6
+#endif
 
 static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "ms",           TIMELIB_MICROSEC, 1000 },
@@ -331,44 +340,57 @@ uchar *fill(Scanner *s, uchar *cursor){
 }
 #endif
 
+static timelib_error_message *alloc_error_message(timelib_error_message **messages, int *count)
+{
+	/* Realloc in power of two increments */
+	int is_pow2 = (*count & (*count - 1)) == 0;
+
+	if (is_pow2) {
+		size_t alloc_size = *count ? (*count * 2) : 1;
+
+		*messages = timelib_realloc(*messages, alloc_size * sizeof(timelib_error_message));
+	}
+	return *messages + (*count)++;
+}
+
 static void add_warning(Scanner *s, int error_code, char *error)
 {
-	s->errors->warning_count++;
-	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
-	s->errors->warning_messages[s->errors->warning_count - 1].error_code = error_code;
-	s->errors->warning_messages[s->errors->warning_count - 1].position = s->tok ? s->tok - s->str : 0;
-	s->errors->warning_messages[s->errors->warning_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
+	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
+
+	message->error_code = error_code;
+	message->position = s->tok ? s->tok - s->str : 0;
+	message->character = s->tok ? *s->tok : 0;
+	message->message = timelib_strdup(error);
 }
 
 static void add_error(Scanner *s, int error_code, char *error)
 {
-	s->errors->error_count++;
-	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
-	s->errors->error_messages[s->errors->error_count - 1].error_code = error_code;
-	s->errors->error_messages[s->errors->error_count - 1].position = s->tok ? s->tok - s->str : 0;
-	s->errors->error_messages[s->errors->error_count - 1].character = s->tok ? *s->tok : 0;
-	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
+	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+
+	message->error_code = error_code;
+	message->position = s->tok ? s->tok - s->str : 0;
+	message->character = s->tok ? *s->tok : 0;
+	message->message = timelib_strdup(error);
 }
 
 static void add_pbf_warning(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
 {
-	s->errors->warning_count++;
-	s->errors->warning_messages = timelib_realloc(s->errors->warning_messages, s->errors->warning_count * sizeof(timelib_error_message));
-	s->errors->warning_messages[s->errors->warning_count - 1].error_code = error_code;
-	s->errors->warning_messages[s->errors->warning_count - 1].position = cptr - sptr;
-	s->errors->warning_messages[s->errors->warning_count - 1].character = *cptr;
-	s->errors->warning_messages[s->errors->warning_count - 1].message = timelib_strdup(error);
+	timelib_error_message *message = alloc_error_message(&s->errors->warning_messages, &s->errors->warning_count);
+
+	message->error_code = error_code;
+	message->position = cptr - sptr;
+	message->character = *cptr;
+	message->message = timelib_strdup(error);
 }
 
 static void add_pbf_error(Scanner *s, int error_code, char *error, const char *sptr, const char *cptr)
 {
-	s->errors->error_count++;
-	s->errors->error_messages = timelib_realloc(s->errors->error_messages, s->errors->error_count * sizeof(timelib_error_message));
-	s->errors->error_messages[s->errors->error_count - 1].error_code = error_code;
-	s->errors->error_messages[s->errors->error_count - 1].position = cptr - sptr;
-	s->errors->error_messages[s->errors->error_count - 1].character = *cptr;
-	s->errors->error_messages[s->errors->error_count - 1].message = timelib_strdup(error);
+	timelib_error_message *message = alloc_error_message(&s->errors->error_messages, &s->errors->error_count);
+
+	message->error_code = error_code;
+	message->position = cptr - sptr;
+	message->character = *cptr;
+	message->message = timelib_strdup(error);
 }
 
 static timelib_sll timelib_meridian(const char **ptr, timelib_sll h)
@@ -734,7 +756,7 @@ static timelib_long timelib_lookup_abbr(const char **ptr, int *dst, char **tz_ab
 	word = timelib_calloc(1, end - begin + 1);
 	memcpy(word, begin, end - begin);
 
-	if ((tp = abbr_search(word, -1, 0))) {
+	if (end - begin < MAX_ABBR_LEN && (tp = abbr_search(word, -1, 0))) {
 		value = tp->gmtoffset;
 		*dst = tp->type;
 		value -= tp->type * 3600;

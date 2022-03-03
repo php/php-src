@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -31,7 +31,6 @@
 #include "sysvsem_arginfo.h"
 #include "php_sysvsem.h"
 #include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
 
 #if !HAVE_SEMUN
 
@@ -151,13 +150,8 @@ static void sysvsem_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(sysvsem)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
-	sysvsem_ce = zend_register_internal_class(&ce);
-	sysvsem_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	sysvsem_ce = register_class_SysvSemaphore();
 	sysvsem_ce->create_object = sysvsem_create_object;
-	sysvsem_ce->serialize = zend_class_serialize_deny;
-	sysvsem_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvsem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvsem_object_handlers.offset = XtOffsetOf(sysvsem_sem, std);
@@ -189,7 +183,7 @@ PHP_MINFO_FUNCTION(sysvsem)
 PHP_FUNCTION(sem_get)
 {
 	zend_long key, max_acquire = 1, perm = 0666;
-	zend_bool auto_release = 1;
+	bool auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
@@ -299,7 +293,7 @@ PHP_FUNCTION(sem_get)
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	zval *arg_id;
-	zend_bool nowait = 0;
+	bool nowait = 0;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 

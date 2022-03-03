@@ -1,5 +1,7 @@
 --TEST--
 Bug #80742 (Opcache JIT makes some boolean logic unexpectedly be true)
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 

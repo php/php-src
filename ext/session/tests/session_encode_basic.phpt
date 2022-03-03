@@ -2,6 +2,8 @@
 Test session_encode() function : basic functionality
 --INI--
 serialize_precision=100
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

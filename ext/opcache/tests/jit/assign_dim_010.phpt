@@ -10,7 +10,7 @@ opcache.jit_buffer_size=1M
 function test() {
     for($i=0; $i<10; $i++) {
         $a[] &= $y;
-        $a = false;
+        $a = null;
         $a[] =& $y;
      }
 }

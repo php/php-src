@@ -1,5 +1,7 @@
 --TEST--
 DBA FirstKey/NextKey with 2 deletes
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');

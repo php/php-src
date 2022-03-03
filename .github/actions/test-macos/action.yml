@@ -1,0 +1,20 @@
+name: Test
+inputs:
+  runTestsParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        export SKIP_IO_CAPTURE_TESTS=1
+        export CI_NO_IPV6=1
+        sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -j$(sysctl -n hw.ncpu) \
+          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          --offline \
+          --show-diff \
+          --show-slow 1000 \
+          --set-timeout 120

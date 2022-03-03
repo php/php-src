@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -95,12 +95,9 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
  */
 void msgformat_register_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'MessageFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "MessageFormatter", class_MessageFormatter_methods );
-	ce.create_object = MessageFormatter_object_create;
-	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
+	MessageFormatter_ce_ptr = register_class_MessageFormatter();
+	MessageFormatter_ce_ptr->create_object = MessageFormatter_object_create;
 
 	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);

@@ -95,6 +95,7 @@ jobs:
           exit 1
         fi
       displayName: 'Test PHPUnit'
+      condition: or(succeeded(), failed())
     - script: |
         php8.0 /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress
         cd symfony_demo

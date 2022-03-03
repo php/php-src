@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -137,10 +137,9 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	zend_stack handlers;
 	php_output_handler *active;
 	php_output_handler *running;
-	const char *output_start_filename; /* TODO: Unused, remove */
+	zend_string *output_start_filename;
 	int output_start_lineno;
 	int flags;
-	zend_string *output_start_filename_str;
 ZEND_END_MODULE_GLOBALS(output)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output)
@@ -241,23 +240,5 @@ PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *hand
 PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t handler_name_len, php_output_handler_alias_ctor_t func);
 
 END_EXTERN_C()
-
-
-PHP_FUNCTION(ob_start);
-PHP_FUNCTION(ob_flush);
-PHP_FUNCTION(ob_clean);
-PHP_FUNCTION(ob_end_flush);
-PHP_FUNCTION(ob_end_clean);
-PHP_FUNCTION(ob_get_flush);
-PHP_FUNCTION(ob_get_clean);
-PHP_FUNCTION(ob_get_contents);
-PHP_FUNCTION(ob_get_length);
-PHP_FUNCTION(ob_get_level);
-PHP_FUNCTION(ob_get_status);
-PHP_FUNCTION(ob_implicit_flush);
-PHP_FUNCTION(ob_list_handlers);
-
-PHP_FUNCTION(output_add_rewrite_var);
-PHP_FUNCTION(output_reset_rewrite_vars);
 
 #endif

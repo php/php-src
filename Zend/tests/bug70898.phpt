@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-array_map(): Argument #1 ($callback) must be a valid callback, function "0000000000000000000000000000000000" not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback or null, function "0000000000000000000000000000000000" not found or invalid function name

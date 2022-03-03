@@ -14,7 +14,7 @@ web development. Fast, flexible and pragmatic, PHP powers everything from your
 blog to the most popular websites in the world. PHP is distributed under the
 [PHP License v3.01](LICENSE).
 
-[![Build status](https://travis-ci.org/php/php-src.svg?branch=master)](https://travis-ci.org/php/php-src)
+[![Build status](https://travis-ci.com/php/php-src.svg?branch=master)](https://travis-ci.com/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy/branch/master?svg=true)](https://ci.appveyor.com/project/php/php-src)
 [![Build Status](https://dev.azure.com/phpazuredevops/php/_apis/build/status/php.php-src?branchName=master)](https://dev.azure.com/phpazuredevops/php/_build/latest?definitionId=1&branchName=master)
 [![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
@@ -40,11 +40,16 @@ For other systems, see the [installation chapter](https://php.net/install).
 *For Windows, see [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).*
 
 For a minimal PHP build from Git, you will need autoconf, bison, and re2c. For
-a default build, you will additionally need libxml2 and libsqlite3. On Ubuntu,
-you can install these using:
+a default build, you will additionally need libxml2 and libsqlite3.
+
+On Ubuntu, you can install these using:
 
     sudo apt install -y pkg-config build-essential autoconf bison re2c \
                         libxml2-dev libsqlite3-dev
+
+On Fedora, you can install these using:
+
+    sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
 
 Generate configure:
 
@@ -127,7 +132,7 @@ contribute:
 
 - [Contributing to PHP](/CONTRIBUTING.md)
 - [PHP coding standards](/CODING_STANDARDS.md)
-- [Mailinglist rules](/docs/mailinglist-rules.md)
+- [Mailing list rules](/docs/mailinglist-rules.md)
 - [PHP release process](/docs/release-process.md)
 
 ## Credits

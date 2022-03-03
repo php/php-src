@@ -1,7 +1,7 @@
 --TEST--
 Bug #51250 (iconv_mime_decode() does not ignore malformed Q-encoded words)
---SKIPIF--
-<?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 $m = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;

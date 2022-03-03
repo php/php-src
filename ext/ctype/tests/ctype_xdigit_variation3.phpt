@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_xdigit() function : usage variations - Different strings
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+ctype
 --FILE--
 <?php
 /*

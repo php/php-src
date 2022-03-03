@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -21,14 +21,14 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 {
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
 	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
 	zend_long method = CAL_EASTER_DEFAULT;
-	zend_bool year_is_null = 1;
+	bool year_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|l!l", &year, &year_is_null, &method) == FAILURE) {
@@ -112,19 +112,19 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 	} else {							/* return the days after March 21 */
 	    result = easter;
 	}
-    ZVAL_LONG(return_value, result);
+	ZVAL_LONG(return_value, result);
 }
 
 /* {{{ Return the timestamp of midnight on Easter of a given year (defaults to current year) */
 PHP_FUNCTION(easter_date)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */

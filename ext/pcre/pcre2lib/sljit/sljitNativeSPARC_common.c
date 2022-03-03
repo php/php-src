@@ -311,7 +311,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	CHECK_PTR(check_sljit_generate_code(compiler));
 	reverse_buf(compiler);
 
-	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins));
+	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins), compiler->exec_allocator_data);
 	PTR_FAIL_WITH_EXEC_IF(code);
 	buf = compiler->buf;
 
@@ -437,6 +437,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	code_ptr = (sljit_ins *)SLJIT_ADD_EXEC_OFFSET(code_ptr, executable_offset);
 
 	SLJIT_CACHE_FLUSH(code, code_ptr);
+	SLJIT_UPDATE_WX_FLAGS(code, code_ptr, 1);
 	return code;
 }
 
@@ -1274,16 +1275,14 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_label* sljit_emit_label(struct sljit_compi
 	return label;
 }
 
-static sljit_ins get_cc(sljit_s32 type)
+static sljit_ins get_cc(struct sljit_compiler *compiler, sljit_s32 type)
 {
 	switch (type) {
 	case SLJIT_EQUAL:
-	case SLJIT_MUL_NOT_OVERFLOW:
 	case SLJIT_NOT_EQUAL_F64: /* Unordered. */
 		return DA(0x1);
 
 	case SLJIT_NOT_EQUAL:
-	case SLJIT_MUL_OVERFLOW:
 	case SLJIT_EQUAL_F64:
 		return DA(0x9);
 
@@ -1316,10 +1315,16 @@ static sljit_ins get_cc(sljit_s32 type)
 		return DA(0x2);
 
 	case SLJIT_OVERFLOW:
+		if (!(compiler->status_flags_state & SLJIT_CURRENT_FLAGS_ADD_SUB))
+			return DA(0x9);
+
 	case SLJIT_UNORDERED_F64:
 		return DA(0x7);
 
 	case SLJIT_NOT_OVERFLOW:
+		if (!(compiler->status_flags_state & SLJIT_CURRENT_FLAGS_ADD_SUB))
+			return DA(0x1);
+
 	case SLJIT_ORDERED_F64:
 		return DA(0xf);
 
@@ -1346,7 +1351,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 		if (((compiler->delay_slot & DST_INS_MASK) != UNMOVABLE_INS) && !(compiler->delay_slot & ICC_IS_SET))
 			jump->flags |= IS_MOVABLE;
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
-		PTR_FAIL_IF(push_inst(compiler, BICC | get_cc(type ^ 1) | 5, UNMOVABLE_INS));
+		PTR_FAIL_IF(push_inst(compiler, BICC | get_cc(compiler, type ^ 1) | 5, UNMOVABLE_INS));
 #else
 #error "Implementation required"
 #endif
@@ -1356,7 +1361,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 		if (((compiler->delay_slot & DST_INS_MASK) != UNMOVABLE_INS) && !(compiler->delay_slot & FCC_IS_SET))
 			jump->flags |= IS_MOVABLE;
 #if (defined SLJIT_CONFIG_SPARC_32 && SLJIT_CONFIG_SPARC_32)
-		PTR_FAIL_IF(push_inst(compiler, FBFCC | get_cc(type ^ 1) | 5, UNMOVABLE_INS));
+		PTR_FAIL_IF(push_inst(compiler, FBFCC | get_cc(compiler, type ^ 1) | 5, UNMOVABLE_INS));
 #else
 #error "Implementation required"
 #endif
@@ -1473,9 +1478,9 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 
 	type &= 0xff;
 	if (type < SLJIT_EQUAL_F64)
-		FAIL_IF(push_inst(compiler, BICC | get_cc(type) | 3, UNMOVABLE_INS));
+		FAIL_IF(push_inst(compiler, BICC | get_cc(compiler, type) | 3, UNMOVABLE_INS));
 	else
-		FAIL_IF(push_inst(compiler, FBFCC | get_cc(type) | 3, UNMOVABLE_INS));
+		FAIL_IF(push_inst(compiler, FBFCC | get_cc(compiler, type) | 3, UNMOVABLE_INS));
 
 	FAIL_IF(push_inst(compiler, OR | D(reg) | S1(0) | IMM(1), UNMOVABLE_INS));
 	FAIL_IF(push_inst(compiler, OR | D(reg) | S1(0) | IMM(0), UNMOVABLE_INS));

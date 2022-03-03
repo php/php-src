@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -31,7 +31,7 @@
 /* {{{ Sends a raw HTTP header */
 PHP_FUNCTION(header)
 {
-	zend_bool rep = 1;
+	bool rep = 1;
 	sapi_header_line ctr = {0};
 	char *line;
 	size_t len;
@@ -193,7 +193,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 }
 
 static zend_result php_head_parse_cookie_options_array(HashTable *options, zend_long *expires, zend_string **path,
-		zend_string **domain, zend_bool *secure, zend_bool *httponly, zend_string **samesite)
+		zend_string **domain, bool *secure, bool *httponly, zend_string **samesite)
 {
 	zend_string *key;
 	zval *value;
@@ -228,7 +228,7 @@ static void php_setcookie_common(INTERNAL_FUNCTION_PARAMETERS, bool is_raw)
 	HashTable *options = NULL;
 	zend_long expires = 0;
 	zend_string *name, *value = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
-	zend_bool secure = 0, httponly = 0;
+	bool secure = 0, httponly = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 7)
 		Z_PARAM_STR(name)
@@ -313,6 +313,7 @@ PHP_FUNCTION(headers_sent)
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		ZEND_TRY_ASSIGN_REF_LONG(arg2, line);
+		ZEND_FALLTHROUGH;
 	case 1:
 		if (file) {
 			ZEND_TRY_ASSIGN_REF_STRING(arg1, file);

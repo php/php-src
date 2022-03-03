@@ -1,10 +1,7 @@
 --TEST--
 Test iconv_get_encoding()/iconv_set_encoding() function : basic functionality
---SKIPIF--
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not available in this build");
-?>
+--EXTENSIONS--
+iconv
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 input_encoding=ISO-8859-1

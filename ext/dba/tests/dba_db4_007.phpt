@@ -1,5 +1,7 @@
 --TEST--
 DBA DB4 File Creation popen("c") with existing invalid file
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";
@@ -35,5 +37,5 @@ require(__DIR__ .'/clean.inc');
 database handler: db4
 int(14)
 
-Warning: dba_popen(%stest0.dbm,c): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_007.php on line %d
+Warning: dba_popen(): Driver initialization failed for handler: db4: Invalid argument in %sdba_db4_007.php on line %d
 Error creating %stest0.dbm

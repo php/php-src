@@ -111,12 +111,14 @@ test: all
 
 clean:
 	find . -name \*.gcno -o -name \*.gcda | xargs rm -f
-	find . -name \*.lo -o -name \*.o | xargs rm -f
+	find . -name \*.lo -o -name \*.o -o -name \*.dep | xargs rm -f
 	find . -name \*.la -o -name \*.a | xargs rm -f
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
 	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
 	rm -f ext/opcache/jit/zend_jit_x86.c
+	rm -f ext/opcache/jit/zend_jit_arm64.c
+	rm -f ext/opcache/minilua
 
 distclean: clean
 	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h
@@ -142,23 +144,16 @@ prof-clean:
 prof-use:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
 
-# only php above 7.1.0 supports nullable return type
 %_arginfo.h: %.stub.php
 	@if test -e "$(top_srcdir)/build/gen_stub.php"; then \
-		if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+		if test ! -z "$(PHP)"; then \
+			echo Parse $< to generate $@;\
+			$(PHP) $(top_srcdir)/build/gen_stub.php $<; \
+		elif test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
 			echo Parse $< to generate $@;\
 			$(PHP_EXECUTABLE) $(top_srcdir)/build/gen_stub.php $<; \
-		elif type php >/dev/null 2>/dev/null; then \
-			if test `php -v | head -n1 | cut -d" " -f 2 | sed "s/$$/\n7.0.99/" | sort -rV | head -n1` != "7.0.99"; then \
-				echo Parse $< to generate $@;\
-				php $(top_srcdir)/build/gen_stub.php $<; \
-			fi; \
 		fi; \
 	fi;
-
-# As we don't track includes, this is just a heuristic
-%.c: %_arginfo.h
-	@touch $@
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:

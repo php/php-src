@@ -1,7 +1,7 @@
 --TEST--
 Bug #29839 (incorrect convert (xml:lang to lang))
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -12,6 +12,7 @@ function EchoString($s) {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
@@ -19,7 +20,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction('EchoString');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

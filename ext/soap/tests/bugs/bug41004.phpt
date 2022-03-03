@@ -1,7 +1,7 @@
 --TEST--
 Bug #41004 (minOccurs="0" and null class member variable)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --FILE--
 <?php
 ini_set('soap.wsdl_cache_enabled', false);

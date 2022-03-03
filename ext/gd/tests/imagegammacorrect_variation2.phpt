@@ -1,9 +1,7 @@
 --TEST--
 Apply imagegammacorrect() to a step wedge
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 require __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';

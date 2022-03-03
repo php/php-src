@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -63,12 +63,9 @@ zend_object *Collator_object_create(zend_class_entry *ce )
  */
 void collator_register_Collator_class( void )
 {
-	zend_class_entry ce;
-
 	/* Create and register 'Collator' class. */
-	INIT_CLASS_ENTRY( ce, "Collator", class_Collator_methods );
-	ce.create_object = Collator_object_create;
-	Collator_ce_ptr = zend_register_internal_class( &ce );
+	Collator_ce_ptr = register_class_Collator();
+	Collator_ce_ptr->create_object = Collator_object_create;
 
 	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);

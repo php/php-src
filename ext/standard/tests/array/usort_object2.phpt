@@ -129,30 +129,30 @@ bool(true)
 array(4) {
   [0]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(15)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(15)
   }
   [1]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(20)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(20)
   }
   [2]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(500)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(500)
   }
   [3]=>
   object(ChildClass)#%d (2) {
-    ["child_value"]=>
-    int(700)
     ["pub_value"]=>
     NULL
+    ["child_value"]=>
+    int(700)
   }
 }

@@ -1,19 +1,21 @@
 --TEST--
 ensure an error is returned when mysqli.allow_local_infile is off
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
 $link = mysqli_init();
-if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf("skip Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+if (!@my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 
-require_once('local_infile_tools.inc');
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_support($link, $engine))
     die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
+mysqli_close($link);
 ?>
 --INI--
 mysqli.allow_local_infile=0
@@ -54,7 +56,6 @@ if (!$link->query('DROP TABLE IF EXISTS test')) {
 $link->close();
 unlink('bug77956.data');
 ?>
---EXPECTF--
-Warning: mysqli::query(): LOAD DATA LOCAL INFILE forbidden in %s on line %d
-[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check mysqli.allow_local_infile
+--EXPECT--
+[006] [2000] LOAD DATA LOCAL INFILE is forbidden, check related settings like mysqli.allow_local_infile|mysqli.local_infile_directory or PDO::MYSQL_ATTR_LOCAL_INFILE|PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY
 done

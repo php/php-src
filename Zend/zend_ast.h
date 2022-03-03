@@ -62,6 +62,7 @@ enum _zend_ast_kind {
 	ZEND_AST_TRAIT_ADAPTATIONS,
 	ZEND_AST_USE,
 	ZEND_AST_TYPE_UNION,
+	ZEND_AST_TYPE_INTERSECTION,
 	ZEND_AST_ATTRIBUTE_LIST,
 	ZEND_AST_ATTRIBUTE_GROUP,
 	ZEND_AST_MATCH_ARM_LIST,
@@ -70,6 +71,7 @@ enum _zend_ast_kind {
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TYPE,
 	ZEND_AST_CONSTANT_CLASS,
+	ZEND_AST_CALLABLE_CONVERT,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -160,9 +162,13 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
 
+	// Pseudo node for initializing enums
+	ZEND_AST_CONST_ENUM_INIT,
+
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_FOREACH,
+	ZEND_AST_ENUM_CASE,
 
 	/* 5 child nodes */
 	ZEND_AST_PARAM = 5 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -298,14 +304,18 @@ ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
-typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
+typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
-static zend_always_inline zend_bool zend_ast_is_special(zend_ast *ast) {
+static zend_always_inline size_t zend_ast_size(uint32_t children) {
+	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
+}
+
+static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_SPECIAL_SHIFT) & 1;
 }
 
-static zend_always_inline zend_bool zend_ast_is_list(zend_ast *ast) {
+static zend_always_inline bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;
 }
 static zend_always_inline zend_ast_list *zend_ast_get_list(zend_ast *ast) {
@@ -345,6 +355,9 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
+
+zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1);
+
 static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }

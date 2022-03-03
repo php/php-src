@@ -1,22 +1,26 @@
 --TEST--
 Fetching BIT column values using the PS API
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
-    require_once('skipifconnectfailure.inc');
+if (!function_exists('mysqli_stmt_get_result')) {
+    die("skip mysqli_stmt_get_result() not available");
+}
 
-    if (!function_exists('mysqli_stmt_get_result'))
-        die("skip mysqli_stmt_get_result() not available");
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
 
-    require_once('connect.inc');
-    require_once('table.inc');
-    if (mysqli_get_server_version($link) < 50003)
-        // b'001' syntax not supported before 5.0.3
-        die("skip Syntax used for test not supported with MySQL Server before 5.0.3");
+if (mysqli_get_server_version($link) < 50003) {
+    // b'001' syntax not supported before 5.0.3
+    die("skip Syntax used for test not supported with MySQL Server before 5.0.3");
+}
 ?>
 --FILE--
 <?php
-    require('connect.inc');
+    require_once 'connect.inc';
 
     function dec32bin($dec, $bits) {
 
@@ -123,7 +127,7 @@ Fetching BIT column values using the PS API
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 done!

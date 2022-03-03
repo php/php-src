@@ -1,8 +1,9 @@
 --TEST--
 PDO MySQL Bug #41997 (stored procedure call returning single rowset blocks future queries)
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
@@ -21,6 +22,7 @@ if ($version < 50000)
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $db->exec('DROP PROCEDURE IF EXISTS p');
 $db->exec('CREATE PROCEDURE p() BEGIN SELECT 1 AS "one"; END');
@@ -35,6 +37,12 @@ $stmt = $db->query('SELECT 2 AS "two"');
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 var_dump($stmt->errorInfo());
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP PROCEDURE IF EXISTS p");
 ?>
 --EXPECT--
 array(1) {

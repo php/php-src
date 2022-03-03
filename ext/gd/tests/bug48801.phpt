@@ -1,8 +1,9 @@
 --TEST--
 Bug #48801 (Problem with imagettfbbox)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if(!extension_loaded('gd')){ die('skip gd extension not available'); }
     if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
 ?>
 --FILE--

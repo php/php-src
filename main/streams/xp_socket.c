@@ -5,7 +5,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -75,7 +75,8 @@ retry:
 	if (didwrite <= 0) {
 		char *estr;
 		int err = php_socket_errno();
-		if (err == EWOULDBLOCK || err == EAGAIN) {
+
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			if (sock->is_blocked) {
 				int retval;
 
@@ -162,14 +163,14 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	if (sock->is_blocked) {
 		php_sock_stream_wait_for_data(stream, sock);
 		if (sock->timeout_event)
-			return 0;
+			return -1;
 	}
 
 	nr_bytes = recv(sock->socket, buf, XP_SOCK_BUF_SIZE(count), (sock->is_blocked && sock->timeout.tv_sec != -1) ? MSG_DONTWAIT : 0);
 	err = php_socket_errno();
 
 	if (nr_bytes < 0) {
-		if (err == EAGAIN || err == EWOULDBLOCK) {
+		if (PHP_IS_TRANSIENT_ERROR(err)) {
 			nr_bytes = 0;
 		} else {
 			stream->eof = 1;
@@ -815,7 +816,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		php_stream_xport_param *xparam STREAMS_DC)
 {
 	int clisock;
-	zend_bool nodelay = 0;
+	bool nodelay = 0;
 	zval *tmpzval = NULL;
 
 	xparam->outputs.client = NULL;

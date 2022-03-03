@@ -1,9 +1,9 @@
 --TEST--
 Bug #62915: cloning of several classes is defective
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl'))
-        die('skip intl extension not enabled');
 if (!class_exists('Spoofchecker'))
         die('skip intl extension does not have spoof checker');
 --FILE--

@@ -19,7 +19,6 @@ for ($i = 0; $i < 30; ++$i) {
 function is_pipeline($pipeline): bool {
         foreach ($pipeline as $stage) {
                 if (!is_array($stage)) {
-                		var_dump($stage);
                         return false; // must never happen
                 }
 

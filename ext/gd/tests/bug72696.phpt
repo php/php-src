@@ -1,9 +1,7 @@
 --TEST--
 Bug #72696 (imagefilltoborder stackoverflow on truecolor images)
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(10, 10);

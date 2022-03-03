@@ -1,5 +1,7 @@
 --TEST--
 Bug #49125 (Error in dba_exists C code)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'db4';

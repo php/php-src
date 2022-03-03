@@ -5,12 +5,6 @@ PHP_ARG_ENABLE([phpdbg],
   [yes],
   [yes])
 
-PHP_ARG_ENABLE([phpdbg-webhelper],
-  [for phpdbg web SAPI support],
-  [AS_HELP_STRING([--enable-phpdbg-webhelper],
-    [Build phpdbg web SAPI support])],
-  [no])
-
 PHP_ARG_ENABLE([phpdbg-debug],
   [for phpdbg debug build],
   [AS_HELP_STRING([--enable-phpdbg-debug],
@@ -36,7 +30,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_wait.c phpdbg_io.c phpdbg_eol.c phpdbg_out.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_io.c phpdbg_out.c"
 
   AC_MSG_CHECKING([for phpdbg and readline integration])
   if test "$PHP_PHPDBG_READLINE" = "yes"; then
@@ -49,6 +43,36 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
     fi
   else
     AC_MSG_RESULT([disabled])
+  fi
+
+  AC_CACHE_CHECK([for userfaultfd faulting on write-protected memory support], ac_cv_phpdbg_userfaultfd_writefault, AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+    #include <linux/userfaultfd.h>
+    #ifndef UFFDIO_WRITEPROTECT_MODE_WP
+    # error userfaults on write-protected memory not supported
+    #endif
+  ]])], [ac_cv_phpdbg_userfaultfd_writefault=yes], [ac_cv_phpdbg_userfaultfd_writefault=no]))
+  if test "$ac_cv_phpdbg_userfaultfd_writefault" = "yes"; then
+    if test "$enable_zts" != "yes"; then
+      CFLAGS_SAVE="$CFLAGS"
+      LIBS_SAVE="$LIBS"
+
+      PTHREADS_CHECK
+      AC_MSG_CHECKING([working pthreads]);
+
+      if test "$pthreads_working" = "yes"; then
+      	AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib]);
+      	PHP_PHPDBG_CFLAGS="$PHP_PHPDBG_CFLAGS $ac_cv_pthreads_cflags"
+      	PHPDBG_EXTRA_LIBS="$PHPDBG_EXTRA_LIBS -l$ac_cv_pthreads_lib"
+      	AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
+      else
+        AC_MSG_WARN([pthreads not available])
+      fi
+
+      CFLAGS="$CFLAGS_SAVE"
+      LIBS="$LIBS_SAVE"
+    else
+      AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
+    fi
   fi
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
@@ -89,8 +113,4 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST(BUILD_PHPDBG_SHARED)
 
   PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
-fi
-
-if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
-  PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
 fi

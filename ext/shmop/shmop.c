@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -23,7 +23,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "Zend/zend_interfaces.h"
 #include "php_shmop.h"
 #include "shmop_arginfo.h"
 
@@ -66,7 +65,7 @@ typedef struct php_shmop
 	int shmatflg;
 	char *addr;
 	zend_long size;
-  zend_object std;
+	zend_object std;
 } php_shmop;
 
 zend_class_entry *shmop_ce;
@@ -108,13 +107,8 @@ static void shmop_free_obj(zend_object *object)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(shmop)
 {
-	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
-	shmop_ce = zend_register_internal_class(&ce);
-	shmop_ce->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	shmop_ce = register_class_Shmop();
 	shmop_ce->create_object = shmop_create_object;
-	shmop_ce->serialize = zend_class_serialize_deny;
-	shmop_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	shmop_object_handlers.offset = XtOffsetOf(php_shmop, std);

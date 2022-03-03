@@ -23,6 +23,10 @@ Warning: Undefined variable $a in %sbool_not_002.php on line 6
 
 Warning: Undefined variable $a in %sbool_not_002.php on line 6
 
+Deprecated: Implicit conversion from float %f to int loses precision in %sbool_not_002.php on line 6
+
+Deprecated: Implicit conversion from float %f to int loses precision in %sbool_not_002.php on line 6
+
 Fatal error: Uncaught ArithmeticError: Bit shift by negative number in %sbool_not_002.php:6
 Stack trace:
 #0 %sbool_not_002.php(10): test()

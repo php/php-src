@@ -1,17 +1,13 @@
 --TEST--
 SOAP Interop Round2 base 015 (php/direct): echoStructArray
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 precision=14
 --FILE--
 <?php
 class SOAPStruct {
-    function __construct($s, $i, $f) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-    }
+    function __construct(public $varString, public $varInt, public $varFloat) {}
 }
 
 $struct1 = new SOAPStruct('arg',34,325.325);

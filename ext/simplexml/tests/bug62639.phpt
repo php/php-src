@@ -1,9 +1,7 @@
 --TEST--
 Bug #62639 (XML structure broken)
---SKIPIF--
-<?php
-if (!extension_loaded("simplexml")) die("skip SimpleXML not available");
-?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

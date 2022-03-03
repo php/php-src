@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.107 2020/06/08 19:58:36 christos Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.109 2021/02/05 23:01:40 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -50,7 +50,8 @@ FILE_RCSID("@(#)$File: ascmagic.c,v 1.107 2020/06/08 19:58:36 christos Exp $")
 #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \
 		  || (x) == 0x85 || (x) == '\f')
 
-private unsigned char *encode_utf8(unsigned char *, size_t, unicodechar *, size_t);
+private unsigned char *encode_utf8(unsigned char *, size_t, file_unichar_t *,
+    size_t);
 private size_t trim_nuls(const unsigned char *, size_t);
 
 /*
@@ -69,7 +70,7 @@ trim_nuls(const unsigned char *buf, size_t nbytes)
 protected int
 file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 {
-	unicodechar *ubuf = NULL;
+	file_unichar_t *ubuf = NULL;
 	size_t ulen = 0;
 	int rv = 1;
 	struct buffer bb;
@@ -101,9 +102,9 @@ file_ascmagic(struct magic_set *ms, const struct buffer *b, int text)
 }
 
 protected int
-file_ascmagic_with_encoding(struct magic_set *ms,
-    const struct buffer *b, unicodechar *ubuf, size_t ulen, const char *code,
-    const char *type, int text)
+file_ascmagic_with_encoding(struct magic_set *ms, const struct buffer *b,
+    file_unichar_t *ubuf, size_t ulen, const char *code, const char *type,
+    int text)
 {
 	struct buffer bb;
 	const unsigned char *buf = CAST(const unsigned char *, b->fbuf);
@@ -127,7 +128,7 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 	int executable = 0;
 
 	size_t last_line_end = CAST(size_t, -1);
-	int has_long_lines = 0;
+	size_t has_long_lines = 0;
 
 	nbytes = trim_nuls(buf, nbytes);
 
@@ -190,8 +191,11 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 		}
 
 		/* If this line is _longer_ than MAXLINELEN, remember it. */
-		if (i > last_line_end + MAXLINELEN)
-			has_long_lines = 1;
+		if (i > last_line_end + MAXLINELEN) {
+			size_t ll = i - last_line_end;
+			if (ll > has_long_lines)
+				has_long_lines = ll;
+		}
 
 		if (ubuf[i] == '\033')
 			has_escapes = 1;
@@ -269,7 +273,8 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 				goto done;
 
 		if (has_long_lines)
-			if (file_printf(ms, ", with very long lines") == -1)
+			if (file_printf(ms, ", with very long lines (%zu)",
+			    has_long_lines) == -1)
 				goto done;
 
 		/*
@@ -281,7 +286,8 @@ file_ascmagic_with_encoding(struct magic_set *ms,
 			if (file_printf(ms, ", with") == -1)
 				goto done;
 
-			if (n_crlf == 0 && n_cr == 0 && n_nel == 0 && n_lf == 0) {
+			if (n_crlf == 0 && n_cr == 0 &&
+			    n_nel == 0 && n_lf == 0) {
 				if (file_printf(ms, " no") == -1)
 					goto done;
 			} else {
@@ -335,7 +341,7 @@ done:
  * after end of string, or NULL if an invalid character is found.
  */
 private unsigned char *
-encode_utf8(unsigned char *buf, size_t len, unicodechar *ubuf, size_t ulen)
+encode_utf8(unsigned char *buf, size_t len, file_unichar_t *ubuf, size_t ulen)
 {
 	size_t i;
 	unsigned char *end = buf + len;
@@ -345,43 +351,45 @@ encode_utf8(unsigned char *buf, size_t len, unicodechar *ubuf, size_t ulen)
 			if (end - buf < 1)
 				return NULL;
 			*buf++ = CAST(unsigned char, ubuf[i]);
-		} else if (ubuf[i] <= 0x7ff) {
+			continue;
+		} 
+		if (ubuf[i] <= 0x7ff) {
 			if (end - buf < 2)
 				return NULL;
 			*buf++ = CAST(unsigned char, (ubuf[i] >> 6) + 0xc0);
-			*buf++ = CAST(unsigned char, (ubuf[i] & 0x3f) + 0x80);
-		} else if (ubuf[i] <= 0xffff) {
+			goto out1;
+		}
+		if (ubuf[i] <= 0xffff) {
 			if (end - buf < 3)
 				return NULL;
 			*buf++ = CAST(unsigned char, (ubuf[i] >> 12) + 0xe0);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 6) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, (ubuf[i] & 0x3f) + 0x80);
-		} else if (ubuf[i] <= 0x1fffff) {
+			goto out2;
+		}
+		if (ubuf[i] <= 0x1fffff) {
 			if (end - buf < 4)
 				return NULL;
 			*buf++ = CAST(unsigned char, (ubuf[i] >> 18) + 0xf0);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 12) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >>  6) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, (ubuf[i] & 0x3f) + 0x80);
-		} else if (ubuf[i] <= 0x3ffffff) {
+			goto out3;
+		}
+		if (ubuf[i] <= 0x3ffffff) {
 			if (end - buf < 5)
 				return NULL;
 			*buf++ = CAST(unsigned char, (ubuf[i] >> 24) + 0xf8);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 18) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 12) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >>  6) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, (ubuf[i] & 0x3f) + 0x80);
-		} else if (ubuf[i] <= 0x7fffffff) {
+			goto out4;
+		} 
+		if (ubuf[i] <= 0x7fffffff) {
 			if (end - buf < 6)
 				return NULL;
 			*buf++ = CAST(unsigned char, (ubuf[i] >> 30) + 0xfc);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 24) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 18) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >> 12) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, ((ubuf[i] >>  6) & 0x3f) + 0x80);
-			*buf++ = CAST(unsigned char, (ubuf[i] & 0x3f) + 0x80);
-		} else /* Invalid character */
-			return NULL;
+			goto out5;
+		} 
+		/* Invalid character */
+		return NULL;
+	out5:	*buf++ = CAST(unsigned char, ((ubuf[i] >> 24) & 0x3f) + 0x80);
+	out4:	*buf++ = CAST(unsigned char, ((ubuf[i] >> 18) & 0x3f) + 0x80);
+	out3:	*buf++ = CAST(unsigned char, ((ubuf[i] >> 12) & 0x3f) + 0x80);
+	out2:	*buf++ = CAST(unsigned char, ((ubuf[i] >>  6) & 0x3f) + 0x80);
+	out1:	*buf++ = CAST(unsigned char, ((ubuf[i] >>  0) & 0x3f) + 0x80);
 	}
 
 	return buf;

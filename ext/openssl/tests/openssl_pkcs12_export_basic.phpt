@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs12_export() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert_file = __DIR__ . "/public.crt";

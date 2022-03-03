@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -103,20 +103,20 @@ static size_t (*php_output_direct)(const char *str, size_t str_len) = php_output
 static void php_output_header(void)
 {
 	if (!SG(headers_sent)) {
-		if (!OG(output_start_filename_str)) {
+		if (!OG(output_start_filename)) {
 			if (zend_is_compiling()) {
-				OG(output_start_filename_str) = zend_get_compiled_filename();
+				OG(output_start_filename) = zend_get_compiled_filename();
 				OG(output_start_lineno) = zend_get_compiled_lineno();
 			} else if (zend_is_executing()) {
-				OG(output_start_filename_str) = zend_get_executed_filename_ex();
+				OG(output_start_filename) = zend_get_executed_filename_ex();
 				OG(output_start_lineno) = zend_get_executed_lineno();
 			}
-			if (OG(output_start_filename_str)) {
-				zend_string_addref(OG(output_start_filename_str));
+			if (OG(output_start_filename)) {
+				zend_string_addref(OG(output_start_filename));
 			}
 #if PHP_OUTPUT_DEBUG
 			fprintf(stderr, "!!! output started at: %s (%d)\n",
-				ZSTR_VAL(OG(output_start_filename_str)), OG(output_start_lineno));
+				ZSTR_VAL(OG(output_start_filename)), OG(output_start_lineno));
 #endif
 		}
 		if (!php_header()) {
@@ -195,9 +195,9 @@ PHPAPI void php_output_deactivate(void)
 		zend_stack_destroy(&OG(handlers));
 	}
 
-	if (OG(output_start_filename_str)) {
-		zend_string_release(OG(output_start_filename_str));
-		OG(output_start_filename_str) = NULL;
+	if (OG(output_start_filename)) {
+		zend_string_release(OG(output_start_filename));
+		OG(output_start_filename) = NULL;
 	}
 }
 /* }}} */
@@ -494,6 +494,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				handler = alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags);
 				break;
 			}
+			ZEND_FALLTHROUGH;
 		default:
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
@@ -559,7 +560,7 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 		}
 	}
 	if (NULL != (rconflicts = zend_hash_find_ptr(&php_output_handler_reverse_conflicts, handler->name))) {
-		ZEND_HASH_FOREACH_PTR(rconflicts, conflict) {
+		ZEND_HASH_PACKED_FOREACH_PTR(rconflicts, conflict) {
 			if (SUCCESS != conflict(ZSTR_VAL(handler->name), ZSTR_LEN(handler->name))) {
 				return FAILURE;
 			}
@@ -694,7 +695,7 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 				return SUCCESS;
 			case PHP_OUTPUT_HANDLER_HOOK_GET_LEVEL:
 				*(int *) arg = OG(running)->level;
-                return SUCCESS;
+				return SUCCESS;
 			case PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE:
 				OG(running)->flags &= ~(PHP_OUTPUT_HANDLER_REMOVABLE|PHP_OUTPUT_HANDLER_CLEANABLE);
 				return SUCCESS;
@@ -758,7 +759,7 @@ PHPAPI void php_output_set_implicit_flush(int flush)
  * Get the file name where output has started */
 PHPAPI const char *php_output_get_start_filename(void)
 {
-	return OG(output_start_filename_str) ? ZSTR_VAL(OG(output_start_filename_str)) : NULL;
+	return OG(output_start_filename) ? ZSTR_VAL(OG(output_start_filename)) : NULL;
 }
 /* }}} */
 
@@ -807,7 +808,7 @@ static inline void php_output_context_reset(php_output_context *context)
 
 /* {{{ static void php_output_context_feed(php_output_context *context, char *, size_t, size_t)
  * Feed output contexts input buffer */
-static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, zend_bool free)
+static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, bool free)
 {
 	if (context->in.free && context->in.data) {
 		efree(context->in.data);
@@ -884,7 +885,7 @@ static inline php_output_handler *php_output_handler_init(zend_string *name, siz
 }
 /* }}} */
 
-/* {{{ static int php_output_handler_appen(php_output_handler *handler, const php_output_buffer *buf)
+/* {{{ static int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
  * Appends input to the output handlers buffer and indicates whether the buffer does not have to be processed by the output handler */
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf)
 {
@@ -970,7 +971,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
-					convert_to_string_ex(&retval);
+					convert_to_string(&retval);
 					if (Z_STRLEN(retval)) {
 						context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 						context->out.used = Z_STRLEN(retval);
@@ -1023,7 +1024,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		case PHP_OUTPUT_HANDLER_NO_DATA:
 			/* handler ate all */
 			php_output_context_reset(context);
-			/* no break */
+			ZEND_FALLTHROUGH;
 		case PHP_OUTPUT_HANDLER_SUCCESS:
 			/* no more buffered data */
 			handler->buffer.used = 0;
@@ -1491,7 +1492,7 @@ PHP_FUNCTION(ob_list_handlers)
 /* {{{ Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
 {
-	zend_bool full_status = 0;
+	bool full_status = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_status) == FAILURE) {
 		RETURN_THROWS();

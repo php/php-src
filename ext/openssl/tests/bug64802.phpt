@@ -1,8 +1,9 @@
 --TEST--
 Bug #64802: openssl_x509_parse fails to parse subject properly in some cases
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
 if (!defined('OPENSSL_KEYTYPE_EC')) die("skip no EC available");
 ?>
 --FILE--

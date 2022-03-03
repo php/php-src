@@ -1,9 +1,7 @@
 --TEST--
 Bug #80710 (imap_mail_compose() header injection) - Remail
---SKIPIF--
-<?php
-if (!extension_loaded("imap")) die("skip imap extension not available");
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $envelope["from"]= "joe@example.com\n From : X-INJECTED";

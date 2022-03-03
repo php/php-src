@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO->prepare(), emulated PS
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -11,6 +12,7 @@ $db = MySQLPDOTest::factory();
 <?php
     require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
+    $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     function prepex($offset, &$db, $query, $input_params = null, $error_info = null) {
 

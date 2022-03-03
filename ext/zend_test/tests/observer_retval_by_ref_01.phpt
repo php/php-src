@@ -1,7 +1,7 @@
 --TEST--
 Observer: Retvals by reference are observable that are: IS_CV
---SKIPIF--
-<?php if (!extension_loaded('zend-test')) die('skip: zend-test extension required'); ?>
+--EXTENSIONS--
+zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1

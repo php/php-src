@@ -12,6 +12,8 @@ $string_float= PHP_INT_MAX;
 $a = [$float => 'a', $string_float => 'b', 'c', 'd'];
 ?>
 --EXPECTF--
+Deprecated: Implicit conversion from float 1.0E+38 to int loses precision in %sarray_elem_002.php on line 4
+
 Fatal error: Uncaught Error: Cannot add element to the array as the next element is already occupied in %sarray_elem_002.php:4
 Stack trace:
 #0 {main}

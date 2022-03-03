@@ -37,9 +37,11 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	mbfl_no_encoding_qprint,
 	"Quoted-Printable",
 	"Quoted-Printable",
-	(const char *(*)[])&mbfl_encoding_qprint_aliases,
+	mbfl_encoding_qprint_aliases,
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
+	NULL,
+	NULL,
 	NULL,
 	NULL
 };
@@ -110,8 +112,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		}
 
 		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
-		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) != 0 &&
-		       (mbfl_charprop_table[s] & MBFL_CHP_MMHQENC) != 0)) {
+		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) && mime_char_needs_qencode[s])) {
 			/* hex-octet */
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 			n = (s >> 4) & 0xf;
@@ -140,7 +141,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
@@ -220,7 +221,7 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)

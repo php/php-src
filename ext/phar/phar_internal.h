@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt.                                 |
+  | https://www.php.net/license/3_01.txt                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -88,6 +88,8 @@
 #define PHAR_SIG_SHA256           0x0003
 #define PHAR_SIG_SHA512           0x0004
 #define PHAR_SIG_OPENSSL          0x0010
+#define PHAR_SIG_OPENSSL_SHA256   0x0011
+#define PHAR_SIG_OPENSSL_SHA512   0x0012
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */
@@ -141,9 +143,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         persist;
 	int         has_zlib;
 	int         has_bz2;
-	zend_bool   readonly_orig;
-	zend_bool   require_hash_orig;
-	zend_bool   intercepted;
+	bool   readonly_orig;
+	bool   require_hash_orig;
+	bool   intercepted;
 	int         request_init;
 	int         require_hash;
 	int         request_done;
@@ -475,10 +477,6 @@ union _phar_entry_object {
 	phar_entry_info          *entry;
 };
 
-#ifndef PHAR_MAIN
-extern zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len);
-#endif
-
 BEGIN_EXTERN_C()
 
 #ifdef PHP_WIN32
@@ -532,12 +530,12 @@ void phar_destroy_phar_data(phar_archive_data *phar);
 int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
-int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_open_executed_filename(char *alias, size_t alias_len, char **error);
 int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len);
 int phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error);
-int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, zend_bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
+int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error);
 int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error);
 
@@ -553,7 +551,7 @@ zend_string *phar_find_in_include_path(char *file, size_t file_len, phar_archive
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);
-zend_bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
+bool phar_metadata_tracker_has_data(const phar_metadata_tracker* tracker, int persistent);
 /* If this has data, free it and set all values to undefined. */
 void phar_metadata_tracker_free(phar_metadata_tracker* val, int persistent);
 void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata_tracker *source, int persistent);

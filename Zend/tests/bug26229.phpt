@@ -4,6 +4,7 @@ Bug #26229 (getIterator() segfaults when it returns arrays or scalars)
 <?php
 
 class array_iterator implements IteratorAggregate {
+        #[ReturnTypeWillChange]
         public function getIterator() {
                 return array('foo', 'bar');
         }

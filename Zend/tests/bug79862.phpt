@@ -3,6 +3,7 @@ Bug #79862: Public non-static property in child should take priority over privat
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class a {
     private static $prop1;
     private static $prop2;
@@ -45,14 +46,14 @@ NULL
 NULL
 NULL
 object(c)#1 (6) {
-  ["prop1"]=>
-  int(1)
-  ["prop2":protected]=>
-  int(2)
   ["prop3":"a":private]=>
   int(3)
   ["prop4":"a":private]=>
   int(4)
+  ["prop1"]=>
+  int(1)
+  ["prop2":protected]=>
+  int(2)
   ["prop5"]=>
   int(5)
   ["prop6"]=>

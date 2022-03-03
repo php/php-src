@@ -1,4 +1,4 @@
-VERSION=5.39
+VERSION=5.40
 if [[ ! -d libmagic.orig ]]; then
   mkdir libmagic.orig
   wget -O - ftp://ftp.astron.com/pub/file/file-$VERSION.tar.gz \

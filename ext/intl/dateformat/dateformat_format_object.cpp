@@ -3,7 +3,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -89,10 +89,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	if (format == NULL || Z_TYPE_P(format) == IS_NULL) {
 		//nothing
 	} else if (Z_TYPE_P(format) == IS_ARRAY) {
-		HashTable		*ht	= Z_ARRVAL_P(format);
-		uint32_t         idx;
-		zval			*z;
-
+		HashTable *ht = Z_ARRVAL_P(format);
 		if (zend_hash_num_elements(ht) != 2) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; if array, it must have "
@@ -100,37 +97,31 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 			RETURN_FALSE;
 		}
 
-		idx = 0;
-		while (idx < ht->nNumUsed) {
-			z = &ht->arData[idx].val;
-			if (Z_TYPE_P(z) != IS_UNDEF) {
-				break;
+		uint32_t idx = 0;
+		zval *z;
+		ZEND_HASH_FOREACH_VAL(ht, z) {
+			if (!valid_format(z)) {
+				if (idx == 0) {
+					intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+						"datefmt_format_object: bad format; the date format (first "
+						"element of the array) is not valid", 0);
+				} else {
+					ZEND_ASSERT(idx == 1 && "We checked that there are two elements above");
+					intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+						"datefmt_format_object: bad format; the time format (second "
+						"element of the array) is not valid", 0);
+				}
+				RETURN_FALSE;
+			}
+			if (idx == 0) {
+				dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
+			} else {
+				ZEND_ASSERT(idx == 1 && "We checked that there are two elements above");
+				timeStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 			}
 			idx++;
-		}
-		if (idx >= ht->nNumUsed || !valid_format(z)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: bad format; the date format (first "
-					"element of the array) is not valid", 0);
-			RETURN_FALSE;
-		}
-		dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
-
-		idx++;
-		while (idx < ht->nNumUsed) {
-			z = &ht->arData[idx].val;
-			if (Z_TYPE_P(z) != IS_UNDEF) {
-				break;
-			}
-			idx++;
-		}
-		if (idx >= ht->nNumUsed || !valid_format(z)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: bad format; the time format ("
-					"second element of the array) is not valid", 0);
-			RETURN_FALSE;
-		}
-		timeStyle = (DateFormat::EStyle)Z_LVAL_P(z);
+		} ZEND_HASH_FOREACH_END();
+		ZEND_ASSERT(idx == 2 && "We checked that there are two elements above");
 	} else if (Z_TYPE_P(format) == IS_LONG) {
 		if (!valid_format(format)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,

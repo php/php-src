@@ -1,9 +1,7 @@
 --TEST--
 Bug #65236 (heap corruption in xml parser)
---SKIPIF--
-<?php
-require_once("skipif.inc");
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 xml_parse_into_struct(xml_parser_create_ns(), str_repeat("<blah>", 1000), $a);

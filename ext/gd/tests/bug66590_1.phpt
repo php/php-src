@@ -1,8 +1,9 @@
 --TEST--
 Bug #66590 (imagewebp() doesn't pad to even length) - segfault
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!function_exists('imagewebp')) die('skip WebP support not available');
 ?>
 --FILE--

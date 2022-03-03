@@ -1,10 +1,8 @@
 --TEST--
 Bug #81577: (Exceptions in interrupt handlers: cleanup_live_vars)
---SKIPIF--
-<?php
-if (!extension_loaded("pcntl")) print "skip pcntl extension not available";
-elseif (!extension_loaded('posix')) die('skip posix extension not available');
-?>
+--EXTENSIONS--
+pcntl
+posix
 --XFAIL--
 leaks are not fixed yet
 --FILE--

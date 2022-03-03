@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_attr_set() - mysqlnd does not check for invalid codes
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -61,7 +62,7 @@ require_once("connect.inc");
     $res->close();
     $stmt->close();
 
-    // expecting max_length to _be_ set
+    // MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH is no longer supported, expect no change in behavior.
     $stmt = mysqli_stmt_init($link);
     $stmt->prepare("SELECT label FROM test");
     var_dump($stmt->attr_set(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, 1));
@@ -75,8 +76,8 @@ require_once("connect.inc");
     $max_lengths = array();
     foreach ($fields as $k => $meta) {
         $max_lengths[$meta->name] = $meta->max_length;
-        if ($meta->max_length === 0)
-            printf("[008] max_length should be set (!= 0), got %s for field %s\n", $meta->max_length, $meta->name);
+        if ($meta->max_length !== 0)
+            printf("[008] max_length should be not set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
     }
     $res->close();
     $stmt->close();

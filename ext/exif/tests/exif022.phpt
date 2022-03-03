@@ -1,7 +1,7 @@
 --TEST--
 Check for exif_read_data, TIFF with IFD, EXIF and GPS data in Intel byte-order.
---SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--EXTENSIONS--
+exif
 --INI--
 output_handler=
 zlib.output_compression=0
@@ -1642,7 +1642,7 @@ array(45) {
   ["ExifImageLength"]=>
   int(1)
   ["GPSVersion"]=>
-  string(4) "  "
+  string(4) "%0%0"
   ["GPSLatitudeRef"]=>
   string(1) "N"
   ["GPSLatitude"]=>
@@ -1666,7 +1666,7 @@ array(45) {
     string(3) "0/1"
   }
   ["GPSAltitudeRef"]=>
-  string(1) " "
+  string(1) "%0"
   ["GPSAltitude"]=>
   string(5) "295/1"
   ["GPSTimeStamp"]=>

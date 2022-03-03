@@ -3,11 +3,11 @@ ext/sockets - socket_getpeername_ipv6loop - basic test
 --CREDITS--
 Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 require 'ipv6_skipif.inc';
 ?>
 --FILE--

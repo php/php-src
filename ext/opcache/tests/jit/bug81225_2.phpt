@@ -1,12 +1,13 @@
 --TEST--
 Bug #81225: Wrong result with pow operator with JIT enabled
+--EXTENSIONS--
+opcache
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
 opcache.jit_buffer_size=1M
 opcache.jit=function
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 --FILE--
 <?php

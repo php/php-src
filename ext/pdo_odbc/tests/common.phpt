@@ -1,8 +1,9 @@
 --TEST--
 ODBC
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) print 'skip';
 if (substr(PHP_OS, 0, 3) == 'WIN' &&
     false === getenv('PDOTEST_DSN') &&
     false === getenv('PDO_ODBC_TEST_DSN') &&

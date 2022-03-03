@@ -1,10 +1,10 @@
 --TEST--
 Test if socket_set_option() returns 'Unable to set socket option' failure for invalid options
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+
 if (PHP_OS == 'Darwin') {
     die('skip Not for OSX');
 }

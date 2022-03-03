@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_open_uri with empty string as parameter
---SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 try {

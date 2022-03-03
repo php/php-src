@@ -1,8 +1,9 @@
 --TEST--
 SELECT oci_bind_by_name with SQLT_AFC aka CHAR
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(__DIR__."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -87,17 +88,17 @@ if ($r)
     do_e_q($s);
 
 echo "Test 2.4: Type: AFC:  Length: strlen\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1), SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 0, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 2.5: Type: AFC.  Length: strlen-1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)-1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, -1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 2.6: Type: AFC.  Length: strlen+1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)+1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
@@ -159,17 +160,17 @@ if ($r)
     do_e_q($s);
 
 echo "Test 4.4: Type: AFC:  Length: strlen\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1), SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, 0, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 4.5: Type: AFC.  Length: strlen-1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)-1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, -1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 
 echo "Test 4.6: Type: AFC.  Length: strlen+1\n";
-$r = oci_bind_by_name($s, ":bv", $bv1, strlen($bv1)+1, SQLT_AFC);
+$r = oci_bind_by_name($s, ":bv", $bv1, +1, SQLT_AFC);
 if ($r)
     do_e_q($s);
 

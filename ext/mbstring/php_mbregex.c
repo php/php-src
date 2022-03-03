@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -721,7 +721,7 @@ static inline void mb_regex_substitute(
 	eos = replace + replace_len;
 
 	while (p < eos) {
-		clen = (int) php_mb_mbchar_bytes_ex(p, enc);
+		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
 			smart_str_appendl(pbuf, p, clen);
@@ -729,7 +729,7 @@ static inline void mb_regex_substitute(
 			continue;
 		}
 		sp = p; /* save position */
-		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+		clen = (int) php_mb_mbchar_bytes(++p, enc);
 		if (clen != 1 || p == eos) {
 			/* skip backslash followed by multibyte char */
 			smart_str_appendl(pbuf, sp, p - sp);
@@ -759,7 +759,7 @@ static inline void mb_regex_substitute(
 				break;
 			case 'k':
 			{
-				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+				clen = (int) php_mb_mbchar_bytes(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
 					p += clen;
@@ -772,7 +772,7 @@ static inline void mb_regex_substitute(
 				char maybe_num = 1;
 				name_end = name = p + 1;
 				while (name_end < eos) {
-					clen = (int) php_mb_mbchar_bytes_ex(name_end, enc);
+					clen = (int) php_mb_mbchar_bytes(name_end, enc);
 					if (clen != 1) {
 						name_end += clen;
 						maybe_num = 0;
@@ -1102,7 +1102,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				arg_replace_fci.retval = &retval;
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache) == SUCCESS &&
 						!Z_ISUNDEF(retval)) {
-					convert_to_string_ex(&retval);
+					convert_to_string(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
 					smart_str_free(&eval_buf);
 					zval_ptr_dtor(&retval);

@@ -6,10 +6,11 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0x20000
 opcache.preload=
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class A {
 }
 function foo(int $x) {
@@ -21,12 +22,12 @@ function foo(int $x) {
 $_main:
      ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
-     ; %sdce_005.php:1-9
+     ; %s
 0000 RETURN int(1)
 
 foo:
      ; (lines=2, args=1, vars=1, tmps=0)
      ; (after optimizer)
-     ; %sdce_005.php:4-7
+     ; %s
 0000 CV0($x) = RECV 1
 0001 RETURN null

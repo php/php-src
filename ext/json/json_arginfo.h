@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 200044f4196cd8efd1ec9a2e93d4bbb63618b3c9 */
+ * Stub hash: e59995a9cd647f36164468dd2ae4c11239e3405f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_json_encode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -20,7 +20,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_json_last_error_msg, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_JsonSerializable_jsonSerialize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_JsonSerializable_jsonSerialize, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 
@@ -48,3 +48,23 @@ static const zend_function_entry class_JsonSerializable_methods[] = {
 static const zend_function_entry class_JsonException_methods[] = {
 	ZEND_FE_END
 };
+
+static zend_class_entry *register_class_JsonSerializable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_JsonException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "JsonException", class_JsonException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+
+	return class_entry;
+}

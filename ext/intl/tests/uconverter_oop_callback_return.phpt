@@ -1,11 +1,11 @@
 --TEST--
 UConverter::convert() w/ Callback Return Values
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 class MyConverter extends UConverter {
-  public function toUCallback($reason, $source, $codeUnits, &$error) {
+  public function toUCallback($reason, $source, $codeUnits, &$error): string|int|array|null {
     $error = U_ZERO_ERROR;
     switch ($codeUnits) {
       case "\x80": return NULL;
@@ -13,12 +13,14 @@ class MyConverter extends UConverter {
       case "\x82": return ord('b');
       case "\x83": return array('c');
     }
+
+    return null;
   }
 
   /**
    * Called during conversion from internal UChar to destination encoding
    */
-  public function fromUCallback($reason, $source, $codePoint, &$error) {
+  public function fromUCallback($reason, $source, $codePoint, &$error): string|int|array|null {
     $error = U_ZERO_ERROR;
     switch ($codePoint) {
       case 0x00F1: return "A";
@@ -26,6 +28,8 @@ class MyConverter extends UConverter {
       case 0x00F3: return array("C");
       case 0x00F4: return NULL;
     }
+
+    return null;
   }
 
 }

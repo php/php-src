@@ -3,12 +3,8 @@ Test imagecolorset() function : basic functionality
 --CREDITS--
 Erick Belluci Tedeschi <erickbt86 [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
---SKIPIF--
-<?php
-if (!extension_loaded('gd')) {
-    die('skip gd extension is not loaded');
-}
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 // Create a 300x100 image

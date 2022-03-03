@@ -1,8 +1,9 @@
 --TEST--
 libgd #100 (spurious horizontal line drawn by gdImageFilledPolygon)
+--EXTENSIONS--
+gd
 --SKIPIF--
 <?php
-    if (!extension_loaded('gd')) die("skip gd extension not available\n");
     if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
@@ -30,7 +31,7 @@ $points = array(
   $x,      $top,
   $x+2*$d, $top,
   $x+2*$d, $bot,
-  $x+$d,   ($top+$bot)/2,
+  $x+$d,   (int) (($top+$bot)/2),
   $x,      $bot
 );
 imagefilledpolygon($im, $points, $yellow);

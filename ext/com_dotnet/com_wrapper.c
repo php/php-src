@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -170,21 +170,20 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 	FETCH_DISP("GetIDsOfNames");
 
 	for (i = 0; i < cNames; i++) {
-		char *name;
-		size_t namelen;
+		zend_string *name;
 		zval *tmp;
 
-		name = php_com_olestring_to_string(rgszNames[i], &namelen, COMG(code_page));
+		name = php_com_olestring_to_string(rgszNames[i], COMG(code_page));
 
 		/* Lookup the name in the hash */
-		if ((tmp = zend_hash_str_find(disp->name_to_dispid, name, namelen)) == NULL) {
+		if ((tmp = zend_hash_find(disp->name_to_dispid, name)) == NULL) {
 			ret = DISP_E_UNKNOWNNAME;
 			rgDispId[i] = 0;
 		} else {
 			rgDispId[i] = (DISPID)Z_LVAL_P(tmp);
 		}
 
-		efree(name);
+		zend_string_release_ex(name, /* persistent */ false);
 
 	}
 
@@ -214,23 +213,22 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 	/* [out] */ DISPID *pid)
 {
 	HRESULT ret = DISP_E_UNKNOWNNAME;
-	char *name;
-	size_t namelen;
+	zend_string *name;
 	zval *tmp;
 	FETCH_DISP("GetDispID");
 
-	name = php_com_olestring_to_string(bstrName, &namelen, COMG(code_page));
+	name = php_com_olestring_to_string(bstrName, COMG(code_page));
 
-	trace("Looking for %s, namelen=%d in %p\n", name, namelen, disp->name_to_dispid);
+	trace("Looking for %s, namelen=%d in %p\n", ZSTR_VAL(name), ZSTR_LEN(name), disp->name_to_dispid);
 
 	/* Lookup the name in the hash */
-	if ((tmp = zend_hash_str_find(disp->name_to_dispid, name, namelen)) != NULL) {
+	if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
 		trace("found it\n");
 		*pid = (DISPID)Z_LVAL_P(tmp);
 		ret = S_OK;
 	}
 
-	efree(name);
+	zend_string_release_ex(name, /* persistent */ false);
 
 	return ret;
 }

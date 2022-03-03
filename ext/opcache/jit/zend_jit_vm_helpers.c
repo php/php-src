@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,12 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
-#include "zend_jit_x86.h"
+#if ZEND_JIT_TARGET_X86
+# include "zend_jit_x86.h"
+#elif ZEND_JIT_TARGET_ARM64
+# include "zend_jit_arm64.h"
+#endif
+
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS
@@ -36,9 +41,12 @@
 # if defined(__x86_64__)
 register zend_execute_data* volatile execute_data __asm__("%r14");
 register const zend_op* volatile opline __asm__("%r15");
-# else
+# elif defined(i386)
 register zend_execute_data* volatile execute_data __asm__("%esi");
 register const zend_op* volatile opline __asm__("%edi");
+# elif defined(__aarch64__)
+register zend_execute_data* volatile execute_data __asm__("x27");
+register const zend_op* volatile opline __asm__("x28");
 # endif
 # pragma GCC diagnostic warning "-Wvolatile-register-var"
 #endif
@@ -106,8 +114,10 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t ca
 #endif
 }
 
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(uint32_t call_info EXECUTE_DATA_DC)
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D)
 {
+	uint32_t call_info = EX_CALL_INFO();
+
 	if (call_info & ZEND_CALL_TOP) {
 		ZEND_OPCODE_TAIL_CALL_EX(zend_jit_leave_top_func_helper, call_info);
 	} else {
@@ -161,7 +171,7 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D)
 	}
 }
 
-zend_bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
+bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 {
 	zend_execute_data *call = (zend_execute_data *) opline;
 	zend_function *fbc = call->func;
@@ -250,12 +260,12 @@ static zend_always_inline zend_constant* _zend_quick_get_constant(
 	zend_constant *c = NULL;
 
 	/* null/true/false are resolved during compilation, so don't check for them here. */
-	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+	zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
 	if (zv) {
 		c = (zend_constant*)Z_PTR_P(zv);
 	} else if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
 		key++;
-		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+		zv = zend_hash_find_known_hash(EG(zend_constants), Z_STR_P(key));
 		if (zv) {
 			c = (zend_constant*)Z_PTR_P(zv);
 		}
@@ -438,11 +448,6 @@ static uint8_t zend_jit_trace_bad_stop_event(const zend_op *opline, int count)
 	}
 	return 0;
 }
-
-/* Workaround for PHP-8.0 */
-#ifndef ZEND_CALL_JIT_RESERVED
-# define ZEND_CALL_JIT_RESERVED (1<<29)
-#endif
 
 #define ZEND_CALL_MEGAMORPHIC ZEND_CALL_JIT_RESERVED
 
@@ -708,6 +713,104 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			TRACE_RECORD(ZEND_JIT_TRACE_OP2_TYPE, 0, ce2);
 		}
 
+		switch (opline->opcode) {
+			case ZEND_FETCH_DIM_R:
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_DIM_RW:
+			case ZEND_FETCH_DIM_IS:
+			case ZEND_FETCH_DIM_FUNC_ARG:
+			case ZEND_FETCH_DIM_UNSET:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
+			case ZEND_ASSIGN_DIM:
+			case ZEND_ASSIGN_DIM_OP:
+			case ZEND_UNSET_DIM:
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				if (opline->op1_type == IS_CONST) {
+					zval *arr = RT_CONSTANT(opline, opline->op1);
+					op1_type = Z_TYPE_P(arr);
+				}
+				if ((op1_type & IS_TRACE_TYPE_MASK) == IS_ARRAY
+				 && opline->op2_type != IS_UNDEF) {
+					zval *arr, *dim, *val;
+					uint8_t val_type = IS_UNDEF;
+
+					if (opline->op2_type == IS_CONST) {
+						dim	= RT_CONSTANT(opline, opline->op2);
+					} else {
+						dim = EX_VAR(opline->op2.var);
+					}
+
+					if (Z_TYPE_P(dim) == IS_LONG || Z_TYPE_P(dim) == IS_STRING) {
+						if (opline->op1_type == IS_CONST) {
+							arr = RT_CONSTANT(opline, opline->op1);
+						} else {
+							arr = EX_VAR(opline->op1.var);
+						}
+						if (Z_TYPE_P(arr) == IS_INDIRECT) {
+							arr = Z_INDIRECT_P(arr);
+						}
+						if (Z_TYPE_P(arr) == IS_REFERENCE) {
+							arr = Z_REFVAL_P(arr);
+						}
+						ZEND_ASSERT(Z_TYPE_P(arr) == IS_ARRAY);
+						if (Z_TYPE_P(dim) == IS_LONG) {
+							val = zend_hash_index_find(Z_ARRVAL_P(arr), Z_LVAL_P(dim));
+						} else /*if Z_TYPE_P(dim) == IS_STRING)*/ {
+							val = zend_symtable_find(Z_ARRVAL_P(arr), Z_STR_P(dim));
+						}
+						if (val) {
+							val_type = Z_TYPE_P(val);
+						}
+						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, val_type, 0, 0);
+					}
+				}
+				break;
+			case ZEND_FETCH_OBJ_R:
+			case ZEND_FETCH_OBJ_W:
+			case ZEND_FETCH_OBJ_RW:
+			case ZEND_FETCH_OBJ_IS:
+			case ZEND_FETCH_OBJ_FUNC_ARG:
+			case ZEND_FETCH_OBJ_UNSET:
+			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_OP:
+			case ZEND_ASSIGN_OBJ_REF:
+			case ZEND_UNSET_OBJ:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			case ZEND_PRE_INC_OBJ:
+			case ZEND_PRE_DEC_OBJ:
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ:
+				if (opline->op1_type != IS_CONST
+				 && opline->op2_type == IS_CONST
+				 && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_STRING
+				 && Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] != '\0') {
+					zval *obj, *val;
+					zend_string *prop_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+					zend_property_info *prop_info;
+
+					if (opline->op1_type == IS_UNUSED) {
+						obj = &EX(This);
+					} else {
+						obj = EX_VAR(opline->op1.var);
+					}
+					if (Z_TYPE_P(obj) != IS_OBJECT
+					 || Z_OBJ_P(obj)->handlers != &std_object_handlers) {
+						break;
+					}
+					prop_info = zend_get_property_info(Z_OBJCE_P(obj), prop_name, 1);
+					if (prop_info
+					 && prop_info != ZEND_WRONG_PROPERTY_INFO
+					 && !(prop_info->flags & ZEND_ACC_STATIC)) {
+						val = OBJ_PROP(Z_OBJ_P(obj), prop_info->offset);
+						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, Z_TYPE_P(val), 0, 0);
+					}
+				}
+				break;
+			default:
+				break;
+		}
+
 		if (opline->opcode == ZEND_DO_FCALL
 		 || opline->opcode == ZEND_DO_ICALL
 		 || opline->opcode == ZEND_DO_UCALL
@@ -723,7 +826,9 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				}
 				TRACE_RECORD(ZEND_JIT_TRACE_DO_ICALL, 0, EX(call)->func);
 			}
-		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+		} else if (opline->opcode == ZEND_INCLUDE_OR_EVAL
+				|| opline->opcode == ZEND_CALLABLE_CONVERT) {
+			/* TODO: Support tracing JIT for ZEND_CALLABLE_CONVERT. */
 			stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
 			break;
 		}
@@ -754,7 +859,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			opline = EX(opline);
 #endif
 
-            op_array = &EX(func)->op_array;
+			op_array = &EX(func)->op_array;
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 			if (UNEXPECTED(!jit_extension)
@@ -789,7 +894,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				}
 
 				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
-					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETRUN_VALUE_USED : 0,
+					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETURN_VALUE_USED : 0,
 					op_array);
 
 				count = zend_jit_trace_recursive_call_count(&EX(func)->op_array, unrolled_calls, ret_level, level);

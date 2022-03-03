@@ -4,11 +4,9 @@ Test function posix_errno() by calling it with its expected arguments
 Morten Amundsen mor10am@gmail.com
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
---SKIPIF--
-<?php
-if(!extension_loaded("posix")) print "skip posix extension not loaded";
-if(!extension_loaded("pcntl")) print "skip pcntl extension not loaded";
-?>
+--EXTENSIONS--
+posix
+pcntl
 --FILE--
 <?php
 echo "*** Test by calling function with pid error ***\n";

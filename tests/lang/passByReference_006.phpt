@@ -1,5 +1,5 @@
 --TEST--
-Pass uninitialised objects and arrays by reference to test implicit initialisation.
+Pass uninitialized objects and arrays by reference to test implicit initialisation.
 --FILE--
 <?php
 
@@ -28,29 +28,29 @@ class C {
 
 }
 
-echo "\n ---- Pass uninitialised array & object by ref: function call ---\n";
+echo "\n ---- Pass uninitialized array & object by ref: function call ---\n";
 unset($u1, $u2);
 refs($u1[0], $u2[0][1]);
 var_dump($u1, $u2);
 
-echo "\n ---- Pass uninitialised arrays & objects by ref: static method call ---\n";
+echo "\n ---- Pass uninitialized arrays & objects by ref: static method call ---\n";
 unset($u1, $u2);
 C::static_refs($u1[0], $u2[0][1]);
 var_dump($u1, $u2);
 
-echo "\n\n---- Pass uninitialised arrays & objects by ref: constructor ---\n";
+echo "\n\n---- Pass uninitialized arrays & objects by ref: constructor ---\n";
 unset($u1, $u2);
 $c = new C($u1[0], $u2[0][1]);
 var_dump($u1, $u2);
 
-echo "\n ---- Pass uninitialised arrays & objects by ref: instance method call ---\n";
+echo "\n ---- Pass uninitialized arrays & objects by ref: instance method call ---\n";
 unset($u1, $u2);
 $c->refs($u1[0], $u2[0][1]);
 var_dump($u1, $u2);
 
 ?>
 --EXPECT--
----- Pass uninitialised array & object by ref: function call ---
+---- Pass uninitialized array & object by ref: function call ---
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -63,7 +63,7 @@ array(1) {
   }
 }
 
- ---- Pass uninitialised arrays & objects by ref: static method call ---
+ ---- Pass uninitialized arrays & objects by ref: static method call ---
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -77,7 +77,7 @@ array(1) {
 }
 
 
----- Pass uninitialised arrays & objects by ref: constructor ---
+---- Pass uninitialized arrays & objects by ref: constructor ---
 array(1) {
   [0]=>
   string(12) "Ref1 changed"
@@ -90,7 +90,7 @@ array(1) {
   }
 }
 
- ---- Pass uninitialised arrays & objects by ref: instance method call ---
+ ---- Pass uninitialized arrays & objects by ref: instance method call ---
 array(1) {
   [0]=>
   string(12) "Ref1 changed"

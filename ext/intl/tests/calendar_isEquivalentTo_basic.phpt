@@ -1,9 +1,7 @@
 --TEST--
 IntlCalendar::isEquivalentTo() basic test
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -13,7 +11,7 @@ $intlcal1 = IntlCalendar::createInstance('Europe/Amsterdam');
 $intlcal2 = IntlCalendar::createInstance('Europe/Lisbon');
 $intlcal3 = IntlCalendar::createInstance('Europe/Amsterdam', "nl_NL@calendar=islamic");
 $intlcal4 = IntlCalendar::createInstance('Europe/Amsterdam');
-$intlcal4->roll(IntlCalendar::FIELD_MONTH, true);
+$intlcal4->roll(IntlCalendar::FIELD_MONTH, 1);
 
 var_dump(
         "1 - 1",
@@ -35,4 +33,4 @@ bool(false)
 string(5) "1 - 3"
 bool(false)
 string(5) "1 - 4"
-bool(true)
+bool(true)

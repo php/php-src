@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -54,6 +54,10 @@
 
 #include "ext/standard/php_string.h"
 #include <oci.h>
+
+#if !defined(OCI_MAJOR_VERSION) || OCI_MAJOR_VERSION < 11 || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION < 2))
+#error This version of PHP OCI8 requires Oracle Client libraries from 11.2 or later.
+#endif
 
 extern int le_connection;
 extern int le_pconnection;
@@ -235,7 +239,8 @@ typedef struct {
 	unsigned			 has_data:1;			/* statement has more data flag */
 	unsigned			 has_descr:1;			/* statement has at least one descriptor or cursor column */
 	ub2					 stmttype;				/* statement type */
-	ub4                  prefetch_count;        /* current prefetch count */
+	ub4                  prefetch_count;        /* row prefetch count */
+	ub4                  prefetch_lob_size;     /* LOB prefetch size */
 } php_oci_statement;
 /* }}} */
 
@@ -519,16 +524,16 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	zend_long		 persistent_timeout;			/* time period after which idle persistent connection is considered expired */
 	zend_long		 statement_cache_size;			/* statement cache size. used with 9i+ clients only*/
 	zend_long		 default_prefetch;				/* default prefetch setting */
-	zend_bool	 privileged_connect;			/* privileged connect flag (On/Off) */
-	zend_bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
-
+	zend_long	 	 prefetch_lob_size;				/* amount of LOB data to read when initially getting a LOB locator */
+	bool	 privileged_connect;			/* privileged connect flag (On/Off) */
+	bool	 old_oci_close_semantics;		/* old_oci_close_semantics flag (to determine the way oci_close() should behave) */
 	int			 shutdown;						/* in shutdown flag */
 
 	OCIEnv		*env;							/* global environment handle */
 
-	zend_bool	 in_call;
+	bool	 in_call;
 	char		*connection_class;
-	zend_bool	 events;
+	bool	 events;
 	char		*edition;
 ZEND_END_MODULE_GLOBALS(oci) /* }}} */
 

@@ -1,7 +1,7 @@
 --TEST--
 Phar::buildFromIterator() iterator, file can't be opened zip-based
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -14,25 +14,25 @@ class myIterator implements Iterator
     {
         $this->a = $a;
     }
-    function next() {
+    function next(): void {
         echo "next\n";
-        return next($this->a);
+        next($this->a);
     }
-    function current() {
+    function current(): mixed {
         echo "current\n";
         return current($this->a);
     }
-    function key() {
+    function key(): mixed {
         echo "key\n";
         return key($this->a);
     }
-    function valid() {
+    function valid(): bool {
         echo "valid\n";
         return current($this->a);
     }
-    function rewind() {
+    function rewind(): void {
         echo "rewind\n";
-        return reset($this->a);
+        reset($this->a);
     }
 }
 try {
@@ -43,11 +43,6 @@ try {
     var_dump(get_class($e));
     echo $e->getMessage() . "\n";
 }
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromiterator.phar.zip');
-__HALT_COMPILER();
 ?>
 --EXPECTF--
 rewind

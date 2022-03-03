@@ -1,9 +1,7 @@
 --TEST--
 imageline no AA
---SKIPIF--
-<?php
-        if (!function_exists('imageline')) die("skip gd extension not available\n");
-?>
+--EXTENSIONS--
+gd
 --FILE--
 <?php
 $im = imagecreatetruecolor(6,6);

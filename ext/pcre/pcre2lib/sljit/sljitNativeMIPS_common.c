@@ -290,9 +290,9 @@ static const sljit_u8 freg_map[SLJIT_NUMBER_OF_FLOAT_REGISTERS + 4] = {
    Useful for reordering instructions in the delay slot. */
 static sljit_s32 push_inst(struct sljit_compiler *compiler, sljit_ins ins, sljit_s32 delay_slot)
 {
+	sljit_ins *ptr = (sljit_ins*)ensure_buf(compiler, sizeof(sljit_ins));
 	SLJIT_ASSERT(delay_slot == MOVABLE_INS || delay_slot >= UNMOVABLE_INS
 		|| delay_slot == ((ins >> 11) & 0x1f) || delay_slot == ((ins >> 16) & 0x1f));
-	sljit_ins *ptr = (sljit_ins*)ensure_buf(compiler, sizeof(sljit_ins));
 	FAIL_IF(!ptr);
 	*ptr = ins;
 	compiler->size++;
@@ -520,7 +520,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	CHECK_PTR(check_sljit_generate_code(compiler));
 	reverse_buf(compiler);
 
-	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins));
+	code = (sljit_ins*)SLJIT_MALLOC_EXEC(compiler->size * sizeof(sljit_ins), compiler->exec_allocator_data);
 	PTR_FAIL_WITH_EXEC_IF(code);
 	buf = compiler->buf;
 
@@ -667,6 +667,7 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_generate_code(struct sljit_compiler *compil
 	/* GCC workaround for invalid code generation with -O2. */
 	sljit_cache_flush(code, code_ptr);
 #endif
+	SLJIT_UPDATE_WX_FLAGS(code, code_ptr, 1);
 	return code;
 }
 
@@ -679,7 +680,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 #ifdef SLJIT_IS_FPU_AVAILABLE
 		return SLJIT_IS_FPU_AVAILABLE;
 #elif defined(__GNUC__)
-		asm ("cfc1 %0, $0" : "=r"(fir));
+		__asm__ ("cfc1 %0, $0" : "=r"(fir));
 		return (fir >> 22) & 0x1;
 #else
 #error "FIR check is not implemented for this architecture"
@@ -1376,6 +1377,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op1(struct sljit_compiler *compile
 		return emit_op(compiler, op, flags, dst, dstw, TMP_REG1, 0, src, srcw);
 
 	case SLJIT_NEG:
+		compiler->status_flags_state = SLJIT_CURRENT_FLAGS_ADD_SUB;
 		return emit_op(compiler, SLJIT_SUB | GET_ALL_FLAGS(op), flags | IMM_OP, dst, dstw, SLJIT_IMM, 0, src, srcw);
 
 	case SLJIT_CLZ:
@@ -1423,13 +1425,16 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op2(struct sljit_compiler *compile
 	switch (GET_OPCODE(op)) {
 	case SLJIT_ADD:
 	case SLJIT_ADDC:
+		compiler->status_flags_state = SLJIT_CURRENT_FLAGS_ADD_SUB;
 		return emit_op(compiler, op, flags | CUMULATIVE_OP | IMM_OP, dst, dstw, src1, src1w, src2, src2w);
 
 	case SLJIT_SUB:
 	case SLJIT_SUBC:
+		compiler->status_flags_state = SLJIT_CURRENT_FLAGS_ADD_SUB;
 		return emit_op(compiler, op, flags | IMM_OP, dst, dstw, src1, src1w, src2, src2w);
 
 	case SLJIT_MUL:
+		compiler->status_flags_state = 0;
 		return emit_op(compiler, op, flags | CUMULATIVE_OP, dst, dstw, src1, src1w, src2, src2w);
 
 	case SLJIT_AND:
@@ -1859,7 +1864,6 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	case SLJIT_SIG_LESS:
 	case SLJIT_SIG_GREATER:
 	case SLJIT_OVERFLOW:
-	case SLJIT_MUL_OVERFLOW:
 		BR_Z(OTHER_FLAG);
 		break;
 	case SLJIT_GREATER_EQUAL:
@@ -1867,7 +1871,6 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_jump(struct sljit_compile
 	case SLJIT_SIG_GREATER_EQUAL:
 	case SLJIT_SIG_LESS_EQUAL:
 	case SLJIT_NOT_OVERFLOW:
-	case SLJIT_MUL_NOT_OVERFLOW:
 		BR_NZ(OTHER_FLAG);
 		break;
 	case SLJIT_NOT_EQUAL_F64:
@@ -2126,8 +2129,12 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_op_flags(struct sljit_compiler *co
 		FAIL_IF(push_inst(compiler, SLTIU | SA(EQUAL_FLAG) | TA(dst_ar) | IMM(1), dst_ar));
 		src_ar = dst_ar;
 		break;
-	case SLJIT_MUL_OVERFLOW:
-	case SLJIT_MUL_NOT_OVERFLOW:
+	case SLJIT_OVERFLOW:
+	case SLJIT_NOT_OVERFLOW:
+		if (compiler->status_flags_state & SLJIT_CURRENT_FLAGS_ADD_SUB) {
+			src_ar = OTHER_FLAG;
+			break;
+		}
 		FAIL_IF(push_inst(compiler, SLTIU | SA(OTHER_FLAG) | TA(dst_ar) | IMM(1), dst_ar));
 		src_ar = dst_ar;
 		type ^= 0x1; /* Flip type bit for the XORI below. */
@@ -2185,14 +2192,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	sljit_s32 dst_reg,
 	sljit_s32 src, sljit_sw srcw)
 {
-#if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1)
+#if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1 && SLJIT_MIPS_REV < 6)
 	sljit_ins ins;
-#endif /* SLJIT_MIPS_REV >= 1 */
+#endif /* SLJIT_MIPS_REV >= 1 && SLJIT_MIPS_REV < 6 */
 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_cmov(compiler, type, dst_reg, src, srcw));
 
-#if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1)
+#if (defined SLJIT_MIPS_REV && SLJIT_MIPS_REV >= 1 && SLJIT_MIPS_REV < 6)
 
 	if (SLJIT_UNLIKELY(src & SLJIT_IMM)) {
 #if (defined SLJIT_CONFIG_MIPS_64 && SLJIT_CONFIG_MIPS_64)
@@ -2218,7 +2225,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	case SLJIT_SIG_LESS:
 	case SLJIT_SIG_GREATER:
 	case SLJIT_OVERFLOW:
-	case SLJIT_MUL_OVERFLOW:
 		ins = MOVN | TA(OTHER_FLAG);
 		break;
 	case SLJIT_GREATER_EQUAL:
@@ -2226,7 +2232,6 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 	case SLJIT_SIG_GREATER_EQUAL:
 	case SLJIT_SIG_LESS_EQUAL:
 	case SLJIT_NOT_OVERFLOW:
-	case SLJIT_MUL_NOT_OVERFLOW:
 		ins = MOVZ | TA(OTHER_FLAG);
 		break;
 	case SLJIT_EQUAL_F64:
@@ -2249,7 +2254,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_cmov(struct sljit_compiler *compil
 
 	return push_inst(compiler, ins | S(src) | D(dst_reg), DR(dst_reg));
 
-#else /* SLJIT_MIPS_REV < 1 */
+#else /* SLJIT_MIPS_REV < 1 || SLJIT_MIPS_REV >= 6 */
 	return sljit_emit_cmov_generic(compiler, type, dst_reg, src, srcw);
 #endif /* SLJIT_MIPS_REV >= 1 */
 }

@@ -20,6 +20,8 @@ function reflectClassConstant($base, $constant) {
     var_dump($constInfo->isPrivate());
     echo "isProtected():\n";
     var_dump($constInfo->isProtected());
+    echo "isFinal():\n";
+    var_dump($constInfo->isFinal());
     echo "getModifiers():\n";
     var_dump($constInfo->getModifiers());
     echo "getDeclaringClass():\n";
@@ -34,12 +36,14 @@ class TestClass {
     /** Another doc comment */
     protected const PROT = 4;
     private const PRIV = "keepOut";
+    public final const FINAL = "foo";
 }
 $instance = new TestClass();
 
 reflectClassConstant("TestClass", "PUB");
 reflectClassConstant("TestClass", "PROT");
 reflectClassConstant("TestClass", "PRIV");
+reflectClassConstant("TestClass", "FINAL");
 reflectClassConstant($instance, "PRIV");
 reflectClassConstant($instance, "BAD_CONST");
 
@@ -60,6 +64,8 @@ bool(true)
 isPrivate():
 bool(false)
 isProtected():
+bool(false)
+isFinal():
 bool(false)
 getModifiers():
 int(1)
@@ -88,6 +94,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(true)
+isFinal():
+bool(false)
 getModifiers():
 int(2)
 getDeclaringClass():
@@ -115,8 +123,39 @@ isPrivate():
 bool(true)
 isProtected():
 bool(false)
+isFinal():
+bool(false)
 getModifiers():
 int(4)
+getDeclaringClass():
+object(ReflectionClass)#3 (1) {
+  ["name"]=>
+  string(9) "TestClass"
+}
+getDocComment():
+bool(false)
+
+**********************************
+**********************************
+Reflecting on class constant TestClass::FINAL
+
+__toString():
+string(47) "Constant [ final public string FINAL ] { foo }
+"
+getName():
+string(5) "FINAL"
+getValue():
+string(3) "foo"
+isPublic():
+bool(true)
+isPrivate():
+bool(false)
+isProtected():
+bool(false)
+isFinal():
+bool(true)
+getModifiers():
+int(33)
 getDeclaringClass():
 object(ReflectionClass)#3 (1) {
   ["name"]=>
@@ -141,6 +180,8 @@ bool(false)
 isPrivate():
 bool(true)
 isProtected():
+bool(false)
+isFinal():
 bool(false)
 getModifiers():
 int(4)

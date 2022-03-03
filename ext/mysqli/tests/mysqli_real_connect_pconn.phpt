@@ -1,10 +1,10 @@
 --TEST--
 mysqli_real_connect() - persistent connections
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 if (!$IS_MYSQLND)
     die("skip mysqlnd only test");
 ?>
@@ -14,7 +14,7 @@ mysqli.allow_persistent=1
 mysqli.max_persistent=10
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
     $host = 'p:' . $host;
 
     if (!$link = mysqli_init())
@@ -148,7 +148,7 @@ mysqli.max_persistent=10
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once "clean_table.inc";
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d

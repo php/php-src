@@ -1,8 +1,9 @@
 --TEST--
 Server bitwise stream crypto flag assignment
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSLv1.0.1 required");
 ?>
@@ -19,7 +20,7 @@ $serverCode = <<<'CODE'
 
         // Only accept TLSv1.0 and TLSv1.2 connections
         'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_0_SERVER  | STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -40,7 +41,7 @@ $clientCode = <<<'CODE'
         'verify_peer' => true,
         'cafile' => '%s',
         'peer_name' => '%s',
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     phpt_wait();

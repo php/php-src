@@ -39,6 +39,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 %define api.value.type {phpdbg_param_t}
 %define parse.error verbose
 
+%token END 0 "end of command"
 %token T_EVAL       "eval"
 %token T_RUN        "run"
 %token T_SHELL      "shell"
@@ -171,7 +172,7 @@ full_expression
 %%
 
 static int yyerror(const char *msg) {
-	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
+	phpdbg_error("Parse Error: %s", msg);
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);

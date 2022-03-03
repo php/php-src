@@ -1,9 +1,7 @@
 --TEST--
 Bug #65391 (Unable to send vary header user-agent when ob_start('ob_gzhandler') is called)
---SKIPIF--
-<?php
-extension_loaded("zlib") or die("skip need zlib");
-?>
+--EXTENSIONS--
+zlib
 --GET--
 dummy=1
 --INI--

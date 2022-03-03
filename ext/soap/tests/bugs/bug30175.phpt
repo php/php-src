@@ -1,7 +1,7 @@
 --TEST--
 Bug #30175 (SOAP results aren't parsed correctly)
---SKIPIF--
-<?php require_once('skipif.inc'); ?>
+--EXTENSIONS--
+soap
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--
@@ -9,7 +9,7 @@ soap.wsdl_cache_enabled=0
 
 class LocalSoapClient extends SoapClient {
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0) {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
     return <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope

@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: isset and unset by offset
---SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 $xml =<<<EOF

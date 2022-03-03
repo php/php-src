@@ -5,7 +5,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -28,7 +28,7 @@
 #include <errno.h>
 
 static int fpm_event_kqueue_init(int max);
-static int fpm_event_kqueue_clean();
+static int fpm_event_kqueue_clean(void);
 static int fpm_event_kqueue_wait(struct fpm_event_queue_s *queue, unsigned long int timeout);
 static int fpm_event_kqueue_add(struct fpm_event_s *ev);
 static int fpm_event_kqueue_remove(struct fpm_event_s *ev);
@@ -52,7 +52,7 @@ static int kfd = 0;
 /*
  * Return the module configuration
  */
-struct fpm_event_module_s *fpm_event_kqueue_module() /* {{{ */
+struct fpm_event_module_s *fpm_event_kqueue_module(void) /* {{{ */
 {
 #ifdef HAVE_KQUEUE
 	return &kqueue_module;

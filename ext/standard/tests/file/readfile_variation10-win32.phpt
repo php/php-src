@@ -19,7 +19,6 @@ $names_arr = array(
   "-1" => -1,
   "TRUE" => TRUE,
   "FALSE" => FALSE,
-  "NULL" => NULL,
   "\"\"" => "",
   "\" \"" => " ",
   "\\0" => "\0",
@@ -52,9 +51,6 @@ Warning: readfile(-1): Failed to open stream: No such file or directory in %s on
 Warning: readfile(1): Failed to open stream: No such file or directory in %s on line %d
 
 -- Filename: FALSE --
-ValueError: Path cannot be empty
-
--- Filename: NULL --
 ValueError: Path cannot be empty
 
 -- Filename: "" --

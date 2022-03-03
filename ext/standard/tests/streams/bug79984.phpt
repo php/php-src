@@ -5,18 +5,18 @@ Bug #79984 (Stream filter is not called with closing arg)
 
 class F extends php_user_filter
 {
-    public function onCreate()
+    public function onCreate(): bool
     {
         echo 'filter onCreate' . PHP_EOL;
         return true;
     }
 
-    public function onClose()
+    public function onClose(): void
     {
         echo 'filter onClose' . PHP_EOL;
     }
 
-    public function filter($in, $out, &$consumed, $closing)
+    public function filter($in, $out, &$consumed, $closing): int
     {
         while ($bucket = stream_bucket_make_writeable($in)) {
             $bucket->data = strtoupper($bucket->data);

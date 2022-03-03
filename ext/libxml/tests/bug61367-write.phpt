@@ -1,13 +1,15 @@
 --TEST--
 Bug #61367: open_basedir bypass in libxml RSHUTDOWN: write test
---SKIPIF--
-<?php if(!extension_loaded('dom')) echo 'skip dom extension not available'; ?>
+--EXTENSIONS--
+dom
 --INI--
 open_basedir=.
 --FILE--
 <?php
 
 class StreamExploiter {
+    public $context;
+
     public function stream_close (  ) {
         $doc = new DOMDocument;
         $doc->appendChild($doc->createTextNode('hello'));

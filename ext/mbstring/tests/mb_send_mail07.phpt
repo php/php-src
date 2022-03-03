@@ -1,10 +1,9 @@
 --TEST--
 mb_send_mail() test 7 (lang=Korean)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not valid for Windows');
-}
 if (!function_exists("mb_send_mail") || !mb_language("Korean")) {
     die("skip mb_send_mail() not available");
 }
@@ -13,7 +12,7 @@ if (!@mb_internal_encoding('ISO-2022-KR')) {
 }
 ?>
 --INI--
-sendmail_path=/bin/cat
+sendmail_path={MAIL:{PWD}/mb_send_mail07.eml}
 mail.add_x_header=off
 --FILE--
 <?php
@@ -21,12 +20,18 @@ $to = 'example@example.com';
 
 /* default setting */
 mb_send_mail($to, mb_language(), "test");
+readfile(__DIR__ . "/mb_send_mail07.eml");
 
 /* Korean */
 if (mb_language("korean")) {
     mb_internal_encoding('EUC-KR');
     mb_send_mail($to, "테스트 ".mb_language(), "테스트");
+    readfile(__DIR__ . "/mb_send_mail07.eml");
 }
+?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . "/mb_send_mail07.eml");
 ?>
 --EXPECTF--
 To: example@example.com

@@ -1,5 +1,7 @@
 --TEST--
 Bug #50308 (session id not appended properly for empty anchor tags)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

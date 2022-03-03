@@ -44,9 +44,9 @@ static inline const char *dtrace_get_executed_filename(void)
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *res;
-	DTRACE_COMPILE_FILE_ENTRY(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_ENTRY(ZSTR_VAL(file_handle->opened_path), ZSTR_VAL(file_handle->filename));
 	res = compile_file(file_handle, type);
-	DTRACE_COMPILE_FILE_RETURN(ZSTR_VAL(file_handle->opened_path), (char *)file_handle->filename);
+	DTRACE_COMPILE_FILE_RETURN(ZSTR_VAL(file_handle->opened_path), ZSTR_VAL(file_handle->filename));
 
 	return res;
 }
@@ -109,10 +109,10 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 	}
 }
 
-void dtrace_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message)
+void dtrace_error_notify_cb(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message)
 {
 	if (DTRACE_ERROR_ENABLED()) {
-		DTRACE_ERROR(ZSTR_VAL(message), (char *)error_filename, error_lineno);
+		DTRACE_ERROR(ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
 	}
 }
 

@@ -2,7 +2,7 @@
 -- DynASM. A dynamic assembler for code generation engines.
 -- Originally designed and implemented for LuaJIT.
 --
--- Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 -- See below for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -10,14 +10,14 @@
 local _info = {
   name =	"DynASM",
   description =	"A dynamic assembler for code generation engines",
-  version =	"1.4.0",
-  vernum =	 10400,
-  release =	"2015-10-18",
+  version =	"1.5.0",
+  vernum =	 10500,
+  release =	"2021-05-02",
   author =	"Mike Pall",
-  url =		"http://luajit.org/dynasm.html",
+  url =		"https://luajit.org/dynasm.html",
   license =	"MIT",
   copyright =	[[
-Copyright (C) 2005-2016 Mike Pall. All rights reserved.
+Copyright (C) 2005-2021 Mike Pall. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -38,7 +38,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[ MIT license: http://www.opensource.org/licenses/mit-license.php ]
+[ MIT license: https://www.opensource.org/licenses/mit-license.php ]
 ]],
 }
 
@@ -630,6 +630,7 @@ end
 -- Load architecture-specific module.
 local function loadarch(arch)
   if not match(arch, "^[%w_]+$") then return "bad arch name" end
+  _G._map_def = map_def
   local ok, m_arch = pcall(require, "dasm_"..arch)
   if not ok then return "cannot load module: "..m_arch end
   g_arch = m_arch

@@ -10,5 +10,7 @@ opcache.jit_buffer_size=1M
 $a = [];
 $a[] &= $b;
 ?>
+--EXTENSIONS--
+opcache
 --EXPECTF--
 Warning: Undefined variable $b in %s on line %d

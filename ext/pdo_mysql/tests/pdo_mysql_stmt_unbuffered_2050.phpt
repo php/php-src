@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDO:query() vs. PDO::prepare() and MySQL error 2050
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
@@ -138,11 +139,11 @@ array(1) {
 }
 Unbuffered...
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050  in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050 Row retrieval was canceled by mysql_stmt_close() call in %s on line %d
 array(0) {
 }
 
-Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050  in %s on line %d
+Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: 2050 Row retrieval was canceled by mysql_stmt_close() call in %s on line %d
 array(0) {
 }
 array(1) {
