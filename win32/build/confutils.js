@@ -120,6 +120,7 @@ function get_version_numbers()
 }
 
 configure_args = new Array();
+configure_args_declared = {};
 configure_subst = WScript.CreateObject("Scripting.Dictionary");
 
 configure_hdr = WScript.CreateObject("Scripting.Dictionary");
@@ -228,6 +229,8 @@ function ConfigureArg(type, optname, helptext, defval)
 		this.arg = "--" + type + "-" + optname;
 		this.imparg = "--" + opptype + "-" + optname;
 	}
+	check_arg_uniqueness(this.arg);
+	check_arg_uniqueness(this.imparg);
 
 	this.optname = optname;
 	this.helptext = helptext;
@@ -235,6 +238,14 @@ function ConfigureArg(type, optname, helptext, defval)
 	this.symval = optname.toUpperCase().replace(new RegExp("-", "g"), "_");
 	this.seen = false;
 	this.argval = defval;
+}
+
+function check_arg_uniqueness(argname)
+{
+	if (configure_args_declared[argname]) {
+		ERROR('Option ' + argname + ' is already declared.');
+	}
+	configure_args_declared[argname] = true;
 }
 
 function ARG_WITH(optname, helptext, defval)
