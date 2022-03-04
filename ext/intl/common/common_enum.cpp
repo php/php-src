@@ -291,6 +291,7 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	IntlIterator_ce_ptr = register_class_IntlIterator(zend_ce_iterator);
 	IntlIterator_ce_ptr->create_object = IntlIterator_object_create;
 	IntlIterator_ce_ptr->get_iterator = IntlIterator_get_iterator;
+	IntlIterator_ce_ptr->ce_flags |= ZEND_ACC_REUSE_GET_ITERATOR;
 
 	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
