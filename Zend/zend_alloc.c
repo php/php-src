@@ -2724,6 +2724,14 @@ ZEND_API size_t zend_memory_peak_usage(bool real_usage)
 	return 0;
 }
 
+ZEND_API void zend_memory_reset_peak_usage(void)
+{
+#if ZEND_MM_STAT
+	AG(mm_heap)->real_peak = AG(mm_heap)->real_size;
+	AG(mm_heap)->peak = AG(mm_heap)->size;
+#endif
+}
+
 ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 {
 	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
