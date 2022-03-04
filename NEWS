@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-8115 (Can't catch arg type deprecation when instantiating Intl
     classes). (ilutov)
 
+- Standard:
+  . Fixed bug GH-8048 (Force macOS to use statfs). (risner)
+
 17 Mar 2022, PHP 8.1.4
 
 - Core:
