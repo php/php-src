@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-8115 (Can't catch arg type deprecation when instantiating Intl
     classes). (ilutov)
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
+  . Fixed bug GH-7734 (Fix IntlPartsIterator key off-by-one error and first
+    key). (ilutov)
 
 - MBString:
   . Fixed bug GH-8208 (mb_encode_mimeheader: $indent functionality broken).

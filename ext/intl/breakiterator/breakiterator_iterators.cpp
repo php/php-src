@@ -127,6 +127,7 @@ typedef struct zoi_break_iter_parts {
 	zoi_with_current zoi_cur;
 	parts_iter_key_type key_type;
 	BreakIterator_object *bio; /* so we don't have to fetch it all the time */
+	zend_ulong index_right;
 } zoi_break_iter_parts;
 
 static void _breakiterator_parts_destroy_it(zend_object_iterator *iter)
@@ -136,8 +137,16 @@ static void _breakiterator_parts_destroy_it(zend_object_iterator *iter)
 
 static void _breakiterator_parts_get_current_key(zend_object_iterator *iter, zval *key)
 {
-	/* the actual work is done in move_forward and rewind */
-	ZVAL_LONG(key, iter->index);
+	// The engine resets the iterator index to -1 after rewinding. When using
+	// PARTS_ITERATOR_KEY_RIGHT we store it in zoi_break_iter_parts.index_right
+	// so it doesn't get lost.
+	zoi_break_iter_parts *zoi_bit = (zoi_break_iter_parts*)iter;
+
+	if (zoi_bit->key_type == PARTS_ITERATOR_KEY_RIGHT && iter->index == 0) {
+		ZVAL_LONG(key, zoi_bit->index_right);
+	} else {
+		ZVAL_LONG(key, iter->index);
+	}
 }
 
 static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
@@ -163,6 +172,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 		iter->index = cur;
 	} else if (zoi_bit->key_type == PARTS_ITERATOR_KEY_RIGHT) {
 		iter->index = next;
+		zoi_bit->index_right = next;
 	}
 	/* else zoi_bit->key_type == PARTS_ITERATOR_KEY_SEQUENTIAL
 	 * No need to do anything, the engine increments ->index */
@@ -229,6 +239,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	assert(((zoi_break_iter_parts*)ii->iterator)->bio->biter != NULL);
 
 	((zoi_break_iter_parts*)ii->iterator)->key_type = key_type;
+	((zoi_break_iter_parts*)ii->iterator)->index_right = 0;
 }
 
 U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
