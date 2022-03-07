@@ -670,7 +670,7 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 
 		func->common.attributes = NULL;
 
-		ZEND_HASH_FOREACH_PTR(old_func->common.attributes, old_attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
 			uint32_t i;
 			zend_attribute *attr;
 
