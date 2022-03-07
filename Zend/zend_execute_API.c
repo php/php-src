@@ -329,6 +329,18 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 						ZVAL_UNDEF(&c->value);
 					}
 				} ZEND_HASH_FOREACH_END();
+
+				/* properties may contain objects as well */
+				if (ce->default_properties_table) {
+					zval *p = ce->default_properties_table;
+					zval *end = p + ce->default_properties_count;
+
+					while (p != end) {
+						i_zval_ptr_dtor(p);
+						ZVAL_UNDEF(p);
+						p++;
+					}
+				}
 			}
 
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
