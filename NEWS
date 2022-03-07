@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-8176 (Enum values in property initializers leak). (Bob)
+  . Fixed freeing of internal attribute arguments. (Bob)
+  . Fixed bug GH-8070 (memory leak of internal function attribute hash).
+    (Tim Düsterhus)
 
 - Intl:
   . Fixed bug GH-8115 (Can't catch arg type deprecation when instantiating Intl
