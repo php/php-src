@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed freeing of internal attribute arguments. (Bob)
+  . Fixed bug GH-8070 (memory leak of internal function attribute hash).
+    (Tim Düsterhus)
 
 - Intl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
