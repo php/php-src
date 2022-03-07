@@ -205,6 +205,7 @@ ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *
 static void attr_free(zval *v)
 {
 	zend_attribute *attr = Z_PTR_P(v);
+	bool persistent = attr->flags & ZEND_ATTRIBUTE_PERSISTENT;
 
 	zend_string_release(attr->name);
 	zend_string_release(attr->lcname);
@@ -213,10 +214,14 @@ static void attr_free(zval *v)
 		if (attr->args[i].name) {
 			zend_string_release(attr->args[i].name);
 		}
-		zval_ptr_dtor(&attr->args[i].value);
+		if (persistent) {
+			zval_internal_ptr_dtor(&attr->args[i].value);
+		} else {
+			zval_ptr_dtor(&attr->args[i].value);
+		}
 	}
 
-	pefree(attr, attr->flags & ZEND_ATTRIBUTE_PERSISTENT);
+	pefree(attr, persistent);
 }
 
 ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string *name, uint32_t argc, uint32_t flags, uint32_t offset, uint32_t lineno)

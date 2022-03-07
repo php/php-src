@@ -156,6 +156,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 		/* For methods this will be called explicitly. */
 		if (!function->common.scope) {
 			zend_free_internal_arg_info(&function->internal_function);
+
+			if (function->common.attributes) {
+				zend_hash_release(function->common.attributes);
+				function->common.attributes = NULL;
+			}
 		}
 
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
@@ -433,11 +438,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release_ex(ce->name, 1);
 
-			/* TODO: eliminate this loop for classes without functions with arg_info */
+			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
-				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
-				    fn->common.scope == ce) {
-					zend_free_internal_arg_info(&fn->internal_function);
+				if (fn->common.scope == ce) {
+					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
+						zend_free_internal_arg_info(&fn->internal_function);
+					}
+
+					if (fn->common.attributes) {
+						zend_hash_release(fn->common.attributes);
+						fn->common.attributes = NULL;
+					}
 				}
 			} ZEND_HASH_FOREACH_END();
 
