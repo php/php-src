@@ -615,7 +615,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	char				 delimiter;
 	char				 start_delimiter;
 	char				 end_delimiter;
-	char				*p, *pp, *end_p;
+	char				*p, *pp;
 	char				*pattern;
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
@@ -645,7 +645,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	}
 
 	p = ZSTR_VAL(regex);
-	end_p = ZSTR_VAL(regex) + ZSTR_LEN(regex);
+	const char* end_p = ZSTR_VAL(regex) + ZSTR_LEN(regex);
 
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
@@ -707,7 +707,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		}
 	}
 
-	if (pp == end_p) {
+	if (pp >= end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
