@@ -793,15 +793,15 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			zend_string *previous_filename;
 			zend_long previous_lineno;
 			if (scope) {
-				previous_filename = EG(exception_filename);
-				previous_lineno = EG(exception_lineno);
-				EG(exception_filename) = scope->info.user.filename;
-				EG(exception_lineno) = zend_ast_get_lineno(ast);
+				previous_filename = EG(filename_override);
+				previous_lineno = EG(lineno_override);
+				EG(filename_override) = scope->info.user.filename;
+				EG(lineno_override) = zend_ast_get_lineno(ast);
 			}
 			zval *zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
 			if (scope) {
-				EG(exception_filename) = previous_filename;
-				EG(exception_lineno) = previous_lineno;
+				EG(filename_override) = previous_filename;
+				EG(lineno_override) = previous_lineno;
 			}
 
 			if (UNEXPECTED(zv == NULL)) {
