@@ -1943,7 +1943,11 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 	zval retval;
 
 	/* 1) use fgetcsv? 2) overloaded call the function, 3) do it directly */
-	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
+	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
+		return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
+	}
+	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
+		zend_execute_data *execute_data = EG(current_execute_data);
 		spl_filesystem_file_free_line(intern);
 
 		if (php_stream_eof(intern->u.file.stream)) {
@@ -1952,11 +1956,6 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			}
 			return FAILURE;
 		}
-		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
-			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
-		}
-
-		zend_execute_data *execute_data = EG(current_execute_data);
 		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		if (Z_ISUNDEF(retval)) {
 			return FAILURE;
@@ -2733,8 +2732,8 @@ PHP_METHOD(SplFileObject, seek)
 		}
 	}
 	if (line_pos > 0) {
-		intern->u.file.current_line_num++;
 		if (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
+		intern->u.file.current_line_num++;
 			spl_filesystem_file_free_line(intern);
 		}
 	}
