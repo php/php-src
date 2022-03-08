@@ -31,31 +31,31 @@ preg_replace("/foo/e\0/i", "echo('Eek');", "");
 
 ?>
 --EXPECTF--
-Warning: preg_match(): Delimiter must not be a null character in %snull_bytes.php on line 3
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 3
 bool(false)
 int(0)
 int(1)
 
-Warning: preg_match(): Null character is not a valid modifier in %snull_bytes.php on line 6
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 6
 bool(false)
 
-Warning: preg_match(): Null character is not a valid modifier in %snull_bytes.php on line 7
-bool(false)
-int(0)
-int(1)
-
-Warning: preg_match(): Delimiter must not be a null character in %snull_bytes.php on line 11
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 7
 bool(false)
 int(0)
 int(1)
 
-Warning: preg_match(): Null character is not a valid modifier in %snull_bytes.php on line 14
-bool(false)
-
-Warning: preg_match(): Null character is not a valid modifier in %snull_bytes.php on line 15
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 11
 bool(false)
 int(0)
 int(1)
+
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 14
+bool(false)
+
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 15
+bool(false)
+int(0)
+int(1)
 int(0)
 int(1)
 int(0)
@@ -63,4 +63,4 @@ int(0)
 int(1)
 int(0)
 
-Warning: preg_replace(): Null character is not a valid modifier in %snull_bytes.php on line 27
+Warning: preg_replace(): NUL is not a valid modifier in %snull_bytes.php on line 27

@@ -30,7 +30,7 @@ foreach($regex_array as $regex_value) {
 
 Arg value is abcdef
 
-Warning: preg_replace_callback(): Delimiter must not be alphanumeric or backslash in %s on line %d
+Warning: preg_replace_callback(): Delimiter must not be alphanumeric, backslash, or NUL in %s on line %d
 NULL
 
 Arg value is /[a-zA-Z]
