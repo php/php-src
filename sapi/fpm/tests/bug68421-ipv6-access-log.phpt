@@ -18,6 +18,7 @@ listen = {{ADDR:IPv6:ANY}}
 access.log = {{FILE:LOG:ACC}}
 ping.path = /ping
 ping.response = pong
+ping.dontlog = no
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
