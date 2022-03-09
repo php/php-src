@@ -27,6 +27,8 @@
 
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
+static char *fpm_ping_path = NULL;
+static int fpm_ping_dontlog = -1;
 
 int fpm_log_open(int reopen) /* {{{ */
 {
@@ -83,6 +85,13 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		fpm_log_fd = wp->log_fd;
 	}
 
+	if (wp->config->ping_path && *wp->config->ping_path) {
+		fpm_ping_path = strdup(wp->config->ping_path);
+	}
+
+	if (fpm_ping_dontlog == -1) {
+		fpm_ping_dontlog = wp->config->ping_dontlog;
+	}
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
 		if (wp->log_fd > -1 && wp->log_fd != fpm_log_fd) {
@@ -136,6 +145,11 @@ int fpm_log_write(char *log_format) /* {{{ */
 		}
 		proc = *proc_p;
 		fpm_scoreboard_proc_release(proc_p);
+	}
+
+	if (fpm_ping_path && fpm_ping_dontlog && !strcasecmp(proc.request_uri, fpm_ping_path)
+	    && (!strcasecmp(proc.request_method, "GET") || !strcasecmp(proc.request_method, "HEAD"))) {
+		return 0;
 	}
 
 	token = 0;

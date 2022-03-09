@@ -139,6 +139,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "pm.status_listen",          &fpm_conf_set_string,      WPO(pm_status_listen) },
 	{ "ping.path",                 &fpm_conf_set_string,      WPO(ping_path) },
 	{ "ping.response",             &fpm_conf_set_string,      WPO(ping_response) },
+	{ "ping.dontlog",              &fpm_conf_set_boolean,     WPO(ping_dontlog) },
 	{ "access.log",                &fpm_conf_set_string,      WPO(access_log) },
 	{ "access.format",             &fpm_conf_set_string,      WPO(access_format) },
 	{ "slowlog",                   &fpm_conf_set_string,      WPO(slowlog) },
@@ -618,6 +619,7 @@ static void *fpm_worker_pool_config_alloc(void) /* {{{ */
 	wp->config->process_dumpable = 0;
 	wp->config->clear_env = 1;
 	wp->config->decorate_workers_output = 1;
+	wp->config->ping_dontlog = 1; /* don't log /ping entries */
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -1733,6 +1735,7 @@ static void fpm_conf_dump(void) /* {{{ */
 		zlog(ZLOG_NOTICE, "\tpm.status_listen = %s",           STR2STR(wp->config->pm_status_listen));
 		zlog(ZLOG_NOTICE, "\tping.path = %s",                  STR2STR(wp->config->ping_path));
 		zlog(ZLOG_NOTICE, "\tping.response = %s",              STR2STR(wp->config->ping_response));
+		zlog(ZLOG_NOTICE, "\tping.dontlog = %s",               BOOL2STR(wp->config->ping_dontlog));
 		zlog(ZLOG_NOTICE, "\taccess.log = %s",                 STR2STR(wp->config->access_log));
 		zlog(ZLOG_NOTICE, "\taccess.format = %s",              STR2STR(wp->config->access_format));
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));

@@ -77,6 +77,7 @@ struct fpm_worker_pool_config_s {
 	char *pm_status_listen;
 	char *ping_path;
 	char *ping_response;
+	int ping_dontlog;
 	char *access_log;
 	char *access_format;
 	char *slowlog;

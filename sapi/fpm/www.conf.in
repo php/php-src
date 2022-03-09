@@ -280,6 +280,11 @@ pm.max_spare_servers = 3
 ; Default Value: pong
 ;ping.response = pong
 
+; This directive may be used to apply (or prevent) the "GET /ping" to be logged.
+; The directive "ping.path" have to be set, before this setting to be effective.
+; Default Value: yes
+;ping.dontlog = yes
+
 ; The access log file
 ; Default: not set
 ;access.log = log/$pool.access.log
