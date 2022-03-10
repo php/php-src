@@ -176,6 +176,7 @@ typedef struct _php_ps_globals {
 	} mod_user_names;
 	int mod_user_implemented;
 	int mod_user_is_open;
+	zend_string *mod_user_class_name;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
 	bool auto_start;
