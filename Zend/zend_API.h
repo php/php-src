@@ -721,7 +721,17 @@ static zend_always_inline zend_result zend_forbid_dynamic_call(void)
 	return SUCCESS;
 }
 
-ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce);
+ZEND_API ZEND_COLD const char *zend_get_object_type_case(const zend_class_entry *ce, bool upper_case);
+
+static zend_always_inline const char *zend_get_object_type(const zend_class_entry *ce)
+{
+	return zend_get_object_type_case(ce, false);
+}
+
+static zend_always_inline const char *zend_get_object_type_uc(const zend_class_entry *ce)
+{
+	return zend_get_object_type_case(ce, true);
+}
 
 ZEND_API bool zend_is_iterable(zval *iterable);
 

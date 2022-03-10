@@ -67,8 +67,13 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 		return SUCCESS;
 	}
 
+	bool can_extend = (class_type->ce_flags & ZEND_ACC_ENUM) == 0;
+
 	zend_error_noreturn(E_ERROR,
-		"Class %s cannot implement interface %s, extend Exception or Error instead",
+		can_extend
+			? "%s %s cannot implement interface %s, extend Exception or Error instead"
+			: "%s %s cannot implement interface %s",
+		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(interface->name));
 	return FAILURE;
