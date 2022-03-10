@@ -330,9 +330,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (ce->attributes) {
 					zend_hash_release(ce->attributes);
 				}
-				if (ce->backed_enum_table) {
-					zend_hash_release(ce->backed_enum_table);
-				}
 
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 					uint32_t i;
@@ -402,6 +399,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
+			}
+			if (ce->backed_enum_table) {
+				zend_hash_release(ce->backed_enum_table);
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:

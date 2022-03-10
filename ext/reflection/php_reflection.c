@@ -1485,7 +1485,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 {
 	reflection_object *intern;
 
-	zend_class_entry *case_reflection_class = ce->backed_enum_table == IS_UNDEF
+	zend_class_entry *case_reflection_class = ce->enum_backing_type == IS_UNDEF
 		? reflection_enum_unit_case_ptr
 		: reflection_enum_backed_case_ptr;
 	reflection_instantiate(case_reflection_class, object);

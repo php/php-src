@@ -30,6 +30,7 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
+#include "zend_enum.h"
 
 #include <stdarg.h>
 
@@ -1490,6 +1491,12 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
+		}
+	}
+
+	if (class_type->type == ZEND_USER_CLASS && class_type->ce_flags & ZEND_ACC_ENUM && class_type->enum_backing_type != IS_UNDEF) {
+		if (zend_enum_build_backed_enum_table(class_type) == FAILURE) {
+			return FAILURE;
 		}
 	}
 
