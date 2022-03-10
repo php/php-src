@@ -19,7 +19,11 @@ function init() {
     var_dump($c->a);
 }
 
-(new C)->init();
+try {
+    (new C)->init();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 try {
     init();
@@ -29,8 +33,5 @@ try {
 
 ?>
 --EXPECT--
-array(1) {
-  [0]=>
-  int(1)
-}
-Cannot initialize readonly property C::$a from global scope
+Cannot indirectly modify readonly property C::$a
+Cannot indirectly modify readonly property C::$a
