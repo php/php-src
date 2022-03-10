@@ -4789,8 +4789,24 @@ ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) 
 		return "trait";
 	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		return "interface";
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		return "enum";
 	} else {
 		return "class";
+	}
+}
+/* }}} */
+
+ZEND_API ZEND_COLD const char *zend_get_object_type_uc(const zend_class_entry *ce) /* {{{ */
+{
+	if(ce->ce_flags & ZEND_ACC_TRAIT) {
+		return "Trait";
+	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		return "Interface";
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		return "Enum";
+	} else {
+		return "Class";
 	}
 }
 /* }}} */
