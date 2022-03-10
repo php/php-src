@@ -35,4 +35,8 @@ PHP                                                                        NEWS
   . add ZipArchive::getStreamName() method
   . add ZipArchive::getStreamIndex() method
 
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
