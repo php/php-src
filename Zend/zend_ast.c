@@ -776,12 +776,18 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			zend_string *case_name = zend_ast_get_str(case_name_ast);
 
 			zend_ast *case_value_ast = ast->child[2];
-			zval *case_value_zv = case_value_ast != NULL
-				? zend_ast_get_zval(case_value_ast)
-				: NULL;
+
+			zval case_value_zv;
+			ZVAL_UNDEF(&case_value_zv);
+			if (case_value_ast != NULL) {
+				if (UNEXPECTED(zend_ast_evaluate(&case_value_zv, case_value_ast, scope) != SUCCESS)) {
+					return FAILURE;
+				}
+			}
 
 			zend_class_entry *ce = zend_lookup_class(class_name);
-			zend_enum_new(result, ce, case_name, case_value_zv);
+			zend_enum_new(result, ce, case_name, case_value_ast != NULL ? &case_value_zv : NULL);
+			zval_ptr_dtor_nogc(&case_value_zv);
 			break;
 		}
 		case ZEND_AST_CLASS_CONST:

@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     references). (Nicolas Grekas)
   . Fixed bug GH-8661 (Nullsafe in coalesce triggers undefined variable
     warning). (ilutov)
+  . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
+    enums). (ilutov)
 
 - MBString:
   . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
