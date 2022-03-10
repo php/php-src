@@ -604,6 +604,17 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				}
 			}
 			goto exit;
+		} else {
+			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+				if (type == BP_VAR_W || type == BP_VAR_RW) {
+					zend_readonly_property_indirect_modification_error(prop_info);
+					retval = &EG(uninitialized_zval);
+					goto exit;
+				} else if (type == BP_VAR_UNSET) {
+					retval = &EG(uninitialized_zval);
+					goto exit;
+				}
+			}
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
 			/* Skip __get() for uninitialized typed properties */
@@ -1024,9 +1035,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
-				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
-					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize")) {
-					retval = &EG(error_zval);
+				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+					/* Readonly property, delegate to read_property + write_property. */
+					retval = NULL;
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */

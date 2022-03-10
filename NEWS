@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
   . Fixed potential use after free in php_binary_init(). (Heiko Weber)
+  . Fixed bug GH-7942 (Indirect mutation of readonly properties through
+    references). (ilutov)
 
 - CLI:
   . Fixed GH-8827 (Intentionally closing std handles no longer possible). (cmb)
