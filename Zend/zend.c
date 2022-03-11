@@ -1343,6 +1343,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
+	bool orig_record_errors;
+	uint32_t orig_num_errors;
+	zend_error_info **orig_errors;
+	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1436,7 +1440,20 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				CG(in_compilation) = 0;
 			}
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
+			orig_record_errors = EG(record_errors);
+			orig_num_errors = EG(num_errors);
+			orig_errors = EG(errors);
+			EG(record_errors) = false;
+			EG(num_errors) = 0;
+			EG(errors) = NULL;
+
+			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
+
+			EG(record_errors) = orig_record_errors;
+			EG(num_errors) = orig_num_errors;
+			EG(errors) = orig_errors;
+
+			if (res == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(orig_type, error_filename, error_lineno, message);
