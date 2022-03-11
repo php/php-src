@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-9089 (Fix memory leak on Randomizer::__construct()
     call twice) (zeriyoshi)
 
+- Sockets:
+  . Added SOL_FILTER socket option for Solaris. (David Carlier)
+
 21 Jul 2022, PHP 8.2.0beta1
 
 - CLI:
