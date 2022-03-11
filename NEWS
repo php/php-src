@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed freeing of internal attribute arguments. (Bob)
   . Fixed bug GH-8070 (memory leak of internal function attribute hash).
     (Tim Düsterhus)
+  . Fixed bug GH-8160 (ZTS support on Alpine is broken). (Michael Voříšek)
 
 - Intl:
   . Fixed bug GH-8115 (Can't catch arg type deprecation when instantiating Intl
