@@ -1612,6 +1612,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					ADD_OP1_TRACE_GUARD();
 					break;
+				case ZEND_CONCAT:
+				case ZEND_FAST_CONCAT:
+					if ((opline->op1_type == IS_CONST || orig_op1_type == IS_STRING)
+					 && (opline->op2_type == IS_CONST || orig_op2_type == IS_STRING)) {
+						ADD_OP2_TRACE_GUARD();
+						ADD_OP1_TRACE_GUARD();
+					}
+					break;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
@@ -1630,8 +1638,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SUB:
 				case ZEND_MUL:
 //				case ZEND_DIV: // TODO: check for division by zero ???
-				case ZEND_CONCAT:
-				case ZEND_FAST_CONCAT:
 					ADD_OP2_TRACE_GUARD();
 					/* break missing intentionally */
 				case ZEND_ECHO:
