@@ -216,6 +216,7 @@ typedef struct _builtin_type_info {
 
 static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("null"), IS_NULL},
+	{ZEND_STRL("true"), IS_TRUE},
 	{ZEND_STRL("false"), IS_FALSE},
 	{ZEND_STRL("int"), IS_LONG},
 	{ZEND_STRL("float"), IS_DOUBLE},
@@ -1246,6 +1247,8 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_BOOL), /* is_intersection */ false);
 	} else if (type_mask & MAY_BE_FALSE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_FALSE), /* is_intersection */ false);
+	} else if (type_mask & MAY_BE_TRUE) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_TRUE), /* is_intersection */ false);
 	}
 	if (type_mask & MAY_BE_VOID) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_VOID), /* is_intersection */ false);
@@ -6225,6 +6228,11 @@ static zend_type zend_compile_typename(
 				zend_string *overlap_type_str = zend_type_to_string(overlap_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Duplicate type %s is redundant", ZSTR_VAL(overlap_type_str));
+			}
+			if ( ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_TRUE) && (single_type_mask == MAY_BE_FALSE))
+					|| ((ZEND_TYPE_PURE_MASK(type) & MAY_BE_FALSE) && (single_type_mask == MAY_BE_TRUE)) ) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Type contains both true and false, bool should be used instead");
 			}
 			ZEND_TYPE_FULL_MASK(type) |= ZEND_TYPE_PURE_MASK(single_type);
 			ZEND_TYPE_FULL_MASK(single_type) &= ~_ZEND_TYPE_MAY_BE_MASK;
