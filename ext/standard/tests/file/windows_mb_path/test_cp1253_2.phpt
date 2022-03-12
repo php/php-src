@@ -24,8 +24,8 @@ internal_encoding=cp1253
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "διαδρομή δοκιμής";
-$prefix = create_data("dir_cp1253", "${item}42}", 1253);
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_cp1253", "{$item}42}", 1253);
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

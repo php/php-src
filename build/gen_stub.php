@@ -1484,7 +1484,7 @@ class PropertyInfo
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
                     $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
-                    $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"${escapedClassName}\")-1, 1);\n";
+                    $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
 
                     $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
                 }

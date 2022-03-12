@@ -1077,6 +1077,10 @@ static zend_always_inline bool zend_check_arg_send_type(const zend_function *zf,
 /* Attribute for ternary inside parentheses */
 #define ZEND_PARENTHESIZED_CONDITIONAL 1
 
+/* Attributes for ${} encaps var in strings */
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY (1<<0)
+#define ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR (1<<1)
+
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)

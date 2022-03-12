@@ -9504,7 +9504,16 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	j = 0;
 	last_const_node.op_type = IS_UNUSED;
 	for (i = 0; i < list->children; i++) {
-		zend_compile_expr(&elem_node, list->child[i]);
+		zend_ast *encaps_var = list->child[i];
+		if (encaps_var->attr & (ZEND_ENCAPS_VAR_DOLLAR_CURLY|ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
+			if (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR) {
+				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
+			} else {
+				zend_error(E_DEPRECATED, "Using ${var} in strings is deprecated, use {$var} instead");
+			}
+		}
+
+		zend_compile_expr(&elem_node, encaps_var);
 
 		if (elem_node.op_type == IS_CONST) {
 			convert_to_string(&elem_node.u.constant);
