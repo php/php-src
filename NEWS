@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-8121 (SplFileObject - seek and key with csv file inconsistent).
     (cmb)
+  . Fixed bug GH-8192 (Cannot override DirectoryIterator::current() without
+    return typehint in 8.1). (Nikita)
 
 - Standard:
   . Fixed bug GH-8048 (Force macOS to use statfs). (risner)
