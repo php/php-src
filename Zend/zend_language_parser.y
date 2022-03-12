@@ -1490,11 +1490,11 @@ encaps_var:
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_PROP,
 			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES expr '}'
-			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_VAR, ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '}'
-			{ $$ = zend_ast_create(ZEND_AST_VAR, $2); }
+			{ $$ = zend_ast_create_ex(ZEND_AST_VAR, ZEND_ENCAPS_VAR_DOLLAR_CURLY, $2); }
 	|	T_DOLLAR_OPEN_CURLY_BRACES T_STRING_VARNAME '[' expr ']' '}'
-			{ $$ = zend_ast_create(ZEND_AST_DIM,
+			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_ENCAPS_VAR_DOLLAR_CURLY,
 			      zend_ast_create(ZEND_AST_VAR, $2), $4); }
 	|	T_CURLY_OPEN variable '}' { $$ = $2; }
 ;
