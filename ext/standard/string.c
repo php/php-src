@@ -6056,7 +6056,7 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 	str = zend_string_alloc(len, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos < len) {
-		int status = FAILURE;
+		zend_result status = FAILURE;
 		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
 
 		/* The lower 256 codepoints of Unicode are identical to Latin-1,

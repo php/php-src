@@ -316,7 +316,6 @@ static int php_json_escape_string(
 		smart_str *buf, const char *s, size_t len,
 		int options, php_json_encoder *encoder) /* {{{ */
 {
-	int status;
 	unsigned int us;
 	size_t pos, checkpoint;
 	char *dst;
@@ -371,7 +370,7 @@ static int php_json_escape_string(
 			}
 			us = (unsigned char)s[0];
 			if (UNEXPECTED(us >= 0x80)) {
-
+				zend_result status;
 				us = php_next_utf8_char((unsigned char *)s, len, &pos, &status);
 
 				/* check whether UTF8 character is correct */
