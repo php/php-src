@@ -28,7 +28,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 ========================
 3. Module changes
 ========================
-
+  a. ext/standard
+    - The PHP APIs php_strtoupper(), php_string_toupper(), php_strtolower(),
+      and php_string_tolower() have been removed.
+      Use zend_str_toupper(), zend_string_toupper(), zend_str_tolower(),
+      and zend_string_tolower() respectively instead.
 ========================
 4. OpCode changes
 ========================
