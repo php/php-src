@@ -226,6 +226,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_END_HEREDOC     "heredoc end"
 %token T_DOLLAR_OPEN_CURLY_BRACES "'${'"
 %token T_CURLY_OPEN      "'{$'"
+%token T_CURLY_DOLLAR_COLON "'{$:'"
 %token T_PAAMAYIM_NEKUDOTAYIM "'::'"
 %token T_NS_SEPARATOR    "'\\'"
 %token T_ELLIPSIS        "'...'"
@@ -1497,6 +1498,7 @@ encaps_var:
 			{ $$ = zend_ast_create(ZEND_AST_DIM,
 			      zend_ast_create(ZEND_AST_VAR, $2), $4); }
 	|	T_CURLY_OPEN variable '}' { $$ = $2; }
+	|	T_CURLY_DOLLAR_COLON expr '}' { $$ = $2; }
 ;
 
 encaps_var_offset:

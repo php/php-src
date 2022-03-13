@@ -2761,6 +2761,13 @@ skip_escape_conversion:
 }
 
 
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$:" {
+	yy_push_state(ST_IN_SCRIPTING);
+	enter_nesting('{');
+	RETURN_TOKEN(T_CURLY_DOLLAR_COLON);
+}
+
+
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);

@@ -8,4 +8,4 @@ Note: the closing ?> has been deliberately elided.
 echo <<<END
 
 --EXPECTF--
-Parse error: syntax error, unexpected end of file, expecting variable or heredoc end or "${" or "{$" in %s on line %d
+Parse error: syntax error, unexpected end of file in %s on line %d

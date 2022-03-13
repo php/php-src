@@ -9550,7 +9550,6 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 			ZVAL_EMPTY_STRING(&result->u.constant);
 			/* empty string */
 		}
-		CG(active_op_array)->last = reserved_op_number - 1;
 		return;
 	} else if (last_const_node.op_type == IS_CONST) {
 		opline = &CG(active_op_array)->opcodes[reserved_op_number];
