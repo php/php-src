@@ -29,6 +29,12 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+  a. ext/standard
+    - The PHP APIs string_natural_compare_function_ex(),
+      string_natural_case_compare_function(), and string_natural_compare_function()
+      have been removed. They always returned SUCCESS and were a wrapper around
+      strnatcmp_ex(). Use strnatcmp_ex() directly instead.
+
 ========================
 4. OpCode changes
 ========================
