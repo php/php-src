@@ -1,5 +1,9 @@
 --TEST--
 Error recording in error handler
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Error handler not active during preloading');
+?>
 --FILE--
 <?php
 set_error_handler(function($code, $msg) {
