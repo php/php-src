@@ -158,6 +158,9 @@ PHP 8.2 UPGRADE NOTES
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
 
+- SQLite3:
+  . sqlite3.defensive is now PHP_INI_USER.
+
 - Standard:
   . getimagesize() now reports the actual image dimensions, bits and channels
     of AVIF images. Previously, the dimensions have been reported as 0x0, and

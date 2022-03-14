@@ -31,6 +31,9 @@ PHP                                                                        NEWS
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 
+- SQLite3:
+  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
+
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.
     (Yurun)
