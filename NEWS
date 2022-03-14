@@ -14,6 +14,10 @@ PHP                                                                        NEWS
     classes). (ilutov)
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
+- MySQLi:
+  . Fixed bug GH-8068 (mysqli_fetch_object creates inaccessible properties).
+    (cmb)
+
 - Pcntl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
