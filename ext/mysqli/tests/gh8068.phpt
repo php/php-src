@@ -1,6 +1,6 @@
 --TEST--
 GH-8068 (mysqli_fetch_object creates inaccessible properties)
---EXTENSION--
+--EXTENSIONS--
 mysqli
 --SKIPIF--
 <?php
