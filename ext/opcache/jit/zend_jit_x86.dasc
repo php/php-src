@@ -16179,6 +16179,7 @@ bw_op:
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				if (opline->op2_type == IS_CONST &&
+				    opline->op1_type != IS_CONST &&
 				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
 				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2))) &&
 				    OP1_HAS_RANGE() &&
