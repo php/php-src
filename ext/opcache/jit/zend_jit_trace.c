@@ -4896,14 +4896,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
-						if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_LONG
-						 || (op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_GUARD)) == MAY_BE_DOUBLE) {
-							if (STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) != IS_LONG
-							 && STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) != IS_DOUBLE) {
-								/* type may be not set */
-								op1_info |= MAY_BE_NULL;
-						    }
-						}
 						op1_def_info = OP1_DEF_INFO();
 						if (op1_type != IS_UNKNOWN && (op1_info & MAY_BE_GUARD)) {
 							if (op1_type < IS_STRING
@@ -4918,6 +4910,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_addr = OP1_REG_ADDR();
 						op1_def_addr = OP1_DEF_REG_ADDR();
+						if (Z_MODE(op1_def_addr) != IS_REG &&
+								STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var)) !=
+								STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var))) {
+							/* type may be not set */
+							op1_info |= MAY_BE_NULL;
+						}
 						if (orig_op1_type != IS_UNKNOWN) {
 							if (orig_op1_type & IS_TRACE_REFERENCE) {
 								if (!zend_jit_fetch_reference(&dasm_state, opline, orig_op1_type, &op1_info, &op1_addr,
