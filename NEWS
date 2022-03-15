@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-03 Mar 2022, PHP 8.1.4RC1
+17 Mar 2022, PHP 8.1.4
 
 - Core:
   . Fixed Haiku ZTS build. (David Carlier)
