@@ -3448,7 +3448,7 @@ PHP_FUNCTION(similar_text)
 {
 	zend_string *t1, *t2;
 	zval *percent = NULL;
-	bool compute_percentage = ZEND_NUM_ARGS() == 3;
+	bool compute_percentage = ZEND_NUM_ARGS() >= 3;
 	size_t sim;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -4827,8 +4827,8 @@ PHP_FUNCTION(parse_str)
 static bool php_tag_find(char *tag, size_t len, const char *set) {
 	char c, *n;
 	const char *t;
-	int state=0;
-	bool done=0;
+	int state = 0;
+	bool done = 0;
 	char *norm;
 
 	if (len == 0) {
