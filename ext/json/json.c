@@ -141,10 +141,10 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
+PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
 {
 	php_json_encoder encoder;
-	int return_code;
+	zend_result return_code;
 
 	php_json_encode_init(&encoder);
 	encoder.max_depth = depth;
@@ -156,7 +156,7 @@ PHP_JSON_API int php_json_encode_ex(smart_str *buf, zval *val, int options, zend
 }
 /* }}} */
 
-PHP_JSON_API int php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
+PHP_JSON_API zend_result php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	return php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth));
 }
@@ -195,7 +195,7 @@ static const char *php_json_get_error_msg(php_json_error_code error_code) /* {{{
 }
 /* }}} */
 
-PHP_JSON_API int php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
+PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 

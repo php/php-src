@@ -33,6 +33,6 @@ static inline void php_json_encode_init(php_json_encoder *encoder)
 	memset(encoder, 0, sizeof(php_json_encoder));
 }
 
-int php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);
+zend_result php_json_encode_zval(smart_str *buf, zval *val, int options, php_json_encoder *encoder);
 
 #endif	/* PHP_JSON_ENCODER_H */
