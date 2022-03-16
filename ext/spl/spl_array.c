@@ -993,11 +993,9 @@ static HashTable *spl_array_it_get_gc(zend_object_iterator *iter, zval **table, 
 }
 
 /* {{{ spl_array_set_array */
-static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
-	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
-		zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
-		return;
-	}
+static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, bool just_array) {
+	/* Handled by ZPP prior to this, or for __unserialize() before passing to here */
+	ZEND_ASSERT(Z_TYPE_P(array) == IS_ARRAY || Z_TYPE_P(array) == IS_OBJECT);
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		zval_ptr_dtor(&intern->array);
 		if (Z_REFCOUNT_P(array) == 1) {
@@ -1739,6 +1737,11 @@ PHP_METHOD(ArrayObject, __unserialize)
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
 	} else {
+		if (Z_TYPE_P(storage_zv) != IS_OBJECT && Z_TYPE_P(storage_zv) != IS_ARRAY) {
+			/* TODO Use UnexpectedValueException instead? And better error message? */
+			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
+			RETURN_THROWS();
+		}
 		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, 1);
 	}
 
