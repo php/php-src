@@ -14,6 +14,10 @@ PHP                                                                        NEWS
     classes). (ilutov)
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
+- MBString:
+  . Fixed bug GH-8208 (mb_encode_mimeheader: $indent functionality broken).
+    (cmb)
+
 - MySQLi:
   . Fixed bug GH-8068 (mysqli_fetch_object creates inaccessible properties).
     (cmb)
