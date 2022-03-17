@@ -311,6 +311,8 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
+BEGIN_EXTERN_C()
+
 void accel_shutdown(void);
 zend_result  accel_activate(INIT_FUNC_ARGS);
 zend_result accel_post_deactivate(void);
@@ -332,6 +334,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+END_EXTERN_C()
 
 /* memory write protection */
 #define SHM_PROTECT() \

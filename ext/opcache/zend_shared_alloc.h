@@ -125,6 +125,8 @@ extern zend_smm_shared_globals *smm_shared_globals;
 
 #define SHARED_ALLOC_REATTACHED		(SUCCESS+1)
 
+BEGIN_EXTERN_C()
+
 int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size);
 void zend_shared_alloc_shutdown(void);
 
@@ -199,5 +201,7 @@ void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);
 #endif
+
+END_EXTERN_C()
 
 #endif /* ZEND_SHARED_ALLOC_H */

@@ -60,6 +60,8 @@ typedef struct _zend_accel_hash {
 	uint32_t               num_direct_entries;
 } zend_accel_hash;
 
+BEGIN_EXTERN_C()
+
 void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size);
 void zend_accel_hash_clean(zend_accel_hash *accel_hash);
 
@@ -89,5 +91,7 @@ static inline bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
 		return 0;
 	}
 }
+
+END_EXTERN_C()
 
 #endif /* ZEND_ACCELERATOR_HASH_H */
