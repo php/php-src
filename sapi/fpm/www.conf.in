@@ -347,6 +347,22 @@ pm.max_spare_servers = 3
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
 
+; A list of request_uri values which should be filtered from the access log.
+;
+; As a security precuation, this setting will be ignored if:
+;     - the request method is not GET or HEAD; or
+;     - there is a request body; or
+;     - there are query parameters; or
+;     - the response code is outwith the successful range of 200 to 299
+;
+; Note: The paths are matched against the output of the access.format tag "%r".
+;       On common configurations, this may look more like SCRIPT_NAME than the
+;       expected pre-rewrite URI.
+;
+; Default Value: not set
+;access.suppress_path[] = /ping
+;access.suppress_path[] = /health_check.php
+
 ; The log file for slow requests
 ; Default Value: not set
 ; Note: slowlog is mandatory if request_slowlog_timeout is set

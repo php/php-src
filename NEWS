@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
+  . Added access.suppress_path pool option to filter access log entries.
+    (Mark Gallagher)
 
 - Standard:
   . Fixed empty array returned by str_split on empty input. (Michael Vorisek)

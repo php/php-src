@@ -560,11 +560,13 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 	}
 
 	memset(kv, 0, sizeof(*kv));
-	kv->key = strdup(Z_STRVAL_P(key));
+	if (key) {
+		kv->key = strdup(Z_STRVAL_P(key));
 
-	if (!kv->key) {
-		free(kv);
-		return "fpm_conf_set_array: strdup(key) failed";
+		if (!kv->key) {
+			free(kv);
+			return "fpm_conf_set_array: strdup(key) failed";
+		}
 	}
 
 	if (convert_to_bool) {
@@ -669,6 +671,11 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->apparmor_hat);
 #endif
 
+	for (kv = wpc->access_suppress_paths; kv; kv = kv_next) {
+		kv_next = kv->next;
+		free(kv->value);
+		free(kv);
+	}
 	for (kv = wpc->php_values; kv; kv = kv_next) {
 		kv_next = kv->next;
 		free(kv->key);
@@ -1503,11 +1510,24 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 	char *err = NULL;
 	void *config;
 
-	if (!*Z_STRVAL_P(key)) {
-		zlog(ZLOG_ERROR, "[%s:%d] Misspelled  array ?", ini_filename, ini_lineno);
+	if (zend_string_equals_literal(Z_STR_P(name), "access.suppress_path")) {
+		if (!(*Z_STRVAL_P(key) == '\0')) {
+			zlog(ZLOG_ERROR, "[%s:%d] Keys provided to field 'access.suppress_path' are ignored", ini_filename, ini_lineno);
+			*error = 1;
+		}
+		if (!(*Z_STRVAL_P(value)) || (*Z_STRVAL_P(value) != '/')) {
+			zlog(ZLOG_ERROR, "[%s:%d] Values provided to field 'access.suppress_path' must begin with '/'", ini_filename, ini_lineno);
+			*error = 1;
+		}
+		if (*error) {
+			return;
+		}
+	} else if (!*Z_STRVAL_P(key)) {
+		zlog(ZLOG_ERROR, "[%s:%d] You must provide a key for field '%s'", ini_filename, ini_lineno, Z_STRVAL_P(name));
 		*error = 1;
 		return;
 	}
+
 	if (!current_wp || !current_wp->config) {
 		zlog(ZLOG_ERROR, "[%s:%d] Array are not allowed in the global section", ini_filename, ini_lineno);
 		*error = 1;
@@ -1538,6 +1558,10 @@ static void fpm_conf_ini_parser_array(zval *name, zval *key, zval *value, void *
 	} else if (zend_string_equals_literal(Z_STR_P(name), "php_admin_flag")) {
 		config = (char *)current_wp->config + WPO(php_admin_values);
 		err = fpm_conf_set_array(key, value, &config, 1);
+
+	} else if (zend_string_equals_literal(Z_STR_P(name), "access.suppress_path")) {
+		config = (char *)current_wp->config + WPO(access_suppress_paths);
+		err = fpm_conf_set_array(NULL, value, &config, 0);
 
 	} else {
 		zlog(ZLOG_ERROR, "[%s:%d] unknown directive '%s'", ini_filename, ini_lineno, Z_STRVAL_P(name));
@@ -1747,6 +1771,9 @@ static void fpm_conf_dump(void) /* {{{ */
 		zlog(ZLOG_NOTICE, "\tping.response = %s",              STR2STR(wp->config->ping_response));
 		zlog(ZLOG_NOTICE, "\taccess.log = %s",                 STR2STR(wp->config->access_log));
 		zlog(ZLOG_NOTICE, "\taccess.format = %s",              STR2STR(wp->config->access_format));
+		for (kv = wp->config->access_suppress_paths; kv; kv = kv->next) {
+			zlog(ZLOG_NOTICE, "\taccess.suppress_path[] = %s", kv->value);
+		}
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_trace_depth = %d", wp->config->request_slowlog_trace_depth);
