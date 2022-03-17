@@ -1,9 +1,7 @@
 --TEST--
-FPM: set pm.max_spawn_rate
+FPM: Validates arrays in configuration are correctly set - access.suppress_path doesn't allow key
 --SKIPIF--
-<?php
-include "skipif.inc";
-?>
+<?php include "skipif.inc"; ?>
 --FILE--
 <?php
 
@@ -12,25 +10,22 @@ require_once "tester.inc";
 $cfg = <<<EOT
 [global]
 error_log = {{FILE:LOG}}
-log_level = notice
+pid = {{FILE:PID}}
 [unconfined]
 listen = {{ADDR}}
-pm = dynamic
+access.suppress_path[pingpath] = /ping
+pm = static
 pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
-pm.max_spawn_rate = 64
 EOT;
 
 $tester = new FPM\Tester($cfg);
 $tester->start(['-tt']);
-$tester->expectLogConfigOptions(['pm.max_spawn_rate = 64']);
-$tester->close();
+$tester->expectLogError("\[%s:%d\] Keys provided to field 'access.suppress_path' are ignored");
 
 ?>
 Done
 --EXPECT--
+
 Done
 --CLEAN--
 <?php

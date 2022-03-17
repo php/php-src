@@ -79,6 +79,7 @@ struct fpm_worker_pool_config_s {
 	char *ping_response;
 	char *access_log;
 	char *access_format;
+	struct key_value_s *access_suppress_paths;
 	char *slowlog;
 	int request_slowlog_timeout;
 	int request_slowlog_trace_depth;
