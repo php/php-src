@@ -1665,7 +1665,7 @@ mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *res
 		mbfl_memory_device_strncat(&pe->outdev, "\x3f\x3d", 2);		/* ?= */
 	} else if (pe->tmpdev.pos > 0) {
 		if (pe->outdev.pos > 0) {
-			if ((pe->outdev.pos - pe->linehead + pe->tmpdev.pos) > 74) {
+			if ((pe->outdev.pos - pe->linehead + pe->tmpdev.pos + pe->firstindent) > 74) {
 				mbfl_memory_device_strncat(&pe->outdev, pe->lwsp, pe->lwsplen);
 			} else {
 				mbfl_memory_device_output(0x20, &pe->outdev);
