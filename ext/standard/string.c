@@ -1810,11 +1810,7 @@ PHP_FUNCTION(str_starts_with)
 		Z_PARAM_STR(needle)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
+	RETURN_BOOL(zend_string_starts_with(haystack, needle));
 }
 /* }}} */
 

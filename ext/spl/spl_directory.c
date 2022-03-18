@@ -740,7 +740,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 	/* spl_filesystem_dir_open() may emit an E_WARNING */
 	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 #ifdef HAVE_GLOB
-	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && memcmp(ZSTR_VAL(path), "glob://", sizeof("glob://")-1) != 0) {
+	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && !zend_string_starts_with_literal(path, "glob://")) {
 		path = zend_strpprintf(0, "glob://%s", ZSTR_VAL(path));
 		spl_filesystem_dir_open(intern, path);
 		zend_string_release(path);

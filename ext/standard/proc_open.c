@@ -728,7 +728,7 @@ static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_s
 
 	desc->type = DESCRIPTOR_TYPE_PIPE;
 
-	if (strncmp(ZSTR_VAL(zmode), "w", 1) != 0) {
+	if (!zend_string_starts_with_literal(zmode, "w")) {
 		desc->parentend = newpipe[1];
 		desc->childend = newpipe[0];
 		desc->mode_flags = O_WRONLY;
