@@ -4783,30 +4783,16 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
+ZEND_API ZEND_COLD const char *zend_get_object_type_case(const zend_class_entry *ce, bool upper_case) /* {{{ */
 {
-	if(ce->ce_flags & ZEND_ACC_TRAIT) {
-		return "trait";
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return upper_case ? "Trait" : "trait";
 	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		return "interface";
+		return upper_case ? "Interface" : "interface";
 	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
-		return "enum";
+		return upper_case ? "Enum" : "enum";
 	} else {
-		return "class";
-	}
-}
-/* }}} */
-
-ZEND_API ZEND_COLD const char *zend_get_object_type_uc(const zend_class_entry *ce) /* {{{ */
-{
-	if(ce->ce_flags & ZEND_ACC_TRAIT) {
-		return "Trait";
-	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		return "Interface";
-	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
-		return "Enum";
-	} else {
-		return "Class";
+		return upper_case ? "Class" : "class";
 	}
 }
 /* }}} */
