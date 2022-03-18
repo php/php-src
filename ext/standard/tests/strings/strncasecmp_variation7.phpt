@@ -17,6 +17,6 @@ echo "*** Done ***\n";
 ?>
 --EXPECT--
 *** Test strncasecmp() function: with null terminated strings and binary inputs ***
-int(5)
+int(1)
 int(-119)
 *** Done ***
