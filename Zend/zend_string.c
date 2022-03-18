@@ -135,10 +135,8 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 	idx = HT_HASH(interned_strings, nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(interned_strings, idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == size)) {
-			if (!memcmp(ZSTR_VAL(p->key), str, size)) {
-				return p->key;
-			}
+		if ((p->h == h) && zend_string_equals_str(p->key, str, size)) {
+			return p->key;
 		}
 		idx = Z_NEXT(p->val);
 	}
