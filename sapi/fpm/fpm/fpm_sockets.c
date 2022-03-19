@@ -334,7 +334,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		port_str = dup_address;
 	}
 
-	if (port == 0) {
+	if (port < 1 || port > 65535) {
 		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
 		free(dup_address);
 		return -1;
