@@ -1961,8 +1961,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(cache_opline) = NULL;
 		ZCG(cache_persistent_script) = NULL;
 		return file_cache_compile_file(file_handle, type);
-	} else if (!ZCG(accelerator_enabled) ||
-	           (ZCSG(restart_in_progress) && accel_restart_is_active())) {
+	} else if ((ZCSG(restart_in_progress) && accel_restart_is_active())) {
 		if (ZCG(accel_directives).file_cache) {
 			return file_cache_compile_file(file_handle, type);
 		}
