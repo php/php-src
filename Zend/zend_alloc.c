@@ -425,12 +425,14 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	int flags = MAP_PRIVATE | MAP_ANON;
 #if defined(MAP_EXCL)
 	flags |= MAP_FIXED | MAP_EXCL;
+#elif defined(MAP_TRYFIXED)
+	flags |= MAP_TRYFIXED;
 #endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
 	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, ZEND_MM_FD, 0);
 
 	if (ptr == MAP_FAILED) {
-#if ZEND_MM_ERROR && !defined(MAP_EXCL)
+#if ZEND_MM_ERROR && !defined(MAP_EXCL) && !defined(MAP_TRYFIXED)
 		fprintf(stderr, "\nmmap() failed: [%d] %s\n", errno, strerror(errno));
 #endif
 		return NULL;
