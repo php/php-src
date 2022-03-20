@@ -1913,7 +1913,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	int page_num;
 	zend_mm_page_info info;
 	uint32_t i, free_counter;
-	int has_free_pages;
+	bool has_free_pages;
 	size_t collected = 0;
 
 #if ZEND_MM_CUSTOM
@@ -1923,7 +1923,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 #endif
 
 	for (i = 0; i < ZEND_MM_BINS; i++) {
-		has_free_pages = 0;
+		has_free_pages = false;
 		p = heap->free_slot[i];
 		while (p != NULL) {
 			chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(p, ZEND_MM_CHUNK_SIZE);
@@ -1942,7 +1942,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
 			free_counter = ZEND_MM_SRUN_FREE_COUNTER(info) + 1;
 			if (free_counter == bin_elements[i]) {
-				has_free_pages = 1;
+				has_free_pages = true;
 			}
 			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);
 			p = p->next_free_slot;
