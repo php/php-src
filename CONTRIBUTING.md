@@ -58,8 +58,8 @@ and build PHP source code. We recommend to look at our
 
 ## Filing bugs
 
-Bugs can be filed on the [PHP bug tracker](https://bugs.php.net/). If this is
-the first time you've filed a bug, we suggest reading the
+Bugs can be filed on [GitHub Issues](https://github.com/php/php-src/issues/new/choose).
+If this is the first time you've filed a bug, we suggest reading the
 [guide to reporting a bug](https://bugs.php.net/how-to-report.php).
 
 Where possible, please include a self-contained reproduction case!
