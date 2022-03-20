@@ -69,7 +69,6 @@
 # include "win32/winutil.h"
 #endif
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
