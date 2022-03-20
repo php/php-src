@@ -58,7 +58,7 @@ and build PHP source code. We recommend to look at our
 
 ## Filing bugs
 
-Bugs can be filed on the [GitHub Issues](https://github.com/php/php-src/issues/). If this is
+Bugs can be filed on [GitHub Issues](https://github.com/php/php-src/issues/). If this is
 the first time you've filed a bug, we suggest reading the
 [guide to reporting a bug](https://bugs.php.net/how-to-report.php).
 
