@@ -93,6 +93,3 @@ Date: %s
 Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
-
-<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
-</head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/foo/bar</code> was not found on this server.</p></body></html>

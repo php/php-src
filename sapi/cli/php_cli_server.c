@@ -1980,49 +1980,51 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = true;
 
-	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
+	if (client->request.request_method != PHP_HTTP_HEAD) {
+		escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) ZSTR_VAL(client->request.request_uri), ZSTR_LEN(client->request.request_uri), 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
-	{
-		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
+			if (!chunk) {
+				goto fail;
+			}
+			snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
+			chunk->data.heap.len = strlen(chunk->data.heap.p);
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string);
-		chunk->data.heap.len = strlen(chunk->data.heap.p);
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(php_cli_server_css, sizeof(php_cli_server_css) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(php_cli_server_css, sizeof(php_cli_server_css) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		static const char template[] = "</head><body>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(template, sizeof(template) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char template[] = "</head><body>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(template, sizeof(template) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
-		if (!chunk) {
-			goto fail;
+		{
+			php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(content_template) + ZSTR_LEN(escaped_request_uri) + 3 + strlen(status_string) + 1);
+			if (!chunk) {
+				goto fail;
+			}
+			snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
+			chunk->data.heap.len = strlen(chunk->data.heap.p);
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, ZSTR_VAL(escaped_request_uri));
-		chunk->data.heap.len = strlen(chunk->data.heap.p);
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-	}
-	{
-		static const char epilogue_template[] = "</body></html>";
-		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(epilogue_template, sizeof(epilogue_template) - 1);
-		if (!chunk) {
-			goto fail;
+		{
+			static const char epilogue_template[] = "</body></html>";
+			php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(epilogue_template, sizeof(epilogue_template) - 1);
+			if (!chunk) {
+				goto fail;
+			}
+			php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 		}
-		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 
 	{
@@ -2053,14 +2055,18 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	if (escaped_request_uri) {
+		zend_string_free(escaped_request_uri);
+	}
 	return SUCCESS;
 
 fail:
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	zend_string_free(escaped_request_uri);
+	if (escaped_request_uri) {
+		zend_string_free(escaped_request_uri);
+	}
 	return FAILURE;
 } /* }}} */
 
@@ -2115,7 +2121,9 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 
 	php_cli_server_content_sender_ctor(&client->content_sender);
 	client->content_sender_initialized = true;
-	client->file_fd = fd;
+	if (client->request.request_method != PHP_HTTP_HEAD) {
+		client->file_fd = fd;
+	}
 
 	{
 		php_cli_server_chunk *chunk;
