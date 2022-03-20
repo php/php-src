@@ -196,7 +196,7 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
-int zend_mm_use_huge_pages = 0;
+static int zend_mm_use_huge_pages = 0;
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
