@@ -202,6 +202,7 @@ typedef struct php_cli_server_http_response_status_code_pair {
 static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
+	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -2040,6 +2041,15 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
+		if (status == 405) {
+			smart_str_appends_ex(&buffer, "Allow: ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_GET), 1);
+			smart_str_appends_ex(&buffer, ", ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_HEAD), 1);
+			smart_str_appends_ex(&buffer, ", ", 1);
+			smart_str_appends_ex(&buffer, php_http_method_str(PHP_HTTP_POST), 1);
+			smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
+		}
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
 		chunk = php_cli_server_chunk_heap_new(buffer.s, ZSTR_VAL(buffer.s), ZSTR_LEN(buffer.s));
@@ -2093,6 +2103,12 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 {
 	int fd;
 	int status = 200;
+
+	if (client->request.request_method == PHP_HTTP_DELETE
+		|| client->request.request_method == PHP_HTTP_PUT
+		|| client->request.request_method == PHP_HTTP_PATCH) {
+		return php_cli_server_send_error_page(server, client, 405);
+	}
 
 	if (client->request.path_translated && strlen(client->request.path_translated) != client->request.path_translated_len) {
 		/* can't handle paths that contain nul bytes */
