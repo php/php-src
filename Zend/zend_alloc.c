@@ -69,6 +69,7 @@
 # include "win32/winutil.h"
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -196,7 +197,7 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
-int zend_mm_use_huge_pages = 0;
+static bool zend_mm_use_huge_pages = false;
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
@@ -1912,7 +1913,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	int page_num;
 	zend_mm_page_info info;
 	uint32_t i, free_counter;
-	int has_free_pages;
+	bool has_free_pages;
 	size_t collected = 0;
 
 #if ZEND_MM_CUSTOM
@@ -1922,7 +1923,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 #endif
 
 	for (i = 0; i < ZEND_MM_BINS; i++) {
-		has_free_pages = 0;
+		has_free_pages = false;
 		p = heap->free_slot[i];
 		while (p != NULL) {
 			chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(p, ZEND_MM_CHUNK_SIZE);
@@ -1941,7 +1942,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
 			free_counter = ZEND_MM_SRUN_FREE_COUNTER(info) + 1;
 			if (free_counter == bin_elements[i]) {
-				has_free_pages = 1;
+				has_free_pages = true;
 			}
 			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);
 			p = p->next_free_slot;
@@ -2025,7 +2026,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 
 static zend_long zend_mm_find_leaks_small(zend_mm_chunk *p, uint32_t i, uint32_t j, zend_leak_info *leak)
 {
-	int empty = 1;
+	bool empty = true;
 	zend_long count = 0;
 	int bin_num = ZEND_MM_SRUN_BIN_NUM(p->map[i]);
 	zend_mm_debug_info *dbg = (zend_mm_debug_info*)((char*)p + ZEND_MM_PAGE_SIZE * i + bin_data_size[bin_num] * (j + 1) - ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info)));
@@ -2038,7 +2039,7 @@ static zend_long zend_mm_find_leaks_small(zend_mm_chunk *p, uint32_t i, uint32_t
 				dbg->filename = NULL;
 				dbg->lineno = 0;
 			} else {
-				empty = 0;
+				empty = false;
 			}
 		}
 		j++;
@@ -2869,7 +2870,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
 	if (tmp && ZEND_ATOL(tmp)) {
-		zend_mm_use_huge_pages = 1;
+		zend_mm_use_huge_pages = true;
 	}
 	alloc_globals->mm_heap = zend_mm_init();
 }
