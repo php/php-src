@@ -2647,7 +2647,9 @@ COMMAND $cmd
             // Stick to basics
             $wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
             $wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
+            $wanted_re = preg_replace('/%([1-9]\d{0,14})s/', '[^\r\n]{1,\\1}', $wanted_re);
             $wanted_re = str_replace('%S', '[^\r\n]*', $wanted_re);
+            $wanted_re = preg_replace('/%([1-9]\d{0,14})S/', '?([^\r\n]{1,\\1})', $wanted_re);
             $wanted_re = str_replace('%a', '.+', $wanted_re);
             $wanted_re = str_replace('%A', '.*', $wanted_re);
             $wanted_re = str_replace('%w', '\s*', $wanted_re);
@@ -2657,6 +2659,7 @@ COMMAND $cmd
             $wanted_re = str_replace('%f', '[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?', $wanted_re);
             $wanted_re = str_replace('%c', '.', $wanted_re);
             $wanted_re = str_replace('%0', '\x00', $wanted_re);
+            $wanted_re = str_replace('%o', '?', $wanted_re); // Allow optional parts
             // %f allows two points "-.0.0" but that is the best *simple* expression
         }
 
