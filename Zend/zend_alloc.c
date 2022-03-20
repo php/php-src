@@ -69,6 +69,7 @@
 # include "win32/winutil.h"
 #endif
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -196,7 +197,7 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
-static int zend_mm_use_huge_pages = 0;
+static bool zend_mm_use_huge_pages = false;
 
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
@@ -2869,7 +2870,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
 	if (tmp && ZEND_ATOL(tmp)) {
-		zend_mm_use_huge_pages = 1;
+		zend_mm_use_huge_pages = true;
 	}
 	alloc_globals->mm_heap = zend_mm_init();
 }
