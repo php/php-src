@@ -209,6 +209,11 @@ class mysqli
     public function get_charset(): ?object {}
 
     /**
+     * @alias mysqli_execute_query
+     */
+    public function execute_query(string $query, ?array $params = null): mysqli_result|bool {}
+
+    /**
      * @tentative-return-type
      * @alias mysqli_get_client_info
      * @deprecated 8.1.0
@@ -792,6 +797,8 @@ function mysqli_stmt_execute(mysqli_stmt $statement, ?array $params = null): boo
 
 /** @alias mysqli_stmt_execute */
 function mysqli_execute(mysqli_stmt $statement, ?array $params = null): bool {}
+
+function mysqli_execute_query(mysqli $mysql, string $query, ?array $params = null): mysqli_result|bool {}
 
 /** @refcount 1 */
 function mysqli_fetch_field(mysqli_result $result): object|false {}

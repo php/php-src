@@ -476,6 +476,148 @@ PHP_FUNCTION(mysqli_stmt_execute)
 }
 /* }}} */
 
+void close_stmt_and_copy_errors(MY_STMT *stmt, MY_MYSQL *mysql)
+{
+	/* mysql_stmt_close() clears errors, so we have to store them temporarily */
+	MYSQLND_ERROR_INFO error_info = *stmt->stmt->data->error_info;
+	stmt->stmt->data->error_info->error_list.head = NULL;
+	stmt->stmt->data->error_info->error_list.tail = NULL;
+	stmt->stmt->data->error_info->error_list.count = 0;
+
+	/* we also remember affected_rows which gets cleared too */
+	uint64_t affected_rows = mysql->mysql->data->upsert_status->affected_rows;
+
+	mysqli_stmt_close(stmt->stmt, false);
+	stmt->stmt = NULL;
+	php_clear_stmt_bind(stmt);
+
+	/* restore error messages, but into the mysql object */
+	zend_llist_clean(&mysql->mysql->data->error_info->error_list);
+	*mysql->mysql->data->error_info = error_info;
+	mysql->mysql->data->upsert_status->affected_rows = affected_rows;
+}
+
+PHP_FUNCTION(mysqli_execute_query)
+{
+	MY_MYSQL		*mysql;
+	MY_STMT			*stmt;
+	char			*query = NULL;
+	size_t				query_len;
+	zval			*mysql_link;
+	HashTable	*input_params = NULL;
+	MYSQL_RES 		*result;
+	MYSQLI_RESOURCE	*mysqli_resource;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|h!", &mysql_link, mysqli_link_class_entry, &query, &query_len, &input_params) == FAILURE) {
+		RETURN_THROWS();
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
+
+	stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+
+	if (!(stmt->stmt = mysql_stmt_init(mysql->mysql))) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		efree(stmt);
+		RETURN_FALSE;
+	}
+
+	if (FAIL == mysql_stmt_prepare(stmt->stmt, query, query_len)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		
+		close_stmt_and_copy_errors(stmt, mysql);
+		RETURN_FALSE;
+	}
+
+	/* The bit below, which is copied from mysqli_stmt_prepare, is needed for bad index exceptions */ 
+	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
+	/* Get performance boost if reporting is switched off */
+	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {
+		stmt->query = (char *)emalloc(query_len + 1);
+		memcpy(stmt->query, query, query_len);
+		stmt->query[query_len] = '\0';
+	}
+
+	// bind-in-execute
+	// It's very similar to the mysqli_stmt::execute, but it uses different error handling
+	if (input_params) {
+		zval *tmp;
+		unsigned int index;
+		unsigned int hash_num_elements;
+		unsigned int param_count;
+		MYSQLND_PARAM_BIND	*params;
+
+		if (!zend_array_is_list(input_params)) {
+			mysqli_stmt_close(stmt->stmt, false);
+			stmt->stmt = NULL;
+			efree(stmt);
+			zend_argument_value_error(ERROR_ARG_POS(3), "must be a list array");
+			RETURN_THROWS();
+		}
+
+		hash_num_elements = zend_hash_num_elements(input_params);
+		param_count = mysql_stmt_param_count(stmt->stmt);
+		if (hash_num_elements != param_count) {
+			mysqli_stmt_close(stmt->stmt, false);
+			stmt->stmt = NULL;
+			efree(stmt);
+			zend_argument_value_error(ERROR_ARG_POS(3), "must consist of exactly %d elements, %d present", param_count, hash_num_elements);
+			RETURN_THROWS();
+		}
+
+		params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
+		ZEND_ASSERT(params);
+
+		index = 0;
+		ZEND_HASH_FOREACH_VAL(input_params, tmp) {
+			ZVAL_COPY_VALUE(&params[index].zv, tmp);
+			params[index].type = MYSQL_TYPE_VAR_STRING;
+			index++;
+		} ZEND_HASH_FOREACH_END();
+
+		if (mysqlnd_stmt_bind_param(stmt->stmt, params)) {
+			close_stmt_and_copy_errors(stmt, mysql);
+			RETURN_FALSE;
+		}
+
+	}
+
+	if (mysql_stmt_execute(stmt->stmt)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+
+		if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+			php_mysqli_report_index(stmt->query, mysqli_stmt_server_status(stmt->stmt));
+		}
+
+		close_stmt_and_copy_errors(stmt, mysql);
+		RETURN_FALSE;
+	}
+
+	if (!mysql_stmt_field_count(stmt->stmt)) {
+		/* no result set - not a SELECT */
+		close_stmt_and_copy_errors(stmt, mysql);
+		RETURN_TRUE;
+	}
+
+	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+		php_mysqli_report_index(stmt->query, mysqli_stmt_server_status(stmt->stmt));
+	}
+
+	/* get result */
+	if (!(result = mysqlnd_stmt_get_result(stmt->stmt))) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+
+		close_stmt_and_copy_errors(stmt, mysql);
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	mysqli_resource->status = MYSQLI_STATUS_VALID;
+	MYSQLI_RETVAL_RESOURCE(mysqli_resource, mysqli_result_class_entry);
+
+	close_stmt_and_copy_errors(stmt, mysql);
+}
+
 /* {{{ mixed mysqli_stmt_fetch_mysqlnd */
 void mysqli_stmt_fetch_mysqlnd(INTERNAL_FUNCTION_PARAMETERS)
 {
