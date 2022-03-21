@@ -3411,12 +3411,14 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
-/* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
+static void accel_deactivate_now()
+{
+	/* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
 #ifdef ZEND_WIN32
-#define accel_deactivate_now() ZCG(counted) = true; accel_deactivate_sub()
-#else
-#define accel_deactivate_now() accel_deactivate_sub()
+	ZCG(counted) = true;
 #endif
+	accel_deactivate_sub();
+}
 
 /* ensures it is OK to read SHM
 	if it's not OK (restart in progress) returns FAILURE
