@@ -1009,6 +1009,29 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	return filename;
 }
 
+/**
+ * Helper function for zend_file_cache_script_store().
+ *
+ * @return true on success, false on error
+ */
+static bool zend_file_cache_script_write(int fd, const zend_persistent_script *script, const zend_file_cache_metainfo *info, const void *buf, const zend_string *s)
+{
+#ifdef HAVE_SYS_UIO_H
+	const struct iovec vec[] = {
+		{ .iov_base = (void *)info, .iov_len = sizeof(*info) },
+		{ .iov_base = (void *)buf, .iov_len = script->size },
+		{ .iov_base = (void *)ZSTR_VAL(s), .iov_len = info->str_size },
+	};
+
+	return writev(fd, vec, sizeof(vec) / sizeof(vec[0])) == (ssize_t)(sizeof(*info) + script->size + info->str_size);
+#else
+	return ZEND_LONG_MAX >= (zend_long)(sizeof(*info) + script->size + info->str_size) &&
+		write(fd, info, sizeof(*info)) == sizeof(*info) &&
+		write(fd, buf, script->size) == script->size &&
+		write(fd, ZSTR_VAL(s), info->str_size) == info->str_size;
+#endif
+}
+
 int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 {
 	int fd;
@@ -1079,14 +1102,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	__msan_unpoison(buf, script->size);
 #endif
 
-#ifdef HAVE_SYS_UIO_H
-	const struct iovec vec[] = {
-		{ .iov_base = (void *)&info, .iov_len = sizeof(info) },
-		{ .iov_base = buf, .iov_len = script->size },
-		{ .iov_base = ZSTR_VAL(s), .iov_len = info.str_size },
-	};
-
-	if (writev(fd, vec, sizeof(vec) / sizeof(vec[0])) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
+	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release_ex(s, 0);
 		close(fd);
@@ -1095,21 +1111,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 		efree(filename);
 		return FAILURE;
 	}
-#else
-	if (ZEND_LONG_MAX < (zend_long)(sizeof(info) + script->size + info.str_size) ||
-		write(fd, &info, sizeof(info)) != sizeof(info) ||
-		write(fd, buf, script->size) != script->size ||
-		write(fd, ZSTR_VAL(s), info.str_size) != info.str_size
-		) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release_ex(s, 0);
-		close(fd);
-		efree(mem);
-		zend_file_cache_unlink(filename);
-		efree(filename);
-		return FAILURE;
-	}
-#endif
 
 	zend_string_release_ex(s, 0);
 	efree(mem);
