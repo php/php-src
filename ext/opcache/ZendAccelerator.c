@@ -34,6 +34,7 @@
 #include "zend_vm.h"
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
+#include "zend_mmap.h"
 #include "main/php_main.h"
 #include "main/SAPI.h"
 #include "main/php_streams.h"
@@ -2986,6 +2987,8 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		return -1;
 #  endif
 	}
+
+	zend_mmap_set_name(start, size, "zend_huge_code_pages");
 
 	if (ret == start) {
 		memcpy(start, mem, real_size);
