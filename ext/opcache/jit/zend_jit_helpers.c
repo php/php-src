@@ -922,6 +922,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 						ZVAL_NULL(EX_VAR(opline->result.var));
 					}
 				}
+				if (opline->opcode == ZEND_ASSIGN_DIM
+				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
+					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				}
 				return NULL;
 			}
 			ZEND_FALLTHROUGH;
