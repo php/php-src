@@ -1342,6 +1342,40 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	return str;
 }
 
+/**
+ * Discard a #zend_persistent_script currently stored in shared
+ * memory.
+ *
+ * Caller must lock shared memory via zend_shared_alloc_lock().
+ */
+static void zend_accel_discard_script(zend_persistent_script *persistent_script)
+{
+	if (persistent_script->corrupted) {
+		/* already discarded */
+		return;
+	}
+
+	persistent_script->corrupted = true;
+	persistent_script->timestamp = 0;
+	ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
+	if (ZSMMG(memory_exhausted)) {
+		zend_accel_restart_reason reason =
+			zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+		zend_accel_schedule_restart_if_necessary(reason);
+	}
+}
+
+/**
+ * Wrapper for zend_accel_discard_script() which locks shared memory
+ * via zend_shared_alloc_lock().
+ */
+static void zend_accel_lock_discard_script(zend_persistent_script *persistent_script)
+{
+	zend_shared_alloc_lock();
+	zend_accel_discard_script(persistent_script);
+	zend_shared_alloc_unlock();
+}
+
 int zend_accel_invalidate(zend_string *filename, bool force)
 {
 	zend_string *realpath;
@@ -1372,18 +1406,7 @@ int zend_accel_invalidate(zend_string *filename, bool force)
 			do_validate_timestamps(persistent_script, &file_handle) == FAILURE) {
 			HANDLE_BLOCK_INTERRUPTIONS();
 			SHM_UNPROTECT();
-			zend_shared_alloc_lock();
-			if (!persistent_script->corrupted) {
-				persistent_script->corrupted = true;
-				persistent_script->timestamp = 0;
-				ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
-				if (ZSMMG(memory_exhausted)) {
-					zend_accel_restart_reason reason =
-						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
-					zend_accel_schedule_restart_if_necessary(reason);
-				}
-			}
-			zend_shared_alloc_unlock();
+			zend_accel_lock_discard_script(persistent_script);
 			SHM_PROTECT();
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 		}
@@ -2078,18 +2101,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* If script is found then validate_timestamps if option is enabled */
 	if (persistent_script && ZCG(accel_directives).validate_timestamps) {
 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {
-			zend_shared_alloc_lock();
-			if (!persistent_script->corrupted) {
-				persistent_script->corrupted = true;
-				persistent_script->timestamp = 0;
-				ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
-				if (ZSMMG(memory_exhausted)) {
-					zend_accel_restart_reason reason =
-						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
-					zend_accel_schedule_restart_if_necessary(reason);
-				}
-			}
-			zend_shared_alloc_unlock();
+			zend_accel_lock_discard_script(persistent_script);
 			persistent_script = NULL;
 		}
 	}
@@ -2103,18 +2115,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			/* The checksum is wrong */
 			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
 							 ZSTR_VAL(persistent_script->script.filename), persistent_script->dynamic_members.checksum, checksum);
-			zend_shared_alloc_lock();
-			if (!persistent_script->corrupted) {
-				persistent_script->corrupted = true;
-				persistent_script->timestamp = 0;
-				ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
-				if (ZSMMG(memory_exhausted)) {
-					zend_accel_restart_reason reason =
-						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
-					zend_accel_schedule_restart_if_necessary(reason);
-				}
-			}
-			zend_shared_alloc_unlock();
+			zend_accel_lock_discard_script(persistent_script);
 			persistent_script = NULL;
 		}
 	}
