@@ -269,7 +269,7 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	return ret;
 }
 
-static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
+static void *zend_file_cache_unserialize_interned(zend_string *str, bool in_shm)
 {
 	str = (zend_string*)((char*)ZCG(mem) + ((size_t)(str) & ~Z_UL(1)));
 	if (!in_shm) {
@@ -1006,7 +1006,7 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	return filename;
 }
 
-int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
+int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 {
 	int fd;
 	char *filename;
@@ -1744,9 +1744,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_file_cache_metainfo info;
 	zend_accel_hash_entry *bucket;
 	void *mem, *checkpoint, *buf;
-	int cache_it = 1;
+	bool cache_it = true;
 	unsigned int actual_checksum;
-	int ok;
+	bool ok;
 
 	if (!full_path) {
 		return NULL;
@@ -1878,18 +1878,18 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	} else {
 use_process_mem:
 		buf = mem;
-		cache_it = 0;
+		cache_it = false;
 	}
 
 	ZCG(mem) = ((char*)mem + info.mem_size);
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
 	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
 
-	ok = 1;
+	ok = true;
 	zend_try {
 		zend_file_cache_unserialize(script, buf);
 	} zend_catch {
-		ok = 0;
+		ok = false;
 	} zend_end_try();
 	if (!ok) {
 		if (cache_it) {

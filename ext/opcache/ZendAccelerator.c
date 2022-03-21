@@ -1493,7 +1493,7 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 
 	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
-	zend_file_cache_script_store(new_persistent_script, 0);
+	zend_file_cache_script_store(new_persistent_script, /* is_shm */ false);
 
 	return new_persistent_script;
 }
@@ -1639,7 +1639,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	if (ZCG(accel_directives).file_cache) {
 		SHM_PROTECT();
-		zend_file_cache_script_store(new_persistent_script, 1);
+		zend_file_cache_script_store(new_persistent_script, /* is_shm */ true);
 		SHM_UNPROTECT();
 	}
 
