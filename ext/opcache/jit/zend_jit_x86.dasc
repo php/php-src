@@ -16074,6 +16074,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 				if (op1_info & MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				}
+				if (opline->result_type != IS_UNUSED && (op1_info & MAY_BE_LONG)) {
+					ZEND_REGSET_INCL(regset, ZREG_R1);
+				}
 			}
 			break;
 		case ZEND_ADD:
