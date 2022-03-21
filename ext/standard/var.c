@@ -575,6 +575,7 @@ again:
 			if (ce == zend_standard_class_def) {
 				smart_str_appendl(buf, "(object) array(\n", 16);
 			} else {
+				smart_str_appendc(buf, '\\');
 				smart_str_append(buf, ce->name);
 				if (is_enum) {
 					zend_object *zobj = Z_OBJ_P(struc);
