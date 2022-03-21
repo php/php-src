@@ -253,15 +253,18 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	len = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	ret = (void*)(info->str_size | Z_UL(1));
 	zend_shared_alloc_register_xlat_entry(str, ret);
-	if (info->str_size + len > ZSTR_LEN((zend_string*)ZCG(mem))) {
+
+	zend_string *s = (zend_string*)ZCG(mem);
+	if (info->str_size + len > ZSTR_LEN(s)) {
 		size_t new_len = info->str_size + len;
-		ZCG(mem) = (void*)zend_string_realloc(
-			(zend_string*)ZCG(mem),
+		s = zend_string_realloc(
+			s,
 			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
+		ZCG(mem) = (void*)s;
 	}
 
-	zend_string *new_str = (zend_string *) (ZSTR_VAL((zend_string*)ZCG(mem)) + info->str_size);
+	zend_string *new_str = (zend_string *) (ZSTR_VAL(s) + info->str_size);
 	memcpy(new_str, str, len);
 	GC_ADD_FLAGS(new_str, IS_STR_INTERNED);
 	GC_DEL_FLAGS(new_str, IS_STR_PERMANENT|IS_STR_CLASS_NAME_MAP_PTR);
@@ -1063,8 +1066,10 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	}
 	zend_shared_alloc_destroy_xlat_table();
 
+	zend_string *const s = (zend_string*)ZCG(mem);
+
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
 
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
@@ -1078,12 +1083,12 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	const struct iovec vec[] = {
 		{ .iov_base = (void *)&info, .iov_len = sizeof(info) },
 		{ .iov_base = buf, .iov_len = script->size },
-		{ .iov_base = ZSTR_VAL((zend_string*)ZCG(mem)), .iov_len = info.str_size },
+		{ .iov_base = ZSTR_VAL(s), .iov_len = info.str_size },
 	};
 
 	if (writev(fd, vec, sizeof(vec) / sizeof(vec[0])) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release_ex((zend_string*)ZCG(mem), 0);
+		zend_string_release_ex(s, 0);
 		close(fd);
 		efree(mem);
 		zend_file_cache_unlink(filename);
@@ -1094,10 +1099,10 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	if (ZEND_LONG_MAX < (zend_long)(sizeof(info) + script->size + info.str_size) ||
 		write(fd, &info, sizeof(info)) != sizeof(info) ||
 		write(fd, buf, script->size) != script->size ||
-		write(fd, ((zend_string*)ZCG(mem))->val, info.str_size) != info.str_size
+		write(fd, s->val, info.str_size) != info.str_size
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release_ex((zend_string*)ZCG(mem), 0);
+		zend_string_release_ex(s, 0);
 		close(fd);
 		efree(mem);
 		zend_file_cache_unlink(filename);
@@ -1106,7 +1111,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	}
 #endif
 
-	zend_string_release_ex((zend_string*)ZCG(mem), 0);
+	zend_string_release_ex(s, 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
