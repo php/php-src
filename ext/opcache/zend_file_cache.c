@@ -1099,7 +1099,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	if (ZEND_LONG_MAX < (zend_long)(sizeof(info) + script->size + info.str_size) ||
 		write(fd, &info, sizeof(info)) != sizeof(info) ||
 		write(fd, buf, script->size) != script->size ||
-		write(fd, s->val, info.str_size) != info.str_size
+		write(fd, ZSTR_VAL(s), info.str_size) != info.str_size
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release_ex(s, 0);
