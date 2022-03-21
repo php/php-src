@@ -1011,9 +1011,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	int fd;
 	char *filename;
 	zend_file_cache_metainfo info;
-#ifdef HAVE_SYS_UIO_H
-	struct iovec vec[3];
-#endif
 	void *mem, *buf;
 
 #ifdef HAVE_JIT
@@ -1078,14 +1075,13 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 #endif
 
 #ifdef HAVE_SYS_UIO_H
-	vec[0].iov_base = (void *)&info;
-	vec[0].iov_len = sizeof(info);
-	vec[1].iov_base = buf;
-	vec[1].iov_len = script->size;
-	vec[2].iov_base = ZSTR_VAL((zend_string*)ZCG(mem));
-	vec[2].iov_len = info.str_size;
+	const struct iovec vec[] = {
+		{ .iov_base = (void *)&info, .iov_len = sizeof(info) },
+		{ .iov_base = buf, .iov_len = script->size },
+		{ .iov_base = ZSTR_VAL((zend_string*)ZCG(mem)), .iov_len = info.str_size },
+	};
 
-	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
+	if (writev(fd, vec, sizeof(vec) / sizeof(vec[0])) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
 		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
