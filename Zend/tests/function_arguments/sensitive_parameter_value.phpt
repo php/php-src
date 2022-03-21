@@ -33,7 +33,7 @@ object(SensitiveParameterValue)#%d (%d) refcount(%d){
 SensitiveParameterValue Object
 
 # var_export()
-SensitiveParameterValue::__set_state(array(
+\SensitiveParameterValue::__set_state(array(
 ))
 
 # (array) / json_encode()
