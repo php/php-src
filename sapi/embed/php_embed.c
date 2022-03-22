@@ -214,8 +214,7 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	 * allocated so any INI settings added via this callback will have the
 	 * lowest precedence and will allow INI files to overwrite them.
 	 */
-	php_embed_module.ini_entries = malloc(sizeof(HARDCODED_INI));
-	memcpy(php_embed_module.ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
+	php_embed_module.ini_entries = HARDCODED_INI;
 
 	/* SAPI-provided functions. */
 	php_embed_module.additional_functions = additional_functions;
@@ -264,9 +263,4 @@ EMBED_SAPI_API void php_embed_shutdown(void)
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
-
-	if (php_embed_module.ini_entries) {
-		free(php_embed_module.ini_entries);
-		php_embed_module.ini_entries = NULL;
-	}
 }
