@@ -2968,6 +2968,24 @@ static void clean_module_classes(int module_number) /* {{{ */
 }
 /* }}} */
 
+static int clean_module_function(zval *el, void *arg) /* {{{ */
+{
+	zend_function *fe = (zend_function *) Z_PTR_P(el);
+	zend_module_entry *module = (zend_module_entry *) arg;
+	if (fe->common.type == ZEND_INTERNAL_FUNCTION && fe->internal_function.module == module) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+}
+/* }}} */
+
+static void clean_module_functions(zend_module_entry *module) /* {{{ */
+{
+	zend_hash_apply_with_argument(CG(function_table), clean_module_function, module);
+}
+/* }}} */
+
 void module_destructor(zend_module_entry *module) /* {{{ */
 {
 #if ZEND_RC_DEBUG
@@ -3015,6 +3033,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	module->module_started=0;
 	if (module->type == MODULE_TEMPORARY && module->functions) {
 		zend_unregister_functions(module->functions, -1, NULL);
+		clean_module_functions(module);
 	}
 
 #if HAVE_LIBDL
