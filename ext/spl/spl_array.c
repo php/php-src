@@ -1574,7 +1574,7 @@ PHP_METHOD(ArrayObject, unserialize)
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* storage */
@@ -1773,7 +1773,7 @@ PHP_METHOD(ArrayObject, __unserialize)
 PHP_METHOD(ArrayObject, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_array_get_debug_info(Z_OBJ_P(ZEND_THIS)));
