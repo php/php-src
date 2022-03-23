@@ -115,7 +115,7 @@ static inline bool spl_array_is_object(spl_array_object *intern) /* {{{ */
 }
 /* }}} */
 
-static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
+static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
 static zend_never_inline void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
@@ -552,7 +552,10 @@ static void spl_array_unset_dimension(zend_object *object, zval *offset) /* {{{ 
 	spl_array_unset_dimension_ex(1, object, offset);
 } /* }}} */
 
-static int spl_array_has_dimension_ex(bool check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
+/* check_empty can take value 0, 1, or 2
+ * 0/1 are used as normal boolean, but 2 is used for the case when this function is called from
+ * the offsetExists() method, in which case it needs to report the offset exist even if the value is null */
+static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	zval rv, *value = NULL, *tmp;
@@ -873,7 +876,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 	return result;
 } /* }}} */
 
-static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /* {{{ */
+static zend_result spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /* {{{ */
 {
 	zend_string *string_key;
 	zend_ulong num_key;
@@ -903,7 +906,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 	return FAILURE;
 } /* }}} */
 
-static int spl_array_next_ex(spl_array_object *intern, HashTable *aht) /* {{{ */
+static zend_result spl_array_next_ex(spl_array_object *intern, HashTable *aht) /* {{{ */
 {
 	uint32_t *pos_ptr = spl_array_get_pos_ptr(aht, intern);
 
@@ -915,7 +918,7 @@ static int spl_array_next_ex(spl_array_object *intern, HashTable *aht) /* {{{ */
 	}
 } /* }}} */
 
-static int spl_array_next(spl_array_object *intern) /* {{{ */
+static zend_result spl_array_next(spl_array_object *intern) /* {{{ */
 {
 	HashTable *aht = spl_array_get_hash_table(intern);
 
