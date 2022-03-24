@@ -4220,7 +4220,7 @@ PHP_FUNCTION(array_count_values)
 				ZVAL_LONG(&data, 1);
 				zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			} else {
-				Z_LVAL_P(tmp)++;
+				Z_STR_P(tmp)++;
 			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Can only count string and integer values, entry skipped");
