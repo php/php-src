@@ -182,6 +182,14 @@ if test "$PHP_PDO_OCI" != "no"; then
     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
   ])
 
+  dnl Can handle bytes vs. characters?
+  PHP_CHECK_LIBRARY(clntsh, OCILobRead2,
+  [
+     AC_DEFINE(HAVE_OCILOBREAD2,1,[ ])
+  ], [], [
+     -L$PDO_OCI_LIB_DIR $PDO_OCI_SHARED_LIBADD
+  ])
+
   PHP_CHECK_PDO_INCLUDES
 
   PHP_NEW_EXTENSION(pdo_oci, pdo_oci.c oci_driver.c oci_statement.c, $ext_shared,,-I$pdo_cv_inc_path)
