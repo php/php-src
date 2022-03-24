@@ -226,6 +226,63 @@ void fpm_scoreboard_release(struct fpm_scoreboard_s *scoreboard) {
 	scoreboard->lock = 0;
 }
 
+struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard, int copy_procs)
+{
+	struct fpm_scoreboard_s *scoreboard_copy;
+	struct fpm_scoreboard_proc_s *scoreboard_proc_p;
+	size_t scoreboard_size, scoreboard_nprocs_size;
+	int i;
+	void *mem;
+
+	if (!scoreboard) {
+		scoreboard = fpm_scoreboard_get();
+	}
+
+	if (copy_procs) {
+		scoreboard_size = sizeof(struct fpm_scoreboard_s);
+		scoreboard_nprocs_size = sizeof(struct fpm_scoreboard_proc_s) * scoreboard->nprocs;
+
+		mem = malloc(scoreboard_size + scoreboard_nprocs_size);
+	} else {
+		mem = malloc(sizeof(struct fpm_scoreboard_s));
+	}
+
+	if (!mem) {
+		zlog(ZLOG_ERROR, "scoreboard: failed to allocate memory for copy");
+		return NULL;
+	}
+
+	scoreboard_copy = mem;
+
+	scoreboard = fpm_scoreboard_acquire(scoreboard, FPM_SCOREBOARD_LOCK_NOHANG);
+	if (!scoreboard) {
+		free(mem);
+		zlog(ZLOG_ERROR, "scoreboard: failed to lock (already locked)");
+		return NULL;
+	}
+
+	*scoreboard_copy = *scoreboard;
+
+	if (copy_procs) {
+		mem += scoreboard_size;
+
+		for (i = 0; i < scoreboard->nprocs; i++, mem += sizeof(struct fpm_scoreboard_proc_s)) {
+			scoreboard_proc_p = fpm_scoreboard_proc_acquire(scoreboard, i, FPM_SCOREBOARD_LOCK_HANG);
+			scoreboard_copy->procs[i] = *scoreboard_proc_p;
+			fpm_scoreboard_proc_release(scoreboard_proc_p);
+		}
+	}
+
+	fpm_scoreboard_release(scoreboard);
+
+	return scoreboard_copy;
+}
+
+void fpm_scoreboard_free_copy(struct fpm_scoreboard_s *scoreboard)
+{
+	free(scoreboard);
+}
+
 struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_acquire(struct fpm_scoreboard_s *scoreboard, int child_index, int nohang) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;

@@ -181,7 +181,8 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 	}
 
 #if ZEND_DEBUG
-	ZEND_ASSERT(zend_is_identical(value, new));
+	ZEND_ASSERT(zend_is_identical(value, new) ||
+		(Z_TYPE_P(value) == IS_DOUBLE && Z_TYPE_P(new) == IS_DOUBLE && isnan(Z_DVAL_P(value)) && isnan(Z_DVAL_P(new))));
 #endif
 }
 
@@ -785,27 +786,9 @@ static inline zend_result ct_eval_func_call(
 		return FAILURE;
 	}
 
-	if (num_args == 1) {
-		/* Handle a few functions for which we manually implement evaluation here. */
-		if (zend_string_equals_literal(name, "ini_get")) {
-			zend_ini_entry *ini_entry;
-
-			if (Z_TYPE_P(args[0]) != IS_STRING) {
-				return FAILURE;
-			}
-
-			ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
-			if (!ini_entry) {
-				ZVAL_FALSE(result);
-			} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
-				return FAILURE;
-			} else if (ini_entry->value) {
-				ZVAL_STR_COPY(result, ini_entry->value);
-			} else {
-				ZVAL_EMPTY_STRING(result);
-			}
-			return SUCCESS;
-		}
+	if (num_args == 1 && Z_TYPE_P(args[0]) == IS_STRING &&
+			zend_optimizer_eval_special_func_call(result, name, Z_STR_P(args[0])) == SUCCESS) {
+		return SUCCESS;
 	}
 
 	if (!can_ct_eval_func_call(func, name, num_args, args)) {
@@ -1396,13 +1379,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 						dup_partial_object(&zv, op1);
 						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ
-								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
+						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
-							zval_ptr_dtor_nogc(&tmp1);
 						} else {
 							SET_RESULT(result, &tmp1);
 						}
+						zval_ptr_dtor_nogc(&tmp1);
+						zval_ptr_dtor_nogc(&tmp2);
 						SET_RESULT(op1, &zv);
 						zval_ptr_dtor_nogc(&zv);
 						break;
@@ -1803,7 +1786,6 @@ static void sccp_mark_feasible_successors(
 
 	switch (opline->opcode) {
 		case ZEND_JMPZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		{
 			if (ct_eval_bool_cast(&zv, op1) == FAILURE) {
@@ -2126,21 +2108,31 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);
 				}
 				return 0;
-			} else {
-				zend_ssa_remove_result_def(ssa, ssa_op);
-				if (opline->opcode == ZEND_DO_ICALL) {
-					removed_ops = remove_call(ctx, opline, ssa_op);
-				} else if (opline->opcode == ZEND_TYPE_CHECK
-						&& (opline->op1_type & (IS_VAR|IS_TMP_VAR))
-						&& (!value_known(&ctx->values[ssa_op->op1_use])
-							|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op1_use])
-							|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op1_use]))) {
+			} else if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op2_use]))) {
+				return 0;
+			} else if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op1_use]))) {
+				if (opline->opcode == ZEND_TYPE_CHECK
+				 || opline->opcode == ZEND_BOOL) {
+					zend_ssa_remove_result_def(ssa, ssa_op);
 					/* For TYPE_CHECK we may compute the result value without knowing the
 					 * operand, based on type inference information. Make sure the operand is
 					 * freed and leave further cleanup to DCE. */
 					opline->opcode = ZEND_FREE;
 					opline->result_type = IS_UNUSED;
 					removed_ops++;
+				} else {
+					return 0;
+				}
+			} else {
+				zend_ssa_remove_result_def(ssa, ssa_op);
+				if (opline->opcode == ZEND_DO_ICALL) {
+					removed_ops = remove_call(ctx, opline, ssa_op);
 				} else {
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;

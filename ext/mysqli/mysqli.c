@@ -980,7 +980,11 @@ PHP_METHOD(mysqli_result, __construct)
 	}
 
 	if (!result) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
+	}
+	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+		php_mysqli_report_index("from previous query", mysqli_server_status(mysql->mysql));
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -1135,11 +1139,13 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
 		object_init_ex(return_value, ce);
+		HashTable *prop_table = zend_symtable_to_proptable(Z_ARR(dataset));
+		zval_ptr_dtor(&dataset);
 		if (!ce->default_properties_count && !ce->__set) {
-			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
+			Z_OBJ_P(return_value)->properties = prop_table;
 		} else {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
+			zend_merge_properties(return_value, prop_table);
+			zend_array_release(prop_table);
 		}
 
 		if (ce->constructor) {

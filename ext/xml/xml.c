@@ -550,8 +550,8 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 	str = zend_string_alloc(len, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos < len) {
-		int status = FAILURE;
-		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
+		zend_result status = FAILURE;
+		c = php_next_utf8_char((const unsigned char*)s, len, &pos, &status);
 
 		if (status == FAILURE || c > 0xFFU) {
 			c = '?';

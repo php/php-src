@@ -420,6 +420,19 @@ ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind ki
 }
 #endif
 
+zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1) {
+	if (op0->kind == ZEND_AST_ZVAL && op1->kind == ZEND_AST_ZVAL) {
+		zval *zv0 = zend_ast_get_zval(op0);
+		zval *zv1 = zend_ast_get_zval(op1);
+		if (!zend_binary_op_produces_error(ZEND_CONCAT, zv0, zv1) &&
+				concat_function(zv0, zv0, zv1) == SUCCESS) {
+			zval_ptr_dtor_nogc(zv1);
+			return zend_ast_create_zval(zv0);
+		}
+	}
+	return zend_ast_create_binary_op(ZEND_CONCAT, op0, op1);
+}
+
 static inline bool is_power_of_two(uint32_t n) {
 	return ((n != 0) && (n == (n & (~n + 1))));
 }
@@ -776,7 +789,29 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 		{
 			zend_string *class_name = zend_ast_get_str(ast->child[0]);
 			zend_string *const_name = zend_ast_get_str(ast->child[1]);
-			zval *zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
+			zval *zv;
+			bool bailout = 0;
+
+			zend_string *previous_filename;
+			zend_long previous_lineno;
+			if (scope) {
+				previous_filename = EG(filename_override);
+				previous_lineno = EG(lineno_override);
+				EG(filename_override) = scope->info.user.filename;
+				EG(lineno_override) = zend_ast_get_lineno(ast);
+			}
+			zend_try {
+				zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
+			} zend_catch {
+				bailout = 1;
+			}  zend_end_try();
+			if (scope) {
+				EG(filename_override) = previous_filename;
+				EG(lineno_override) = previous_lineno;
+			}
+			if (bailout) {
+				zend_bailout();
+			}
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
@@ -938,6 +973,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		zend_ast *new = (zend_ast*)buf;
 		new->kind = ast->kind;
 		new->attr = ast->attr;
+		new->lineno = ast->lineno;
 		buf = (void*)((char*)buf + zend_ast_size(children));
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {

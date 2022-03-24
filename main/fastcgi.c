@@ -1742,7 +1742,7 @@ void fcgi_free_mgmt_var_cb(zval *zv)
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+const char *fcgi_get_last_client_ip(void)
 {
 	static char str[INET6_ADDRSTRLEN];
 

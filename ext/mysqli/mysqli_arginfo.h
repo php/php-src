@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e9f4dd04e7d01864c38033bcaf5e03b63e191deb */
+ * Stub hash: 7901d2cbbf9663f2c0cc140870baed0fe04c2bd1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -720,6 +720,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_warning_next arginfo_mysqli_thread_safe
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_sql_exception_getSqlState, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(mysqli_affected_rows);
 ZEND_FUNCTION(mysqli_autocommit);
@@ -842,6 +845,7 @@ ZEND_METHOD(mysqli_result, getIterator);
 ZEND_METHOD(mysqli_stmt, __construct);
 ZEND_METHOD(mysqli_warning, __construct);
 ZEND_METHOD(mysqli_warning, next);
+ZEND_METHOD(mysqli_sql_exception, getSqlState);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -1083,6 +1087,7 @@ static const zend_function_entry class_mysqli_warning_methods[] = {
 
 
 static const zend_function_entry class_mysqli_sql_exception_methods[] = {
+	ZEND_ME(mysqli_sql_exception, getSqlState, arginfo_class_mysqli_sql_exception_getSqlState, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

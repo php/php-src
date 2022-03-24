@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlPartsIterator extends IntlIterator
 {
     /** @tentative-return-type */

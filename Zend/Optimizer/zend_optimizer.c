@@ -30,6 +30,7 @@
 #include "zend_call_graph.h"
 #include "zend_inference.h"
 #include "zend_dump.h"
+#include "php.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
@@ -121,6 +122,81 @@ zend_result zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
 }
 /* }}} */
 
+zend_result zend_optimizer_eval_special_func_call(
+		zval *result, zend_string *name, zend_string *arg) {
+	if (zend_string_equals_literal(name, "function_exists") ||
+			zend_string_equals_literal(name, "is_callable")) {
+		zend_string *lc_name = zend_string_tolower(arg);
+		zend_internal_function *func = zend_hash_find_ptr(EG(function_table), lc_name);
+		zend_string_release_ex(lc_name, 0);
+
+		if (func && func->type == ZEND_INTERNAL_FUNCTION
+				&& func->module->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+				&& func->module->handle == NULL
+#endif
+		) {
+			ZVAL_TRUE(result);
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+	if (zend_string_equals_literal(name, "extension_loaded")) {
+		zend_string *lc_name = zend_string_tolower(arg);
+		zend_module_entry *m = zend_hash_find_ptr(&module_registry, lc_name);
+		zend_string_release_ex(lc_name, 0);
+
+		if (!m) {
+			if (PG(enable_dl)) {
+				return FAILURE;
+			}
+			ZVAL_FALSE(result);
+			return SUCCESS;
+		}
+
+		if (m->type == MODULE_PERSISTENT
+#ifdef ZEND_WIN32
+			&& m->handle == NULL
+#endif
+		) {
+			ZVAL_TRUE(result);
+			return SUCCESS;
+		}
+		return FAILURE;
+	}
+	if (zend_string_equals_literal(name, "constant")) {
+		return zend_optimizer_get_persistent_constant(arg, result, 1) ? SUCCESS : FAILURE;
+	}
+	if (zend_string_equals_literal(name, "dirname")) {
+		if (!IS_ABSOLUTE_PATH(ZSTR_VAL(arg), ZSTR_LEN(arg))) {
+			return FAILURE;
+		}
+
+		zend_string *dirname = zend_string_init(ZSTR_VAL(arg), ZSTR_LEN(arg), 0);
+		ZSTR_LEN(dirname) = zend_dirname(ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+		if (IS_ABSOLUTE_PATH(ZSTR_VAL(dirname), ZSTR_LEN(dirname))) {
+			ZVAL_STR(result, dirname);
+			return SUCCESS;
+		}
+		zend_string_release_ex(dirname, 0);
+		return FAILURE;
+	}
+	if (zend_string_equals_literal(name, "ini_get")) {
+		zend_ini_entry *ini_entry = zend_hash_find_ptr(EG(ini_directives), arg);
+		if (!ini_entry) {
+			ZVAL_FALSE(result);
+		} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
+			return FAILURE;
+		} else if (ini_entry->value) {
+			ZVAL_STR_COPY(result, ini_entry->value);
+		} else {
+			ZVAL_EMPTY_STRING(result);
+		}
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
 bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {
 	zval *val;
@@ -130,6 +206,25 @@ bool zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zva
 		return 1;
 	}
 	return 0;
+}
+
+void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline)
+{
+	if (opline->op1_type == IS_CV) {
+		opline->opcode = ZEND_CHECK_VAR;
+		SET_UNUSED(opline->op2);
+		SET_UNUSED(opline->result);
+		opline->extended_value = 0;
+	} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+		opline->opcode = ZEND_FREE;
+		SET_UNUSED(opline->op2);
+		SET_UNUSED(opline->result);
+		opline->extended_value = 0;
+	} else {
+		ZEND_ASSERT(opline->op1_type == IS_CONST);
+		literal_dtor(&ZEND_OP1_LITERAL(opline));
+		MAKE_NOP(opline);
+	}
 }
 
 int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
@@ -609,9 +704,6 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		case ZEND_FAST_CALL:
 			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op1, ZEND_OP1_JMP_ADDR(opline));
 			break;
-		case ZEND_JMPZNZ:
-			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -655,9 +747,6 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		case ZEND_FAST_CALL:
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op1, ZEND_OP1_JMP_ADDR(opline) - shiftlist[ZEND_OP1_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
-		case ZEND_JMPZNZ:
-			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-			ZEND_FALLTHROUGH;
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
@@ -1044,9 +1133,6 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
 				break;
-			case ZEND_JMPZNZ:
-				/* relative extended_value don't have to be changed */
-				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -1167,9 +1253,6 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
 				break;
-			case ZEND_JMPZNZ:
-				/* relative extended_value don't have to be changed */
-				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
@@ -1339,6 +1422,7 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->scope == ce
 					&& op_array->type == ZEND_USER_FUNCTION
+					&& !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				zend_foreach_op_array_helper(op_array, func, context);
 			}

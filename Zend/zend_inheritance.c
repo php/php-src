@@ -1285,7 +1285,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
-		zend_error_noreturn(E_CORE_ERROR, "Class %s could not implement interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 	}
 	/* This should be prevented by the class lookup logic. */
 	ZEND_ASSERT(ce != iface);
@@ -1610,7 +1610,8 @@ static bool do_inherit_constant_check(
 
 	if (old_constant->ce != parent_constant->ce && old_constant->ce != ce) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Class %s inherits both %s::%s and %s::%s, which is ambiguous",
+			"%s %s inherits both %s::%s and %s::%s, which is ambiguous",
+			zend_get_object_type_uc(ce),
 			ZSTR_VAL(ce->name),
 			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
 			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name));
@@ -1729,7 +1730,10 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 			if (interfaces[j] == iface) {
 				if (j >= num_parent_interfaces) {
 					efree(interfaces);
-					zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+					zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot implement previously implemented interface %s",
+						zend_get_object_type_uc(ce),
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(iface->name));
 					return;
 				}
 				/* skip duplications */
@@ -2311,6 +2315,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	zend_function *func;
 	zend_abstract_info ai;
 	bool is_explicit_abstract = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
+	bool can_be_abstract = (ce->ce_flags & ZEND_ACC_ENUM) == 0;
 	memset(&ai, 0, sizeof(ai));
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
@@ -2324,9 +2329,10 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 
 	if (ai.cnt) {
-		zend_error_noreturn(E_ERROR, !is_explicit_abstract
-			? "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
-			: "Class %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+		zend_error_noreturn(E_ERROR, !is_explicit_abstract && can_be_abstract
+			? "%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
+			: "%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+			zend_get_object_type_uc(ce),
 			ZSTR_VAL(ce->name), ai.cnt,
 			ai.cnt > 1 ? "s" : "",
 			DISPLAY_ABSTRACT_FN(0),

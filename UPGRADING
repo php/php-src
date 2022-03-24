@@ -114,6 +114,10 @@ PHP 8.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Standard:
+  . The peak memory usage can now be reset to the current usage thanks to
+    memory_reset_peak_usage().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -125,6 +129,14 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- Intl:
+  . IntlBreakIterator, IntlRuleBasedBreakIterator, IntlCodePointBreakIterator,
+    IntlPartsIterator, IntlCalendar, IntlCalendar, Collator, IntlIterator,
+    UConverter, IntlDateFormatter, IntlDatePatternGenerator, MessageFormatter,
+    ResourceBundle, Spoofchecker, IntlTimeZone and Transliterator instances are
+    no longer serializable. Previously, they could be serialized, but
+    unserialization yielded unusable objects or failed.
 
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.

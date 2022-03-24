@@ -425,6 +425,10 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 		efree(logline);
 	}
 
+	if (EG(exception)) {
+		MAIL_RET(0);
+	}
+
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename();
 		zend_string *f;

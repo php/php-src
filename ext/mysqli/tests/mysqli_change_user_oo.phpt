@@ -4,9 +4,9 @@ mysqli->change_user()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
-require_once('table.inc');
+require_once 'table.inc';
 if (!$IS_MYSQLND && (mysqli_get_server_version($link) < 50118 && mysqli_get_server_version($link) > 50100)) {
     die("skip Your MySQL Server version has a known bug that will cause a crash");
 }
@@ -16,7 +16,7 @@ if (mysqli_get_server_version($link) >= 50600)
 ?>
 --FILE--
 <?php
-    include_once("connect.inc");
+    require_once "connect.inc";
 
     $link	= NULL;
     $tmp	= NULL;

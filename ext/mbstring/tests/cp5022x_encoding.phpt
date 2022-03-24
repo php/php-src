@@ -365,6 +365,11 @@ foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
 }
 
 echo "Invalid escape sequences OK\n";
+
+// Regression test
+if (mb_convert_encoding("\x1BC\xF5", 'UTF-16BE', 'CP50221') !== "\x00%\x00C\x00%")
+  die("Bad")
+
 ?>
 --EXPECT--
 ASCII support OK

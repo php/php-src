@@ -115,6 +115,7 @@ extern ZEND_API int zend_op_array_extension_handles;
 
 ZEND_API int zend_get_resource_handle(const char *module_name);
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name);
+ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int handles);
 ZEND_API void zend_extension_dispatch_message(int message, void *arg);
 END_EXTERN_C()
 

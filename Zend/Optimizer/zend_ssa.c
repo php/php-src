@@ -257,7 +257,6 @@ static void place_essa_pis(
 		 */
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
-			case ZEND_JMPZNZ:
 				bf = blocks[j].successors[0];
 				bt = blocks[j].successors[1];
 				break;
@@ -1202,6 +1201,46 @@ void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 			}
 		} else {
 			break;
+		}
+	}
+	/* something wrong */
+	ZEND_UNREACHABLE();
+}
+/* }}} */
+
+void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var) /* {{{ */
+{
+	if (ssa->vars[var].use_chain == op) {
+		ssa->vars[var].use_chain = new_op;
+		return;
+	} else {
+		int use = ssa->vars[var].use_chain;
+
+		while (use >= 0) {
+			if (ssa->ops[use].result_use == var) {
+				if (ssa->ops[use].res_use_chain == op) {
+					ssa->ops[use].res_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].res_use_chain;
+				}
+			} else if (ssa->ops[use].op1_use == var) {
+				if (ssa->ops[use].op1_use_chain == op) {
+					ssa->ops[use].op1_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].op1_use_chain;
+				}
+			} else if (ssa->ops[use].op2_use == var) {
+				if (ssa->ops[use].op2_use_chain == op) {
+					ssa->ops[use].op2_use_chain = new_op;
+					return;
+				} else {
+					use = ssa->ops[use].op2_use_chain;
+				}
+			} else {
+				break;
+			}
 		}
 	}
 	/* something wrong */

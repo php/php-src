@@ -542,9 +542,6 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FAST_CALL:
 					SERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
@@ -1369,9 +1366,6 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_FAST_CALL:
 					UNSERIALIZE_PTR(opline->op1.jmp_addr);
 					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
@@ -1872,13 +1866,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			goto use_process_mem;
 		}
 
-#if defined(__AVX__) || defined(__SSE2__)
-		/* Align to 64-byte boundary */
-		buf = zend_shared_alloc(info.mem_size + 64);
-		buf = (void*)(((zend_uintptr_t)buf + 63L) & ~63L);
-#else
-		buf = zend_shared_alloc(info.mem_size);
-#endif
+		buf = zend_shared_alloc_aligned(info.mem_size);
 
 		if (!buf) {
 			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);

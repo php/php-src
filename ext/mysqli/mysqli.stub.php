@@ -4,10 +4,13 @@
 
 final class mysqli_driver
 {
+    /** @readonly */
     public string $client_info;
 
+    /** @readonly */
     public int $client_version;
 
+    /** @readonly */
     public int $driver_version;
 
     public bool $reconnect = false;
@@ -17,40 +20,58 @@ final class mysqli_driver
 
 class mysqli
 {
+    /** @link mysqli.affected-rows */
     public int|string $affected_rows;
 
+    /** @link mysqli.get-client-info */
     public string $client_info;
 
+    /** @link mysqli.get-client-version */
     public int $client_version;
 
+    /** @link mysqli.connect-errno */
     public int $connect_errno;
 
+    /** @link mysqli.connect-error */
     public ?string $connect_error;
 
+    /** @link mysqli.errno */
     public int $errno;
 
+    /** @link mysqli.error */
     public string $error;
 
+    /** @link mysqli.error-list */
     public array $error_list;
 
+    /** @link mysqli.field-count */
     public int $field_count;
 
+    /** @link mysqli.get-host-info */
     public string $host_info;
 
+    /** @link mysqli.info */
     public ?string $info;
 
+    /** @link mysqli.insert-id */
     public int|string $insert_id;
 
+    /** @link mysqli.get-server-info */
     public string $server_info;
 
+    /** @link mysqli.get-server-version */
     public int $server_version;
 
+    /** @link mysqli.sqlstate */
     public string $sqlstate;
 
+    /** @link mysqli.get-proto-info */
     public int $protocol_version;
 
+    /** @link mysqli.thread-id */
     public int $thread_id;
 
+    /** @link mysqli.warning-count */
     public int $warning_count;
 
     public function __construct(
@@ -352,12 +373,16 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
+    /** @link mysqli-result.current-field */
     public int $current_field;
 
+    /** @link mysqli-result.field-count */
     public int $field_count;
 
+    /** @link mysqli-result.lengths */
     public ?array $lengths;
 
+    /** @link mysqli-result.num-rows */
     public int|string $num_rows;
 
     public int $type;
@@ -455,22 +480,31 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
+    /** @link mysqli-stmt.affected-rows */
     public int|string $affected_rows;
 
+    /** @link mysqli-stmt.insert-id */
     public int|string $insert_id;
 
+    /** @link mysqli-stmt.num-rows */
     public int|string $num_rows;
 
+    /** @link mysqli-stmt.param-count */
     public int $param_count;
 
+    /** @link mysqli-stmt.field-count */
     public int $field_count;
 
+    /** @link mysqli-stmt.errno */
     public int $errno;
 
+    /** @link mysqli-stmt.error */
     public string $error;
 
+    /** @link mysqli-stmt.error-list */
     public array $error_list;
 
+    /** @link mysqli-stmt.sqlstate */
     public string $sqlstate;
 
     public int $id;
@@ -613,6 +647,8 @@ final class mysqli_warning
 final class mysqli_sql_exception extends RuntimeException
 {
     protected string $sqlstate = "00000";
+
+    public function getSqlState(): string {}
 }
 
 /** @refcount 1 */

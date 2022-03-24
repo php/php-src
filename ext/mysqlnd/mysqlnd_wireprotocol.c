@@ -41,6 +41,8 @@ const char mysqlnd_read_body_name[]		= "mysqlnd_read_body";
 #define ERROR_MARKER 0xFF
 #define EODATA_MARKER 0xFE
 
+#define MARIADB_RPL_VERSION_HACK "5.5.5-"
+
 /* {{{ mysqlnd_command_to_text */
 const char * const mysqlnd_command_to_text[COM_END] =
 {
@@ -367,6 +369,12 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 			memcpy(packet->sqlstate, "08004", MYSQLND_SQLSTATE_LENGTH);
 		}
 		DBG_RETURN(PASS);
+	}
+
+	/* MariaDB always sends 5.5.5 before version string: 5.5.5 was never released,
+		so just ignore it */
+	if (!strncmp((char *) p, MARIADB_RPL_VERSION_HACK, sizeof(MARIADB_RPL_VERSION_HACK) - 1)) {
+		p += sizeof(MARIADB_RPL_VERSION_HACK) - 1;
 	}
 
 	packet->server_version = estrdup((char *)p);
@@ -1614,9 +1622,9 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fiel
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
-						(uint64_t) atoll((char *) p);
+						strtoull((char *) p, NULL, 10);
 #else
-						(uint64_t) _atoi64((char *) p);
+						_strtoui64((char *) p, NULL, 10);
 #endif
 					bool uns = fields_metadata[i].flags & UNSIGNED_FLAG? TRUE:FALSE;
 					/* We have to make it ASCIIZ temporarily */

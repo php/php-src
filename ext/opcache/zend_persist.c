@@ -590,9 +590,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FAST_CALL:
 						opline->op1.jmp_addr = &new_opcodes[opline->op1.jmp_addr - op_array->opcodes];
 						break;
-					case ZEND_JMPZNZ:
-						/* relative extended_value don't have to be changed */
-						/* break omitted intentionally */
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
 					case ZEND_JMPZ_EX:
@@ -1262,6 +1259,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 					if (op_array->type == ZEND_USER_FUNCTION) {
 						if (op_array->scope == ce
+						 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
 						 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 							zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 							for (uint32_t i = 0; i < op_array->num_dynamic_func_defs; i++) {
@@ -1276,7 +1274,8 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 			if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
 				ce = Z_PTR(p->val);
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
-					if (op_array->type == ZEND_USER_FUNCTION) {
+					if (op_array->type == ZEND_USER_FUNCTION
+					 && !(op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
 						if ((op_array->scope != ce
 						 || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))
 						  && (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC

@@ -286,14 +286,8 @@ static zlog_bool zlog_stream_buf_alloc_ex(struct zlog_stream *stream, size_t nee
 {
 	char *buf;
 	size_t size = stream->buf.size ?: stream->buf_init_size;
-
-	if (stream->buf.data) {
-		size = MIN(zlog_limit, MAX(size * 2, needed));
-		buf = realloc(stream->buf.data, size);
-	} else {
-		size = MIN(zlog_limit, MAX(size, needed));
-		buf = malloc(size);
-	}
+	size = MIN(zlog_limit, MAX((stream->buf.data ? (size << 1) : size), needed));
+	buf = realloc(stream->buf.data, size);
 
 	if (buf == NULL) {
 		return 0;
@@ -637,10 +631,10 @@ zlog_bool zlog_stream_set_msg_suffix(
 	if (suffix != NULL) {
 		stream->msg_suffix_len = strlen(suffix);
 		len = stream->msg_suffix_len + 1;
-		stream->msg_suffix = malloc(len);
 		if (stream->msg_suffix != NULL) {
 			free(stream->msg_suffix);
 		}
+		stream->msg_suffix = malloc(len);
 		if (stream->msg_suffix == NULL) {
 			return ZLOG_FALSE;
 		}
@@ -650,10 +644,10 @@ zlog_bool zlog_stream_set_msg_suffix(
 	if (final_suffix != NULL) {
 		stream->msg_final_suffix_len = strlen(final_suffix);
 		len = stream->msg_final_suffix_len + 1;
-		stream->msg_final_suffix = malloc(len);
 		if (stream->msg_final_suffix != NULL) {
 			free(stream->msg_suffix);
 		}
+		stream->msg_final_suffix = malloc(len);
 		if (stream->msg_final_suffix == NULL) {
 			return ZLOG_FALSE;
 		}

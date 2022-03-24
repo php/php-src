@@ -1406,6 +1406,8 @@ class PropertyInfo
     public $defaultValueString;
     /** @var bool */
     public $isDocReadonly;
+    /** @var string|null */
+    public $link;
 
     public function __construct(
         PropertyName $name,
@@ -1414,7 +1416,8 @@ class PropertyInfo
         ?Type $phpDocType,
         ?Expr $defaultValue,
         ?string $defaultValueString,
-        bool $isDocReadonly
+        bool $isDocReadonly,
+        ?string $link
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -1423,6 +1426,7 @@ class PropertyInfo
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
+        $this->link = $link;
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -1548,9 +1552,13 @@ class PropertyInfo
         $fieldsynopsisElement->appendChild(new DOMText("\n     "));
         $fieldsynopsisElement->appendChild($this->getFieldSynopsisType()->getTypeForDoc($doc));
 
-        $className = str_replace("\\", "-", $this->name->class->toLowerString());
+        $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
         $varnameElement = $doc->createElement("varname", $this->name->property);
-        $varnameElement->setAttribute("linkend", "$className.props." . strtolower($this->name->property));
+        if ($this->link) {
+            $varnameElement->setAttribute("linkend", $this->link);
+        } else {
+            $varnameElement->setAttribute("linkend", "$className.props." . strtolower(str_replace("_", "-", $this->name->property)));
+        }
         $fieldsynopsisElement->appendChild(new DOMText("\n     "));
         $fieldsynopsisElement->appendChild($varnameElement);
 
@@ -1566,12 +1574,12 @@ class PropertyInfo
     }
 
     private function getFieldSynopsisType(): Type {
-        if ($this->type) {
-            return $this->type;
-        }
-
         if ($this->phpDocType) {
             return $this->phpDocType;
+        }
+
+        if ($this->type) {
+            return $this->type;
         }
 
         throw new Exception("A property must have a type");
@@ -1748,7 +1756,7 @@ class ClassInfo {
         }
 
         if ($this->alias) {
-            $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "_", $this->alias) . "\", class_entry);\n";
+            $code .= "\tzend_register_class_alias(\"" . str_replace("\\", "\\\\", $this->alias) . "\", class_entry);\n";
         }
 
         foreach ($this->enumCaseInfos as $enumCase) {
@@ -2013,11 +2021,11 @@ class ClassInfo {
     }
 
     public static function getClassSynopsisFilename(Name $name): string {
-        return strtolower(implode('-', $name->parts));
+        return strtolower(str_replace("_", "-", implode('-', $name->parts)));
     }
 
     public static function getClassSynopsisReference(Name $name): string {
-        return "class." . strtolower(implode('-', $name->parts));
+        return "class." . self::getClassSynopsisFilename($name);
     }
 
     /**
@@ -2027,10 +2035,6 @@ class ClassInfo {
      */
     private function collectInheritedMembers(array &$parentsWithInheritedProperties, array &$parentsWithInheritedMethods, array $classMap): void
     {
-        if ($this->type !== "class") {
-            return;
-        }
-
         foreach ($this->extends as $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
             if (!$parentInfo) {
@@ -2041,7 +2045,7 @@ class ClassInfo {
                 $parentsWithInheritedProperties[$parent->toString()] = $parent;
             }
 
-            if (!empty($parentInfo->funcInfos) && !isset($parentsWithInheritedMethods[$parent->toString()])) {
+            if (!isset($parentsWithInheritedMethods[$parent->toString()]) && $parentInfo->hasMethods()) {
                 $parentsWithInheritedMethods[$parent->toString()] = $parent;
             }
 
@@ -2388,6 +2392,7 @@ function parseProperty(
 ): PropertyInfo {
     $phpDocType = null;
     $isDocReadonly = false;
+    $link = null;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -2396,6 +2401,8 @@ function parseProperty(
                 $phpDocType = $tag->getType();
             } elseif ($tag->name === 'readonly') {
                 $isDocReadonly = true;
+            } elseif ($tag->name === 'link') {
+                $link = $tag->value;
             }
         }
     }
@@ -2423,7 +2430,8 @@ function parseProperty(
         $phpDocType ? Type::fromString($phpDocType) : null,
         $property->default,
         $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
-        $isDocReadonly
+        $isDocReadonly,
+        $link
     );
 }
 
@@ -2998,12 +3006,14 @@ function replaceClassSynopses(string $targetDirectory, array $classMap): array
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
+                    "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
                     "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
                     "/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
                     "/<phpdoc:(classref|exceptionref)\s+xmlns=\"([a-z0-9.:\/]+)\"\s+xmlns:xlink=\"([a-z0-9.:\/]+)\"\s+xmlns:xi=\"([a-z0-9.:\/]+)\"\s+xmlns:phpdoc=\"([a-z0-9.:\/]+)\"\s+xml:id=\"([a-z0-9._-]+)\"\s*>/i",
                 ],
                 [
                     "&$1",
+                    "<phpdoc:$1 xml:id=\"$4\" xmlns:phpdoc=\"$2\" xmlns=\"$3\">",
                     "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
                     "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
@@ -3277,7 +3287,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "4.13.0";
+    $version = "4.13.2";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);

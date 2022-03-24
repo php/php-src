@@ -662,7 +662,11 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	data->n += 1;
 
-	if (!is_ref && (Z_TYPE_P(var) != IS_OBJECT || Z_REFCOUNT_P(var) == 1)) {
+	if (is_ref) {
+		/* pass */
+	} else if (Z_TYPE_P(var) != IS_OBJECT) {
+		return 0;
+	} else if (Z_REFCOUNT_P(var) == 1 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
 		return 0;
 	}
 
@@ -1471,6 +1475,14 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
+}
+/* }}} */
+
+/* {{{ Resets the peak PHP memory usage */
+PHP_FUNCTION(memory_reset_peak_usage) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_memory_reset_peak_usage();
 }
 /* }}} */
 

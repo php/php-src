@@ -90,7 +90,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
      * @implementation-alias SplObjectStorage::attach
      * @no-verify Cannot specify arg type because ArrayAccess does not
      */
-    public function offsetSet(mixed $object, mixed $info = null): void {}
+    public function offsetSet($object, mixed $info = null): void {}
 
     /**
      * @param object $object

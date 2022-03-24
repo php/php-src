@@ -2258,6 +2258,25 @@ static uint32_t zend_fetch_prop_type(const zend_script *script, zend_property_in
 	return zend_convert_type(script, prop_info->type, pce);
 }
 
+static bool result_may_be_separated(zend_ssa *ssa, zend_ssa_op *ssa_op)
+{
+	int tmp_var = ssa_op->result_def;
+
+	if (ssa->vars[tmp_var].use_chain >= 0
+	 && !ssa->vars[tmp_var].phi_use_chain) {
+		zend_ssa_op *use_op = &ssa->ops[ssa->vars[tmp_var].use_chain];
+
+		/* TODO: analize instructions between ssa_op and use_op */
+		if (use_op == ssa_op + 1) {
+			if ((use_op->op1_use == tmp_var && use_op->op1_use_chain < 0)
+			 || (use_op->op2_use == tmp_var && use_op->op2_use_chain < 0)) {
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 static zend_always_inline zend_result _zend_update_type_info(
 			const zend_op_array *op_array,
 			zend_ssa            *ssa,
@@ -2665,13 +2684,17 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_ASSIGN_DIM:
 			if (opline->op1_type == IS_CV) {
 				tmp = assign_dim_result_type(t1, t2, OP1_DATA_INFO(), opline->op2_type);
+				tmp |= ssa->var_info[ssa_op->op1_def].type & (MAY_BE_ARRAY_PACKED|MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
 				tmp = 0;
 				if (t1 & MAY_BE_STRING) {
-					tmp |= MAY_BE_STRING;
+					tmp |= MAY_BE_STRING | MAY_BE_NULL;
+				}
+				if (t1 & MAY_BE_OBJECT) {
+					tmp |= (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF);
 				}
 				if (t1 & (MAY_BE_ARRAY|MAY_BE_FALSE|MAY_BE_NULL|MAY_BE_UNDEF)) {
 					tmp |= (OP1_DATA_INFO() & (MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF));
@@ -2683,9 +2706,6 @@ static zend_always_inline zend_result _zend_update_type_info(
 						/* A scalar type conversion may occur when assigning to a typed reference. */
 						tmp |= MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING;
 					}
-				}
-				if (t1 & MAY_BE_OBJECT) {
-					tmp |= MAY_BE_REF;
 				}
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
@@ -2795,6 +2815,20 @@ static zend_always_inline zend_result _zend_update_type_info(
 					/* A scalar type conversion may occur when assigning to a typed reference. */
 					tmp &= ~MAY_BE_REF;
 					tmp |= MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN;
+				}
+				if ((tmp & (MAY_BE_RC1|MAY_BE_RCN)) == MAY_BE_RCN) {
+					/* refcount may be indirectly decremented. Make an exception if the result is used in the next instruction */
+					if (!ssa_opcodes) {
+						if (ssa->vars[ssa_op->result_def].use_chain < 0
+						 || opline + 1 != op_array->opcodes + ssa->vars[ssa_op->result_def].use_chain) {
+							tmp |= MAY_BE_RC1;
+					    }
+					} else {
+						if (ssa->vars[ssa_op->result_def].use_chain < 0
+						 || opline + 1 != ssa_opcodes[ssa->vars[ssa_op->result_def].use_chain]) {
+							tmp |= MAY_BE_RC1;
+					    }
+					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->result_def);
@@ -3366,11 +3400,11 @@ static zend_always_inline zend_result _zend_update_type_info(
 					if (prop_info) {
 						/* FETCH_OBJ_R/IS for plain property increments reference counter,
 						   so it can't be 1 */
-						if (ce && !ce->create_object) {
+						if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					} else {
-						if (ce && !ce->create_object && !ce->__get) {
+						if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
 						}
 					}
@@ -3396,7 +3430,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			if (opline->result_type == IS_VAR) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
 			} else {
-				tmp &= ~MAY_BE_RC1;
+				if (!result_may_be_separated(ssa, ssa_op)) {
+					tmp &= ~MAY_BE_RC1;
+				}
 				if (opline->opcode == ZEND_FETCH_STATIC_PROP_IS) {
 					tmp |= MAY_BE_UNDEF;
 				}
@@ -3630,6 +3666,17 @@ static zend_class_entry *join_class_entries(
 	return ce1;
 }
 
+static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
+	if (ce1 == ce2) {
+		return 1;
+	}
+	if (!(ce1->ce_flags & ZEND_ACC_LINKED)) {
+		/* This case could be generalized, similarly to unlinked_instanceof */
+		return 0;
+	}
+	return instanceof_function(ce1, ce2);
+}
+
 static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -3661,7 +3708,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 						if (!ce) {
 							ce = constraint->ce;
 							is_instanceof = 1;
-						} else if (is_instanceof && instanceof_function(constraint->ce, ce)) {
+						} else if (is_instanceof && safe_instanceof(constraint->ce, ce)) {
 							ce = constraint->ce;
 						} else {
 							/* Ignore the constraint (either ce instanceof constraint->ce or
@@ -4590,7 +4637,6 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 		case ZEND_BOOL:

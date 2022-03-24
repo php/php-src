@@ -2030,7 +2030,7 @@ ifelse([$3],[],,[else $3])
 ])
 
 dnl
-dnl PHP_SETUP_LIBXML(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_LIBXML(shared-add [, action-found])
 dnl
 dnl Common setup macro for libxml.
 dnl

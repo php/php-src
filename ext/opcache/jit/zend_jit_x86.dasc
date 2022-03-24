@@ -2956,7 +2956,7 @@ static int zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
@@ -2975,7 +2975,7 @@ static int zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__i386__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
@@ -3660,11 +3660,6 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 							OP_JMP_ADDR(opline, opline->op2) :
 							opline + 1;
 						break;
-					case ZEND_JMPZNZ:
-						exit_opline = (trace->opline == OP_JMP_ADDR(opline, opline->op2)) ?
-							ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) :
-							OP_JMP_ADDR(opline, opline->op2);
-						break;
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 						if (opline->op2_type == IS_CV) {
@@ -3900,6 +3895,14 @@ static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg
 	return zend_jit_spill_store(Dst, src, dst, info, set_type);
 }
 
+static int zend_jit_store_var_type(dasm_State **Dst, int var, uint32_t type)
+{
+	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
+
+	|	SET_ZVAL_TYPE_INFO dst, type
+	return 1;
+}
+
 static int zend_jit_store_var_if_necessary(dasm_State **Dst, int var, zend_jit_addr src, uint32_t info)
 {
 	if (Z_MODE(src) == IS_REG && Z_STORE(src)) {
@@ -3954,6 +3957,18 @@ static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr sr
 					|	SSE_AVX_INS movaps, vmovaps, xmm(Z_REG(dst)-ZREG_XMM0), xmm(Z_REG(src)-ZREG_XMM0)
 				} else {
 					ZEND_UNREACHABLE();
+				}
+				if (!Z_LOAD(src) && !Z_STORE(src) && Z_STORE(dst)) {
+					zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
+
+					if (!zend_jit_spill_store(Dst, dst, var_addr, info,
+							JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+							JIT_G(current_frame) == NULL ||
+							STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var)) == IS_UNKNOWN ||
+							(1 << STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var))) != (info & MAY_BE_ANY)
+					)) {
+						return 0;
+					}
 				}
 			} else if (Z_MODE(dst) == IS_MEM_ZVAL) {
 				if (!Z_LOAD(src) && !Z_STORE(src)) {
@@ -4478,11 +4493,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 			     (Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1))) {
 				if (opcode == ZEND_ADD) {
 					|.if X64
-						|	mov64 rax, 0x43e0000000000000
+						|	mov64 Ra(tmp_reg), 0x43e0000000000000
 						if (Z_MODE(res_addr) == IS_REG) {
-							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), Ra(tmp_reg)
 						} else {
-							|	SET_ZVAL_LVAL res_addr, rax
+							|	SET_ZVAL_LVAL res_addr, Ra(tmp_reg)
 						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0
@@ -4491,11 +4506,11 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 					break;
 				} else if (opcode == ZEND_SUB) {
 					|.if X64
-						|	mov64 rax, 0xc3e0000000000000
+						|	mov64 Ra(tmp_reg), 0xc3e0000000000000
 						if (Z_MODE(res_addr) == IS_REG) {
-							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), rax
+							|	movd xmm(Z_REG(res_addr)-ZREG_XMM0), Ra(tmp_reg)
 						} else {
-							|	SET_ZVAL_LVAL res_addr, rax
+							|	SET_ZVAL_LVAL res_addr, Ra(tmp_reg)
 						}
 					|.else
 						|	SET_ZVAL_LVAL res_addr, 0x00200000
@@ -6112,6 +6127,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 0);
 			} else {
 				zend_jit_addr ref_addr;
+				zend_reg type_reg = tmp_reg;
 
 				if (in_cold) {
 					|	IF_NOT_ZVAL_TYPE val_addr, IS_REFERENCE, >1
@@ -6120,21 +6136,24 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 					|.cold_code
 					|1:
 				}
-				if (Z_REG(val_addr) == ZREG_R2) {
-					|	mov aword T1, r2 // save
-				}
 				|	// zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
 				|	GET_ZVAL_PTR r2, val_addr
 				|	GC_DELREF r2
 				|	// ZVAL_COPY_VALUE(return_value, &ref->value);
 				ref_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R2, 8);
 				if (!res_addr) {
-					|	ZVAL_COPY_VALUE var_addr, var_info, ref_addr, val_info, ZREG_R2, tmp_reg
+					|	ZVAL_COPY_VALUE var_addr, var_info, ref_addr, val_info, type_reg, tmp_reg
 				} else {
-					|	ZVAL_COPY_VALUE_2 var_addr, var_info, res_addr, ref_addr, val_info, ZREG_R2, tmp_reg
+					|	ZVAL_COPY_VALUE_2 var_addr, var_info, res_addr, ref_addr, val_info, type_reg, tmp_reg
 				}
 				|	je >2
-				|	IF_NOT_REFCOUNTED dh, >3
+				if (tmp_reg == ZREG_R0) {
+					|	IF_NOT_REFCOUNTED ah, >3
+				} else {
+					|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >3
+				}
+				|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
+
 				if (!res_addr) {
 					|	GC_ADDREF Ra(tmp_reg)
 				} else {
@@ -6143,17 +6162,19 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|	jmp >3
 				|2:
 				if (res_addr) {
-					|	IF_NOT_REFCOUNTED dh, >2
+					if (tmp_reg == ZREG_R0) {
+						|	IF_NOT_REFCOUNTED ah, >2
+					} else {
+						|	IF_NOT_FLAGS Rd(tmp_reg), (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT), >2
+					}
+					|	GET_ZVAL_PTR Ra(tmp_reg), var_addr
 					|	GC_ADDREF Ra(tmp_reg)
 					|2:
-				}
-				if (Z_REG(val_addr) == ZREG_R2) {
-					|	mov r2, aword T1 // restore
 				}
 				if (save_r1) {
 					|	mov aword T1, FCARG1a // save
 				}
-				|	EFREE_REFERENCE aword [Ra(Z_REG(val_addr))+Z_OFFSET(val_addr)]
+				|	EFREE_REFERENCE r2
 				if (save_r1) {
 					|	mov FCARG1a, aword T1 // restore
 				}
@@ -6837,7 +6858,12 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, uint3
 					|	PUSH_ADDR binary_op, r0
 				|.endif
 				|	SET_EX_OPLINE opline, r0
-				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+				if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+				 && (op1_data_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+				} else {
+					|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+				}
 				|.if not(X64)
 				|	add r4, 12
 				|.endif
@@ -6975,7 +7001,12 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, uint32_t 
 			|	PUSH_ADDR binary_op, r0
 		|.endif
 		|	SET_EX_OPLINE opline, r0
-		|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
+		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+		} else {
+			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		}
 		|.if not(X64)
 		|	add r4, 12
 		|.endif
@@ -7047,12 +7078,6 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 			           smart_branch_opcode == ZEND_JMPNZ_EX) {
 				if (result) {
 					| jmp => target_label
-				}
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				if (!result) {
-					| jmp => target_label
-				} else {
-					| jmp => target_label2
 				}
 			} else {
 				ZEND_UNREACHABLE();
@@ -7250,36 +7275,6 @@ static int zend_jit_cmp_long_long(dasm_State    **Dst,
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_IDENTICAL:
-				case ZEND_CASE:
-				case ZEND_CASE_STRICT:
-					| jne => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-				    if (swap) {
-						| jle => target_label
-				    } else {
-						| jge => target_label
-					}
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					if (swap) {
-						| jl => target_label
-					} else {
-						| jg => target_label
-					}
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -7463,40 +7458,6 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_IDENTICAL:
-				case ZEND_CASE:
-				case ZEND_CASE_STRICT:
-					| jne => target_label
-					| jp => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
-					| jp => target_label2
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-					if (swap) {
-						| jbe => target_label
-					} else {
-						| jae => target_label
-						| jp => target_label
-					}
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					if (swap) {
-						| jb => target_label
-					} else {
-						| ja => target_label
-						| jp => target_label
-					}
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else if (smart_branch_opcode == ZEND_JMPZ_EX) {
 			switch (opline->opcode) {
 				case ZEND_IS_EQUAL:
@@ -7793,25 +7754,6 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, zend_jit_a
 				default:
 					ZEND_UNREACHABLE();
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			switch (opline->opcode) {
-				case ZEND_IS_EQUAL:
-				case ZEND_CASE:
-					| jne => target_label
-					break;
-				case ZEND_IS_NOT_EQUAL:
-					| je => target_label
-					break;
-				case ZEND_IS_SMALLER:
-					| jge => target_label
-					break;
-				case ZEND_IS_SMALLER_OR_EQUAL:
-					| jg => target_label
-					break;
-				default:
-					ZEND_UNREACHABLE();
-			}
-			| jmp => target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -8110,9 +8052,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 				not_identical_label = target_label;
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				identical_label = target_label;
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				not_identical_label = target_label;
-				identical_label = target_label2;
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -8121,9 +8060,6 @@ static int zend_jit_identical(dasm_State    **Dst,
 				identical_label = target_label;
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				not_identical_label = target_label;
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				identical_label = target_label;
-				not_identical_label = target_label2;
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -8501,9 +8437,6 @@ static int zend_jit_bool_jmpznz(dasm_State **Dst, const zend_op *opline, uint32_
 		false_label = target_label;
 	} else if (branch_opcode == ZEND_JMPNZ) {
 		true_label = target_label;
-	} else if (branch_opcode == ZEND_JMPZNZ) {
-		true_label = target_label2;
-		false_label = target_label;
 	} else if (branch_opcode == ZEND_JMPZ_EX) {
 		set_bool = 1;
 		false_label = target_label;
@@ -10846,8 +10779,6 @@ static int zend_jit_smart_true(dasm_State **Dst, const zend_op *opline, int jmp,
 			}
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			|	jmp =>target_label
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jmp =>target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -10872,8 +10803,6 @@ static int zend_jit_smart_false(dasm_State **Dst, const zend_op *opline, int jmp
 			if (jmp) {
 				|	jmp >7
 			}
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jmp =>target_label
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -10901,9 +10830,6 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, zend_uchar 
 			undefined_label = target_label;
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			defined_label = target_label;
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			undefined_label = target_label;
-			defined_label = target_label2;
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -11141,9 +11067,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 						|	je =>target_label
 					} else if (smart_branch_opcode == ZEND_JMPNZ) {
 						|	jne =>target_label
-					} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-						|	je =>target_label
-						|	jmp =>target_label2
 					} else {
 						ZEND_UNREACHABLE();
 					}
@@ -11225,9 +11148,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 							|	je =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPNZ) {
 							|	jne =>target_label
-						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-							|	je =>target_label
-							|	jmp =>target_label2
 						} else {
 							ZEND_UNREACHABLE();
 						}
@@ -11236,9 +11156,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, uint32_t
 							|	jne =>target_label
 						} else if (smart_branch_opcode == ZEND_JMPNZ) {
 							|	je =>target_label
-						} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-							|	jne =>target_label
-							|	jmp =>target_label2
 						} else {
 							ZEND_UNREACHABLE();
 						}
@@ -12452,8 +12369,6 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 					|	jmp =>target_label2
 				} else if (smart_branch_opcode == ZEND_JMPNZ) {
 					|	jmp =>target_label
-				} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-					|	jmp =>target_label2
 				} else {
 					ZEND_UNREACHABLE();
 				}
@@ -12485,8 +12400,6 @@ static int zend_jit_isset_isempty_dim(dasm_State    **Dst,
 			if (smart_branch_opcode == ZEND_JMPZ) {
 				|	jmp =>target_label
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jmp =>target_label
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -13960,7 +13873,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	sub r4, 12
 				|	PUSH_ADDR binary_op, r0
 			|.endif
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			}
 			|.if not(X64)
 				|	add r4, 12
 			|.endif
@@ -14039,7 +13957,12 @@ static int zend_jit_assign_obj_op(dasm_State          **Dst,
 				|	sub r4, 12
 				|	PUSH_ADDR binary_op, r0
 			|.endif
-			|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			if (((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR))
+			 && (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref_tmp, r0
+			} else {
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+			}
 			|.if not(X64)
 				|	add r4, 12
 			|.endif
@@ -15196,8 +15119,6 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 		} else if (smart_branch_opcode) {
 			if (smart_branch_opcode == ZEND_JMPNZ) {
 				|	jmp =>target_label
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jmp =>target_label2
 			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
@@ -15226,9 +15147,6 @@ static int zend_jit_isset_isempty_cv(dasm_State **Dst, const zend_op *opline, ui
 				|	jle =>target_label
 			} else if (smart_branch_opcode == ZEND_JMPNZ) {
 				|	jg =>target_label
-			} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-				|	jle =>target_label
-				|	jmp =>target_label2
 			} else {
 				ZEND_UNREACHABLE();
 			}
@@ -15580,9 +15498,6 @@ static int zend_jit_in_array(dasm_State **Dst, const zend_op *opline, uint32_t o
 			|	jz =>target_label
 		} else if (smart_branch_opcode == ZEND_JMPNZ) {
 			|	jnz =>target_label
-		} else if (smart_branch_opcode == ZEND_JMPZNZ) {
-			|	jz =>target_label
-			|	jmp =>target_label2
 		} else {
 			ZEND_UNREACHABLE();
 		}
@@ -15875,7 +15790,6 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			ZEND_FALLTHROUGH;
 		case ZEND_BOOL:
 		case ZEND_BOOL_NOT:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			return 1;
@@ -16098,6 +16012,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 				if (op1_info & MAY_BE_DOUBLE) {
 					regset = ZEND_REGSET(ZREG_XMM0);
 				}
+				if (opline->result_type != IS_UNUSED && (op1_info & MAY_BE_LONG)) {
+					ZEND_REGSET_INCL(regset, ZREG_R1);
+				}
 			}
 			break;
 		case ZEND_ADD:
@@ -16203,6 +16120,7 @@ bw_op:
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				if (opline->op2_type == IS_CONST &&
+				    opline->op1_type != IS_CONST &&
 				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
 				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2))) &&
 				    OP1_HAS_RANGE() &&
@@ -16263,7 +16181,6 @@ bw_op:
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-		case ZEND_JMPZNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
 			op1_info = OP1_INFO();

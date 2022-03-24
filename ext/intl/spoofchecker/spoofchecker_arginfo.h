@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d915fb3698e0bde4af2a1175fff882cae1f55668 */
+ * Stub hash: f1c86958a39aa8f89ee468a0753f6a5b232c3e1f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -58,6 +58,7 @@ static zend_class_entry *register_class_Spoofchecker(void)
 
 	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -139,6 +139,40 @@ static void preload_restart(void);
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
+/**
+ * Clear AVX/SSE2-aligned memory.
+ */
+static void bzero_aligned(void *mem, size_t size)
+{
+#if defined(__x86_64__)
+	memset(mem, 0, size);
+#elif defined(__AVX__)
+	char *p = (char*)mem;
+	char *end = p + size;
+	__m256i ymm0 = _mm256_setzero_si256();
+
+	while (p < end) {
+		_mm256_store_si256((__m256i*)p, ymm0);
+		_mm256_store_si256((__m256i*)(p+32), ymm0);
+		p += 64;
+	}
+#elif defined(__SSE2__)
+	char *p = (char*)mem;
+	char *end = p + size;
+	__m128i xmm0 = _mm_setzero_si128();
+
+	while (p < end) {
+		_mm_store_si128((__m128i*)p, xmm0);
+		_mm_store_si128((__m128i*)(p+16), xmm0);
+		_mm_store_si128((__m128i*)(p+32), xmm0);
+		_mm_store_si128((__m128i*)(p+48), xmm0);
+		p += 64;
+	}
+#else
+	memset(mem, 0, size);
+#endif
+}
+
 #ifdef ZEND_WIN32
 static time_t zend_accel_get_time(void)
 {
@@ -1538,47 +1572,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, 1);
 
 	/* Allocate shared memory */
-#if defined(__AVX__) || defined(__SSE2__)
-	/* Align to 64-byte boundary */
-	ZCG(mem) = zend_shared_alloc(memory_used + 64);
-	if (ZCG(mem)) {
-		ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
-#if defined(__x86_64__)
-		memset(ZCG(mem), 0, memory_used);
-#elif defined(__AVX__)
-		{
-			char *p = (char*)ZCG(mem);
-			char *end = p + memory_used;
-			__m256i ymm0 = _mm256_setzero_si256();
-
-			while (p < end) {
-				_mm256_store_si256((__m256i*)p, ymm0);
-				_mm256_store_si256((__m256i*)(p+32), ymm0);
-				p += 64;
-			}
-		}
-#else
-		{
-			char *p = (char*)ZCG(mem);
-			char *end = p + memory_used;
-			__m128i xmm0 = _mm_setzero_si128();
-
-			while (p < end) {
-				_mm_store_si128((__m128i*)p, xmm0);
-				_mm_store_si128((__m128i*)(p+16), xmm0);
-				_mm_store_si128((__m128i*)(p+32), xmm0);
-				_mm_store_si128((__m128i*)(p+48), xmm0);
-				p += 64;
-			}
-		}
-#endif
-	}
-#else
-	ZCG(mem) = zend_shared_alloc(memory_used);
-	if (ZCG(mem)) {
-		memset(ZCG(mem), 0, memory_used);
-	}
-#endif
+	ZCG(mem) = zend_shared_alloc_aligned(memory_used);
 	if (!ZCG(mem)) {
 		zend_shared_alloc_destroy_xlat_table();
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
@@ -1589,6 +1583,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		}
 		return new_persistent_script;
 	}
+
+	bzero_aligned(ZCG(mem), memory_used);
 
 	zend_shared_alloc_clear_xlat_table();
 
@@ -1961,8 +1957,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		ZCG(cache_opline) = NULL;
 		ZCG(cache_persistent_script) = NULL;
 		return file_cache_compile_file(file_handle, type);
-	} else if (!ZCG(accelerator_enabled) ||
-	           (ZCSG(restart_in_progress) && accel_restart_is_active())) {
+	} else if ((ZCSG(restart_in_progress) && accel_restart_is_active())) {
 		if (ZCG(accel_directives).file_cache) {
 			return file_cache_compile_file(file_handle, type);
 		}
@@ -2178,6 +2173,9 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				zend_hash_index_del(EG(zend_constants), new_const_num);
 			}
 		}
+		persistent_script->dynamic_members.last_used = ZCG(request_time);
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else {
 
 #if !ZEND_WIN32
@@ -2214,14 +2212,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				}
 			}
 		}
+		persistent_script->dynamic_members.last_used = ZCG(request_time);
+		SHM_PROTECT();
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+
 		replay_warnings(persistent_script->num_warnings, persistent_script->warnings);
 		from_shared_memory = 1;
 	}
-
-	persistent_script->dynamic_members.last_used = ZCG(request_time);
-
-	SHM_PROTECT();
-	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	/* Fetch jit auto globals used in the script before execution */
 	if (persistent_script->ping_auto_globals_mask & ~ZCG(auto_globals_mask)) {
@@ -4236,51 +4233,13 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, 1);
 
 	/* Allocate shared memory */
-#if defined(__AVX__) || defined(__SSE2__)
-	/* Align to 64-byte boundary */
-	ZCG(mem) = zend_shared_alloc(memory_used + 64);
-	if (ZCG(mem)) {
-		ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
-#if defined(__x86_64__)
-		memset(ZCG(mem), 0, memory_used);
-#elif defined(__AVX__)
-		{
-			char *p = (char*)ZCG(mem);
-			char *end = p + memory_used;
-			__m256i ymm0 = _mm256_setzero_si256();
-
-			while (p < end) {
-				_mm256_store_si256((__m256i*)p, ymm0);
-				_mm256_store_si256((__m256i*)(p+32), ymm0);
-				p += 64;
-			}
-		}
-#else
-		{
-			char *p = (char*)ZCG(mem);
-			char *end = p + memory_used;
-			__m128i xmm0 = _mm_setzero_si128();
-
-			while (p < end) {
-				_mm_store_si128((__m128i*)p, xmm0);
-				_mm_store_si128((__m128i*)(p+16), xmm0);
-				_mm_store_si128((__m128i*)(p+32), xmm0);
-				_mm_store_si128((__m128i*)(p+48), xmm0);
-				p += 64;
-			}
-		}
-#endif
-	}
-#else
-	ZCG(mem) = zend_shared_alloc(memory_used);
-	if (ZCG(mem)) {
-		memset(ZCG(mem), 0, memory_used);
-	}
-#endif
+	ZCG(mem) = zend_shared_alloc_aligned(memory_used);
 	if (!ZCG(mem)) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Not enough shared memory for preloading. Consider increasing the value for the opcache.memory_consumption directive in php.ini.");
 		return NULL;
 	}
+
+	bzero_aligned(ZCG(mem), memory_used);
 
 	zend_shared_alloc_restore_xlat_table(checkpoint);
 

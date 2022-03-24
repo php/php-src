@@ -19,4 +19,4 @@ interface I3 extends I1, I2
 
 ?>
 --EXPECTF--
-Fatal error: Class I3 inherits both I1::C and I2::C, which is ambiguous in %s on line %d
+Fatal error: Interface I3 inherits both I1::C and I2::C, which is ambiguous in %s on line %d

@@ -4,15 +4,15 @@ new mysqli()
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
-    if (!get_current_user())
-        die('skip: get_current_user() not supported');
-    if (stristr(mysqli_get_client_info(), 'mysqlnd'))
-        die("skip: test for libmysql (different error output when using php streams");
+require_once 'skipifconnectfailure.inc';
+if (!get_current_user())
+    die('skip: get_current_user() not supported');
+if ($IS_MYSQLND)
+    die("skip: test for libmysql (different error output when using php streams");
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
     $myhost = 'invalidhost';
     $link   = NULL;

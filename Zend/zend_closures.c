@@ -775,7 +775,8 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 
 ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr)
 {
-	zend_create_closure_ex(res, func, scope, called_scope, this_ptr, /* is_fake */ false);
+	zend_create_closure_ex(res, func, scope, called_scope, this_ptr,
+		/* is_fake */ (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) != 0);
 }
 
 ZEND_API void zend_create_fake_closure(zval *res, zend_function *func, zend_class_entry *scope, zend_class_entry *called_scope, zval *this_ptr) /* {{{ */

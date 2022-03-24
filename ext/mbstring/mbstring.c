@@ -3318,6 +3318,8 @@ PHP_FUNCTION(mb_decode_numericentity)
 /* }}} */
 
 /* {{{ Sends an email message with MIME scheme */
+#define CRLF "\r\n"
+
 static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
 {
 	const char *ps;
@@ -3649,7 +3651,7 @@ PHP_FUNCTION(mb_send_mail)
 			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
 		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
-	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
 	if (pstr != NULL) {
 		subject_buf = subject = (char *)pstr->val;
 	}
@@ -3688,14 +3690,14 @@ PHP_FUNCTION(mb_send_mail)
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, "\n", 1);
+			mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 		}
 		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
@@ -3706,7 +3708,7 @@ PHP_FUNCTION(mb_send_mail)
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
 		}
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
@@ -3715,9 +3717,10 @@ PHP_FUNCTION(mb_send_mail)
 			p = "7bit";
 		}
 		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 
+	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
 	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
@@ -3754,6 +3757,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 }
 
+#undef CRLF
 #undef MAIL_ASCIIZ_CHECK_MBSTRING
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
 #undef PHP_MBSTR_MAIL_MIME_HEADER2

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eab71d8a7172dba2dac3c6fa97b2064c7a99191f */
+ * Stub hash: 3f2caf1c46760d8ef629ccb2e94ab0dba09f713b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -102,7 +102,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key

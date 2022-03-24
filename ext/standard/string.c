@@ -1687,9 +1687,7 @@ PHP_FUNCTION(pathinfo)
    case insensitive strstr */
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 {
-	zend_str_tolower(s, s_len);
-	zend_str_tolower(t, t_len);
-	return (char*)php_memnstr(s, t, t_len, s + s_len);
+	return (char*)php_memnistr(s, t, t_len, s + s_len);
 }
 /* }}} */
 
@@ -1735,8 +1733,6 @@ PHP_FUNCTION(stristr)
 	zend_string *haystack, *needle;
 	const char *found = NULL;
 	size_t  found_offset;
-	char *haystack_dup;
-	char *orig_needle;
 	bool part = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -1746,13 +1742,10 @@ PHP_FUNCTION(stristr)
 		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
-	haystack_dup = estrndup(ZSTR_VAL(haystack), ZSTR_LEN(haystack));
-	orig_needle = estrndup(ZSTR_VAL(needle), ZSTR_LEN(needle));
-	found = php_stristr(haystack_dup, orig_needle, ZSTR_LEN(haystack), ZSTR_LEN(needle));
-	efree(orig_needle);
+	found = php_stristr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(haystack), ZSTR_LEN(needle));
 
 	if (found) {
-		found_offset = found - haystack_dup;
+		found_offset = found - ZSTR_VAL(haystack);
 		if (part) {
 			RETVAL_STRINGL(ZSTR_VAL(haystack), found_offset);
 		} else {
@@ -1761,8 +1754,6 @@ PHP_FUNCTION(stristr)
 	} else {
 		RETVAL_FALSE;
 	}
-
-	efree(haystack_dup);
 }
 /* }}} */
 
@@ -1890,7 +1881,6 @@ PHP_FUNCTION(stripos)
 	const char *found = NULL;
 	zend_string *haystack, *needle;
 	zend_long offset = 0;
-	zend_string *needle_dup = NULL, *haystack_dup;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
@@ -1907,23 +1897,14 @@ PHP_FUNCTION(stripos)
 		RETURN_THROWS();
 	}
 
-	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
-		RETURN_FALSE;
-	}
-
-	haystack_dup = zend_string_tolower(haystack);
-	needle_dup = zend_string_tolower(needle);
-	found = (char*)php_memnstr(ZSTR_VAL(haystack_dup) + offset,
-			ZSTR_VAL(needle_dup), ZSTR_LEN(needle_dup), ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack));
+	found = (char*)php_memnistr(ZSTR_VAL(haystack) + offset,
+			ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 
 	if (found) {
-		RETVAL_LONG(found - ZSTR_VAL(haystack_dup));
+		RETVAL_LONG(found - ZSTR_VAL(haystack));
 	} else {
 		RETVAL_FALSE;
 	}
-
-	zend_string_release_ex(haystack_dup, 0);
-	zend_string_release_ex(needle_dup, 0);
 }
 /* }}} */
 
@@ -3139,7 +3120,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 		char *e;
 
 		if (ZSTR_LEN(needle) == str_len) {
-			lc_needle = php_string_tolower(needle);
+			lc_needle = zend_string_tolower(needle);
 			end = lc_haystack + ZSTR_LEN(haystack);
 			for (p = lc_haystack; (r = (char*)php_memnstr(p, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle), end)); p = r + ZSTR_LEN(lc_needle)) {
 				if (!new_str) {
@@ -3160,7 +3141,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 			const char *n;
 			const char *endp = o + ZSTR_LEN(haystack);
 
-			lc_needle = php_string_tolower(needle);
+			lc_needle = zend_string_tolower(needle);
 			n = ZSTR_VAL(lc_needle);
 
 			while ((o = (char*)php_memnstr(o, n, ZSTR_LEN(lc_needle), endp))) {
@@ -3204,7 +3185,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 nothing_todo:
 		return zend_string_copy(haystack);
 	} else {
-		lc_needle = php_string_tolower(needle);
+		lc_needle = zend_string_tolower(needle);
 
 		if (memcmp(lc_haystack, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle))) {
 			zend_string_release_ex(lc_needle, 0);
@@ -5425,32 +5406,6 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 }
 /* }}} */
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive) /* {{{ */
-{
-	zend_string *tmp_str1, *tmp_str2;
-	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
-	zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
-
-	ZVAL_LONG(result, strnatcmp_ex(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2), case_insensitive));
-
-	zend_tmp_string_release(tmp_str1);
-	zend_tmp_string_release(tmp_str2);
-	return SUCCESS;
-}
-/* }}} */
-
-PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
-{
-	return string_natural_compare_function_ex(result, op1, op2, 1);
-}
-/* }}} */
-
-PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
-{
-	return string_natural_compare_function_ex(result, op1, op2, 0);
-}
-/* }}} */
-
 /* {{{ Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)
 {
@@ -6075,7 +6030,7 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 	str = zend_string_alloc(len, 0);
 	ZSTR_LEN(str) = 0;
 	while (pos < len) {
-		int status = FAILURE;
+		zend_result status = FAILURE;
 		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
 
 		/* The lower 256 codepoints of Unicode are identical to Latin-1,
