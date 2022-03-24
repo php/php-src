@@ -10,7 +10,5 @@ function test(null $v): null {
 var_dump(test(null));
 
 ?>
-===DONE===
 --EXPECT--
 NULL
-===DONE===

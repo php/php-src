@@ -7,7 +7,14 @@ class Foo {
 }
 
 $foo = new Foo();
+$foo->value = false;
+
+try {
+    $foo->value = true;
+} catch (\TypeError $e) {
+    echo $e->getMessage();
+}
+
 ?>
-===DONE===
 --EXPECT--
-===DONE===
+Cannot assign bool to property Foo::$value of type false

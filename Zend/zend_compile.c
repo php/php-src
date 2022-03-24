@@ -6186,11 +6186,11 @@ static bool zend_type_contains_traversable(zend_type type) {
 static zend_type zend_compile_typename(
 		zend_ast *ast, bool force_allow_null) /* {{{ */
 {
-	bool is_marked_nullable = false;
+	bool is_marked_nullable = ast->attr & ZEND_TYPE_NULLABLE;
 	zend_ast_attr orig_ast_attr = ast->attr;
 	zend_type type = ZEND_TYPE_INIT_NONE(0);
-	if (ast->attr & ZEND_TYPE_NULLABLE) {
-		is_marked_nullable = true;
+
+	if (is_marked_nullable) {
 		ast->attr &= ~ZEND_TYPE_NULLABLE;
 	}
 
