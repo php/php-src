@@ -77,6 +77,8 @@ Show compiled in modules
 .PD 1
 .B \-v
 Version number
+.TP
+.PD 0
 .B \-\-prefix \fIpath\fP
 .TP
 .PD 1
