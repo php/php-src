@@ -549,17 +549,26 @@ SAPI_API void sapi_initialize_empty_request(void)
 
 static int sapi_extract_response_code(const char *header_line)
 {
-	int code = 200;
+	zend_ulong code = 200;
 	const char *ptr;
 
 	for (ptr = header_line; *ptr; ptr++) {
 		if (*ptr == ' ' && *(ptr + 1) != ' ') {
-			code = atoi(ptr + 1);
+			const char *code_begin = ptr + 1;
+			char *code_end;
+
+			code = ZEND_STRTOUL(code_begin, &code_end, 10);
+
+			/* rfc7230 3.1.2 status-code = 3DIGIT */
+			if (code < 100 || code > 599 || (code_end - code_begin) != 3) {
+				return -1;
+			}
+
 			break;
 		}
 	}
 
-	return code;
+	return (int)code;
 }
 
 
@@ -747,7 +756,14 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 	if (header_line_len>=5
 		&& !strncasecmp(header_line, "HTTP/", 5)) {
 		/* filter out the response code */
-		sapi_update_response_code(sapi_extract_response_code(header_line));
+		int status_code = sapi_extract_response_code(header_line);
+		if (status_code < 0) {
+			sapi_module.sapi_error(E_WARNING, "Cannot set HTTP status line - "
+				"status code is malformed");
+			efree(header_line);
+			return FAILURE;
+		}
+		sapi_update_response_code(status_code);
 		/* sapi_update_response_code doesn't free the status line if the code didn't change */
 		if (SG(sapi_headers).http_status_line) {
 			efree(SG(sapi_headers).http_status_line);
