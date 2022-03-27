@@ -564,7 +564,7 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
-static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
 
@@ -633,15 +633,15 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_FLAGS_SHIFT				0
 #define GC_INFO_SHIFT				10
 
-static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
 }
 
-static zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT uint32_t zval_gc_flags(uint32_t gc_type_info) {
 	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
 }
 
-static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT uint32_t zval_gc_info(uint32_t gc_type_info) {
 	return (gc_type_info >> GC_INFO_SHIFT);
 }
 
@@ -1181,7 +1181,7 @@ extern ZEND_API bool zend_rc_debug;
 	do { } while (0)
 #endif
 
-static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
+static zend_always_inline uint32_t ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_gc_refcount(const zend_refcounted_h *p) {
 	return p->refcount;
 }
 
@@ -1227,7 +1227,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zval_refcount_p(const zval* pz) {
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT uint32_t zval_refcount_p(const zval* pz) {
 #if ZEND_DEBUG
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_TYPE_P(pz) == IS_ARRAY);
 #endif

@@ -173,15 +173,15 @@ ZEND_API void ZEND_FASTCALL zend_hash_del_bucket(HashTable *ht, Bucket *p);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_del_val(HashTable *ht, zval *zv);
 
 /* Data retrieval */
-ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *key);
-ZEND_API zval* ZEND_FASTCALL zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
-ZEND_API zval* ZEND_FASTCALL zend_hash_index_find(const HashTable *ht, zend_ulong h);
-ZEND_API zval* ZEND_FASTCALL _zend_hash_index_find(const HashTable *ht, zend_ulong h);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_find(const HashTable *ht, zend_string *key);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_str_find(const HashTable *ht, const char *key, size_t len);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_index_find(const HashTable *ht, zend_ulong h);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT _zend_hash_index_find(const HashTable *ht, zend_ulong h);
 
 /* The same as zend_hash_find(), but hash value of the key must be already calculated. */
-ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_find_known_hash(const HashTable *ht, zend_string *key);
 
-static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_find_ex(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	if (known_hash) {
 		return zend_hash_find_known_hash(ht, key);
@@ -210,8 +210,8 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 
 
 /* Find or add NULL, if doesn't exist */
-ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
-ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_lookup(HashTable *ht, zend_string *key);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_index_lookup(HashTable *ht, zend_ulong h);
 
 #define ZEND_HASH_INDEX_LOOKUP(_ht, _h, _ret) do { \
 		if (EXPECTED(HT_FLAGS(_ht) & HASH_FLAG_PACKED)) { \
@@ -226,23 +226,23 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h)
 	} while (0)
 
 /* Misc */
-static zend_always_inline bool zend_hash_exists(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_hash_exists(const HashTable *ht, zend_string *key)
 {
 	return zend_hash_find(ht, key) != NULL;
 }
 
-static zend_always_inline bool zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_hash_str_exists(const HashTable *ht, const char *str, size_t len)
 {
 	return zend_hash_str_find(ht, str, len) != NULL;
 }
 
-static zend_always_inline bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_hash_index_exists(const HashTable *ht, zend_ulong h)
 {
 	return zend_hash_index_find(ht, h) != NULL;
 }
 
 /* traversing */
-ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
+ZEND_API HashPosition ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_get_current_pos(const HashTable *ht);
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
@@ -251,7 +251,7 @@ ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_backwards_ex(HashTable *ht, 
 ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int   ZEND_FASTCALL zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
-ZEND_API zval* ZEND_FASTCALL zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
+ZEND_API zval* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void  ZEND_FASTCALL zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
 
@@ -314,15 +314,18 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 	_zend_new_array(size)
 #endif
 
-ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(void);
-ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t size);
-ZEND_API HashTable* ZEND_FASTCALL zend_new_pair(zval *val1, zval *val2);
-ZEND_API uint32_t zend_array_count(HashTable *ht);
-ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
+/* Methods for allocating new HashTables, used for PHP arrays and property tables of PHP objects.
+ * Note that ZEND_ATTRIBUTE_MALLOC is not used because the returned array arguably contains pointers to other valid objects - https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
+ */
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT _zend_new_array_0(void);
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT _zend_new_array(uint32_t size);
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_new_pair(zval *val1, zval *val2);
+ZEND_API uint32_t ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_array_count(HashTable *ht);
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_array_dup(HashTable *source);
 ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_symtable_clean(HashTable *ht);
-ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht);
-ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, bool always_duplicate);
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_symtable_to_proptable(HashTable *ht);
+ZEND_API HashTable* ZEND_FASTCALL ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_proptable_to_symtable(HashTable *ht, bool always_duplicate);
 
 ZEND_API bool ZEND_FASTCALL _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
@@ -395,7 +398,7 @@ static zend_always_inline bool _zend_handle_numeric_str(const char *key, size_t 
 	ZEND_HANDLE_NUMERIC_STR(ZSTR_VAL(key), ZSTR_LEN(key), idx)
 
 
-static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
@@ -405,7 +408,7 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 }
 
 
-static zend_always_inline zval *zend_hash_find_ex_ind(const HashTable *ht, zend_string *key, bool known_hash)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_find_ex_ind(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	zval *zv;
 
@@ -415,7 +418,7 @@ static zend_always_inline zval *zend_hash_find_ex_ind(const HashTable *ht, zend_
 }
 
 
-static zend_always_inline bool zend_hash_exists_ind(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_hash_exists_ind(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
@@ -425,7 +428,7 @@ static zend_always_inline bool zend_hash_exists_ind(const HashTable *ht, zend_st
 }
 
 
-static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_str_find_ind(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
 
@@ -435,7 +438,7 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 }
 
 
-static zend_always_inline bool zend_hash_str_exists_ind(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_hash_str_exists_ind(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
 
@@ -503,7 +506,7 @@ static zend_always_inline zend_result zend_symtable_del_ind(HashTable *ht, zend_
 }
 
 
-static zend_always_inline zval *zend_symtable_find(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_symtable_find(const HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -515,7 +518,7 @@ static zend_always_inline zval *zend_symtable_find(const HashTable *ht, zend_str
 }
 
 
-static zend_always_inline zval *zend_symtable_find_ind(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_symtable_find_ind(const HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -527,7 +530,7 @@ static zend_always_inline zval *zend_symtable_find_ind(const HashTable *ht, zend
 }
 
 
-static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_symtable_exists(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -539,7 +542,7 @@ static zend_always_inline bool zend_symtable_exists(HashTable *ht, zend_string *
 }
 
 
-static zend_always_inline bool zend_symtable_exists_ind(HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_symtable_exists_ind(HashTable *ht, zend_string *key)
 {
 	zend_ulong idx;
 
@@ -599,7 +602,7 @@ static zend_always_inline zend_result zend_symtable_str_del_ind(HashTable *ht, c
 }
 
 
-static zend_always_inline zval *zend_symtable_str_find(HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_symtable_str_find(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -611,7 +614,7 @@ static zend_always_inline zval *zend_symtable_str_find(HashTable *ht, const char
 }
 
 
-static zend_always_inline bool zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_symtable_str_exists(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -845,7 +848,7 @@ static zend_always_inline void *zend_hash_next_index_insert_mem(HashTable *ht, v
 	return NULL;
 }
 
-static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_string *key)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_find_ptr(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
@@ -858,7 +861,7 @@ static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_str
 	}
 }
 
-static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, bool known_hash)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, bool known_hash)
 {
 	zval *zv;
 
@@ -871,7 +874,7 @@ static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_
 	}
 }
 
-static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
 
@@ -886,13 +889,13 @@ static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, cons
 
 /* Will lowercase the str; use only if you don't need the lowercased string for
  * anything else. If you have a lowered string, use zend_hash_str_find_ptr. */
-ZEND_API void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_str_find_ptr_lc(const HashTable *ht, const char *str, size_t len);
 
 /* Will lowercase the str; use only if you don't need the lowercased string for
  * anything else. If you have a lowered string, use zend_hash_find_ptr. */
-ZEND_API void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
+ZEND_API ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_find_ptr_lc(const HashTable *ht, zend_string *key);
 
-static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_index_find_ptr(const HashTable *ht, zend_ulong h)
 {
 	zval *zv;
 
@@ -905,7 +908,7 @@ static zend_always_inline void *zend_hash_index_find_ptr(const HashTable *ht, ze
 	}
 }
 
-static zend_always_inline zval *zend_hash_index_find_deref(HashTable *ht, zend_ulong h)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_index_find_deref(HashTable *ht, zend_ulong h)
 {
 	zval *zv = zend_hash_index_find(ht, h);
 	if (zv) {
@@ -914,7 +917,7 @@ static zend_always_inline zval *zend_hash_index_find_deref(HashTable *ht, zend_u
 	return zv;
 }
 
-static zend_always_inline zval *zend_hash_find_deref(HashTable *ht, zend_string *str)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_find_deref(HashTable *ht, zend_string *str)
 {
 	zval *zv = zend_hash_find(ht, str);
 	if (zv) {
@@ -923,7 +926,7 @@ static zend_always_inline zval *zend_hash_find_deref(HashTable *ht, zend_string 
 	return zv;
 }
 
-static zend_always_inline zval *zend_hash_str_find_deref(HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zval *zend_hash_str_find_deref(HashTable *ht, const char *str, size_t len)
 {
 	zval *zv = zend_hash_str_find(ht, str, len);
 	if (zv) {
@@ -932,7 +935,7 @@ static zend_always_inline zval *zend_hash_str_find_deref(HashTable *ht, const ch
 	return zv;
 }
 
-static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, size_t len)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_symtable_str_find_ptr(HashTable *ht, const char *str, size_t len)
 {
 	zend_ulong idx;
 
@@ -943,7 +946,7 @@ static zend_always_inline void *zend_symtable_str_find_ptr(HashTable *ht, const 
 	}
 }
 
-static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPosition *pos)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPosition *pos)
 {
 	zval *zv;
 
@@ -1553,7 +1556,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	} while (0)
 
 /* Check if an array is a list */
-static zend_always_inline bool zend_array_is_list(zend_array *array)
+static zend_always_inline ZEND_ATTRIBUTE_WARN_UNUSED_RESULT bool zend_array_is_list(zend_array *array)
 {
 	zend_long expected_idx = 0;
 	zend_long num_idx;

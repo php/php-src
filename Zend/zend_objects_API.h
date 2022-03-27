@@ -78,7 +78,7 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 	}
 }
 
-static zend_always_inline size_t zend_object_properties_size(zend_class_entry *ce)
+static zend_always_inline size_t ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_object_properties_size(zend_class_entry *ce)
 {
 	return sizeof(zval) *
 		(ce->default_properties_count -
@@ -88,13 +88,13 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
 /* Allocates object type and zeros it, but not the standard zend_object and properties.
  * Standard object MUST be initialized using zend_object_std_init().
  * Properties MUST be initialized using object_properties_init(). */
-static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
+static zend_always_inline void * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
 	memset(obj, 0, obj_size - sizeof(zend_object));
 	return obj;
 }
 
-static inline zend_property_info *zend_get_property_info_for_slot(zend_object *obj, zval *slot)
+static inline zend_property_info * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_property_info_for_slot(zend_object *obj, zval *slot)
 {
 	zend_property_info **table = obj->ce->properties_info_table;
 	intptr_t prop_num = slot - obj->properties_table;
@@ -103,7 +103,7 @@ static inline zend_property_info *zend_get_property_info_for_slot(zend_object *o
 }
 
 /* Helper for cases where we're only interested in property info of typed properties. */
-static inline zend_property_info *zend_get_typed_property_info_for_slot(zend_object *obj, zval *slot)
+static inline zend_property_info * ZEND_ATTRIBUTE_WARN_UNUSED_RESULT zend_get_typed_property_info_for_slot(zend_object *obj, zval *slot)
 {
 	zend_property_info *prop_info = zend_get_property_info_for_slot(obj, slot);
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
