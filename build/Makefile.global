@@ -75,7 +75,7 @@ PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=
 PHP_TEST_SHARED_EXTENSIONS =  ` \
 	if test "x$(PHP_MODULES)" != "x"; then \
 		for i in $(PHP_MODULES)""; do \
-			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$(top_builddir)/modules/$$dlname"; \
 		done; \
 	fi; \
 	if test "x$(PHP_ZEND_EX)" != "x"; then \
@@ -101,7 +101,7 @@ test: all
 		TEST_PHP_EXECUTABLE=$(PHP_EXECUTABLE) \
 		TEST_PHP_SRCDIR=$(top_srcdir) \
 		CC="$(CC)" \
-			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini -d extension_dir=$(top_builddir)/modules/ $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
+			$(PHP_EXECUTABLE) -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SETTINGS) $(top_srcdir)/run-tests.php -n -c $(top_builddir)/tmp-php.ini $(PHP_TEST_SHARED_EXTENSIONS) $(TESTS); \
 		TEST_RESULT_EXIT_CODE=$$?; \
 		rm $(top_builddir)/tmp-php.ini; \
 		exit $$TEST_RESULT_EXIT_CODE; \
