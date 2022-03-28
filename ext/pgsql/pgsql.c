@@ -2021,7 +2021,7 @@ PHP_FUNCTION(pg_fetch_object)
 PHP_FUNCTION(pg_fetch_all)
 {
 	zval *result;
-	long result_type = PGSQL_ASSOC;
+	zend_long result_type = PGSQL_ASSOC;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
@@ -5879,7 +5879,7 @@ PHP_FUNCTION(pg_select)
 	pgsql_link_handle *link;
 	zend_string *table;
 	zend_ulong option = PGSQL_DML_EXEC;
-	long result_type = PGSQL_ASSOC;
+	zend_long result_type = PGSQL_ASSOC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 
