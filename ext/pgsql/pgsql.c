@@ -4595,6 +4595,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), field, val) {
 		skip_field = 0;
+		ZVAL_DEREF(val);
 		ZVAL_NULL(&new_val);
 
 		/* TODO: Check when meta data can be broken and see if can use assertions instead */
