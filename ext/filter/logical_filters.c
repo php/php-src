@@ -517,7 +517,7 @@ static int _php_filter_validate_domain(char * domain, size_t len, zend_long flag
 	t = e - 1;
 
 	/* Ignore trailing dot */
-	if (*t == '.') {
+	if (l > 0 && *t == '.') {
 		e = t;
 		l--;
 	}
