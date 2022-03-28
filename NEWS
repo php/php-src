@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 
 - PgSQL:
   . Fixed result_type related stack corruption on LLP64 architectures. (cmb)
+  . Fixed bug GH-8253 (pg_insert() fails for references). (cmb)
 
 - Sockets:
   . Fixed Solaris builds. (David Carlier)
