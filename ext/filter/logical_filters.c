@@ -504,7 +504,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(char * domain, int len, zend_long flags) /* {{{ */
+static int _php_filter_validate_domain(char * domain, size_t len, zend_long flags) /* {{{ */
 {
 	char *e, *s, *t;
 	size_t l;
