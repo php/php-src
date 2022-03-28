@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Added support for listening queue on macOS. (David Carlier)
   . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
 
+- FTP:
+  . Fix datetime format string to follow POSIX spec in ftp_mdtm(). (Jihwan Kim)
+
 - Intl:
   . Update all grandfathered language tags with preferred values
   . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
