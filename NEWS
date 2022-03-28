@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     (Tim Düsterhus)
   . Fixed bug GH-8160 (ZTS support on Alpine is broken). (Michael Voříšek)
 
+- Filter:
+  . Fixed signedness confusion in php_filter_validate_domain(). (cmb)
+
 - Intl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
