@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - Pcntl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
+- PgSQL:
+  . Fixed result_type related stack corruption on LLP64 architectures. (cmb)
+
 - Sockets:
   . Fixed Solaris builds. (David Carlier)
 
