@@ -3,9 +3,12 @@ PHP                                                                        NEWS
 ?? ??? 2022, PHP 8.0.19
 
 - Core:
-  
   . Fixed bug GH-8289 (Exceptions thrown within a yielded from iterator are
     not rethrown into the generator). (Bob)
+
+- MySQLi:
+  . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
+    (cmb)
 
 14 Apr 2022, PHP 8.0.18
 
