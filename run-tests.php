@@ -98,7 +98,7 @@ Options:
                 file.
 
     --set-timeout <n>
-                Set timeout for individual tests, where [n] is the number of
+                Set timeout for individual tests, where <n> is the number of
                 seconds. The default value is 60 seconds, or 300 seconds when
                 testing for memory leaks.
 
@@ -114,7 +114,7 @@ Options:
                 however 'diff' only exists when a test fails.
 
     --show-slow <n>
-                Show all tests that took longer than [n] milliseconds to run.
+                Show all tests that took longer than <n> milliseconds to run.
 
     --no-clean  Do not execute clean section if any.
 
