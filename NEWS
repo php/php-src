@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed signedness confusion in php_filter_validate_domain(). (cmb)
 
+- Hash:
+  . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
+
 - Intl:
   . Fixed bug GH-8142 (Compilation error on cygwin). (David Carlier)
 
