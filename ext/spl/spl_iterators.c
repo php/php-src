@@ -1866,6 +1866,9 @@ PHP_METHOD(RegexIterator, accept)
 			}
 
 			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count);
+			if (UNEXPECTED(!result)) {
+				RETURN_FALSE;
+			}
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
