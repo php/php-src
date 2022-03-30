@@ -87,7 +87,7 @@ static char *ErrorMessages[] =
 	{"Bad Message File"},
 	{"\"sendmail_from\" not set in php.ini or custom \"From:\" header missing"},
 	{"Mailserver rejected our \"sendmail_from\" setting"}, /* 20 */
-	{"Error while trimming mail header with PCRE, please file a bug report at http://bugs.php.net/"} /* 21 */
+	{"Error while trimming mail header with PCRE, please file a bug report at https://github.com/php/php-src/issues"} /* 21 */
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
