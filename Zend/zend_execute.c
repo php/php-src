@@ -4516,11 +4516,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 					}
 
 					if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path)) {
-						zend_op_array *op_array = zend_compile_file(&file_handle, (type==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE));
-						zend_destroy_file_handle(&file_handle);
-						zend_string_release_ex(resolved_path, 0);
-						zend_tmp_string_release(tmp_inc_filename);
-						return op_array;
+						new_op_array = zend_compile_file(&file_handle, (type==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE));
 					} else {
 						new_op_array = ZEND_FAKE_OP_ARRAY;
 					}
