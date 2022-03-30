@@ -15,4 +15,4 @@ as the same user running the tests you ensure that the user is granted access to
 the database.
 
 If you find problems in PostgreSQL extension, please report a
-[bug](https://bugs.php.net).
+[bug](https://github.com/php/php-src/issues).
