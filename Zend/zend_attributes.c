@@ -112,10 +112,8 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 		zend_attribute *attr;
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && ZSTR_LEN(attr->lcname) == len) {
-				if (0 == memcmp(ZSTR_VAL(attr->lcname), str, len)) {
-					return attr;
-				}
+			if (attr->offset == offset && zend_string_equals_cstr(attr->lcname, str, len)) {
+				return attr;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

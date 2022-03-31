@@ -1810,11 +1810,7 @@ PHP_FUNCTION(str_starts_with)
 		Z_PARAM_STR(needle)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
+	RETURN_BOOL(zend_string_starts_with(haystack, needle));
 }
 /* }}} */
 
@@ -4738,14 +4734,14 @@ static zend_string *try_setlocale_str(zend_long cat, zend_string *loc) {
 				/* C locale is represented as NULL. */
 				BG(ctype_string) = NULL;
 				return ZSTR_CHAR('C');
-			} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
+			} else if (zend_string_equals_cstr(loc, retval, len)) {
 				BG(ctype_string) = zend_string_copy(loc);
 				return zend_string_copy(BG(ctype_string));
 			} else {
 				BG(ctype_string) = zend_string_init(retval, len, 0);
 				return zend_string_copy(BG(ctype_string));
 			}
-		} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
+		} else if (zend_string_equals_cstr(loc, retval, len)) {
 			return zend_string_copy(loc);
 		}
 	}

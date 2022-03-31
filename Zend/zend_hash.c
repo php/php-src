@@ -711,8 +711,7 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && zend_string_equals_cstr(p->key, str, len)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
@@ -1556,8 +1555,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const ch
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && zend_string_equals_cstr(p->key, str, len)) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -1602,8 +1600,7 @@ ZEND_API zend_result ZEND_FASTCALL zend_hash_str_del(HashTable *ht, const char *
 		p = HT_HASH_TO_BUCKET(ht, idx);
 		if ((p->h == h)
 			 && p->key
-			 && (ZSTR_LEN(p->key) == len)
-			 && !memcmp(ZSTR_VAL(p->key), str, len)) {
+			 && zend_string_equals_cstr(p->key, str, len)) {
 			zend_string_release(p->key);
 			p->key = NULL;
 			_zend_hash_del_el_ex(ht, idx, p, prev);

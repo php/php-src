@@ -590,10 +590,8 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 	if (EXPECTED(pos != STRTAB_INVALID_POS)) {
 		do {
 			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
-			if (EXPECTED(ZSTR_H(s) == h) && EXPECTED(ZSTR_LEN(s) == size)) {
-				if (!memcmp(ZSTR_VAL(s), str, size)) {
-					return s;
-				}
+			if (EXPECTED(ZSTR_H(s) == h) && zend_string_equals_cstr(s, str, size)) {
+				return s;
 			}
 			pos = STRTAB_COLLISION(s);
 		} while (pos != STRTAB_INVALID_POS);
@@ -1637,7 +1635,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", ZSTR_VAL(new_persistent_script->script.filename));
 		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
-		    memcmp(ZSTR_VAL(key), "phar://", sizeof("phar://") - 1) != 0 &&
+		    !zend_string_starts_with_literal(key, "phar://") &&
 		    !zend_string_equals(new_persistent_script->script.filename, key)) {
 			/* link key to the same persistent script in hash table */
 			zend_string *new_key = accel_new_interned_key(key);
