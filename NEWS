@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.5
+?? ??? ????, PHP 8.1.6
+
+
+31 Mar 2022, PHP 8.1.5
 
 - Core:
   . Fixed bug GH-8176 (Enum values in property initializers leak). (Bob)
