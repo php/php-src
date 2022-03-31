@@ -347,6 +347,7 @@ PHP                                                                        NEWS
 - JSON:
   . Fixed bug #81532 (Change of $depth behaviour in json_encode() on PHP 8.1).
     (Nikita)
+  . Fixed bug GH-8238 (Register JSON_ERROR_NON_BACKED_ENUM constant). (ilutov)
 
 - LDAP:
   . Convert resource<ldap link> to object \LDAP\Connection. (Máté)
