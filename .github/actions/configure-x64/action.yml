@@ -80,5 +80,4 @@ runs:
           --with-config-file-scan-dir=/etc/php.d \
           --with-pdo-firebird \
           --with-pdo-dblib \
-          --enable-werror \
           ${{ inputs.configurationParameters }}
