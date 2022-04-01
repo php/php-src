@@ -1333,6 +1333,7 @@ function chmod(string $filename, int $permissions): bool {}
 
 #ifdef HAVE_UTIME
 function touch(string $filename, ?int $mtime = null, ?int $atime = null): bool {}
+#endif
 
 function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
 
