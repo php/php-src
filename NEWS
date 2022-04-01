@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.6
 
+- Date:
+  . Fixed bug GH-7752 (DateTimeZone::getTransitions() returns insufficient
+    data). (Derick)
+  . Fixed bug GH-8108 (Timezone doesn't work as intended). (Derick)
+  . Fixed bug #81660 (DateTimeZone::getTransitions() returns invalid data).
+    (Derick)
 
 31 Mar 2022, PHP 8.1.5
 

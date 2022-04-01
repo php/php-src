@@ -3629,6 +3629,15 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
+#define add_from_tto(to,ts) \
+		array_init(&element); \
+		add_assoc_long(&element, "ts",     ts); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_long(&element, "offset", (to)->offset); \
+		add_assoc_bool(&element, "isdst",  (to)->is_dst); \
+		add_assoc_string(&element, "abbr", (to)->abbr); \
+		add_next_index_zval(return_value, &element);
+
 #define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
@@ -3658,7 +3667,13 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	if (!found) {
 		if (tzobj->tzi.tz->bit64.timecnt > 0) {
-			add_last();
+			if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
+				timelib_time_offset *tto = timelib_get_time_zone_info(timestamp_begin, tzobj->tzi.tz);
+				add_from_tto(tto, timestamp_begin);
+				timelib_time_offset_dtor(tto);
+			} else {
+				add_last();
+			}
 		} else {
 			add_nominal();
 		}
@@ -3671,31 +3686,34 @@ PHP_FUNCTION(timezone_transitions_get)
 				return;
 			}
 		}
-		if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
-			int i, j;
-			timelib_sll start_y, end_y, dummy_m, dummy_d;
-			timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
+	}
+	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
+		int i, j;
+		timelib_sll start_y, end_y, dummy_m, dummy_d;
+		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
-			/* Find out year for last transition */
-			timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
+		/* Find out year for last transition */
+		timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
 
-			/* Find out year for final boundary timestamp */
-			timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
+		/* Find out year for final boundary timestamp */
+		timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
 
-			for (i = start_y; i <= end_y; i++) {
-				timelib_posix_transitions transitions = { 0 };
+		for (i = start_y; i <= end_y; i++) {
+			timelib_posix_transitions transitions = { 0 };
 
-				timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
+			timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
 
-				for (j = 0; j < transitions.count; j++) {
-					if (transitions.times[j] <= last_transition_ts) {
-						continue;
-					}
-					if (transitions.times[j] > timestamp_end) {
-						return;
-					}
-					add_by_index(transitions.types[j], transitions.times[j]);
+			for (j = 0; j < transitions.count; j++) {
+				if (transitions.times[j] <= last_transition_ts) {
+					continue;
 				}
+				if (transitions.times[j] < timestamp_begin) {
+					continue;
+				}
+				if (transitions.times[j] > timestamp_end) {
+					return;
+				}
+				add_by_index(transitions.types[j], transitions.times[j]);
 			}
 		}
 	}
