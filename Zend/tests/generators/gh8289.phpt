@@ -6,7 +6,7 @@ GH-8289 (Exceptions thrown within a yielded from iterator are not rethrown into 
 function yieldFromIteratorGeneratorThrows() {
 	try {
 		yield from new class(new ArrayIterator([1, -2])) extends IteratorIterator {
-			public function key() {
+			public function key(): mixed {
 				if ($k = parent::key()) {
 					throw new Exception;
 				}
