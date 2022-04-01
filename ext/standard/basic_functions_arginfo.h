@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e53bcb20eb22fd198019ca24ebbf10a0decde13a */
+ * Stub hash: bbcebdb57572133d5f442f220f1e98a1320ed0f6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2175,6 +2175,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_memory_get_peak_usage arginfo_memory_get_usage
 
+#define arginfo_memory_reset_peak_usage arginfo_flush
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_version_compare, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, version1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version2, IS_STRING, 0)
@@ -2824,6 +2826,7 @@ ZEND_FUNCTION(serialize);
 ZEND_FUNCTION(unserialize);
 ZEND_FUNCTION(memory_get_usage);
 ZEND_FUNCTION(memory_get_peak_usage);
+ZEND_FUNCTION(memory_reset_peak_usage);
 ZEND_FUNCTION(version_compare);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_set);
@@ -3479,6 +3482,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(unserialize, arginfo_unserialize)
 	ZEND_FE(memory_get_usage, arginfo_memory_get_usage)
 	ZEND_FE(memory_get_peak_usage, arginfo_memory_get_peak_usage)
+	ZEND_FE(memory_reset_peak_usage, arginfo_memory_reset_peak_usage)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(version_compare, arginfo_version_compare)
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)
