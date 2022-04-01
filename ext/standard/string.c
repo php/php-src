@@ -1742,7 +1742,7 @@ PHP_FUNCTION(stristr)
 
 	found = php_stristr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(haystack), ZSTR_LEN(needle));
 
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	found_offset = found - ZSTR_VAL(haystack);
@@ -1770,7 +1770,7 @@ PHP_FUNCTION(strstr)
 
 	found = php_memnstr(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	found_offset = found - ZSTR_VAL(haystack);
@@ -1858,7 +1858,7 @@ PHP_FUNCTION(strpos)
 						ZSTR_VAL(needle), ZSTR_LEN(needle),
 						ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(found - ZSTR_VAL(haystack));
@@ -1890,7 +1890,7 @@ PHP_FUNCTION(stripos)
 	found = (char*)php_memnistr(ZSTR_VAL(haystack) + offset,
 			ZSTR_VAL(needle), ZSTR_LEN(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(found - ZSTR_VAL(haystack));
@@ -1935,7 +1935,7 @@ PHP_FUNCTION(strrpos)
 
 	found = zend_memnrstr(p, ZSTR_VAL(needle), ZSTR_LEN(needle), e);
 
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(found - ZSTR_VAL(haystack));
@@ -2037,7 +2037,7 @@ PHP_FUNCTION(strrchr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	found = zend_memrchr(ZSTR_VAL(haystack), *ZSTR_VAL(needle), ZSTR_LEN(haystack));
-	if (!found) {
+	if (UNEXPECTED(!found)) {
 		RETURN_FALSE;
 	}
 	found_offset = found - ZSTR_VAL(haystack);
