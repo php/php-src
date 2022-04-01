@@ -27,7 +27,7 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# error "ZENF_MM_ALIGNMENT was not defined during configure"
+# error "ZEND_MM_ALIGNMENT was not defined during configure"
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
