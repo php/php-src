@@ -27,11 +27,10 @@ schedules:
         - master
 
 jobs:
-  # Azure pipelines don't work atm
-  # - template: azure/i386/job.yml
-  #   parameters:
-  #     configurationName: I386_DEBUG_ZTS
-  #     configurationParameters: '--enable-debug --enable-zts'
+  - template: azure/i386/job.yml
+    parameters:
+      configurationName: I386_DEBUG_ZTS
+      configurationParameters: '--enable-debug --enable-zts'
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
     - template: azure/job.yml
       parameters:
