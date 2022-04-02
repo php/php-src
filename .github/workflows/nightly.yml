@@ -93,6 +93,8 @@ jobs:
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Assert generated files are up to date
+        uses: ./.github/actions/verify-templating
   MACOS:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -149,3 +151,6 @@ jobs:
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Assert generated files are up to date
+        if: false # TODO scripts/dev/genfiles needs Bison 3.0
+        uses: ./.github/actions/verify-templating

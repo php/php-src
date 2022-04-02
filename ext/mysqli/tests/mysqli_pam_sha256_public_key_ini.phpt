@@ -59,6 +59,7 @@ if (strlen($key) != fwrite($fp, $key)) {
 
 
 if (!$link->query("SET @@session.old_passwords=2")) {
+    @unlink($file);
     die(sprintf("skip Cannot set @@session.old_passwords=2 [%d] %s", $link->errno, $link->error));
 }
 
