@@ -1145,7 +1145,7 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	}
 	/* parse out the timestamp */
 	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
-	n = sscanf(ptr, "%4u%2u%2u%2u%2u%2u", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
+	n = sscanf(ptr, "%4d%2d%2d%2d%2d%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
 	if (n != 6) {
 		return -1;
 	}
