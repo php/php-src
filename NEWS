@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-8070 (memory leak of internal function attribute hash).
     (Tim Düsterhus)
   . Fixed bug GH-8160 (ZTS support on Alpine is broken). (Michael Voříšek)
+  . Fixed potential race condition during resource ID allocation. (ryancaicse)
 
 - Filter:
   . Fixed signedness confusion in php_filter_validate_domain(). (cmb)
