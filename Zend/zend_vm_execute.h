@@ -23245,6 +23245,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -23371,6 +23382,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -23498,6 +23520,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -23624,7 +23657,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_D
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -25821,6 +25865,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -25947,6 +26002,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -26074,6 +26140,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -26200,7 +26277,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -27253,6 +27341,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -27379,6 +27478,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -27506,6 +27616,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -27632,7 +27753,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -29844,6 +29976,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -29970,6 +30113,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -30097,6 +30251,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -30223,7 +30388,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -40799,6 +40975,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -40925,6 +41112,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -41052,6 +41250,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -41178,7 +41387,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DA
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CONST == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -44449,6 +44669,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -44575,6 +44806,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -44702,6 +44944,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -44828,7 +45081,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_D
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -46327,6 +46591,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -46453,6 +46728,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -46580,6 +46866,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -46706,7 +47003,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_D
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_UNUSED == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -49586,6 +49894,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = RT_CONSTANT((opline+1), (opline+1)->op1);
+			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -49712,6 +50031,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = _get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -49839,6 +50169,17 @@ try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
 			value = _get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC);
+			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
@@ -49965,7 +50306,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_
 try_assign_dim_array:
 		SEPARATE_ARRAY(object_ptr);
 		if (IS_CV == IS_UNUSED) {
-			value = _get_zval_ptr_cv_BP_VAR_R((opline+1)->op1.var EXECUTE_DATA_CC);
+			value = EX_VAR((opline+1)->op1.var);
+			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
 			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(value);
 			}
