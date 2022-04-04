@@ -455,21 +455,23 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 {
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 
+	/* Throw the exception in the context of the generator. Decrementing the opline
+	 * to pretend the exception happened during the YIELD opcode. */
+	EG(current_execute_data) = generator->execute_data;
+	generator->execute_data->opline--;
+
+	if (exception) {
+		zend_throw_exception_object(exception);
+	} else {
+		zend_rethrow_exception(EG(current_execute_data));
+	}
+
 	/* if we don't stop an array/iterator yield from, the exception will only reach the generator after the values were all iterated over */
 	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
 		zval_ptr_dtor(&generator->values);
 		ZVAL_UNDEF(&generator->values);
 	}
 
-	/* Throw the exception in the context of the generator. Decrementing the opline
-	 * to pretend the exception happened during the YIELD opcode. */
-	EG(current_execute_data) = generator->execute_data;
-	generator->execute_data->opline--;
-	if (exception) {
-		zend_throw_exception_object(exception);
-	} else {
-		zend_rethrow_exception(EG(current_execute_data));
-	}
 	generator->execute_data->opline++;
 	EG(current_execute_data) = original_execute_data;
 }
@@ -600,6 +602,8 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
+	--generator->execute_data->opline;
+	
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
 		HashTable *ht = Z_ARR(generator->values);
@@ -665,11 +669,15 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 			ZVAL_LONG(&generator->key, iter->index);
 		}
 	}
+	
+	++generator->execute_data->opline;
 	return SUCCESS;
 
 failure:
 	zval_ptr_dtor(&generator->values);
 	ZVAL_UNDEF(&generator->values);
+
+	++generator->execute_data->opline;
 	return FAILURE;
 }
 /* }}} */
