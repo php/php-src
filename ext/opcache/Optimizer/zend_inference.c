@@ -3311,6 +3311,20 @@ static zend_always_inline int _zend_update_type_info(
 			if (opline->opcode == ZEND_FETCH_DIM_IS && (t1 & MAY_BE_STRING)) {
 				tmp |= MAY_BE_NULL;
 			}
+			if ((tmp & (MAY_BE_RC1|MAY_BE_RCN)) == MAY_BE_RCN && opline->result_type == IS_TMP_VAR) {
+				/* refcount may be indirectly decremented. Make an exception if the result is used in the next instruction */
+				if (!ssa_opcodes) {
+					if (ssa->vars[ssa_op->result_def].use_chain < 0
+					 || opline + 1 != op_array->opcodes + ssa->vars[ssa_op->result_def].use_chain) {
+						tmp |= MAY_BE_RC1;
+				    }
+				} else {
+					if (ssa->vars[ssa_op->result_def].use_chain < 0
+					 || opline + 1 != ssa_opcodes[ssa->vars[ssa_op->result_def].use_chain]) {
+						tmp |= MAY_BE_RC1;
+				    }
+				}
+			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_THIS:
