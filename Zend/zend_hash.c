@@ -2551,6 +2551,16 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 		ht->nNumUsed = i;
 	}
 
+	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED)) {
+		/* We broke the hash colisions chains overriding Z_NEXT() by Z_EXTRA().
+		 * Reset the hash headers table as well to avoid possilbe inconsistent
+		 * access on recursive data structures.
+	     *
+	     * See Zend/tests/bug63882_2.phpt
+		 */
+		HT_HASH_RESET(ht);
+	}
+
 	sort((void *)ht->arData, ht->nNumUsed, sizeof(Bucket), (compare_func_t) compar,
 			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
 				((HT_FLAGS(ht) & HASH_FLAG_PACKED) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
