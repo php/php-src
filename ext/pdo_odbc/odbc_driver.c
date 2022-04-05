@@ -428,6 +428,72 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL /* get_gc */
 };
 
+/**
+ * Determines if a string matches the ODBC quoting rules.
+ *
+ * A valid quoted string begins with a '{', ends with a '}', and has no '}'
+ * inside of the string that aren't repeated (as to be escaped).
+ *
+ * These rules are what .NET also follows.
+ */
+static bool is_odbc_quoted(const char *str)
+{
+	if (!str) {
+		return false;
+	}
+	/* ODBC quotes are curly braces */
+	if (str[0] != '{') {
+		return false;
+	}
+	/* Check for } that aren't doubled up or at the end of the string */
+	size_t length = strlen(str);
+	for (size_t i = 0; i < length; i++) {
+		if (str[i] == '}' && str[i + 1] == '}') {
+			/* Skip over so we don't count it again */
+			i++;
+		} else if (str[i] == '}' && str[i + 1] != '\0') {
+			/* If not at the end, not quoted */
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Quotes a string with ODBC rules.
+ *
+ * Some characters (curly braces, semicolons) are special and must be quoted.
+ * In the case of '}' in a quoted string, they must be escaped SQL style; that
+ * is, repeated.
+ */
+static size_t odbc_quote(char *out_str, const char *in_str, size_t out_str_size)
+{
+	*out_str++ = '{';
+	out_str_size--;
+	while (out_str_size > 2) {
+		if (*in_str == '\0') {
+			break;
+		} else if (*in_str == '}' && out_str_size - 1 > 2) {
+			/* enough room to append */
+			*out_str++ = '}';
+			*out_str++ = *in_str++;
+			out_str_size -= 2;
+		} else if (*in_str == '}') {
+			/* not enough, truncate here */
+			break;
+		} else {
+			*out_str++ = *in_str++;
+			out_str_size--;
+		}
+	}
+	/* append termination */
+	*out_str++ = '}';
+	*out_str++ = '\0';
+	out_str_size -= 2;
+	/* return how many characters were left */
+	return strlen(in_str);
+}
+
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
 {
 	pdo_odbc_db_handle *H;
@@ -487,16 +553,28 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		/* Force UID and PWD to be set in the DSN */
 		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
 				&& !strstr(dbh->data_source, "UID")) {
+			char uid[256], pwd[256];
+			/* XXX: Check for truncation by odbc_quote */
+			if (!is_odbc_quoted(dbh->username)) {
+				odbc_quote(uid, dbh->username, 256);
+			} else {
+				strlcpy(uid, dbh->username, 256);
+			}
 			/* XXX: Do we check if password is null? */
+			if (!is_odbc_quoted(dbh->password)) {
+				odbc_quote(pwd, dbh->password, 256);
+			} else {
+				strlcpy(pwd, dbh->password, 256);
+			}
 			size_t new_dsn_size = strlen(dbh->data_source)
-				+ strlen(dbh->username) + strlen(dbh->password)
+				+ strlen(uid) + strlen(pwd)
 				+ strlen(";UID=;PWD=") + 1;
 			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
 			if (dsn == NULL) {
 				/* XXX: Do we inform the caller? */
 				goto fail;
 			}
-			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
+			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, uid, pwd);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
 		}
