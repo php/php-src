@@ -1585,7 +1585,7 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor_ic)
 	unsigned char *key;
 	unsigned char *msg;
 	unsigned char *nonce;
-	zend_long     *ic;
+	zend_long      ic;
 
 	size_t         ciphertext_len;
 	size_t         key_len;
@@ -1612,7 +1612,7 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor_ic)
 	ciphertext = zend_string_checked_alloc((size_t) ciphertext_len, 0);
 	if (crypto_stream_xchacha20_xor_ic((unsigned char *) ZSTR_VAL(ciphertext), msg,
 									   (unsigned long long) msg_len, nonce,
-									   (unsigned long long) ic, key) != 0) {
+									   (uint64_t) ic, key) != 0) {
 		zend_string_free(ciphertext);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
