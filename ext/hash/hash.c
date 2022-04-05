@@ -234,6 +234,9 @@ PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *hash, zva
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
 	zval tmp;
+	if (buf == NULL) {
+		return FAILURE;
+	}
 	array_init(zv);
 	while (*spec != '\0' && *spec != '.') {
 		char spec_ch = *spec;
