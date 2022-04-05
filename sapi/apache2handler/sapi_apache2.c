@@ -378,10 +378,7 @@ extern zend_module_entry php_apache_module;
 
 static int php_apache2_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, &php_apache_module, 1)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, &php_apache_module);
 }
 
 static sapi_module_struct apache2_sapi_module = {
