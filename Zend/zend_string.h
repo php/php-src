@@ -346,21 +346,21 @@ static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, co
 
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
