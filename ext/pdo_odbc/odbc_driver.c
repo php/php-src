@@ -497,6 +497,15 @@ static bool should_odbc_quote(const char *str)
 }
 
 /**
+ * Estimates the worst-case scenario for a quoted version of a string's size.
+ */
+static size_t estimate_odbc_quote_length(const char *in_str)
+{
+	/* Assume all '}'. Include '{,' '}', and the null terminator too */
+	return (strlen(in_str) * 2) + 3;
+}
+
+/**
  * Quotes a string with ODBC rules.
  *
  * Some characters (curly braces, semicolons) are special and must be quoted.
@@ -590,30 +599,56 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		/* Force UID and PWD to be set in the DSN */
 		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
 				&& !strstr(dbh->data_source, "UID")) {
-			char uid[256], pwd[256];
-			/* XXX: Check for truncation by odbc_quote */
-			if (!is_odbc_quoted(dbh->username) && should_odbc_quote(dbh->username)) {
-				odbc_quote(uid, dbh->username, 256);
+			char *uid = NULL, *pwd = NULL;
+			bool should_quote_uid = !is_odbc_quoted(dbh->username) && should_odbc_quote(dbh->username);
+			bool should_quote_pwd = !is_odbc_quoted(dbh->password) && should_odbc_quote(dbh->password);
+			bool connection_string_fail = false;
+			if (should_quote_uid) {
+				size_t estimated_length = estimate_odbc_quote_length(dbh->username);
+				uid = emalloc(estimated_length);
+				if (!uid) {
+					connection_string_fail = true;
+					goto connection_string_fail;
+				}
+				odbc_quote(uid, dbh->username, estimated_length);
 			} else {
-				strlcpy(uid, dbh->username, 256);
+				uid = dbh->username;
 			}
 			/* XXX: Do we check if password is null? */
-			if (!is_odbc_quoted(dbh->password) && should_odbc_quote(dbh->password)) {
-				odbc_quote(pwd, dbh->password, 256);
+			if (should_quote_pwd) {
+				size_t estimated_length = estimate_odbc_quote_length(dbh->password);
+				pwd = emalloc(estimated_length);
+				if (!uid) {
+					connection_string_fail = true;
+					goto connection_string_fail;
+				}
+				odbc_quote(pwd, dbh->password, estimated_length);
 			} else {
-				strlcpy(pwd, dbh->password, 256);
+				pwd = dbh->password;
 			}
 			size_t new_dsn_size = strlen(dbh->data_source)
 				+ strlen(uid) + strlen(pwd)
 				+ strlen(";UID=;PWD=") + 1;
 			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
 			if (dsn == NULL) {
+				connection_string_fail = true;
 				/* XXX: Do we inform the caller? */
-				goto fail;
+				goto connection_string_fail;
 			}
 			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, uid, pwd);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
+			/* Convoluted label to handle freeing in this scope */
+connection_string_fail:
+			if (uid && should_quote_uid) {
+				efree(uid);
+			}
+			if (pwd && should_quote_pwd) {
+				efree(pwd);
+			}
+			if (connection_string_fail) {
+				goto fail;
+			}
 		}
 
 		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, strlen(dbh->data_source),
