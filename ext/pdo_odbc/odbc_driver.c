@@ -460,6 +460,43 @@ static bool is_odbc_quoted(const char *str)
 }
 
 /**
+ * Determines if a value for a connection string should be quoted.
+ *
+ * The ODBC specification mentions:
+ * "Because of connection string and initialization file grammar, keywords and
+ * and attribute values that contain the characters []{}(),;?*=!@ not enclosed
+ * with braces should be avoided."
+ *
+ * Note that it assumes that the string is *not* already quoted. You should
+ * check beforehand.
+ */
+static bool should_odbc_quote(const char *str)
+{
+	size_t length = strlen(str);
+	for (size_t i = 0; i < length; i++) {
+		switch (str[i]) {
+		case '[':
+		case ']':
+		case '{':
+		case '}':
+		case '(':
+		case ')':
+		case ',':
+		case ';':
+		case '?':
+		case '*':
+		case '=':
+		case '!':
+		case '@':
+			return true;
+		default:
+			continue;
+		}
+	}
+	return false;
+}
+
+/**
  * Quotes a string with ODBC rules.
  *
  * Some characters (curly braces, semicolons) are special and must be quoted.
@@ -555,13 +592,13 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 				&& !strstr(dbh->data_source, "UID")) {
 			char uid[256], pwd[256];
 			/* XXX: Check for truncation by odbc_quote */
-			if (!is_odbc_quoted(dbh->username)) {
+			if (!is_odbc_quoted(dbh->username) && should_odbc_quote(dbh->username)) {
 				odbc_quote(uid, dbh->username, 256);
 			} else {
 				strlcpy(uid, dbh->username, 256);
 			}
 			/* XXX: Do we check if password is null? */
-			if (!is_odbc_quoted(dbh->password)) {
+			if (!is_odbc_quoted(dbh->password) && should_odbc_quote(dbh->password)) {
 				odbc_quote(pwd, dbh->password, 256);
 			} else {
 				strlcpy(pwd, dbh->password, 256);
