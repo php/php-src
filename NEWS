@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.6
 
+- Core:
+  . Fixed bug GH-8310 (Registry settings are no longer recognized). (cmb)
+
 - Date:
   . Fixed bug GH-7752 (DateTimeZone::getTransitions() returns insufficient
     data). (Derick)
