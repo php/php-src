@@ -14,7 +14,7 @@
 #if HAVE_STDATOMIC_H
 #include <stdatomic.h>
 #define HAVE_ATOMIC_BOOL 1
-#elif WIN32
+#elif ZEND_WIN32
 #include <atomic>
 using std::atomic_bool;
 using std::atomic_exchange;
