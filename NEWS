@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-8366 (ArrayIterator may leak when calling __construct()).
     (cmb)
+  . Fixed bug GH-8273 (SplFileObject: key() returns wrong value). (Girgias)
 
 - Streams:
   . Fixed php://temp does not preserve file-position when switched to temporary
