@@ -55,7 +55,7 @@ object(DateTime)#3 (3) {
 }
 
 string(11) "Y-m-d H:i:s"
-string(24) "2008-07-08 22:14:12"
+string(19) "2008-07-08 22:14:12"
 object(DateTime)#3 (3) {
   ["date"]=>
   string(26) "2008-07-08 22:14:12.000000"
