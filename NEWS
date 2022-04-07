@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-8366 (ArrayIterator may leak when calling __construct()).
     (cmb)
+  . Fixed bug GH-8273 (SplFileObject: key() returns wrong value). (Girgias)
 
 - Streams:
   . Fixed php://temp does not preserve file-position when switched to temporary
@@ -95,7 +96,7 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8080 (ReflectionClass::getConstants() depends on def. order).
     (cmb)
-  . Fixed bug GH-8421 (Closures should accept attributes with 
+  . Fixed bug GH-8421 (Closures should accept attributes with
     Attribute::TARGET_FUNCTION). (ollieread)
 
 - Zlib:

@@ -1856,11 +1856,10 @@ static int spl_filesystem_object_cast(zend_object *readobj, zval *writeobj, int 
 }
 /* }}} */
 
-static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /* {{{ */
+static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add) /* {{{ */
 {
 	char *buf;
 	size_t line_len = 0;
-	zend_long line_add = (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern);
 
@@ -1905,7 +1904,13 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent) /
 	return SUCCESS;
 } /* }}} */
 
-static int spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
+static inline zend_result spl_filesystem_file_read(spl_filesystem_object *intern, bool silent)
+{
+	zend_long line_add = (intern->u.file.current_line) ? 1 : 0;
+	return spl_filesystem_file_read_ex(intern, silent, line_add);
+}
+
+static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
 {
 	int ret = SUCCESS;
 	zval *value;
@@ -2185,7 +2190,7 @@ PHP_METHOD(SplFileObject, fgets)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
+	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1) == FAILURE) {
 		RETURN_THROWS();
 	}
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
@@ -2225,8 +2230,8 @@ PHP_METHOD(SplFileObject, key)
 		RETURN_THROWS();
 	}
 
-/*	Do not read the next line to support correct counting with fgetc()
-	if (!intern->current_line) {
+	/* Do not read the next line to support correct counting with fgetc()
+	if (!intern->u.file.current_line) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, 1);
 	} */
 	RETURN_LONG(intern->u.file.current_line_num);
