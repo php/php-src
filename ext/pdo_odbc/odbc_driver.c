@@ -576,8 +576,13 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		use_direct = 1;
 
 		/* Force UID and PWD to be set in the DSN */
-		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
-				&& !strstr(dbh->data_source, "UID")) {
+		bool is_uid_set = dbh->username && *dbh->username
+			&& !strstr(dbh->data_source, "uid=")
+			&& !strstr(dbh->data_source, "UID=");
+		bool is_pwd_set = dbh->password && *dbh->password
+			&& !strstr(dbh->data_source, "pwd=")
+			&& !strstr(dbh->data_source, "PWD=");
+		if (is_uid_set && is_pwd_set) {
 			char *uid = NULL, *pwd = NULL;
 			bool should_quote_uid = !is_odbc_quoted(dbh->username) && should_odbc_quote(dbh->username);
 			bool should_quote_pwd = !is_odbc_quoted(dbh->password) && should_odbc_quote(dbh->password);
@@ -593,7 +598,6 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			} else {
 				uid = dbh->username;
 			}
-			/* XXX: Do we check if password is null? */
 			if (should_quote_pwd) {
 				size_t estimated_length = estimate_odbc_quote_length(dbh->password);
 				pwd = emalloc(estimated_length);
