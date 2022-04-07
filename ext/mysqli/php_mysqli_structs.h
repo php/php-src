@@ -127,8 +127,6 @@ typedef struct {
 
 #ifdef PHP_WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
-#define MYSQLI_LLU_SPEC "%I64u"
-#define MYSQLI_LL_SPEC "%I64d"
 #ifndef L64
 #define L64(x) x##i64
 #endif
@@ -139,15 +137,16 @@ typedef __int64 my_longlong;
 # else
 #  define PHP_MYSQLI_API
 # endif
-/* we need this for PRIu64 and PRId64 */
-#include <inttypes.h>
-#define MYSQLI_LLU_SPEC "%" PRIu64
-#define MYSQLI_LL_SPEC "%" PRId64
 #ifndef L64
 #define L64(x) x##LL
 #endif
 typedef int64_t my_longlong;
 #endif
+
+/* we need this for PRIu64 and PRId64 */
+#include <inttypes.h>
+#define MYSQLI_LLU_SPEC "%" PRIu64
+#define MYSQLI_LL_SPEC "%" PRId64
 
 #ifdef ZTS
 #include "TSRM.h"
