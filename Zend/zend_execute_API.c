@@ -1341,7 +1341,10 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 	zend_set_timeout_ex(0, 1);
 #endif
 
-	zend_error_noreturn(E_ERROR, "Maximum execution time of " ZEND_LONG_FMT " second%s exceeded", EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
+	zend_error_noreturn(E_ERROR, "Maximum %s time of " ZEND_LONG_FMT " second%s exceeded", 
+		EG(timeout_type) == ZEND_TIMEOUT_TYPE_INPUT ? "input" : "execution",
+		EG(timeout_seconds), 
+		EG(timeout_seconds) == 1 ? "" : "s");
 }
 /* }}} */
 
@@ -1493,12 +1496,18 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 
 void zend_set_timeout(zend_long seconds, bool reset_signals) /* {{{ */
 {
-
 	EG(timeout_seconds) = seconds;
+	EG(timeout_type) = ZEND_TIMEOUT_TYPE_DEFAULT;
 	zend_set_timeout_ex(seconds, reset_signals);
 	EG(timed_out) = 0;
 }
 /* }}} */
+
+void zend_set_input_timeout(zend_long seconds)
+{
+	zend_set_timeout(seconds, 1);
+	EG(timeout_type) = ZEND_TIMEOUT_TYPE_INPUT;
+}
 
 void zend_unset_timeout(void) /* {{{ */
 {

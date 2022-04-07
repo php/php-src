@@ -53,6 +53,8 @@ END_EXTERN_C()
 
 #define SYMTABLE_CACHE_SIZE 32
 
+#define ZEND_TIMEOUT_TYPE_DEFAULT       1
+#define ZEND_TIMEOUT_TYPE_INPUT         2
 
 #include "zend_compile.h"
 
@@ -212,6 +214,7 @@ struct _zend_executor_globals {
 
 	/* timeout support */
 	zend_long timeout_seconds;
+	zend_ulong timeout_type;
 
 	int capture_warnings_during_sccp;
 
