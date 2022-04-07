@@ -1991,6 +1991,54 @@ static void free_cb(void *arg) /* {{{ */
 /* }}} */
 #endif
 
+static inline CURLcode add_simple_field(curl_mime *mime, zend_string *string_key, zval *current)
+{
+	CURLcode error = CURLE_OK;
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	curl_mimepart *part;
+	CURLcode form_error;
+#else
+	struct HttpPost *first = NULL;
+	struct HttpPost *last  = NULL;
+	CURLFORMcode form_error;
+#endif
+	zend_string *postval, *tmp_postval;
+
+	postval = zval_get_tmp_string(current, &tmp_postval);
+
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	part = curl_mime_addpart(mime);
+	if (part == NULL) {
+		zend_tmp_string_release(tmp_postval);
+		zend_string_release_ex(string_key, 0);
+		return CURLE_OUT_OF_MEMORY;
+	}
+	if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
+		|| (form_error = curl_mime_data(part, ZSTR_VAL(postval), ZSTR_LEN(postval))) != CURLE_OK) {
+		error = form_error;
+	}
+#else
+	/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
+		* must be explicitly cast to long in curl_formadd
+		* use since curl needs a long not an int. */
+	form_error = curl_formadd(&first, &last,
+		CURLFORM_COPYNAME, ZSTR_VAL(string_key),
+		CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
+		CURLFORM_COPYCONTENTS, ZSTR_VAL(postval),
+		CURLFORM_CONTENTSLENGTH, ZSTR_LEN(postval),
+		CURLFORM_END
+	);
+
+	if (form_error != CURL_FORMADD_OK) {
+		/* Not nice to convert between enums but we only have place for one error type */
+		error = (CURLcode)form_error;
+	}
+#endif
+	zend_tmp_string_release(tmp_postval);
+
+	return error;
+}
+
 static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpostfields) /* {{{ */
 {
 	HashTable *postfields = Z_ARRVAL_P(zpostfields);
@@ -2018,7 +2066,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 #endif
 
 	ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
-		zend_string *postval, *tmp_postval;
+		zend_string *postval;
 		/* Pretend we have a string_key here */
 		if (!string_key) {
 			string_key = zend_long_to_str(num_key);
@@ -2181,36 +2229,19 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			continue;
 		}
 
-		postval = zval_get_tmp_string(current, &tmp_postval);
+		if (Z_TYPE_P(current) == IS_ARRAY) {
+			zval *current_element;
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-		part = curl_mime_addpart(mime);
-		if (part == NULL) {
-			zend_tmp_string_release(tmp_postval);
+			ZEND_HASH_FOREACH_VAL(HASH_OF(current), current_element) {
+				add_simple_field(mime, string_key, current_element);
+			} ZEND_HASH_FOREACH_END();
+
 			zend_string_release_ex(string_key, 0);
-			return FAILURE;
+			continue;
 		}
-		if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
-			|| (form_error = curl_mime_data(part, ZSTR_VAL(postval), ZSTR_LEN(postval))) != CURLE_OK) {
-			error = form_error;
-		}
-#else
-		/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
-			* must be explicitly cast to long in curl_formadd
-			* use since curl needs a long not an int. */
-		form_error = curl_formadd(&first, &last,
-								CURLFORM_COPYNAME, ZSTR_VAL(string_key),
-								CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
-								CURLFORM_COPYCONTENTS, ZSTR_VAL(postval),
-								CURLFORM_CONTENTSLENGTH, ZSTR_LEN(postval),
-								CURLFORM_END);
 
-		if (form_error != CURL_FORMADD_OK) {
-			/* Not nice to convert between enums but we only have place for one error type */
-			error = (CURLcode)form_error;
-		}
-#endif
-		zend_tmp_string_release(tmp_postval);
+		add_simple_field(mime, string_key, current);
+
 		zend_string_release_ex(string_key, 0);
 	} ZEND_HASH_FOREACH_END();
 
