@@ -1,6 +1,7 @@
 --TEST--
 CURLOPT_POSTFIELDS with multi-value fields
 --EXTENSIONS--
+curl
 sockets
 --FILE--
 <?php
