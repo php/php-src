@@ -15,6 +15,11 @@ try {
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
+try {
+    var_dump($fo->fputcsv(array('water', 'fruit'), ',', '""'));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 unset($fo);
 
@@ -27,5 +32,6 @@ unlink($file);
 ?>
 --EXPECT--
 *** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***
+SplFileObject::fputcsv(): Argument #2 ($separator) must be a single character
 SplFileObject::fputcsv(): Argument #3 ($enclosure) must be a single character
 Done

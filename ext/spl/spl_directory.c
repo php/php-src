@@ -2331,8 +2331,21 @@ PHP_METHOD(SplFileObject, fgetcsv)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	switch (ZEND_NUM_ARGS()) {
-	case 3:
+	if (delim) {
+		if (d_len != 1) {
+			zend_argument_value_error(1, "must be a single character");
+			RETURN_THROWS();
+		}
+		delimiter = delim[0];
+	}
+	if (enclo) {
+		if (e_len != 1) {
+			zend_argument_value_error(2, "must be a single character");
+			RETURN_THROWS();
+		}
+		enclosure = enclo[0];
+	}
+	if (esc) {
 		if (esc_len > 1) {
 			zend_argument_value_error(3, "must be empty or a single character");
 			RETURN_THROWS();
@@ -2342,24 +2355,8 @@ PHP_METHOD(SplFileObject, fgetcsv)
 		} else {
 			escape = (unsigned char) esc[0];
 		}
-		ZEND_FALLTHROUGH;
-	case 2:
-		if (e_len != 1) {
-			zend_argument_value_error(2, "must be a single character");
-			RETURN_THROWS();
-		}
-		enclosure = enclo[0];
-		ZEND_FALLTHROUGH;
-	case 1:
-		if (d_len != 1) {
-			zend_argument_value_error(1, "must be a single character");
-			RETURN_THROWS();
-		}
-		delimiter = delim[0];
-		ZEND_FALLTHROUGH;
-	case 0:
-		break;
 	}
+
 	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2378,49 +2375,41 @@ PHP_METHOD(SplFileObject, fputcsv)
 	zval *fields = NULL;
 	zend_string *eol = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sssS", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len, &eol) == SUCCESS) {
-
-		switch(ZEND_NUM_ARGS())
-		{
-		case 5:
-		case 4:
-			switch (esc_len) {
-				case 0:
-					escape = PHP_CSV_NO_ESCAPE;
-					break;
-				case 1:
-					escape = (unsigned char) esc[0];
-					break;
-				default:
-					zend_argument_value_error(4, "must be empty or a single character");
-					RETURN_THROWS();
-			}
-			ZEND_FALLTHROUGH;
-		case 3:
-			if (e_len != 1) {
-				zend_argument_value_error(3, "must be a single character");
-				RETURN_THROWS();
-			}
-			enclosure = enclo[0];
-			ZEND_FALLTHROUGH;
-		case 2:
-			if (d_len != 1) {
-				zend_argument_value_error(2, "must be a single character");
-				RETURN_THROWS();
-			}
-			delimiter = delim[0];
-			ZEND_FALLTHROUGH;
-		case 1:
-		case 0:
-			break;
-		}
-
-		ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape, eol);
-		if (ret < 0) {
-			RETURN_FALSE;
-		}
-		RETURN_LONG(ret);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sssS", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len, &eol) == FAILURE) {
+		RETURN_THROWS();
 	}
+
+	if (delim) {
+		if (d_len != 1) {
+			zend_argument_value_error(2, "must be a single character");
+			RETURN_THROWS();
+		}
+		delimiter = delim[0];
+	}
+	if (enclo) {
+		if (e_len != 1) {
+			zend_argument_value_error(3, "must be a single character");
+			RETURN_THROWS();
+		}
+		enclosure = enclo[0];
+	}
+	if (esc) {
+		if (esc_len > 1) {
+			zend_argument_value_error(4, "must be empty or a single character");
+			RETURN_THROWS();
+		}
+		if (esc_len == 0) {
+			escape = PHP_CSV_NO_ESCAPE;
+		} else {
+			escape = (unsigned char) esc[0];
+		}
+	}
+
+	ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape, eol);
+	if (ret < 0) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(ret);
 }
 /* }}} */
 
@@ -2433,43 +2422,39 @@ PHP_METHOD(SplFileObject, setCsvControl)
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	size_t d_len = 0, e_len = 0, esc_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
-		switch(ZEND_NUM_ARGS())
-		{
-		case 3:
-			switch (esc_len) {
-				case 0:
-					escape = PHP_CSV_NO_ESCAPE;
-					break;
-				case 1:
-					escape = (unsigned char) esc[0];
-					break;
-				default:
-					zend_argument_value_error(3, "must be empty or a single character");
-					RETURN_THROWS();
-			}
-			ZEND_FALLTHROUGH;
-		case 2:
-			if (e_len != 1) {
-				zend_argument_value_error(2, "must be a single character");
-				RETURN_THROWS();
-			}
-			enclosure = enclo[0];
-			ZEND_FALLTHROUGH;
-		case 1:
-			if (d_len != 1) {
-				zend_argument_value_error(1, "must be a single character");
-				RETURN_THROWS();
-			}
-			delimiter = delim[0];
-			ZEND_FALLTHROUGH;
-		case 0:
-			break;
-		}
-		intern->u.file.delimiter = delimiter;
-		intern->u.file.enclosure = enclosure;
-		intern->u.file.escape    = escape;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+		RETURN_THROWS();
 	}
+
+	if (delim) {
+		if (d_len != 1) {
+			zend_argument_value_error(1, "must be a single character");
+			RETURN_THROWS();
+		}
+		delimiter = delim[0];
+	}
+	if (enclo) {
+		if (e_len != 1) {
+			zend_argument_value_error(2, "must be a single character");
+			RETURN_THROWS();
+		}
+		enclosure = enclo[0];
+	}
+	if (esc) {
+		if (esc_len > 1) {
+			zend_argument_value_error(3, "must be empty or a single character");
+			RETURN_THROWS();
+		}
+		if (esc_len == 0) {
+			escape = PHP_CSV_NO_ESCAPE;
+		} else {
+			escape = (unsigned char) esc[0];
+		}
+	}
+
+	intern->u.file.delimiter = delimiter;
+	intern->u.file.enclosure = enclosure;
+	intern->u.file.escape    = escape;
 }
 /* }}} */
 
