@@ -1163,8 +1163,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, 
 	HT_ASSERT_RC1(ht);
 	ZEND_ASSERT(!HT_IS_PACKED(ht));
 
-	/* Precompute string hash */
-	zend_string_hash_val(key);
+	(void)zend_string_hash_val(key);
 	p = zend_hash_find_bucket(ht, key);
 	if (UNEXPECTED(p)) {
 		return (p == b) ? &p->val : NULL;
@@ -2525,8 +2524,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 
 	IS_CONSISTENT(ht);
 
-	/* Precompute string hash */
-	zend_string_hash_val(key);
+	(void)zend_string_hash_val(key);
 	p = zend_hash_find_bucket(ht, key);
 	return p ? &p->val : NULL;
 }
