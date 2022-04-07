@@ -472,28 +472,7 @@ static bool is_odbc_quoted(const char *str)
  */
 static bool should_odbc_quote(const char *str)
 {
-	size_t length = strlen(str);
-	for (size_t i = 0; i < length; i++) {
-		switch (str[i]) {
-		case '[':
-		case ']':
-		case '{':
-		case '}':
-		case '(':
-		case ')':
-		case ',':
-		case ';':
-		case '?':
-		case '*':
-		case '=':
-		case '!':
-		case '@':
-			return true;
-		default:
-			continue;
-		}
-	}
-	return false;
+	return strpbrk(str, "[]{}(),;?*=!@") != NULL;
 }
 
 /**
