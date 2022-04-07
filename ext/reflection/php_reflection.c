@@ -1342,10 +1342,6 @@ static reflection_type_kind get_type_kind(zend_type type) {
 	if (type_mask_without_null == MAY_BE_BOOL || ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
 		return NAMED_TYPE;
 	}
-	/* null|false must be a union type */
-	if (ZEND_TYPE_PURE_MASK(type) == (MAY_BE_NULL|MAY_BE_FALSE)) {
-		return UNION_TYPE;
-	}
 	/* Check that only one bit is set. */
 	if ((type_mask_without_null & (type_mask_without_null - 1)) != 0) {
 		return UNION_TYPE;
