@@ -25,6 +25,7 @@
 
 #include "zend_globals_macros.h"
 
+#include "zend_atomic.h"
 #include "zend_stack.h"
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
@@ -189,8 +190,8 @@ struct _zend_executor_globals {
 	/* for extended information support */
 	bool no_extensions;
 
-	bool vm_interrupt;
-	bool timed_out;
+	zend_atomic_bool vm_interrupt;
+	zend_atomic_bool timed_out;
 	zend_long hard_timeout;
 
 #ifdef ZEND_WIN32

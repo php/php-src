@@ -22,7 +22,7 @@
 /* true globals; only used from main thread and from kernel callback */
 static zval ctrl_handler;
 static DWORD ctrl_evt = (DWORD)-1;
-static bool *vm_interrupt_flag = NULL;
+static volatile bool *vm_interrupt_flag = NULL;
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 

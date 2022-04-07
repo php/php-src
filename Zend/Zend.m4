@@ -389,3 +389,32 @@ AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 if test "$ac_cv_cpuid_count_available" = "yes"; then
   AC_DEFINE([HAVE_CPUID_COUNT], 1, [whether __cpuid_count is available])
 fi
+
+dnl Check whether <stdatomic.h> is available.
+AC_CACHE_CHECK(
+  [whether <stdatomic.h> is available],
+  ac_cv_stdatomic_h,
+  [AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+      [[
+        #include <stdatomic.h>
+        #include <stdbool.h>
+        int main(void) {
+          atomic_bool val = false;
+          (void)atomic_load(&val);
+          atomic_store(&val, true);
+          (void)atomic_exchange(&val, false);
+
+          if (sizeof(atomic_bool) != sizeof(bool)) return 1;
+          if (_Alignof(atomic_bool) != _Alignof(bool)) return 1;
+          return 0;
+        }
+      ]]
+    )],
+    [ac_cv_stdatomic_h_available=yes],
+    [ac_cv_stdatomic_h_available=no]
+  )]
+)
+if test "$ac_cv_stdatomic_h_available" = "yes"; then
+  AC_DEFINE([HAVE_STDATOMIC_H], 1, [whether <stdatomic.h> is available])
+fi
