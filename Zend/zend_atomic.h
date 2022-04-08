@@ -1,5 +1,8 @@
 // TODO: license
 
+#ifndef ZEND_ATOMIC_H
+#define ZEND_ATOMIC_H
+
 #include "zend_portability.h"
 
 #include <stdbool.h>
@@ -23,3 +26,5 @@ ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
 ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired);
 
 END_EXTERN_C()
+
+#endif
