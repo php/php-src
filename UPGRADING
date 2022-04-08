@@ -27,6 +27,15 @@ PHP 8.2 UPGRADE NOTES
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
 
+- SPL:
+  . The following methods now enforce their signature:
+    * SplFileInfo::_bad_state_ex()
+    * SplFileObject::getCsvControl()
+    * SplFileObject::fflush()
+    * SplFileObject::ftell()
+    * SplFileObject::fgetc()
+    * SplFileObject::fpassthru()
+
 ========================================
 2. New Features
 ========================================
