@@ -12,22 +12,8 @@
  */
 
 #if HAVE_STDATOMIC_H
-#include <stdatomic.h>
-#define HAVE_ATOMIC_BOOL 1
-#elif ZEND_WIN32
-#include <atomic>
-using std::atomic_bool;
-using std::atomic_exchange;
-using std::atomic_load;
-using std::atomic_store;
-static_assert(sizeof(atomic_bool) == sizeof(bool), "Repr of atomic_bool and bool must match");
-static_assert(alignof(atomic_bool) == alignof(bool), "Repr of atomic_bool and bool must match");
-#define HAVE_ATOMIC_BOOL 1
-#else
-#define HAVE_ATOMIC_BOOL 0
-#endif
 
-#if HAVE_ATOMIC_BOOL
+#include <stdatomic.h>
 
 ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
 	return atomic_exchange((atomic_bool *)obj, desired);
