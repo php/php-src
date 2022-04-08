@@ -1663,7 +1663,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 #ifdef ZEND_WIN32
-		if (EG(timed_out)) {
+		if (zend_atomic_bool_load(&EG(timed_out))) {
 			zend_timeout();
 		}
 #endif
