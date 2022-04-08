@@ -1399,6 +1399,9 @@ PHP_METHOD(SplFileInfo, __debugInfo)
 /* {{{ */
 PHP_METHOD(SplFileInfo, _bad_state_ex)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
 }
 /* }}} */
@@ -2476,6 +2479,10 @@ PHP_METHOD(SplFileObject, getCsvControl)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	char delimiter[2], enclosure[2], escape[2];
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	array_init(return_value);
 
 	delimiter[0] = intern->u.file.delimiter;
@@ -2517,6 +2524,10 @@ PHP_METHOD(SplFileObject, fflush)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
@@ -2527,6 +2538,10 @@ PHP_METHOD(SplFileObject, ftell)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	zend_long ret;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
@@ -2562,6 +2577,10 @@ PHP_METHOD(SplFileObject, fgetc)
 	char buf[2];
 	int result;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	spl_filesystem_file_free_line(intern);
@@ -2584,6 +2603,10 @@ PHP_METHOD(SplFileObject, fgetc)
 PHP_METHOD(SplFileObject, fpassthru)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
