@@ -28,7 +28,7 @@ PHP 8.2 UPGRADE NOTES
     conversion.
 
 - SPL:
-  . The following methods of now enforce their signature:
+  . The following methods now enforce their signature:
     * SplFileInfo::_bad_state_ex()
     * SplFileObject::getCsvControl()
     * SplFileObject::fflush()
