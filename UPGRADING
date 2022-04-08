@@ -32,7 +32,7 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - Core:
-  . Added the #\[\SensitiveParameter] attribute to redact sensitive data in
+  . Added the #[\SensitiveParameter] attribute to redact sensitive data in
     backtraces.
     RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
 
