@@ -1640,11 +1640,12 @@ tail_call:
 		/* declaration nodes */
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
+		case ZEND_AST_SHORT_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
 		case ZEND_AST_METHOD:
 			decl = (zend_ast_decl *) ast;
 			if (decl->child[4]) {
-				bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
+				bool newlines = !(ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_SHORT_CLOSURE || ast->kind == ZEND_AST_ARROW_FUNC);
 				zend_ast_export_attributes(str, decl->child[4], indent, newlines);
 			}
 
@@ -1659,7 +1660,7 @@ tail_call:
 			if (decl->flags & ZEND_ACC_FINAL) {
 				smart_str_appends(str, "final ");
 			}
-			if (decl->kind == ZEND_AST_ARROW_FUNC) {
+			if (decl->kind == ZEND_AST_ARROW_FUNC || decl->kind == ZEND_AST_SHORT_CLOSURE) {
 				smart_str_appends(str, "fn");
 			} else {
 				smart_str_appends(str, "function ");
@@ -1667,7 +1668,7 @@ tail_call:
 			if (decl->flags & ZEND_ACC_RETURN_REFERENCE) {
 				smart_str_appendc(str, '&');
 			}
-			if (ast->kind != ZEND_AST_CLOSURE && ast->kind != ZEND_AST_ARROW_FUNC) {
+			if (ast->kind != ZEND_AST_CLOSURE && ast->kind != ZEND_AST_SHORT_CLOSURE && ast->kind != ZEND_AST_ARROW_FUNC) {
 				smart_str_appendl(str, ZSTR_VAL(decl->name), ZSTR_LEN(decl->name));
 			}
 			smart_str_appendc(str, '(');
@@ -1690,7 +1691,7 @@ tail_call:
 				zend_ast_export_stmt(str, decl->child[2], indent + 1);
 				zend_ast_export_indent(str, indent);
 				smart_str_appendc(str, '}');
-				if (ast->kind != ZEND_AST_CLOSURE) {
+				if (ast->kind != ZEND_AST_CLOSURE && ast->kind != ZEND_AST_SHORT_CLOSURE) {
 					smart_str_appendc(str, '\n');
 				}
 			} else {
@@ -2442,6 +2443,7 @@ zend_ast * ZEND_FASTCALL zend_ast_with_attributes(zend_ast *ast, zend_ast *attr)
 	switch (ast->kind) {
 	case ZEND_AST_FUNC_DECL:
 	case ZEND_AST_CLOSURE:
+	case ZEND_AST_SHORT_CLOSURE:
 	case ZEND_AST_METHOD:
 	case ZEND_AST_ARROW_FUNC:
 		((zend_ast_decl *) ast)->child[4] = attr;

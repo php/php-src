@@ -33,6 +33,9 @@
 #include "zend_inheritance.h"
 #include "zend_vm.h"
 #include "zend_enum.h"
+#include "Optimizer/zend_cfg.h"
+#include "Optimizer/zend_dfg.h"
+#include "Optimizer/zend_dump.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -6844,7 +6847,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 		for (i = 0; i < list->children; i++) {
 			find_implicit_binds_recursively(info, list->child[i]);
 		}
-	} else if (ast->kind == ZEND_AST_CLOSURE) {
+	} else if (ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_SHORT_CLOSURE) {
 		/* For normal closures add the use() list. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
 		zend_ast *uses_ast = closure_ast->child[1];
@@ -6854,6 +6857,9 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 			for (i = 0; i < uses_list->children; i++) {
 				zend_hash_add_empty_element(&info->uses, zend_ast_get_str(uses_list->child[i]));
 			}
+		}
+		if (ast->kind == ZEND_AST_SHORT_CLOSURE) {
+			find_implicit_binds_recursively(info, closure_ast->child[2]);
 		}
 	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
 		/* For arrow functions recursively check the expression. */
@@ -6867,8 +6873,13 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 	}
 }
 
-static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_ast *stmt_ast)
+static void zend_find_implicit_binds(closure_info *info, zend_ast_decl *func_decl)
 {
+	zend_ast *params_ast = func_decl->child[0];
+	zend_ast *uses_ast = func_decl->child[1];
+	zend_ast *stmt_ast = func_decl->child[2];
+	zend_ast_list *uses_list;
+
 	zend_ast_list *param_list = zend_ast_get_list(params_ast);
 	uint32_t i;
 
@@ -6881,9 +6892,77 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 		zend_ast *param_ast = param_list->child[i];
 		zend_hash_del(&info->uses, zend_ast_get_str(param_ast->child[1]));
 	}
+
+	/* Remove explicitly used variables */
+	if (uses_ast) {
+		uses_list = zend_ast_get_list(uses_ast);
+		for (i = 0; i < uses_list->children; ++i) {
+			zend_hash_del(&info->uses, zend_ast_get_str(uses_list->child[i]));
+		}
+	}
 }
 
-static void compile_implicit_lexical_binds(
+static void zend_find_minimal_implicit_binds(closure_info *info, zend_op_array *op_array)
+{
+	zend_arena *arena = zend_arena_create(1024);
+	zend_cfg cfg;
+	uint32_t set_size;
+	int i;
+	zend_dfg dfg;
+	ALLOCA_FLAG(use_heap)
+	int blocks_count;
+	HashTable min_uses;
+
+	zend_build_cfg(&arena, op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &cfg);
+	zend_cfg_build_predecessors(&arena, &cfg);
+	// zend_dump_op_array(op_array, ZEND_DUMP_CFG, "...", &cfg);
+	blocks_count = cfg.blocks_count;
+
+	/* Compute Variable Liveness. The minimum set of variables to bind is the
+	 * live-in variables of the entry block. */
+	dfg.vars = op_array->last_var + op_array->T;
+	dfg.size = set_size = zend_bitset_len(dfg.vars);
+	dfg.tmp = do_alloca((set_size * sizeof(zend_ulong)) * (blocks_count * 4 + 1), use_heap);
+	memset(dfg.tmp, 0, (set_size * sizeof(zend_ulong)) * (blocks_count * 4 + 1));
+	dfg.def = dfg.tmp + set_size;
+	dfg.use = dfg.def + set_size * blocks_count;
+	dfg.in  = dfg.use + set_size * blocks_count;
+	dfg.out = dfg.in  + set_size * blocks_count;
+
+	zend_build_dfg(op_array, &cfg, &dfg, ZEND_DFG_SHORT_CLOSURE);
+
+	// zend_dump_dfg(op_array, &cfg, &dfg);
+
+	zend_hash_init(&min_uses, 8, NULL, NULL, 0);
+
+	ZEND_BITSET_FOREACH(dfg.in, zend_bitset_len(dfg.vars), i) {
+		if (i < op_array->last_var) {
+			zend_string *var_name = op_array->vars[i];
+
+			if (!zend_hash_find(&info->uses, var_name)) {
+				continue;
+			}
+
+			if (!op_array->static_variables) {
+				op_array->static_variables = zend_new_array(8);
+			}
+
+			if (!zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval))) {
+				continue;
+			}
+
+			zend_hash_add_empty_element(&min_uses, var_name);
+		}
+	} ZEND_BITSET_FOREACH_END();
+
+	zend_hash_destroy(&info->uses);
+	info->uses = min_uses;
+
+	zend_arena_destroy(arena);
+	free_alloca(dfg.tmp, use_heap);
+}
+
+static void zend_compile_implicit_lexical_binds(
 		closure_info *info, znode *closure, zend_op_array *op_array)
 {
 	zend_string *var_name;
@@ -6894,13 +6973,12 @@ static void compile_implicit_lexical_binds(
 		return;
 	}
 
-	if (!op_array->static_variables) {
-		op_array->static_variables = zend_new_array(8);
-	}
+	ZEND_ASSERT(op_array->static_variables);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
-		zval *value = zend_hash_add(
-			op_array->static_variables, var_name, &EG(uninitialized_zval));
+		zval *value = zend_hash_find(op_array->static_variables, var_name);
+		ZEND_ASSERT(value);
+
 		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
 
 		opline = zend_emit_op(NULL, ZEND_BIND_LEXICAL, closure, NULL);
@@ -6944,13 +7022,29 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_implicit_closure_uses(closure_info *info)
+static void zend_compile_implicit_closure_uses(closure_info *info, zend_op_array *op_array, uint32_t opnum)
 {
+	if (zend_hash_num_elements(&info->uses) == 0) {
+		return;
+	}
+
+	ZEND_ASSERT(op_array->static_variables);
+
 	zend_string *var_name;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
-		zval zv;
-		ZVAL_NULL(&zv);
-		zend_compile_static_var_common(var_name, &zv, ZEND_BIND_IMPLICIT);
+		zval *value = zend_hash_find(op_array->static_variables, var_name);
+		zend_op *opline;
+
+		ZEND_ASSERT(value);
+
+		opline = &op_array->opcodes[opnum];
+		opline->opcode = ZEND_BIND_STATIC;
+		opline->op1_type = IS_CV;
+		opline->op1.var = lookup_cv(var_name);
+		opline->extended_value = (uint32_t)((char*)value - (char*)op_array->static_variables->arData) | ZEND_BIND_IMPLICIT;
+		ZEND_VM_SET_OPCODE_HANDLER(opline);
+
+		opnum++;
 	ZEND_HASH_FOREACH_END();
 }
 
@@ -7113,6 +7207,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
 	zend_string *method_lcname = NULL;
+	uint32_t opnum_bind = 0;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7135,7 +7230,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		op_array->doc_comment = zend_string_copy(decl->doc_comment);
 	}
 
-	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
+	if (decl->kind == ZEND_AST_CLOSURE || decl->kind == ZEND_AST_SHORT_CLOSURE || decl->kind == ZEND_AST_ARROW_FUNC) {
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
@@ -7144,10 +7239,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		method_lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
 		zend_begin_func_decl(result, op_array, decl, toplevel);
-		if (decl->kind == ZEND_AST_ARROW_FUNC) {
-			find_implicit_binds(&info, params_ast, stmt_ast);
-			compile_implicit_lexical_binds(&info, result, op_array);
-		} else if (uses_ast) {
+		if (uses_ast) {
 			zend_compile_closure_binding(result, op_array, uses_ast);
 		}
 	}
@@ -7191,11 +7283,20 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_mark_function_as_generator();
 		zend_emit_op(NULL, ZEND_GENERATOR_CREATE, NULL, NULL);
 	}
-	if (decl->kind == ZEND_AST_ARROW_FUNC) {
-		zend_compile_implicit_closure_uses(&info);
-		zend_hash_destroy(&info.uses);
-	} else if (uses_ast) {
+	if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
+	}
+	if (decl->kind == ZEND_AST_ARROW_FUNC || decl->kind == ZEND_AST_SHORT_CLOSURE) {
+		uint32_t i, l;
+		opnum_bind = get_next_op_number();
+
+		zend_find_implicit_binds(&info, decl);
+
+		/* Add placeholders so that we don't have to move oplines later.
+		 * Unused placeholders will be removed by the optimizer. */
+		for (i = 0, l = zend_hash_num_elements(&info.uses); i < l; i++) {
+			zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
+		}
 	}
 	zend_compile_stmt(stmt_ast);
 
@@ -7213,6 +7314,13 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	zend_emit_final_return(0);
 
 	pass_two(CG(active_op_array));
+
+	if (decl->kind == ZEND_AST_ARROW_FUNC || decl->kind == ZEND_AST_SHORT_CLOSURE) {
+		/* Depends on pass_two() */
+		zend_find_minimal_implicit_binds(&info, op_array);
+		zend_compile_implicit_closure_uses(&info, op_array, opnum_bind);
+	}
+
 	zend_oparray_context_end(&orig_oparray_context);
 
 	/* Pop the loop variable stack separator */
@@ -7220,6 +7328,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
+
+	if (decl->kind == ZEND_AST_ARROW_FUNC || decl->kind == ZEND_AST_SHORT_CLOSURE) {
+		zend_compile_implicit_lexical_binds(&info, result, op_array);
+		zend_hash_destroy(&info.uses);
+	}
 }
 /* }}} */
 
@@ -10132,6 +10245,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			zend_compile_magic_const(result, ast);
 			return;
 		case ZEND_AST_CLOSURE:
+		case ZEND_AST_SHORT_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
 			return;

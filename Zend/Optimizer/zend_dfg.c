@@ -25,18 +25,44 @@ static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_
 	const zend_op *next;
 
 	if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-		var_num = EX_VAR_TO_NUM(opline->op1.var);
-		if (!zend_bitset_in(def, var_num)) {
-			zend_bitset_incl(use, var_num);
+		if (build_flags & ZEND_DFG_SHORT_CLOSURE) {
+			switch (opline->opcode) {
+				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_REF:
+				case ZEND_BIND_GLOBAL:
+				case ZEND_BIND_STATIC:
+				case ZEND_UNSET_CV:
+					break;
+				default:
+					var_num = EX_VAR_TO_NUM(opline->op1.var);
+					if (!zend_bitset_in(def, var_num)) {
+						zend_bitset_incl(use, var_num);
+					}
+					break;
+			}
+		} else {
+			var_num = EX_VAR_TO_NUM(opline->op1.var);
+			if (!zend_bitset_in(def, var_num)) {
+				zend_bitset_incl(use, var_num);
+			}
 		}
 	}
 	if (((opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0
 	  && opline->opcode != ZEND_FE_FETCH_R
 	  && opline->opcode != ZEND_FE_FETCH_RW)
 	 || (opline->op2_type == IS_CV)) {
-		var_num = EX_VAR_TO_NUM(opline->op2.var);
-		if (!zend_bitset_in(def, var_num)) {
-			zend_bitset_incl(use, var_num);
+		if (build_flags & ZEND_DFG_SHORT_CLOSURE) {
+			if (opline->opcode != ZEND_FE_FETCH_R && opline->opcode != ZEND_FE_FETCH_RW) {
+				var_num = EX_VAR_TO_NUM(opline->op2.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+			}
+		} else {
+			var_num = EX_VAR_TO_NUM(opline->op2.var);
+			if (!zend_bitset_in(def, var_num)) {
+				zend_bitset_incl(use, var_num);
+			}
 		}
 	}
 	if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
