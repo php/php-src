@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
     (cmb)
 
+- Streams:
+  . Fixed php://temp does not preserve file-position when switched to temporary
+    file. (Bernd Holzmüller)
+
 14 Apr 2022, PHP 8.0.18
 
 - Core:
