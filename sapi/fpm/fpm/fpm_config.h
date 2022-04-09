@@ -70,7 +70,7 @@
 # define HAVE_FPM_TRACE 0
 #endif
 
-#if defined(HAVE_LQ_TCP_INFO) || defined(HAVE_LQ_SO_LISTENQ)
+#if defined(HAVE_LQ_TCP_INFO) || defined(HAVE_LQ_TCP_CONNECTION_INFO) || defined(HAVE_LQ_SO_LISTENQ)
 # define HAVE_FPM_LQ 1
 #else
 # define HAVE_FPM_LQ 0

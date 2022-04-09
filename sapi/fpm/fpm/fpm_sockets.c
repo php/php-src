@@ -524,6 +524,30 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	return 0;
 }
 
+#elif defined(HAVE_LQ_TCP_CONNECTION_INFO)
+
+#include <netinet/tcp.h>
+
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+{
+	struct tcp_connection_info info;
+	socklen_t len = sizeof(info);
+
+	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_CONNECTION_INFO, &info, &len)) {
+		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_CONNECTION_INFO for socket");
+		return -1;
+	}
+
+	if (cur_lq) {
+		*cur_lq = info.tcpi_tfo_syn_data_acked;
+	}
+
+	if (max_lq) {
+		*max_lq = 0;
+	}
+
+	return 0;
+}
 #endif
 
 #ifdef HAVE_LQ_SO_LISTENQ

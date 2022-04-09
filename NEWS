@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Emit error for invalid port setting. (David Carlier)
   . Added extra check for FPM proc dumpable on SELinux based systems.
     (David Carlier)
+  . Added support for listening queue on macOS. (David Carlier)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
