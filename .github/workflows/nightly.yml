@@ -3,8 +3,6 @@ on:
   schedule:
    - cron: "0 1 * * *"
   workflow_dispatch: ~
-  issue_comment:
-    types: [created]
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
