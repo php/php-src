@@ -1858,7 +1858,10 @@ static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa 
 	int def_op_num = ssa->vars[var].definition;
 	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
 	const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
-	zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
+	uint32_t lineno = def_opline ? def_opline->lineno : 0;
+	zend_error_at(
+		E_WARNING, op_array->filename, lineno,
+		"Narrowing occurred during type inference of %s. Please file a bug report on https://github.com/php/php-src/issues", def_op_name);
 }
 
 ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
