@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e172b900040a9d9ac98207c638fdeb3a0c6a13e6 */
+ * Stub hash: 7ccd5115d292690c0cfcfeeb2ff5adf7ac7a616a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -445,6 +445,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_stream_xchacha20_x
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_stream_xchacha20_xor_ic, 0, 4, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, counter, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(1, string1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
@@ -662,6 +671,9 @@ ZEND_FUNCTION(sodium_crypto_stream_xchacha20_keygen);
 #if defined(crypto_stream_xchacha20_KEYBYTES)
 ZEND_FUNCTION(sodium_crypto_stream_xchacha20_xor);
 #endif
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_stream_xchacha20_xor_ic);
+#endif
 ZEND_FUNCTION(sodium_add);
 ZEND_FUNCTION(sodium_compare);
 ZEND_FUNCTION(sodium_increment);
@@ -844,6 +856,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(crypto_stream_xchacha20_KEYBYTES)
 	ZEND_FE(sodium_crypto_stream_xchacha20_xor, arginfo_sodium_crypto_stream_xchacha20_xor)
+#endif
+#if defined(crypto_stream_xchacha20_KEYBYTES)
+	ZEND_FE(sodium_crypto_stream_xchacha20_xor_ic, arginfo_sodium_crypto_stream_xchacha20_xor_ic)
 #endif
 	ZEND_FE(sodium_add, arginfo_sodium_add)
 	ZEND_FE(sodium_compare, arginfo_sodium_compare)

@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_INIFILE
+#ifdef DBA_INIFILE
 #include "php_inifile.h"
 
 #include "libinifile/inifile.h"

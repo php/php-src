@@ -27,9 +27,23 @@ PHP 8.2 UPGRADE NOTES
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
 
+- SPL:
+  . The following methods now enforce their signature:
+    * SplFileInfo::_bad_state_ex()
+    * SplFileObject::getCsvControl()
+    * SplFileObject::fflush()
+    * SplFileObject::ftell()
+    * SplFileObject::fgetc()
+    * SplFileObject::fpassthru()
+
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Added the #[\SensitiveParameter] attribute to redact sensitive data in
+    backtraces.
+    RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
@@ -113,6 +127,9 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- Sodium:
+  . sodium_crypto_stream_xchacha20_xor_ic()
 
 - Standard:
   . The peak memory usage can now be reset to the current usage thanks to

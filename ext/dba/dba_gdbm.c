@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_GDBM
+#ifdef DBA_GDBM
 #include "php_gdbm.h"
 
 #ifdef GDBM_INCLUDE_FILE

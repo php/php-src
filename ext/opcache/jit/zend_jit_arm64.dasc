@@ -13317,6 +13317,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
 	zend_jit_addr prop_addr;
 	bool needs_slow_path = 0;
+	bool needs_val_dtor = 0;
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -13373,6 +13374,7 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 				}
 				if (((opline+1)->op1_type & (IS_VAR|IS_TMP_VAR))
 				 && (val_info & (MAY_BE_REF|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+					needs_val_dtor = 1;
 					|	b >7
 				} else {
 					|	b >9
@@ -13549,6 +13551,13 @@ static int zend_jit_assign_obj(dasm_State          **Dst,
 			val_info |= MAY_BE_RC1|MAY_BE_RCN;
 		}
 
+		|7:
+		|	// FREE_OP_DATA();
+		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline, ZREG_TMP1, ZREG_TMP2
+		|	b >9
+		|.code
+	} else if (needs_val_dtor) {
+		|.cold_code
 		|7:
 		|	// FREE_OP_DATA();
 		|	FREE_OP (opline+1)->op1_type, (opline+1)->op1, val_info, 0, opline, ZREG_TMP1, ZREG_TMP2

@@ -20,7 +20,7 @@
 #include "php_version.h"
 #define PHP_DBA_VERSION PHP_VERSION
 
-#if HAVE_DBA
+#ifdef HAVE_DBA
 
 typedef enum {
 	/* do not allow 0 here */

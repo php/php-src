@@ -2373,6 +2373,9 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 	zend_throw_error(NULL,
 		"Attempt to increment/decrement property \"%s\" on %s",
 		property_name, zend_zval_type_name(container));
+	if (opline->op1_type == IS_VAR) {
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, const char *property_name)

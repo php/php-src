@@ -2073,7 +2073,9 @@ propagate_arg:
 				case ZEND_ROPE_INIT:
 				case ZEND_ROPE_ADD:
 				case ZEND_ROPE_END:
-					ADD_OP2_TRACE_GUARD();
+					if (op2_type == IS_STRING) {
+						ADD_OP2_TRACE_GUARD();
+					}
 					break;
 				default:
 					break;

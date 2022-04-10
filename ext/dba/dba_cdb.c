@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if DBA_CDB
+#ifdef DBA_CDB
 #include "php_cdb.h"
 
 #include <sys/types.h>

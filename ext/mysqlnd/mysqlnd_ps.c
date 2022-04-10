@@ -369,7 +369,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 
 /* {{{ mysqlnd_stmt::prepare */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * s, const char * const query, const size_t query_len)
+MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const query, const size_t query_len)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
@@ -391,12 +391,25 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * s, const char * const query
 		/*
 		  Create a new prepared statement and destroy the previous one.
 		*/
-		s->m->dtor(s, TRUE);
-		s = conn->m->stmt_init(conn);
-		if (!s) {
+		MYSQLND_STMT * s_to_prepare = conn->m->stmt_init(conn);
+		if (!s_to_prepare) {
 			goto fail;
 		}
-		stmt = s->data;
+		MYSQLND_STMT_DATA * stmt_to_prepare = s_to_prepare->data;
+
+		/* swap */
+		size_t real_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
+		char * tmp_swap = mnd_emalloc(real_size);
+		memcpy(tmp_swap, s, real_size);
+		memcpy(s, s_to_prepare, real_size);
+		memcpy(s_to_prepare, tmp_swap, real_size);
+		mnd_efree(tmp_swap);
+		{
+			MYSQLND_STMT_DATA * tmp_swap_data = stmt_to_prepare;
+			stmt_to_prepare = stmt;
+			stmt = tmp_swap_data;
+		}
+		s_to_prepare->m->dtor(s_to_prepare, TRUE);
 	}
 
 	{

@@ -2489,7 +2489,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry((char*)primary_file->filename);
+			UpdateIniFromRegistry(ZSTR_VAL(primary_file->filename));
 		}
 #endif
 
@@ -2581,7 +2581,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 	zend_try {
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry((char*)primary_file->filename);
+			UpdateIniFromRegistry(ZSTR_VAL(primary_file->filename));
 		}
 #endif
 

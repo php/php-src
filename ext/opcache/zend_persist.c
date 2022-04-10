@@ -1331,12 +1331,12 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 
 	script = zend_shared_memdup_free(script, sizeof(zend_persistent_script));
-	script->corrupted = 0;
+	script->corrupted = false;
 	ZCG(current_persistent_script) = script;
 
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
-		script->corrupted = 1;
+		script->corrupted = true;
 	}
 
 	zend_accel_store_interned_string(script->script.filename);
@@ -1392,7 +1392,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 #endif
 
-	script->corrupted = 0;
+	script->corrupted = false;
 	ZCG(current_persistent_script) = NULL;
 
 	return script;

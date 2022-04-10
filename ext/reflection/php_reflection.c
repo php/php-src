@@ -1356,6 +1356,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 	type_reference *reference;
 	reflection_type_kind type_kind = get_type_kind(type);
 	bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
+	bool is_only_null = (ZEND_TYPE_PURE_MASK(type) == MAY_BE_NULL && !ZEND_TYPE_IS_COMPLEX(type));
 
 	switch (type_kind) {
 		case INTERSECTION_TYPE:
@@ -1373,7 +1374,7 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->type = type;
-	reference->legacy_behavior = legacy_behavior && type_kind == NAMED_TYPE && !is_mixed;
+	reference->legacy_behavior = legacy_behavior && type_kind == NAMED_TYPE && !is_mixed && !is_only_null;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 

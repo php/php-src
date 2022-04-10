@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_DB2
+#ifdef DBA_DB2
 #include "php_db2.h"
 #include <sys/stat.h>
 

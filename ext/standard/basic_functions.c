@@ -67,22 +67,22 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "win32/inet.h"
 #endif
 
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
 #include <string.h>
 #include <locale.h>
 
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif
 
-#if HAVE_SYS_LOADAVG_H
+#ifdef HAVE_SYS_LOADAVG_H
 # include <sys/loadavg.h>
 #endif
 
@@ -91,7 +91,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #ifndef INADDR_NONE
-#define INADDR_NONE ((zend_ulong) -1)
+# define INADDR_NONE ((zend_ulong) -1)
 #endif
 
 #include "zend_globals.h"
@@ -149,13 +149,13 @@ zend_module_entry basic_functions_module = { /* {{{ */
 };
 /* }}} */
 
-#if defined(HAVE_PUTENV)
+#ifdef HAVE_PUTENV
 static void php_putenv_destructor(zval *zv) /* {{{ */
 {
 	putenv_entry *pe = Z_PTR_P(zv);
 
 	if (pe->previous_value) {
-# if defined(PHP_WIN32)
+# ifdef PHP_WIN32
 		/* MSVCRT has a bug in putenv() when setting a variable that
 		 * is already set; if the SetEnvironmentVariable() API call
 		 * fails, the Crt will double free() a string.
@@ -163,11 +163,11 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 		SetEnvironmentVariable(ZSTR_VAL(pe->key), "bugbug");
 # endif
 		putenv(pe->previous_value);
-# if defined(PHP_WIN32)
+# ifdef PHP_WIN32
 		efree(pe->previous_value);
 # endif
 	} else {
-# if HAVE_UNSETENV
+# ifdef HAVE_UNSETENV
 		unsetenv(ZSTR_VAL(pe->key));
 # elif defined(PHP_WIN32)
 		SetEnvironmentVariable(ZSTR_VAL(pe->key), NULL);
@@ -282,14 +282,14 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
-#ifdef PHP_WIN32
+# ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor );
-#endif
+# endif
 #else
 	basic_globals_ctor(&basic_globals);
-#ifdef PHP_WIN32
+# ifdef PHP_WIN32
 	php_win32_core_globals_ctor(&the_php_win32_core_globals);
-#endif
+# endif
 #endif
 
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
@@ -347,7 +347,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_CS | CONST_PERSISTENT);
 
-#if ENABLE_TEST_CLASS
+#ifdef ENABLE_TEST_CLASS
 	test_class_startup();
 #endif
 
@@ -364,23 +364,23 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(password)
 	BASIC_MINIT_SUBMODULE(mt_rand)
 
-#if defined(ZTS)
+#ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
 #endif
 
-#if defined(HAVE_NL_LANGINFO)
+#ifdef HAVE_NL_LANGINFO
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
-#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(string_intrin)
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_PCLMUL_FUNC_PTR
 	BASIC_MINIT_SUBMODULE(crc32_x86_intrin)
 #endif
 
-#if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR
+#if defined(ZEND_INTRIN_AVX2_FUNC_PTR) || defined(ZEND_INTRIN_SSSE3_FUNC_PTR)
 	BASIC_MINIT_SUBMODULE(base64_intrin)
 #endif
 
@@ -411,8 +411,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+# if defined(PHP_WIN32) || defined(HAVE_FULL_DNS_FUNCS)
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
 #endif
@@ -452,7 +452,7 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_MSHUTDOWN_SUBMODULE(file)
 	BASIC_MSHUTDOWN_SUBMODULE(standard_filters)
-#if defined(ZTS)
+#ifdef ZTS
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
@@ -876,7 +876,7 @@ PHP_FUNCTION(putenv)
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		if (!strncmp(*env, ZSTR_VAL(pe.key), ZSTR_LEN(pe.key))
 				&& (*env)[ZSTR_LEN(pe.key)] == '=') {	/* found it */
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 			/* must copy previous value because MSVCRT's putenv can free the string without notice */
 			pe.previous_value = estrdup(*env);
 #else
@@ -886,7 +886,7 @@ PHP_FUNCTION(putenv)
 		}
 	}
 
-#if HAVE_UNSETENV
+#ifdef HAVE_UNSETENV
 	if (!p) { /* no '=' means we want to unset it */
 		unsetenv(pe.putenv_string);
 	}
@@ -932,7 +932,7 @@ PHP_FUNCTION(putenv)
 		}
 #endif
 		tsrm_env_unlock();
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		free(keyw);
 		free(valw);
 #endif
@@ -940,7 +940,7 @@ PHP_FUNCTION(putenv)
 	} else {
 		free(pe.putenv_string);
 		zend_string_release(pe.key);
-#if defined(PHP_WIN32)
+#ifdef PHP_WIN32
 		free(keyw);
 		free(valw);
 #endif
@@ -1245,13 +1245,13 @@ PHP_FUNCTION(usleep)
 		RETURN_THROWS();
 	}
 
-#if HAVE_USLEEP
+#ifdef HAVE_USLEEP
 	usleep((unsigned int)num);
 #endif
 }
 /* }}} */
 
-#if HAVE_NANOSLEEP
+#ifdef HAVE_NANOSLEEP
 /* {{{ Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {
@@ -2245,7 +2245,7 @@ PHP_FUNCTION(ignore_user_abort)
 }
 /* }}} */
 
-#if HAVE_GETSERVBYNAME
+#ifdef HAVE_GETSERVBYNAME
 /* {{{ Returns port associated with service. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyname)
 {
@@ -2270,7 +2270,7 @@ PHP_FUNCTION(getservbyname)
 
 	serv = getservbyname(ZSTR_VAL(name), proto);
 
-#if defined(_AIX)
+#ifdef _AIX
 	/*
         On AIX, imap is only known as imap2 in /etc/services, while on Linux imap is an alias for imap2.
         If a request for imap gives no result, we try again with imap2.
@@ -2288,7 +2288,7 @@ PHP_FUNCTION(getservbyname)
 /* }}} */
 #endif
 
-#if HAVE_GETSERVBYPORT
+#ifdef HAVE_GETSERVBYPORT
 /* {{{ Returns service name associated with port. Protocol must be "tcp" or "udp" */
 PHP_FUNCTION(getservbyport)
 {
@@ -2313,7 +2313,7 @@ PHP_FUNCTION(getservbyport)
 /* }}} */
 #endif
 
-#if HAVE_GETPROTOBYNAME
+#ifdef HAVE_GETPROTOBYNAME
 /* {{{ Returns protocol number associated with name as per /etc/protocols */
 PHP_FUNCTION(getprotobyname)
 {
@@ -2336,7 +2336,7 @@ PHP_FUNCTION(getprotobyname)
 /* }}} */
 #endif
 
-#if HAVE_GETPROTOBYNUMBER
+#ifdef HAVE_GETPROTOBYNUMBER
 /* {{{ Returns protocol name associated with protocol number proto */
 PHP_FUNCTION(getprotobynumber)
 {

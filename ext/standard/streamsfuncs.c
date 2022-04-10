@@ -26,7 +26,7 @@
 #include "streamsfuncs.h"
 #include "php_network.h"
 #include "php_string.h"
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -46,7 +46,7 @@ static php_stream_context *decode_context_param(zval *contextresource);
 
 /* Streams based network functions */
 
-#if HAVE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
 /* {{{ Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
@@ -1343,7 +1343,7 @@ PHP_FUNCTION(stream_set_blocking)
 /* }}} */
 
 /* {{{ Set timeout on stream read to seconds + microseonds */
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;

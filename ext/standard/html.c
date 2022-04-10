@@ -44,7 +44,7 @@
 #include "php_string.h"
 #include "SAPI.h"
 #include <locale.h>
-#if HAVE_LANGINFO_H
+#ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
 

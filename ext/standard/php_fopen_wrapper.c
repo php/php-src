@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #include "php.h"
@@ -317,7 +317,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 		dtablesize = getdtablesize();
 #else
 		dtablesize = INT_MAX;

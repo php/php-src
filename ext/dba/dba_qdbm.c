@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_QDBM
+#ifdef DBA_QDBM
 #include "php_qdbm.h"
 
 #ifdef QDBM_INCLUDE_FILE

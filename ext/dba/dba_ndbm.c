@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_NDBM
+#ifdef DBA_NDBM
 #include "php_ndbm.h"
 
 #include <fcntl.h>
