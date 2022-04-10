@@ -1862,6 +1862,9 @@ static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa 
 	zend_error_at(
 		E_WARNING, op_array->filename, lineno,
 		"Narrowing occurred during type inference of %s. Please file a bug report on https://github.com/php/php-src/issues", def_op_name);
+#if ZEND_DEBUG
+	ZEND_ASSERT(0 && "Narrowing during type inference");
+#endif
 }
 
 ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
