@@ -202,6 +202,7 @@ static zend_object_handlers zend_ffi_ctype_handlers;
 static zend_internal_function zend_ffi_new_fn;
 static zend_internal_function zend_ffi_cast_fn;
 static zend_internal_function zend_ffi_type_fn;
+static zend_internal_function zend_ffi_has_sym_fn;
 
 /* forward declarations */
 static void _zend_ffi_type_dtor(zend_ffi_type *type);
@@ -2777,6 +2778,14 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	 && (ZSTR_VAL(name)[2] == 'p' || ZSTR_VAL(name)[2] == 'P')
 	 && (ZSTR_VAL(name)[3] == 'e' || ZSTR_VAL(name)[3] == 'E')) {
 		return (zend_function*)&zend_ffi_type_fn;
+	} else if (ZSTR_LEN(name) == sizeof("hasSym") -1
+	 && (ZSTR_VAL(name)[0] == 'h' || ZSTR_VAL(name)[0] == 'H')
+	 && (ZSTR_VAL(name)[1] == 'a' || ZSTR_VAL(name)[1] == 'A')
+	 && (ZSTR_VAL(name)[2] == 's' || ZSTR_VAL(name)[2] == 'S')
+	 && (ZSTR_VAL(name)[3] == 'S' || ZSTR_VAL(name)[3] == 's')
+	 && (ZSTR_VAL(name)[4] == 'y' || ZSTR_VAL(name)[4] == 'Y')
+	 && (ZSTR_VAL(name)[5] == 'm' || ZSTR_VAL(name)[5] == 'M')) {
+		return (zend_function*)&zend_ffi_has_sym_fn;
 	}
 
 	if (ffi->symbols) {
@@ -4452,6 +4461,39 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 }
 /* }}} */
 
+ZEND_METHOD(FFI, hasSym) /* {{{ */
+{
+	zend_string *symbols;
+	zend_long symbols_kind;
+	zend_ffi_symbol *sym = NULL;
+	bool kind_is_null = 1;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(symbols);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(symbols_kind, kind_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if(!kind_is_null && (symbols_kind > ZEND_FFI_SYM_FUNC || symbols_kind < ZEND_FFI_SYM_TYPE)) {
+		zend_argument_value_error(2, "value error");
+		RETURN_THROWS();
+	}
+
+	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
+		sym = zend_hash_find_ptr(ffi->symbols, symbols);
+		if(!sym) {
+			RETURN_FALSE;
+		}
+		if(!kind_is_null && sym->kind != symbols_kind) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+/* }}} */
 
 ZEND_METHOD(FFI_CType, getName) /* {{{ */
 {
@@ -5226,13 +5268,14 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
-
+	
 	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
 	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&zend_ffi_cast_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "cast", sizeof("cast")-1), sizeof(zend_internal_function));
 	zend_ffi_cast_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", sizeof("type")-1), sizeof(zend_internal_function));
 	zend_ffi_type_fn.fn_flags &= ~ZEND_ACC_STATIC;
+	memcpy(&zend_ffi_has_sym_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "hassym", sizeof("hassym")-1), sizeof(zend_internal_function));
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
@@ -5256,6 +5299,10 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_gc               = zend_fake_get_gc;
 
 	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_TYPE", sizeof("SYM_TYPE")-1, ZEND_FFI_SYM_TYPE);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_CONST", sizeof("SYM_CONST")-1, ZEND_FFI_SYM_CONST);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_VAR", sizeof("SYM_VAR")-1, ZEND_FFI_SYM_VAR);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_FUNC", sizeof("SYM_FUNC")-1, ZEND_FFI_SYM_FUNC);
 
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;

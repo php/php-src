@@ -63,6 +63,7 @@ namespace {
 
         /** @prefer-ref $ptr */
         public static function isNull(FFI\CData $ptr): bool {}
+        public function hasSym(string $symbol, ?int $symbol_kind): bool {}
     }
 
 }
