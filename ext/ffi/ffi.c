@@ -4463,30 +4463,30 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 
 ZEND_METHOD(FFI, hasSym) /* {{{ */
 {
-	zend_string *symbols;
-	zend_long symbols_kind;
+	zend_string *symbol;
+	zend_long symbol_kind;
 	zend_ffi_symbol *sym = NULL;
 	bool kind_is_null = 1;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(symbols);
+		Z_PARAM_STR(symbol);
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_OR_NULL(symbols_kind, kind_is_null)
+		Z_PARAM_LONG_OR_NULL(symbol_kind, kind_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if(!kind_is_null && (symbols_kind > ZEND_FFI_SYM_FUNC || symbols_kind < ZEND_FFI_SYM_TYPE)) {
+	if(!kind_is_null && (symbol_kind > ZEND_FFI_SYM_FUNC || symbol_kind < ZEND_FFI_SYM_TYPE)) {
 		zend_argument_value_error(2, "value error");
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
-		sym = zend_hash_find_ptr(ffi->symbols, symbols);
+		sym = zend_hash_find_ptr(ffi->symbols, symbol);
 		if(!sym) {
 			RETURN_FALSE;
 		}
-		if(!kind_is_null && sym->kind != symbols_kind) {
+		if(!kind_is_null && sym->kind != symbol_kind) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
