@@ -1764,11 +1764,6 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					(ssa_var_info[__var].type & MAY_BE_REF)				\
 						== (__type & MAY_BE_REF));						\
 				if (ssa_var_info[__var].type & ~__type) {				\
-					if ((ssa_var_info[__var].type & ~__type &			\
-							~(MAY_BE_RC1|MAY_BE_RCN)) == 0) {			\
-						ssa_var_info[__var].type |= __type;				\
-						break;											\
-					}													\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
 				}														\
@@ -3375,33 +3370,40 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_FETCH_OBJ_UNSET:
 		case ZEND_FETCH_OBJ_FUNC_ARG:
 			if (ssa_op->result_def >= 0) {
-				zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, opline, ssa_op);
+				uint32_t tmp = 0;
+				ce = NULL;
+				if (opline->op1_type != IS_UNUSED
+						&& (t1 & (MAY_BE_ANY | MAY_BE_UNDEF) & ~MAY_BE_OBJECT)) {
+					tmp |= MAY_BE_NULL;
+				}
+				if (opline->op1_type == IS_UNUSED || (t1 & MAY_BE_OBJECT)) {
+					zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, opline, ssa_op);
+					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
+					if (opline->result_type == IS_VAR) {
+						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
+						zend_class_entry *ce = NULL;
 
-				tmp = zend_fetch_prop_type(script, prop_info, &ce);
-				if (opline->result_type == IS_VAR) {
-					tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
-				} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
-					zend_class_entry *ce = NULL;
-
-					if (opline->op1_type == IS_UNUSED) {
-						ce = op_array->scope;
-					} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
-						ce = ssa->var_info[ssa_op->op1_use].ce;
-					}
-					if (prop_info) {
-						/* FETCH_OBJ_R/IS for plain property increments reference counter,
-						   so it can't be 1 */
-						if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
-							tmp &= ~MAY_BE_RC1;
+						if (opline->op1_type == IS_UNUSED) {
+							ce = op_array->scope;
+						} else if (ssa_op->op1_use >= 0 && !ssa->var_info[ssa_op->op1_use].is_instanceof) {
+							ce = ssa->var_info[ssa_op->op1_use].ce;
 						}
-					} else {
-						if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
-							tmp &= ~MAY_BE_RC1;
+						if (prop_info) {
+							/* FETCH_OBJ_R/IS for plain property increments reference counter,
+							   so it can't be 1 */
+							if (ce && !ce->create_object && !result_may_be_separated(ssa, ssa_op)) {
+								tmp &= ~MAY_BE_RC1;
+							}
+						} else {
+							if (ce && !ce->create_object && !ce->__get && !result_may_be_separated(ssa, ssa_op)) {
+								tmp &= ~MAY_BE_RC1;
+							}
 						}
-					}
-					if (opline->opcode == ZEND_FETCH_OBJ_IS) {
-						/* IS check may return null for uninitialized typed property. */
-						tmp |= MAY_BE_NULL;
+						if (opline->opcode == ZEND_FETCH_OBJ_IS) {
+							/* IS check may return null for uninitialized typed property. */
+							tmp |= MAY_BE_NULL;
+						}
 					}
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
