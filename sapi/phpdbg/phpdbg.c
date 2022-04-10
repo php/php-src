@@ -1358,11 +1358,11 @@ phpdbg_main:
 
 			ini_entries = realloc(
 				ini_entries, ini_entries_len + (ze_len + (sizeof("zend_extension=\n"))));
-			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (sizeof("zend_extension=\n")-1));
-			ini_entries_len += (sizeof("zend_extension=")-1);
+			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (strlen("zend_extension=\n")));
+			ini_entries_len += (strlen("zend_extension="));
 			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
 			ini_entries_len += ze_len;
-			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
+			memcpy(&ini_entries[ini_entries_len], "\n", (strlen("\n")));
 
 			free(zend_extensions[zend_extension]);
 			zend_extension++;

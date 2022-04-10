@@ -1455,7 +1455,7 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 				if (type->enumeration.tag_name) {
 					zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->enumeration.tag_name), ZSTR_LEN(type->enumeration.tag_name));
 				} else {
-					zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+					zend_ffi_ctype_name_prepend(buf, "<anonymous>", strlen("<anonymous>"));
 				}
 				name = "enum ";
 				break;
@@ -1519,14 +1519,14 @@ static bool zend_ffi_ctype_name(zend_ffi_ctype_name_buf *buf, const zend_ffi_typ
 					if (type->record.tag_name) {
 						zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->record.tag_name), ZSTR_LEN(type->record.tag_name));
 					} else {
-						zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+						zend_ffi_ctype_name_prepend(buf, "<anonymous>", strlen("<anonymous>"));
 					}
 					name = "union ";
 				} else {
 					if (type->record.tag_name) {
 						zend_ffi_ctype_name_prepend(buf, ZSTR_VAL(type->record.tag_name), ZSTR_LEN(type->record.tag_name));
 					} else {
-						zend_ffi_ctype_name_prepend(buf, "<anonymous>", sizeof("<anonymous>")-1);
+						zend_ffi_ctype_name_prepend(buf, "<anonymous>", strlen("<anonymous>"));
 					}
 					name = "struct ";
 				}
@@ -1964,7 +1964,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 		case ZEND_FFI_TYPE_SINT64:
 			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 			ht = zend_new_array(1);
-			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
+			zend_hash_str_add(ht, "cdata", strlen("cdata"), &tmp);
 			*is_temp = 1;
 			return ht;
 			break;
@@ -2760,18 +2760,18 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	zend_function   *func;
 	zend_ffi_type   *type;
 
-	if (ZSTR_LEN(name) == sizeof("new") -1
+	if (ZSTR_LEN(name) == strlen("new")
 	 && (ZSTR_VAL(name)[0] == 'n' || ZSTR_VAL(name)[0] == 'N')
 	 && (ZSTR_VAL(name)[1] == 'e' || ZSTR_VAL(name)[1] == 'E')
 	 && (ZSTR_VAL(name)[2] == 'w' || ZSTR_VAL(name)[2] == 'W')) {
 		return (zend_function*)&zend_ffi_new_fn;
-	} else if (ZSTR_LEN(name) == sizeof("cast") -1
+	} else if (ZSTR_LEN(name) == strlen("cast")
 	 && (ZSTR_VAL(name)[0] == 'c' || ZSTR_VAL(name)[0] == 'C')
 	 && (ZSTR_VAL(name)[1] == 'a' || ZSTR_VAL(name)[1] == 'A')
 	 && (ZSTR_VAL(name)[2] == 's' || ZSTR_VAL(name)[2] == 'S')
 	 && (ZSTR_VAL(name)[3] == 't' || ZSTR_VAL(name)[3] == 'T')) {
 		return (zend_function*)&zend_ffi_cast_fn;
-	} else if (ZSTR_LEN(name) == sizeof("type") -1
+	} else if (ZSTR_LEN(name) == strlen("type")
 	 && (ZSTR_VAL(name)[0] == 't' || ZSTR_VAL(name)[0] == 'T')
 	 && (ZSTR_VAL(name)[1] == 'y' || ZSTR_VAL(name)[1] == 'Y')
 	 && (ZSTR_VAL(name)[2] == 'p' || ZSTR_VAL(name)[2] == 'P')
@@ -4791,9 +4791,9 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 	*scope_name = NULL;
 	*lib = NULL;
 	while (*code_pos == '#') {
-		if (strncmp(code_pos, "#define FFI_SCOPE", sizeof("#define FFI_SCOPE") - 1) == 0
-		 && (code_pos[sizeof("#define FFI_SCOPE") - 1] == ' '
-		  || code_pos[sizeof("#define FFI_SCOPE") - 1] == '\t')) {
+		if (strncmp(code_pos, "#define FFI_SCOPE", strlen("#define FFI_SCOPE")) == 0
+		 && (code_pos[strlen("#define FFI_SCOPE")] == ' '
+		  || code_pos[strlen("#define FFI_SCOPE")] == '\t')) {
 			p = code_pos + sizeof("#define FFI_SCOPE");
 			while (*p == ' ' || *p == '\t') {
 				p++;
@@ -4838,9 +4838,9 @@ static char *zend_ffi_parse_directives(const char *filename, char *code_pos, cha
 				p++;
 			}
 			code_pos = p;
-		} else if (strncmp(code_pos, "#define FFI_LIB", sizeof("#define FFI_LIB") - 1) == 0
-		 && (code_pos[sizeof("#define FFI_LIB") - 1] == ' '
-		  || code_pos[sizeof("#define FFI_LIB") - 1] == '\t')) {
+		} else if (strncmp(code_pos, "#define FFI_LIB", strlen("#define FFI_LIB")) == 0
+		 && (code_pos[strlen("#define FFI_LIB")] == ' '
+		  || code_pos[strlen("#define FFI_LIB")] == '\t')) {
 			p = code_pos + sizeof("#define FFI_LIB");
 			while (*p == ' ' || *p == '\t') {
 				p++;
@@ -5227,11 +5227,11 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
 
-	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
+	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", strlen("new")), sizeof(zend_internal_function));
 	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	memcpy(&zend_ffi_cast_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "cast", sizeof("cast")-1), sizeof(zend_internal_function));
+	memcpy(&zend_ffi_cast_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "cast", strlen("cast")), sizeof(zend_internal_function));
 	zend_ffi_cast_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", sizeof("type")-1), sizeof(zend_internal_function));
+	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", strlen("type")), sizeof(zend_internal_function));
 	zend_ffi_type_fn.fn_flags &= ~ZEND_ACC_STATIC;
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -5255,7 +5255,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_handlers.get_gc               = zend_fake_get_gc;
 
-	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
+	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", strlen("__BIGGEST_ALIGNMENT__"), __BIGGEST_ALIGNMENT__);
 
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
@@ -6063,37 +6063,37 @@ void zend_ffi_add_bit_field(zend_ffi_dcl *struct_dcl, const char *name, size_t n
 
 	if (field_type->kind < ZEND_FFI_TYPE_UINT8 || field_type->kind > ZEND_FFI_TYPE_BOOL) {
 		zend_ffi_cleanup_dcl(field_dcl);
-		zend_ffi_parser_error("Wrong type of bit field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+		zend_ffi_parser_error("Wrong type of bit field \"%.*s\" at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 	}
 
 	if (bits->kind == ZEND_FFI_VAL_INT32 || bits->kind == ZEND_FFI_VAL_INT64) {
 		if (bits->i64 < 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("Negative width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Negative width in bit-field \"%.*s\" at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 		} else if (bits->i64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {
-				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 			}
 			return;
 		} else if (bits->i64 > field_type->size * 8) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 		}
 	} else if (bits->kind == ZEND_FFI_VAL_UINT32 || bits->kind == ZEND_FFI_VAL_UINT64) {
 		if (bits->u64 == 0) {
 			zend_ffi_cleanup_dcl(field_dcl);
 			if (name) {
-				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+				zend_ffi_parser_error("Zero width in bit-field \"%.*s\" at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 			}
 			return;
 		} else if (bits->u64 > field_type->size * 8) {
 			zend_ffi_cleanup_dcl(field_dcl);
-			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+			zend_ffi_parser_error("Width of \"%.*s\" exceeds its type at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 		}
 	} else {
 		zend_ffi_cleanup_dcl(field_dcl);
-		zend_ffi_parser_error("Bit field \"%.*s\" width not an integer constant at line %d", name ? name_len : sizeof("<anonymous>")-1, name ? name : "<anonymous>", FFI_G(line));
+		zend_ffi_parser_error("Bit field \"%.*s\" width not an integer constant at line %d", name ? name_len : strlen("<anonymous>"), name ? name : "<anonymous>", FFI_G(line));
 	}
 
 	field = pemalloc(sizeof(zend_ffi_field), FFI_G(persistent));
@@ -6839,7 +6839,7 @@ void zend_ffi_add_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t na
 
 void zend_ffi_add_msvc_attribute_value(zend_ffi_dcl *dcl, const char *name, size_t name_len, zend_ffi_val *val) /* {{{ */
 {
-	if (name_len == sizeof("align")-1 && memcmp(name, "align", sizeof("align")-1) == 0) {
+	if (name_len == strlen("align") && memcmp(name, "align", strlen("align")) == 0) {
 		if ((val->kind == ZEND_FFI_VAL_INT32 || val->kind == ZEND_FFI_VAL_UINT32 || val->kind == ZEND_FFI_VAL_INT64 || val->kind == ZEND_FFI_VAL_UINT64)
 		 && val->i64 > 0 && val->i64 <= 0x80000000 && (val->i64 & (val->i64 - 1)) == 0) {
 			dcl->align = val->i64;

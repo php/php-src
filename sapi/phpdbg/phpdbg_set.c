@@ -221,9 +221,9 @@ PHPDBG_SET(stepping) /* {{{ */
 		phpdbg_writeln("Stepping %s", PHPDBG_G(flags) & PHPDBG_STEP_OPCODE ? "opcode" : "line");
 	} else switch (param->type) {
 		case STR_PARAM: {
-			if (param->len == sizeof("opcode") - 1 && !memcmp(param->str, "opcode", sizeof("opcode"))) {
+			if (param->len == strlen("opcode") && !memcmp(param->str, "opcode", sizeof("opcode"))) {
 				PHPDBG_G(flags) |= PHPDBG_STEP_OPCODE;
-			} else if (param->len == sizeof("line") - 1 && !memcmp(param->str, "line", sizeof("line"))) {
+			} else if (param->len == strlen("line") && !memcmp(param->str, "line", sizeof("line"))) {
 				PHPDBG_G(flags) &= ~PHPDBG_STEP_OPCODE;
 			} else {
 				phpdbg_error("usage set stepping [<opcode|line>]");

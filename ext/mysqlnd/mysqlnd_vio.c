@@ -127,7 +127,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 		streams_options |= STREAM_OPEN_PERSISTENT;
 	}
 	streams_options |= IGNORE_URL;
-	net_stream = php_stream_open_wrapper(scheme.s + sizeof("pipe://") - 1, "r+", streams_options, NULL);
+	net_stream = php_stream_open_wrapper(scheme.s + strlen("pipe://"), "r+", streams_options, NULL);
 	if (!net_stream) {
 		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown error while connecting");
 		DBG_RETURN(NULL);
@@ -255,7 +255,7 @@ MYSQLND_METHOD(mysqlnd_vio, post_connect_set_opt)(MYSQLND_VIO * const vio, const
 			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 		}
 
-		if (!memcmp(scheme.s, "tcp://", sizeof("tcp://") - 1)) {
+		if (!memcmp(scheme.s, "tcp://", strlen("tcp://"))) {
 			/* TCP -> Set TCP_NODELAY */
 			mysqlnd_set_sock_no_delay(net_stream);
 			/* TCP -> Set SO_KEEPALIVE */
@@ -278,11 +278,11 @@ MYSQLND_METHOD(mysqlnd_vio, get_open_stream)(MYSQLND_VIO * const vio, const MYSQ
 {
 	func_mysqlnd_vio__open_stream ret = NULL;
 	DBG_ENTER("mysqlnd_vio::get_open_stream");
-	if (scheme.l > (sizeof("pipe://") - 1) && !memcmp(scheme.s, "pipe://", sizeof("pipe://") - 1)) {
+	if (scheme.l > (strlen("pipe://")) && !memcmp(scheme.s, "pipe://", strlen("pipe://"))) {
 		ret = vio->data->m.open_pipe;
-	} else if ((scheme.l > (sizeof("tcp://") - 1) && !memcmp(scheme.s, "tcp://", sizeof("tcp://") - 1))
+	} else if ((scheme.l > (strlen("tcp://")) && !memcmp(scheme.s, "tcp://", strlen("tcp://")))
 				||
-				(scheme.l > (sizeof("unix://") - 1) && !memcmp(scheme.s, "unix://", sizeof("unix://") - 1)))
+				(scheme.l > (strlen("unix://")) && !memcmp(scheme.s, "unix://", strlen("unix://"))))
 	{
 		ret = vio->data->m.open_tcp_or_unix;
 	}

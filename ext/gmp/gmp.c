@@ -310,7 +310,7 @@ static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 	ht = zend_array_dup(props);
 
 	gmp_strval(&zv, gmpnum, 10);
-	zend_hash_str_update(ht, "num", sizeof("num")-1, &zv);
+	zend_hash_str_update(ht, "num", strlen("num"), &zv);
 
 	return ht;
 }

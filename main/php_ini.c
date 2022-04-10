@@ -83,10 +83,10 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 			} else {
 				if (!sapi_module.phpinfo_as_text) {
 					display_string = "<i>no value</i>";
-					display_string_length = sizeof("<i>no value</i>") - 1;
+					display_string_length = strlen("<i>no value</i>");
 				} else {
 					display_string = "no value";
-					display_string_length = sizeof("no value") - 1;
+					display_string_length = strlen("no value");
 				}
 			}
 		} else if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
@@ -96,10 +96,10 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		} else {
 			if (!sapi_module.phpinfo_as_text) {
 				display_string = "<i>no value</i>";
-				display_string_length = sizeof("<i>no value</i>") - 1;
+				display_string_length = strlen("<i>no value</i>");
 			} else {
 				display_string = "no value";
-				display_string_length = sizeof("no value") - 1;
+				display_string_length = strlen("no value");
 			}
 		}
 
@@ -252,9 +252,9 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				size_t key_len;
 
 				/* PATH sections */
-				if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "PATH", sizeof("PATH") - 1, sizeof("PATH") - 1)) {
+				if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "PATH", strlen("PATH"), strlen("PATH"))) {
 					key = Z_STRVAL_P(arg1);
-					key = key + sizeof("PATH") - 1;
+					key = key + strlen("PATH");
 					key_len = Z_STRLEN_P(arg1) - sizeof("PATH") + 1;
 					is_special_section = 1;
 					has_per_dir_config = 1;
@@ -263,9 +263,9 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					TRANSLATE_SLASHES_LOWER(key);
 
 				/* HOST sections */
-				} else if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "HOST", sizeof("HOST") - 1, sizeof("HOST") - 1)) {
+				} else if (!zend_binary_strncasecmp(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), "HOST", strlen("HOST"), strlen("HOST"))) {
 					key = Z_STRVAL_P(arg1);
-					key = key + sizeof("HOST") - 1;
+					key = key + strlen("HOST");
 					key_len = Z_STRLEN_P(arg1) - sizeof("HOST") + 1;
 					is_special_section = 1;
 					has_per_host_config = 1;
@@ -617,7 +617,7 @@ int php_init_config(void)
 			zval tmp;
 
 			ZVAL_NEW_STR(&tmp, zend_string_init(filename, strlen(filename), 1));
-			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
+			zend_hash_str_update(&configuration_hash, "cfg_file_path", strlen("cfg_file_path"), &tmp);
 			if (opened_path) {
 				zend_string_release_ex(opened_path, 0);
 			}

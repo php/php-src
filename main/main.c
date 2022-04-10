@@ -1377,7 +1377,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					sapi_header_line ctr = {0};
 
 					ctr.line = "HTTP/1.0 500 Internal Server Error";
-					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
+					ctr.line_len = strlen("HTTP/1.0 500 Internal Server Error");
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
@@ -1476,7 +1476,7 @@ PHP_FUNCTION(set_time_limit)
 
 	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
-	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
+	key = zend_string_init("max_execution_time", strlen("max_execution_time"), 0);
 	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
@@ -2262,7 +2262,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* register additional functions */
 	if (sapi_module.additional_functions) {
-		if ((module = zend_hash_str_find_ptr(&module_registry, "standard", sizeof("standard")-1)) != NULL) {
+		if ((module = zend_hash_str_find_ptr(&module_registry, "standard", strlen("standard"))) != NULL) {
 			EG(current_module) = module;
 			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT);
 			EG(current_module) = NULL;
@@ -2274,7 +2274,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_disable_classes();
 
 	/* make core report what it should */
-	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
+	if ((module = zend_hash_str_find_ptr(&module_registry, "core", strlen("core"))) != NULL) {
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
@@ -2622,7 +2622,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 	int ret = -1;
 	size_t auth_len = auth != NULL ? strlen(auth) : 0;
 
-	if (auth && auth_len > 0 && zend_binary_strncasecmp(auth, auth_len, "Basic ", sizeof("Basic ")-1, sizeof("Basic ")-1) == 0) {
+	if (auth && auth_len > 0 && zend_binary_strncasecmp(auth, auth_len, "Basic ", strlen("Basic "), strlen("Basic ")) == 0) {
 		char *pass;
 		zend_string *user;
 
@@ -2645,7 +2645,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 		SG(request_info).auth_digest = NULL;
 	}
 
-	if (ret == -1 && auth && auth_len > 0 && zend_binary_strncasecmp(auth, auth_len, "Digest ", sizeof("Digest ")-1, sizeof("Digest ")-1) == 0) {
+	if (ret == -1 && auth && auth_len > 0 && zend_binary_strncasecmp(auth, auth_len, "Digest ", strlen("Digest "), strlen("Digest ")) == 0) {
 		SG(request_info).auth_digest = estrdup(auth + 7);
 		ret = 0;
 	}

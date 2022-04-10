@@ -162,10 +162,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (idna_info) {
-		add_assoc_str_ex(idna_info, "result", sizeof("result")-1, zend_string_copy(buffer));
+		add_assoc_str_ex(idna_info, "result", strlen("result"), zend_string_copy(buffer));
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
-				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
-		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
+				strlen("isTransitionalDifferent"), info.isTransitionalDifferent);
+		add_assoc_long_ex(idna_info, "errors", strlen("errors"), (zend_long)info.errors);
 	}
 
 	zend_string_release(buffer);

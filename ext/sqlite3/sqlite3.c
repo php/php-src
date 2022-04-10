@@ -112,8 +112,8 @@ PHP_METHOD(SQLite3, open)
 		RETURN_THROWS();
 	}
 
-	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
-			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
+	if (filename_len != 0 && (filename_len != strlen(":memory:") ||
+			memcmp(filename, ":memory:", strlen(":memory:")) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
 			RETURN_THROWS();
@@ -2402,48 +2402,48 @@ PHP_MINIT_FUNCTION(sqlite3)
 	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_CREATE", SQLITE_OPEN_CREATE, CONST_CS | CONST_PERSISTENT);
 
 	/* Class constants */
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "OK", sizeof("OK") - 1, SQLITE_OK);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "OK", strlen("OK"), SQLITE_OK);
 
 	/* Constants for authorizer return */
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DENY", sizeof("DENY") - 1, SQLITE_DENY);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "IGNORE", sizeof("IGNORE") - 1, SQLITE_IGNORE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DENY", strlen("DENY"), SQLITE_DENY);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "IGNORE", strlen("IGNORE"), SQLITE_IGNORE);
 
 	/* Constants for authorizer actions */
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_INDEX", sizeof("CREATE_INDEX") - 1, SQLITE_CREATE_INDEX);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TABLE", sizeof("CREATE_TABLE") - 1, SQLITE_CREATE_TABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_INDEX", sizeof("CREATE_TEMP_INDEX") - 1, SQLITE_CREATE_TEMP_INDEX);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_TABLE", sizeof("CREATE_TEMP_TABLE") - 1, SQLITE_CREATE_TEMP_TABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_TRIGGER", sizeof("CREATE_TEMP_TRIGGER") - 1, SQLITE_CREATE_TEMP_TRIGGER);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_VIEW", sizeof("CREATE_TEMP_VIEW") - 1, SQLITE_CREATE_TEMP_VIEW);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TRIGGER", sizeof("CREATE_TRIGGER") - 1, SQLITE_CREATE_TRIGGER);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_VIEW", sizeof("CREATE_VIEW") - 1, SQLITE_CREATE_VIEW);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DELETE", sizeof("DELETE") - 1, SQLITE_DELETE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_INDEX", sizeof("DROP_INDEX") - 1, SQLITE_DROP_INDEX);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TABLE", sizeof("DROP_TABLE") - 1, SQLITE_DROP_TABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_INDEX", sizeof("DROP_TEMP_INDEX") - 1, SQLITE_DROP_TEMP_INDEX);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_TABLE", sizeof("DROP_TEMP_TABLE") - 1, SQLITE_DROP_TEMP_TABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_TRIGGER", sizeof("DROP_TEMP_TRIGGER") - 1, SQLITE_DROP_TEMP_TRIGGER);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_VIEW", sizeof("DROP_TEMP_VIEW") - 1, SQLITE_DROP_TEMP_VIEW);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TRIGGER", sizeof("DROP_TRIGGER") - 1, SQLITE_DROP_TRIGGER);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_VIEW", sizeof("DROP_VIEW") - 1, SQLITE_DROP_VIEW);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "INSERT", sizeof("INSERT") - 1, SQLITE_INSERT);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "PRAGMA", sizeof("PRAGMA") - 1, SQLITE_PRAGMA);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "READ", sizeof("READ") - 1, SQLITE_READ);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "SELECT", sizeof("SELECT") - 1, SQLITE_SELECT);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "TRANSACTION", sizeof("TRANSACTION") - 1, SQLITE_TRANSACTION);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "UPDATE", sizeof("UPDATE") - 1, SQLITE_UPDATE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ATTACH", sizeof("ATTACH") - 1, SQLITE_ATTACH);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DETACH", sizeof("DETACH") - 1, SQLITE_DETACH);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ALTER_TABLE", sizeof("ALTER_TABLE") - 1, SQLITE_ALTER_TABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "REINDEX", sizeof("REINDEX") - 1, SQLITE_REINDEX);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ANALYZE", sizeof("ANALYZE") - 1, SQLITE_ANALYZE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_VTABLE", sizeof("CREATE_VTABLE") - 1, SQLITE_CREATE_VTABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_VTABLE", sizeof("DROP_VTABLE") - 1, SQLITE_DROP_VTABLE);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "FUNCTION", sizeof("FUNCTION") - 1, SQLITE_FUNCTION);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "SAVEPOINT", sizeof("SAVEPOINT") - 1, SQLITE_SAVEPOINT);
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "COPY", sizeof("COPY") - 1, SQLITE_COPY);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_INDEX", strlen("CREATE_INDEX"), SQLITE_CREATE_INDEX);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TABLE", strlen("CREATE_TABLE"), SQLITE_CREATE_TABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_INDEX", strlen("CREATE_TEMP_INDEX"), SQLITE_CREATE_TEMP_INDEX);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_TABLE", strlen("CREATE_TEMP_TABLE"), SQLITE_CREATE_TEMP_TABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_TRIGGER", strlen("CREATE_TEMP_TRIGGER"), SQLITE_CREATE_TEMP_TRIGGER);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TEMP_VIEW", strlen("CREATE_TEMP_VIEW"), SQLITE_CREATE_TEMP_VIEW);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_TRIGGER", strlen("CREATE_TRIGGER"), SQLITE_CREATE_TRIGGER);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_VIEW", strlen("CREATE_VIEW"), SQLITE_CREATE_VIEW);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DELETE", strlen("DELETE"), SQLITE_DELETE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_INDEX", strlen("DROP_INDEX"), SQLITE_DROP_INDEX);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TABLE", strlen("DROP_TABLE"), SQLITE_DROP_TABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_INDEX", strlen("DROP_TEMP_INDEX"), SQLITE_DROP_TEMP_INDEX);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_TABLE", strlen("DROP_TEMP_TABLE"), SQLITE_DROP_TEMP_TABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_TRIGGER", strlen("DROP_TEMP_TRIGGER"), SQLITE_DROP_TEMP_TRIGGER);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TEMP_VIEW", strlen("DROP_TEMP_VIEW"), SQLITE_DROP_TEMP_VIEW);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_TRIGGER", strlen("DROP_TRIGGER"), SQLITE_DROP_TRIGGER);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_VIEW", strlen("DROP_VIEW"), SQLITE_DROP_VIEW);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "INSERT", strlen("INSERT"), SQLITE_INSERT);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "PRAGMA", strlen("PRAGMA"), SQLITE_PRAGMA);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "READ", strlen("READ"), SQLITE_READ);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "SELECT", strlen("SELECT"), SQLITE_SELECT);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "TRANSACTION", strlen("TRANSACTION"), SQLITE_TRANSACTION);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "UPDATE", strlen("UPDATE"), SQLITE_UPDATE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ATTACH", strlen("ATTACH"), SQLITE_ATTACH);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DETACH", strlen("DETACH"), SQLITE_DETACH);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ALTER_TABLE", strlen("ALTER_TABLE"), SQLITE_ALTER_TABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "REINDEX", strlen("REINDEX"), SQLITE_REINDEX);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "ANALYZE", strlen("ANALYZE"), SQLITE_ANALYZE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "CREATE_VTABLE", strlen("CREATE_VTABLE"), SQLITE_CREATE_VTABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "DROP_VTABLE", strlen("DROP_VTABLE"), SQLITE_DROP_VTABLE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "FUNCTION", strlen("FUNCTION"), SQLITE_FUNCTION);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "SAVEPOINT", strlen("SAVEPOINT"), SQLITE_SAVEPOINT);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "COPY", strlen("COPY"), SQLITE_COPY);
 #ifdef SQLITE_RECURSIVE
-	zend_declare_class_constant_long(php_sqlite3_sc_entry, "RECURSIVE", sizeof("RECURSIVE") - 1, SQLITE_RECURSIVE);
+	zend_declare_class_constant_long(php_sqlite3_sc_entry, "RECURSIVE", strlen("RECURSIVE"), SQLITE_RECURSIVE);
 #endif
 
 #ifdef SQLITE_DETERMINISTIC

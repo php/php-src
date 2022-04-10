@@ -118,7 +118,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
-		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0);
+		dt = php_format_date("D, d-M-Y H:i:s T", strlen("D, d-M-Y H:i:s T"), 1, 0);
 		smart_str_appends(&buf, "Set-Cookie: ");
 		smart_str_append(&buf, name);
 		smart_str_appends(&buf, "=deleted; expires=");
@@ -141,7 +141,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 			double diff;
 
 			smart_str_appends(&buf, COOKIE_EXPIRES);
-			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0);
+			dt = php_format_date("D, d-M-Y H:i:s T", strlen("D, d-M-Y H:i:s T"), expires, 0);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(ZSTR_VAL(dt), '-', ZSTR_LEN(dt));
 			if (!p || *(p + 5) != ' ') {

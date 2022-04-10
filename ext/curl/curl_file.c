@@ -38,14 +38,14 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_STR_OR_NULL(postname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "name", sizeof("name")-1, fname);
+	zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "name", strlen("name"), fname);
 
 	if (mime) {
-		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "mime", sizeof("mime")-1, mime);
+		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "mime", strlen("mime"), mime);
 	}
 
 	if (postname) {
-		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "postname", sizeof("postname")-1, postname);
+		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "postname", strlen("postname"), postname);
 	}
 }
 
@@ -88,35 +88,35 @@ static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION
 /* {{{ Get file name */
 ZEND_METHOD(CURLFile, getFilename)
 {
-	curlfile_get_property("name", sizeof("name")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("name", strlen("name"), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Get MIME type */
 ZEND_METHOD(CURLFile, getMimeType)
 {
-	curlfile_get_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("mime", strlen("mime"), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Get file name for POST */
 ZEND_METHOD(CURLFile, getPostFilename)
 {
-	curlfile_get_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_get_property("postname", strlen("postname"), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Set MIME type */
 ZEND_METHOD(CURLFile, setMimeType)
 {
-	curlfile_set_property("mime", sizeof("mime")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_set_property("mime", strlen("mime"), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Set file name for POST */
 ZEND_METHOD(CURLFile, setPostFilename)
 {
-	curlfile_set_property("postname", sizeof("postname")-1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	curlfile_set_property("postname", strlen("postname"), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -134,12 +134,12 @@ ZEND_METHOD(CURLStringFile, __construct)
 		Z_PARAM_STR(mime)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "data", sizeof("data") - 1, data);
-	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "postname", sizeof("postname")-1, postname);
+	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "data", strlen("data"), data);
+	zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "postname", strlen("postname"), postname);
 	if (mime) {
-		zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", sizeof("mime")-1, mime);
+		zend_update_property_str(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", strlen("mime"), mime);
 	} else {
-		zend_update_property_string(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", sizeof("mime")-1, "application/octet-stream");
+		zend_update_property_string(curl_CURLStringFile_class, Z_OBJ_P(object), "mime", strlen("mime"), "application/octet-stream");
 	}
 }
 

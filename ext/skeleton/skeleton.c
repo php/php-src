@@ -29,7 +29,7 @@ PHP_FUNCTION(test1)
 PHP_FUNCTION(test2)
 {
 	char *var = "World";
-	size_t var_len = sizeof("World") - 1;
+	size_t var_len = strlen("World");
 	zend_string *retval;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)

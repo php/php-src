@@ -23,21 +23,21 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	zend_string *jit_option = zend_string_init("opcache.jit", sizeof("opcache.jit") - 1, 1);
+	zend_string *jit_option = zend_string_init("opcache.jit", strlen("opcache.jit"), 1);
 
 	/* First run without JIT to determine whether we bail out. We should not run JITed code if
 	 * we bail out here, as the JIT code may loop infinitely. */
 	steps_left = MAX_STEPS;
 	bailed_out = false;
 	zend_alter_ini_entry_chars(
-		jit_option, "off", sizeof("off")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		jit_option, "off", strlen("off"), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	fuzzer_do_request_from_buffer(
 		FILE_NAME, (const char *) Data, Size, /* execute */ 1, opcache_invalidate);
 
 	if (!bailed_out) {
 		steps_left = MAX_STEPS;
 		zend_alter_ini_entry_chars(jit_option,
-			"tracing", sizeof("tracing")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			"tracing", strlen("tracing"), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_execute_ex = orig_execute_ex;
 		/* Trace & compile */
 		fuzzer_do_request_from_buffer(

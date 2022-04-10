@@ -185,13 +185,13 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
 {
-	if (ZSTR_LEN(name) == sizeof("open") - 1
+	if (ZSTR_LEN(name) == strlen("open")
 			&& (ZSTR_VAL(name)[0] == 'o' || ZSTR_VAL(name)[0] == 'O')
 			&& (ZSTR_VAL(name)[1] == 'p' || ZSTR_VAL(name)[1] == 'P')
 			&& (ZSTR_VAL(name)[2] == 'e' || ZSTR_VAL(name)[2] == 'E')
 			&& (ZSTR_VAL(name)[3] == 'n' || ZSTR_VAL(name)[3] == 'N')) {
 		return (zend_function*)&xmlreader_open_fn;
-	} else if (ZSTR_LEN(name) == sizeof("xml") - 1
+	} else if (ZSTR_LEN(name) == strlen("xml")
 			&& (ZSTR_VAL(name)[0] == 'x' || ZSTR_VAL(name)[0] == 'X')
 			&& (ZSTR_VAL(name)[1] == 'm' || ZSTR_VAL(name)[1] == 'M')
 			&& (ZSTR_VAL(name)[2] == 'l' || ZSTR_VAL(name)[2] == 'L')) {
@@ -1164,9 +1164,9 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_class_entry = register_class_XMLReader();
 	xmlreader_class_entry->create_object = xmlreader_objects_new;
 
-	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1), sizeof(zend_internal_function));
+	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", strlen("open")), sizeof(zend_internal_function));
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	memcpy(&xmlreader_xml_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1), sizeof(zend_internal_function));
+	memcpy(&xmlreader_xml_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", strlen("xml")), sizeof(zend_internal_function));
 	xmlreader_xml_fn.fn_flags &= ~ZEND_ACC_STATIC;
 
 	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, php_xmlreader_free_prop_handler, 1);

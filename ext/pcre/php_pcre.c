@@ -1124,7 +1124,7 @@ static void populate_subpat_array(
 	}
 	/* Add MARK, if available */
 	if (mark) {
-		add_assoc_string_ex(subpats, "MARK", sizeof("MARK") - 1, (char *)mark);
+		add_assoc_string_ex(subpats, "MARK", strlen("MARK"), (char *)mark);
 	}
 }
 

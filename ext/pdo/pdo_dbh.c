@@ -48,13 +48,13 @@ void pdo_throw_exception(unsigned int driver_errcode, char *driver_errmsg, pdo_e
 		add_next_index_string(&error_info, driver_errmsg);
 
 		spprintf(&pdo_exception_message, 0,"SQLSTATE[%s] [%d] %s",*pdo_error, driver_errcode, driver_errmsg);
-		zend_update_property(php_pdo_get_exception(), Z_OBJ(pdo_exception), "errorInfo", sizeof("errorInfo")-1, &error_info);
-		zend_update_property_long(php_pdo_get_exception(), Z_OBJ(pdo_exception), "code", sizeof("code")-1, driver_errcode);
+		zend_update_property(php_pdo_get_exception(), Z_OBJ(pdo_exception), "errorInfo", strlen("errorInfo"), &error_info);
+		zend_update_property_long(php_pdo_get_exception(), Z_OBJ(pdo_exception), "code", strlen("code"), driver_errcode);
 		zend_update_property_string(
 			php_pdo_get_exception(),
 			Z_OBJ(pdo_exception),
 			"message",
-			sizeof("message")-1,
+			strlen("message"),
 			pdo_exception_message
 		);
 		efree(pdo_exception_message);
@@ -103,14 +103,14 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message")-1, message);
-		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code")-1, *pdo_err);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "message", strlen("message"), message);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", strlen("code"), *pdo_err);
 
 		array_init(&info);
 
 		add_next_index_string(&info, *pdo_err);
 		add_next_index_long(&info, 0);
-		zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", sizeof("errorInfo")-1, &info);
+		zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", strlen("errorInfo"), &info);
 		zval_ptr_dtor(&info);
 
 		zend_throw_exception_object(&ex);
@@ -180,11 +180,11 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 
 		object_init_ex(&ex, pdo_ex);
 
-		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", sizeof("message") - 1, message);
-		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", sizeof("code") - 1, *pdo_err);
+		zend_update_property_str(zend_ce_exception, Z_OBJ(ex), "message", strlen("message"), message);
+		zend_update_property_string(zend_ce_exception, Z_OBJ(ex), "code", strlen("code"), *pdo_err);
 
 		if (!Z_ISUNDEF(info)) {
-			zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", sizeof("errorInfo") - 1, &info);
+			zend_update_property(pdo_ex, Z_OBJ(ex), "errorInfo", strlen("errorInfo"), &info);
 		}
 
 		zend_throw_exception_object(&ex);
@@ -265,9 +265,9 @@ PHP_METHOD(PDO, __construct)
 		}
 	}
 
-	if (!strncmp(data_source, "uri:", sizeof("uri:")-1)) {
+	if (!strncmp(data_source, "uri:", strlen("uri:"))) {
 		/* the specified URI holds connection details */
-		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
+		data_source = dsn_from_uri(data_source + strlen("uri:"), alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
 			zend_argument_error(php_pdo_get_exception(), 1, "must be a valid data source URI");
 			RETURN_THROWS();
@@ -458,7 +458,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 	zend_string *key;
 
 	ZVAL_STR(&query_string, stmt->query_string);
-	key = zend_string_init("queryString", sizeof("queryString") - 1, 0);
+	key = zend_string_init("queryString", strlen("queryString"), 0);
 	zend_std_write_property(Z_OBJ_P(object), key, &query_string, NULL);
 	zend_string_release_ex(key, 0);
 

@@ -45,8 +45,8 @@ static void php_dba_db4_errcall_fcn(
 	{
 		const char *function = get_active_function_name();
 		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
-			&& (!strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)
-				|| !strncmp(msg, "BDB0004 fop_read_meta", sizeof("BDB0004 fop_read_meta")-1))) {
+			&& (!strncmp(msg, "fop_read_meta", strlen("fop_read_meta"))
+				|| !strncmp(msg, "BDB0004 fop_read_meta", strlen("BDB0004 fop_read_meta")))) {
 			return;
 		}
 	}

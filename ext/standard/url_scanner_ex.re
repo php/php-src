@@ -458,7 +458,7 @@ static inline void handle_tag(STD_PARA)
     /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
 	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ZSTR_VAL(ctx->tag.s), ZSTR_LEN(ctx->tag.s))) != NULL) {
 		ok = 1;
-		if (ZSTR_LEN(ctx->tag.s) == sizeof("form")-1
+		if (ZSTR_LEN(ctx->tag.s) == strlen("form")
 			&& !strncasecmp(ZSTR_VAL(ctx->tag.s), "form", ZSTR_LEN(ctx->tag.s))) {
 			ctx->tag_type = TAG_FORM;
 		} else {

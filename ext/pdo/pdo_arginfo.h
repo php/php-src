@@ -27,13 +27,13 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
-	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_string *property_code_name = zend_string_init("code", strlen("code"), 1);
 	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL);
 	zend_string_release(property_code_name);
 
 	zval property_errorInfo_default_value;
 	ZVAL_NULL(&property_errorInfo_default_value);
-	zend_string *property_errorInfo_name = zend_string_init("errorInfo", sizeof("errorInfo") - 1, 1);
+	zend_string *property_errorInfo_name = zend_string_init("errorInfo", strlen("errorInfo"), 1);
 	zend_declare_typed_property(class_entry, property_errorInfo_name, &property_errorInfo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
 	zend_string_release(property_errorInfo_name);
 

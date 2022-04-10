@@ -549,9 +549,9 @@ PHP_FUNCTION(mysqli_error_list)
 		{
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
+			add_assoc_long_ex(&single_error, "errno", strlen("errno"), message->error_no);
+			add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), message->sqlstate);
+			add_assoc_string_ex(&single_error, "error", strlen("error"), message->error);
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
@@ -562,9 +562,9 @@ PHP_FUNCTION(mysqli_error_list)
 		zval single_error;
 		array_init(return_value);
 		array_init(&single_error);
-		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
-		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_sqlstate(mysql->mysql));
-		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
+		add_assoc_long_ex(&single_error, "errno", strlen("errno"), mysql_errno(mysql->mysql));
+		add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), mysql_sqlstate(mysql->mysql));
+		add_assoc_string_ex(&single_error, "error", strlen("error"), mysql_error(mysql->mysql));
 		add_next_index_zval(return_value, &single_error);
 	} else {
 		RETURN_EMPTY_ARRAY();
@@ -594,9 +594,9 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		{
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
+			add_assoc_long_ex(&single_error, "errno", strlen("errno"), message->error_no);
+			add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), message->sqlstate);
+			add_assoc_string_ex(&single_error, "error", strlen("error"), message->error);
 			add_next_index_zval(return_value, &single_error);
 		}
 	} else {
@@ -607,9 +607,9 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		zval single_error;
 		array_init(return_value);
 		array_init(&single_error);
-		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
-		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_stmt_sqlstate(stmt->stmt));
-		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
+		add_assoc_long_ex(&single_error, "errno", strlen("errno"), mysql_stmt_errno(stmt->stmt));
+		add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), mysql_stmt_sqlstate(stmt->stmt));
+		add_assoc_string_ex(&single_error, "error", strlen("error"), mysql_stmt_error(stmt->stmt));
 		add_next_index_zval(return_value, &single_error);
 	} else {
 		RETURN_EMPTY_ARRAY();
@@ -1166,20 +1166,20 @@ static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mo
 	unsigned int query_len;
 	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
 		if (tmp_str.s) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
+		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", strlen("WITH CONSISTENT SNAPSHOT"));
 	}
 	if (mode & TRANS_START_READ_WRITE) {
 		if (tmp_str.s) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+		smart_str_appendl(&tmp_str, "READ WRITE", strlen("READ WRITE"));
 	} else if (mode & TRANS_START_READ_ONLY) {
 		if (tmp_str.s) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+		smart_str_appendl(&tmp_str, "READ ONLY", strlen("READ ONLY"));
 	}
 	smart_str_0(&tmp_str);
 
@@ -1315,8 +1315,8 @@ PHP_FUNCTION(mysqli_get_links_stats)
 	}
 
 	array_init(return_value);
-	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
-	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
-	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks") - 1, MyG(num_inactive_persistent));
+	add_assoc_long_ex(return_value, "total", strlen("total"), MyG(num_links));
+	add_assoc_long_ex(return_value, "active_plinks", strlen("active_plinks"), MyG(num_active_persistent));
+	add_assoc_long_ex(return_value, "cached_plinks", strlen("cached_plinks"), MyG(num_inactive_persistent));
 }
 /* }}} */

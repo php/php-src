@@ -1139,7 +1139,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		{
 			zval *tmp;
 
-			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "collection", sizeof("collection")-1)) == NULL) {
+			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "collection", strlen("collection"))) == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 				return 1;
 			}
@@ -1161,7 +1161,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		{
 			zval *tmp;
 
-			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "descriptor", sizeof("descriptor")-1)) == NULL) {
+			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "descriptor", strlen("descriptor"))) == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 				return 1;
 			}
@@ -1480,7 +1480,7 @@ sb4 php_oci_bind_out_callback(
 		 * out-bind as the contents would have been changed for in/out
 		 * binds (Bug #46994).
 		 */
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor")-1)) == NULL) {
+		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", strlen("descriptor"))) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Unable to find object outbind descriptor property");
 			return OCI_ERROR;
 		}
@@ -1952,7 +1952,7 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, zend_long max_table_leng
 			((OCIDate *)bind->array.elements)[i] = oci_date;
 			zend_hash_move_forward(hash);
 		} else {
-			PHP_OCI_CALL_RETURN(errstatus, OCIDateFromText, (connection->err, (CONST text *)"01-JAN-00", sizeof("01-JAN-00")-1, NULL, 0, NULL, 0, &oci_date));
+			PHP_OCI_CALL_RETURN(errstatus, OCIDateFromText, (connection->err, (CONST text *)"01-JAN-00", strlen("01-JAN-00"), NULL, 0, NULL, 0, &oci_date));
 
 			if (errstatus != OCI_SUCCESS) {
 				/* failed to convert string to date */

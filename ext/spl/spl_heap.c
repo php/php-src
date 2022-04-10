@@ -147,9 +147,9 @@ static void spl_pqueue_extract_helper(zval *result, spl_pqueue_elem *elem, int f
 	if ((flags & SPL_PQUEUE_EXTR_BOTH) == SPL_PQUEUE_EXTR_BOTH) {
 		array_init(result);
 		Z_TRY_ADDREF(elem->data);
-		add_assoc_zval_ex(result, "data", sizeof("data") - 1, &elem->data);
+		add_assoc_zval_ex(result, "data", strlen("data"), &elem->data);
 		Z_TRY_ADDREF(elem->priority);
-		add_assoc_zval_ex(result, "priority", sizeof("priority") - 1, &elem->priority);
+		add_assoc_zval_ex(result, "priority", strlen("priority"), &elem->priority);
 		return;
 	}
 
@@ -454,11 +454,11 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
-		intern->fptr_cmp = zend_hash_str_find_ptr(&class_type->function_table, "compare", sizeof("compare") - 1);
+		intern->fptr_cmp = zend_hash_str_find_ptr(&class_type->function_table, "compare", strlen("compare"));
 		if (intern->fptr_cmp->common.scope == parent) {
 			intern->fptr_cmp = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", strlen("count"));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -520,12 +520,12 @@ static inline HashTable* spl_heap_object_get_debug_info(zend_class_entry *ce, ze
 	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-	pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1);
+	pnstr = spl_gen_private_prop_name(ce, "flags", strlen("flags"));
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_update(debug_info, pnstr, &tmp);
 	zend_string_release_ex(pnstr, 0);
 
-	pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1);
+	pnstr = spl_gen_private_prop_name(ce, "isCorrupted", strlen("isCorrupted"));
 	ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
 	zend_hash_update(debug_info, pnstr, &tmp);
 	zend_string_release_ex(pnstr, 0);
@@ -545,7 +545,7 @@ static inline HashTable* spl_heap_object_get_debug_info(zend_class_entry *ce, ze
 		}
 	}
 
-	pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1);
+	pnstr = spl_gen_private_prop_name(ce, "heap", strlen("heap"));
 	zend_hash_update(debug_info, pnstr, &heap_array);
 	zend_string_release_ex(pnstr, 0);
 

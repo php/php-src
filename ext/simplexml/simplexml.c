@@ -1121,7 +1121,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 					namelen = xmlStrlen(attr->name);
 					if (Z_ISUNDEF(zattr)) {
 						array_init(&zattr);
-						sxe_properties_add(rv, "@attributes", sizeof("@attributes") - 1, &zattr);
+						sxe_properties_add(rv, "@attributes", strlen("@attributes"), &zattr);
 					}
 					add_assoc_zval_ex(&zattr, (char*)attr->name, namelen, &value);
 				}
@@ -2198,7 +2198,7 @@ static zend_function* php_sxe_find_fptr_count(zend_class_entry *ce)
 	}
 
 	if (inherited) {
-		fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
+		fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", strlen("count"));
 		if (fptr_count->common.scope == parent) {
 			fptr_count = NULL;
 		}

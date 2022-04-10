@@ -616,7 +616,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			zend_string_release_ex(name, 0);
 			arg_info++;
 		}
-		zend_hash_str_update(debug_info, "parameter", sizeof("parameter")-1, &val);
+		zend_hash_str_update(debug_info, "parameter", strlen("parameter"), &val);
 	}
 
 	return debug_info;

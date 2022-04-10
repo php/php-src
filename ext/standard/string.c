@@ -4598,7 +4598,7 @@ PHP_FUNCTION(nl2br)
 	}
 
 	{
-		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
+		size_t repl_len = is_xhtml ? (strlen("<br />")) : (strlen("<br>"));
 
 		result = zend_string_safe_alloc(repl_cnt, repl_len, ZSTR_LEN(str), 0);
 		target = ZSTR_VAL(result);
@@ -5458,8 +5458,8 @@ PHP_FUNCTION(localeconv)
 		add_assoc_long(  return_value, "n_sign_posn",       currlocdata.n_sign_posn);
 	}
 
-	zend_hash_str_update(Z_ARRVAL_P(return_value), "grouping", sizeof("grouping")-1, &grouping);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), "mon_grouping", sizeof("mon_grouping")-1, &mon_grouping);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), "grouping", strlen("grouping"), &grouping);
+	zend_hash_str_update(Z_ARRVAL_P(return_value), "mon_grouping", strlen("mon_grouping"), &mon_grouping);
 }
 /* }}} */
 

@@ -843,7 +843,7 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name) {
 	return zend_string_concat3(
 		ZSTR_VAL(class_name), ZSTR_LEN(class_name),
-		"::", sizeof("::") - 1,
+		"::", strlen("::"),
 		ZSTR_VAL(member_name), ZSTR_LEN(member_name));
 }
 
@@ -1852,7 +1852,7 @@ zend_ast *zend_negate_num_string(zend_ast *ast) /* {{{ */
 	zval *zv = zend_ast_get_zval(ast);
 	if (Z_TYPE_P(zv) == IS_LONG) {
 		if (Z_LVAL_P(zv) == 0) {
-			ZVAL_NEW_STR(zv, zend_string_init("-0", sizeof("-0")-1, 0));
+			ZVAL_NEW_STR(zv, zend_string_init("-0", strlen("-0"), 0));
 		} else {
 			ZEND_ASSERT(Z_LVAL_P(zv) > 0);
 			Z_LVAL_P(zv) *= -1;
@@ -4033,7 +4033,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 				/* If the original argument was named, add the new argument as named as well,
 				 * as mixing named and positional is not allowed. */
 				zend_ast *name = zend_ast_create_zval_from_str(
-					zend_string_init("description", sizeof("description") - 1, 0));
+					zend_string_init("description", strlen("description"), 0));
 				arg = zend_ast_create(ZEND_AST_NAMED_ARG, name, arg);
 			}
 			zend_ast_list_add((zend_ast *) args, arg);
@@ -6963,9 +6963,9 @@ static void add_stringable_interface(zend_class_entry *ce) {
 		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 	// TODO: Add known interned strings instead?
 	ce->interface_names[ce->num_interfaces - 1].name =
-		zend_string_init("Stringable", sizeof("Stringable") - 1, 0);
+		zend_string_init("Stringable", strlen("Stringable"), 0);
 	ce->interface_names[ce->num_interfaces - 1].lc_name =
-		zend_string_init("stringable", sizeof("stringable") - 1, 0);
+		zend_string_init("stringable", strlen("stringable"), 0);
 }
 
 static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string *name, bool has_body) /* {{{ */

@@ -163,12 +163,12 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
 
 static char *phar_find_eocd(const char *s, size_t n)
 {
-	const char *end = s + n + sizeof("PK\5\6") - 1 - sizeof(phar_zip_dir_end);
+	const char *end = s + n + strlen("PK\5\6") - sizeof(phar_zip_dir_end);
 
 	/* search backwards for end of central directory signatures */
 	do {
 		uint16_t comment_len;
-		const char *eocd_start = zend_memnrstr(s, "PK\5\6", sizeof("PK\5\6") - 1, end);
+		const char *eocd_start = zend_memnrstr(s, "PK\5\6", strlen("PK\5\6"), end);
 
 		if (eocd_start == NULL) {
 			return NULL;
@@ -416,7 +416,7 @@ foundit:
 			entry.is_dir = 0;
 		}
 
-		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
+		if (entry.filename_len == strlen(".phar/signature.bin") && !strncmp(entry.filename, ".phar/signature.bin", strlen(".phar/signature.bin"))) {
 			size_t read;
 			php_stream *sigfile;
 			char *sig;
@@ -560,7 +560,7 @@ foundit:
 			ZVAL_UNDEF(&entry.metadata_tracker.val);
 		}
 
-		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
+		if (!actual_alias && entry.filename_len == strlen(".phar/alias.txt") && !strncmp(entry.filename, ".phar/alias.txt", strlen(".phar/alias.txt"))) {
 			php_stream_filter *filter;
 			zend_off_t saveloc;
 			/* verify local file header */
@@ -686,7 +686,7 @@ foundit:
 		zend_hash_str_add_mem(&mydata->manifest, entry.filename, entry.filename_len, (void *)&entry, sizeof(phar_entry_info));
 	}
 
-	if (zend_hash_str_exists(&(mydata->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+	if (zend_hash_str_exists(&(mydata->manifest), ".phar/stub.php", strlen(".phar/stub.php"))) {
 		mydata->is_data = 0;
 	} else {
 		mydata->is_data = 1;
@@ -1159,7 +1159,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		}
 
 		entry.filename = ".phar/signature.bin";
-		entry.filename_len = sizeof(".phar/signature.bin")-1;
+		entry.filename_len = strlen(".phar/signature.bin");
 		entry.fp = php_stream_fopen_tmpfile();
 		entry.fp_type = PHAR_MOD;
 		entry.is_modified = 1;
@@ -1245,12 +1245,12 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		}
 
 		entry.uncompressed_filesize = entry.compressed_filesize = phar->alias_len;
-		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
-		entry.filename_len = sizeof(".phar/alias.txt")-1;
+		entry.filename = estrndup(".phar/alias.txt", strlen(".phar/alias.txt"));
+		entry.filename_len = strlen(".phar/alias.txt");
 
 		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 	} else {
-		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
+		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", strlen(".phar/alias.txt"));
 	}
 
 	/* register alias */
@@ -1334,8 +1334,8 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			return EOF;
 		}
 
-		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
-		entry.filename_len = sizeof(".phar/stub.php")-1;
+		entry.filename = estrndup(".phar/stub.php", strlen(".phar/stub.php"));
+		entry.filename_len = strlen(".phar/stub.php");
 
 		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 
@@ -1358,11 +1358,11 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		}
 
 		entry.uncompressed_filesize = entry.compressed_filesize = sizeof(newstub) - 1;
-		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
-		entry.filename_len = sizeof(".phar/stub.php")-1;
+		entry.filename = estrndup(".phar/stub.php", strlen(".phar/stub.php"));
+		entry.filename_len = strlen(".phar/stub.php");
 
 		if (!defaultstub) {
-			if (!zend_hash_str_exists(&phar->manifest, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+			if (!zend_hash_str_exists(&phar->manifest, ".phar/stub.php", strlen(".phar/stub.php"))) {
 				if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
 					php_stream_close(entry.fp);
 					efree(entry.filename);

@@ -144,7 +144,7 @@ static size_t browscap_compute_regex_len(zend_string *pattern) {
 		}
 	}
 
-	return len + sizeof("~^$~")-1;
+	return len + strlen("~^$~");
 }
 
 static zend_string *browscap_convert_pattern(zend_string *pattern, int persistent) /* {{{ */
@@ -279,14 +279,14 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	HashTable *ht = zend_new_array(8);
 
 	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
-	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
+	zend_hash_str_add(ht, "browser_name_regex", strlen("browser_name_regex"), &tmp);
 
 	ZVAL_STR_COPY(&tmp, entry->pattern);
-	zend_hash_str_add(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
+	zend_hash_str_add(ht, "browser_name_pattern", strlen("browser_name_pattern"), &tmp);
 
 	if (entry->parent) {
 		ZVAL_STR_COPY(&tmp, entry->parent);
-		zend_hash_str_add(ht, "parent", sizeof("parent")-1, &tmp);
+		zend_hash_str_add(ht, "parent", strlen("parent"), &tmp);
 	}
 
 	for (i = entry->kv_start; i < entry->kv_end; i++) {
@@ -713,7 +713,7 @@ PHP_FUNCTION(get_browser)
 				|| zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) {
 			http_user_agent = zend_hash_str_find(
 				Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]),
-				"HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1);
+				"HTTP_USER_AGENT", strlen("HTTP_USER_AGENT"));
 		}
 		if (http_user_agent == NULL) {
 			php_error_docref(NULL, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");

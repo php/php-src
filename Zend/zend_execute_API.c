@@ -562,7 +562,7 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
-	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", sizeof("main") - 1, 0);
+	return func->common.function_name ? zend_string_copy(func->common.function_name) : zend_string_init("main", strlen("main"), 0);
 }
 /* }}} */
 
@@ -1242,7 +1242,7 @@ ZEND_API zend_result zend_eval_stringl(const char *str, size_t str_len, zval *re
 
 	if (retval_ptr) {
 		code_str = zend_string_concat3(
-			"return ", sizeof("return ")-1, str, str_len, ";", sizeof(";")-1);
+			"return ", strlen("return "), str, str_len, ";", strlen(";"));
 	} else {
 		code_str = zend_string_init(str, str_len, 0);
 	}

@@ -272,7 +272,7 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 			/* Possible optimization: Cache these results with a map from class entry to IS_NULL/IS_PTR.
 			 * Or maybe just a single item with the result for the most recently loaded subclass. */
 			if (class_type != spl_ce_SplObjectStorage) {
-				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", sizeof("gethash") - 1);
+				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", strlen("gethash"));
 				if (get_hash->common.scope != spl_ce_SplObjectStorage) {
 					intern->fptr_get_hash = get_hash;
 				}
@@ -343,12 +343,12 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 		Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 		zval obj;
 		ZVAL_OBJ(&obj, element->obj);
-		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &obj);
-		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
+		add_assoc_zval_ex(&tmp, "obj", strlen("obj"), &obj);
+		add_assoc_zval_ex(&tmp, "inf", strlen("inf"), &element->inf);
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();
 
-	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
+	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", strlen("storage"));
 	zend_symtable_update(debug_info, zname, &storage);
 	zend_string_release_ex(zname, 0);
 

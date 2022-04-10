@@ -1811,20 +1811,20 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 	}
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", sizeof("Y-m-d H:i:s.u")-1, dateobj->time, 1));
-	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
+	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", strlen("Y-m-d H:i:s.u"), dateobj->time, 1));
+	zend_hash_str_update(props, "date", strlen("date"), &zv);
 
 	/* then we add the timezone name (or similar) */
 	if (dateobj->time->is_localtime) {
 		ZVAL_LONG(&zv, dateobj->time->zone_type);
-		zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
+		zend_hash_str_update(props, "timezone_type", strlen("timezone_type"), &zv);
 
 		switch (dateobj->time->zone_type) {
 			case TIMELIB_ZONETYPE_ID:
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
-				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+				zend_string *tmpstr = zend_string_alloc(strlen("UTC+05:00"), 0);
 				int utc_offset = dateobj->time->z;
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
@@ -1839,7 +1839,7 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 				ZVAL_STRING(&zv, dateobj->time->tz_abbr);
 				break;
 		}
-		zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+		zend_hash_str_update(props, "timezone", strlen("timezone"), &zv);
 	}
 
 	return props;
@@ -1922,7 +1922,7 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 			ZVAL_STRING(zv, tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+			zend_string *tmpstr = zend_string_alloc(strlen("UTC+05:00"), 0);
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
@@ -1963,10 +1963,10 @@ static HashTable *date_object_get_properties_for_timezone(zend_object *object, z
 	}
 
 	ZVAL_LONG(&zv, tzobj->type);
-	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
+	zend_hash_str_update(props, "timezone_type", strlen("timezone_type"), &zv);
 
 	php_timezone_to_string(tzobj, &zv);
-	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+	zend_hash_str_update(props, "timezone", strlen("timezone"), &zv);
 
 	return props;
 } /* }}} */
@@ -1984,10 +1984,10 @@ static HashTable *date_object_get_debug_info_timezone(zend_object *object, int *
 	ht = zend_array_dup(props);
 
 	ZVAL_LONG(&zv, tzobj->type);
-	zend_hash_str_update(ht, "timezone_type", sizeof("timezone_type")-1, &zv);
+	zend_hash_str_update(ht, "timezone_type", strlen("timezone_type"), &zv);
 
 	php_timezone_to_string(tzobj, &zv);
-	zend_hash_str_update(ht, "timezone", sizeof("timezone")-1, &zv);
+	zend_hash_str_update(ht, "timezone", strlen("timezone"), &zv);
 
 	return ht;
 } /* }}} */
@@ -2048,7 +2048,7 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
 	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
-	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
+	zend_hash_str_update(props, "f", strlen("f"), &zv);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
@@ -2057,7 +2057,7 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
 	} else {
 		ZVAL_FALSE(&zv);
-		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
+		zend_hash_str_update(props, "days", strlen("days"), &zv);
 	}
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
@@ -2214,7 +2214,7 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	} else {
 		if (time_str_len == 0) {
 			time_str = "now";
-			time_str_len = sizeof("now") - 1;
+			time_str_len = strlen("now");
 		}
 		dateobj->time = timelib_strtotime(time_str, time_str_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	}
@@ -2278,8 +2278,8 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 	php_date_set_time_fraction(now, usec);
 
 	if (!format
-	 && time_str_len == sizeof("now") - 1
-	 && memcmp(time_str, "now", sizeof("now") - 1) == 0) {
+	 && time_str_len == strlen("now")
+	 && memcmp(time_str, "now", strlen("now")) == 0) {
 		timelib_time_dtor(dateobj->time);
 		dateobj->time = now;
 		return 1;
@@ -2505,17 +2505,17 @@ static bool php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myh
 	zval              tmp_obj;
 	timelib_tzinfo   *tzi;
 
-	z_date = zend_hash_str_find(myht, "date", sizeof("date")-1);
+	z_date = zend_hash_str_find(myht, "date", strlen("date"));
 	if (!z_date || Z_TYPE_P(z_date) != IS_STRING) {
 		return false;
 	}
 
-	z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
+	z_timezone_type = zend_hash_str_find(myht, "timezone_type", strlen("timezone_type"));
 	if (!z_timezone_type || Z_TYPE_P(z_timezone_type) != IS_LONG) {
 		return false;
 	}
 
-	z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
+	z_timezone = zend_hash_str_find(myht, "timezone", strlen("timezone"));
 	if (!z_timezone || Z_TYPE_P(z_timezone) != IS_STRING) {
 		return false;
 	}
@@ -3454,13 +3454,13 @@ static zend_result php_date_timezone_initialize_from_hash(zval **return_value, p
 {
 	zval            *z_timezone_type;
 
-	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type") - 1)) == NULL) {
+	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", strlen("timezone_type"))) == NULL) {
 		return FAILURE;
 	}
 
 	zval *z_timezone;
 
-	if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone") - 1)) == NULL) {
+	if ((z_timezone = zend_hash_str_find(myht, "timezone", strlen("timezone"))) == NULL) {
 		return FAILURE;
 	}
 
@@ -3957,7 +3957,7 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 
 #define PHP_DATE_INTERVAL_READ_PROPERTY_DAYS(member) \
 	do { \
-		zval *z_arg = zend_hash_str_find(myht, "days", sizeof("days") - 1); \
+		zval *z_arg = zend_hash_str_find(myht, "days", strlen("days")); \
 		if (z_arg && Z_TYPE_P(z_arg) == IS_FALSE) { \
 			(*intobj)->diff->member = -99999; \
 		} else if (z_arg && Z_TYPE_P(z_arg) <= IS_STRING) { \
@@ -3986,7 +3986,7 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 	PHP_DATE_INTERVAL_READ_PROPERTY("i", i, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("s", s, timelib_sll, -1)
 	{
-		zval *z_arg = zend_hash_str_find(myht, "f", sizeof("f") - 1);
+		zval *z_arg = zend_hash_str_find(myht, "f", strlen("f"));
 		if (z_arg) {
 			(*intobj)->diff->us = zend_dval_to_lval(zval_get_double(z_arg) * 1000000.0);
 		}
@@ -4001,7 +4001,7 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_weekday_relative", have_weekday_relative, unsigned int, 0);
 	PHP_DATE_INTERVAL_READ_PROPERTY("have_special_relative", have_special_relative, unsigned int, 0);
 	{
-		zval *z_arg = zend_hash_str_find(myht, "civil_or_wall", sizeof("civil_or_wall") - 1);
+		zval *z_arg = zend_hash_str_find(myht, "civil_or_wall", strlen("civil_or_wall"));
 		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
 		if (z_arg) {
 			zend_long val = zval_get_long(z_arg);
@@ -4475,12 +4475,12 @@ PHP_FUNCTION(timezone_abbreviations_list)
 
 	do {
 		array_init(&element);
-		add_assoc_bool_ex(&element, "dst", sizeof("dst") -1, entry->type);
-		add_assoc_long_ex(&element, "offset", sizeof("offset") - 1, entry->gmtoffset);
+		add_assoc_bool_ex(&element, "dst", strlen("dst"), entry->type);
+		add_assoc_long_ex(&element, "offset", strlen("offset"), entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_assoc_string_ex(&element, "timezone_id", sizeof("timezone_id") - 1, entry->full_tz_name);
+			add_assoc_string_ex(&element, "timezone_id", strlen("timezone_id"), entry->full_tz_name);
 		} else {
-			add_assoc_null_ex(&element, "timezone_id", sizeof("timezone_id") - 1);
+			add_assoc_null_ex(&element, "timezone_id", strlen("timezone_id"));
 		}
 
 		abbr_array_p = zend_hash_str_find(Z_ARRVAL_P(return_value), entry->name, strlen(entry->name));
@@ -4767,7 +4767,7 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 	} else {
 		ZVAL_NULL(&zv);
 	}
-	zend_hash_str_update(props, "start", sizeof("start")-1, &zv);
+	zend_hash_str_update(props, "start", strlen("start"), &zv);
 
 	if (period_obj->current) {
 		php_date_obj *date_obj;
@@ -4777,7 +4777,7 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 	} else {
 		ZVAL_NULL(&zv);
 	}
-	zend_hash_str_update(props, "current", sizeof("current")-1, &zv);
+	zend_hash_str_update(props, "current", strlen("current"), &zv);
 
 	if (period_obj->end) {
 		php_date_obj *date_obj;
@@ -4787,7 +4787,7 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 	} else {
 		ZVAL_NULL(&zv);
 	}
-	zend_hash_str_update(props, "end", sizeof("end")-1, &zv);
+	zend_hash_str_update(props, "end", strlen("end"), &zv);
 
 	if (period_obj->interval) {
 		php_interval_obj *interval_obj;
@@ -4798,14 +4798,14 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 	} else {
 		ZVAL_NULL(&zv);
 	}
-	zend_hash_str_update(props, "interval", sizeof("interval")-1, &zv);
+	zend_hash_str_update(props, "interval", strlen("interval"), &zv);
 
 	/* converted to larger type (int->long); must check when unserializing */
 	ZVAL_LONG(&zv, (zend_long) period_obj->recurrences);
-	zend_hash_str_update(props, "recurrences", sizeof("recurrences")-1, &zv);
+	zend_hash_str_update(props, "recurrences", strlen("recurrences"), &zv);
 
 	ZVAL_BOOL(&zv, period_obj->include_start_date);
-	zend_hash_str_update(props, "include_start_date", sizeof("include_start_date")-1, &zv);
+	zend_hash_str_update(props, "include_start_date", strlen("include_start_date"), &zv);
 
 	return props;
 } /* }}} */
@@ -4816,7 +4816,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 
 	/* this function does no rollback on error */
 
-	ht_entry = zend_hash_str_find(myht, "start", sizeof("start")-1);
+	ht_entry = zend_hash_str_find(myht, "start", strlen("start"));
 	if (ht_entry) {
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
@@ -4830,7 +4830,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		return 0;
 	}
 
-	ht_entry = zend_hash_str_find(myht, "end", sizeof("end")-1);
+	ht_entry = zend_hash_str_find(myht, "end", strlen("end"));
 	if (ht_entry) {
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
@@ -4843,7 +4843,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		return 0;
 	}
 
-	ht_entry = zend_hash_str_find(myht, "current", sizeof("current")-1);
+	ht_entry = zend_hash_str_find(myht, "current", strlen("current"));
 	if (ht_entry) {
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && instanceof_function(Z_OBJCE_P(ht_entry), date_ce_interface)) {
 			php_date_obj *date_obj;
@@ -4856,7 +4856,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		return 0;
 	}
 
-	ht_entry = zend_hash_str_find(myht, "interval", sizeof("interval")-1);
+	ht_entry = zend_hash_str_find(myht, "interval", strlen("interval"));
 	if (ht_entry) {
 		if (Z_TYPE_P(ht_entry) == IS_OBJECT && Z_OBJCE_P(ht_entry) == date_ce_interval) {
 			php_interval_obj *interval_obj;
@@ -4869,7 +4869,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		return 0;
 	}
 
-	ht_entry = zend_hash_str_find(myht, "recurrences", sizeof("recurrences")-1);
+	ht_entry = zend_hash_str_find(myht, "recurrences", strlen("recurrences"));
 	if (ht_entry &&
 			Z_TYPE_P(ht_entry) == IS_LONG && Z_LVAL_P(ht_entry) >= 0 && Z_LVAL_P(ht_entry) <= INT_MAX) {
 		period_obj->recurrences = Z_LVAL_P(ht_entry);
@@ -4877,7 +4877,7 @@ static bool php_date_period_initialize_from_hash(php_period_obj *period_obj, Has
 		return 0;
 	}
 
-	ht_entry = zend_hash_str_find(myht, "include_start_date", sizeof("include_start_date")-1);
+	ht_entry = zend_hash_str_find(myht, "include_start_date", strlen("include_start_date"));
 	if (ht_entry &&
 			(Z_TYPE_P(ht_entry) == IS_FALSE || Z_TYPE_P(ht_entry) == IS_TRUE)) {
 		period_obj->include_start_date = (Z_TYPE_P(ht_entry) == IS_TRUE);

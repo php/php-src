@@ -487,7 +487,7 @@ int fcgi_init(void)
 		socklen_t len = sizeof(sa);
 #endif
 		zend_hash_init(&fcgi_mgmt_vars, 8, NULL, fcgi_free_mgmt_var_cb, 1);
-		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
+		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", strlen("FCGI_MPXS_CONNS"), "0", strlen("0"));
 
 		is_initialized = 1;
 #ifdef _WIN32
@@ -680,7 +680,7 @@ int fcgi_listen(const char *path, int backlog)
 		sa.sa_inet.sin_port = htons(port);
 		sock_len = sizeof(sa.sa_inet);
 
-		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
+		if (!*host || !strncmp(host, "*", strlen("*"))) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
 #ifdef HAVE_INET_PTON
@@ -1105,13 +1105,13 @@ static int fcgi_read_request(fcgi_request *req)
 #endif
 		switch ((b->roleB1 << 8) + b->roleB0) {
 			case FCGI_RESPONDER:
-				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", strlen("FCGI_ROLE")), "FCGI_ROLE", strlen("FCGI_ROLE"), "RESPONDER", strlen("RESPONDER"));
 				break;
 			case FCGI_AUTHORIZER:
-				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "AUTHORIZER", sizeof("AUTHORIZER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", strlen("FCGI_ROLE")), "FCGI_ROLE", strlen("FCGI_ROLE"), "AUTHORIZER", strlen("AUTHORIZER"));
 				break;
 			case FCGI_FILTER:
-				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "FILTER", sizeof("FILTER")-1);
+				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", strlen("FCGI_ROLE")), "FCGI_ROLE", strlen("FCGI_ROLE"), "FILTER", strlen("FILTER"));
 				break;
 			default:
 				return 0;

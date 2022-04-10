@@ -694,8 +694,8 @@ PHP_FUNCTION(ip2long)
 		/* The only special case when we should return -1 ourselves,
 		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
 		 * not -1 or ~0 because of 32/64bit issues. */
-		if (addr_len == sizeof("255.255.255.255") - 1 &&
-			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
+		if (addr_len == strlen("255.255.255.255") &&
+			!memcmp(addr, "255.255.255.255", strlen("255.255.255.255"))
 		) {
 			RETURN_LONG(0xFFFFFFFF);
 		}
@@ -1278,8 +1278,8 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
+		add_assoc_long_ex(return_value, "seconds", strlen("seconds"), php_rem.tv_sec);
+		add_assoc_long_ex(return_value, "nanoseconds", strlen("nanoseconds"), php_rem.tv_nsec);
 		return;
 	} else if (errno == EINVAL) {
 		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(set_include_path)
 		Z_PARAM_PATH_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	old_value = zend_ini_string("include_path", strlen("include_path"), 0);
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
 		RETVAL_STRING(old_value);
@@ -2155,7 +2155,7 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
+	key = zend_string_init("include_path", strlen("include_path"), 0);
 	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zend_string_release_ex(key, 0);
 		zval_ptr_dtor_str(return_value);
@@ -2172,7 +2172,7 @@ PHP_FUNCTION(get_include_path)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	str = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
+	str = zend_ini_string("include_path", strlen("include_path"), 0);
 
 	if (str == NULL) {
 		RETURN_FALSE;
@@ -2236,7 +2236,7 @@ PHP_FUNCTION(ignore_user_abort)
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (!arg_is_null) {
-		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
+		zend_string *key = zend_string_init("ignore_user_abort", strlen("ignore_user_abort"), 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(key, 0);
 	}

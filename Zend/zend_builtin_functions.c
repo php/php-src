@@ -112,8 +112,8 @@ ZEND_FUNCTION(gc_enable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
-	zend_alter_ini_entry_chars(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	key = zend_string_init("zend.enable_gc", strlen("zend.enable_gc"), 0);
+	zend_alter_ini_entry_chars(key, "1", strlen("1"), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
 /* }}} */
@@ -125,8 +125,8 @@ ZEND_FUNCTION(gc_disable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
-	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	key = zend_string_init("zend.enable_gc", strlen("zend.enable_gc"), 0);
+	zend_alter_ini_entry_chars(key, "0", strlen("0"), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
 /* }}} */
@@ -142,10 +142,10 @@ ZEND_FUNCTION(gc_status)
 
 	array_init_size(return_value, 3);
 
-	add_assoc_long_ex(return_value, "runs", sizeof("runs")-1, (long)status.runs);
-	add_assoc_long_ex(return_value, "collected", sizeof("collected")-1, (long)status.collected);
-	add_assoc_long_ex(return_value, "threshold", sizeof("threshold")-1, (long)status.threshold);
-	add_assoc_long_ex(return_value, "roots", sizeof("roots")-1, (long)status.num_roots);
+	add_assoc_long_ex(return_value, "runs", strlen("runs"), (long)status.runs);
+	add_assoc_long_ex(return_value, "collected", strlen("collected"), (long)status.collected);
+	add_assoc_long_ex(return_value, "threshold", strlen("threshold"), (long)status.threshold);
+	add_assoc_long_ex(return_value, "roots", strlen("roots"), (long)status.num_roots);
 }
 /* }}} */
 
@@ -481,7 +481,7 @@ ZEND_FUNCTION(define)
 		Z_PARAM_BOOL(non_cs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
+	if (zend_memnstr(ZSTR_VAL(name), "::", strlen("::"), ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_argument_value_error(1, "cannot be a class constant");
 		RETURN_THROWS();
 	}
@@ -1323,8 +1323,8 @@ ZEND_FUNCTION(get_defined_functions)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
-	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", strlen("internal"), &internal);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", strlen("user"), &user);
 }
 /* }}} */
 
@@ -1563,7 +1563,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						zend_attribute *attribute = zend_get_parameter_attribute_str(
 							call->func->common.attributes,
 							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
+							strlen("sensitiveparameter"),
 							i
 						);
 
@@ -1595,7 +1595,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 						zend_attribute *attribute = zend_get_parameter_attribute_str(
 							call->func->common.attributes,
 							"sensitiveparameter",
-							sizeof("sensitiveparameter") - 1,
+							strlen("sensitiveparameter"),
 							i
 						);
 						bool is_sensitive = attribute != NULL;
@@ -1634,7 +1634,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					zend_attribute *attribute = zend_get_parameter_attribute_str(
 						call->func->common.attributes,
 						"sensitiveparameter",
-						sizeof("sensitiveparameter") - 1,
+						strlen("sensitiveparameter"),
 						MIN(i, call->func->common.num_args)
 					);
 					is_sensitive = attribute != NULL;
@@ -1953,7 +1953,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		module = zend_hash_find_ptr(&module_registry, lcname);
 		zend_string_release_ex(lcname, 0);
 	} else {
-		module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core") - 1);
+		module = zend_hash_str_find_ptr(&module_registry, "core", strlen("core"));
 	}
 
 	if (!module) {

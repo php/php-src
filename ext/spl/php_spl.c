@@ -541,7 +541,7 @@ PHP_FUNCTION(spl_autoload_register)
 	} else {
 		alfi = emalloc(sizeof(autoload_func_info));
 		alfi->func_ptr = zend_hash_str_find_ptr(
-			CG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
+			CG(function_table), "spl_autoload", strlen("spl_autoload"));
 		alfi->obj = NULL;
 		alfi->ce = NULL;
 		alfi->closure = NULL;

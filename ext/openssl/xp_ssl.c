@@ -837,7 +837,7 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 	GET_VER_OPT_STRING("capath", capath);
 
 	if (cafile == NULL) {
-		cafile = zend_ini_string("openssl.cafile", sizeof("openssl.cafile")-1, 0);
+		cafile = zend_ini_string("openssl.cafile", strlen("openssl.cafile"), 0);
 		cafile = strlen(cafile) ? cafile : NULL;
 	} else if (!sslsock->is_client) {
 		/* Servers need to load and assign CA names from the cafile */
@@ -851,7 +851,7 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 	}
 
 	if (capath == NULL) {
-		capath = zend_ini_string("openssl.capath", sizeof("openssl.capath")-1, 0);
+		capath = zend_ini_string("openssl.capath", strlen("openssl.capath"), 0);
 		capath = strlen(capath) ? capath : NULL;
 	}
 
@@ -1432,7 +1432,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			zend_string *local_pk_str, *local_cert_str;
 			char resolved_cert_path_buff[MAXPATHLEN], resolved_pk_path_buff[MAXPATHLEN];
 
-			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", sizeof("local_cert")-1);
+			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", strlen("local_cert"));
 			if (local_cert == NULL) {
 				php_error_docref(NULL, E_WARNING,
 					"local_cert not present in the array"
@@ -1454,7 +1454,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			}
 			zend_string_release(local_cert_str);
 
-			local_pk = zend_hash_str_find(Z_ARRVAL_P(current), "local_pk", sizeof("local_pk")-1);
+			local_pk = zend_hash_str_find(Z_ARRVAL_P(current), "local_pk", strlen("local_pk"));
 			if (local_pk == NULL) {
 				php_error_docref(NULL, E_WARNING,
 					"local_pk not present in the array"

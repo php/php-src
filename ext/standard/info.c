@@ -997,16 +997,16 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_SELF", strlen("PHP_SELF"))) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_TYPE", strlen("PHP_AUTH_TYPE"))) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_USER", strlen("PHP_AUTH_USER"))) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_PW", strlen("PHP_AUTH_PW"))) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_P(data));
 		}
 		php_print_gpcse_array(ZEND_STRL("_REQUEST"));
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(php_sapi_name)
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
-	size_t modelen = sizeof("a")-1;
+	size_t modelen = strlen("a");
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL

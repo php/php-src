@@ -426,7 +426,7 @@ void on_event(
 			/* Special cases */
 			if (token == ';' && LANG_SCNG(yy_leng) > 1) { /* ?> or ?>\n or ?>\r\n */
 				token = T_CLOSE_TAG;
-			} else if (token == T_ECHO && LANG_SCNG(yy_leng) == sizeof("<?=") - 1) {
+			} else if (token == T_ECHO && LANG_SCNG(yy_leng) == strlen("<?=")) {
 				token = T_OPEN_TAG_WITH_ECHO;
 			}
 			add_token(

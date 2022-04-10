@@ -78,7 +78,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	object_init_ex(ret, php_date_get_timezone_ce());
 	tzobj = Z_PHPTIMEZONE_P(ret);
 
-	if (id.compare(0, 3, UnicodeString("GMT", sizeof("GMT")-1, US_INV)) == 0) {
+	if (id.compare(0, 3, UnicodeString("GMT", strlen("GMT"), US_INV)) == 0) {
 		/* The DateTimeZone constructor doesn't support offset time zones,
 		 * so we must mess with DateTimeZone structure ourselves */
 		tzobj->initialized	  = 1;
@@ -308,12 +308,12 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 
 	if (tz == NULL) {
 		ZVAL_FALSE(&zv);
-		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		zend_hash_str_update(debug_info, "valid", strlen("valid"), &zv);
 		return debug_info;
 	}
 
 	ZVAL_TRUE(&zv);
-	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+	zend_hash_str_update(debug_info, "valid", strlen("valid"), &zv);
 
 	tz->getID(ustr);
 	u8str = intl_convert_utf16_to_utf8(
@@ -322,7 +322,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 		return debug_info;
 	}
 	ZVAL_NEW_STR(&zv, u8str);
-	zend_hash_str_update(debug_info, "id", sizeof("id") - 1, &zv);
+	zend_hash_str_update(debug_info, "id", strlen("id"), &zv);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();
@@ -332,9 +332,9 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 	}
 
 	ZVAL_LONG(&zv, (zend_long)rawOffset);
-	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv);
+	zend_hash_str_update(debug_info,"rawOffset", strlen("rawOffset"), &zv);
 	ZVAL_LONG(&zv, (zend_long)(rawOffset + dstOffset));
-	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv);
+	zend_hash_str_update(debug_info,"currentOffset", strlen("currentOffset"), &zv);
 
 	return debug_info;
 }

@@ -359,7 +359,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	intern->u.file.enclosure = '"';
 	intern->u.file.escape = (unsigned char) '\\';
 
-	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline") - 1);
+	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", strlen("getcurrentline"));
 
 	return SUCCESS;
 } /* }}} */
@@ -622,7 +622,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 
 	rv = zend_array_dup(intern->std.properties);
 
-	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1);
+	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", strlen("pathName"));
 	path = spl_filesystem_object_get_pathname(intern);
 	if (path) {
 		ZVAL_STR_COPY(&tmp, path);
@@ -635,7 +635,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	if (intern->file_name) {
 		size_t path_len;
 
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", strlen("fileName"));
 		spl_filesystem_object_get_path(intern, &path_len);
 
 		if (path_len && path_len < ZSTR_LEN(intern->file_name)) {
@@ -648,7 +648,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", sizeof("glob")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", strlen("glob"));
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
@@ -657,7 +657,7 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, 0);
 #endif
-		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", strlen("subPathName"));
 		if (intern->u.dir.sub_path) {
 			ZVAL_STR_COPY(&tmp, intern->u.dir.sub_path);
 		} else {
@@ -667,18 +667,18 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 		zend_string_release_ex(pnstr, 0);
 	}
 	if (intern->type == SPL_FS_FILE) {
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", sizeof("openMode")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", strlen("openMode"));
 		ZVAL_STR_COPY(&tmp, intern->u.file.open_mode);
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, 0);
 		stmp[1] = '\0';
 		stmp[0] = intern->u.file.delimiter;
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "delimiter", sizeof("delimiter")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "delimiter", strlen("delimiter"));
 		ZVAL_STRINGL(&tmp, stmp, 1);
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, 0);
 		stmp[0] = intern->u.file.enclosure;
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "enclosure", sizeof("enclosure")-1);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "enclosure", strlen("enclosure"));
 		ZVAL_STRINGL(&tmp, stmp, 1);
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, 0);
@@ -694,7 +694,7 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 
 	if (fsobj->u.dir.dirp == NULL && fsobj->orig_path == NULL) {
 		zend_function *func;
-		zend_string *tmp = zend_string_init("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
+		zend_string *tmp = zend_string_init("_bad_state_ex", strlen("_bad_state_ex"), 0);
 		func = zend_std_get_method(object, tmp, NULL);
 		zend_string_release_ex(tmp, 0);
 		return func;
@@ -2110,14 +2110,14 @@ PHP_METHOD(SplTempFileObject, __construct)
 	}
 
 	if (max_memory < 0) {
-		file_name = zend_string_init("php://memory", sizeof("php://memory")-1, 0);
+		file_name = zend_string_init("php://memory", strlen("php://memory"), 0);
 	} else if (ZEND_NUM_ARGS()) {
 		file_name = zend_strpprintf(0, "php://temp/maxmemory:" ZEND_LONG_FMT, max_memory);
 	} else {
-		file_name = zend_string_init("php://temp", sizeof("php://temp")-1, 0);
+		file_name = zend_string_init("php://temp", strlen("php://temp"), 0);
 	}
 	intern->file_name = file_name;
-	intern->u.file.open_mode = zend_string_init("wb", sizeof("wb")-1, 0);
+	intern->u.file.open_mode = zend_string_init("wb", strlen("wb"), 0);
 
 	/* spl_filesystem_file_open() can generate E_WARNINGs which we want to promote to exceptions */
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);

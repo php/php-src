@@ -3658,28 +3658,28 @@ PHP_FUNCTION(imagecrop)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", strlen("x"))) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
 		zend_argument_value_error(2, "must have an \"x\" key");
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", strlen("y"))) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
 		zend_argument_value_error(2, "must have a \"y\" key");
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", strlen("width"))) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
 		zend_argument_value_error(2, "must have a \"width\" key");
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", strlen("height"))) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
 		zend_argument_value_error(2, "must have a \"height\" key");
@@ -3842,28 +3842,28 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if (z_rect != NULL) {
-		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", strlen("x"))) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
 			zend_argument_value_error(3, "must have an \"x\" key");
 			RETURN_THROWS();
 		}
 
-		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", strlen("y"))) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
 			zend_argument_value_error(3, "must have a \"y\" key");
 			RETURN_THROWS();
 		}
 
-		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", strlen("width"))) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
 			zend_argument_value_error(3, "must have a \"width\" key");
 			RETURN_THROWS();
 		}
 
-		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", strlen("height"))) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
 			zend_argument_value_error(3, "must have a \"height\" key");
@@ -3906,14 +3906,14 @@ PHP_FUNCTION(imageaffinematrixget)
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", strlen("x"))) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have an \"x\" key");
 				RETURN_THROWS();
 			}
 
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", strlen("y"))) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
 				zend_argument_value_error(2, "must have a \"y\" key");

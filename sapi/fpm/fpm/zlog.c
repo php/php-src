@@ -128,7 +128,7 @@ int zlog_set_buffering(zlog_bool buffering) /* {{{ */
 
 static inline size_t zlog_truncate_buf(char *buf, size_t buf_size, size_t space_left) /* {{{ */
 {
-	memcpy(buf + buf_size - sizeof("...") + 1 - space_left, "...", sizeof("...") - 1);
+	memcpy(buf + buf_size - sizeof("...") + 1 - space_left, "...", strlen("..."));
 	return buf_size - space_left;
 }
 /* }}} */
@@ -389,7 +389,7 @@ static inline ssize_t zlog_stream_unbuffered_write(
 			append = NULL;
 		} else {
 			append = "...";
-			append_len = sizeof("...") - 1;
+			append_len = strlen("...");
 			len = zlog_limit - stream->len - append_len;
 		}
 	}

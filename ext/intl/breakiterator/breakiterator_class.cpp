@@ -150,22 +150,22 @@ static HashTable *BreakIterator_get_debug_info(zend_object *object, int *is_temp
 
 	if (biter == NULL) {
 		ZVAL_FALSE(&val);
-		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &val);
+		zend_hash_str_update(debug_info, "valid", strlen("valid"), &val);
 		return debug_info;
 	}
 	ZVAL_TRUE(&val);
-	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &val);
+	zend_hash_str_update(debug_info, "valid", strlen("valid"), &val);
 
 	if (Z_ISUNDEF(bio->text)) {
 		ZVAL_NULL(&val);
-		zend_hash_str_update(debug_info, "text", sizeof("text") - 1, &val);
+		zend_hash_str_update(debug_info, "text", strlen("text"), &val);
 	} else {
 		Z_TRY_ADDREF(bio->text);
-		zend_hash_str_update(debug_info, "text", sizeof("text") - 1, &bio->text);
+		zend_hash_str_update(debug_info, "text", strlen("text"), &bio->text);
 	}
 
 	ZVAL_STRING(&val, const_cast<char*>(typeid(*biter).name()));
-	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &val);
+	zend_hash_str_update(debug_info, "type", strlen("type"), &val);
 
 	return debug_info;
 }
@@ -235,7 +235,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
 
 	zend_declare_class_constant_long(BreakIterator_ce_ptr,
-		"DONE", sizeof("DONE") - 1, BreakIterator::DONE );
+		"DONE", strlen("DONE"), BreakIterator::DONE );
 
 	/* Declare constants that are defined in the C header */
 #define BREAKITER_DECL_LONG_CONST(name) \

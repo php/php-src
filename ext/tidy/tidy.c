@@ -597,7 +597,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj)
 			rebuild_object_properties(&obj->std);
 		}
 		ZVAL_STRINGL(&temp, (char*)output.bp, output.size-1);
-		zend_hash_str_update(obj->std.properties, "value", sizeof("value") - 1, &temp);
+		zend_hash_str_update(obj->std.properties, "value", strlen("value"), &temp);
 	}
 
 	tidyBufFree(&output);
@@ -607,7 +607,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj)
 			rebuild_object_properties(&obj->std);
 		}
 		ZVAL_STRINGL(&temp, (char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1);
-		zend_hash_str_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer") - 1, &temp);
+		zend_hash_str_update(obj->std.properties, "errorBuffer", strlen("errorBuffer"), &temp);
 	}
 }
 
@@ -664,7 +664,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
 			} else {
 				ZVAL_NULL(&attribute);
 			}
-			zend_hash_str_update(obj->std.properties, "attribute", sizeof("attribute") - 1, &attribute);
+			zend_hash_str_update(obj->std.properties, "attribute", strlen("attribute"), &attribute);
 
 			tempnode = tidyGetChild(obj->node);
 
@@ -687,7 +687,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
 				ZVAL_NULL(&children);
 			}
 
-			zend_hash_str_update(obj->std.properties, "child", sizeof("child") - 1, &children);
+			zend_hash_str_update(obj->std.properties, "child", strlen("child"), &children);
 
 			break;
 

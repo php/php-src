@@ -118,7 +118,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 		return;
 	}
 
-	zend_string *func_name = zend_string_init("onclose", sizeof("onclose")-1, 0);
+	zend_string *func_name = zend_string_init("onclose", strlen("onclose"), 0);
 	zend_call_method_if_exists(Z_OBJ_P(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 
@@ -153,7 +153,7 @@ php_stream_filter_status_t userfilter_filter(
 	uint32_t orig_no_fclose = stream->flags & PHP_STREAM_FLAG_NO_FCLOSE;
 	stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 
-	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", sizeof("stream")-1);
+	zval *stream_prop = zend_hash_str_find_ind(Z_OBJPROP_P(obj), "stream", strlen("stream"));
 	if (stream_prop) {
 		/* Give the userfilter class a hook back to the stream */
 		zval_ptr_dtor(stream_prop);
@@ -161,7 +161,7 @@ php_stream_filter_status_t userfilter_filter(
 		Z_ADDREF_P(stream_prop);
 	}
 
-	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
+	ZVAL_STRINGL(&func_name, "filter", strlen("filter"));
 
 	/* Setup calling arguments */
 	ZVAL_RES(&args[0], zend_register_resource(buckets_in, le_bucket_brigade));
@@ -319,7 +319,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	zend_string *func_name = zend_string_init("oncreate", sizeof("oncreate")-1, 0);
+	zend_string *func_name = zend_string_init("oncreate", strlen("oncreate"), 0);
 	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 
@@ -400,7 +400,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OBJECT(zobject)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (NULL == (pzbucket = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
+	if (NULL == (pzbucket = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "bucket", strlen("bucket")))) {
 		zend_argument_value_error(2, "must be an object that has a \"bucket\" property");
 		RETURN_THROWS();
 	}
@@ -414,7 +414,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_THROWS();
 	}
 
-	if (NULL != (pzdata = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
+	if (NULL != (pzdata = zend_hash_str_find_deref(Z_OBJPROP_P(zobject), "data", strlen("data"))) && Z_TYPE_P(pzdata) == IS_STRING) {
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket);
 		}

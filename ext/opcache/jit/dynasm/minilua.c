@@ -7575,7 +7575,7 @@ size_t l=strlen(form);
 char spec=form[l-1];
 strcpy(form+l-1,"l");
 form[l+sizeof("l")-2]=spec;
-form[l+sizeof("l")-1]='\0';
+form[l+strlen("l")]='\0';
 }
 static int str_format(lua_State*L){
 int top=lua_gettop(L);

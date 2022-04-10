@@ -1135,10 +1135,10 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 	if (flags & (ENT_HTML_SUBSTITUTE_ERRORS | ENT_HTML_SUBSTITUTE_DISALLOWED_CHARS)) {
 		if (charset == cs_utf_8) {
 			replacement = (const unsigned char*)"\xEF\xBF\xBD";
-			replacement_len = sizeof("\xEF\xBF\xBD") - 1;
+			replacement_len = strlen("\xEF\xBF\xBD");
 		} else {
 			replacement = (const unsigned char*)"&#xFFFD;";
-			replacement_len = sizeof("&#xFFFD;") - 1;
+			replacement_len = strlen("&#xFFFD;");
 		}
 	}
 
@@ -1254,8 +1254,8 @@ pass_char_through:
 		} else { /* this_char == '&' */
 			if (double_encode) {
 encode_amp:
-				memcpy(&ZSTR_VAL(replaced)[len], "&amp;", sizeof("&amp;") - 1);
-				len += sizeof("&amp;") - 1;
+				memcpy(&ZSTR_VAL(replaced)[len], "&amp;", strlen("&amp;"));
+				len += strlen("&amp;");
 			} else { /* no double encode */
 				/* check if entity is valid */
 				size_t ent_len; /* not counting & or ; */

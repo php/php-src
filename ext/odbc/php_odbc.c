@@ -1253,8 +1253,8 @@ PHP_FUNCTION(odbc_data_source)
 
 	array_init(return_value);
 
-	add_assoc_string_ex(return_value, "server", sizeof("server")-1, (char *) server_name);
-	add_assoc_string_ex(return_value, "description", sizeof("description")-1, (char *) desc);
+	add_assoc_string_ex(return_value, "server", strlen("server"), (char *) server_name);
+	add_assoc_string_ex(return_value, "description", strlen("description"), (char *) desc);
 
 }
 /* }}} */

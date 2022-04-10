@@ -123,7 +123,7 @@ ZEND_API bool zend_gdb_present(void)
 			buf[n] = 0;
 			s = strstr(buf, "TracerPid:");
 			if (s) {
-				s += sizeof("TracerPid:") - 1;
+				s += strlen("TracerPid:");
 				while (*s == ' ' || *s == '\t') {
 					s++;
 				}

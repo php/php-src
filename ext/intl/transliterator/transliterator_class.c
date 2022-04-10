@@ -55,7 +55,7 @@ int transliterator_object_construct( zval *object,
 
 	ZVAL_NEW_STR(&tmp, u8str);
 	zend_update_property(Transliterator_ce_ptr, Z_OBJ_P(object),
-		"id", sizeof( "id" ) - 1, &tmp );
+		"id", strlen( "id" ), &tmp );
 	GC_DELREF(u8str);
 	return SUCCESS;
 }

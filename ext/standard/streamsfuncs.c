@@ -913,7 +913,7 @@ static int parse_context_params(php_stream_context *context, HashTable *params)
 	int ret = SUCCESS;
 	zval *tmp;
 
-	if (NULL != (tmp = zend_hash_str_find(params, "notification", sizeof("notification")-1))) {
+	if (NULL != (tmp = zend_hash_str_find(params, "notification", strlen("notification")))) {
 
 		if (context->notifier) {
 			php_stream_notification_free(context->notifier);
@@ -925,7 +925,7 @@ static int parse_context_params(php_stream_context *context, HashTable *params)
 		ZVAL_COPY(&context->notifier->ptr, tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
-	if (NULL != (tmp = zend_hash_str_find(params, "options", sizeof("options")-1))) {
+	if (NULL != (tmp = zend_hash_str_find(params, "options", strlen("options")))) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			return parse_context_options(context, Z_ARRVAL_P(tmp));
 		} else {
@@ -1080,10 +1080,10 @@ PHP_FUNCTION(stream_context_get_params)
 	array_init(return_value);
 	if (context->notifier && Z_TYPE(context->notifier->ptr) != IS_UNDEF && context->notifier->func == user_space_stream_notifier) {
 		Z_TRY_ADDREF(context->notifier->ptr);
-		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
+		add_assoc_zval_ex(return_value, "notification", strlen("notification"), &context->notifier->ptr);
 	}
 	Z_TRY_ADDREF(context->options);
-	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
+	add_assoc_zval_ex(return_value, "options", strlen("options"), &context->options);
 }
 /* }}} */
 

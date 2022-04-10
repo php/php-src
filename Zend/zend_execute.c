@@ -826,7 +826,7 @@ ZEND_COLD void zend_match_unhandled_error(zval *value)
 	if (Z_TYPE_P(value) <= IS_STRING) {
 		smart_str_append_scalar(&msg, value, EG(exception_string_param_max_len));
 	} else {
-		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
+		smart_str_appendl(&msg, "of type ", strlen("of type "));
 		smart_str_appends(&msg, zend_zval_type_name(value));
 	}
 
@@ -4273,7 +4273,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 	) {
 		zend_string *mname;
 		size_t cname_length = colon - ZSTR_VAL(function) - 1;
-		size_t mname_length = ZSTR_LEN(function) - cname_length - (sizeof("::") - 1);
+		size_t mname_length = ZSTR_LEN(function) - cname_length - (strlen("::"));
 
 		lcname = zend_string_init(ZSTR_VAL(function), cname_length, 0);
 
@@ -4283,7 +4283,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			return NULL;
 		}
 
-		mname = zend_string_init(ZSTR_VAL(function) + (cname_length + sizeof("::") - 1), mname_length, 0);
+		mname = zend_string_init(ZSTR_VAL(function) + (cname_length + strlen("::")), mname_length, 0);
 
 		if (called_scope->get_static_method) {
 			fbc = called_scope->get_static_method(called_scope, mname);

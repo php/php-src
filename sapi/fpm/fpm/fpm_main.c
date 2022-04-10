@@ -345,8 +345,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 				while (h) {
-					if (h->header_len > sizeof("Status:") - 1 &&
-						strncasecmp(h->header, "Status:", sizeof("Status:") - 1) == 0
+					if (h->header_len > strlen("Status:") &&
+						strncasecmp(h->header, "Status:", strlen("Status:")) == 0
 					) {
 						has_status = 1;
 						break;
@@ -382,16 +382,16 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:") - 1 &&
-				strncasecmp(h->header, "Status:", sizeof("Status:") - 1) == 0
+			if (h->header_len > strlen("Status:") &&
+				strncasecmp(h->header, "Status:", strlen("Status:")) == 0
 			) {
 				if (!ignore_status) {
 					ignore_status = 1;
 					PHPWRITE_H(h->header, h->header_len);
 					PHPWRITE_H("\r\n", 2);
 				}
-			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:") - 1 &&
-				strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:") - 1) == 0
+			} else if (response_status == 304 && h->header_len > strlen("Content-Type:") &&
+				strncasecmp(h->header, "Content-Type:", strlen("Content-Type:")) == 0
 			) {
 				h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				continue;
@@ -555,7 +555,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
 		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
-		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1);
+		char *path_info = sapi_cgibin_getenv("PATH_INFO", strlen("PATH_INFO"));
 		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
@@ -987,7 +987,7 @@ static void init_request_info(void)
 		if (env_server_software &&
 			env_script_name &&
 			env_path_info &&
-			strncmp(env_server_software, "Microsoft-IIS", sizeof("Microsoft-IIS") - 1) == 0 &&
+			strncmp(env_server_software, "Microsoft-IIS", strlen("Microsoft-IIS")) == 0 &&
 			strncmp(env_path_info, env_script_name, strlen(env_script_name)) == 0
 		) {
 			env_path_info = FCGI_PUTENV(request, "ORIG_PATH_INFO", env_path_info);

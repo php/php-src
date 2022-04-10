@@ -353,21 +353,21 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	char *val;
 	struct timeval tv = {0};
 
-	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
+	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", strlen("host")))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
 		smart_str_appends_ex(buffer, val, persistent);
 		smart_str_appends_ex(buffer, "\r\n", persistent);
 	}
 
 	if (!gettimeofday(&tv, NULL)) {
-		zend_string *dt = php_format_date("D, d M Y H:i:s", sizeof("D, d M Y H:i:s") - 1, tv.tv_sec, 0);
+		zend_string *dt = php_format_date("D, d M Y H:i:s", strlen("D, d M Y H:i:s"), tv.tv_sec, 0);
 		smart_str_appends_ex(buffer, "Date: ", persistent);
 		smart_str_appends_ex(buffer, dt->val, persistent);
 		smart_str_appends_ex(buffer, " GMT\r\n", persistent);
 		zend_string_release_ex(dt, 0);
 	}
 
-	smart_str_appendl_ex(buffer, "Connection: close\r\n", sizeof("Connection: close\r\n") - 1, persistent);
+	smart_str_appendl_ex(buffer, "Connection: close\r\n", strlen("Connection: close\r\n"), persistent);
 } /* }}} */
 
 static const char *get_mime_type(const php_cli_server *server, const char *ext, size_t ext_len) /* {{{ */
@@ -575,7 +575,7 @@ static char *sapi_cli_server_read_cookies(void) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	char *val;
-	if (NULL == (val = zend_hash_str_find_ptr(&client->request.headers, "cookie", sizeof("cookie")-1))) {
+	if (NULL == (val = zend_hash_str_find_ptr(&client->request.headers, "cookie", strlen("cookie")))) {
 		return NULL;
 	}
 	return val;
@@ -1870,7 +1870,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->query_string = client->request.query_string;
 	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
-	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "content-type", sizeof("content-type")-1))) {
+	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "content-type", strlen("content-type")))) {
 		request_info->content_type = val;
 	}
 } /* }}} */
@@ -2095,7 +2095,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		}
 		append_essential_headers(&buffer, client, 1);
 		if (mime_type) {
-			smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
+			smart_str_appendl_ex(&buffer, "Content-Type: ", strlen("Content-Type: "), 1);
 			smart_str_appends_ex(&buffer, mime_type, 1);
 			if (strncmp(mime_type, "text/", 5) == 0) {
 				smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
@@ -2123,7 +2123,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
 	char *auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	if (NULL != (auth = zend_hash_str_find_ptr(&client->request.headers, "authorization", sizeof("authorization")-1))) {
+	if (NULL != (auth = zend_hash_str_find_ptr(&client->request.headers, "authorization", strlen("authorization")))) {
 		php_handle_auth_data(auth);
 	}
 	SG(sapi_headers).http_response_code = 200;

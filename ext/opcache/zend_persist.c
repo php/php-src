@@ -408,7 +408,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		memset(&fake_execute_data, 0, sizeof(fake_execute_data));
 		fake_execute_data.func = (zend_function*)op_array;
 		EG(current_execute_data) = &fake_execute_data;
-		if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1)) != NULL) {
+		if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", strlen("__COMPILER_HALT_OFFSET__"))) != NULL) {
 			main_persistent_script->compiler_halt_offset = Z_LVAL_P(offset);
 		}
 		EG(current_execute_data) = orig_execute_data;
@@ -1125,23 +1125,23 @@ void zend_update_parent_ce(zend_class_entry *ce)
 		if (ce->iterator_funcs_ptr) {
 			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
 			if (zend_class_implements_interface(ce, zend_ce_aggregate)) {
-				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
+				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", strlen("getiterator"));
 			}
 			if (zend_class_implements_interface(ce, zend_ce_iterator)) {
-				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
-				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
-				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
-				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
-				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
+				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", strlen("rewind"));
+				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", strlen("valid"));
+				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", strlen("key"));
+				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", strlen("current"));
+				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", strlen("next"));
 			}
 		}
 
 		if (ce->arrayaccess_funcs_ptr) {
 			ZEND_ASSERT(zend_class_implements_interface(ce, zend_ce_arrayaccess));
-			ce->arrayaccess_funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(&ce->function_table, "offsetget", sizeof("offsetget") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(&ce->function_table, "offsetexists", sizeof("offsetexists") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(&ce->function_table, "offsetset", sizeof("offsetset") - 1);
-			ce->arrayaccess_funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(&ce->function_table, "offsetunset", sizeof("offsetunset") - 1);
+			ce->arrayaccess_funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(&ce->function_table, "offsetget", strlen("offsetget"));
+			ce->arrayaccess_funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(&ce->function_table, "offsetexists", strlen("offsetexists"));
+			ce->arrayaccess_funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(&ce->function_table, "offsetset", strlen("offsetset"));
+			ce->arrayaccess_funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(&ce->function_table, "offsetunset", strlen("offsetunset"));
 		}
 	}
 

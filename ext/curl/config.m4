@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
     const char *ptr = data->ssl_version;
 
     while(*ptr == ' ') ++ptr;
-    if (strncasecmp(ptr, "OpenSSL/1.1", sizeof("OpenSSL/1.1")-1) == 0) {
+    if (strncasecmp(ptr, "OpenSSL/1.1", strlen("OpenSSL/1.1")) == 0) {
       /* New OpenSSL version */
       return 3;
     }
-    if (strncasecmp(ptr, "OpenSSL", sizeof("OpenSSL")-1) == 0) {
+    if (strncasecmp(ptr, "OpenSSL", strlen("OpenSSL")) == 0) {
       /* Old OpenSSL version */
       return 0;
     }

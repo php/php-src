@@ -59,7 +59,7 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 
 	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", strlen("HY000"),  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 
@@ -106,7 +106,7 @@ MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
 	ZVAL_COPY(&w->reason, reason);
 	convert_to_string(&w->reason);
 
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
+	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", strlen("HY000"),  ZSTR_DUPLICATE);
 
 	w->errorno = errorno;
 

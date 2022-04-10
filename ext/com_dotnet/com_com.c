@@ -77,28 +77,28 @@ PHP_METHOD(com, __construct)
 		/* decode the data from the array */
 
 		if (NULL != (tmp = zend_hash_str_find(server_params,
-				"Server", sizeof("Server")-1))) {
+				"Server", strlen("Server")))) {
 			server_name = zval_get_string(tmp);
 			ctx = CLSCTX_REMOTE_SERVER;
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(server_params,
-				"Username", sizeof("Username")-1))) {
+				"Username", strlen("Username")))) {
 			user_name = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(server_params,
-				"Password", sizeof("Password")-1))) {
+				"Password", strlen("Password")))) {
 			password = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(server_params,
-				"Domain", sizeof("Domain")-1))) {
+				"Domain", strlen("Domain")))) {
 			domain_name = zval_get_string(tmp);
 		}
 
 		if (NULL != (tmp = zend_hash_str_find(server_params,
-				"Flags", sizeof("Flags")-1))) {
+				"Flags", strlen("Flags")))) {
 			ctx = (CLSCTX)zval_get_long(tmp);
 		}
 	}

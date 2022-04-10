@@ -405,8 +405,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 				while (h) {
-					if (h->header_len > sizeof("Status:")-1 &&
-						strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+					if (h->header_len > strlen("Status:") &&
+						strncasecmp(h->header, "Status:", strlen("Status:")) == 0
 					) {
 						has_status = 1;
 						break;
@@ -442,16 +442,16 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:")-1 &&
-				strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+			if (h->header_len > strlen("Status:") &&
+				strncasecmp(h->header, "Status:", strlen("Status:")) == 0
 			) {
 				if (!ignore_status) {
 					ignore_status = 1;
 					PHPWRITE_H(h->header, h->header_len);
 					PHPWRITE_H("\r\n", 2);
 				}
-			} else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 &&
-				strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0
+			} else if (response_status == 304 && h->header_len > strlen("Content-Type:") &&
+				strncasecmp(h->header, "Content-Type:", strlen("Content-Type:")) == 0
 			) {
 				h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				continue;
@@ -1199,7 +1199,7 @@ static void init_request_info(fcgi_request *request)
 		if (env_server_software &&
 			env_script_name &&
 			env_path_info &&
-			strncmp(env_server_software, "Microsoft-IIS", sizeof("Microsoft-IIS")-1) == 0 &&
+			strncmp(env_server_software, "Microsoft-IIS", strlen("Microsoft-IIS")) == 0 &&
 			strncmp(env_path_info, env_script_name, strlen(env_script_name)) == 0
 		) {
 			env_path_info = CGI_PUTENV("ORIG_PATH_INFO", env_path_info);
@@ -1638,11 +1638,11 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 					}
 				}
 				*q = 0;
-			} else if (var_len == sizeof("CONTENT_TYPE")-1 &&
-			           memcmp(var, "CONTENT_TYPE", sizeof("CONTENT_TYPE")-1) == 0) {
+			} else if (var_len == strlen("CONTENT_TYPE") &&
+			           memcmp(var, "CONTENT_TYPE", strlen("CONTENT_TYPE")) == 0) {
 				var = "Content-Type";
-			} else if (var_len == sizeof("CONTENT_LENGTH")-1 &&
-			           memcmp(var, "CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1) == 0) {
+			} else if (var_len == strlen("CONTENT_LENGTH") &&
+			           memcmp(var, "CONTENT_LENGTH", strlen("CONTENT_LENGTH")) == 0) {
 				var = "Content-Length";
 			} else {
 				continue;
@@ -1983,9 +1983,9 @@ consult the installation file that came with this distribution, or visit \n\
 				fprintf(stderr, "PHP_FCGI_CHILDREN is not valid\n");
 				return FAILURE;
 			}
-			fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, children_str, strlen(children_str));
+			fcgi_set_mgmt_var("FCGI_MAX_CONNS", strlen("FCGI_MAX_CONNS"), children_str, strlen(children_str));
 			/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
-			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
+			fcgi_set_mgmt_var("FCGI_MAX_REQS",  strlen("FCGI_MAX_REQS"),  children_str, strlen(children_str));
 		} else {
 #ifdef PHP_WIN32
 			/* If this env var is set, the process was invoked as a child. Let
@@ -2003,8 +2003,8 @@ consult the installation file that came with this distribution, or visit \n\
 				SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", NULL);
 			}
 #endif
-			fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
-			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
+			fcgi_set_mgmt_var("FCGI_MAX_CONNS", strlen("FCGI_MAX_CONNS"), "1", strlen("1"));
+			fcgi_set_mgmt_var("FCGI_MAX_REQS",  strlen("FCGI_MAX_REQS"),  "1", strlen("1"));
 		}
 
 #ifndef PHP_WIN32

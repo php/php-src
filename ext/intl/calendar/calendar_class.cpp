@@ -161,14 +161,14 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 
 	if (cal == NULL) {
 		ZVAL_FALSE(&zv);
-		zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+		zend_hash_str_update(debug_info, "valid", strlen("valid"), &zv);
 		return debug_info;
 	}
 	ZVAL_TRUE(&zv);
-	zend_hash_str_update(debug_info, "valid", sizeof("valid") - 1, &zv);
+	zend_hash_str_update(debug_info, "valid", strlen("valid"), &zv);
 
 	ZVAL_STRING(&zv, const_cast<char*>(cal->getType()));
-	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &zv);
+	zend_hash_str_update(debug_info, "type", strlen("type"), &zv);
 	{
 		zval		   ztz,
 					   ztz_debug;
@@ -184,7 +184,7 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 		zend_hash_destroy(debug_info_tz);
 		FREE_HASHTABLE(debug_info_tz);
 
-		zend_hash_str_update(debug_info, "timeZone", sizeof("timeZone") - 1, &ztz_debug);
+		zend_hash_str_update(debug_info, "timeZone", strlen("timeZone"), &ztz_debug);
 	}
 
 	{
@@ -192,10 +192,10 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 		Locale		locale	= cal->getLocale(ULOC_VALID_LOCALE, uec);
 		if (U_SUCCESS(uec)) {
 			ZVAL_STRING(&zv, const_cast<char*>(locale.getName()));
-			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
+			zend_hash_str_update(debug_info, "locale", strlen("locale"), &zv);
 		} else {
 			ZVAL_STRING(&zv, const_cast<char*>(u_errorName(uec)));
-			zend_hash_str_update(debug_info, "locale", sizeof("locale") - 1, &zv);
+			zend_hash_str_update(debug_info, "locale", strlen("locale"), &zv);
 		}
 	}
 
@@ -214,7 +214,7 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 		}
 	}
 
-	zend_hash_str_update(debug_info, "fields", sizeof("fields") - 1, &zfields);
+	zend_hash_str_update(debug_info, "fields", strlen("fields"), &zfields);
 
 	return debug_info;
 }

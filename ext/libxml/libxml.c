@@ -272,7 +272,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 			thus the php stream wrapper will fail on a valid case. For this
 			reason the prefix is rather better cut off. */
 		{
-			size_t pre_len = sizeof("file:/") - 1;
+			size_t pre_len = strlen("file:/");
 
 			if (strncasecmp(resolved_path, "file:/", pre_len) == 0
 				&& '/' != resolved_path[pre_len]) {
@@ -385,7 +385,7 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 					if (encoding) {
 						char *end;
 
-						encoding += sizeof("charset=")-1;
+						encoding += strlen("charset=");
 						if (*encoding == '"') {
 							encoding++;
 						}
@@ -1051,20 +1051,20 @@ PHP_FUNCTION(libxml_get_errors)
 			zval z_error;
 
 			object_init_ex(&z_error, libxmlerror_class_entry);
-			add_property_long_ex(&z_error, "level", sizeof("level") - 1, error->level);
-			add_property_long_ex(&z_error, "code", sizeof("code") - 1, error->code);
-			add_property_long_ex(&z_error, "column", sizeof("column") - 1, error->int2 );
+			add_property_long_ex(&z_error, "level", strlen("level"), error->level);
+			add_property_long_ex(&z_error, "code", strlen("code"), error->code);
+			add_property_long_ex(&z_error, "column", strlen("column"), error->int2 );
 			if (error->message) {
-				add_property_string_ex(&z_error, "message", sizeof("message") - 1, error->message);
+				add_property_string_ex(&z_error, "message", strlen("message"), error->message);
 			} else {
-				add_property_stringl_ex(&z_error, "message", sizeof("message") - 1, "", 0);
+				add_property_stringl_ex(&z_error, "message", strlen("message"), "", 0);
 			}
 			if (error->file) {
-				add_property_string_ex(&z_error, "file", sizeof("file") - 1, error->file);
+				add_property_string_ex(&z_error, "file", strlen("file"), error->file);
 			} else {
-				add_property_stringl_ex(&z_error, "file", sizeof("file") - 1, "", 0);
+				add_property_stringl_ex(&z_error, "file", strlen("file"), "", 0);
 			}
-			add_property_long_ex(&z_error, "line", sizeof("line") - 1, error->line);
+			add_property_long_ex(&z_error, "line", strlen("line"), error->line);
 			add_next_index_zval(return_value, &z_error);
 
 			error = zend_llist_get_next(LIBXML(error_list));

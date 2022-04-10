@@ -117,11 +117,11 @@ static zend_result php_curl_option_url(php_curl *ch, const char *url, const size
 	}
 
 #if LIBCURL_VERSION_NUM > 0x073800 && defined(PHP_WIN32)
-	if (len > sizeof("file://") - 1 && '/' != url[sizeof("file://") - 1] && !strncmp("file://", url, sizeof("file://") - 1) && len < MAXPATHLEN - 2) {
+	if (len > strlen("file://") && '/' != url[strlen("file://")] && !strncmp("file://", url, strlen("file://")) && len < MAXPATHLEN - 2) {
 		char _tmp[MAXPATHLEN] = {0};
 
-		memmove(_tmp, "file:///", sizeof("file:///") - 1);
-		memmove(_tmp + sizeof("file:///") - 1, url + sizeof("file://") - 1, len - sizeof("file://") + 1);
+		memmove(_tmp, "file:///", strlen("file:///"));
+		memmove(_tmp + strlen("file:///"), url + strlen("file://"), len - sizeof("file://") + 1);
 
 		return php_curl_option_str(ch, CURLOPT_URL, _tmp, len + 1);
 	}
@@ -2088,7 +2088,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			curl_seek_callback seekfunc = seek_cb;
 #endif
 
-			prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "name", sizeof("name")-1, 0, &rv);
+			prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "name", strlen("name"), 0, &rv);
 			ZVAL_DEREF(prop);
 			if (Z_TYPE_P(prop) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", ZSTR_VAL(string_key));
@@ -2099,12 +2099,12 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 					return 1;
 				}
 
-				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
+				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", strlen("mime"), 0, &rv);
 				ZVAL_DEREF(prop);
 				if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 					type = Z_STRVAL_P(prop);
 				}
-				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "postname", sizeof("postname")-1, 0, &rv);
+				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "postname", strlen("postname"), 0, &rv);
 				ZVAL_DEREF(prop);
 				if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 					filename = Z_STRVAL_P(prop);
@@ -2162,7 +2162,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			zval *prop, rv;
 			char *type = NULL, *filename = NULL;
 
-			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "postname", sizeof("postname")-1, 0, &rv);
+			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "postname", strlen("postname"), 0, &rv);
 			if (EG(exception)) {
 				zend_string_release_ex(string_key, 0);
 				return FAILURE;
@@ -2172,7 +2172,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			filename = Z_STRVAL_P(prop);
 
-			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
+			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "mime", strlen("mime"), 0, &rv);
 			if (EG(exception)) {
 				zend_string_release_ex(string_key, 0);
 				return FAILURE;
@@ -2182,7 +2182,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			type = Z_STRVAL_P(prop);
 
-			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "data", sizeof("data")-1, 0, &rv);
+			prop = zend_read_property(curl_CURLStringFile_class, Z_OBJ_P(current), "data", strlen("data"), 0, &rv);
 			if (EG(exception)) {
 				zend_string_release_ex(string_key, 0);
 				return FAILURE;

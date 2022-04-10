@@ -39,7 +39,7 @@ const php_hash_ops php_hash_murmur3a_ops = {
 PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args)
 {
 	if (args) {
-		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		zval *seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {
@@ -96,7 +96,7 @@ const php_hash_ops php_hash_murmur3c_ops = {
 PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args)
 {
 	if (args) {
-		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		zval *seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {
@@ -170,7 +170,7 @@ const php_hash_ops php_hash_murmur3f_ops = {
 PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args)
 {
 	if (args) {
-		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		zval *seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {

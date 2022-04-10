@@ -233,7 +233,7 @@ PHP_FUNCTION(oci_free_descriptor)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -264,7 +264,7 @@ PHP_FUNCTION(oci_lob_save)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -290,7 +290,7 @@ PHP_FUNCTION(oci_lob_import)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -316,7 +316,7 @@ PHP_FUNCTION(oci_lob_load)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -356,7 +356,7 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -388,7 +388,7 @@ PHP_FUNCTION(oci_lob_eof)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -414,7 +414,7 @@ PHP_FUNCTION(oci_lob_tell)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -435,7 +435,7 @@ PHP_FUNCTION(oci_lob_rewind)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -460,7 +460,7 @@ PHP_FUNCTION(oci_lob_seek)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -507,7 +507,7 @@ PHP_FUNCTION(oci_lob_size)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -540,7 +540,7 @@ PHP_FUNCTION(oci_lob_write)
 		data_len = MIN((zend_long) data_len, write_len);
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -568,12 +568,12 @@ PHP_FUNCTION(oci_lob_append)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
 
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
@@ -606,7 +606,7 @@ PHP_FUNCTION(oci_lob_truncate)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -648,7 +648,7 @@ PHP_FUNCTION(oci_lob_erase)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -673,7 +673,7 @@ PHP_FUNCTION(oci_lob_flush)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -703,7 +703,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -727,7 +727,7 @@ PHP_FUNCTION(ocigetbufferinglob)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -760,12 +760,12 @@ PHP_FUNCTION(oci_lob_copy)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
 
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
@@ -791,12 +791,12 @@ PHP_FUNCTION(oci_lob_is_equal)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_first = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_first), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_first = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_first), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
 
-	if ((tmp_second = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_second), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp_second = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_second), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
 		RETURN_FALSE;
 	}
@@ -846,7 +846,7 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -928,7 +928,7 @@ PHP_METHOD(OCILob, writeTemporary)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -952,7 +952,7 @@ PHP_METHOD(OCILob, close)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", strlen("descriptor"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 		RETURN_FALSE;
 	}
@@ -2097,7 +2097,7 @@ PHP_FUNCTION(oci_free_collection)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2121,7 +2121,7 @@ PHP_FUNCTION(oci_collection_append)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2146,7 +2146,7 @@ PHP_FUNCTION(oci_collection_element_get)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2169,12 +2169,12 @@ PHP_FUNCTION(oci_collection_assign)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_collection_dest), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_collection_dest), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property. The first argument should be valid collection object");
 		RETURN_FALSE;
 	}
 
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_collection_from), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_collection_from), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property. The second argument should be valid collection object");
 		RETURN_FALSE;
 	}
@@ -2202,7 +2202,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2227,7 +2227,7 @@ PHP_FUNCTION(oci_collection_size)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2252,7 +2252,7 @@ PHP_FUNCTION(oci_collection_max)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}
@@ -2277,7 +2277,7 @@ PHP_FUNCTION(oci_collection_trim)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", strlen("collection"))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 		RETURN_FALSE;
 	}

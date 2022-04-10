@@ -285,11 +285,11 @@ PHP_FUNCTION(net_get_interfaces) {
 			iface = zend_hash_str_add(Z_ARR_P(return_value), p->ifa_name, strlen(p->ifa_name), &newif);
 		}
 
-		unicast = zend_hash_str_find(Z_ARR_P(iface), "unicast", sizeof("unicast") - 1);
+		unicast = zend_hash_str_find(Z_ARR_P(iface), "unicast", strlen("unicast"));
 		if (!unicast) {
 			zval newuni;
 			array_init(&newuni);
-			unicast = zend_hash_str_add(Z_ARR_P(iface), "unicast", sizeof("unicast") - 1, &newuni);
+			unicast = zend_hash_str_add(Z_ARR_P(iface), "unicast", strlen("unicast"), &newuni);
 		}
 
 		iface_append_unicast(unicast,
@@ -297,7 +297,7 @@ PHP_FUNCTION(net_get_interfaces) {
 		                     p->ifa_addr, p->ifa_netmask,
 		                     (p->ifa_flags & IFF_BROADCAST) ? p->ifa_broadaddr : NULL,
 					         (p->ifa_flags & IFF_POINTOPOINT) ? p->ifa_dstaddr : NULL);
-		status = zend_hash_str_find(Z_ARR_P(iface), "up", sizeof("up") - 1);
+		status = zend_hash_str_find(Z_ARR_P(iface), "up", strlen("up"));
 		if (!status) {
 			add_assoc_bool(iface, "up", ((p->ifa_flags & IFF_UP) != 0));
 		}

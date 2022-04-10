@@ -131,7 +131,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				memset(&fake_execute_data, 0, sizeof(zend_execute_data));
 				fake_execute_data.func = (zend_function*)op_array;
 				EG(current_execute_data) = &fake_execute_data;
-				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1)) != NULL) {
+				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", strlen("__COMPILER_HALT_OFFSET__"))) != NULL) {
 
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					replace_by_const_or_qm_assign(op_array, opline, offset);
@@ -232,7 +232,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 
 					if (RESULT_UNUSED(opline) &&
-					    !zend_memnstr(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), "::", sizeof("::") - 1, Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)) + Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
+					    !zend_memnstr(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), "::", strlen("::"), Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)) + Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
 
 						opline->opcode = ZEND_DECLARE_CONST;
 						opline->op1_type = IS_CONST;

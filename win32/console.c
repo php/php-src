@@ -111,6 +111,6 @@ PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
 
 PHP_WINUTIL_API BOOL php_win32_console_is_cli_sapi(void)
 {/*{{{*/
-	return strlen(sapi_module.name) >= sizeof("cli") - 1 && !strncmp(sapi_module.name, "cli", sizeof("cli") - 1);
+	return strlen(sapi_module.name) >= strlen("cli") && !strncmp(sapi_module.name, "cli", strlen("cli"));
 }/*}}}*/
 

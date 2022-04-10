@@ -619,10 +619,10 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 #define IC_CONSTL(name, val) \
 	zend_declare_class_constant_long(ce, name, strlen(name), val);
 
-	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION);
+	zend_declare_class_constant_string(ce, "UNICODE_VERSION", strlen("UNICODE_VERISON"), U_UNICODE_VERSION);
 	IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
-	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
+	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", strlen("NO_NUMERIC_VALUE"), U_NO_NUMERIC_VALUE);
 
 	/* All enums used by the uchar APIs.  There are a LOT of them,
 	 * so they're separated out into include files,

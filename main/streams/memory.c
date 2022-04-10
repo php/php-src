@@ -651,7 +651,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			add_assoc_stringl(&meta, "mediatype", (char *) path, plen);
 			mlen -= plen;
 			path += plen;
-		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
+		} else if (semi != path || mlen != strlen(";base64") || memcmp(path, ";base64", strlen(";base64"))) { /* must be error since parameters are only allowed after mediatype */
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal media type");
 			return NULL;
@@ -663,21 +663,21 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			sep = memchr(path, '=', mlen);
 			semi = memchr(path, ';', mlen);
 			if (!sep || (semi && semi < sep)) { /* must be ';base64' or failure */
-				if (mlen != sizeof("base64")-1 || memcmp(path, "base64", sizeof("base64")-1)) {
+				if (mlen != strlen("base64") || memcmp(path, "base64", strlen("base64"))) {
 					/* must be error since parameters are only allowed after mediatype and we have no '=' sign */
 					zval_ptr_dtor(&meta);
 					php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal parameter");
 					return NULL;
 				}
 				base64 = 1;
-				mlen -= sizeof("base64") - 1;
-				path += sizeof("base64") - 1;
+				mlen -= strlen("base64");
+				path += strlen("base64");
 				break;
 			}
 			/* found parameter ... the heart of cs ppl lies in +1/-1 or was it +2 this time? */
 			plen = sep - path;
 			vlen = (semi ? (size_t)(semi - sep) : (mlen - plen)) - 1 /* '=' */;
-			if (plen != sizeof("mediatype")-1 || memcmp(path, "mediatype", sizeof("mediatype")-1)) {
+			if (plen != strlen("mediatype") || memcmp(path, "mediatype", strlen("mediatype"))) {
 				add_assoc_stringl_ex(&meta, path, plen, sep + 1, vlen);
 			}
 			plen += vlen + 1;

@@ -47,19 +47,19 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, .
 
 	if (message) {
 		zend_update_property_string(
-			mysqli_exception_class_entry, Z_OBJ(sql_ex), "message", sizeof("message") - 1, message);
+			mysqli_exception_class_entry, Z_OBJ(sql_ex), "message", strlen("message"), message);
 	}
 
 	if (sqlstate) {
 		zend_update_property_string(
-			mysqli_exception_class_entry, Z_OBJ(sql_ex), "sqlstate", sizeof("sqlstate") - 1, sqlstate);
+			mysqli_exception_class_entry, Z_OBJ(sql_ex), "sqlstate", strlen("sqlstate"), sqlstate);
 	} else {
 		zend_update_property_string(
-			mysqli_exception_class_entry, Z_OBJ(sql_ex), "sqlstate", sizeof("sqlstate") - 1, "00000");
+			mysqli_exception_class_entry, Z_OBJ(sql_ex), "sqlstate", strlen("sqlstate"), "00000");
 	}
 
 	efree(message);
-	zend_update_property_long(mysqli_exception_class_entry, Z_OBJ(sql_ex), "code", sizeof("code") - 1, errorno);
+	zend_update_property_long(mysqli_exception_class_entry, Z_OBJ(sql_ex), "code", strlen("code"), errorno);
 
 	zend_throw_exception_object(&sql_ex);
 }
@@ -71,7 +71,7 @@ PHP_METHOD(mysqli_sql_exception, getSqlState)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = zend_read_property(mysqli_exception_class_entry, Z_OBJ_P(ZEND_THIS), "sqlstate", sizeof("sqlstate")-1, 1, &rv);
+	prop = zend_read_property(mysqli_exception_class_entry, Z_OBJ_P(ZEND_THIS), "sqlstate", strlen("sqlstate"), 1, &rv);
 	ZVAL_DEREF(prop);
 	zend_string *str = zval_get_string(prop);
 	

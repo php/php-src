@@ -954,33 +954,33 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		use_spool = 0;
 	}
 
-	smart_str_appendl_ex(&hashed_details, "oci8***", sizeof("oci8***") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "oci8***", strlen("oci8***"), 0);
 	smart_str_appendl_ex(&hashed_details, username, username_len, 0);
-	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "**", strlen("**"), 0);
 
 	/* DRCP: connection_class is an attribute of a connection */
 	if (OCI_G(connection_class)){
 		smart_str_appendl_ex(&hashed_details, OCI_G(connection_class), strlen(OCI_G(connection_class)), 0);
 	}
-	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "**", strlen("**"), 0);
 
 	/* Add edition attribute to the hash */
 	if (OCI_G(edition)){
 		smart_str_appendl_ex(&hashed_details, OCI_G(edition), strlen(OCI_G(edition)), 0);
 	}
-	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "**", strlen("**"), 0);
 
 	if (password_len) {
 		zend_ulong password_hash;
 		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&hashed_details, password_hash, 0);
 	}
-	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "**", strlen("**"), 0);
 
 	if (dbname) {
 		smart_str_appendl_ex(&hashed_details, dbname, dbname_len, 0);
 	}
-	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&hashed_details, "**", strlen("**"), 0);
 
 	if (charset && *charset) {
 		PHP_OCI_CALL_RETURN(charsetid, OCINlsCharSetNameToId, (OCI_G(env), (CONST oratext *)charset));
@@ -1007,7 +1007,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	smart_str_append_unsigned_ex(&hashed_details, session_mode, 0);
 	if (persistent) {
-		smart_str_appendl_ex(&hashed_details, "pc", sizeof("pc") - 1, 0);
+		smart_str_appendl_ex(&hashed_details, "pc", strlen("pc"), 0);
 	}
 
 	smart_str_0(&hashed_details);
@@ -2075,25 +2075,25 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	zval *spool_out_zv = NULL;
 
 	/* {{{ Create the spool hash key */
-	smart_str_appendl_ex(&spool_hashed_details, "oci8spool***", sizeof("oci8spool***") - 1, 0);
+	smart_str_appendl_ex(&spool_hashed_details, "oci8spool***", strlen("oci8spool***"), 0);
 	smart_str_appendl_ex(&spool_hashed_details, username, username_len, 0);
-	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&spool_hashed_details, "**", strlen("**"), 0);
 	/* Add edition attribute to the hash */
 	if (OCI_G(edition)){
 		smart_str_appendl_ex(&spool_hashed_details, OCI_G(edition), strlen(OCI_G(edition)), 0);
 	}
-	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&spool_hashed_details, "**", strlen("**"), 0);
 	if (password_len) {
 		zend_ulong password_hash;
 		password_hash = zend_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&spool_hashed_details, password_hash, 0);
 	}
-	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&spool_hashed_details, "**", strlen("**"), 0);
 
 	if (dbname_len) {
 		smart_str_appendl_ex(&spool_hashed_details, dbname, dbname_len, 0);
 	}
-	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
+	smart_str_appendl_ex(&spool_hashed_details, "**", strlen("**"), 0);
 
 	smart_str_append_unsigned_ex(&spool_hashed_details, charsetid, 0);
 

@@ -392,8 +392,8 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
         } else {
             h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
             while (h) {
-                if (h->header_len > sizeof("Status:")-1 &&
-                    strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+                if (h->header_len > strlen("Status:") &&
+                    strncasecmp(h->header, "Status:", strlen("Status:")) == 0
                 ) {
                     has_status = 1;
                     break;
@@ -427,15 +427,15 @@ static int sapi_lsapi_send_headers_like_cgi(sapi_headers_struct *sapi_headers)
     while (h) {
         /* prevent CRLFCRLF */
         if (h->header_len) {
-            if (h->header_len > sizeof("Status:")-1 &&
-                strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
+            if (h->header_len > strlen("Status:") &&
+                strncasecmp(h->header, "Status:", strlen("Status:")) == 0
             ) {
                 if (!ignore_status) {
                     ignore_status = 1;
                     LSAPI_AppendRespHeader(h->header, h->header_len);
                 }
-            } else if (response_status == 304 && h->header_len > sizeof("Content-Type:")-1 &&
-                       strncasecmp(h->header, "Content-Type:", sizeof("Content-Type:")-1) == 0
+            } else if (response_status == 304 && h->header_len > strlen("Content-Type:") &&
+                       strncasecmp(h->header, "Content-Type:", strlen("Content-Type:")) == 0
                    ) {
                 h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
                 continue;

@@ -73,7 +73,7 @@ static zend_class_entry *register_class_Attribute(void)
 
 	zval property_flags_default_value;
 	ZVAL_UNDEF(&property_flags_default_value);
-	zend_string *property_flags_name = zend_string_init("flags", sizeof("flags") - 1, 1);
+	zend_string *property_flags_name = zend_string_init("flags", strlen("flags"), 1);
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_flags_name);
 
@@ -123,7 +123,7 @@ static zend_class_entry *register_class_SensitiveParameterValue(void)
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
-	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
+	zend_string *property_value_name = zend_string_init("value", strlen("value"), 1);
 	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_value_name);
 

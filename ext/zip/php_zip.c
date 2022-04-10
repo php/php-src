@@ -350,7 +350,7 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 	opts->enc_method = -1;  /* -1 to not change default */
 #endif
 
-	if ((option = zend_hash_str_find(options, "remove_all_path", sizeof("remove_all_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "remove_all_path", strlen("remove_all_path"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_FALSE && Z_TYPE_P(option) != IS_TRUE) {
 			php_error_docref(NULL, E_WARNING, "Option \"remove_all_path\" must be of type bool, %s given",
 				zend_zval_type_name(option));
@@ -358,14 +358,14 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 		opts->remove_all_path = zval_get_long(option);
 	}
 
-	if ((option = zend_hash_str_find(options, "comp_method", sizeof("comp_method") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "comp_method", strlen("comp_method"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
 			php_error_docref(NULL, E_WARNING, "Option \"comp_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
 		}
 		opts->comp_method = zval_get_long(option);
 
-		if ((option = zend_hash_str_find(options, "comp_flags", sizeof("comp_flags") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(options, "comp_flags", strlen("comp_flags"))) != NULL) {
 			if (Z_TYPE_P(option) != IS_LONG) {
 				php_error_docref(NULL, E_WARNING, "Option \"comp_flags\" must be of type int, %s given",
 					zend_zval_type_name(option));
@@ -375,14 +375,14 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 	}
 
 #ifdef HAVE_ENCRYPTION
-	if ((option = zend_hash_str_find(options, "enc_method", sizeof("enc_method") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "enc_method", strlen("enc_method"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
 			php_error_docref(NULL, E_WARNING, "Option \"enc_method\" must be of type int, %s given",
 				zend_zval_type_name(option));
 		}
 		opts->enc_method = zval_get_long(option);
 
-		if ((option = zend_hash_str_find(options, "enc_password", sizeof("enc_password") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(options, "enc_password", strlen("enc_password"))) != NULL) {
 			if (Z_TYPE_P(option) != IS_STRING) {
 				zend_type_error("Option \"enc_password\" must be of type string, %s given",
 					zend_zval_type_name(option));
@@ -393,7 +393,7 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 	}
 #endif
 
-	if ((option = zend_hash_str_find(options, "remove_path", sizeof("remove_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "remove_path", strlen("remove_path"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
 			zend_type_error("Option \"remove_path\" must be of type string, %s given",
 				zend_zval_type_name(option));
@@ -413,7 +413,7 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 		opts->remove_path = Z_STRVAL_P(option);
 	}
 
-	if ((option = zend_hash_str_find(options, "add_path", sizeof("add_path") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "add_path", strlen("add_path"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_STRING) {
 			zend_type_error("Option \"add_path\" must be of type string, %s given",
 				zend_zval_type_name(option));
@@ -433,7 +433,7 @@ static int php_zip_parse_options(HashTable *options, zip_options *opts)
 		opts->add_path = Z_STRVAL_P(option);
 	}
 
-	if ((option = zend_hash_str_find(options, "flags", sizeof("flags") - 1)) != NULL) {
+	if ((option = zend_hash_str_find(options, "flags", strlen("flags"))) != NULL) {
 		if (Z_TYPE_P(option) != IS_LONG) {
 			zend_type_error("Option \"flags\" must be of type int, %s given",
 				zend_zval_type_name(option));
@@ -3245,9 +3245,9 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("EM_UNKNOWN",				ZIP_EM_UNKNOWN);
 
 #ifdef HAVE_LIBZIP_VERSION
-	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, zip_libzip_version());
+	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", strlen("LIBZIP_VERSION"), zip_libzip_version());
 #else
-	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, LIBZIP_VERSION);
+	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", strlen("LIBZIP_VERSION"), LIBZIP_VERSION);
 #endif
 
 	php_register_url_stream_wrapper("zip", &php_stream_zip_wrapper);

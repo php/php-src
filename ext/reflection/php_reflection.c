@@ -1522,27 +1522,27 @@ ZEND_METHOD(Reflection, getModifierNames)
 	array_init(return_value);
 
 	if (modifiers & (ZEND_ACC_ABSTRACT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		add_next_index_stringl(return_value, "abstract", sizeof("abstract")-1);
+		add_next_index_stringl(return_value, "abstract", strlen("abstract"));
 	}
 	if (modifiers & ZEND_ACC_FINAL) {
-		add_next_index_stringl(return_value, "final", sizeof("final")-1);
+		add_next_index_stringl(return_value, "final", strlen("final"));
 	}
 
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
-			add_next_index_stringl(return_value, "public", sizeof("public")-1);
+			add_next_index_stringl(return_value, "public", strlen("public"));
 			break;
 		case ZEND_ACC_PRIVATE:
-			add_next_index_stringl(return_value, "private", sizeof("private")-1);
+			add_next_index_stringl(return_value, "private", strlen("private"));
 			break;
 		case ZEND_ACC_PROTECTED:
-			add_next_index_stringl(return_value, "protected", sizeof("protected")-1);
+			add_next_index_stringl(return_value, "protected", strlen("protected"));
 			break;
 	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
-		add_next_index_stringl(return_value, "static", sizeof("static")-1);
+		add_next_index_stringl(return_value, "static", strlen("static"));
 	}
 }
 /* }}} */
@@ -2924,13 +2924,13 @@ ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName)
 	if (ast->kind == ZEND_AST_CONSTANT) {
 		RETVAL_STR_COPY(zend_ast_get_constant_name(ast));
 	} else if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
-		RETVAL_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
+		RETVAL_STRINGL("__CLASS__", strlen("__CLASS__"));
 	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
 		zend_string *class_name = zend_ast_get_str(ast->child[0]);
 		zend_string *const_name = zend_ast_get_str(ast->child[1]);
 		RETVAL_NEW_STR(zend_string_concat3(
 			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
-			"::", sizeof("::")-1,
+			"::", strlen("::"),
 			ZSTR_VAL(const_name), ZSTR_LEN(const_name)));
 	} else {
 		RETVAL_NULL();
@@ -6076,19 +6076,19 @@ ZEND_METHOD(ReflectionExtension, getDependencies)
 		switch(dep->type) {
 			case MODULE_DEP_REQUIRED:
 				rel_type = "Required";
-				len += sizeof("Required") - 1;
+				len += strlen("Required");
 				break;
 			case MODULE_DEP_CONFLICTS:
 				rel_type = "Conflicts";
-				len += sizeof("Conflicts") - 1;
+				len += strlen("Conflicts");
 				break;
 			case MODULE_DEP_OPTIONAL:
 				rel_type = "Optional";
-				len += sizeof("Optional") - 1;
+				len += strlen("Optional");
 				break;
 			default:
 				rel_type = "Error"; /* shouldn't happen */
-				len += sizeof("Error") - 1;
+				len += strlen("Error");
 				break;
 		}
 

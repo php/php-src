@@ -203,23 +203,23 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
-		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
+		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", strlen("offsetget"));
 		if (intern->fptr_offset_get->common.scope == parent) {
 			intern->fptr_offset_get = NULL;
 		}
-		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
+		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", strlen("offsetset"));
 		if (intern->fptr_offset_set->common.scope == parent) {
 			intern->fptr_offset_set = NULL;
 		}
-		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
+		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", strlen("offsetexists"));
 		if (intern->fptr_offset_has->common.scope == parent) {
 			intern->fptr_offset_has = NULL;
 		}
-		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset",  sizeof("offsetunset") - 1);
+		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset",  strlen("offsetunset"));
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", strlen("count"));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -762,7 +762,7 @@ static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 
 		base = obj->handlers == &spl_handler_ArrayIterator
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
+		zname = spl_gen_private_prop_name(base, "storage", strlen("storage"));
 		zend_symtable_update(debug_info, zname, storage);
 		zend_string_release_ex(zname, 0);
 

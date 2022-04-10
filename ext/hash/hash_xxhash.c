@@ -43,7 +43,7 @@ PHP_HASH_API void PHP_XXH32Init(PHP_XXH32_CTX *ctx, HashTable *args)
 	memset(&ctx->s, 0, sizeof ctx->s);
 
 	if (args) {
-		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		zval *seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {
@@ -107,7 +107,7 @@ PHP_HASH_API void PHP_XXH64Init(PHP_XXH64_CTX *ctx, HashTable *args)
 	memset(&ctx->s, 0, sizeof ctx->s);
 
 	if (args) {
-		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
+		zval *seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {
@@ -160,8 +160,8 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 	memset(&ctx->s, 0, sizeof ctx->s);
 
 	if (args) {
-		zval *_seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
-		zval *_secret = zend_hash_str_find_deref(args, "secret", sizeof("secret") - 1);
+		zval *_seed = zend_hash_str_find_deref(args, "seed", strlen("seed"));
+		zval *_secret = zend_hash_str_find_deref(args, "secret", strlen("secret"));
 
 		if (_seed && _secret) {
 			zend_throw_error(NULL, "%s: Only one of seed or secret is to be passed for initialization", algo_name);

@@ -1115,18 +1115,18 @@ PHP_FUNCTION(realpath_cache_get)
 
 			/* bucket->key is unsigned long */
 			if (ZEND_LONG_MAX >= bucket->key) {
-				add_assoc_long_ex(&entry, "key", sizeof("key") - 1, bucket->key);
+				add_assoc_long_ex(&entry, "key", strlen("key"), bucket->key);
 			} else {
-				add_assoc_double_ex(&entry, "key", sizeof("key") - 1, (double)bucket->key);
+				add_assoc_double_ex(&entry, "key", strlen("key"), (double)bucket->key);
 			}
-			add_assoc_bool_ex(&entry, "is_dir", sizeof("is_dir") - 1, bucket->is_dir);
-			add_assoc_stringl_ex(&entry, "realpath", sizeof("realpath") - 1, bucket->realpath, bucket->realpath_len);
-			add_assoc_long_ex(&entry, "expires", sizeof("expires") - 1, bucket->expires);
+			add_assoc_bool_ex(&entry, "is_dir", strlen("is_dir"), bucket->is_dir);
+			add_assoc_stringl_ex(&entry, "realpath", strlen("realpath"), bucket->realpath, bucket->realpath_len);
+			add_assoc_long_ex(&entry, "expires", strlen("expires"), bucket->expires);
 #ifdef PHP_WIN32
-			add_assoc_bool_ex(&entry, "is_rvalid", sizeof("is_rvalid") - 1, bucket->is_rvalid);
-			add_assoc_bool_ex(&entry, "is_wvalid", sizeof("is_wvalid") - 1, bucket->is_wvalid);
-			add_assoc_bool_ex(&entry, "is_readable", sizeof("is_readable") - 1, bucket->is_readable);
-			add_assoc_bool_ex(&entry, "is_writable", sizeof("is_writable") - 1, bucket->is_writable);
+			add_assoc_bool_ex(&entry, "is_rvalid", strlen("is_rvalid"), bucket->is_rvalid);
+			add_assoc_bool_ex(&entry, "is_wvalid", strlen("is_wvalid"), bucket->is_wvalid);
+			add_assoc_bool_ex(&entry, "is_readable", strlen("is_readable"), bucket->is_readable);
+			add_assoc_bool_ex(&entry, "is_writable", strlen("is_writable"), bucket->is_writable);
 #endif
 			zend_hash_str_update(Z_ARRVAL_P(return_value), bucket->path, bucket->path_len, &entry);
 			bucket = bucket->next;

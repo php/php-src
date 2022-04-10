@@ -31,8 +31,8 @@ static inline const char *phpdbg_command_name(const phpdbg_command_t *command, c
 	if (command->parent) {
 		memcpy(&buffer[pos], command->parent->name, command->parent->name_len);
 		pos += command->parent->name_len;
-		memcpy(&buffer[pos], " ", sizeof(" ")-1);
-		pos += (sizeof(" ")-1);
+		memcpy(&buffer[pos], " ", strlen(" "));
+		pos += (strlen(" "));
 	}
 
 	memcpy(&buffer[pos], command->name, command->name_len);
@@ -627,15 +627,15 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 
 			while (it < matches) {
 				if (!list) {
-					list = emalloc(matched[it]->name_len + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
+					list = emalloc(matched[it]->name_len + 1 + (it + 1 < matches ? strlen(", ") : 0));
 				} else {
-					list = erealloc(list, (pos + matched[it]->name_len) + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
+					list = erealloc(list, (pos + matched[it]->name_len) + 1 + (it + 1 < matches ? strlen(", ") : 0));
 				}
 				memcpy(&list[pos], matched[it]->name, matched[it]->name_len);
 				pos += matched[it]->name_len;
 				if ((it + 1) < matches) {
-					memcpy(&list[pos], ", ", sizeof(", ") - 1);
-					pos += (sizeof(", ") - 1);
+					memcpy(&list[pos], ", ", strlen(", "));
+					pos += (strlen(", "));
 				}
 
 				list[pos] = 0;

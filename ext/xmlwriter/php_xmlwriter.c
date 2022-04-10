@@ -117,7 +117,7 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 	if (uri->scheme != NULL) {
 		/* absolute file uris - libxml only supports localhost or empty host */
 		if (strncasecmp(source, "file:///", 8) == 0) {
-			if (source[sizeof("file:///") - 1] == '\0') {
+			if (source[strlen("file:///")] == '\0') {
 				xmlFreeURI(uri);
 				return NULL;
 			}
@@ -128,7 +128,7 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 			source += 7;
 #endif
 		} else if (strncasecmp(source, "file://localhost/",17) == 0) {
-			if (source[sizeof("file://localhost/") - 1] == '\0') {
+			if (source[strlen("file://localhost/")] == '\0') {
 				xmlFreeURI(uri);
 				return NULL;
 			}

@@ -194,10 +194,10 @@ PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					smart_str_append_long(formstr, Z_LVAL_P(zdata));
 					break;
 				case IS_FALSE:
-					smart_str_appendl(formstr, "0", sizeof("0")-1);
+					smart_str_appendl(formstr, "0", strlen("0"));
 					break;
 				case IS_TRUE:
-					smart_str_appendl(formstr, "1", sizeof("1")-1);
+					smart_str_appendl(formstr, "1", strlen("1"));
 					break;
 				default:
 					{

@@ -350,7 +350,7 @@ handle_default:
 		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_P(value) == IS_NULL) ||
 		(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_P(value) == IS_FALSE))) {
 		zval *tmp;
-		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "default", sizeof("default") - 1)) != NULL) {
+		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "default", strlen("default"))) != NULL) {
 			ZVAL_COPY(value, tmp);
 		}
 	}
@@ -547,11 +547,11 @@ static void php_filter_call(
 			filter = filter_args_long;
 		}
 	} else {
-		if ((option = zend_hash_str_find(filter_args_ht, "filter", sizeof("filter") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(filter_args_ht, "filter", strlen("filter"))) != NULL) {
 			filter = zval_get_long(option);
 		}
 
-		if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
+		if ((option = zend_hash_str_find(filter_args_ht, "flags", strlen("flags"))) != NULL) {
 			filter_flags = zval_get_long(option);
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
@@ -559,7 +559,7 @@ static void php_filter_call(
 			}
 		}
 
-		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL) {
+		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", strlen("options"))) != NULL) {
 			if (filter != FILTER_CALLBACK) {
 				if (Z_TYPE_P(option) == IS_ARRAY) {
 					options = option;
@@ -678,13 +678,13 @@ PHP_FUNCTION(filter_input)
 		if (!filter_args_ht) {
 			filter_flags = filter_args_long;
 		} else {
-			if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
+			if ((option = zend_hash_str_find(filter_args_ht, "flags", strlen("flags"))) != NULL) {
 				filter_flags = zval_get_long(option);
 			}
 
-			if ((opt = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL &&
+			if ((opt = zend_hash_str_find_deref(filter_args_ht, "options", strlen("options"))) != NULL &&
 				Z_TYPE_P(opt) == IS_ARRAY &&
-				(def = zend_hash_str_find_deref(Z_ARRVAL_P(opt), "default", sizeof("default") - 1)) != NULL
+				(def = zend_hash_str_find_deref(Z_ARRVAL_P(opt), "default", strlen("default"))) != NULL
 			) {
 				ZVAL_COPY(return_value, def);
 				return;
@@ -766,7 +766,7 @@ PHP_FUNCTION(filter_input_array)
 		zval *option;
 		if (op_long) {
 			filter_flags = op_long;
-		} else if (op_ht && (option = zend_hash_str_find(op_ht, "flags", sizeof("flags") - 1)) != NULL) {
+		} else if (op_ht && (option = zend_hash_str_find(op_ht, "flags", strlen("flags"))) != NULL) {
 			filter_flags = zval_get_long(option);
 		}
 

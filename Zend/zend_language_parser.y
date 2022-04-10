@@ -1204,12 +1204,12 @@ inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
+				  zend_string_init("{closure}", strlen("{closure}"), 0),
 				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
 	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
 		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $5, NULL,
+				  zend_string_init("{closure}", strlen("{closure}"), 0), $5, NULL,
 				  zend_ast_create(ZEND_AST_RETURN, $11), $7, NULL);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
@@ -1568,7 +1568,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			if (yyres) {
 				yystpcpy(yyres, "end of file");
 			}
-			return sizeof("end of file")-1;
+			return strlen("end of file");
 		}
 
 		/* Prevent the backslash getting doubled in the output (eugh) */
@@ -1576,7 +1576,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			if (yyres) {
 				yystpcpy(yyres, "token \"\\\"");
 			}
-			return sizeof("token \"\\\"")-1;
+			return strlen("token \"\\\"");
 		}
 
 		/* We used "amp" as a dummy label to avoid a duplicate token literal warning. */
@@ -1584,7 +1584,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			if (yyres) {
 				yystpcpy(yyres, "token \"&\"");
 			}
-			return sizeof("token \"&\"")-1;
+			return strlen("token \"&\"");
 		}
 
 		/* Avoid unreadable """ */
@@ -1593,7 +1593,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			if (yyres) {
 				yystpcpy(yyres, "double-quote mark");
 			}
-			return sizeof("double-quote mark")-1;
+			return strlen("double-quote mark");
 		}
 
 		/* Strip off the outer quote marks */
@@ -1610,7 +1610,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				snprintf(buffer, sizeof(buffer), "token \"%.*s\"", (int)toktype_len-2, toktype+1);
 				yystpcpy(yyres, buffer);
 			}
-			return toktype_len + sizeof("token ")-1;
+			return toktype_len + strlen("token ");
 		}
 
 		/* Fetch the content of the last seen token from global lexer state */
@@ -1624,7 +1624,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				snprintf(buffer, sizeof(buffer), "character 0x%02hhX", *tokcontent);
 				yystpcpy(yyres, buffer);
 			}
-			return sizeof("character 0x00")-1;
+			return strlen("character 0x00");
 		}
 
 		/* Truncate at line end to avoid messing up log formats */
@@ -1637,11 +1637,11 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		if (tokcontent_len > 0 && strcmp(yystr, "\"quoted string\"") == 0) {
 			if (*tokcontent == '"') {
 				toktype = "double-quoted string";
-				toktype_len = sizeof("double-quoted string")-1;
+				toktype_len = strlen("double-quoted string");
 			}
 			else if (*tokcontent == '\'') {
 				toktype = "single-quoted string";
-				toktype_len = sizeof("single-quoted string")-1;
+				toktype_len = strlen("single-quoted string");
 			}
 		}
 
@@ -1655,19 +1655,19 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		}
 
 		/* Truncate to 30 characters and add a ... */
-		if (tokcontent_len > 30 + sizeof("...")-1) {
+		if (tokcontent_len > 30 + strlen("...")) {
 			if (yyres) {
 				snprintf(buffer, sizeof(buffer), "%.*s \"%.*s...\"", (int)toktype_len, toktype, 30, tokcontent);
 				yystpcpy(yyres, buffer);
 			}
-			return toktype_len + 30 + sizeof(" \"...\"")-1;
+			return toktype_len + 30 + strlen(" \"...\"");
 		}
 
 		if (yyres) {
 			snprintf(buffer, sizeof(buffer), "%.*s \"%.*s\"", (int)toktype_len, toktype, (int)tokcontent_len, tokcontent);
 			yystpcpy(yyres, buffer);
 		}
-		return toktype_len + tokcontent_len + sizeof(" \"\"")-1;
+		return toktype_len + tokcontent_len + strlen(" \"\"");
 	}
 
 	/* One of the expected tokens */
@@ -1677,7 +1677,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		if (yyres) {
 			yystpcpy(yyres, "\"\\\"");
 		}
-		return sizeof("\"\\\"")-1;
+		return strlen("\"\\\"");
 	}
 
 	/* Strip off the outer quote marks */

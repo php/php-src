@@ -317,13 +317,13 @@ static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 	if (*charset && strncasecmp(mimetype, "text/", 5) == 0) {
 		char *p;
 
-		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
+		*len = prefix_len + mimetype_len + strlen("; charset=") + charset_len;
 		content_type = (char*)emalloc(*len + 1);
 		p = content_type + prefix_len;
 		memcpy(p, mimetype, mimetype_len);
 		p += mimetype_len;
-		memcpy(p, "; charset=", sizeof("; charset=") - 1);
-		p += sizeof("; charset=") - 1;
+		memcpy(p, "; charset=", strlen("; charset="));
+		p += strlen("; charset=");
 		memcpy(p, charset, charset_len + 1);
 	} else {
 		*len = prefix_len + mimetype_len;
@@ -346,9 +346,9 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
 {
 	uint32_t len;
 
-	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
+	default_header->header = get_default_content_type(strlen("Content-type: "), &len);
 	default_header->header_len = len;
-	memcpy(default_header->header, "Content-type: ", sizeof("Content-type: ") - 1);
+	memcpy(default_header->header, "Content-type: ", strlen("Content-type: "));
 }
 
 /*
@@ -370,7 +370,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len)
 
 	if (*mimetype != NULL) {
 		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
-			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
+			newlen = len + (strlen(";charset=")) + strlen(charset);
 			newtype = emalloc(newlen + 1);
 	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
 			strlcat(newtype, ";charset=", newlen + 1);
@@ -775,7 +775,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				if (newlen != 0) {
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
-					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
+					PHP_STRLCPY(newheader, "Content-type: ", newlen, strlen("Content-type: "));
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
 					sapi_header.header_len = (uint32_t)(newlen - 1);
@@ -789,9 +789,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * do disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = zend_string_init("zlib.output_compression", strlen("zlib.output_compression"), 0);
 				zend_alter_ini_entry_chars(key,
-					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+					"0", strlen("0"), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);
 			} else if (!strcasecmp(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
@@ -846,11 +846,11 @@ SAPI_API int sapi_send_headers(void)
 
 			SG(sapi_headers).mimetype = default_mimetype;
 
-			default_header.header_len = sizeof("Content-type: ") - 1 + len;
+			default_header.header_len = strlen("Content-type: ") + len;
 			default_header.header = emalloc(default_header.header_len + 1);
 
-			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
-			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
+			memcpy(default_header.header, "Content-type: ", strlen("Content-type: "));
+			memcpy(default_header.header + strlen("Content-type: "), SG(sapi_headers).mimetype, len + 1);
 
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {
@@ -1016,7 +1016,7 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 		if (tmp) {
 			value = estrdup(tmp);
 #ifdef PHP_WIN32
-			if (strlen(sapi_module.name) == sizeof("cgi-fcgi") - 1 && !strcmp(sapi_module.name, "cgi-fcgi")) {
+			if (strlen(sapi_module.name) == strlen("cgi-fcgi") && !strcmp(sapi_module.name, "cgi-fcgi")) {
 				/* XXX more modules to go, if needed. */
 				free(tmp);
 			}
@@ -1126,11 +1126,11 @@ SAPI_API void sapi_add_request_header(const char *var, unsigned int var_len, cha
 			}
 		}
 		*str = 0;
-	} else if (var_len == sizeof("CONTENT_TYPE")-1 &&
-	           memcmp(var, "CONTENT_TYPE", sizeof("CONTENT_TYPE")-1) == 0) {
+	} else if (var_len == strlen("CONTENT_TYPE") &&
+	           memcmp(var, "CONTENT_TYPE", strlen("CONTENT_TYPE")) == 0) {
 		var = "Content-Type";
-	} else if (var_len == sizeof("CONTENT_LENGTH")-1 &&
-	           memcmp(var, "CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1) == 0) {
+	} else if (var_len == strlen("CONTENT_LENGTH") &&
+	           memcmp(var, "CONTENT_LENGTH", strlen("CONTENT_LENGTH")) == 0) {
 		var = "Content-Length";
 	} else {
 		return;

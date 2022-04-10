@@ -456,10 +456,10 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 		{
 			char buf[MAX_LENGTH_OF_LONG + 1];
 			char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-			char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
+			char *str = emalloc(strlen("anonymous") + (buf + sizeof(buf) - res));
 
-			memcpy(str, "anonymous", sizeof("anonymous")-1);
-			memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+			memcpy(str, "anonymous", strlen("anonymous"));
+			memcpy(str + strlen("anonymous"), res, buf + sizeof(buf) - res);
 			newType->name = str;
 		}
 		newType->namens = estrdup((char*)tns->children->content);
@@ -553,10 +553,10 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 			{
 				char buf[MAX_LENGTH_OF_LONG + 1];
 				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-				char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
+				char *str = emalloc(strlen("anonymous") + (buf + sizeof(buf) - res));
 
-				memcpy(str, "anonymous", sizeof("anonymous")-1);
-				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+				memcpy(str, "anonymous", strlen("anonymous"));
+				memcpy(str + strlen("anonymous"), res, buf + sizeof(buf) - res);
 				newType->name = str;
 			}
 			newType->namens = estrdup((char*)tns->children->content);
@@ -1924,10 +1924,10 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			{
 				char buf[MAX_LENGTH_OF_LONG + 1];
 				char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, zend_hash_num_elements(sdl->types));
-				char *str = emalloc(sizeof("anonymous")-1 + (buf + sizeof(buf) - res));
+				char *str = emalloc(strlen("anonymous") + (buf + sizeof(buf) - res));
 
-				memcpy(str, "anonymous", sizeof("anonymous")-1);
-				memcpy(str + sizeof("anonymous")-1, res, buf + sizeof(buf) - res);
+				memcpy(str, "anonymous", strlen("anonymous"));
+				memcpy(str + strlen("anonymous"), res, buf + sizeof(buf) - res);
 				dummy_type->name = str;
 			}
 			dummy_type->namens = estrdup((char*)tns->children->content);

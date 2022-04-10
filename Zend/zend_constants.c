@@ -136,9 +136,9 @@ void zend_register_standard_constants(void)
 	REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT);
 	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT);
 
-	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", sizeof("TRUE")-1);
-	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", sizeof("FALSE")-1);
-	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
+	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", strlen("TRUE"));
+	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", strlen("FALSE"));
+	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", strlen("NULL"));
 }
 
 
@@ -213,8 +213,8 @@ static zend_constant *zend_get_halt_offset_constant(const char *name, size_t nam
 
 	if (!EG(current_execute_data)) {
 		return NULL;
-	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
-	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
+	} else if (name_len == strlen("__COMPILER_HALT_OFFSET__") &&
+	          !memcmp(name, "__COMPILER_HALT_OFFSET__", strlen("__COMPILER_HALT_OFFSET__"))) {
 		const char *cfilename;
 		zend_string *haltname;
 		size_t clen;
@@ -223,7 +223,7 @@ static zend_constant *zend_get_halt_offset_constant(const char *name, size_t nam
 		clen = strlen(cfilename);
 		/* check for __COMPILER_HALT_OFFSET__ */
 		haltname = zend_mangle_property_name(haltoff,
-			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
+			strlen("__COMPILER_HALT_OFFSET__"), cfilename, clen, 0);
 		c = zend_hash_find_ptr(EG(zend_constants), haltname);
 		zend_string_efree(haltname);
 		return c;

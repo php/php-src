@@ -154,7 +154,7 @@ static int php_zlib_output_encoding(void)
 
 	if (!ZLIBG(compression_coding)) {
 		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER))) &&
-			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING") - 1))) {
+			(enc = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_ACCEPT_ENCODING", strlen("HTTP_ACCEPT_ENCODING")))) {
 			convert_to_string(enc);
 			if (strstr(Z_STRVAL_P(enc), "gzip")) {
 				ZLIBG(compression_coding) = PHP_ZLIB_ENCODING_GZIP;
@@ -595,9 +595,9 @@ PHP_FUNCTION(zlib_get_coding_type)
 	}
 	switch (ZLIBG(compression_coding)) {
 		case PHP_ZLIB_ENCODING_GZIP:
-			RETURN_STRINGL("gzip", sizeof("gzip") - 1);
+			RETURN_STRINGL("gzip", strlen("gzip"));
 		case PHP_ZLIB_ENCODING_DEFLATE:
-			RETURN_STRINGL("deflate", sizeof("deflate") - 1);
+			RETURN_STRINGL("deflate", strlen("deflate"));
 		default:
 			RETURN_FALSE;
 	}

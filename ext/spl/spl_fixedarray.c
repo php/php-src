@@ -288,7 +288,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	ZEND_ASSERT(parent);
 
 	if (UNEXPECTED(inherited)) {
-		zend_function *fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		zend_function *fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", strlen("count"));
 		if (fptr_count->common.scope == parent) {
 			fptr_count = NULL;
 		}

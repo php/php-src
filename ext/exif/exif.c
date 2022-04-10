@@ -71,7 +71,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
 
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
+	if (zend_hash_str_exists(&module_registry, "mbstring", strlen("mbstring"))) {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
 	} else {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
@@ -163,7 +163,7 @@ static PHP_GINIT_FUNCTION(exif)
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
+	if (zend_hash_str_exists(&module_registry, "mbstring", strlen("mbstring"))) {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT);
 	} else {
 		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT);

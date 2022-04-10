@@ -110,14 +110,14 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 		return;
 	}
 
-	if (var_len == sizeof("this")-1 && EG(current_execute_data)) {
+	if (var_len == strlen("this") && EG(current_execute_data)) {
 		zend_execute_data *ex = EG(current_execute_data);
 
 		while (ex) {
 			if (ex->func && ZEND_USER_CODE(ex->func->common.type)) {
 				if ((ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)
 						&& ex->symbol_table == symtable1) {
-					if (memcmp(var, "this", sizeof("this")-1) == 0) {
+					if (memcmp(var, "this", strlen("this")) == 0) {
 						zend_throw_error(NULL, "Cannot re-assign $this");
 						zval_ptr_dtor_nogc(val);
 						free_alloca(var_orig, use_heap);
@@ -132,8 +132,8 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 
 	/* GLOBALS hijack attempt, reject parameter */
 	if (symtable1 == &EG(symbol_table) &&
-		var_len == sizeof("GLOBALS")-1 &&
-		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
+		var_len == strlen("GLOBALS") &&
+		!memcmp(var, "GLOBALS", strlen("GLOBALS"))) {
 		zval_ptr_dtor_nogc(val);
 		free_alloca(var_orig, use_heap);
 		return;
@@ -668,22 +668,22 @@ static inline void php_register_server_variables(void)
 	/* PHP Authentication support */
 	if (SG(request_info).auth_user) {
 		ZVAL_STRING(&tmp, SG(request_info).auth_user);
-		php_register_variable_quick("PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1, &tmp, ht);
+		php_register_variable_quick("PHP_AUTH_USER", strlen("PHP_AUTH_USER"), &tmp, ht);
 	}
 	if (SG(request_info).auth_password) {
 		ZVAL_STRING(&tmp, SG(request_info).auth_password);
-		php_register_variable_quick("PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1, &tmp, ht);
+		php_register_variable_quick("PHP_AUTH_PW", strlen("PHP_AUTH_PW"), &tmp, ht);
 	}
 	if (SG(request_info).auth_digest) {
 		ZVAL_STRING(&tmp, SG(request_info).auth_digest);
-		php_register_variable_quick("PHP_AUTH_DIGEST", sizeof("PHP_AUTH_DIGEST")-1, &tmp, ht);
+		php_register_variable_quick("PHP_AUTH_DIGEST", strlen("PHP_AUTH_DIGEST"), &tmp, ht);
 	}
 
 	/* store request init time */
 	ZVAL_DOUBLE(&tmp, sapi_get_request_time());
-	php_register_variable_quick("REQUEST_TIME_FLOAT", sizeof("REQUEST_TIME_FLOAT")-1, &tmp, ht);
+	php_register_variable_quick("REQUEST_TIME_FLOAT", strlen("REQUEST_TIME_FLOAT"), &tmp, ht);
 	ZVAL_LONG(&tmp, zend_dval_to_lval(Z_DVAL(tmp)));
-	php_register_variable_quick("REQUEST_TIME", sizeof("REQUEST_TIME")-1, &tmp, ht);
+	php_register_variable_quick("REQUEST_TIME", strlen("REQUEST_TIME"), &tmp, ht);
 }
 /* }}} */
 
@@ -794,15 +794,15 @@ static bool php_auto_globals_create_files(zend_string *name)
 /* Ugly hack to fix HTTP_PROXY issue, see bug #72573 */
 static void check_http_proxy(HashTable *var_table)
 {
-	if (zend_hash_str_exists(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1)) {
+	if (zend_hash_str_exists(var_table, "HTTP_PROXY", strlen("HTTP_PROXY"))) {
 		char *local_proxy = getenv("HTTP_PROXY");
 
 		if (!local_proxy) {
-			zend_hash_str_del(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1);
+			zend_hash_str_del(var_table, "HTTP_PROXY", strlen("HTTP_PROXY"));
 		} else {
 			zval local_zval;
 			ZVAL_STRING(&local_zval, local_proxy);
-			zend_hash_str_update(var_table, "HTTP_PROXY", sizeof("HTTP_PROXY")-1, &local_zval);
+			zend_hash_str_update(var_table, "HTTP_PROXY", strlen("HTTP_PROXY"), &local_zval);
 		}
 	}
 }
@@ -906,11 +906,11 @@ static bool php_auto_globals_create_request(zend_string *name)
 
 void php_startup_auto_globals(void)
 {
-	zend_register_auto_global(zend_string_init_interned("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
-	zend_register_auto_global(zend_string_init_interned("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
-	zend_register_auto_global(zend_string_init_interned("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
+	zend_register_auto_global(zend_string_init_interned("_GET", strlen("_GET"), 1), 0, php_auto_globals_create_get);
+	zend_register_auto_global(zend_string_init_interned("_POST", strlen("_POST"), 1), 0, php_auto_globals_create_post);
+	zend_register_auto_global(zend_string_init_interned("_COOKIE", strlen("_COOKIE"), 1), 0, php_auto_globals_create_cookie);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER), PG(auto_globals_jit), php_auto_globals_create_server);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_ENV), PG(auto_globals_jit), php_auto_globals_create_env);
 	zend_register_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_REQUEST), PG(auto_globals_jit), php_auto_globals_create_request);
-	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
+	zend_register_auto_global(zend_string_init_interned("_FILES", strlen("_FILES"), 1), 0, php_auto_globals_create_files);
 }

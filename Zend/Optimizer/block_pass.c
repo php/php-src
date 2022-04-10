@@ -334,8 +334,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				zval *arg = &OPLINE_OP1_LITERAL(sv);
 				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
 				size_t flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
-				if((flen == sizeof("function_exists")-1 && zend_binary_strcasecmp(fname, flen, "function_exists", sizeof("function_exists")-1) == 0) ||
-						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
+				if((flen == strlen("function_exists") && zend_binary_strcasecmp(fname, flen, "function_exists", strlen("function_exists")) == 0) ||
+						  (flen == strlen("is_callable") && zend_binary_strcasecmp(fname, flen, "is_callable", strlen("is_callable")) == 0)
 						  ) {
 					zend_function *function;
 					if((function = zend_hash_find_ptr(EG(function_table), Z_STR_P(arg))) != NULL) {
@@ -345,7 +345,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						LITERAL_BOOL(opline->op1, 1);
 						opline->op1_type = IS_CONST;
 					}
-				} else if(flen == sizeof("constant")-1 && zend_binary_strcasecmp(fname, flen, "constant", sizeof("constant")-1) == 0) {
+				} else if(flen == strlen("constant") && zend_binary_strcasecmp(fname, flen, "constant", strlen("constant")) == 0) {
 					zval c;
 					if (zend_optimizer_get_persistent_constant(Z_STR_P(arg), &c, 1 ELS_CC)) {
 						literal_dtor(arg);
@@ -355,7 +355,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						/* no copy ctor - get already copied it */
 						opline->op1_type = IS_CONST;
 					}
-				} else if(flen == sizeof("extension_loaded")-1 && zend_binary_strcasecmp(fname, flen, "extension_loaded", sizeof("extension_loaded")-1) == 0) {
+				} else if(flen == strlen("extension_loaded") && zend_binary_strcasecmp(fname, flen, "extension_loaded", strlen("extension_loaded")) == 0) {
 					if(zend_hash_exists(&module_registry, Z_STR_P(arg))) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);

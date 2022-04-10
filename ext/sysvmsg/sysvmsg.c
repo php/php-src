@@ -154,16 +154,16 @@ PHP_FUNCTION(msg_set_queue)
 		zval *item;
 
 		/* now pull out members of data and set them in the stat buffer */
-		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.uid", sizeof("msg_perm.uid") - 1)) != NULL) {
+		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.uid", strlen("msg_perm.uid"))) != NULL) {
 			stat.msg_perm.uid = zval_get_long(item);
 		}
-		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.gid", sizeof("msg_perm.gid") - 1)) != NULL) {
+		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.gid", strlen("msg_perm.gid"))) != NULL) {
 			stat.msg_perm.gid = zval_get_long(item);
 		}
-		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.mode", sizeof("msg_perm.mode") - 1)) != NULL) {
+		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.mode", strlen("msg_perm.mode"))) != NULL) {
 			stat.msg_perm.mode = zval_get_long(item);
 		}
-		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_qbytes", sizeof("msg_qbytes") - 1)) != NULL) {
+		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_qbytes", strlen("msg_qbytes"))) != NULL) {
 			stat.msg_qbytes = zval_get_long(item);
 		}
 		if (msgctl(mq->id, IPC_SET, &stat) == 0) {

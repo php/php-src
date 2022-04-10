@@ -525,7 +525,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_attribute *attr;
 
 		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1),
+			zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", strlen("zend_test_parameter_with_attribute")),
 			0,
 			zend_test_parameter_attribute->name,
 			1
@@ -540,7 +540,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_attribute *attr;
 
 		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "no_override", sizeof("no_override") - 1),
+			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "no_override", strlen("no_override")),
 			0,
 			zend_test_parameter_attribute->name,
 			1
@@ -549,7 +549,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		ZVAL_PSTRING(&attr->args[0].value, "value2");
 
 		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "override", sizeof("override") - 1),
+			zend_hash_str_find_ptr(&zend_test_class_with_method_with_parameter_attribute->function_table, "override", strlen("override")),
 			0,
 			zend_test_parameter_attribute->name,
 			1
@@ -564,7 +564,7 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_attribute *attr;
 
 		attr = zend_add_parameter_attribute(
-			zend_hash_str_find_ptr(&zend_test_child_class_with_method_with_parameter_attribute->function_table, "override", sizeof("override") - 1),
+			zend_hash_str_find_ptr(&zend_test_child_class_with_method_with_parameter_attribute->function_table, "override", strlen("override")),
 			0,
 			zend_test_parameter_attribute->name,
 			1

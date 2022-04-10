@@ -530,7 +530,7 @@ static void php_converter_resolve_callback(zval *zobj,
 PHP_METHOD(UConverter, __construct) {
 	php_converter_object *objval = CONV_GET(ZEND_THIS);
 	char *src = "utf-8";
-	size_t src_len = sizeof("utf-8") - 1;
+	size_t src_len = strlen("utf-8");
 	char *dest = src;
 	size_t dest_len = src_len;
 
@@ -746,13 +746,13 @@ PHP_METHOD(UConverter, transcode) {
 			zval *tmpzval;
 
 			if (U_SUCCESS(error) &&
-				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst") - 1)) != NULL &&
+				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "from_subst", strlen("from_subst"))) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
 				ucnv_setSubstChars(src_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);
 			}
 			if (U_SUCCESS(error) &&
-				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst") - 1)) != NULL &&
+				(tmpzval = zend_hash_str_find(Z_ARRVAL_P(options), "to_subst", strlen("to_subst"))) != NULL &&
 				Z_TYPE_P(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
 				ucnv_setSubstChars(dest_cnv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval) & 0x7F, &error);

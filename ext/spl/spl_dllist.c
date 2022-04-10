@@ -367,23 +367,23 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
-		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
+		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", strlen("offsetget"));
 		if (intern->fptr_offset_get->common.scope == parent) {
 			intern->fptr_offset_get = NULL;
 		}
-		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
+		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", strlen("offsetset"));
 		if (intern->fptr_offset_set->common.scope == parent) {
 			intern->fptr_offset_set = NULL;
 		}
-		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
+		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", strlen("offsetexists"));
 		if (intern->fptr_offset_has->common.scope == parent) {
 			intern->fptr_offset_has = NULL;
 		}
-		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
+		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", strlen("offsetunset"));
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", strlen("count"));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -446,7 +446,7 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 	debug_info = zend_new_array(1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", strlen("flags"));
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_add(debug_info, pnstr, &tmp);
 	zend_string_release_ex(pnstr, 0);
@@ -465,7 +465,7 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 		current = next;
 	}
 
-	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
+	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", strlen("dllist"));
 	zend_hash_add(debug_info, pnstr, &dllist_array);
 	zend_string_release_ex(pnstr, 0);
 

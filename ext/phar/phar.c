@@ -49,7 +49,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 {
 	bool old, ini;
 
-	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+	if (ZSTR_LEN(entry->name) == strlen("phar.readonly")) {
 		old = PHAR_G(readonly_orig);
 	} else {
 		old = PHAR_G(require_hash_orig);
@@ -59,7 +59,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	/* do not allow unsetting in runtime */
 	if (stage == ZEND_INI_STAGE_STARTUP) {
-		if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+		if (ZSTR_LEN(entry->name) == strlen("phar.readonly")) {
 			PHAR_G(readonly_orig) = ini;
 		} else {
 			PHAR_G(require_hash_orig) = ini;
@@ -68,7 +68,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
+	if (ZSTR_LEN(entry->name) == strlen("phar.readonly")) {
 		PHAR_G(readonly) = ini;
 		if (PHAR_G(request_init) && HT_IS_INITIALIZED(&PHAR_G(phar_fname_map))) {
 			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
@@ -106,8 +106,8 @@ static void phar_split_cache_list(void) /* {{{ */
 	zend_init_rsrc_list();
 	EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
 
-	PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);
-	PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", sizeof("zlib")-1);
+	PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", strlen("bz2"));
+	PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", strlen("zlib"));
 	/* these two are dummies and will be destroyed later */
 	zend_hash_init(&cached_phars, sizeof(phar_archive_data*), zend_get_hash_value, destroy_phar_data,  1);
 	zend_hash_init(&cached_alias, sizeof(phar_archive_data*), zend_get_hash_value, NULL, 1);
@@ -524,7 +524,7 @@ int phar_open_parsed_phar(char *fname, size_t fname_len, char *alias, size_t ali
 		if (!is_data) {
 			/* prevent any ".phar" without a stub getting through */
 			if (!phar->halt_offset && !phar->is_brandnew && (phar->is_tar || phar->is_zip)) {
-				if (PHAR_G(readonly) && NULL == (stub = zend_hash_str_find_ptr(&(phar->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1))) {
+				if (PHAR_G(readonly) && NULL == (stub = zend_hash_str_find_ptr(&(phar->manifest), ".phar/stub.php", strlen(".phar/stub.php")))) {
 					if (error) {
 						spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 					}
@@ -1347,7 +1347,7 @@ check_file:
 
 		if (PHAR_G(readonly) && !(*test)->is_data && ((*test)->is_tar || (*test)->is_zip)) {
 			phar_entry_info *stub;
-			if (NULL == (stub = zend_hash_str_find_ptr(&((*test)->manifest), ".phar/stub.php", sizeof(".phar/stub.php")-1))) {
+			if (NULL == (stub = zend_hash_str_find_ptr(&((*test)->manifest), ".phar/stub.php", strlen(".phar/stub.php")))) {
 				spprintf(error, 0, "'%s' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive", fname);
 				return FAILURE;
 			}
@@ -1672,7 +1672,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 #ifndef MAX_WBITS
 #define MAX_WBITS 15
 #endif
-				add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS + 32);
+				add_assoc_long_ex(&filterparams, "window", strlen("window"), MAX_WBITS + 32);
 
 				/* entire file is gzip-compressed, uncompress to temporary file */
 				if (!(temp = php_stream_fopen_tmpfile())) {
@@ -1684,7 +1684,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 
 				if (!filter) {
 					err = 1;
-					add_assoc_long_ex(&filterparams, "window", sizeof("window") - 1, MAX_WBITS);
+					add_assoc_long_ex(&filterparams, "window", strlen("window"), MAX_WBITS);
 					filter = php_stream_filter_create("zlib.inflate", &filterparams, php_stream_is_persistent(fp));
 					zend_array_destroy(Z_ARR(filterparams));
 
@@ -2333,7 +2333,7 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 		return FAILURE;
 	}
 
-	if (0 == zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
+	if (0 == zend_get_constant_str("__COMPILER_HALT_OFFSET__", strlen("__COMPILER_HALT_OFFSET__"))) {
 		if (error) {
 			spprintf(error, 0, "__HALT_COMPILER(); must be declared in a phar");
 		}
@@ -3486,8 +3486,8 @@ void phar_request_initialize(void) /* {{{ */
 	{
 		PHAR_G(last_phar) = NULL;
 		PHAR_G(last_phar_name) = PHAR_G(last_alias) = NULL;
-		PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", sizeof("bz2")-1);
-		PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", sizeof("zlib")-1);
+		PHAR_G(has_bz2) = zend_hash_str_exists(&module_registry, "bz2", strlen("bz2"));
+		PHAR_G(has_zlib) = zend_hash_str_exists(&module_registry, "zlib", strlen("zlib"));
 		PHAR_G(request_init) = 1;
 		PHAR_G(request_ends) = 0;
 		PHAR_G(request_done) = 0;
@@ -3585,7 +3585,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 #ifdef PHAR_HAVE_OPENSSL
 	php_info_print_table_row(2, "Native OpenSSL support", "enabled");
 #else
-	if (zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
+	if (zend_hash_str_exists(&module_registry, "openssl", strlen("openssl"))) {
 		php_info_print_table_row(2, "OpenSSL support", "enabled");
 	} else {
 		php_info_print_table_row(2, "OpenSSL support", "disabled (install ext/openssl)");

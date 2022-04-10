@@ -3738,7 +3738,7 @@ try_again:
 			zend_class_entry *ce = Z_OBJCE_P(callable);
 			return zend_string_concat2(
 				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
-				"::__invoke", sizeof("::__invoke") - 1);
+				"::__invoke", strlen("::__invoke"));
 		}
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
@@ -4832,7 +4832,7 @@ static zend_result get_default_via_ast(zval *default_value_zval, const char *def
 	zend_arena *ast_arena;
 
 	zend_string *code = zend_string_concat3(
-		"<?php ", sizeof("<?php ") - 1, default_value, strlen(default_value), ";", 1);
+		"<?php ", strlen("<?php "), default_value, strlen(default_value), ";", 1);
 
 	ast = zend_compile_string_to_ast(code, &ast_arena, ZSTR_EMPTY_ALLOC());
 	zend_string_release(code);
@@ -4886,16 +4886,16 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 	/* Avoid going through the full AST machinery for some simple and common cases. */
 	size_t default_value_len = strlen(default_value);
 	zend_ulong lval;
-	if (default_value_len == sizeof("null")-1
-			&& !memcmp(default_value, "null", sizeof("null")-1)) {
+	if (default_value_len == strlen("null")
+			&& !memcmp(default_value, "null", strlen("null"))) {
 		ZVAL_NULL(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len == sizeof("true")-1
-			&& !memcmp(default_value, "true", sizeof("true")-1)) {
+	} else if (default_value_len == strlen("true")
+			&& !memcmp(default_value, "true", strlen("true"))) {
 		ZVAL_TRUE(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len == sizeof("false")-1
-			&& !memcmp(default_value, "false", sizeof("false")-1)) {
+	} else if (default_value_len == strlen("false")
+			&& !memcmp(default_value, "false", strlen("false"))) {
 		ZVAL_FALSE(default_value_zval);
 		return SUCCESS;
 	} else if (default_value_len >= 2
@@ -4907,8 +4907,8 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 			ZVAL_STR(default_value_zval, str);
 			return SUCCESS;
 		}
-	} else if (default_value_len == sizeof("[]")-1
-			&& !memcmp(default_value, "[]", sizeof("[]")-1)) {
+	} else if (default_value_len == strlen("[]")
+			&& !memcmp(default_value, "[]", strlen("[]"))) {
 		ZVAL_EMPTY_ARRAY(default_value_zval);
 		return SUCCESS;
 	} else if (ZEND_HANDLE_NUMERIC_STR(default_value, default_value_len, lval)) {

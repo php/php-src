@@ -99,7 +99,7 @@ ZEND_API void zend_interned_strings_init(void)
 	zend_string_init_existing_interned = zend_string_init_existing_interned_permanent;
 
 	/* interned empty string */
-	str = zend_string_alloc(sizeof("")-1, 1);
+	str = zend_string_alloc(strlen(""), 1);
 	ZSTR_VAL(str)[0] = '\000';
 	zend_empty_string = zend_new_interned_string_permanent(str);
 

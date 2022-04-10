@@ -214,9 +214,9 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 			{
 				zval single_error;
 				array_init(&single_error);
-				add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
-				add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
-				add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
+				add_assoc_long_ex(&single_error, "errno", strlen("errno"), message->error_no);
+				add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), message->sqlstate);
+				add_assoc_string_ex(&single_error, "error", strlen("error"), message->error);
 				add_next_index_zval(retval, &single_error);
 			}
 		}
@@ -224,9 +224,9 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 		if (mysql_errno(mysql->mysql)) {
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_sqlstate(mysql->mysql));
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
+			add_assoc_long_ex(&single_error, "errno", strlen("errno"), mysql_errno(mysql->mysql));
+			add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), mysql_sqlstate(mysql->mysql));
+			add_assoc_string_ex(&single_error, "error", strlen("error"), mysql_error(mysql->mysql));
 			add_next_index_zval(retval, &single_error);
 		}
 #endif
@@ -369,9 +369,9 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 			{
 				zval single_error;
 				array_init(&single_error);
-				add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, message->error_no);
-				add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, message->sqlstate);
-				add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
+				add_assoc_long_ex(&single_error, "errno", strlen("errno"), message->error_no);
+				add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), message->sqlstate);
+				add_assoc_string_ex(&single_error, "error", strlen("error"), message->error);
 				add_next_index_zval(retval, &single_error);
 			}
 		}
@@ -379,9 +379,9 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 		if (mysql_stmt_errno(stmt->stmt)) {
 			zval single_error;
 			array_init(&single_error);
-			add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
-			add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_stmt_sqlstate(stmt->stmt));
-			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
+			add_assoc_long_ex(&single_error, "errno", strlen("errno"), mysql_stmt_errno(stmt->stmt));
+			add_assoc_string_ex(&single_error, "sqlstate", strlen("sqlstate"), mysql_stmt_sqlstate(stmt->stmt));
+			add_assoc_string_ex(&single_error, "error", strlen("error"), mysql_stmt_error(stmt->stmt));
 			add_next_index_zval(retval, &single_error);
 		}
 #endif

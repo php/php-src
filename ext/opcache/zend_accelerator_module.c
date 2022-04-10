@@ -388,15 +388,15 @@ void zend_accel_override_file_functions(void)
 			return;
 		}
 		/* override file_exists */
-		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", sizeof("file_exists")-1)) != NULL) {
+		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "file_exists", strlen("file_exists"))) != NULL) {
 			orig_file_exists = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_file_exists;
 		}
-		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_file", sizeof("is_file")-1)) != NULL) {
+		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_file", strlen("is_file"))) != NULL) {
 			orig_is_file = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_is_file;
 		}
-		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_readable", sizeof("is_readable")-1)) != NULL) {
+		if ((old_function = zend_hash_str_find_ptr(CG(function_table), "is_readable", strlen("is_readable"))) != NULL) {
 			orig_is_readable = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_is_readable;
 		}

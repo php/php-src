@@ -211,18 +211,18 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		php_url_free(resource);
 		efree(internal_file);
 
-		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(HASH_OF(&context->options), "phar", sizeof("phar")-1)) != NULL) {
+		if (context && Z_TYPE(context->options) != IS_UNDEF && (pzoption = zend_hash_str_find(HASH_OF(&context->options), "phar", strlen("phar"))) != NULL) {
 			pharcontext = HASH_OF(pzoption);
 			if (idata->internal_file->uncompressed_filesize == 0
 				&& idata->internal_file->compressed_filesize == 0
-				&& (pzoption = zend_hash_str_find(pharcontext, "compress", sizeof("compress")-1)) != NULL
+				&& (pzoption = zend_hash_str_find(pharcontext, "compress", strlen("compress"))) != NULL
 				&& Z_TYPE_P(pzoption) == IS_LONG
 				&& (Z_LVAL_P(pzoption) & ~PHAR_ENT_COMPRESSION_MASK) == 0
 			) {
 				idata->internal_file->flags &= ~PHAR_ENT_COMPRESSION_MASK;
 				idata->internal_file->flags |= Z_LVAL_P(pzoption);
 			}
-			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", sizeof("metadata")-1)) != NULL) {
+			if ((pzoption = zend_hash_str_find(pharcontext, "metadata", strlen("metadata"))) != NULL) {
 				phar_metadata_tracker_free(&idata->internal_file->metadata_tracker, idata->internal_file->is_persistent);
 
 				metadata = pzoption;
@@ -244,7 +244,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				return NULL;
 			}
 			if (phar->is_tar || phar->is_zip) {
-				if ((FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), host_len, ".phar/stub.php", sizeof(".phar/stub.php")-1, "r", 0, &error, 0)) || !idata) {
+				if ((FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), host_len, ".phar/stub.php", strlen(".phar/stub.php"), "r", 0, &error, 0)) || !idata) {
 					goto idata_error;
 				}
 				efree(internal_file);
@@ -319,7 +319,7 @@ idata_error:
 		char *entry = idata->internal_file->filename, *cwd;
 
 		PHAR_G(cwd_init) = 1;
-		if ((idata->phar->is_tar || idata->phar->is_zip) && idata->internal_file->filename_len == sizeof(".phar/stub.php")-1 && !strncmp(idata->internal_file->filename, ".phar/stub.php", sizeof(".phar/stub.php")-1)) {
+		if ((idata->phar->is_tar || idata->phar->is_zip) && idata->internal_file->filename_len == strlen(".phar/stub.php") && !strncmp(idata->internal_file->filename, ".phar/stub.php", strlen(".phar/stub.php"))) {
 			/* we're executing the stub, which doesn't count as a file */
 			PHAR_G(cwd_init) = 0;
 		} else if ((cwd = strrchr(entry, '/'))) {

@@ -1205,7 +1205,7 @@ PHP_FUNCTION(mb_language)
 	if (name == NULL) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
 	} else {
-		zend_string *ini_name = zend_string_init("mbstring.language", sizeof("mbstring.language") - 1, 0);
+		zend_string *ini_name = zend_string_init("mbstring.language", strlen("mbstring.language"), 0);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
 			zend_string_release_ex(ini_name, 0);
@@ -3558,7 +3558,7 @@ PHP_FUNCTION(mb_send_mail)
 		_php_mbstr_parse_mail_headers(&ht_headers, ZSTR_VAL(str_headers), ZSTR_LEN(str_headers));
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "content-type", sizeof("content-type") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-type", strlen("content-type")))) {
 		char *tmp;
 		char *param_name;
 		char *charset = NULL;
@@ -3594,7 +3594,7 @@ PHP_FUNCTION(mb_send_mail)
 		suppressed_hdrs.cnt_type = 1;
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "content-transfer-encoding", sizeof("content-transfer-encoding") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-transfer-encoding", strlen("content-transfer-encoding")))) {
 		const mbfl_encoding *_body_enc;
 
 		ZEND_ASSERT(Z_TYPE_P(s) == IS_STRING);
@@ -3695,7 +3695,7 @@ PHP_FUNCTION(mb_send_mail)
 		zend_string_release_ex(str_headers, 0);
 	}
 
-	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
+	if (!zend_hash_str_exists(&ht_headers, "mime-version", strlen("mime-version"))) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
 		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
@@ -3791,7 +3791,7 @@ PHP_FUNCTION(mb_get_info)
 		if (MBSTRG(current_http_output_encoding)) {
 			add_assoc_string(return_value, "http_output", (char *)MBSTRG(current_http_output_encoding)->name);
 		}
-		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
+		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", strlen("mbstring.http_output_conv_mimetypes"), 0)) != NULL) {
 			add_assoc_string(return_value, "http_output_conv_mimetypes", name);
 		}
 		if (lang != NULL) {
@@ -3852,7 +3852,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING((char *)MBSTRG(current_http_output_encoding)->name);
 		}
 	} else if (zend_string_equals_literal_ci(type, "http_output_conv_mimetypes")) {
-		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
+		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", strlen("mbstring.http_output_conv_mimetypes"), 0)) != NULL) {
 			RETVAL_STRING(name);
 		}
 	} else if (zend_string_equals_literal_ci(type, "mail_charset")) {

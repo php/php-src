@@ -175,7 +175,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, NULL, NULL, 0);
 
-	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
+	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= strlen(".phar") && !memcmp(dir, ".phar", strlen(".phar")))) {
 		/* make empty root directory for empty phar */
 		/* make empty directory for .phar magic directory */
 		efree(dir);
@@ -201,7 +201,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 
 		if (*dir == '/') {
 			/* root directory */
-			if (keylen >= sizeof(".phar")-1 && !memcmp(ZSTR_VAL(str_key), ".phar", sizeof(".phar")-1)) {
+			if (keylen >= strlen(".phar") && !memcmp(ZSTR_VAL(str_key), ".phar", strlen(".phar"))) {
 				/* do not add any magic entries to this directory */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;

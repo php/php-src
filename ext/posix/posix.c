@@ -725,7 +725,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 
 		add_next_index_string(&array_members, gr_mem);
 	}
-	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", sizeof("members")-1, &array_members);
+	zend_hash_str_update(Z_ARRVAL_P(array_group), "members", strlen("members"), &array_members);
 	add_assoc_long(array_group, "gid", g->gr_gid);
 	return 1;
 }

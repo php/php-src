@@ -714,7 +714,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 
 	fill_sockaddr = param_get_bool(ctx, KEY_FILL_SOCKADDR, 1);
 
-	if ((elem = zend_hash_str_find(Z_ARRVAL_P(container), "family", sizeof("family") - 1)) != NULL
+	if ((elem = zend_hash_str_find(Z_ARRVAL_P(container), "family", strlen("family"))) != NULL
 			&& Z_TYPE_P(elem) != IS_NULL) {
 		const char *node = "family";
 		zend_llist_add_element(&ctx->keys, &node);
@@ -879,7 +879,7 @@ static void from_zval_write_control(const zval			*arr,
 	if (entry->calc_space) {
 		zval *data_elem;
 		/* arr must be an array at this point */
-		if ((data_elem = zend_hash_str_find(Z_ARRVAL_P(arr), "data", sizeof("data") - 1)) == NULL) {
+		if ((data_elem = zend_hash_str_find(Z_ARRVAL_P(arr), "data", strlen("data"))) == NULL) {
 			do_from_zval_err(ctx, "cmsghdr should have a 'data' element here");
 			return;
 		}

@@ -991,7 +991,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 		zend_attribute *return_type_will_change_attribute = zend_get_attribute_str(
 			child->common.attributes,
 			"returntypewillchange",
-			sizeof("returntypewillchange")-1
+			strlen("returntypewillchange")
 		);
 
 		if (!return_type_will_change_attribute) {

@@ -558,15 +558,15 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	php_stream_to_zval(s_err, &ec.value);
 
 	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
-	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
+	ic.name = zend_string_init_interned("STDIN", strlen("STDIN"), 0);
 	zend_register_constant(&ic);
 
 	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
-	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
+	oc.name = zend_string_init_interned("STDOUT", strlen("STDOUT"), 0);
 	zend_register_constant(&oc);
 
 	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
-	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
+	ec.name = zend_string_init_interned("STDERR", strlen("STDERR"), 0);
 	zend_register_constant(&ec);
 }
 /* }}} */
@@ -1017,9 +1017,9 @@ do_repeat:
 						input[len] = '\0';
 					}
 					ZVAL_STRINGL(&argn, input, len + 1);
-					zend_hash_str_update(&EG(symbol_table), "argn", sizeof("argn")-1, &argn);
+					zend_hash_str_update(&EG(symbol_table), "argn", strlen("argn"), &argn);
 					ZVAL_LONG(&argi, ++index);
-					zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
+					zend_hash_str_update(&EG(symbol_table), "argi", strlen("argi"), &argi);
 					if (exec_run) {
 						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
 					} else {
@@ -1081,7 +1081,7 @@ do_repeat:
 
 					if (EG(exception)) {
 						zval rv;
-						zval *msg = zend_read_property(zend_ce_exception, EG(exception), "message", sizeof("message")-1, 0, &rv);
+						zval *msg = zend_read_property(zend_ce_exception, EG(exception), "message", strlen("message"), 0, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zend_object_release(EG(exception));
 						EG(exception) = NULL;

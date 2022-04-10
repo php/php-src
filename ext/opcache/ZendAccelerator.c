@@ -200,8 +200,8 @@ static inline bool is_stream_path(const char *filename)
 
 static inline bool is_cacheable_stream_path(const char *filename)
 {
-	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
-	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
+	return memcmp(filename, "file://", strlen("file://")) == 0 ||
+	       memcmp(filename, "phar://", strlen("phar://")) == 0;
 }
 
 /* O+ overrides PHP chdir() function and remembers the current working directory
@@ -1466,7 +1466,7 @@ static void zend_accel_add_key(zend_string *key, zend_accel_hash_entry *bucket)
 static zend_always_inline bool is_phar_file(zend_string *filename)
 {
 	return filename && ZSTR_LEN(filename) >= sizeof(".phar") &&
-		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (sizeof(".phar")-1), ".phar", sizeof(".phar")-1) &&
+		!memcmp(ZSTR_VAL(filename) + ZSTR_LEN(filename) - (strlen(".phar")), ".phar", strlen(".phar")) &&
 		!strstr(ZSTR_VAL(filename), "://");
 }
 
@@ -1907,8 +1907,8 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 						php_stream_statbuf ssb;
 						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script->script.filename));
 
-						memcpy(fname, "phar://", sizeof("phar://") - 1);
-						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
+						memcpy(fname, "phar://", strlen("phar://"));
+						memcpy(fname + strlen("phar://"), ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
 						php_stream_stat_path(fname, &ssb);
 						efree(fname);
 					}
@@ -1939,13 +1939,13 @@ static int check_persistent_script_access(zend_persistent_script *persistent_scr
 {
 	char *phar_path, *ptr;
 	if ((ZSTR_LEN(persistent_script->script.filename)<sizeof("phar://.phar")) ||
-	    memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", sizeof("phar://")-1)) {
+	    memcmp(ZSTR_VAL(persistent_script->script.filename), "phar://", strlen("phar://"))) {
 
 		return access(ZSTR_VAL(persistent_script->script.filename), R_OK) != 0;
 
 	} else {
 		/* we got a cached file from .phar, so we have to strip prefix and path inside .phar to check access() */
-		phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+sizeof("phar://")-1);
+		phar_path = estrdup(ZSTR_VAL(persistent_script->script.filename)+strlen("phar://"));
 		if ((ptr = strstr(phar_path, ".phar/")) != NULL)
 		{
 			*(ptr+sizeof(".phar/")-2) = 0; /* strip path inside .phar file */
@@ -2202,8 +2202,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 						php_stream_statbuf ssb;
 						char *fname = emalloc(sizeof("phar://") + ZSTR_LEN(persistent_script->script.filename));
 
-						memcpy(fname, "phar://", sizeof("phar://") - 1);
-						memcpy(fname + sizeof("phar://") - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
+						memcpy(fname, "phar://", strlen("phar://"));
+						memcpy(fname + strlen("phar://"), ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename) + 1);
 						php_stream_stat_path(fname, &ssb);
 						efree(fname);
 					}
@@ -2631,7 +2631,7 @@ zend_result accel_activate(INIT_FUNC_ARGS)
 			ZCG(root_hash) = buf.st_ino;
 			if (sizeof(buf.st_ino) > sizeof(ZCG(root_hash))) {
 				if (ZCG(root_hash) != buf.st_ino) {
-					zend_string *key = zend_string_init("opcache.enable", sizeof("opcache.enable")-1, 0);
+					zend_string *key = zend_string_init("opcache.enable", strlen("opcache.enable"), 0);
 					zend_alter_ini_entry_chars(key, "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_RUNTIME);
 					zend_string_release_ex(key, 0);
 					zend_accel_error(ACCEL_LOG_WARNING, "Can't cache files in chroot() directory with too big inode");
@@ -3278,7 +3278,7 @@ file_cache_fallback:
 	zend_resolve_path = persistent_zend_resolve_path;
 
 	/* Override chdir() function */
-	if ((func = zend_hash_str_find_ptr(CG(function_table), "chdir", sizeof("chdir")-1)) != NULL &&
+	if ((func = zend_hash_str_find_ptr(CG(function_table), "chdir", strlen("chdir"))) != NULL &&
 	    func->type == ZEND_INTERNAL_FUNCTION) {
 		orig_chdir = func->internal_function.handler;
 		func->internal_function.handler = ZEND_FN(accel_chdir);
@@ -3287,7 +3287,7 @@ file_cache_fallback:
 	ZCG(include_path) = NULL;
 
 	/* Override "include_path" modifier callback */
-	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
+	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", strlen("include_path"))) != NULL) {
 		ZCG(include_path) = ini_entry->value;
 		orig_include_path_on_modify = ini_entry->on_modify;
 		ini_entry->on_modify = accel_include_path_on_modify;
@@ -3373,7 +3373,7 @@ void accel_shutdown(void)
 	zend_inheritance_cache_get = accelerator_orig_inheritance_cache_get;
 	zend_inheritance_cache_add = accelerator_orig_inheritance_cache_add;
 
-	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
+	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", strlen("include_path"))) != NULL) {
 		ini_entry->on_modify = orig_include_path_on_modify;
 	}
 }
@@ -3516,7 +3516,7 @@ static size_t preload_try_strip_filename(zend_string *filename) {
 	if (ZSTR_LEN(filename) > sizeof(" eval()'d code")
 		&& *(ZSTR_VAL(filename) + ZSTR_LEN(filename) - sizeof(" eval()'d code")) == ':') {
 		const char *cfilename = ZSTR_VAL(filename);
-		size_t cfilenamelen = ZSTR_LEN(filename) - sizeof(" eval()'d code") - 1 /*:*/;
+		size_t cfilenamelen = ZSTR_LEN(filename) - strlen(" eval()'d code") /*:*/;
 		while (cfilenamelen && cfilename[--cfilenamelen] != '(');
 		return cfilenamelen;
 	}
@@ -4415,7 +4415,7 @@ static int accel_preload(const char *config, bool in_child)
 				memset(&fake_execute_data, 0, sizeof(fake_execute_data));
 				fake_execute_data.func = (zend_function*)&script->script.main_op_array;
 				EG(current_execute_data) = &fake_execute_data;
-				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1)) != NULL) {
+				if ((offset = zend_get_constant_str("__COMPILER_HALT_OFFSET__", strlen("__COMPILER_HALT_OFFSET__"))) != NULL) {
 					script->compiler_halt_offset = Z_LVAL_P(offset);
 				}
 				EG(current_execute_data) = orig_execute_data;
@@ -4462,7 +4462,7 @@ static int accel_preload(const char *config, bool in_child)
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
-		CG(compiled_filename) = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
+		CG(compiled_filename) = zend_string_init("$PRELOAD$", strlen("$PRELOAD$"), 0);
 #if ZEND_USE_ABS_CONST_ADDR
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 1);
 #else

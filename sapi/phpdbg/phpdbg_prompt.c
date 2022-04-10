@@ -221,11 +221,11 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 
 	if (*cmd && cmd_len > 0L && cmd[0] != '#') {
 		if (cmd_len == 2) {
-			if (memcmp(cmd, "<:", sizeof("<:")-1) == SUCCESS) {
+			if (memcmp(cmd, "<:", strlen("<:")) == SUCCESS) {
 				state->in_code = 1;
 				return;
 			} else {
-				if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
+				if (memcmp(cmd, ":>", strlen(":>")) == SUCCESS) {
 					state->in_code = 0;
 					state->code[state->code_len] = '\0';
 					zend_eval_stringl(state->code, state->code_len, NULL, "phpdbginit code");
@@ -525,7 +525,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		free(PHPDBG_G(exec));
 	}
 	PHPDBG_G(exec) = strdup("Standard input code");
-	PHPDBG_G(exec_len) = sizeof("Standard input code") - 1;
+	PHPDBG_G(exec_len) = strlen("Standard input code");
 	{ /* remove leading ?> from source */
 		int i;
 		/* remove trailing data after zero byte, used for avoiding conflicts in eval()'ed code snippets */
@@ -535,7 +535,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		PHPDBG_G(file_sources).pDestructor = NULL;
 		zend_hash_del(&PHPDBG_G(file_sources), source_path);
 		PHPDBG_G(file_sources).pDestructor = dtor;
-		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", sizeof("Standard input code")-1, data);
+		zend_hash_str_update_ptr(&PHPDBG_G(file_sources), "Standard input code", strlen("Standard input code"), data);
 		zend_string_release(source_path);
 
 		for (i = 1; i <= data->lines; i++) {

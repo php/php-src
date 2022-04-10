@@ -3211,10 +3211,10 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		PHP_MD5Update(&context, (unsigned char*)uri, uri_len);
 		PHP_MD5Final(digest, &context);
 		make_digest(md5str, digest);
-		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
+		key = emalloc(len+strlen("/wsdl-")+user_len+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
-		memcpy(key+len,"/wsdl-",sizeof("/wsdl-")-1);
-		len += sizeof("/wsdl-")-1;
+		memcpy(key+len,"/wsdl-",strlen("/wsdl-"));
+		len += strlen("/wsdl-");
 		if (user_len) {
 			memcpy(key+len, user, user_len-1);
 			len += user_len-1;
@@ -3270,8 +3270,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			php_stream_context_set_option(context, "http", "proxy", &str_proxy);
 			zval_ptr_dtor(&str_proxy);
 
-			if (uri_len < sizeof("https://")-1 ||
-				strncasecmp(uri, "https://", sizeof("https://")-1) != 0) {
+			if (uri_len < strlen("https://") ||
+				strncasecmp(uri, "https://", strlen("https://")) != 0) {
 				ZVAL_TRUE(&str_proxy);
 				php_stream_context_set_option(context, "http", "request_fulluri", &str_proxy);
 			}
@@ -3292,7 +3292,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 
 		ZVAL_DOUBLE(&http_version, 1.1);
 		php_stream_context_set_option(context, "http", "protocol_version", &http_version);
-		smart_str_appendl(&headers, "Connection: close\r\n", sizeof("Connection: close\r\n")-1);
+		smart_str_appendl(&headers, "Connection: close\r\n", strlen("Connection: close\r\n"));
 	}
 
 	if (headers.s && ZSTR_LEN(headers.s) > 0) {

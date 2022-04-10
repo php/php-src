@@ -181,7 +181,7 @@ ZEND_API void zend_strip(void)
 		switch (token_type) {
 			case T_WHITESPACE:
 				if (!prev_space) {
-					zend_write(" ", sizeof(" ") - 1);
+					zend_write(" ", strlen(" "));
 					prev_space = 1;
 				}
 				ZEND_FALLTHROUGH;
@@ -196,7 +196,7 @@ ZEND_API void zend_strip(void)
 				if (lex_scan(&token, NULL) != T_WHITESPACE) {
 					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
-				zend_write("\n", sizeof("\n") - 1);
+				zend_write("\n", strlen("\n"));
 				prev_space = 1;
 				ZVAL_UNDEF(&token);
 				continue;

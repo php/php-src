@@ -4326,26 +4326,26 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 		char *name;
 		array_init(&elem);
 		/* pg_attribute.attnum */
-		add_assoc_long_ex(&elem, "num", sizeof("num") - 1, atoi(PQgetvalue(pg_result, i, 1)));
+		add_assoc_long_ex(&elem, "num", strlen("num"), atoi(PQgetvalue(pg_result, i, 1)));
 		/* pg_type.typname */
-		add_assoc_string_ex(&elem, "type", sizeof("type") - 1, PQgetvalue(pg_result, i, 2));
+		add_assoc_string_ex(&elem, "type", strlen("type"), PQgetvalue(pg_result, i, 2));
 		/* pg_attribute.attlen */
-		add_assoc_long_ex(&elem, "len", sizeof("len") - 1, atoi(PQgetvalue(pg_result,i,3)));
+		add_assoc_long_ex(&elem, "len", strlen("len"), atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
-		add_assoc_bool_ex(&elem, "not null", sizeof("not null") - 1, !strcmp(PQgetvalue(pg_result, i, 4), "t"));
+		add_assoc_bool_ex(&elem, "not null", strlen("not null"), !strcmp(PQgetvalue(pg_result, i, 4), "t"));
 		/* pg_attribute.atthasdef */
-		add_assoc_bool_ex(&elem, "has default", sizeof("has default") - 1, !strcmp(PQgetvalue(pg_result,i,5), "t"));
+		add_assoc_bool_ex(&elem, "has default", strlen("has default"), !strcmp(PQgetvalue(pg_result,i,5), "t"));
 		/* pg_attribute.attndims */
-		add_assoc_long_ex(&elem, "array dims", sizeof("array dims") - 1, atoi(PQgetvalue(pg_result, i, 6)));
+		add_assoc_long_ex(&elem, "array dims", strlen("array dims"), atoi(PQgetvalue(pg_result, i, 6)));
 		/* pg_type.typtype */
-		add_assoc_bool_ex(&elem, "is enum", sizeof("is enum") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "e"));
+		add_assoc_bool_ex(&elem, "is enum", strlen("is enum"), !strcmp(PQgetvalue(pg_result, i, 7), "e"));
 		if (extended) {
 			/* pg_type.typtype */
-			add_assoc_bool_ex(&elem, "is base", sizeof("is base") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "b"));
-			add_assoc_bool_ex(&elem, "is composite", sizeof("is composite") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "c"));
-			add_assoc_bool_ex(&elem, "is pesudo", sizeof("is pesudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
+			add_assoc_bool_ex(&elem, "is base", strlen("is base"), !strcmp(PQgetvalue(pg_result, i, 7), "b"));
+			add_assoc_bool_ex(&elem, "is composite", strlen("is composite"), !strcmp(PQgetvalue(pg_result, i, 7), "c"));
+			add_assoc_bool_ex(&elem, "is pesudo", strlen("is pesudo"), !strcmp(PQgetvalue(pg_result, i, 7), "p"));
 			/* pg_description.description */
-			add_assoc_string_ex(&elem, "description", sizeof("description") - 1, PQgetvalue(pg_result, i, 8));
+			add_assoc_string_ex(&elem, "description", strlen("description"), PQgetvalue(pg_result, i, 8));
 		}
 		/* pg_attribute.attname */
 		name = PQgetvalue(pg_result,i,0);
@@ -4598,19 +4598,19 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 			php_error_docref(NULL, E_NOTICE, "Invalid field name (%s) in values", ZSTR_VAL(field));
 			err = 1;
 		}
-		if (!err && (type = zend_hash_str_find(Z_ARRVAL_P(def), "type", sizeof("type") - 1)) == NULL) {
+		if (!err && (type = zend_hash_str_find(Z_ARRVAL_P(def), "type", strlen("type"))) == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Detected broken meta data. Missing 'type'");
 			err = 1;
 		}
-		if (!err && (not_null = zend_hash_str_find(Z_ARRVAL_P(def), "not null", sizeof("not null") - 1)) == NULL) {
+		if (!err && (not_null = zend_hash_str_find(Z_ARRVAL_P(def), "not null", strlen("not null"))) == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Detected broken meta data. Missing 'not null'");
 			err = 1;
 		}
-		if (!err && (has_default = zend_hash_str_find(Z_ARRVAL_P(def), "has default", sizeof("has default") - 1)) == NULL) {
+		if (!err && (has_default = zend_hash_str_find(Z_ARRVAL_P(def), "has default", strlen("has default"))) == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Detected broken meta data. Missing 'has default'");
 			err = 1;
 		}
-		if (!err && (is_enum = zend_hash_str_find(Z_ARRVAL_P(def), "is enum", sizeof("is enum") - 1)) == NULL) {
+		if (!err && (is_enum = zend_hash_str_find(Z_ARRVAL_P(def), "is enum", strlen("is enum"))) == NULL) {
 			php_error_docref(NULL, E_NOTICE, "Detected broken meta data. Missing 'is enum'");
 			err = 1;
 		}
@@ -4645,14 +4645,14 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 								zend_string_equals_literal(Z_STR_P(val), "true") || zend_string_equals_literal(Z_STR_P(val), "True") ||
 								zend_string_equals_literal(Z_STR_P(val), "yes") || zend_string_equals_literal(Z_STR_P(val), "Yes") ||
 								zend_string_equals_literal(Z_STR_P(val), "1")) {
-								ZVAL_STRINGL(&new_val, "'t'", sizeof("'t'")-1);
+								ZVAL_STRINGL(&new_val, "'t'", strlen("'t'"));
 							}
 							else if (zend_string_equals_literal(Z_STR_P(val), "f") || zend_string_equals_literal(Z_STR_P(val), "F") ||
 									 zend_string_equals_literal(Z_STR_P(val), "n") || zend_string_equals_literal(Z_STR_P(val), "N") ||
 									 zend_string_equals_literal(Z_STR_P(val), "false") ||  zend_string_equals_literal(Z_STR_P(val), "False") ||
 									 zend_string_equals_literal(Z_STR_P(val), "no") ||  zend_string_equals_literal(Z_STR_P(val), "No") ||
 									 zend_string_equals_literal(Z_STR_P(val), "0")) {
-								ZVAL_STRINGL(&new_val, "'f'", sizeof("'f'")-1);
+								ZVAL_STRINGL(&new_val, "'f'", strlen("'f'"));
 							}
 							else {
 								php_error_docref(NULL, E_NOTICE, "Detected invalid value (%s) for PostgreSQL %s field (%s)", Z_STRVAL_P(val), Z_STRVAL_P(type), ZSTR_VAL(field));
@@ -4663,19 +4663,19 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 
 					case IS_LONG:
 						if (Z_LVAL_P(val)) {
-							ZVAL_STRINGL(&new_val, "'t'", sizeof("'t'")-1);
+							ZVAL_STRINGL(&new_val, "'t'", strlen("'t'"));
 						}
 						else {
-							ZVAL_STRINGL(&new_val, "'f'", sizeof("'f'")-1);
+							ZVAL_STRINGL(&new_val, "'f'", strlen("'f'"));
 						}
 						break;
 
 					case IS_TRUE:
-						ZVAL_STRINGL(&new_val, "'t'", sizeof("'t'")-1);
+						ZVAL_STRINGL(&new_val, "'t'", strlen("'t'"));
 						break;
 
 					case IS_FALSE:
-						ZVAL_STRINGL(&new_val, "'f'", sizeof("'f'")-1);
+						ZVAL_STRINGL(&new_val, "'f'", strlen("'f'"));
 						break;
 
 					case IS_NULL:
@@ -4809,7 +4809,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 							if (opt & PGSQL_CONV_FORCE_NULL) {
 								ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 							} else {
-								ZVAL_STRINGL(&new_val, "''", sizeof("''")-1);
+								ZVAL_STRINGL(&new_val, "''", strlen("''"));
 							}
 						}
 						else {
@@ -4855,7 +4855,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 						}
 						else {
 							/* better regex? */
-							if (php_pgsql_convert_match(Z_STR_P(val), "^[0-9]+$", sizeof("^[0-9]+$")-1, 0) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STR_P(val), "^[0-9]+$", strlen("^[0-9]+$"), 0) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -4933,7 +4933,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 						if (Z_STRLEN_P(val) == 0) {
 							ZVAL_STR(&new_val, ZSTR_KNOWN(ZEND_STR_NULL));
 						} else if (zend_string_equals_literal_ci(Z_STR_P(val), "now()")) {
-							ZVAL_STRINGL(&new_val, "NOW()", sizeof("NOW()")-1);
+							ZVAL_STRINGL(&new_val, "NOW()", strlen("NOW()"));
 						} else {
 #define REGEX0 "^([0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2})(([ \\t]+|T)(([0-9]{1,2}:[0-9]{1,2}){1}(:[0-9]{1,2}){0,1}(\\.[0-9]+){0,1}([ \\t]*([+-][0-9]{1,4}(:[0-9]{1,2}){0,1}|[-a-zA-Z_/+]{1,50})){0,1})){0,1}$"
 							/* better regex? */
@@ -5376,7 +5376,7 @@ PHP_PGSQL_API zend_result php_pgsql_insert(PGconn *pg_link, const zend_string *t
 				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)));
 				break;
 			case IS_NULL:
-				smart_str_appendl(&querystr, "NULL", sizeof("NULL")-1);
+				smart_str_appendl(&querystr, "NULL", strlen("NULL"));
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
@@ -5550,7 +5550,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 				}
 				break;
 			case IS_NULL:
-				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);
+				smart_str_appendl(querystr, "NULL", strlen("NULL"));
 				break;
 			default:
 				zend_type_error("Value must be of type string|int|float|null, %s given", zend_zval_type_name(val));
@@ -5608,7 +5608,7 @@ PHP_PGSQL_API zend_result php_pgsql_update(PGconn *pg_link, const zend_string *t
 
 	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
+	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", strlen(" AND "), opt))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');
@@ -5706,7 +5706,7 @@ PHP_PGSQL_API zend_result php_pgsql_delete(PGconn *pg_link, const zend_string *t
 	build_tablename(&querystr, pg_link, table);
 	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
+	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", strlen(" AND "), opt))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');
@@ -5846,7 +5846,7 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 	build_tablename(&querystr, pg_link, table);
 	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
+	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", strlen(" AND "), opt))
 		goto cleanup;
 
 	smart_str_appendc(&querystr, ';');

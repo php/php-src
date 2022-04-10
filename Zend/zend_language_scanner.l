@@ -413,12 +413,12 @@ static const zend_encoding* zend_multibyte_detect_unicode(void)
 		/* check if the NULL byte is after the __HALT_COMPILER(); */
 		pos2 = LANG_SCNG(script_org);
 
-		while ((size_t)(pos1 - pos2) >= sizeof("__HALT_COMPILER();")-1) {
+		while ((size_t)(pos1 - pos2) >= strlen("__HALT_COMPILER();")) {
 			pos2 = memchr(pos2, '_', pos1 - pos2);
 			if (!pos2) break;
 			pos2++;
-			if (strncasecmp((char*)pos2, "_HALT_COMPILER", sizeof("_HALT_COMPILER")-1) == 0) {
-				pos2 += sizeof("_HALT_COMPILER")-1;
+			if (strncasecmp((char*)pos2, "_HALT_COMPILER", strlen("_HALT_COMPILER")) == 0) {
+				pos2 += strlen("_HALT_COMPILER");
 				while (*pos2 == ' '  ||
 					   *pos2 == '\t' ||
 					   *pos2 == '\r' ||
@@ -2361,7 +2361,7 @@ inline_char_handler:
 }
 
 <ST_IN_SCRIPTING>"namespace"("\\"{LABEL})+ {
-	RETURN_TOKEN_WITH_STR(T_NAME_RELATIVE, sizeof("namespace\\") - 1);
+	RETURN_TOKEN_WITH_STR(T_NAME_RELATIVE, strlen("namespace\\"));
 }
 
 <ST_IN_SCRIPTING>{LABEL}("\\"{LABEL})+ {

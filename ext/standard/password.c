@@ -104,7 +104,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 /* }}} */
 
 static zend_string* php_password_get_salt(zval *unused_, size_t required_salt_len, HashTable *options) {
-	if (options && zend_hash_str_exists(options, "salt", sizeof("salt") - 1)) {
+	if (options && zend_hash_str_exists(options, "salt", strlen("salt"))) {
 		php_error_docref(NULL, E_WARNING, "The \"salt\" option has been ignored, since providing a custom salt is no longer supported");
 	}
 
@@ -144,7 +144,7 @@ static bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_array
 	}
 
 	sscanf(ZSTR_VAL(hash), "$2y$" ZEND_LONG_FMT "$", &old_cost);
-	if (options && (znew_cost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
+	if (options && (znew_cost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
 		new_cost = zval_get_long(znew_cost);
 	}
 
@@ -184,7 +184,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
-	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
+	if (options && (zcost = zend_hash_str_find(options, "cost", strlen("cost"))) != NULL) {
 		cost = zval_get_long(zcost);
 	}
 
@@ -242,10 +242,10 @@ static int extract_argon2_parameters(const zend_string *hash,
 	if (!hash || (ZSTR_LEN(hash) < sizeof("$argon2id$"))) {
 		return FAILURE;
 	}
-	if (!memcmp(p, "$argon2i$", sizeof("$argon2i$") - 1)) {
-		p += sizeof("$argon2i$") - 1;
-	} else if (!memcmp(p, "$argon2id$", sizeof("$argon2id$") - 1)) {
-		p += sizeof("$argon2id$") - 1;
+	if (!memcmp(p, "$argon2i$", strlen("$argon2i$"))) {
+		p += strlen("$argon2i$");
+	} else if (!memcmp(p, "$argon2id$", strlen("$argon2id$"))) {
+		p += strlen("$argon2id$");
 	} else {
 		return FAILURE;
 	}
@@ -279,15 +279,15 @@ static bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array
 	zend_long new_threads = PHP_PASSWORD_ARGON2_THREADS, threads = 0;
 	zval *option_buffer;
 
-	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", strlen("memory_cost"))) != NULL) {
 		new_memory_cost = zval_get_long(option_buffer);
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", strlen("time_cost"))) != NULL) {
 		new_time_cost = zval_get_long(option_buffer);
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "threads", strlen("threads"))) != NULL) {
 		new_threads = zval_get_long(option_buffer);
 	}
 
@@ -307,7 +307,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	size_t encoded_len;
 	int status = 0;
 
-	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", sizeof("memory_cost")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "memory_cost", strlen("memory_cost"))) != NULL) {
 		memory_cost = zval_get_long(option_buffer);
 	}
 
@@ -316,7 +316,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", sizeof("time_cost")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "time_cost", strlen("time_cost"))) != NULL) {
 		time_cost = zval_get_long(option_buffer);
 	}
 
@@ -325,7 +325,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 		return NULL;
 	}
 
-	if (options && (option_buffer = zend_hash_str_find(options, "threads", sizeof("threads")-1)) != NULL) {
+	if (options && (option_buffer = zend_hash_str_find(options, "threads", strlen("threads"))) != NULL) {
 		threads = zval_get_long(option_buffer);
 	}
 
@@ -501,14 +501,14 @@ static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str
 #else
 		case 2:
 			{
-			zend_string *n = zend_string_init("argon2i", sizeof("argon2i")-1, 0);
+			zend_string *n = zend_string_init("argon2i", strlen("argon2i"), 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;
 			}
 		case 3:
 			{
-			zend_string *n = zend_string_init("argon2id", sizeof("argon2id")-1, 0);
+			zend_string *n = zend_string_init("argon2id", strlen("argon2id"), 0);
 			const php_password_algo* ret = php_password_algo_find(n);
 			zend_string_release(n);
 			return ret;

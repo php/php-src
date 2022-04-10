@@ -520,7 +520,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 	MYSQLND_STRING transport;
 	DBG_ENTER("mysqlnd_conn_data::get_scheme");
 #ifndef PHP_WIN32
-	if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
+	if (hostname.l == strlen("localhost") && !strncasecmp(hostname.s, "localhost", hostname.l)) {
 		DBG_INF_FMT("socket=%s", socket_or_pipe->s? socket_or_pipe->s:"n/a");
 		if (!socket_or_pipe->s) {
 			socket_or_pipe->s = "/tmp/mysql.sock";
@@ -529,7 +529,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 		transport.l = mnd_sprintf(&transport.s, 0, "unix://%s", socket_or_pipe->s);
 		*unix_socket = TRUE;
 #else
-	if (hostname.l == sizeof(".") - 1 && hostname.s[0] == '.') {
+	if (hostname.l == strlen(".") && hostname.s[0] == '.') {
 		/* named pipe in socket */
 		if (!socket_or_pipe->s) {
 			socket_or_pipe->s = "\\\\.\\pipe\\MySQL";
@@ -1669,7 +1669,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode)
 {
 	DBG_ENTER("mysqlnd_conn_data::set_autocommit");
-	DBG_RETURN(conn->m->query(conn, (mode) ? "SET AUTOCOMMIT=1":"SET AUTOCOMMIT=0", sizeof("SET AUTOCOMMIT=1") - 1));
+	DBG_RETURN(conn->m->query(conn, (mode) ? "SET AUTOCOMMIT=1":"SET AUTOCOMMIT=0", strlen("SET AUTOCOMMIT=1")));
 }
 /* }}} */
 
@@ -1698,26 +1698,26 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_D
 {
 	if ((mode & TRANS_COR_AND_CHAIN) && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendl(str, " ", strlen(" "));
 		}
-		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
+		smart_str_appendl(str, "AND CHAIN", strlen("AND CHAIN"));
 	} else if ((mode & TRANS_COR_AND_NO_CHAIN) && !(mode & TRANS_COR_AND_CHAIN)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendl(str, " ", strlen(" "));
 		}
-		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
+		smart_str_appendl(str, "AND NO CHAIN", strlen("AND NO CHAIN"));
 	}
 
 	if ((mode & TRANS_COR_RELEASE) && !(mode & TRANS_COR_NO_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendl(str, " ", strlen(" "));
 		}
-		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
+		smart_str_appendl(str, "RELEASE", strlen("RELEASE"));
 	} else if ((mode & TRANS_COR_NO_RELEASE) && !(mode & TRANS_COR_RELEASE)) {
 		if (str->s && ZSTR_LEN(str->s)) {
-			smart_str_appendl(str, " ", sizeof(" ") - 1);
+			smart_str_appendl(str, " ", strlen(" "));
 		}
-		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
+		smart_str_appendl(str, "NO RELEASE", strlen("NO RELEASE"));
 	}
 	smart_str_0(str);
 }
@@ -1809,20 +1809,20 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 	smart_str tmp_str = {0, 0};
 	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
 		if (tmp_str.s) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
+		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", strlen("WITH CONSISTENT SNAPSHOT"));
 	}
 	if (mode & TRANS_START_READ_WRITE) {
 		if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+		smart_str_appendl(&tmp_str, "READ WRITE", strlen("READ WRITE"));
 	} else if (mode & TRANS_START_READ_ONLY) {
 		if (tmp_str.s && ZSTR_LEN(tmp_str.s)) {
-			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+			smart_str_appendl(&tmp_str, ", ", strlen(", "));
 		}
-		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+		smart_str_appendl(&tmp_str, "READ ONLY", strlen("READ ONLY"));
 	}
 	smart_str_0(&tmp_str);
 

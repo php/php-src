@@ -174,7 +174,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_le
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (path_len >= strlen(".phar") && !memcmp(path, ".phar", strlen(".phar"))) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -1221,7 +1221,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, si
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && path_len >= strlen(".phar") && !memcmp(path, ".phar", strlen(".phar"))) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1388,7 +1388,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 	zval retval, zp[4], openssl;
 	zend_string *str;
 
-	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? sizeof("openssl_sign")-1 : sizeof("openssl_verify")-1);
+	ZVAL_STRINGL(&openssl, is_sign ? "openssl_sign" : "openssl_verify", is_sign ? strlen("openssl_sign") : strlen("openssl_verify"));
 	if (*signature_len) {
 		ZVAL_STRINGL(&zp[1], *signature, *signature_len);
 	} else {
@@ -1513,7 +1513,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			char *pfile;
 			php_stream *pfp;
 #ifndef PHAR_HAVE_OPENSSL
-			if (!zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
+			if (!zend_hash_str_exists(&module_registry, "openssl", strlen("openssl"))) {
 				if (error) {
 					spprintf(error, 0, "openssl not loaded");
 				}

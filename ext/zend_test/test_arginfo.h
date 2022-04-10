@@ -270,31 +270,31 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 
 	zval property__StaticProp_default_value;
 	ZVAL_NULL(&property__StaticProp_default_value);
-	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, 1);
+	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", strlen("_StaticProp"), 1);
 	zend_declare_property_ex(class_entry, property__StaticProp_name, &property__StaticProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL);
 	zend_string_release(property__StaticProp_name);
 
 	zval property_staticIntProp_default_value;
 	ZVAL_LONG(&property_staticIntProp_default_value, 123);
-	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
+	zend_string *property_staticIntProp_name = zend_string_init("staticIntProp", strlen("staticIntProp"), 1);
 	zend_declare_typed_property(class_entry, property_staticIntProp_name, &property_staticIntProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_staticIntProp_name);
 
 	zval property_intProp_default_value;
 	ZVAL_LONG(&property_intProp_default_value, 123);
-	zend_string *property_intProp_name = zend_string_init("intProp", sizeof("intProp") - 1, 1);
+	zend_string *property_intProp_name = zend_string_init("intProp", strlen("intProp"), 1);
 	zend_declare_typed_property(class_entry, property_intProp_name, &property_intProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_intProp_name);
 
-	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass")-1, 1);
+	zend_string *property_classProp_class_stdClass = zend_string_init("stdClass", strlen("stdClass"), 1);
 	zval property_classProp_default_value;
 	ZVAL_NULL(&property_classProp_default_value);
-	zend_string *property_classProp_name = zend_string_init("classProp", sizeof("classProp") - 1, 1);
+	zend_string *property_classProp_name = zend_string_init("classProp", strlen("classProp"), 1);
 	zend_declare_typed_property(class_entry, property_classProp_name, &property_classProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classProp_class_stdClass, 0, MAY_BE_NULL));
 	zend_string_release(property_classProp_name);
 
-	zend_string *property_classUnionProp_class_stdClass = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
-	zend_string *property_classUnionProp_class_Iterator = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
+	zend_string *property_classUnionProp_class_stdClass = zend_string_init("stdClass", strlen("stdClass"), 1);
+	zend_string *property_classUnionProp_class_Iterator = zend_string_init("Iterator", strlen("Iterator"), 1);
 	zend_type_list *property_classUnionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
 	property_classUnionProp_type_list->num_types = 2;
 	property_classUnionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_stdClass, 0, 0);
@@ -302,13 +302,13 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_UNION(property_classUnionProp_type_list, MAY_BE_NULL);
 	zval property_classUnionProp_default_value;
 	ZVAL_NULL(&property_classUnionProp_default_value);
-	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", strlen("classUnionProp"), 1);
 	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
 	zend_string_release(property_classUnionProp_name);
 
 	zval property_readonlyProp_default_value;
 	ZVAL_UNDEF(&property_readonlyProp_default_value);
-	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, 1);
+	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", strlen("readonlyProp"), 1);
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_readonlyProp_name);
 
@@ -335,7 +335,7 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 
 	zval property_testProp_default_value;
 	ZVAL_NULL(&property_testProp_default_value);
-	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
+	zend_string *property_testProp_name = zend_string_init("testProp", strlen("testProp"), 1);
 	zend_declare_property_ex(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_testProp_name);
 
@@ -363,7 +363,7 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 
 	zval property_parameter_default_value;
 	ZVAL_UNDEF(&property_parameter_default_value);
-	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
+	zend_string *property_parameter_name = zend_string_init("parameter", strlen("parameter"), 1);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
 
@@ -406,17 +406,17 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, class_ZendTestStringEnum_methods);
 
 	zval enum_case_Foo_value;
-	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", sizeof("Test1") - 1, 1);
+	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", strlen("Test1"), 1);
 	ZVAL_STR(&enum_case_Foo_value, enum_case_Foo_value_str);
 	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
 
 	zval enum_case_Bar_value;
-	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", sizeof("Test2") - 1, 1);
+	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", strlen("Test2"), 1);
 	ZVAL_STR(&enum_case_Bar_value, enum_case_Bar_value_str);
 	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
 
 	zval enum_case_Baz_value;
-	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", sizeof("Test2\\a") - 1, 1);
+	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", strlen("Test2\\a"), 1);
 	ZVAL_STR(&enum_case_Baz_value, enum_case_Baz_value_str);
 	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
 
@@ -440,10 +440,10 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS2", "Foo", class_ZendTestNS2_Foo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
-	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo")-1, 1);
+	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", strlen("ZendTestNS2\\ZendSubNS\\Foo"), 1);
 	zval property_foo_default_value;
 	ZVAL_UNDEF(&property_foo_default_value);
-	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, 1);
+	zend_string *property_foo_name = zend_string_init("foo", strlen("foo"), 1);
 	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS2_ZendSubNS_Foo, 0, 0));
 	zend_string_release(property_foo_name);
 

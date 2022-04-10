@@ -243,11 +243,11 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			zval_ptr_dtor(&ssl_proxy_peer_name);
 		}
 
-		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
+		smart_str_appendl(&header, "CONNECT ", strlen("CONNECT "));
 		smart_str_appends(&header, ZSTR_VAL(resource->host));
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
-		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
+		smart_str_appendl(&header, " HTTP/1.0\r\n", strlen(" HTTP/1.0\r\n"));
 
 	    /* check if we have Proxy-Authorization header */
 		if (context && (tmpzval = php_stream_context_get_option(context, "http", "header")) != NULL) {
@@ -265,12 +265,12 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 							while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
 							if (*p == ':') {
 								p++;
-								if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-								    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-								        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+								if (p - s == strlen("Proxy-Authorization:") &&
+								    zend_binary_strcasecmp(s, strlen("Proxy-Authorization:"),
+								        "Proxy-Authorization:", strlen("Proxy-Authorization:")) == 0) {
 									while (*p != 0 && *p != '\r' && *p !='\n') p++;
 									smart_str_appendl(&header, s, p - s);
-									smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+									smart_str_appendl(&header, "\r\n", strlen("\r\n"));
 									goto finish;
 								} else {
 									while (*p != 0 && *p != '\r' && *p !='\n') p++;
@@ -289,12 +289,12 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 					while (*p != 0 && *p != ':' && *p != '\r' && *p !='\n') p++;
 					if (*p == ':') {
 						p++;
-						if (p - s == sizeof("Proxy-Authorization:") - 1 &&
-						    zend_binary_strcasecmp(s, sizeof("Proxy-Authorization:") - 1,
-						        "Proxy-Authorization:", sizeof("Proxy-Authorization:") - 1) == 0) {
+						if (p - s == strlen("Proxy-Authorization:") &&
+						    zend_binary_strcasecmp(s, strlen("Proxy-Authorization:"),
+						        "Proxy-Authorization:", strlen("Proxy-Authorization:")) == 0) {
 							while (*p != 0 && *p != '\r' && *p !='\n') p++;
 							smart_str_appendl(&header, s, p - s);
-							smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+							smart_str_appendl(&header, "\r\n", strlen("\r\n"));
 							goto finish;
 						} else {
 							while (*p != 0 && *p != '\r' && *p !='\n') p++;
@@ -306,7 +306,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			}
 		}
 finish:
-		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
+		smart_str_appendl(&header, "\r\n", strlen("\r\n"));
 
 		if (php_stream_write(stream, ZSTR_VAL(header.s), ZSTR_LEN(header.s)) != ZSTR_LEN(header.s)) {
 			php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
@@ -428,7 +428,7 @@ finish:
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 				if (Z_TYPE_P(tmpheader) == IS_STRING) {
 					smart_str_append(&tmpstr, Z_STR_P(tmpheader));
-					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
+					smart_str_appendl(&tmpstr, "\r\n", strlen("\r\n"));
 				}
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tmpstr);
@@ -489,7 +489,7 @@ finish:
 			/* remove Proxy-Authorization header */
 			if (use_proxy && use_ssl && (s = strstr(t, "proxy-authorization:")) &&
 			    (s == t || *(s-1) == '\n')) {
-				char *p = s + sizeof("proxy-authorization:") - 1;
+				char *p = s + strlen("proxy-authorization:");
 
 				while (s > t && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
 				while (*p != 0 && *p != '\r' && *p != '\n') p++;
@@ -679,7 +679,7 @@ finish:
 				while (
 					!php_stream_eof(stream)
 					&& php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL
-					&& ( tmp_line_len < sizeof("HTTP/1") - 1 || strncasecmp(tmp_line, "HTTP/1", sizeof("HTTP/1") - 1) )
+					&& ( tmp_line_len < strlen("HTTP/1") || strncasecmp(tmp_line, "HTTP/1", strlen("HTTP/1")) )
 				);
 
 				if (tmp_line_len > 9) {
@@ -770,7 +770,7 @@ finish:
 				http_header_value = e;
 			}
 
-			if (!strncasecmp(http_header_line, "Location:", sizeof("Location:")-1)) {
+			if (!strncasecmp(http_header_line, "Location:", strlen("Location:"))) {
 				if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
 					follow_location = zval_is_true(tmpzval);
 				} else if (!((response_code >= 300 && response_code < 304)
@@ -782,14 +782,14 @@ finish:
 					follow_location = 0;
 				}
 				strlcpy(location, http_header_value, sizeof(location));
-			} else if (!strncasecmp(http_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
+			} else if (!strncasecmp(http_header_line, "Content-Type:", strlen("Content-Type:"))) {
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
-			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
+			} else if (!strncasecmp(http_header_line, "Content-Length:", strlen("Content-Length:"))) {
 				file_size = atoi(http_header_value);
 				php_stream_notify_file_size(context, file_size, http_header_line, 0);
 			} else if (
-				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
-				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
+				!strncasecmp(http_header_line, "Transfer-Encoding:", strlen("Transfer-Encoding:"))
+				&& !strncasecmp(http_header_value, "Chunked", strlen("Chunked"))
 			) {
 
 				/* create filter to decode response body */
@@ -841,10 +841,10 @@ finish:
 			char loc_path[HTTP_HEADER_BLOCK_SIZE];
 
 			*new_path='\0';
-			if (strlen(location)<8 || (strncasecmp(location, "http://", sizeof("http://")-1) &&
-							strncasecmp(location, "https://", sizeof("https://")-1) &&
-							strncasecmp(location, "ftp://", sizeof("ftp://")-1) &&
-							strncasecmp(location, "ftps://", sizeof("ftps://")-1)))
+			if (strlen(location)<8 || (strncasecmp(location, "http://", strlen("http://")) &&
+							strncasecmp(location, "https://", strlen("https://")) &&
+							strncasecmp(location, "ftp://", strlen("ftp://")) &&
+							strncasecmp(location, "ftps://", strlen("ftps://"))))
 			{
 				if (*location != '/') {
 					if (*(location+1) != '\0' && resource->path) {
@@ -904,7 +904,7 @@ finish:
 	} \
 }
 			/* check for control characters in login, password & path */
-			if (strncasecmp(new_path, "http://", sizeof("http://") - 1) || strncasecmp(new_path, "https://", sizeof("https://") - 1)) {
+			if (strncasecmp(new_path, "http://", strlen("http://")) || strncasecmp(new_path, "https://", strlen("https://"))) {
 				CHECK_FOR_CNTRL_CHARS(resource->user);
 				CHECK_FOR_CNTRL_CHARS(resource->pass);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
@@ -969,7 +969,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
-				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
+				"http_response_header", strlen("http_response_header"), &headers, 0)) {
 			zval_ptr_dtor(&headers);
 		}
 	}

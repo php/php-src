@@ -186,7 +186,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, z
 	smart_str_append_escaped(str, ZSTR_VAL(value), MIN(length, ZSTR_LEN(value)));
 
 	if (ZSTR_LEN(value) > length) {
-		smart_str_appendl(str, "...", sizeof("...")-1);
+		smart_str_appendl(str, "...", strlen("..."));
 	}
 }
 
@@ -196,7 +196,7 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, zval *value
 	switch (Z_TYPE_P(value)) {
 		case IS_UNDEF:
 		case IS_NULL:
-			smart_str_appendl(dest, "NULL", sizeof("NULL")-1);
+			smart_str_appendl(dest, "NULL", strlen("NULL"));
 		break;
 
 		case IS_TRUE:
