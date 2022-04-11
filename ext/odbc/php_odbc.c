@@ -48,6 +48,97 @@
 
 #endif
 
+/**
+ * Determines if a string matches the ODBC quoting rules.
+ *
+ * A valid quoted string begins with a '{', ends with a '}', and has no '}'
+ * inside of the string that aren't repeated (as to be escaped).
+ *
+ * These rules are what .NET also follows.
+ */
+static bool is_odbc_quoted(const char *str)
+{
+	if (!str) {
+		return false;
+	}
+	/* ODBC quotes are curly braces */
+	if (str[0] != '{') {
+		return false;
+	}
+	/* Check for } that aren't doubled up or at the end of the string */
+	size_t length = strlen(str);
+	for (size_t i = 0; i < length; i++) {
+		if (str[i] == '}' && str[i + 1] == '}') {
+			/* Skip over so we don't count it again */
+			i++;
+		} else if (str[i] == '}' && str[i + 1] != '\0') {
+			/* If not at the end, not quoted */
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Determines if a value for a connection string should be quoted.
+ *
+ * The ODBC specification mentions:
+ * "Because of connection string and initialization file grammar, keywords and
+ * and attribute values that contain the characters []{}(),;?*=!@ not enclosed
+ * with braces should be avoided."
+ *
+ * Note that it assumes that the string is *not* already quoted. You should
+ * check beforehand.
+ */
+static bool should_odbc_quote(const char *str)
+{
+	return strpbrk(str, "[]{}(),;?*=!@") != NULL;
+}
+
+/**
+ * Estimates the worst-case scenario for a quoted version of a string's size.
+ */
+static size_t estimate_odbc_quote_length(const char *in_str)
+{
+	/* Assume all '}'. Include '{,' '}', and the null terminator too */
+	return (strlen(in_str) * 2) + 3;
+}
+
+/**
+ * Quotes a string with ODBC rules.
+ *
+ * Some characters (curly braces, semicolons) are special and must be quoted.
+ * In the case of '}' in a quoted string, they must be escaped SQL style; that
+ * is, repeated.
+ */
+static size_t odbc_quote(char *out_str, const char *in_str, size_t out_str_size)
+{
+	*out_str++ = '{';
+	out_str_size--;
+	while (out_str_size > 2) {
+		if (*in_str == '\0') {
+			break;
+		} else if (*in_str == '}' && out_str_size - 1 > 2) {
+			/* enough room to append */
+			*out_str++ = '}';
+			*out_str++ = *in_str++;
+			out_str_size -= 2;
+		} else if (*in_str == '}') {
+			/* not enough, truncate here */
+			break;
+		} else {
+			*out_str++ = *in_str++;
+			out_str_size--;
+		}
+	}
+	/* append termination */
+	*out_str++ = '}';
+	*out_str++ = '\0';
+	out_str_size -= 2;
+	/* return how many characters were left */
+	return strlen(in_str);
+}
+
 /*
  * not defined elsewhere
  */
@@ -2169,8 +2260,58 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 
 		if (strstr((char*)db, ";")) {
 			direct = 1;
-			if (uid && !strstr ((char*)db, "uid") && !strstr((char*)db, "UID")) {
-				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid, pwd);
+			/* Force UID and PWD to be set in the DSN */
+			bool is_uid_set = uid && *uid
+				&& !strstr(db, "uid=")
+				&& !strstr(db, "UID=");
+			bool is_pwd_set = pwd && *pwd
+				&& !strstr(db, "pwd=")
+				&& !strstr(db, "PWD=");
+			if (is_uid_set && is_pwd_set) {
+				char *uid_quoted = NULL, *pwd_quoted = NULL;
+				bool should_quote_uid = !is_odbc_quoted(uid) && should_odbc_quote(uid);
+				bool should_quote_pwd = !is_odbc_quoted(pwd) && should_odbc_quote(pwd);
+				bool connection_string_fail = false;
+				if (should_quote_uid) {
+					size_t estimated_length = estimate_odbc_quote_length(uid);
+					uid_quoted = emalloc(estimated_length);
+					if (!uid_quoted) {
+						connection_string_fail = true;
+						goto connection_string_fail;
+					}
+					odbc_quote(uid_quoted, uid, estimated_length);
+				} else {
+					uid_quoted = uid;
+				}
+				if (should_quote_pwd) {
+					size_t estimated_length = estimate_odbc_quote_length(pwd);
+					pwd_quoted = emalloc(estimated_length);
+					if (!pwd_quoted) {
+						connection_string_fail = true;
+						goto connection_string_fail;
+					}
+					odbc_quote(pwd_quoted, pwd, estimated_length);
+				} else {
+					pwd_quoted = pwd;
+				}
+				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid_quoted, pwd_quoted);
+connection_string_fail:
+				if (uid_quoted && should_quote_uid) {
+					efree(uid_quoted);
+				}
+				if (pwd_quoted && should_quote_pwd) {
+					efree(pwd_quoted);
+				}
+				/*
+				 * In the PDO version, we fail, but we don't
+				 * really have the facility for that, so fall
+				 * back to the old unquoted case. Note that
+				 * the success case hasn't been allocated, so
+				 * it should be safe.
+				 */
+				if (connection_string_fail) {
+					spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid, pwd);
+				}
 			} else {
 				ldb_len = strlen(db)+1;
 				ldb = (char*) emalloc(ldb_len);
