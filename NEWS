@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-8310 (Registry settings are no longer recognized). (cmb)
+  . Fixed potential race condition during resource ID allocation. (ryancaicse)
 
 - Date:
   . Fixed bug GH-7752 (DateTimeZone::getTransitions() returns insufficient
