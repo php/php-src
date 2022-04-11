@@ -562,6 +562,9 @@ typedef union _zend_jit_trace_stack {
 		(_stack)[_slot].reg = _reg; \
 		(_stack)[_slot].flags = _flags; \
 	} while (0)
+#define RESET_STACK_MEM_TYPE(_stack, _slot) do { \
+		(_stack)[_slot].mem_type = IS_UNKNOWN; \
+	} while (0)
 
 /* trace info flags */
 #define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
