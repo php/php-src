@@ -601,7 +601,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (should_quote_pwd) {
 				size_t estimated_length = estimate_odbc_quote_length(dbh->password);
 				pwd = emalloc(estimated_length);
-				if (!uid) {
+				if (!pwd) {
 					connection_string_fail = true;
 					goto connection_string_fail;
 				}
