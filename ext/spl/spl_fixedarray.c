@@ -781,7 +781,7 @@ PHP_METHOD(SplFixedArray, offsetUnset)
 PHP_METHOD(SplFixedArray, getIterator)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
