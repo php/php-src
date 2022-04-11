@@ -348,9 +348,10 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 		return -1;
 	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
-		zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
-
-		if (ZSTR_LEN(membuf) + count >= ts->smax) {
+		zend_off_t pos = php_stream_tell(ts->innerstream);
+		
+		if (pos + count >= ts->smax) {
+			zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			if (file == NULL) {
 				php_error_docref(NULL, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
@@ -360,6 +361,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
 			php_stream_encloses(stream, ts->innerstream);
+			php_stream_seek(ts->innerstream, pos, SEEK_SET);
 		}
 	}
 	return php_stream_write(ts->innerstream, buf, count);
