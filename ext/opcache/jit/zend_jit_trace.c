@@ -6229,6 +6229,9 @@ done:
 					} else {
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type,
 							(type == IS_UNKNOWN || !ra || !ra[ssa_op->result_def]));
+						if (ssa->var_info[ssa_op->result_def].type & MAY_BE_INDIRECT) {
+							RESET_STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
+						}
 						if (type != IS_UNKNOWN) {
 							ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 							if (opline->opcode == ZEND_FETCH_THIS
