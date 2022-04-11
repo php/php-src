@@ -286,6 +286,10 @@ class SimpleType {
                 return "IS_STATIC";
             case "never":
                 return "IS_NEVER";
+            case "null":
+                return "IS_NULL";
+            case "false":
+                return "IS_FALSE";
             default:
                 throw new Exception("Not implemented: $this->name");
         }
