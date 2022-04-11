@@ -510,6 +510,10 @@ class Type {
 
     public function tryToSimpleType(): ?SimpleType {
         $withoutNull = $this->getWithoutNull();
+        /* type has only null */
+        if (count($withoutNull->types) === 0) {
+            return $this->types[0];
+        }
         if (count($withoutNull->types) === 1) {
             return $withoutNull->types[0];
         }
