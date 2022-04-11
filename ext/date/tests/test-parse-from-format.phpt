@@ -49,9 +49,9 @@ object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2008-07-08 22:14:12.000000"
   ["timezone_type"]=>
-  int(1)
+  int(3)
   ["timezone"]=>
-  string(6) "+02:00"
+  string(11) "Europe/Oslo"
 }
 
 string(11) "Y-m-d H:i:s"
