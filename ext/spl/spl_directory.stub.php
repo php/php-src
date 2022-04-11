@@ -279,10 +279,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function getMaxLineLen(): int {}
 
     /** @tentative-return-type */
-    public function hasChildren(): bool {}
+    public function hasChildren(): false {}
 
     /** @tentative-return-type */
-    public function getChildren(): ?RecursiveIterator {}
+    public function getChildren(): null {}
 
     /** @tentative-return-type */
     public function seek(int $line): void {}
