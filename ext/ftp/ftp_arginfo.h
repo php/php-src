@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bd80737c67a0c10119f97988e41a08870b1f1af9 */
+ * Stub hash: f3728c451a9cd130e9ffdf48389e2f68b4f82423 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -293,6 +293,8 @@ static void register_ftp_symbols(int module_number)
     REGISTER_LONG_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_CS | CONST_PERSISTENT);
+
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ftp_login", 2);
 }
 
 static zend_class_entry *register_class_FTP_Connection(void)
