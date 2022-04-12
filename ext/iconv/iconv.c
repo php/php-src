@@ -311,7 +311,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 		}
 
-		if (mimetype != NULL && (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || (output_context->op & PHP_OUTPUT_HANDLER_START))) {
+		if (mimetype != NULL && (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || ((output_context->op & PHP_OUTPUT_HANDLER_START) && !(output_context->op & PHP_OUTPUT_HANDLER_FINAL)))) {
 			size_t len;
 			char *p = strstr(get_output_encoding(), "//");
 
