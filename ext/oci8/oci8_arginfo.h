@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9db587b5d431b9dfe7178fd843ae8907db737a04 */
+ * Stub hash: db170b61403c53d4d420d0095031944f3d036508 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -798,6 +798,16 @@ static const zend_function_entry class_OCICollection_methods[] = {
 	ZEND_ME_MAPPING(trim, oci_collection_trim, arginfo_class_OCICollection_trim, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_oci8_symbols(int module_number)
+{
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_new_connect", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ocinlogon", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_connect", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ocilogon", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_pconnect", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ociplogon", 1);
+}
 
 static zend_class_entry *register_class_OCILob(void)
 {
