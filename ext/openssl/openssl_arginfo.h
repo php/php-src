@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b820bb89ed3a0612473de268b057663ee237f876 */
+ * Stub hash: 9e75d730683f247a5787fe7d493039b7e4fa4399 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -533,6 +533,49 @@ static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[
 static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_openssl_symbols(int module_number)
+{
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_x509_check_private_key", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export_to_file", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export_to_file", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_export", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs12_read", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_csr_sign", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_csr_new", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export_to_file", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export_to_file", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_export", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_get_private", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_get_private", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_get_privatekey", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_get_privatekey", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pbkdf2", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_sign", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_decrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkcs7_decrypt", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_sign", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_decrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_cms_decrypt", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_encrypt", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_encrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_decrypt", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_private_decrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_public_encrypt", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_public_decrypt", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_sign", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_seal", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_open", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_open", 3);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_encrypt", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_encrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_decrypt", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_dh_compute_key", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_pkey_derive", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "openssl_spki_new", 0);
+}
 
 static zend_class_entry *register_class_OpenSSLCertificate(void)
 {
