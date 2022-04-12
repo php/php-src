@@ -22,6 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_libsodium.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 
 #include <sodium.h>
@@ -385,6 +386,8 @@ PHP_MINIT_FUNCTION(sodium)
 		return FAILURE;
 	}
 #endif
+
+	register_libsodium_symbols(module_number);
 
 	return SUCCESS;
 }
