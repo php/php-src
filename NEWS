@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.29
 
+- Core:
+  . No source changes to this release.
+    Version number added for reproduction of Windows builds.
 
 17 Feb 2022, PHP 7.4.28
 
