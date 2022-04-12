@@ -68,25 +68,28 @@ jobs:
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-linux
-        with:
-          runTestsParameters: >-
-            ${{ matrix.run_tests_parameters }}
-            -d zend_extension=opcache.so
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
   MACOS:
@@ -121,24 +124,27 @@ jobs:
         run: sudo make install
       - name: Test
         uses: ./.github/actions/test-macos
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-macos
-        with:
-          runTestsParameters: >-
-            -d zend_extension=opcache.so
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-macos
+        with:
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.protect_memory=1
+            -d opcache.jit_buffer_size=16M
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
