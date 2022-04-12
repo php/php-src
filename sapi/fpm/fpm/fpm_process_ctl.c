@@ -327,21 +327,6 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 
 		if (wp->config == NULL) continue;
 
-		for (child = wp->children; child; child = child->next) {
-			if (fpm_request_is_idle(child)) {
-				if (last_idle_child == NULL) {
-					last_idle_child = child;
-				} else {
-					if (timercmp(&child->started, &last_idle_child->started, <)) {
-						last_idle_child = child;
-					}
-				}
-				idle++;
-			} else {
-				active++;
-			}
-		}
-
 		/* update status structure for all PMs */
 		if (wp->listen_address_domain == FPM_AF_INET) {
 			if (0 > fpm_socket_get_listening_queue(wp->listening_socket, &cur_lq, NULL)) {
@@ -359,7 +344,25 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 #endif
 			}
 		}
-		fpm_scoreboard_update(idle, active, cur_lq, -1, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
+
+		fpm_scoreboard_update_begin(wp->scoreboard);
+
+		for (child = wp->children; child; child = child->next) {
+			if (fpm_request_is_idle(child)) {
+				if (last_idle_child == NULL) {
+					last_idle_child = child;
+				} else {
+					if (timercmp(&child->started, &last_idle_child->started, <)) {
+						last_idle_child = child;
+					}
+				}
+				idle++;
+			} else {
+				active++;
+			}
+		}
+
+		fpm_scoreboard_update_commit(idle, active, cur_lq, -1, -1, -1, 0, FPM_SCOREBOARD_ACTION_SET, wp->scoreboard);
 
 		/* this is specific to PM_STYLE_ONDEMAND */
 		if (wp->config->pm == PM_STYLE_ONDEMAND) {

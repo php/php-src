@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8289 (Exceptions thrown within a yielded from iterator are
     not rethrown into the generator). (Bob)
 
+- FPM:
+  . Fixed bug #76003 (FPM /status reports wrong number of active processe).
+    (Jakub Zelenka)
+
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
 
