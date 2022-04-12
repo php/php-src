@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6a3bdee5c77294d583d385a03b01713edb0923d8 */
+ * Stub hash: 67b3287b7dfa9beec9d9981214de8099f8224fe2 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -828,6 +828,19 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_CONTROL_VLVREQUEST)
     REGISTER_STRING_CONSTANT("LDAP_CONTROL_VLVRESPONSE", LDAP_CONTROL_VLVRESPONSE, CONST_CS | CONST_PERSISTENT);
+#endif
+
+#if defined(HAVE_ORALDAP)
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_connect", 3);
+#endif
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_bind", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_bind_ext", 2);
+#if defined(HAVE_LDAP_SASL)
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_sasl_bind", 2);
+#endif
+#if defined(HAVE_LDAP_PASSWD)
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_exop_passwd", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "ldap_exop_passwd", 3);
 #endif
 }
 
