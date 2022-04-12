@@ -24,6 +24,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "zend_attributes.h"
 
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -482,6 +483,8 @@ PHP_MINIT_FUNCTION(odbc)
 	/* DB2NOEXITLIST env variable prevents DB2 from invoking atexit() */
 	putenv("DB2NOEXITLIST=TRUE");
 #endif
+
+	register_odbc_symbols(module_number);
 
 	return SUCCESS;
 }
