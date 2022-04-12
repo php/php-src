@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_openssl.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 
 /* PHP Includes */
@@ -1391,6 +1392,8 @@ PHP_MINIT_FUNCTION(openssl)
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
 
 	REGISTER_INI_ENTRIES();
+
+	register_openssl_symbols(module_number);
 
 	return SUCCESS;
 }
