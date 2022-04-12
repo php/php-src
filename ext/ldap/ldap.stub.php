@@ -610,6 +610,9 @@ namespace {
 #endif
 
     #ifdef HAVE_ORALDAP
+    /**
+     * @sensitive-param $password
+     */
     function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
     #else
     function ldap_connect(?string $uri = null, int $port = 389): LDAP\Connection|false {}
@@ -620,11 +623,20 @@ namespace {
     /** @alias ldap_unbind */
     function ldap_close(LDAP\Connection $ldap): bool {}
 
+    /**
+     * @sensitive-param $password
+     */
     function ldap_bind(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null): bool {}
 
+    /**
+     * @sensitive-param $password
+     */
     function ldap_bind_ext(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null, ?array $controls = null): LDAP\Result|false {}
 
     #ifdef HAVE_LDAP_SASL
+    /**
+     * @sensitive-param $password
+     */
     function ldap_sasl_bind(LDAP\Connection $ldap, ?string $dn = null, ?string $password = null, ?string $mech = null, ?string $realm = null, ?string $authc_id = null, ?string $authz_id = null, ?string $props = null): bool {}
     #endif
 
@@ -779,6 +791,8 @@ namespace {
     #ifdef HAVE_LDAP_PASSWD
     /**
      * @param array $controls
+     * @sensitive-param $old_password
+     * @sensitive-param $new_password
      */
     function ldap_exop_passwd(LDAP\Connection $ldap, string $user = "", string $old_password = "", string $new_password = "", &$controls = null): string|bool {}
     #endif
