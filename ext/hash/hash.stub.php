@@ -14,13 +14,22 @@ function hash(string $algo, string $data, bool $binary = false, array $options =
 /** @refcount 1 */
 function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
 
-/** @refcount 1 */
+/**
+ * @sensitive-param $key
+ * @refcount 1
+ */
 function hash_hmac(string $algo, string $data, string $key, bool $binary = false): string {}
 
-/** @refcount 1 */
+/**
+ * @sensitive-param $key
+ * @refcount 1
+ */
 function hash_hmac_file(string $algo, string $filename, string $key, bool $binary = false): string|false {}
 
-/** @refcount 1 */
+/**
+ * @sensitive-param $key
+ * @refcount 1
+ */
 function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
 
 function hash_update(HashContext $context, string $data): bool {}
@@ -49,12 +58,22 @@ function hash_algos(): array {}
  */
 function hash_hmac_algos(): array {}
 
-/** @refcount 1 */
+/**
+ * @sensitive-param $password
+ * @refcount 1
+ */
 function hash_pbkdf2(string $algo, string $password, string $salt, int $iterations, int $length = 0, bool $binary = false): string {}
 
+/**
+ * @sensitive-param $known_string
+ * @sensitive-param $user_string
+ */
 function hash_equals(string $known_string, string $user_string): bool {}
 
-/** @refcount 1 */
+/**
+ * @sensitive-param $key
+ * @refcount 1
+ */
 function hash_hkdf(string $algo, string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC

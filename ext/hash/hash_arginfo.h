@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2c21ea2ab2a1f461c6a59b7c98160dac5d00b339 */
+ * Stub hash: fb95b61917a29769f4be4f5d7b5d589a39ae0c4e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -213,6 +213,14 @@ static const zend_function_entry class_HashContext_methods[] = {
 static void register_hash_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("HASH_HMAC", PHP_HASH_HMAC, CONST_CS | CONST_PERSISTENT);
+
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac_file", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_init", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_pbkdf2", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 0);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 1);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hkdf", 1);
 }
 
 static zend_class_entry *register_class_HashContext(void)

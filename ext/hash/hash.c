@@ -26,8 +26,9 @@
 #include "ext/standard/php_var.h"
 #include "ext/spl/spl_exceptions.h"
 
-#include "zend_interfaces.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 #include "zend_smart_str.h"
 
 #include "hash_arginfo.h"
