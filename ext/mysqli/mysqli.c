@@ -29,6 +29,7 @@
 #include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"

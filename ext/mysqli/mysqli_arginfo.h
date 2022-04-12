@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 794efd97f6eac5e755bed2eb6219173a1ee45321 */
+ * Stub hash: db2ec0349b8b40e9352569e08cb4a3bd253f0255 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -1027,7 +1027,13 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 
 static void register_mysqli_symbols(int module_number, zend_class_entry *class_entry_mysqli)
 {
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_change_user", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_connect", 2);
+    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_real_connect", 3);
     zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "__construct", 2);
+    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "change_user", 1);
+    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "connect", 2);
+    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "real_connect", 2);
 }
 
 static zend_class_entry *register_class_mysqli_driver(void)

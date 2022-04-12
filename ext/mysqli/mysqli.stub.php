@@ -149,6 +149,7 @@ class mysqli
     public function begin_transaction(int $flags = 0, ?string $name = null): bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_change_user
      */
@@ -174,6 +175,7 @@ class mysqli
     public function commit(int $flags = 0, ?string $name = null): bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_connect
      * @no-verify
@@ -287,6 +289,7 @@ class mysqli
     public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
     /**
+     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_real_connect
      */
@@ -740,6 +743,7 @@ function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
 
 function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
+/** @sensitive-param $password */
 function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
 
 /** @refcount 1 */
@@ -750,7 +754,10 @@ function mysqli_close(mysqli $mysql): bool {} // TODO make return type void
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @sensitive-param $password
+ */
 function mysqli_connect(
     ?string $hostname = null,
     ?string $username = null,
@@ -925,6 +932,7 @@ function mysqli_report(int $flags): bool {}
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
+/** @sensitive-param $password */
 function mysqli_real_connect(
     mysqli $mysql,
     ?string $hostname = null,
