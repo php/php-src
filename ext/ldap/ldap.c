@@ -1442,6 +1442,12 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 			case SASL_CB_PASS:
 				p = ctx->passwd;
 				break;
+			case SASL_CB_NOECHOPROMPT:
+				/* FALLTHROUGH */
+			case SASL_CB_ECHOPROMPT:
+				if (interact->challenge != NULL)
+					p = ctx->passwd;
+				break;
 		}
 		if (p) {
 			interact->result = p;
