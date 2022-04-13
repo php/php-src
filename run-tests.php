@@ -735,9 +735,9 @@ function main(): void
     } else {
         // Compile a list of all test files (*.phpt).
         $test_files = [];
-        $exts_tested = count($exts_to_test);
-        $exts_skipped = 0;
-        $ignored_by_ext = 0;
+        $exts_tested = $exts_to_test;
+        $exts_skipped = [];
+        $ignored_by_ext = [];
         sort($exts_to_test);
         $test_dirs = [];
         $optionals = ['Zend', 'tests', 'ext', 'sapi'];
@@ -1053,7 +1053,7 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
         if (is_dir("{$dir}/{$name}") && !in_array($name, ['.', '..', '.svn'])) {
             $skip_ext = ($is_ext_dir && !in_array(strtolower($name), $exts_to_test));
             if ($skip_ext) {
-                $exts_skipped++;
+                $exts_skipped[] = $name;
             }
             find_files("{$dir}/{$name}", false, $ignore || $skip_ext);
         }
@@ -1068,10 +1068,10 @@ function find_files(string $dir, bool $is_ext_dir = false, bool $ignore = false)
         // (but not those starting with a dot, which are hidden on
         // many platforms)
         if (substr($name, -5) == '.phpt' && substr($name, 0, 1) !== '.') {
+            $testfile = realpath("{$dir}/{$name}");
             if ($ignore) {
-                $ignored_by_ext++;
+                $ignored_by_ext[] = $testfile;
             } else {
-                $testfile = realpath("{$dir}/{$name}");
                 $test_files[] = $testfile;
             }
         }
@@ -3042,7 +3042,7 @@ function compute_summary(): void
     global $n_total, $test_results, $ignored_by_ext, $sum_results, $percent_results;
 
     $n_total = count($test_results);
-    $n_total += $ignored_by_ext;
+    $n_total += count($ignored_by_ext);
     $sum_results = [
         'PASSED' => 0,
         'WARNED' => 0,
@@ -3058,7 +3058,7 @@ function compute_summary(): void
         $sum_results[$v]++;
     }
 
-    $sum_results['SKIPPED'] += $ignored_by_ext;
+    $sum_results['SKIPPED'] += count($ignored_by_ext);
     $percent_results = [];
 
     foreach ($sum_results as $v => $n) {
@@ -3090,8 +3090,8 @@ function get_summary(bool $show_ext_summary): string
 =====================================================================
 TEST RESULT SUMMARY
 ---------------------------------------------------------------------
-Exts skipped    : ' . sprintf('%4d', $exts_skipped) . '
-Exts tested     : ' . sprintf('%4d', $exts_tested) . '
+Exts skipped    : ' . sprintf('%4d', count($exts_skipped)) . ($exts_skipped ? ' (' . implode(', ', $exts_skipped) . ')' : '') . '
+Exts tested     : ' . sprintf('%4d', count($exts_tested)) . '
 ---------------------------------------------------------------------
 ';
     }
