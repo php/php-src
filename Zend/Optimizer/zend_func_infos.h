@@ -134,7 +134,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_GD_BMP)
     F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif
-    F0("imagecolorset", MAY_BE_FALSE|MAY_BE_NULL),
     F1("imagecolorsforindex", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
     F1("imagegetclip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
 #if defined(HAVE_GD_FREETYPE)
@@ -514,7 +513,6 @@ static const func_info_t func_infos[] = {
     F1("get_current_user", MAY_BE_STRING),
     FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
     F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
-    F0("register_shutdown_function", MAY_BE_FALSE|MAY_BE_NULL),
     F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
     F1("php_strip_whitespace", MAY_BE_STRING),
     F1("highlight_string", MAY_BE_STRING|MAY_BE_BOOL),
@@ -619,7 +617,6 @@ static const func_info_t func_infos[] = {
 #endif
     F1("exec", MAY_BE_STRING|MAY_BE_FALSE),
     F1("system", MAY_BE_STRING|MAY_BE_FALSE),
-    F0("passthru", MAY_BE_FALSE|MAY_BE_NULL),
     F1("escapeshellcmd", MAY_BE_STRING),
     F1("escapeshellarg", MAY_BE_STRING),
     F1("shell_exec", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
