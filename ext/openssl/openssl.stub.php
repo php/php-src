@@ -66,7 +66,7 @@ function openssl_pkcs12_read(string $pkcs12, &$certificates, string $passphrase)
 
 function openssl_csr_export_to_file(OpenSSLCertificateSigningRequest|string $csr, string $output_filename, bool $no_text = true): bool {}
 
-/** @param OpenSSLAsymmetricKey $output */
+/** @param string $output */
 function openssl_csr_export(OpenSSLCertificateSigningRequest|string $csr, &$output, bool $no_text = true): bool {}
 
 /** @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key */
