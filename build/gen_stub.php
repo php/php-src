@@ -404,7 +404,6 @@ class SimpleType {
     }
 
     public function toVarEscapedName(): string {
-        $name = str_replace('_', '__', $this->name);
         return str_replace('\\', '_', $this->name);
     }
 
