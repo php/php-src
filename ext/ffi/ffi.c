@@ -4483,7 +4483,7 @@ ZEND_METHOD(FFI, hasSym) /* {{{ */
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
 		sym = zend_hash_find_ptr(ffi->symbols, symbol);
-		if(!sym) {
+		if (!sym) {
 			RETURN_FALSE;
 		}
 		if(!kind_is_null && sym->kind != symbol_kind) {
