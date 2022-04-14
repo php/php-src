@@ -1811,28 +1811,9 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
+static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 {
-	HashTable *props;
 	zval zv;
-	php_date_obj *dateobj;
-
-	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
-		case ZEND_PROP_PURPOSE_SERIALIZE:
-		case ZEND_PROP_PURPOSE_VAR_EXPORT:
-		case ZEND_PROP_PURPOSE_JSON:
-		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			break;
-		default:
-			return zend_std_get_properties_for(object, purpose);
-	}
-
-	dateobj = php_date_obj_from_obj(object);
-	props = zend_array_dup(zend_std_get_properties(object));
-	if (!dateobj->time) {
-		return props;
-	}
 
 	/* first we add the date and time in ISO format */
 	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", sizeof("Y-m-d H:i:s.u")-1, dateobj->time, 1));
@@ -1865,6 +1846,31 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 		}
 		zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
 	}
+}
+
+static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
+{
+	HashTable *props;
+	php_date_obj *dateobj;
+
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
+
+	dateobj = php_date_obj_from_obj(object);
+	props = zend_array_dup(zend_std_get_properties(object));
+	if (!dateobj->time) {
+		return props;
+	}
+
+	date_object_to_hash(dateobj, props);
 
 	return props;
 } /* }}} */
@@ -2617,6 +2623,84 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	dateobj = Z_PHPDATE_P(return_value);
+	if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_object_to_hash(dateobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTimeImmutable);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_object_to_hash(dateobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dateobj = Z_PHPDATE_P(object);
+	myht = Z_ARRVAL_P(array);
+
+	if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dateobj = Z_PHPDATE_P(object);
+	myht = Z_ARRVAL_P(array);
+
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
 	}
