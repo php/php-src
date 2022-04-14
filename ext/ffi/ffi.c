@@ -4486,7 +4486,7 @@ ZEND_METHOD(FFI, hasSym) /* {{{ */
 		if (!sym) {
 			RETURN_FALSE;
 		}
-		if(!kind_is_null && sym->kind != symbol_kind) {
+		if (!kind_is_null && sym->kind != symbol_kind) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
