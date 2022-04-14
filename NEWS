@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-8310 (Registry settings are no longer recognized). (cmb)
   . Fixed potential race condition during resource ID allocation. (ryancaicse)
+  . Fixed bug GH-8133 (Preloading of constants containing arrays with enums
+    segfaults). (ilutov)
 
 - Date:
   . Fixed bug GH-7752 (DateTimeZone::getTransitions() returns insufficient
