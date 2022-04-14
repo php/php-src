@@ -3130,6 +3130,12 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time *t)
 {
+	/* Free abbreviation if already set */
+	if (tzobj->initialized && tzobj->type == TIMELIB_ZONETYPE_ABBR) {
+		timelib_free(tzobj->tzi.z.abbr);
+	}
+
+	/* Set new values */
 	tzobj->initialized = 1;
 	tzobj->type = t->zone_type;
 
