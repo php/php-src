@@ -1,5 +1,5 @@
 --TEST--
-Date Period iterators do not advance on `valid()`
+Date Period iterators do not advance on valid()
 --FILE--
 <?php
 
@@ -35,6 +35,7 @@ foreach ($iterator as $item) {
     $iterator->valid();
     echo $item->format('Y-m-d') . "\n";
 }
+?>
 --EXPECT--
 2022-01-01
 2022-01-02

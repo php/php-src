@@ -1492,6 +1492,15 @@ static void date_period_it_current_key(zend_object_iterator *iter, zval *key)
 }
 /* }}} */
 
+static void date_period_advance(timelib_time *it_time, timelib_rel_time *interval)
+{
+	it_time->have_relative = 1;
+	it_time->relative = *interval;
+	it_time->sse_uptodate = 0;
+	timelib_update_ts(it_time, NULL);
+	timelib_update_from_sse(it_time);
+}
+
 /* {{{ date_period_it_move_forward */
 static void date_period_it_move_forward(zend_object_iterator *iter)
 {
@@ -1499,11 +1508,7 @@ static void date_period_it_move_forward(zend_object_iterator *iter)
 	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);
 	timelib_time   *it_time = object->current;
 
-	it_time->have_relative = 1;
-	it_time->relative = *object->interval;
-	it_time->sse_uptodate = 0;
-	timelib_update_ts(it_time, NULL);
-	timelib_update_from_sse(it_time);
+	date_period_advance(it_time, object->interval);
 
 	iterator->current_index++;
 	date_period_it_invalidate_current(iter);
@@ -1527,14 +1532,7 @@ static void date_period_it_rewind(zend_object_iterator *iter)
 	iterator->object->current = timelib_time_clone(iterator->object->start);
 
 	if (!iterator->object->include_start_date) {
-		timelib_time *it_time = iterator->object->current;
-
-		it_time->have_relative = 1;
-		it_time->relative = *iterator->object->interval;
-		it_time->sse_uptodate = 0;
-
-		timelib_update_ts(it_time, NULL);
-		timelib_update_from_sse(it_time);
+		date_period_advance(iterator->object->current, iterator->object->interval);
 	}
 
 	date_period_it_invalidate_current(iter);

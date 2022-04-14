@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8289 (Exceptions thrown within a yielded from iterator are
     not rethrown into the generator). (Bob)
 
+- Date:
+  . Fixed bug GH-7979 (DatePeriod iterator advances when checking if valid).
+    (Derick, Cody Mann)
+
 - FPM:
   . Fixed bug #76003 (FPM /status reports wrong number of active processe).
     (Jakub Zelenka)
