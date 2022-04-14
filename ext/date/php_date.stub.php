@@ -453,6 +453,10 @@ class DateTimeZone
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 

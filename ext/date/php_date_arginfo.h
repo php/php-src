@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ea354510fbf64c42ee1cdd6fd786ab937516226c */
+ * Stub hash: a157de6bca4bcf5a9ddace9e81ef700f132b4dda */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -431,6 +431,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeZone_lis
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, countryCode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_DateTimeZone___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateTimeZone___unserialize arginfo_class_DateTimeInterface___unserialize
+
 #define arginfo_class_DateTimeZone___wakeup arginfo_class_DateTimeInterface___wakeup
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeZone___set_state, 0, 1, DateTimeZone, 0)
@@ -553,6 +557,8 @@ ZEND_METHOD(DateTimeImmutable, setTimestamp);
 ZEND_METHOD(DateTimeImmutable, createFromMutable);
 ZEND_METHOD(DateTimeImmutable, createFromInterface);
 ZEND_METHOD(DateTimeZone, __construct);
+ZEND_METHOD(DateTimeZone, __serialize);
+ZEND_METHOD(DateTimeZone, __unserialize);
 ZEND_METHOD(DateTimeZone, __wakeup);
 ZEND_METHOD(DateTimeZone, __set_state);
 ZEND_METHOD(DateInterval, __construct);
@@ -696,6 +702,8 @@ static const zend_function_entry class_DateTimeZone_methods[] = {
 	ZEND_ME_MAPPING(getLocation, timezone_location_get, arginfo_class_DateTimeZone_getLocation, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, arginfo_class_DateTimeZone_listAbbreviations, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(listIdentifiers, timezone_identifiers_list, arginfo_class_DateTimeZone_listIdentifiers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateTimeZone, __serialize, arginfo_class_DateTimeZone___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeZone, __unserialize, arginfo_class_DateTimeZone___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeZone, __wakeup, arginfo_class_DateTimeZone___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeZone, __set_state, arginfo_class_DateTimeZone___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
