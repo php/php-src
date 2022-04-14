@@ -4476,7 +4476,7 @@ ZEND_METHOD(FFI, hasSym) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if(!kind_is_null && (symbol_kind > ZEND_FFI_SYM_FUNC || symbol_kind < ZEND_FFI_SYM_TYPE)) {
-		zend_argument_value_error(2, "value error");
+		zend_argument_value_error(2, "must be a valid symbol kind");
 		RETURN_THROWS();
 	}
 
