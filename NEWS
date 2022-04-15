@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
 
+- MBString:
+  . Number of error markers emitted for invalid UTF-8 text matches WHATWG specification.
+    This is a return to the behavior of PHP 8.0 and earlier. (alexdowad)
+
 - MySQLi:
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
     (cmb)

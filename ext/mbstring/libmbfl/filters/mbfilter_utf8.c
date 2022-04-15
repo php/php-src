@@ -122,9 +122,7 @@ retry:
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
@@ -139,9 +137,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
@@ -156,9 +152,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -167,9 +161,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	default:
