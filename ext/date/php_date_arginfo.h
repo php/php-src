@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a157de6bca4bcf5a9ddace9e81ef700f132b4dda */
+ * Stub hash: 4845891ab3872f292438de639953e2022f849125 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -451,6 +451,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateInterval_format arginfo_class_DateTimeInterface_format
 
+#define arginfo_class_DateInterval___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateInterval___unserialize arginfo_class_DateTimeInterface___unserialize
+
 #define arginfo_class_DateInterval___wakeup arginfo_class_DateTimeInterface___wakeup
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval___set_state, 0, 1, DateInterval, 0)
@@ -562,6 +566,8 @@ ZEND_METHOD(DateTimeZone, __unserialize);
 ZEND_METHOD(DateTimeZone, __wakeup);
 ZEND_METHOD(DateTimeZone, __set_state);
 ZEND_METHOD(DateInterval, __construct);
+ZEND_METHOD(DateInterval, __serialize);
+ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
 ZEND_METHOD(DatePeriod, __construct);
@@ -714,6 +720,8 @@ static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __construct, arginfo_class_DateInterval___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(createFromDateString, date_interval_create_from_date_string, arginfo_class_DateInterval_createFromDateString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_interval_format, arginfo_class_DateInterval_format, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateInterval, __serialize, arginfo_class_DateInterval___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateInterval, __unserialize, arginfo_class_DateInterval___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __wakeup, arginfo_class_DateInterval___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __set_state, arginfo_class_DateInterval___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END

@@ -4205,6 +4205,44 @@ PHP_METHOD(DateInterval, __set_state)
 /* }}} */
 
 /* {{{ */
+PHP_METHOD(DateInterval, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_interval_obj *intervalobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	intervalobj = Z_PHPINTERVAL_P(object);
+	DATE_CHECK_INITIALIZED(intervalobj->initialized, DateInterval);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_interval_object_to_hash(intervalobj, myht, true);
+}
+/* }}} */
+
+
+/* {{{ */
+PHP_METHOD(DateInterval, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_interval_obj *intervalobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	intervalobj = Z_PHPINTERVAL_P(object);
+	myht = Z_ARRVAL_P(array);
+
+	php_date_interval_initialize_from_hash(&object, &intervalobj, myht);
+}
+/* }}} */
+
+/* {{{ */
 PHP_METHOD(DateInterval, __wakeup)
 {
 	zval             *object = ZEND_THIS;
