@@ -1088,7 +1088,10 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 
 	intern->ar_flags &= ~SPL_ARRAY_IS_SELF & ~SPL_ARRAY_USE_OTHER;
 	intern->ar_flags |= ar_flags;
-	intern->ht_iter = (uint32_t)-1;
+	if (intern->ht_iter != (uint32_t)-1) {
+		zend_hash_iterator_del(intern->ht_iter);
+		intern->ht_iter = (uint32_t)-1;
+	}
 }
 /* }}} */
 

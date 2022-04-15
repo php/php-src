@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
     (cmb)
 
+- SPL:
+  . Fixed bug GH-8366 (ArrayIterator may leak when calling __construct()).
+    (cmb)
+
 - Streams:
   . Fixed php://temp does not preserve file-position when switched to temporary
     file. (Bernd Holzmüller)
