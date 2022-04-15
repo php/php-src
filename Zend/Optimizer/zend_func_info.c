@@ -186,6 +186,7 @@ ZEND_API uint32_t zend_get_func_info(
 			/* It's allowed to override a method that return non-reference with a method that returns a reference */
 			if (call_info->is_prototype && (ret & ~MAY_BE_REF)) {
 				ret |= MAY_BE_REF;
+				*ce = NULL;
 			}
 		}
 	}
