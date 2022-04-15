@@ -2936,6 +2936,7 @@ static zend_always_inline int _zend_update_type_info(
 			tmp = zend_fetch_arg_info_type(script, arg_info, &ce);
 			if (ZEND_ARG_SEND_MODE(arg_info)) {
 				tmp |= MAY_BE_REF;
+				ce = NULL;
 			}
 
 			if (opline->opcode == ZEND_RECV_VARIADIC) {

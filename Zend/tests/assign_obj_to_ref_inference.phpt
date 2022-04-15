@@ -24,10 +24,19 @@ function test2($o) {
     }
 }
 
+function test3(Test &$o) {
+    $GLOBALS['r'] = new stdClass;
+    $GLOBALS['r']->x = 3.141;
+    var_dump(is_float($o->x));
+}
+
 test1();
 test2(new Test);
+$r = new Test;
+test3($r);
 
 ?>
 --EXPECT--
+bool(true)
 bool(true)
 bool(true)
