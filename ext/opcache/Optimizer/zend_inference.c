@@ -1741,7 +1741,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 
 #define COPY_SSA_OBJ_TYPE(from_var, to_var) do { \
 	if ((from_var) >= 0 && (ssa_var_info[(from_var)].type & MAY_BE_OBJECT) \
-			&& ssa_var_info[(from_var)].ce) { \
+			&& ssa_var_info[(from_var)].ce && !(ssa_var_info[(to_var)].type & MAY_BE_REF)) { \
 		UPDATE_SSA_OBJ_TYPE(ssa_var_info[(from_var)].ce, \
 			ssa_var_info[(from_var)].is_instanceof, (to_var)); \
 	} else { \
@@ -2740,11 +2740,7 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= MAY_BE_DOUBLE;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
-				if (tmp & MAY_BE_REF) {
-					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->op1_def);
-				} else {
-					COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->op1_def);
-				}
+				COPY_SSA_OBJ_TYPE(ssa_op->op2_use, ssa_op->op1_def);
 			}
 			if (ssa_op->result_def >= 0) {
 				if (tmp & MAY_BE_REF) {
