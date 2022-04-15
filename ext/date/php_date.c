@@ -4104,6 +4104,12 @@ PHP_METHOD(DateInterval, __construct)
 
 static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
+	/* If ->diff is already set, then we need to free it first */
+	if ((*intobj)->diff) {
+		timelib_rel_time_dtor((*intobj)->diff);
+	}
+
+	/* Set new value */
 	(*intobj)->diff = timelib_rel_time_ctor();
 
 #define PHP_DATE_INTERVAL_READ_PROPERTY(element, member, itype, def) \
