@@ -3411,6 +3411,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
 					if (opline->result_type == IS_VAR) {
 						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+						ce = NULL;
 					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
 						zend_class_entry *ce = NULL;
 
