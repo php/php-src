@@ -31,4 +31,6 @@ object(DateInterval)#3 (%d) {
   int(0)
   ["days"]=>
   int(30)
+  ["have_special_relative"]=>
+  int(0)
 }

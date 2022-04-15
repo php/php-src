@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437 DateInterval unserialize bad data, 64 bit
+Bug #53437 (DateInterval unserialize bad data, 64 bit)
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) { die('skip true 64 bit only'); } ?>
 --FILE--
@@ -29,5 +29,7 @@ object(DateInterval)#%d (%d) {
   ["invert"]=>
   int(0)
   ["days"]=>
+  int(0)
+  ["have_special_relative"]=>
   int(0)
 }

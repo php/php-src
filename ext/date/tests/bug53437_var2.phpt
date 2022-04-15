@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437 DateInterval basic serialization
+Bug #53437 (DateInterval basic serialization)
 --FILE--
 <?php
 $di0 = new DateInterval('P2Y4DT6H8M');
@@ -31,6 +31,8 @@ object(DateInterval)#1 (%d) {
   int(0)
   ["days"]=>
   bool(false)
+  ["have_special_relative"]=>
+  int(0)
 }
 object(DateInterval)#2 (%d) {
   ["y"]=>
@@ -51,4 +53,6 @@ object(DateInterval)#2 (%d) {
   int(0)
   ["days"]=>
   bool(false)
+  ["have_special_relative"]=>
+  int(0)
 }

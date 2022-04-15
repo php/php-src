@@ -69,6 +69,8 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["days"]=>
     bool(false)
+    ["have_special_relative"]=>
+    int(0)
   }
   ["recurrences"]=>
   int(3)
@@ -116,6 +118,8 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["days"]=>
     bool(false)
+    ["have_special_relative"]=>
+    int(0)
   }
   ["recurrences"]=>
   int(3)

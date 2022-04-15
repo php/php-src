@@ -27,4 +27,5 @@ DateInterval Object
     [f] => 0
     [invert] => 0
     [days] => 14
+    [have_special_relative] => 0
 )

@@ -27,6 +27,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   bool(false)
+  ["have_special_relative"]=>
+  int(0)
 }
 7
 (unknown)

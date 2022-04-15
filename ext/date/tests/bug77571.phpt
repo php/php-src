@@ -1,5 +1,5 @@
 --TEST--
-Bug #77571 (DateTime's diff DateInterval incorrect in timezones from UTC+01:00 to UTC+12:00
+Bug #77571 (DateTime's diff DateInterval incorrect in timezones from UTC+01:00 to UTC+12:00)
 --FILE--
 <?php
 
@@ -23,4 +23,5 @@ DateInterval Object
     [f] => 0
     [invert] => 0
     [days] => 35
+    [have_special_relative] => 0
 )
