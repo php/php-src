@@ -342,7 +342,7 @@ static ssize_t zlog_stream_direct_write(
 static inline ssize_t zlog_stream_unbuffered_write(
 		struct zlog_stream *stream, const char *buf, size_t len) /* {{{ */
 {
-	const char *append;
+	const char *append = NULL;
 	size_t append_len = 0, required_len, reserved_len;
 	ssize_t written;
 
