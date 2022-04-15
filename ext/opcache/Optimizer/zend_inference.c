@@ -3629,7 +3629,11 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 				}
 
 				UPDATE_SSA_TYPE(tmp, j);
-				UPDATE_SSA_OBJ_TYPE(ce, is_instanceof, j);
+				if (tmp & MAY_BE_REF) {
+					UPDATE_SSA_OBJ_TYPE(NULL, 0, j);
+				} else {
+					UPDATE_SSA_OBJ_TYPE(ce, is_instanceof, j);
+				}
 			} else {
 				int first = 1;
 				int is_instanceof = 0;
