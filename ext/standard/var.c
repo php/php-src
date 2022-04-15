@@ -1486,6 +1486,12 @@ PHP_FUNCTION(memory_reset_peak_usage) {
 }
 /* }}} */
 
+PHP_FUNCTION(memory_get_limit) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(PG(memory_limit));
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("unserialize_max_depth", "4096", PHP_INI_ALL, OnUpdateLong, unserialize_max_depth, php_basic_globals, basic_globals)
 PHP_INI_END()

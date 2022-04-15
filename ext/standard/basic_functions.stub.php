@@ -2055,6 +2055,8 @@ function memory_get_peak_usage(bool $real_usage = false): int {}
 
 function memory_reset_peak_usage(): void {}
 
+function memory_get_limit(): int {}
+
 /* versioning.c */
 
 /** @compile-time-eval */
