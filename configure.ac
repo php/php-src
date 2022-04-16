@@ -597,6 +597,7 @@ mmap \
 nice \
 nl_langinfo \
 poll \
+pthread_jit_write_protect_np \
 putenv \
 scandir \
 setitimer \

@@ -36,6 +36,8 @@ PHP                                                                        NEWS
     for macOs Instrument. (David Carlier)
   . Fixed bug GH-8030 (Segfault with JIT and large match/switch statements).
     (Arnaud)
+  . JIT support improvement for macOs for segments and executable permission
+    bit handling. (David Carlier)
 
 - PCRE:
   . Updated bundled libpcre to 10.40. (cmb)
