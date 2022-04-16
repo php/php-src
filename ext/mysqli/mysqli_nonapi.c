@@ -650,7 +650,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 		i++;
 		if (Z_TYPE_P(elem) != IS_OBJECT ||
 			!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
-			zend_argument_type_error(i, "must be an instance of mysqli, %s given", zend_zval_type_name(elem));
+			zend_argument_type_error(i, "must be an instance of mysqli, %s given", zend_zval_value_name(elem));
 			return FAILURE;
 		} else {
 			MY_MYSQL *mysql;

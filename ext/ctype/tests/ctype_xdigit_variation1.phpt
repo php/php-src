@@ -153,22 +153,22 @@ bool(false)
 
 -- Iteration 12 --
 
-Deprecated: ctype_xdigit(): Argument of type bool will be interpreted as string in the future in %s on line %d
+Deprecated: ctype_xdigit(): Argument of type true will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 13 --
 
-Deprecated: ctype_xdigit(): Argument of type bool will be interpreted as string in the future in %s on line %d
+Deprecated: ctype_xdigit(): Argument of type false will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 14 --
 
-Deprecated: ctype_xdigit(): Argument of type bool will be interpreted as string in the future in %s on line %d
+Deprecated: ctype_xdigit(): Argument of type true will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 15 --
 
-Deprecated: ctype_xdigit(): Argument of type bool will be interpreted as string in the future in %s on line %d
+Deprecated: ctype_xdigit(): Argument of type false will be interpreted as string in the future in %s on line %d
 bool(false)
 
 -- Iteration 16 --

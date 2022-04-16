@@ -62,19 +62,19 @@ static zend_result verify_bool_return_type_userland_calls(const zval* value)
 	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == -1)) {
 		/* TODO Why are exception cheked? */
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value));
+			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
 		}
 		return FAILURE;
 	}
 	if ((Z_TYPE_P(value) == IS_LONG) && (Z_LVAL_P(value) == 0)) {
 		/* TODO Why are exception cheked? */
 		if (!EG(exception)) {
-			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value));
+			php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value));
 		}
 		return SUCCESS;
 	}
 	if (!EG(exception)) {
-		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_type_name(value)); \
+		zend_type_error("Session callback must have a return value of type bool, %s returned", zend_zval_value_name(value)); \
     }
     return FAILURE;
 }

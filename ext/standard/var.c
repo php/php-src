@@ -1348,7 +1348,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 
 		classes = zend_hash_str_find_deref(options, "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
-			zend_type_error("%s(): Option \"allowed_classes\" must be of type array|bool, %s given", function_name, zend_zval_type_name(classes));
+			zend_type_error("%s(): Option \"allowed_classes\" must be of type array|bool, %s given", function_name, zend_zval_value_name(classes));
 			goto cleanup;
 		}
 
@@ -1377,7 +1377,7 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 		max_depth = zend_hash_str_find_deref(options, "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				zend_type_error("%s(): Option \"max_depth\" must be of type int, %s given", function_name, zend_zval_type_name(max_depth));
+				zend_type_error("%s(): Option \"max_depth\" must be of type int, %s given", function_name, zend_zval_value_name(max_depth));
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {

@@ -635,7 +635,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	 || opline->opcode == ZEND_POST_DEC_OBJ) {
 		zend_throw_error(NULL,
 			"Attempt to increment/decrement property \"%s\" on %s",
-			ZSTR_VAL(property_name), zend_zval_type_name(object)
+			ZSTR_VAL(property_name), zend_zval_value_name(object)
 		);
 	} else if (opline->opcode == ZEND_FETCH_OBJ_W
 			|| opline->opcode == ZEND_FETCH_OBJ_RW
@@ -643,12 +643,12 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 			|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
 		zend_throw_error(NULL,
 			"Attempt to modify property \"%s\" on %s",
-			ZSTR_VAL(property_name), zend_zval_type_name(object)
+			ZSTR_VAL(property_name), zend_zval_value_name(object)
 		);
 	} else {
 		zend_throw_error(NULL,
 			"Attempt to assign property \"%s\" on %s",
-			ZSTR_VAL(property_name), zend_zval_type_name(object)
+			ZSTR_VAL(property_name), zend_zval_value_name(object)
 		);
 	}
 	zend_tmp_string_release(tmp_property_name);
@@ -675,7 +675,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	*need_msg = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 
 	if (value) {
-		*given_kind = zend_zval_type_name(value);
+		*given_kind = zend_zval_value_name(value);
 	} else {
 		*given_kind = "none";
 	}
@@ -824,7 +824,7 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(const zend_prop
 
 	type_str = zend_type_to_string(info->type);
 	zend_type_error("Cannot assign %s to property %s::$%s of type %s",
-		zend_zval_type_name(property),
+		zend_zval_value_name(property),
 		ZSTR_VAL(info->ce->name),
 		zend_get_unmangled_property_name(info->name),
 		ZSTR_VAL(type_str));
@@ -1414,7 +1414,7 @@ ZEND_API bool zend_verify_internal_return_type(zend_function *zf, zval *ret)
 
 	if (ZEND_TYPE_FULL_MASK(ret_info->type) & MAY_BE_VOID) {
 		if (UNEXPECTED(Z_TYPE_P(ret) != IS_NULL)) {
-			zend_verify_void_return_error(zf, zend_zval_type_name(ret), "");
+			zend_verify_void_return_error(zf, zend_zval_value_name(ret), "");
 			return 0;
 		}
 		return 1;
@@ -2181,7 +2181,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(cons
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(zval *object, zval *function_name)
 {
 	zend_throw_error(NULL, "Call to a member function %s() on %s",
-		Z_STRVAL_P(function_name), zend_zval_type_name(object));
+		Z_STRVAL_P(function_name), zend_zval_value_name(object));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
@@ -2786,8 +2786,8 @@ try_string_offset:
 			ZVAL_UNDEFINED_OP2();
 		}
 		if (!is_list && type != BP_VAR_IS) {
-			zend_error(E_WARNING, "Trying to access array offset on value of type %s",
-				zend_zval_type_name(container));
+			zend_error(E_WARNING, "Trying to access array offset on %s",
+				zend_zval_value_name(container));
 		}
 		ZVAL_NULL(result);
 	}
@@ -2986,7 +2986,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 	}
 	if (!EG(exception)) {
 		zend_type_error("array_key_exists(): Argument #2 ($array) must be of type array, %s given",
-			zend_zval_type_name(subject));
+			zend_zval_value_name(subject));
 	}
 }
 
@@ -3406,7 +3406,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv) {
 	zend_string *type_str = zend_type_to_string(prop->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s",
-		zend_zval_type_name(zv),
+		zend_zval_value_name(zv),
 		ZSTR_VAL(prop->ce->name),
 		zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str)
@@ -3418,7 +3418,7 @@ ZEND_API ZEND_COLD void zend_throw_conflicting_coercion_error(const zend_propert
 	zend_string *type1_str = zend_type_to_string(prop1->type);
 	zend_string *type2_str = zend_type_to_string(prop2->type);
 	zend_type_error("Cannot assign %s to reference held by property %s::$%s of type %s and property %s::$%s of type %s, as this would result in an inconsistent type conversion",
-		zend_zval_type_name(zv),
+		zend_zval_value_name(zv),
 		ZSTR_VAL(prop1->ce->name),
 		zend_get_unmangled_property_name(prop1->name),
 		ZSTR_VAL(type1_str),

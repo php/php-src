@@ -3007,7 +3007,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 			if (Z_TYPE_P(data) != IS_ARRAY) {
 				zend_argument_type_error(2, "individual body must be of type array, %s given",
-					zend_zval_type_name(data));
+					zend_zval_value_name(data));
 				goto done;
 			}
 			if (zend_hash_num_elements(Z_ARRVAL_P(data)) == 0) {

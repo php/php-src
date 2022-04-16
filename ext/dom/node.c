@@ -1591,7 +1591,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
-			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_value_name(tmp));
 			RETURN_THROWS();
 		}
 		xquery = Z_STRVAL_P(tmp);

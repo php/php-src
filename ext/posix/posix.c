@@ -460,7 +460,7 @@ PHP_FUNCTION(posix_ttyname)
 	} else {
 		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
-				zend_zval_type_name(z_fd));
+				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
 		}
 		/* fd must fit in an int and be positive */
@@ -510,7 +510,7 @@ PHP_FUNCTION(posix_isatty)
 	} else {
 		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
-				zend_zval_type_name(z_fd));
+				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
 		}
 	}
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(posix_fpathconf)
 	} else {
 		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
 			zend_argument_type_error(1, "must be of type int|resource, %s given",
-				zend_zval_type_name(z_fd));
+				zend_zval_value_name(z_fd));
 			RETURN_THROWS();
 		}
 	}

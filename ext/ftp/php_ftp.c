@@ -1247,7 +1247,7 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type int for the FTP_TIMEOUT_SEC option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
@@ -1259,7 +1259,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type bool for the FTP_AUTOSEEK option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			ftp->autoseek = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
@@ -1267,7 +1267,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_type_name(z_value));
+				zend_argument_type_error(3, "must be of type bool for the FTP_USEPASVADDRESS option, %s given", zend_zval_value_name(z_value));
 				RETURN_THROWS();
 			}
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;

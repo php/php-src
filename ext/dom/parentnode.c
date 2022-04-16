@@ -192,7 +192,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 			} else {
 				xmlFree(fragment);
 
-				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_value_name(&nodes[i]));
 				return NULL;
 			}
 		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
@@ -208,7 +208,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 		} else {
 			xmlFree(fragment);
 
-			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_value_name(&nodes[i]));
 
 			return NULL;
 		}

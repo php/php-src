@@ -137,16 +137,16 @@ Arg value
 get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, null given
 
 Arg value 1
-get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
+get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, true given
 
 Arg value 
-get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
+get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, false given
 
 Arg value 1
-get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
+get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, true given
 
 Arg value 
-get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, bool given
+get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, false given
 
 Arg value 
 get_class_methods(): Argument #1 ($object_or_class) must be an object or a valid class name, string given

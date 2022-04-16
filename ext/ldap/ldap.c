@@ -1602,7 +1602,7 @@ cleanup_parallel:
 			result->result = ldap_res;
 		}
 	} else {
-		zend_argument_type_error(1, "must be of type LDAP|array, %s given", zend_zval_type_name(link));
+		zend_argument_type_error(1, "must be of type LDAP|array, %s given", zend_zval_value_name(link));
 	}
 
 cleanup:
@@ -2568,7 +2568,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				/* does the value type match the key? */
 				if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_ATTRIB)) {
 					if (Z_TYPE_P(modinfo) != IS_STRING) {
-						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", get_active_function_name(), zend_zval_type_name(modinfo));
+						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_ATTRIB "\" must be of type string, %s given", get_active_function_name(), zend_zval_value_name(modinfo));
 						RETURN_THROWS();
 					}
 
@@ -2579,7 +2579,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				}
 				else if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_MODTYPE)) {
 					if (Z_TYPE_P(modinfo) != IS_LONG) {
-						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", get_active_function_name(), zend_zval_type_name(modinfo));
+						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_MODTYPE "\" must be of type int, %s given", get_active_function_name(), zend_zval_value_name(modinfo));
 						RETURN_THROWS();
 					}
 
@@ -2611,7 +2611,7 @@ PHP_FUNCTION(ldap_modify_batch)
 				}
 				else if (_ldap_str_equal_to_const(ZSTR_VAL(modkey), ZSTR_LEN(modkey), LDAP_MODIFY_BATCH_VALUES)) {
 					if (Z_TYPE_P(modinfo) != IS_ARRAY) {
-						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", get_active_function_name(), zend_zval_type_name(modinfo));
+						zend_type_error("%s(): Option \"" LDAP_MODIFY_BATCH_VALUES "\" must be of type array, %s given", get_active_function_name(), zend_zval_value_name(modinfo));
 						RETURN_THROWS();
 					}
 
@@ -3200,7 +3200,7 @@ PHP_FUNCTION(ldap_set_option)
 			int rc;
 
 			if (Z_TYPE_P(newval) != IS_ARRAY) {
-				zend_argument_type_error(3, "must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, %s given", zend_zval_type_name(newval));
+				zend_argument_type_error(3, "must be of type array for the LDAP_OPT_CLIENT_CONTROLS option, %s given", zend_zval_value_name(newval));
 				RETURN_THROWS();
 			}
 
