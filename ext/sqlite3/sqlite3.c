@@ -601,7 +601,6 @@ PHP_METHOD(SQLite3, query)
 			free_item->stmt_obj = stmt_obj;
 			free_item->stmt_obj_zval = stmt;
 			zend_llist_add_element(&(db_obj->free_list), &free_item);
-			sqlite3_reset(result->stmt_obj->stmt);
 			break;
 		}
 		default:
@@ -1787,7 +1786,6 @@ PHP_METHOD(SQLite3Stmt, execute)
 		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
 		{
-			sqlite3_reset(stmt_obj->stmt);
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
 
