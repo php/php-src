@@ -138,6 +138,9 @@ int fpm_pctl_kill(pid_t pid, int how) /* {{{ */
 		case FPM_PCTL_QUIT :
 			s = SIGQUIT;
 			break;
+		case FPM_PCTL_KILL:
+			s = SIGKILL;
+			break;
 		default :
 			break;
 	}
@@ -310,6 +313,17 @@ static void fpm_pctl_check_request_timeout(struct timeval *now) /* {{{ */
 }
 /* }}} */
 
+static void fpm_pctl_kill_idle_child(struct fpm_child_s *child) /* {{{ */
+{
+	if (child->idle_kill) {
+		fpm_pctl_kill(child->pid, FPM_PCTL_KILL);
+	} else {
+		child->idle_kill = 1;
+		fpm_pctl_kill(child->pid, FPM_PCTL_QUIT);
+	}
+}
+/* }}} */
+
 static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
@@ -372,8 +386,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 			fpm_request_last_activity(last_idle_child, &last);
 			fpm_clock_get(&now);
 			if (last.tv_sec < now.tv_sec - wp->config->pm_process_idle_timeout) {
-				last_idle_child->idle_kill = 1;
-				fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_QUIT);
+				fpm_pctl_kill_idle_child(last_idle_child);
 			}
 
 			continue;
@@ -385,8 +398,7 @@ static void fpm_pctl_perform_idle_server_maintenance(struct timeval *now) /* {{{
 		zlog(ZLOG_DEBUG, "[pool %s] currently %d active children, %d spare children, %d running children. Spawning rate %d", wp->config->name, active, idle, wp->running_children, wp->idle_spawn_rate);
 
 		if (idle > wp->config->pm_max_spare_servers && last_idle_child) {
-			last_idle_child->idle_kill = 1;
-			fpm_pctl_kill(last_idle_child->pid, FPM_PCTL_QUIT);
+			fpm_pctl_kill_idle_child(last_idle_child);
 			wp->idle_spawn_rate = 1;
 			continue;
 		}

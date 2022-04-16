@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #76003 (FPM /status reports wrong number of active processe).
     (Jakub Zelenka)
+  . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
 
 - MySQLi:
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
