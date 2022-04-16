@@ -127,9 +127,7 @@ retry:
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
@@ -144,9 +142,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
@@ -161,9 +157,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -172,9 +166,7 @@ retry:
 			filter->status++;
 		} else {
 			CK(mbfl_filt_put_invalid_char(filter));
-			if (c < 0x80 || (c >= 0xc2 && c <= 0xf4)) {
-				goto retry;
-			}
+			goto retry;
 		}
 		break;
 
@@ -237,9 +229,7 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				unsigned char c2 = *p++;
 				if ((c2 & 0xC0) != 0x80) {
 					*out++ = MBFL_BAD_INPUT;
-					if (c2 < 0x80 || (c2 >= 0xC2 && c2 <= 0xF4)) {
-						p--;
-					}
+					p--;
 				} else {
 					*out++ = ((c & 0x1F) << 6) | (c2 & 0x3F);
 				}
@@ -252,34 +242,21 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				unsigned char c3 = *p++;
 				if ((c2 & 0xC0) != 0x80 || !((c2 >= 0x80 && c2 <= 0xBF) && ((c == 0xE0 && c2 >= 0xA0) || (c == 0xED && c2 < 0xA0) || (c > 0xE0 && c != 0xED)))) {
 					*out++ = MBFL_BAD_INPUT;
-					if (c2 < 0x80 || (c2 >= 0xC2 && c2 <= 0xF4)) {
-						p -= 2;
-					} else {
-						p--;
-					}
+					p -= 2;
 				} else if ((c3 & 0xC0) != 0x80) {
 					*out++ = MBFL_BAD_INPUT;
-					if (c3 < 0x80 || (c3 >= 0xC2 && c3 <= 0xF4)) {
-						p--;
-					}
+					p--;
 				} else {
 					uint32_t decoded = ((c & 0xF) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
-					if (decoded >= 0xD800 && decoded <= 0xDFFF) {
+					if (decoded < 0x800 || (decoded >= 0xD800 && decoded <= 0xDFFF)) {
 						*out++ = MBFL_BAD_INPUT;
 					} else {
-						*out++ = (decoded < 0x800) ? MBFL_BAD_INPUT : decoded;
+						*out++ = decoded;
 					}
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
-				/* Skip over some number of bytes to duplicate error-handling behavior of old implementation */
-				while (p < e) {
-					c = *p;
-					if ((c & 0xC0) != 0x80) {
-						if (c >= 0x80 && (c < 0xC2 || c > 0xF4))
-							p++;
-						break;
-					}
+				while (p < e && (*p & 0xC0) == 0x80) {
 					p++;
 				}
 			}
@@ -288,51 +265,28 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
 				unsigned char c4 = *p++;
-				if ((c2 & 0xC0) != 0x80) {
+				/* If c == 0xF0 and c2 < 0x90, then this is an over-long code unit; it could have
+				 * fit in 3 bytes only. If c == 0xF4 and c2 >= 0x90, then this codepoint is
+				 * greater than U+10FFFF, which is the highest legal codepoint */
+				if ((c2 & 0xC0) != 0x80 || (c == 0xF0 && c2 < 0x90) || (c == 0xF4 && c2 >= 0x90)) {
 					*out++ = MBFL_BAD_INPUT;
-					if (c2 < 0x80 || (c2 >= 0xC2 && c2 <= 0xF4)) {
-						p -= 3;
-					} else {
-						p -= 2;
-					}
-				} else if ((c3 & 0xC0) != 0x80 || !((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c > 0xF0 && c < 0xF4))) {
+					p -= 3;
+				} else if ((c3 & 0xC0) != 0x80) {
 					*out++ = MBFL_BAD_INPUT;
-					if (!((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c > 0xF0 && c < 0xF4))) {
-						if (c2 >= 0x80 && (c2 < 0xC2 || c2 > 0xF4)) {
-							p -= 2;
-						} else {
-							p -= 3;
-						}
-					} else if (c3 < 0x80 || (c3 >= 0xC2 && c3 <= 0xF4)) {
-						p -= 2;
-					} else {
-						p--;
-					}
+					p -= 2;
 				} else if ((c4 & 0xC0) != 0x80) {
 					*out++ = MBFL_BAD_INPUT;
-					if (c4 < 0x80 || (c4 >= 0xC2 && c4 <= 0xF4)) {
-						p--;
-					}
+					p--;
 				} else {
 					uint32_t decoded = ((c & 0x7) << 18) | ((c2 & 0x3F) << 12) | ((c3 & 0x3F) << 6) | (c4 & 0x3F);
 					*out++ = (decoded < 0x10000) ? MBFL_BAD_INPUT : decoded;
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
-				/* Skip over some number of bytes to duplicate error-handling behavior of old implementation */
 				if (p < e) {
 					unsigned char c2 = *p;
-					if (!((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c > 0xF0 && c < 0xF4))) {
-						if (c2 >= 0x80 && (c2 < 0xC2 || c2 > 0xF4))
-							p++;
-					} else {
-						while (p < e) {
-							c = *p;
-							if ((c & 0xC0) != 0x80) {
-								if (c >= 0x80 && (c < 0xC2 || c > 0xF4))
-									p++;
-								break;
-							}
+					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || c == 0xF2 || c == 0xF3) {
+						while (p < e && (*p & 0xC0) == 0x80) {
 							p++;
 						}
 					}

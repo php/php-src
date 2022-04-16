@@ -761,14 +761,14 @@ testValidString('', '', 'UTF-8', 'UTF-32BE');
 
 $invalid = array(
   // Codepoints outside of valid 0-0x10FFFF range for Unicode
-  "\xF4\x90\x80\x80" => str_repeat("\x00\x00\x00%", 3), // CP 0x110000
+  "\xF4\x90\x80\x80" => str_repeat("\x00\x00\x00%", 4), // CP 0x110000
   "\xF7\x80\x80\x80" => str_repeat("\x00\x00\x00%", 4), // CP 0x1C0000
   "\xF7\xBF\xBF\xBF" => str_repeat("\x00\x00\x00%", 4), // CP 0x1FFFFF
 
   // Reserved range for UTF-16 surrogate pairs
-  "\xED\xA0\x80" => str_repeat("\x00\x00\x00%", 2),     // CP 0xD800
-  "\xED\xAF\xBF" => str_repeat("\x00\x00\x00%", 2),     // CP 0xDBFF
-  "\xED\xBF\xBF" => str_repeat("\x00\x00\x00%", 2),     // CP 0xDFFF
+  "\xED\xA0\x80" => str_repeat("\x00\x00\x00%", 3),     // CP 0xD800
+  "\xED\xAF\xBF" => str_repeat("\x00\x00\x00%", 3),     // CP 0xDBFF
+  "\xED\xBF\xBF" => str_repeat("\x00\x00\x00%", 3),     // CP 0xDFFF
 
   // Truncated characters
   "\xDF" => "\x00\x00\x00%",         // should have been 2-byte
@@ -788,8 +788,8 @@ $invalid = array(
 
   // Multi-byte characters which end too soon and go to a junk byte
   // (Which isn't even valid to start a new character)
-  "\xF0\xBF\xBF\xFF" => "\x00\x00\x00%",
-  "\xF0\xBF\xFF" => "\x00\x00\x00%",
+  "\xF0\xBF\xBF\xFF" => str_repeat("\x00\x00\x00%", 2),
+  "\xF0\xBF\xFF" => str_repeat("\x00\x00\x00%", 2),
 
   // Continuation bytes which appear outside of a MB char
   "\x80" => "\x00\x00\x00%",
@@ -799,8 +799,8 @@ $invalid = array(
   // Overlong code units
   // (Using more bytes than needed to encode a character)
   "\xC1\xBF" => str_repeat("\x00\x00\x00%", 2),        // didn't need 2 bytes
-  "\xE0\x9F\xBF" => str_repeat("\x00\x00\x00%", 2),    // didn't need 3 bytes
-  "\xF0\x8F\xBF\xBF" => str_repeat("\x00\x00\x00%", 3) // didn't need 4 bytes
+  "\xE0\x9F\xBF" => str_repeat("\x00\x00\x00%", 3),    // didn't need 3 bytes
+  "\xF0\x8F\xBF\xBF" => str_repeat("\x00\x00\x00%", 4) // didn't need 4 bytes
 );
 
 testInvalidCodepoints($invalid, 'UTF-8');
