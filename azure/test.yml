@@ -16,7 +16,6 @@ steps:
       php run-tests.php -P -q \
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
-          --offline \
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120 \

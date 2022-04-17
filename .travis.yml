@@ -91,7 +91,7 @@ before_script:
 script:
     # ARM64 CI reports nproc=32, which is excessive.
     - if [ -z "$ARM64" ]; then export JOBS=$(nproc); else export JOBS=16; fi
-    - ./sapi/cli/php run-tests.php -P -d extension=`pwd`/modules/zend_test.so $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120 -j$JOBS
+    - ./sapi/cli/php run-tests.php -P -d extension=`pwd`/modules/zend_test.so $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --show-slow 1000 --set-timeout 120 -j$JOBS
     - sapi/cli/php -d extension_dir=`pwd`/modules -r 'dl("zend_test");'
 
 after_success:

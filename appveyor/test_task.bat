@@ -98,7 +98,7 @@ mkdir c:\tests_tmp
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
 cd "%APPVEYOR_BUILD_FOLDER%"
-nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -q --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
 

@@ -14,7 +14,6 @@ runs:
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(sysctl -n hw.ncpu) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
-          --offline \
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
