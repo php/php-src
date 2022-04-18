@@ -2,6 +2,8 @@
 Bug #25745 (ctype functions fail with non-ascii characters)
 --EXTENSIONS--
 ctype
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 $funcs = array(

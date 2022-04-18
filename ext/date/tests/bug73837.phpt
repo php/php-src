@@ -13,7 +13,7 @@ for ( $i = 0; $i < 1000; $i++ )
 
 // For low-resolution clocks, we may construct many objects in the same tick.
 var_dump($n = count( $collect ));
-echo $n > 400 ? "microseconds differ\n" : "microseconds do not differ enough ($n)\n";
+echo $n > 200 ? "microseconds differ\n" : "microseconds do not differ enough ($n)\n";
 ?>
 --EXPECTF--
 int(%d)

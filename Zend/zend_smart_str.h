@@ -49,9 +49,14 @@ BEGIN_EXTERN_C()
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
+/* If zero_fraction is true, then a ".0" will be added to numbers that would not otherwise
+ * have a fractional part and look like integers. */
+ZEND_API void ZEND_FASTCALL smart_str_append_double(
+		smart_str *str, double num, int precision, bool zero_fraction);
 ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...)
 	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-
+ZEND_API void ZEND_FASTCALL smart_str_append_escaped_truncated(smart_str *str, zend_string *value, size_t length);
+ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *str, zval *value, size_t truncate);
 END_EXTERN_C()
 
 static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, bool persistent) {

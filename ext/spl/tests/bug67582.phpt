@@ -5,7 +5,7 @@ Bug #67582: Cloned SplObjectStorage with overwritten getHash fails offsetExists(
 
 class MyObjectStorage extends SplObjectStorage {
     // Overwrite getHash() with just some (working) test-method
-    public function getHash($object) { return get_class($object); }
+    public function getHash($object): string { return get_class($object); }
 }
 
 class TestObject {}

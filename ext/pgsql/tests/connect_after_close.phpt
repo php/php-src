@@ -17,6 +17,9 @@ $db2 = pg_connect($conn_str);
 unset($db2);
 var_dump(pg_close());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: pg_close(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 bool(true)
+
+Deprecated: pg_close(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 bool(true)

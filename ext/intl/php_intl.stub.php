@@ -15,6 +15,10 @@ function intlcal_get_keyword_values_for_locale(string $keyword, string $locale, 
 
 function intlcal_get_now(): float {}
 
+/**
+ * @return array<int, string>
+ * @refcount 1
+ */
 function intlcal_get_available_locales(): array {}
 
 function intlcal_get(IntlCalendar $calendar, int $field): int|false {}
@@ -206,7 +210,11 @@ function datefmt_format_object($datetime, $format = null, ?string $locale = null
 /** @param int $offset */
 function datefmt_parse(IntlDateFormatter $formatter, string $string, &$offset = null): int|float|false {}
 
-/** @param int $offset */
+/**
+ * @param int $offset
+ * @return array<string, int>|false
+ * @refcount 1
+ */
 function datefmt_localtime(IntlDateFormatter $formatter, string $string, &$offset = null): array|false {}
 
 function datefmt_get_error_code(IntlDateFormatter $formatter): int {}
@@ -276,10 +284,10 @@ function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR
 /* idn */
 
 /** @param array $idna_info */
-function idn_to_ascii(string $domain, int $flags = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
+function idn_to_ascii(string $domain, int $flags = IDNA_DEFAULT, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
 /** @param array $idna_info */
-function idn_to_utf8(string $domain, int $flags = 0, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
+function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = INTL_IDNA_VARIANT_UTS46, &$idna_info = null): string|false {}
 
 /* locale */
 
@@ -294,6 +302,10 @@ function locale_get_script(string $locale): ?string {}
 
 function locale_get_region(string $locale): ?string {}
 
+/**
+ * @return array<string, string>|false|null
+ * @refcount 1
+ */
 function locale_get_keywords(string $locale): array|false|null {}
 
 function locale_get_display_script(string $locale, ?string $displayLocale = null): string|false {}
@@ -328,9 +340,17 @@ function msgfmt_format(MessageFormatter $formatter, array $values): string|false
 
 function msgfmt_format_message(string $locale, string $pattern, array $values): string|false {}
 
+/**
+ * @return array<int, int|float|string>|false
+ * @refcount 1
+ */
 function msgfmt_parse(MessageFormatter $formatter, string $string): array|false {}
 
-function msgfmt_parse_message(string $locale, string $pattern, string $message): array|false|null {}
+/**
+ * @return array<int, int|float|string>|false
+ * @refcount 1
+ */
+function msgfmt_parse_message(string $locale, string $pattern, string $message): array|false {}
 
 function msgfmt_set_pattern(MessageFormatter $formatter, string $pattern): bool {}
 
@@ -344,7 +364,7 @@ function msgfmt_get_error_message(MessageFormatter $formatter): string {}
 
 /* normalizer */
 
-function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false|null {}
+function normalizer_normalize(string $string, int $form = Normalizer::FORM_C): string|false {}
 
 function normalizer_is_normalized(string $string, int $form = Normalizer::FORM_C): bool {}
 
@@ -356,14 +376,15 @@ function normalizer_get_raw_decomposition(string $string, int $form = Normalizer
 
 function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-/**
- * @param string|int $index
- * @return mixed
- */
-function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true) {}
+/** @param string|int $index */
+function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true): mixed {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function resourcebundle_locales(string $bundle): array|false {}
 
 function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
@@ -376,11 +397,8 @@ function intltz_count_equivalent_ids(string $timezoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
-/**
- * @param IntlTimeZone|string|int|float|null $countryOrRawOffset
- * @return IntlIterator|false
- */
-function intltz_create_enumeration($countryOrRawOffset = null) {}
+/** @param IntlTimeZone|string|int|float|null $countryOrRawOffset */
+function intltz_create_enumeration($countryOrRawOffset = null): IntlIterator|false {}
 
 function intltz_create_time_zone(string $timezoneId): ?IntlTimeZone {}
 
@@ -437,6 +455,10 @@ function transliterator_create(string $id, int $direction = Transliterator::FORW
 
 function transliterator_create_from_rules(string $rules, int $direction = Transliterator::FORWARD): ?Transliterator {}
 
+/**
+ * @return array<int, string>|false
+ * @refcount 1
+ */
 function transliterator_list_ids(): array|false {}
 
 function transliterator_create_inverse(Transliterator $transliterator): ?Transliterator {}

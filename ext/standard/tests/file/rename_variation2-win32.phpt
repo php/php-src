@@ -34,16 +34,12 @@ var_dump( rename($file_path."/rename_variation2_dir/", $file_path."/12345") );
 var_dump( file_exists($file_path."/rename_variation2_dir" ) );  // expecting false
 var_dump( file_exists($file_path."/12345" ) );  // expecting true
 
-rmdir($file_path."/12345");
-
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
 $file_path = __DIR__;
-unlink($file_path."/rename_variation2_link.tmp");
-unlink($file_path."/rename_variation2.tmp");
-rmdir($file_path."/rename_variation2_dir");
+rmdir($file_path."/12345");
 ?>
 --EXPECT--
 *** Testing rename() by renaming a file and directory to numeric name ***

@@ -6,45 +6,11 @@ xml
 <?php
 $var1 = xml_parser_create_ns();
 xml_set_element_handler($var1, new Exception(""), 4096);
-xml_parse($var1,  str_repeat("<a>", 10));
+try {
+    xml_parse($var1,  str_repeat("<a>", 10));
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECTF--
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
-
-Warning: Invalid callback Exception::__invoke, no array or string given in %s on line %d
-
-Warning: xml_parse(): Unable to call handler in %s on line %d
+--EXPECT--
+Invalid callback Exception::__invoke, no array or string given

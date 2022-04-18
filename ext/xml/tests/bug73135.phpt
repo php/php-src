@@ -21,6 +21,6 @@ HERE;
     xml_parse($parser, $xml);
 ?>
 --EXPECTF--
-Warning: xml_parse(): Unable to call handler ahihi() in %s%ebug73135.php on line %d
-
-Warning: xml_parse(): Unable to call handler ahihi() in %s%ebug73135.php on line %d
+Fatal error: Uncaught Error: Parser must not be called recursively in %s:%d
+Stack trace:
+%a

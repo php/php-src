@@ -5,6 +5,7 @@ Closure 020: Trying to access private property outside class
 
 class foo {
     private $test = 3;
+    public $a;
 
     public function x() {
         $a = &$this;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5680b763385b8608dbe797853f83c0e49890737e */
+ * Stub hash: a60454e502813da9aba42100fdbfd619c8da54d2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -91,7 +91,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecolorclosestalpha arginfo_imagecolorresolvealpha
 
-#define arginfo_imagecolorexactalpha arginfo_imagecolorallocatealpha
+#define arginfo_imagecolorexactalpha arginfo_imagecolorresolvealpha
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
@@ -315,7 +315,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecolorexact arginfo_imagecolorclosest
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, IS_FALSE, 1)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
@@ -324,7 +324,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorset, 0, 5, _IS_BOOL, 1
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alpha, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imagecolorsforindex, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecolorsforindex, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -881,7 +881,7 @@ static zend_class_entry *register_class_GdImage(void)
 
 	INIT_CLASS_ENTRY(ce, "GdImage", class_GdImage_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -892,7 +892,7 @@ static zend_class_entry *register_class_GdFont(void)
 
 	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

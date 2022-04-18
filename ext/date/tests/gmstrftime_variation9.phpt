@@ -28,9 +28,17 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --The ISO 8601:1988 week number--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "32"
 
 --Weekday as decimal--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(1) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(1) "5"

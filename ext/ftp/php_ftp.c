@@ -30,7 +30,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 
 #include "php_ftp.h"
 #include "ftp.h"
@@ -112,8 +111,6 @@ PHP_MINIT_FUNCTION(ftp)
 
 	php_ftp_ce = register_class_FTP_Connection();
 	php_ftp_ce->create_object = ftp_object_create;
-	php_ftp_ce->serialize = zend_class_serialize_deny;
-	php_ftp_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ftp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ftp_object_handlers.offset = XtOffsetOf(php_ftp_object, std);

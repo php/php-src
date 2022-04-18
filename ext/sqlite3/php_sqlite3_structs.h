@@ -107,6 +107,11 @@ struct _php_sqlite3_result_object  {
 	php_sqlite3_stmt *stmt_obj;
 	zval stmt_obj_zval;
 
+	/* Cache of column names to speed up repeated fetchArray(SQLITE3_ASSOC) calls.
+	 * Cache is cleared on reset() and finalize() calls. */
+	int column_count;
+	zend_string **column_names;
+
 	int is_prepared_statement;
 	zend_object zo;
 };

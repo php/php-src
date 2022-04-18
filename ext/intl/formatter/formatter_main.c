@@ -23,7 +23,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
 	const char* locale;
 	char*       pattern = NULL;
@@ -38,6 +38,11 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		return FAILURE;
+	}
+
+	if (error_handling != NULL) {
+		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
+		*error_handling_replaced = 1;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
@@ -74,7 +79,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 PHP_FUNCTION( numfmt_create )
 {
 	object_init_ex( return_value, NumberFormatter_ce_ptr );
-	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -85,15 +90,17 @@ PHP_FUNCTION( numfmt_create )
 PHP_METHOD( NumberFormatter, __construct )
 {
 	zend_error_handling error_handling;
+	bool error_handling_replaced = 0;
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	return_value = ZEND_THIS;
-	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+	if (numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
 		if (!EG(exception)) {
 			zend_throw_exception(IntlException_ce_ptr, "Constructor failed", 0);
 		}
 	}
-	zend_restore_error_handling(&error_handling);
+	if (error_handling_replaced) {
+		zend_restore_error_handling(&error_handling);
+	}
 }
 /* }}} */
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 767e5d064aef6d68f860a79c721eb728436c4eb9 */
+ * Stub hash: c7c0d08433ab9dbf59777072550895d85294aad4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -141,6 +141,7 @@ static zend_class_entry *register_class_IntlDateFormatter(void)
 
 	INIT_CLASS_ENTRY(ce, "IntlDateFormatter", class_IntlDateFormatter_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fbc9a196271c276e5af658115571cacde2ad3a3a */
+ * Stub hash: 8ef1f285c6138fbc58c1e4cef04d4ac09dfc3fef */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -61,6 +61,7 @@ static zend_class_entry *register_class_Transliterator(void)
 
 	INIT_CLASS_ENTRY(ce, "Transliterator", class_Transliterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_id_default_value;
 	ZVAL_UNDEF(&property_id_default_value);

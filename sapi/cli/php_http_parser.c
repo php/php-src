@@ -1339,11 +1339,16 @@ size_t php_http_parser_execute (php_http_parser *parser,
           }
         }
 
+        /* We cannot meaningfully support upgrade requests, since we only
+         * support HTTP/1 for now.
+         */
+#if 0
         /* Exit, the rest of the connect is in a different protocol. */
         if (parser->upgrade) {
           CALLBACK2(message_complete);
           return (p - data);
         }
+#endif
 
         if (parser->flags & F_SKIPBODY) {
           CALLBACK2(message_complete);

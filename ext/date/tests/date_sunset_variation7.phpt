@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunset() function : usage variation -  Checking sunrise for consecutive days in specific timezone
+--INI--
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
 echo "*** Testing date_sunset() : usage variation ***\n";

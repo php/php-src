@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fb7d243e0a1b5e85e0bfc0b2add5145cee134b25 */
+ * Stub hash: e9f831c37e960f9b0db7561faefe61d49dd7df21 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -126,6 +126,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_rfork, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_FORKX)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
@@ -167,6 +173,9 @@ ZEND_FUNCTION(pcntl_unshare);
 #endif
 #if defined(HAVE_RFORK)
 ZEND_FUNCTION(pcntl_rfork);
+#endif
+#if defined(HAVE_FORKX)
+ZEND_FUNCTION(pcntl_forkx);
 #endif
 
 
@@ -212,6 +221,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_RFORK)
 	ZEND_FE(pcntl_rfork, arginfo_pcntl_rfork)
+#endif
+#if defined(HAVE_FORKX)
+	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
 #endif
 	ZEND_FE_END
 };

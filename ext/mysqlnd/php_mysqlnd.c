@@ -31,7 +31,7 @@ mysqlnd_minfo_print_hash(zval *values)
 	zval *values_entry;
 	zend_string	*string_key;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), string_key, values_entry) {
 		convert_to_string(values_entry);
 		php_info_print_table_row(2, ZSTR_VAL(string_key), Z_STRVAL_P(values_entry));
 	} ZEND_HASH_FOREACH_END();
@@ -63,7 +63,7 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer)
 	HashTable *ht = mysqlnd_reverse_api_get_api_list();
 	MYSQLND_REVERSE_API *ext;
 
-	ZEND_HASH_FOREACH_PTR(ht, ext) {
+	ZEND_HASH_MAP_FOREACH_PTR(ht, ext) {
 		if (buffer->s) {
 			smart_str_appendc(buffer, ',');
 		}
@@ -157,9 +157,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateNetCmdBufferSize)
 {
-	zend_long long_value;
-
-	ZEND_ATOL(long_value, ZSTR_VAL(new_value));
+	zend_long long_value = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (long_value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 		return FAILURE;
 	}

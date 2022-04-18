@@ -1,4 +1,4 @@
-.TH PHAR 1 "2021" "The PHP Group" "User Commands"
+.TH PHAR 1 "2022" "The PHP Group" "User Commands"
 .SH NAME
 phar, phar.phar \- PHAR (PHP archive) command line tool
 .SH SYNOPSIS
@@ -475,7 +475,15 @@ SHA512
 .TP
 .PD
 .B openssl
-OpenSSL
+OpenSSL using SHA-1
+.TP
+.PD
+.B openssl_sha256
+OpenSSL using SHA-256
+.TP
+.PD
+.B openssl_sha512
+OpenSSL using SHA-512
 
 .SH SEE ALSO
 For a more or less complete description of PHAR look here:

@@ -38,7 +38,6 @@
 #include "mbfl_encoding.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
-#include "mbfilter_wchar.h"
 
 #include "filters/mbfilter_euc_cn.h"
 #include "filters/mbfilter_hz.h"
@@ -86,7 +85,6 @@
 
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
-	&mbfl_encoding_wchar,
 	&mbfl_encoding_base64,
 	&mbfl_encoding_uuencode,
 	&mbfl_encoding_html_ent,

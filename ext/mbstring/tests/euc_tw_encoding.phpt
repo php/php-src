@@ -25,7 +25,20 @@ findInvalidChars($fromUnicode, $invalid, $unused, array_fill_keys(range(0,0xFF),
 convertAllInvalidChars($invalid, $fromUnicode, 'UTF-16BE', 'EUC-TW', '%');
 echo "Tested UTF-16BE -> EUC-TW\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA1\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA1\xA1\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8E\xA2\xA3\x20", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\x8F", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\xA1\x50", "%", "EUC-TW", "UTF-8");
+convertInvalidString("\xFD\xCC", "%", "EUC-TW", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Tested EUC-TW -> UTF-16BE
 Tested UTF-16BE -> EUC-TW
+Done!

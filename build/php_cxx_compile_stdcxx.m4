@@ -6,7 +6,7 @@ dnl PHP_CXX_COMPILE_STDCXX(version, mandatory|optional, var_name_to_put_switch_i
 dnl
 dnl ARGUMENTS
 dnl
-dnl first arg  - version as 11, 14 or 17
+dnl first arg  - version as 11, 14, 17 or 20
 dnl second arg - if mandatory, the configure will fail when no features found.
 dnl                   Optional will make configure silently continue
 dnl third arg  - a variable name where the corresponding switch would be put. If
@@ -26,6 +26,7 @@ AC_DEFUN([PHP_CXX_COMPILE_STDCXX], [dnl
   m4_if([$1], [11], [ax_cxx_compile_alternatives="11 0x"],
         [$1], [14], [ax_cxx_compile_alternatives="14 1y"],
         [$1], [17], [ax_cxx_compile_alternatives="17 1z"],
+        [$1], [20], [ax_cxx_compile_alternatives="20"],
         [m4_fatal([invalid first argument `$1' to PHP_CXX_COMPILE_STDCXX])])dnl
   m4_if([$2], [], [ax_cxx_compile_cxx$1_required=true],
         [$2], [mandatory], [ax_cxx_compile_cxx$1_required=true],
@@ -88,18 +89,20 @@ dnl
 #   Copyright (c) 2015 Moritz Klammler <moritz@klammler.eu>
 #   Copyright (c) 2016, 2018 Krzesimir Nowak <qdlacz@gmail.com>
 #   Copyright (c) 2019 Enji Cooper <yaneurabeya@gmail.com>
+#   Copyright (c) 2020 Jason Merrill <jason@redhat.com>
+#   Copyright (c) 2021 Jörn Heusipp <osmanx@problemloesungsmaschine.de>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
+
 dnl  Test body for checking C++11 support
 
 m4_define([_AX_CXX_COMPILE_STDCXX_testbody_11],
   _AX_CXX_COMPILE_STDCXX_testbody_new_in_11
 )
-
 
 dnl  Test body for checking C++14 support
 
@@ -108,11 +111,23 @@ m4_define([_AX_CXX_COMPILE_STDCXX_testbody_14],
   _AX_CXX_COMPILE_STDCXX_testbody_new_in_14
 )
 
+dnl  Test body for checking C++17 support
+
 m4_define([_AX_CXX_COMPILE_STDCXX_testbody_17],
   _AX_CXX_COMPILE_STDCXX_testbody_new_in_11
   _AX_CXX_COMPILE_STDCXX_testbody_new_in_14
   _AX_CXX_COMPILE_STDCXX_testbody_new_in_17
 )
+
+dnl  Test body for checking C++20 support
+
+m4_define([_AX_CXX_COMPILE_STDCXX_testbody_20],
+  _AX_CXX_COMPILE_STDCXX_testbody_new_in_11
+  _AX_CXX_COMPILE_STDCXX_testbody_new_in_14
+  _AX_CXX_COMPILE_STDCXX_testbody_new_in_17
+  _AX_CXX_COMPILE_STDCXX_testbody_new_in_20
+)
+
 
 dnl  Tests for new features in C++11
 
@@ -907,5 +922,35 @@ namespace cxx17
 }  // namespace cxx17
 
 #endif  // __cplusplus < 201703L
+
+]])
+
+
+dnl  Tests for new features in C++20
+
+m4_define([_AX_CXX_COMPILE_STDCXX_testbody_new_in_20], [[
+
+#ifndef __cplusplus
+
+#error "This is not a C++ compiler"
+
+#elif __cplusplus < 202002L
+
+#error "This is not a C++20 compiler"
+
+#else
+
+#include <version>
+
+namespace cxx20
+{
+
+// As C++20 supports feature test macros in the standard, there is no
+// immediate need to actually test for feature availability on the
+// Autoconf side.
+
+}  // namespace cxx20
+
+#endif  // __cplusplus < 202002L
 
 ]])

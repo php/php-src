@@ -1,4 +1,4 @@
-PHP 8.1 UPGRADE NOTES
+PHP 8.2 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,410 +19,125 @@ PHP 8.1 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Core:
-  . Access to the $GLOBALS array is now subject to a number of restrictions.
-    Read and write access to individual array elements like $GLOBALS['var']
-    continues to work as-is. Read-only access to the entire $GLOBALS array also
-    continues to be supported. However, write access to the entire $GLOBALS
-    array is no longer supported. For example, array_pop($GLOBALS) will result
-    in an error.
-    RFC: https://wiki.php.net/rfc/restrict_globals_usage
-  . Passing null to a non-nullable argument of a built-in function is
-    deprecated. This matches the behavior of user-defined functions, where null
-    is never accepted by non-nullable arguments.
-    user-defined functions.
-
-        var_dump(str_contains("foobar", null));
-        // Deprecated: Passing null to parameter #2 ($needle) of type string
-        //             is deprecated
-
-    RFC: https://wiki.php.net/rfc/deprecate_null_to_scalar_internal_arg
-  . When a method using static variables is inherited (but not overridden), the
-    inherited method will now share static variables with the parent method.
-
-        class A {
-            public static function counter() {
-                static $counter = 0;
-                $counter++;
-                return $counter;
-            }
-        }
-        class B extends A {}
-
-        var_dump(A::counter()); // int(1)
-        var_dump(A::counter()); // int(2)
-        var_dump(B::counter()); // int(3), previously int(1)
-        var_dump(B::counter()); // int(4), previously int(2)
-
-    This means that static variables in methods now behave the same way as
-    static properties.
-    RFC: https://wiki.php.net/rfc/static_variable_inheritance
-  . Most non-final internal methods now require overriding methods to declare a
-    compatible return type, otherwise a deprecated notice is emitted during
-    inheritance validation.
-    In case the return type cannot be declared for an overriding method due to
-    PHP cross-version compatibility concerns, a `#[ReturnTypeWillChange]`
-    attribute can be added to silence the deprecation notice.
-    RFC: https://wiki.php.net/rfc/internal_method_return_types
-  . Added support for intersection types.
-    They cannot be combined with union types.
-    RFC: https://wiki.php.net/rfc/pure-intersection-types
-
-- Fileinfo:
-  . The fileinfo functions now accept and return, respectively, finfo objects
-    instead of resources.
-
-- FTP:
-  . The FTP functions now accept and return, respectively, FTP\Connection objects
-    instead of resources.
-
-- IMAP:
-  . The IMAP functions now accept and return, respectively, IMAP\Connection objects
-    instead of resources.
-
-- LDAP:
-  . The LDAP functions now accept and return, respectively, LDAP\Connection objects
-    instead of "ldap link" resources. Return value checks using is_resource()
-    should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAP\Result objects
-    instead of "ldap result" resources. Return value checks using is_resource()
-    should be replaced with checks for `false`.
-  . The LDAP functions now accept and return, respectively, LDAP\ResultEntry
-    objects instead of "ldap result entry" resources. Return value checks using
-    is_resource() should be replaced with checks for `false`.
-
-- MySQLi:
-  . mysqli_fetch_fields() and mysqli_fetch_field_direct() will now always return
-    zero for max_length. You can compute this information by iterating over the
-    result set and taking the maximum length. This is what PHP was doing
-    internally previously.
-  . The MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH option no longer has an effect.
-  . The MYSQLI_STORE_RESULT_COPY_DATA option no longer has an effect.
-  . The default error handling mode has been changed from "silent" to
-    "exceptions". See https://www.php.net/manual/en/mysqli-driver.report-mode.php
-    for details of behavior changes and how to explicitly set this attribute. To
-    keep the old behavior, use mysqli_report(MYSQLI_REPORT_OFF);
-    RFC: https://wiki.php.net/rfc/mysqli_default_errmode
-  . Classes extending mysqli_stmt::execute() will be required to specify the
-    additional parameter now.
-    RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
-  . mysqli::connect() will now return true instead of null on success.
-
-- MySQLnd:
-  . The mysqlnd.fetch_copy_data ini setting has been removed. However, this
-    should not result in user-visible behavior changes.
-
-- PDO:
-  . PDO::ATTR_STRINGIFY_FETCHES now also stringifies values of type bool to
-    "0" or "1". Previously booleans were not stringified.
-  . Calling bindColumn() with PDO::PARAM_LOB (and assuming stringification is
-    not enabled) will now consistently bind a stream result, as documented.
-    Previously the result would be either a stream or a string depending on the
-    used database driver and the time the binding is performed.
-
-- PDO MySQL:
-  . Integers and floats in result sets will now be returned using native PHP
-    types instead of strings when using emulated prepared statements. This
-    matches the behavior of native prepared statements. You can restore the
-    previous behavior by enabling the PDO::ATTR_STRINGIFY_FETCHES option.
-
-- PDO SQLite:
-  . Integers and floats in results sets will now be returned using native PHP
-    types. You can restore the previous behavior by enabling the
-    PDO::ATTR_STRINGIFY_FETCHES option.
-
-- PgSQL:
-  . The PgSQL functions now accept and return, respectively, \PgSql\Connection
-    objects instead of "pgsql link" resources. Return value checks using
-    is_resource() should be replaced with checks for `false`.
-  . The PgSQL functions now accept and return, respectively, \PgSql\Result
-    objects instead of "pgsql result" resources. Return value checks using
-    is_resource() should be replaced with checks for `false`.
-  . The PgSQL functions now accept and return, respectively, \PgSql\Lob
-    objects instead of "pgsql large object" resources. Return value checks
-    using is_resource() should be replaced with checks for `false`.
-
-- PSpell:
-  . The PSpell functions now accept and return, respectively, PSpell\Dictionary objects
-    instead of "pspell" resources. Return value checks using is_resource()
-    should be replaced with checks for `false`.
-  . The PSpell functions now accept and return, respectively, PSpell\Config objects
-    instead of "pspell config" resources. Return value checks using is_resource()
-    should be replaced with checks for `false`.
-
 - Standard:
-  . version_compare() no longer accepts undocumented operator abbreviations.
-  . htmlspecialchars(), htmlentities(), htmlspecialchars_decode(),
-    html_entity_decode() and get_html_translation_table() now use
-    ENT_QUOTES | ENT_SUBSTITUTE rather than ENT_COMPAT by default. This means
-    that ' is escaped to &#039; while previously it was left alone.
-    Additionally, malformed UTF-8 will be replaced by a Unicode substitution
-    character, instead of resulting in an empty string.
-  . debug_zval_dump() will now print reference wrappers with their refcount,
-    instead of only prepending a "&" to the value. This more accurately models
-    reference representation since PHP 7.0.
-  . debug_zval_dump() will not print "interned" instead of a dummy refcount of
-    one for interned strings and immutable arrays.
-  . fputcsv() now accepts a new "eol" argument which allow to define a custom
-    eol sequence, the default remains the same and is "\n".
+  . strtolower() and strtoupper() are no longer locale-sensitive. They now
+    perform ASCII case conversion, as if the locale were "C". Use
+    mb_strtolower() if you want localized case conversion. Similarly, stristr,
+    stripos, strripos, lcfirst, ucfirst, ucwords, str_ireplace,
+    array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
+    conversion.
 
 - SPL:
-  . SplFileObject::fputcsv() now accepts a new "eol" argument which allow to
-    define a custom eol sequence, the default remains the same and is "\n".
-  . SplFixedArray will now be JSON encoded like an array.
+  . The following methods now enforce their signature:
+    * SplFileInfo::_bad_state_ex()
+    * SplFileObject::getCsvControl()
+    * SplFileObject::fflush()
+    * SplFileObject::ftell()
+    * SplFileObject::fgetc()
+    * SplFileObject::fpassthru()
 
 ========================================
 2. New Features
 ========================================
 
 - Core:
-  . It is now possible to specify octal integer by using the explicit "0o"/"0O"
-    prefix similar to hexadecimal ("0x"/"0X) and binary ("0b"/"0B") integer
-    literals.
-    RFC: https://wiki.php.net/rfc/explicit_octal_notation
-  . Added support for array unpacking with strings keys.
-    RFC: https://wiki.php.net/rfc/array_unpacking_string_keys
-  . Added support for enumerations.
-    RFC: https://wiki.php.net/rfc/enumerations
-  . Added support for never return type
-    RFC: https://wiki.php.net/rfc/noreturn_type
-  . Added support for fibers.
-    RFC: https://wiki.php.net/rfc/fibers
-  . File uploads now provide an additional full_path key, which contains the
-    full path (rather than just the basename) of the uploaded file. This is
-    intended for use in conjunction with "upload webkitdirectory".
-  . It is now allowed to specify named arguments after an argument unpack, e.g.
-    foo(...$args, named: $arg).
+  . Added the #[\SensitiveParameter] attribute to redact sensitive data in
+    backtraces.
+    RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
 
 - Curl:
-  . Added CURLOPT_DOH_URL option.
-  . Added certificate blob options when for libcurl >= 7.71.0:
+  . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
+    HTTP method in curl_getinfo() return value.
 
-        CURLOPT_ISSUERCERT_BLOB
-        CURLOPT_PROXY_ISSUERCERT
-        CURLOPT_PROXY_ISSUERCERT_BLOB
-        CURLOPT_PROXY_SSLCERT_BLOB
-        CURLOPT_PROXY_SSLKEY_BLOB
-        CURLOPT_SSLCERT_BLOB
-        CURLOPT_SSLKEY_BLOB
+- OCI8:
+  . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
+    function to tune LOB query performance by reducing the number of
+    round-trips between PHP and Oracle Database when fetching LOBS. This is
+    usable with Oracle Database 12.2 or later.
 
-  . Added CURLStringFile, which can be used to post a file from a string rather
-    than a file:
-
-        $file = new CURLStringFile($data, 'filename.txt', 'text/plain');
-        curl_setopt($curl, CURLOPT_POSTFIELDS, ['file' => $file]);
-
-- FPM:
-  . Added openmetrics status format. It can be used by Prometheus to fetch FPM
-    metrics.
-  . Added new pool option for the dynamic process manager called
-    pm.max_spawn_rate. It allows to start number of children in a faster rate
-    when dynamic pm is selected. The default value is 32 which was the previous
-    hard coded value.
-
-- GD:
-  . Avif support is now available through the imagecreatefromavif() and
-    imageavif() functions, if libgd has been built with avif support.
-
-- hash:
-  . The following functions have changed signatures:
-
-    - function hash(string $algo, string $data, bool $binary = false, array $options = []): string|false {}
-    - function hash_file(string $algo, string $filename, bool $binary = false, array $options = []): string|false {}
-    - function hash_init(string $algo, int $flags = 0, string $key = "", array $options = []): HashContext {}
-
-    The additional `$options` argument can be used to pass algorithm specific data.
-
-  . Added MurmurHash3 with streaming support. The following variants are implemented:
-
-    - murmur3a, 32-bit hash
-    - murmur3c, 128-bit hash for x86
-    - murmur3f, 128-bit hash for x64
-
-    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
-
-    ```php
-    $h = hash("murmur3f", $data, options: ["seed" => 42]);
-    echo $h, "\n";
-    ```
-
-    A valid seed value is within the range from 0 to the platform defined UINT_MAX, usually 4294967295.
-
-  . Added xxHash. The implementation brings in the following arguments
-
-    - xxh32, 32-bit hash
-    - xxh64, 64-bit hash
-    - xxh3, 64-bit hash
-    - xxh128, 128-bit hash
-
-    The initial hash state can be passed through the `seed` key in the `$options` array, for example:
-
-    ```php
-    $h = hash("xxh3", $data, options: ["seed" => 42]);
-    echo $h, "\n";
-    ```
-
-    Secret usage is supported through passing the `secret` key in the `$options` array, too:
-
-    ```php
-    $h = hash("xxh3", $data, options: ["secret" => "at least 136 bytes long secret here"]);
-    echo $h, "\n";
-    ```
-
-    Note, that the quality of the custom secret is crucial for the quality of the resulting hash. It is
-    highly recommended for the secret to use the best possible entropy.
-
-- MySQLi:
-  . The mysqli.local_infile_directory ini setting has been added, which can be
-    used to specify a directory from which files are allowed to be loaded. It
-    is only meaningful if mysqli.allow_local_infile is not enabled, as all
-    directories are allowed in that case.
-  . Binding in execute has been added to mysqli prepared statements.
-    Parameters can now be passed to mysqli_stmt::execute as an array.
-    RFC: https://wiki.php.net/rfc/mysqli_bind_in_execute
-  . A new function has been added to mysqli_result called mysqli_fetch_column().
-    It allows for fetching single scalar values from the result set.
-    RFC: https://wiki.php.net/rfc/mysqli_fetch_column
-
-- PDO MySQL:
-  . The PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY attribute has been added, which
-    can be used to specify a directory from which files are allowed to be
-    loaded. It is only meaningful if PDO::MYSQL_ATTR_LOCAL_INFILE is not
-    enabled, as all directories are allowed in that case.
-
-- PDO SQLite:
-  . SQLite's "file:" DSN syntax is now supported, which allows specifying
-    additional flags. This feature is not available if open_basedir is set.
-    Example:
-
-        new PDO('sqlite:file:path/to/sqlite.db?mode=ro')
-
-- Posix:
-  . Added POSIX_RLIMIT_KQUEUES and POSIX_RLIMIT_NPTS. These rlimits are only
-    available on FreeBSD.
+- PCRE:
+  . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
+    `(xyz)` groups non-capturing. Only named groups like `(?<name>xyz)` are
+    capturing. This only affects which groups are capturing, it is still
+    possible to use numbered subpattern references, and the matches array will
+    still contain numbered results.
 
 ========================================
 3. Changes in SAPI modules
 ========================================
-
-- CLI:
-  . Using -a without the readline extension will now result in an error.
-    Previously, -a without readline had the same behavior as calling php without
-    any arguments, apart from printing an additional "Interactive mode enabled"
-    message. This mode was not, in fact, interactive.
-
-- phpdbg:
-  . Remote functionality from phpdbg has been removed.
 
 ========================================
 4. Deprecated Functionality
 ========================================
 
 - Core:
-  . Implementing the Serializable interface without also implementing
-    __serialize() and __unserialize() has been deprecated. You should either
-    implement the new methods (if you only support PHP 7.4 and higher) or
-    implement both (if you support older PHP versions as well).
-    RFC: https://wiki.php.net/rfc/phase_out_serializable
-  . Implicit conversion of floats to integers that result in loss of precision,
-    e.g. a truncation from 1.9 to 1, is deprecated. This affects array keys,
-    int parameter and return types, and operators working on integers.
-    RFC: https://wiki.php.net/rfc/implicit-float-int-deprecate
-  . returning a non-array from __sleep will raise a warning
+  . Creation of dynamic properties is deprecated, unless the class opts in by
+    using the #[AllowDynamicProperties] attribute. stdClass allows dynamic
+    properties. Usage of __get()/__set() is not affected by this change. A
+    dynamic properties deprecation warning can be addressed by:
+     - Declaring the property (preferred).
+     - Adding the #[AllowDynamicProperties] attribute to the class (which also
+       applies to all child classes).
+     - Using a WeakMap if you wish to associate additional data with an object
+       you do not own.
 
-- MySQLi:
-  . The mysqli_driver::$driver_version property has been deprecated. The driver
-    version is meaningless as it hasn't been updated in more than a decade. Use
-    PHP_VERSION_ID instead.
-  . Calling mysqli::get_client_info in OO style or passing $mysqli argument to
-    mysqli_get_client_info() function has been deprecated. Use
-    mysqli_get_client_info() without any arguments to obtain the client
-    library version information.
+  . Callables that are not accepted by the $callable() syntax (but are accepted
+    by call_user_func) are deprecated. In particular:
 
-- PDO:
-  . The PDO::FETCH_SERIALIZE mode has been deprecated.
-    RFC: https://wiki.php.net/rfc/phase_out_serializable
+        "self::method"
+        "parent::method"
+        "static::method"
+        ["self", "method"]
+        ["parent", "method"]
+        ["static", "method"]
+        ["Foo", "Bar::method"]
+        [new Foo, "Bar::method"]
+
+    This does not affect normal method callables like "A::method" or
+    ["A", "method"]. A deprecation notice is only emitted on call. Both
+    is_callable() and the callable type will silently accept these callables
+    until support for them is removed entirely.
+
+    RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+
+- Mbstring:
+  . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
+    deprecated for all Mbstring functions. Unlike all the other text
+    encodings supported by Mbstring, these do not encode a sequence of
+    Unicode codepoints, but rather a sequence of raw bytes. It is not
+    clear what the correct return values for most Mbstring functions should
+    be when one of these non-encodings is specified. Further, PHP has
+    separate, built-in implementations of all of them; for example, UUencoded
+    data can be handled using convert_uuencode/convert_uudecode.
 
 ========================================
 5. Changed Functions
 ========================================
 
-- Core:
-  . Properties order used in foreach, var_dump(), serialize(), object comparison
-    etc. was changed. Now properties are naturally ordered according to their
-    declaration and inheritance. Properties declared in a base class are going
-    to be before the child properties. This order is consistent with internal
-    layout of properties in zend_object structure and repeats the order in
-    default_properties_table[] and properties_info_table[]. The old order was
-    not documented and was caused by class inheritance implementation details.
-
-- Filter:
-  . The FILTER_FLAG_ALLOW_OCTAL flag of the FILTER_VALIDATE_INT filter now accept
-    octal string with the leading octal prefix ("0o"/"0O")
-    RFC: https://wiki.php.net/rfc/explicit_octal_notation
-
-- GMP:
-  . All GMP function now accept octal string with the leading octal prefix ("0o"/"0O")
-    RFC: https://wiki.php.net/rfc/explicit_octal_notation
-
-- PDO ODBC:
-  . PDO::getAttributes() with PDO::ATTR_SERVER_INFO and PDO::ATTR_SERVER_VERSION
-    now return values instead of throwing PDOException.
+- DBA
+  . dba_open() and dba_popen() now have the following enforced function signature
+    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
+  . dba_fetch()'s optional skip argument is now at the end in line with
+    PHP userland semantics its signature now is:
+    dba_fetch(string|array $key, $dba, int $skip = 0): string|false
+    The overloaded signature
+    dba_fetch(string|array $key, $skip, $dba): string|false
+    is still accepted, but it is recommended to use the new standard variant.
 
 ========================================
 6. New Functions
 ========================================
 
-- Core:
-  . Added array_is_list(array $array), which will return true if the array keys are 0 .. count($array)-1 in that order.
-    RFC: https://wiki.php.net/rfc/is_list
-
-- pcntl:
-  . Added pcntl_rfork for FreeBSD variants
-
-- Reflection:
-  . Added ReflectionFunctionAbstract::getClosureUsedVariables
+- Sodium:
+  . sodium_crypto_stream_xchacha20_xor_ic()
 
 - Standard:
-  . Added fsync() and fdatasync(), which instruct the operating system to
-    flush its buffers to physical storage.
-    RFC: https://wiki.php.net/rfc/fsync_function
-
-- Sodium:
-  . Added the XChaCha20 stream cipher interface functions:
-
-    - sodium_crypto_stream_xchacha20()
-    - sodium_crypto_stream_xchacha20_keygen()
-    - sodium_crypto_stream_xchacha20_xor()
-
-  . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
-
-    Ristretto is a technique for constructing prime order elliptic curve groups with non-malleable encodings.
-    Ristretto255 implements Ristretto atop Curve25519.
-
-    - sodium_crypto_core_ristretto255_add()
-    - sodium_crypto_core_ristretto255_from_hash()
-    - sodium_crypto_core_ristretto255_is_valid_point()
-    - sodium_crypto_core_ristretto255_random()
-    - sodium_crypto_core_ristretto255_scalar_add()
-    - sodium_crypto_core_ristretto255_scalar_complement()
-    - sodium_crypto_core_ristretto255_scalar_invert()
-    - sodium_crypto_core_ristretto255_scalar_mul()
-    - sodium_crypto_core_ristretto255_scalar_negate()
-    - sodium_crypto_core_ristretto255_scalar_random()
-    - sodium_crypto_core_ristretto255_scalar_reduce()
-    - sodium_crypto_core_ristretto255_scalar_sub()
-    - sodium_crypto_core_ristretto255_sub()
-    - sodium_crypto_scalarmult_ristretto255()
-    - sodium_crypto_scalarmult_ristretto255_base()
+  . The peak memory usage can now be reset to the current usage thanks to
+    memory_reset_peak_usage().
 
 ========================================
 7. New Classes and Interfaces
 ========================================
-
-- Intl:
-  . Added IntlDatePatternGenerator to dynamically generate patterns to use with IntlDateFormatter.
-    RFC: https://wiki.php.net/rfc/intldatetimepatterngenerator
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -432,46 +147,55 @@ PHP 8.1 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
-- MySQLi:
-  . The mysqli_stmt::next_result() and mysqli::fetch_all() methods are now
-    available when linking against libmysqlclient.
+- Intl:
+  . IntlBreakIterator, IntlRuleBasedBreakIterator, IntlCodePointBreakIterator,
+    IntlPartsIterator, IntlCalendar, IntlCalendar, Collator, IntlIterator,
+    UConverter, IntlDateFormatter, IntlDatePatternGenerator, MessageFormatter,
+    ResourceBundle, Spoofchecker, IntlTimeZone and Transliterator instances are
+    no longer serializable. Previously, they could be serialized, but
+    unserialization yielded unusable objects or failed.
 
-- OpenSSL:
-  . The OpenSSL extension now requires at least OpenSSL version 1.0.2.
+- OCI8:
+  . The minimum Oracle Client library version required is now 11.2.
 
-- Sockets:
-  . FreeBSD defines SO_ACCEPTFILTER
+- SQLite3:
+  . sqlite3.defensive is now PHP_INI_USER.
 
 - Standard:
-  . --with-password-argon2 now uses pkg-config to detect libargon2. As such,
-    an alternative libargon2 location should now be specified using
-    PKG_CONFIG_PATH.
+  . getimagesize() now reports the actual image dimensions, bits and channels
+    of AVIF images. Previously, the dimensions have been reported as 0x0, and
+    bits and channels have not been reported at all.
+
+- Zip:
+  . extension updated to 1.20.0 with new methods:
+    ZipArchive::clearError, getStreamName and getStreamIndex
 
 ========================================
 10. New Global Constants
 ========================================
 
-- MySQLi:
-  . MYSQLI_REFRESH_REPLICA has been added as a replacement for
-    MYSQLI_REFRESH_SLAVE, in line with an upstream change in MySQL. The old
-    constant is still available for backwards-compatibility reasons, but may
-    be deprecated/removed in the future.
+- COM_DOTNET:
+  . LOCALE_NEUTRAL
 
 - Sockets:
-  . TCP_DEFER_ACCEPT socket option added where available.
+  . SO_INCOMING_CPU
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
-- The log_errors_max_len ini setting has been removed. It no longer had an
-  effect since PHP 8.0.
-
 ========================================
 12. Windows Support
 ========================================
 
-. The macro IGNORE_URL_WIN has been removed; it had no effect as of PHP 5.0.0.
+- Core:
+  . Windows specific error messages are no longer localized, but instead in
+    English to better match PHP error messages.
+
+- OCI8:
+  . Since building against Oracle Client 10g is no longer supported anyway,
+    the configuration option --with-oci8 has been dropped. --with-oci8-11g,
+    --with-oci8-12c and --with-oci8-19 are still supported.
 
 ========================================
 13. Other Changes

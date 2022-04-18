@@ -21,7 +21,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
@@ -438,7 +437,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *zv, enum pd
 						tmp_data_len = 36;
 						tmp_data = safe_emalloc(tmp_data_len, sizeof(char), 1);
 						data_len = dbconvert(NULL, SQLUNIQUE, data, data_len, SQLCHAR, (LPBYTE) tmp_data, tmp_data_len);
-						php_strtoupper(tmp_data, data_len);
+						zend_str_toupper(tmp_data, data_len);
 						ZVAL_STRINGL(zv, tmp_data, data_len);
 						efree(tmp_data);
 					} else {

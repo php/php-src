@@ -73,7 +73,7 @@ if (!$IS_MYSQLND)
         printf("[025] Timestamp not found. One reason could be that the test is borked and does not recognize the format of the gettimeofday() system call. Check manually (and fix the test, if needed :-)). First characters from trace are '%s'\n", substr($trace, 0, 80));
 
     // i - add PID of the current process
-    // currently PHP is not multi-threaded, so it should be save to test for the PID of this PHP process
+    // currently PHP is not multi-threaded, so it should be safe to test for the PID of this PHP process
     if (false === ($pid = getmypid()))
         $pid = "[\d]+";
 

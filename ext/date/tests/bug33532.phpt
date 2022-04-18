@@ -6,7 +6,7 @@ date.timezone=UTC
 --SKIPIF--
 <?php
 if(PHP_OS == 'Darwin' || defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip strftime uses system TZ on Darwin and Windows");
-if (!strftime('%Z')) die('skip strftime does not support %Z');
+if (!@strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--
 <?php

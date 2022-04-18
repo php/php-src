@@ -3,6 +3,8 @@ Userstream unlink, rename, mkdir, rmdir, and url_stat.
 --FILE--
 <?php
 class test {
+    public $context;
+
     function unlink($file) {
         print "Unlinking file: $file\n";
     }

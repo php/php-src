@@ -6,7 +6,7 @@ pgsql
 <?php
 require_once('skipif.inc');
 
-_skip_lc_messages();
+_skip_lc_messages($conn);
 
 @pg_query($conn, "CREATE LANGUAGE 'plpgsql' HANDLER plpgsql_call_handler LANCOMPILER 'PL/pgSQL'");
 $res = @pg_query($conn, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
@@ -30,7 +30,7 @@ if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-_set_lc_messages();
+_set_lc_messages($dbh);
 
 $res = pg_query($dbh, "CREATE OR REPLACE FUNCTION test_notice() RETURNS boolean AS '
 begin

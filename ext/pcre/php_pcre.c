@@ -193,6 +193,13 @@ static void php_pcre_efree(void *block, void *data)
 	efree(block);
 }
 
+#ifdef PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+	/* pcre 10.38 needs PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK, disabled by default */
+#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK
+#else
+#define PHP_PCRE_DEFAULT_EXTRA_COPTIONS 0
+#endif
+
 #define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
@@ -212,6 +219,8 @@ static void php_pcre_init_pcre2(uint8_t jit)
 			return;
 		}
 	}
+
+	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
 
 	if (!mctx) {
 		mctx = pcre2_match_context_create(gctx);
@@ -725,6 +734,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE2_CASELESS;		break;
 			case 'm':	coptions |= PCRE2_MULTILINE;		break;
+			case 'n':	coptions |= PCRE2_NO_AUTO_CAPTURE;	break;
 			case 's':	coptions |= PCRE2_DOTALL;		break;
 			case 'x':	coptions |= PCRE2_EXTENDED;		break;
 
@@ -1197,7 +1207,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	if (subpats != NULL) {
 		subpats = zend_try_array_init(subpats);
 		if (!subpats) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1716,7 +1726,7 @@ matched:
 			}
 
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -1802,14 +1812,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
@@ -1954,9 +1962,9 @@ matched:
 				pcre2_get_mark(match_data), flags);
 
 			ZEND_ASSERT(eval_result);
-			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result), new_len);
+			new_len = zend_safe_address_guarded(1, ZSTR_LEN(eval_result) + ZSTR_MAX_OVERHEAD, new_len) -ZSTR_MAX_OVERHEAD;
 			if (new_len >= alloc_len) {
-				alloc_len = zend_safe_address_guarded(2, new_len, alloc_len);
+				alloc_len = zend_safe_address_guarded(2, new_len, ZSTR_MAX_OVERHEAD) - ZSTR_MAX_OVERHEAD;
 				if (result == NULL) {
 					result = zend_string_alloc(alloc_len, 0);
 				} else {
@@ -2013,14 +2021,12 @@ not_matched:
 				result = zend_string_copy(subject_str);
 				break;
 			}
-			new_len = result_len + subject_len - last_end_offset;
-			if (new_len >= alloc_len) {
-				alloc_len = new_len; /* now we know exactly how long it is */
-				if (NULL != result) {
-					result = zend_string_realloc(result, alloc_len, 0);
-				} else {
-					result = zend_string_alloc(alloc_len, 0);
-				}
+			/* now we know exactly how long it is */
+			alloc_len = result_len + subject_len - last_end_offset;
+			if (NULL != result) {
+				result = zend_string_realloc(result, alloc_len, 0);
+			} else {
+				result = zend_string_alloc(alloc_len, 0);
 			}
 			/* stick that last bit of string on our output */
 			memcpy(ZSTR_VAL(result) + result_len, piece, subject_len - last_end_offset);
@@ -2110,7 +2116,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zv = &replace_ht->arData[replace_idx].val;
+				zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);

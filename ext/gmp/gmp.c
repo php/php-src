@@ -2017,3 +2017,48 @@ ZEND_FUNCTION(gmp_scan1)
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
+
+ZEND_METHOD(GMP, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval zv;
+	array_init(return_value);
+
+	mpz_ptr gmpnum = GET_GMP_FROM_ZVAL(ZEND_THIS);
+	gmp_strval(&zv, gmpnum, 16);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &zv);
+
+	HashTable *props = Z_OBJ_P(ZEND_THIS)->properties;
+	if (props && zend_hash_num_elements(props) != 0) {
+		ZVAL_ARR(&zv, zend_proptable_to_symtable(
+			zend_std_get_properties(Z_OBJ_P(ZEND_THIS)), /* always duplicate */ 1));
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &zv);
+	}
+}
+
+ZEND_METHOD(GMP, __unserialize)
+{
+	HashTable *data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *num = zend_hash_index_find(data, 0);
+	if (!num || Z_TYPE_P(num) != IS_STRING ||
+			convert_to_gmp(GET_GMP_FROM_ZVAL(ZEND_THIS), num, 16, 0) == FAILURE) {
+		zend_throw_exception(NULL, "Could not unserialize number", 0);
+		RETURN_THROWS();
+	}
+
+	zval *props = zend_hash_index_find(data, 1);
+	if (props) {
+		if (Z_TYPE_P(props) != IS_ARRAY) {
+			zend_throw_exception(NULL, "Could not unserialize properties", 0);
+			RETURN_THROWS();
+		}
+
+		object_properties_load(Z_OBJ_P(ZEND_THIS), Z_ARRVAL_P(props));
+	}
+}

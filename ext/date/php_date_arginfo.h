@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8bc76a5db3a225746daffe29c0b8404cf971452 */
+ * Stub hash: ea354510fbf64c42ee1cdd6fd786ab937516226c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -235,8 +235,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface_getOffset, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTimeInterface_getTimestamp, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeInterface_getTimestamp arginfo_class_DateTimeInterface_getOffset
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeInterface_diff, 0, 1, DateInterval, 0)
 	ZEND_ARG_OBJ_INFO(0, targetObject, DateTimeInterface, 0)
@@ -559,8 +558,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mktime, arginfo_mktime)
 	ZEND_FE(gmmktime, arginfo_gmmktime)
 	ZEND_FE(checkdate, arginfo_checkdate)
-	ZEND_FE(strftime, arginfo_strftime)
-	ZEND_FE(gmstrftime, arginfo_gmstrftime)
+	ZEND_DEP_FE(strftime, arginfo_strftime)
+	ZEND_DEP_FE(gmstrftime, arginfo_gmstrftime)
 	ZEND_FE(time, arginfo_time)
 	ZEND_FE(localtime, arginfo_localtime)
 	ZEND_FE(getdate, arginfo_getdate)
@@ -597,8 +596,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(date_interval_format, arginfo_date_interval_format)
 	ZEND_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
 	ZEND_FE(date_default_timezone_get, arginfo_date_default_timezone_get)
-	ZEND_FE(date_sunrise, arginfo_date_sunrise)
-	ZEND_FE(date_sunset, arginfo_date_sunset)
+	ZEND_DEP_FE(date_sunrise, arginfo_date_sunrise)
+	ZEND_DEP_FE(date_sunset, arginfo_date_sunset)
 	ZEND_FE(date_sun_info, arginfo_date_sun_info)
 	ZEND_FE_END
 };

@@ -94,8 +94,10 @@ function sodium_crypto_kx_secretkey(string $key_pair): string {}
 
 function sodium_crypto_kx_seed_keypair(string $seed): string {}
 
+/** @return array<int, string> */
 function sodium_crypto_kx_client_session_keys(string $client_key_pair, string $server_key): array {}
 
+/** @return array<int, string> */
 function sodium_crypto_kx_server_session_keys(string $server_key_pair, string $client_key): array {}
 
 function sodium_crypto_generichash(string $message, string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
@@ -104,6 +106,7 @@ function sodium_crypto_generichash_keygen(): string {}
 
 function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
+/** @return true */
 function sodium_crypto_generichash_update(string &$state, string $message): bool {}
 
 function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
@@ -149,13 +152,15 @@ function sodium_crypto_secretbox_open(string $ciphertext, string $nonce, string 
 #ifdef crypto_secretstream_xchacha20poly1305_ABYTES
 function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {}
 
+/** @return array<int, string> */
 function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): array {}
 
-function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $message, string $additional_data  = "", int $tag  = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
+function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $message, string $additional_data = "", int $tag = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $header, string $key): string {}
 
-function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $ciphertext, string $additional_data  = ""): array|false {}
+/** @return array<int, int|string>|false */
+function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $ciphertext, string $additional_data = ""): array|false {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void {}
 #endif
@@ -195,11 +200,13 @@ function sodium_crypto_stream_keygen(): string {}
 function sodium_crypto_stream_xor(string $message, string $nonce, string $key): string {}
 
 #if defined(crypto_stream_xchacha20_KEYBYTES)
-function sodium_crypto_stream_xchacha20(int $length, string $nonce, string $key) : string {}
+function sodium_crypto_stream_xchacha20(int $length, string $nonce, string $key): string {}
 
-function sodium_crypto_stream_xchacha20_keygen() : string {}
+function sodium_crypto_stream_xchacha20_keygen(): string {}
 
-function sodium_crypto_stream_xchacha20_xor(string $message, string $nonce, string $key) : string {}
+function sodium_crypto_stream_xchacha20_xor(string $message, string $nonce, string $key): string {}
+
+function sodium_crypto_stream_xchacha20_xor_ic(string $message, string $nonce, int $counter, string $key): string {}
 #endif
 
 function sodium_add(string &$string1, string $string2): void {}
@@ -223,7 +230,7 @@ function sodium_hex2bin(string $string, string $ignore = ""): string {}
 #ifdef sodium_base64_VARIANT_ORIGINAL
 function sodium_bin2base64(string $string, int $id): string {}
 
-function sodium_base642bin(string $string, int $id, string $ignore  = ""): string {}
+function sodium_base642bin(string $string, int $id, string $ignore = ""): string {}
 #endif
 
 /** @alias sodium_crypto_box_publickey_from_secretkey */

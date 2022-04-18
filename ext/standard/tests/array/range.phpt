@@ -1,7 +1,7 @@
 --TEST--
 Test range() function
 --INI--
-precision=14
+serialize_precision=14
 --FILE--
 <?php
 
@@ -347,7 +347,7 @@ array(11) {
   [6]=>
   float(1.6)
   [7]=>
-  float(1.7000000000000002)
+  float(1.7)
   [8]=>
   float(1.8)
   [9]=>
@@ -371,7 +371,7 @@ array(11) {
   [6]=>
   float(1.4)
   [7]=>
-  float(1.2999999999999998)
+  float(1.3)
   [8]=>
   float(1.2)
   [9]=>
@@ -395,7 +395,7 @@ array(11) {
   [6]=>
   float(1.6)
   [7]=>
-  float(1.7000000000000002)
+  float(1.7)
   [8]=>
   float(1.8)
   [9]=>
@@ -419,7 +419,7 @@ array(11) {
   [6]=>
   float(1.6)
   [7]=>
-  float(1.7000000000000002)
+  float(1.7)
   [8]=>
   float(1.8)
   [9]=>

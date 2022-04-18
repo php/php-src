@@ -3,6 +3,7 @@ SPL: ArrayObject::exchangeArray() basic usage with object as underlying data sto
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class C {
     public $pub1 = 'public1';
 }

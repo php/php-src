@@ -99,8 +99,6 @@ void formatter_register_class( void )
 	/* Create and register 'NumberFormatter' class. */
 	NumberFormatter_ce_ptr = register_class_NumberFormatter();
 	NumberFormatter_ce_ptr->create_object = NumberFormatter_object_create;
-	NumberFormatter_ce_ptr->serialize = zend_class_serialize_deny;
-	NumberFormatter_ce_ptr->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));

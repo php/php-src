@@ -1254,7 +1254,7 @@ mysqlnd.collect_memory_statistics = On
 ;oci8.ping_interval = 60
 
 ; Connection: Set this to a user chosen connection class to be used
-; for all pooled server requests with Oracle 11g Database Resident
+; for all pooled server requests with Oracle Database Resident
 ; Connection Pooling (DRCP).  To use DRCP, this value should be set to
 ; the same string for all web servers running the same application,
 ; the database pool must be configured, and the connection string must
@@ -1271,10 +1271,17 @@ mysqlnd.collect_memory_statistics = On
 ; https://php.net/oci8.statement-cache-size
 ;oci8.statement_cache_size = 20
 
-; Tuning: Enables statement prefetching and sets the default number of
+; Tuning: Enables row prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
 ; https://php.net/oci8.default-prefetch
 ;oci8.default_prefetch = 100
+
+; Tuning: Sets the amount of LOB data that is internally returned from
+; Oracle Database when an Oracle LOB locator is initially retrieved as
+; part of a query. Setting this can improve performance by reducing
+; round-trips.
+; https://php.net/oci8.prefetch-lob-size
+; oci8.prefetch_lob_size = 0
 
 ; Compatibility. Using On means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.
@@ -1679,8 +1686,8 @@ zend.assertions = 1
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
-; Default: mbstring.http_output_conv_mimetype=^(text/|application/xhtml\+xml)
-;mbstring.http_output_conv_mimetype=
+; Default: mbstring.http_output_conv_mimetypes=^(text/|application/xhtml\+xml)
+;mbstring.http_output_conv_mimetypes=
 
 ; This directive specifies maximum stack depth for mbstring regular expressions. It is similar
 ; to the pcre.recursion_limit for PCRE.

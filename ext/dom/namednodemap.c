@@ -31,6 +31,33 @@
 * Since:
 */
 
+static int get_namednodemap_length(dom_object *obj)
+{
+	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
+	if (!objmap) {
+		return 0;
+	}
+
+	if (objmap->nodetype == XML_NOTATION_NODE || objmap->nodetype == XML_ENTITY_NODE) {
+		return objmap->ht ? xmlHashSize(objmap->ht) : 0;
+	}
+
+	int count = 0;
+	xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
+	if (nodep) {
+		xmlAttrPtr curnode = nodep->properties;
+		if (curnode) {
+			count++;
+			while (curnode->next != NULL) {
+				count++;
+				curnode = curnode->next;
+			}
+		}
+	}
+
+	return count;
+}
+
 /* {{{ length	int
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
@@ -38,35 +65,7 @@ Since:
 */
 int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 {
-	dom_nnodemap_object *objmap;
-	xmlAttrPtr curnode;
-	xmlNodePtr nodep;
-	int count = 0;
-
-	objmap = (dom_nnodemap_object *)obj->ptr;
-
-	if (objmap != NULL) {
-		if ((objmap->nodetype == XML_NOTATION_NODE) ||
-			objmap->nodetype == XML_ENTITY_NODE) {
-			if (objmap->ht) {
-				count = xmlHashSize(objmap->ht);
-			}
-		} else {
-			nodep = dom_object_get_node(objmap->baseobj);
-			if (nodep) {
-				curnode = nodep->properties;
-				if (curnode) {
-					count++;
-					while (curnode->next != NULL) {
-						count++;
-						curnode = curnode->next;
-					}
-				}
-			}
-		}
-	}
-
-	ZVAL_LONG(retval, count);
+	ZVAL_LONG(retval, get_namednodemap_length(obj));
 	return SUCCESS;
 }
 
@@ -255,9 +254,7 @@ PHP_METHOD(DOMNamedNodeMap, count)
 	}
 
 	intern = Z_DOMOBJ_P(id);
-	if(dom_namednodemap_length_read(intern, return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	RETURN_LONG(get_namednodemap_length(intern));
 }
 /* }}} end dom_namednodemap_count */
 

@@ -41,6 +41,8 @@ void fpm_request_accepting() /* {{{ */
 
 	fpm_clock_get(&now);
 
+	fpm_scoreboard_update_begin(NULL);
+
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
 		zlog(ZLOG_WARNING, "failed to acquire proc scoreboard");
@@ -52,7 +54,7 @@ void fpm_request_accepting() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
-	fpm_scoreboard_update(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 /* }}} */
 
@@ -71,6 +73,8 @@ void fpm_request_reading_headers() /* {{{ */
 #ifdef HAVE_TIMES
 	times(&cpu);
 #endif
+
+	fpm_scoreboard_update_begin(NULL);
 
 	proc = fpm_scoreboard_proc_acquire(NULL, -1, 0);
 	if (proc == NULL) {
@@ -95,7 +99,7 @@ void fpm_request_reading_headers() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle--, active++, request++ */
-	fpm_scoreboard_update(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 /* }}} */
 
@@ -285,7 +289,7 @@ int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 	struct fpm_scoreboard_proc_s *proc;
 
 	/* no need in atomicity here */
-	proc = fpm_scoreboard_proc_get(child->wp->scoreboard, child->scoreboard_i);
+	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
 		return 0;
 	}
@@ -300,7 +304,7 @@ int fpm_request_last_activity(struct fpm_child_s *child, struct timeval *tv) /* 
 
 	if (!tv) return -1;
 
-	proc = fpm_scoreboard_proc_get(child->wp->scoreboard, child->scoreboard_i);
+	proc = fpm_scoreboard_proc_get_from_child(child);
 	if (!proc) {
 		return -1;
 	}

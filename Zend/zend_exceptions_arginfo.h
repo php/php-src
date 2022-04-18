@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a9ce2975a7449a621d364beca646525fc56b294 */
+ * Stub hash: 9d1c2027ebd14e621d9b5b79056ba7300a455be8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -29,7 +29,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Exception___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Exception___wakeup arginfo_class_Throwable_getCode
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Exception___wakeup, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Exception_getMessage arginfo_class_Throwable_getMessage
 
@@ -62,7 +63,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___construct arginfo_class_Exception___construct
 
-#define arginfo_class_Error___wakeup arginfo_class_Throwable_getCode
+#define arginfo_class_Error___wakeup arginfo_class_Exception___wakeup
 
 #define arginfo_class_Error_getMessage arginfo_class_Throwable_getMessage
 

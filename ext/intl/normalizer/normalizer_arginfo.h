@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d2c622731e68d201a72f8c94094ec8263427b6de */
+ * Stub hash: 71dd44d3b839789639c16a4b6d5b2e4f40703a74 */
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, form, IS_LONG, 0, "Normalizer::FORM_C")
 ZEND_END_ARG_INFO()

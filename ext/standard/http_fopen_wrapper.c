@@ -43,7 +43,7 @@
 #include "php_standard.h"
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -52,7 +52,7 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -455,7 +455,7 @@ finish:
 			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
-			php_strtolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+			zend_str_tolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 			t = ZSTR_VAL(tmp);
 
 			if (!header_init) {

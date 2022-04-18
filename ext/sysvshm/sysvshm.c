@@ -29,7 +29,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "Zend/zend_interfaces.h"
 #include "php_ini.h"
 
 /* SysvSharedMemory class */
@@ -90,7 +89,8 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-THREAD_LS sysvshm_module php_sysvshm;
+/* TODO: Make this thread-safe. */
+sysvshm_module php_sysvshm;
 
 static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
 static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
@@ -101,8 +101,6 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	sysvshm_ce = register_class_SysvSharedMemory();
 	sysvshm_ce->create_object = sysvshm_create_object;
-	sysvshm_ce->serialize = zend_class_serialize_deny;
-	sysvshm_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&sysvshm_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sysvshm_object_handlers.offset = XtOffsetOf(sysvshm_shm, std);

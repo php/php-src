@@ -28,7 +28,6 @@ PHPDBG_SET(prompt);
 PHPDBG_SET(color);
 PHPDBG_SET(colors);
 #endif
-PHPDBG_SET(oplog);
 PHPDBG_SET(break);
 PHPDBG_SET(breaks);
 PHPDBG_SET(quiet);

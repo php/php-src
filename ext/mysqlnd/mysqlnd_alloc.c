@@ -61,9 +61,10 @@ PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 #define __zend_orig_lineno   0
 #endif
 
-#define REAL_SIZE(s) (collect_memory_statistics? (s) + sizeof(size_t) : (s))
-#define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - sizeof(size_t)) : (p))
-#define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + sizeof(size_t)) : (p))
+#define EXTRA_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(size_t))
+#define REAL_SIZE(s) (collect_memory_statistics? (s) + EXTRA_SIZE : (s))
+#define REAL_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) - EXTRA_SIZE) : (p))
+#define FAKE_PTR(p) (collect_memory_statistics && (p)? (((char *)(p)) + EXTRA_SIZE) : (p))
 
 /* {{{ _mysqlnd_emalloc */
 static void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
@@ -359,40 +360,7 @@ static char * _mysqlnd_pestrdup(const char * const ptr, bool persistent MYSQLND_
 /* }}} */
 
 
-
-
-#endif /* MYSQLND_DEBUG_MEMORY */
-
-/* {{{ _mysqlnd_sprintf_free */
-static void _mysqlnd_sprintf_free(char * p)
-{
-	efree(p);
-}
-/* }}} */
-
-
-/* {{{ _mysqlnd_sprintf */
-static int _mysqlnd_sprintf(char ** pbuf, size_t max_len, const char *format, ...)
-{
-	int len;
-	va_list ap;
-	va_start(ap, format);
-	len = vspprintf(pbuf, max_len, format, ap);
-	va_end(ap);
-	return len;
-}
-/* }}} */
-
-/* {{{ _mysqlnd_vsprintf */
-static int _mysqlnd_vsprintf(char ** pbuf, size_t max_len, const char * format, va_list ap)
-{
-	return vspprintf(pbuf, max_len, format, ap);
-}
-/* }}} */
-
-
-
-#if MYSQLND_DEBUG_MEMORY == 0
+#else
 
 /* {{{ mysqlnd_zend_mm_emalloc */
 static void * mysqlnd_zend_mm_emalloc(size_t size MYSQLND_MEM_D)
@@ -485,7 +453,7 @@ static char * mysqlnd_zend_mm_pestrdup(const char * const ptr, bool persistent M
 }
 /* }}} */
 
-#endif
+#endif /* MYSQLND_DEBUG_MEMORY */
 
 
 PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
@@ -501,10 +469,7 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 	_mysqlnd_pefree,
 	_mysqlnd_pememdup,
 	_mysqlnd_pestrndup,
-	_mysqlnd_pestrdup,
-	_mysqlnd_sprintf,
-	_mysqlnd_vsprintf,
-	_mysqlnd_sprintf_free
+	_mysqlnd_pestrdup
 #else
 	mysqlnd_zend_mm_emalloc,
 	mysqlnd_zend_mm_pemalloc,
@@ -516,9 +481,6 @@ PHPAPI struct st_mysqlnd_allocator_methods mysqlnd_allocator =
 	mysqlnd_zend_mm_pefree,
 	mysqlnd_zend_mm_pememdup,
 	mysqlnd_zend_mm_pestrndup,
-	mysqlnd_zend_mm_pestrdup,
-	_mysqlnd_sprintf,
-	_mysqlnd_vsprintf,
-	_mysqlnd_sprintf_free,
+	mysqlnd_zend_mm_pestrdup
 #endif
 };

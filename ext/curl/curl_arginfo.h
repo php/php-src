@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b574385806ffec3ad96c1b584778cb53bd42535 */
+ * Stub hash: 3abf3f6d5dfb14d2e22ebf5730a869e2c17c7958 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -224,7 +224,7 @@ static zend_class_entry *register_class_CurlHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlHandle", class_CurlHandle_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -235,7 +235,7 @@ static zend_class_entry *register_class_CurlMultiHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlMultiHandle", class_CurlMultiHandle_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -246,7 +246,7 @@ static zend_class_entry *register_class_CurlShareHandle(void)
 
 	INIT_CLASS_ENTRY(ce, "CurlShareHandle", class_CurlShareHandle_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

@@ -43,7 +43,7 @@ $handle = pg_lo_open ($db, $oid, "w");
 $bytesWritten = pg_lo_read_all($handle);
 echo "\n";
 var_dump($bytesWritten);
-if (pg_last_error()) echo "pg_lo_read_all() error\n".pg_last_error();
+if (pg_last_error($db)) echo "pg_lo_read_all() error\n".pg_last_error();
 pg_lo_close($handle);
 pg_exec ($db, "commit");
 
@@ -103,7 +103,7 @@ try {
 
 echo "OK";
 ?>
---EXPECT--
+--EXPECTF--
 create/write/close LO
 open/read/tell/seek/close LO
 string(5) "large"
@@ -120,10 +120,16 @@ large object data
 int(17)
 unlink LO
 Test without connection
+
+Deprecated: pg_lo_unlink(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Test with string oid value
 import/export LO
+
+Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Invalid OID value passed
 Invalid OID value passed
+
+Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Invalid OID value passed
 Invalid OID value passed
 OK

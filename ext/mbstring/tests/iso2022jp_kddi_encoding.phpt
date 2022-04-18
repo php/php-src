@@ -193,14 +193,51 @@ foreach (array_keys($invalidChars) as $invalid) {
     testInvalidString("\x1B\$B" . $invalid, "\x00\x00\x00%", 'ISO-2022-JP-KDDI', 'UTF-32BE');
   }
 }
+// Try Kanji which starts with a good byte, but the 2nd byte is junk
+testInvalidString("\x1B\$B\x21\xFF", "%", 'ISO-2022-JP-KDDI', 'UTF-8');
 
 foreach (array_keys($truncatedChars) as $truncated)
   testInvalidString("\x1B\$B" . $truncated, "\x00\x00\x00%", 'ISO-2022-JP-KDDI', 'UTF-32BE');
 
+testValidString("\x1B\$B\x76\x27", "\x00\x01\xF1\xEF\x00\x01\xF1\xF5", 'ISO-2022-JP-KDDI', 'UTF-32BE', false); // Japan flag emoji
+testValidString("\x00#\x20\xE3", "\x1B\$B\x71\x69\x1B(B", 'UTF-16BE', 'ISO-2022-JP-KDDI', false); // Phone key emoji
+
+testValidString("\x1B\$(B\x21\x21", "\x30\x00", 'ISO-2022-JP-KDDI', 'UTF-16BE', false); // Try ESC $ ( B escape sequence
+
+// Switch from JISX 0208 Kanji to ASCII
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+// Switch from JISX 0208 Kanji to JISX 0201 Kana
+testValidString("\x30\x00\xFF\x67", "\x1B\$B\x21\x21\x1B(I'\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+
 echo "JIS X 0208 (with MS extensions) and KDDI emoji support OK\n";
 
+testValidString("\x00\xA5", "\x1B\$B!o\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+testValidString("\xFF\x5E", "\x1B\$B!A\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
+
+echo "Other mappings from Unicode -> ISO-2022-JP-KDDI OK\n";
+
+testInvalidString("\x1B\$B\x7F\x7E", "%", 'ISO-2022-JP-KDDI', 'UTF-8');
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "%", "ISO-2022-JP-KDDI", "UTF-8");
+// Invalid escapes:
+convertInvalidString("\x1B", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B(", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B(.", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-KDDI", "UTF-8");
+convertInvalidString("\x1B\$B\x9F", "%", "ISO-2022-JP-KDDI", "UTF-8"); // 0x9F does not start any 2-byte character
+convertInvalidString("\xE0\x00", "U+E000", "UTF-16BE", "ISO-2022-JP-KDDI");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 ASCII support OK
 JIS X 0201 support OK
 JIS X 0208 (with MS extensions) and KDDI emoji support OK
+Other mappings from Unicode -> ISO-2022-JP-KDDI OK
+Done!

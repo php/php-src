@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class PDO
 {
     public function __construct(string $dsn, ?string $username = null, ?string $password = null, ?array $options = null) {}
@@ -45,9 +46,6 @@ class PDO
     /** @tentative-return-type */
     public function rollBack(): bool {}
 
-    /**
-     * @param array|int $value
-     * @tentative-return-type
-     */
-    public function setAttribute(int $attribute, $value): bool {}
+    /** @tentative-return-type */
+    public function setAttribute(int $attribute, mixed $value): bool {}
 }

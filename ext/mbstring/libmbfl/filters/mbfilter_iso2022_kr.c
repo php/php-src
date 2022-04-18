@@ -47,7 +47,9 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_2022kr_wchar,
-	&vtbl_wchar_2022kr
+	&vtbl_wchar_2022kr,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022kr = {
@@ -94,7 +96,7 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 			/* latin, CTLs */
 			CK((*filter->output_function)(c, filter->data));
 		} else {
-			CK((*filter->output_function)(c | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -113,28 +115,21 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 			if (flag == 1) {
 				if (c1 != 0x22 || c <= 0x65) {
 					w = (c1 - 0x21)*190 + (c - 0x41) + 0x80;
-					if (w >= 0 && w < uhc2_ucs_table_size) {
-						w = uhc2_ucs_table[w];
-					} else {
-						w = 0;
-					}
+					ZEND_ASSERT(w < uhc2_ucs_table_size);
+					w = uhc2_ucs_table[w];
 				}
 			} else {
-				w = (c1 - 0x47)*94 + (c - 0x21);
-				if (w >= 0 && w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0x47)*94 + c - 0x21;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
 			}
 
 			if (w <= 0) {
-				w = (c1 << 8) | c | MBFL_WCSPLANE_KSC5601;
+				w = MBFL_BAD_INPUT;
 			}
 			CK((*filter->output_function)(w, filter->data));
 		} else {
-			w = (c1 << 8) | c | MBFL_WCSGROUP_THROUGH;
-			CK((*filter->output_function)(w, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -143,7 +138,7 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 			filter->status++;
 		} else {
 			filter->status = 0;
-			CK((*filter->output_function)(0x1b | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
@@ -152,30 +147,28 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 			filter->status++;
 		} else {
 			filter->status = 0;
-			CK((*filter->output_function)(0x1b24 | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
 	case 4: /* ESC $ ) */
 		filter->status = 0;
 		if (c != 'C') {
-			CK((*filter->output_function)(0x1b2429 | MBFL_WCSGROUP_THROUGH, filter->data));
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_2022kr_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status & 0xF) {
-		/* 2-byte character or escape sequence was truncated */
-		CK((*filter->output_function)(filter->cache | MBFL_WCSGROUP_THROUGH, filter->data));
+		/* 2-byte character was truncated */
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
 
 	if (filter->flush_function) {
@@ -252,7 +245,7 @@ int mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter)
 		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
-	return c;
+	return 0;
 }
 
 static int mbfl_filt_conv_any_2022kr_flush(mbfl_convert_filter *filter)

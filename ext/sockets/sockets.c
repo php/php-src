@@ -28,7 +28,6 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
-#include "zend_interfaces.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
 # include <win32/inet.h>
@@ -436,8 +435,6 @@ static PHP_MINIT_FUNCTION(sockets)
 
 	socket_ce = register_class_Socket();
 	socket_ce->create_object = socket_create_object;
-	socket_ce->serialize = zend_class_serialize_deny;
-	socket_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&socket_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	socket_object_handlers.offset = XtOffsetOf(php_socket, std);
@@ -449,8 +446,6 @@ static PHP_MINIT_FUNCTION(sockets)
 
 	address_info_ce = register_class_AddressInfo();
 	address_info_ce->create_object = address_info_create_object;
-	address_info_ce->serialize = zend_class_serialize_deny;
-	address_info_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&address_info_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	address_info_object_handlers.offset = XtOffsetOf(php_addrinfo, std);
@@ -468,7 +463,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SOCK_DGRAM",	SOCK_DGRAM,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_RAW",		SOCK_RAW,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOCK_SEQPACKET",SOCK_SEQPACKET, CONST_CS | CONST_PERSISTENT);
+#ifdef SOCK_RDM
 	REGISTER_LONG_CONSTANT("SOCK_RDM",		SOCK_RDM,		CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("MSG_OOB",		MSG_OOB,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSG_WAITALL",	MSG_WAITALL,	CONST_CS | CONST_PERSISTENT);
@@ -547,6 +544,12 @@ static PHP_MINIT_FUNCTION(sockets)
 #endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
+#ifdef SO_MARK
+	REGISTER_LONG_CONSTANT("SO_MARK",   SO_MARK,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_INCOMING_CPU
+	REGISTER_LONG_CONSTANT("SO_INCOMING_CPU",   SO_INCOMING_CPU,    CONST_CS | CONST_PERSISTENT);
+#endif
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
 #endif
@@ -2355,8 +2358,8 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zhints) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
+	if (zhints && !HT_IS_PACKED(Z_ARRVAL_P(zhints))) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zhints), key, hint) {
 			if (key) {
 				if (zend_string_equals_literal(key, "ai_flags")) {
 					hints.ai_flags = zval_get_long(hint);

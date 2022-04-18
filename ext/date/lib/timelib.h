@@ -30,6 +30,10 @@
 # include "timelib_config.h"
 #endif
 
+#define TIMELIB_VERSION 202111
+#define TIMELIB_EXTENDED_VERSION 20211101
+#define TIMELIB_ASCII_VERSION "2021.11"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
@@ -175,6 +179,12 @@ typedef struct _timelib_posix_str
 	int type_index_std_type;  // index into tz->type
 	int type_index_dst_type;  // index into tz->type
 } timelib_posix_str;
+
+typedef struct _timelib_posix_transitions {
+	size_t      count;
+	timelib_sll times[6];
+	timelib_sll types[6];
+} timelib_posix_transitions;
 
 typedef struct _timelib_tzinfo
 {
@@ -355,13 +365,14 @@ typedef struct _timelib_tzdb {
 # define timelib_realloc realloc
 # define timelib_calloc  calloc
 # define timelib_strdup  strdup
-# define timelib_strndup strndup
 # define timelib_free    free
+# if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#  define TIMELIB_USE_BUILTIN_STRNDUP 1
+# else
+#  define TIMELIB_USE_BUILTIN_STRNDUP 0
+#  define timelib_strndup strndup
+# endif
 #endif
-
-#define TIMELIB_VERSION 202103
-#define TIMELIB_EXTENDED_VERSION 20210301
-#define TIMELIB_ASCII_VERSION "2021.03"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -370,7 +381,8 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_UNSET   -99999
 
 /* An entry for each of these error codes is also in the
- * timelib_error_messages array in timelib.c */
+ * timelib_error_messages array in timelib.c.
+ * Codes 0x00, 0x07, and 0x09 are warnings only. */
 #define TIMELIB_ERROR_NO_ERROR                            0x00
 #define TIMELIB_ERROR_CANNOT_ALLOCATE                     0x01
 #define TIMELIB_ERROR_CORRUPT_TRANSITIONS_DONT_INCREASE   0x02
@@ -378,8 +390,9 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_ERROR_CORRUPT_NO_ABBREVIATION             0x04
 #define TIMELIB_ERROR_UNSUPPORTED_VERSION                 0x05
 #define TIMELIB_ERROR_NO_SUCH_TIMEZONE                    0x06
-#define TIMELIB_ERROR_SLIM_FILE                           0x07
-#define TIMELIB_ERROR_POSIX_MISSING_TTINFO                0x08
+#define TIMELIB_ERROR_SLIM_FILE                           0x07 /* Warns if the file is SLIM, but we can't read it */
+#define TIMELIB_ERROR_CORRUPT_POSIX_STRING                0x08
+#define TIMELIB_ERROR_EMPTY_POSIX_STRING                  0x09 /* Warns if the POSIX string is empty, but still produces results */
 
 #ifdef __cplusplus
 extern "C" {
@@ -787,6 +800,16 @@ timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *
 timelib_sll timelib_get_current_offset(timelib_time *t);
 
 /**
+ * Returns whether the timezone information in *one and *two are the same
+ *
+ * A timezone is considered the same if:
+ * - the ->zone_type values are the same for *one and *two
+ * - for TYPE_ABBR and TYPE_OFFSET, ->z + (->dst * 3600), is the same
+ * - for TYPE_ID, the zone's names are the same
+ */
+int timelib_same_timezone(timelib_time *one, timelib_time *two);
+
+/**
  * Displays debugging information about the time zone information in 'tz'.
  */
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
@@ -949,6 +972,11 @@ void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
 void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h);
 
 /**
+ * Converts hour/min/sec/micro sec values into a decimal hour
+ */
+void timelib_hmsf_to_decimal_hour(int hour, int min, int sec, int us, double *h);
+
+/**
  * Converts hour/min/sec values into seconds
  */
 timelib_sll timelib_hms_to_seconds(timelib_sll h, timelib_sll m, timelib_sll s);
@@ -1015,6 +1043,15 @@ int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, 
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
 
 /**
+ * Calculates the difference in full days between two times
+ *
+ * The result is the number of full days between 'one' and 'two'. It does take
+ * into account 23 and 25 hour (and variants) days when the zone_type
+ * is TIMELIB_ZONETYPE_ID and have the same TZID for 'one' and 'two'.
+ */
+int timelib_diff_days(timelib_time *one, timelib_time *two);
+
+/**
  * Adds the relative time information 'interval' to the base time 't'.
  *
  * This can be a relative time as created by 'timelib_diff', but also by more
@@ -1038,6 +1075,12 @@ timelib_time *timelib_sub_wall(timelib_time *t, timelib_rel_time *interval);
 void timelib_posix_str_dtor(timelib_posix_str *ps);
 
 timelib_posix_str* timelib_parse_posix_str(const char *posix);
+
+/**
+ * Calculate the two yearly to/from DST
+ */
+void timelib_get_transitions_for_year(timelib_tzinfo *tz, timelib_sll year, timelib_posix_transitions *transitions);
+
 
 #ifdef __cplusplus
 } /* extern "C" */

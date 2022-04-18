@@ -33,7 +33,7 @@ class DirectoryTreeIterator extends RecursiveIteratorIterator
 
     /** @return the current element prefixed with ASCII graphics
      */
-    function current()
+    function current(): mixed
     {
         $tree = '';
         for ($l=0; $l < $this->getDepth(); $l++) {

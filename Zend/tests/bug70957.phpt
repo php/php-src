@@ -1,5 +1,5 @@
 --TEST--
-Bug #70957 (self::class can not be resolved with reflection for abstract class)
+Bug #70957 (self::class cannot be resolved with reflection for abstract class)
 --FILE--
 <?php
 

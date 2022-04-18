@@ -16,14 +16,12 @@ foreach ($key_sizes as $key_size) {
 
 /* array of available hashings to test */
 $algo = array(
-    OPENSSL_ALGO_MD4,
     OPENSSL_ALGO_MD5,
     OPENSSL_ALGO_SHA1,
     OPENSSL_ALGO_SHA224,
     OPENSSL_ALGO_SHA256,
     OPENSSL_ALGO_SHA384,
     OPENSSL_ALGO_SHA512,
-    OPENSSL_ALGO_RMD160
 );
 
 /* loop over key sizes for test */
@@ -51,21 +49,15 @@ string(478) "%s"
 string(478) "%s"
 string(478) "%s"
 string(478) "%s"
-string(478) "%s"
-string(474) "%s"
 string(830) "%s"
 string(830) "%s"
 string(830) "%s"
 string(830) "%s"
 string(830) "%s"
 string(830) "%s"
-string(830) "%s"
-string(826) "%s"
 string(1510) "%s"
 string(1510) "%s"
 string(1510) "%s"
 string(1510) "%s"
 string(1510) "%s"
 string(1510) "%s"
-string(1510) "%s"
-string(1506) "%s"

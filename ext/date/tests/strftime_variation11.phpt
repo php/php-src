@@ -19,5 +19,9 @@ var_dump( strftime($format, $timestamp) );
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with  Abbreviated month name format %h --
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(3) "Aug"

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a299d2a45a3575e6da71560979e2f9301b3c952f */
+ * Stub hash: 7816536650d8513ef6998233096b0bf6a29d7af4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -62,6 +62,7 @@ static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "ResourceBundle", class_ResourceBundle_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	return class_entry;

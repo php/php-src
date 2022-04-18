@@ -125,7 +125,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
 		if (ini_entry->module_number != module_number) {
 			continue;
 		}
@@ -686,8 +686,9 @@ int php_init_config(void)
 					if (VCWD_STAT(ini_file, &sb) == 0) {
 						if (S_ISREG(sb.st_mode)) {
 							zend_file_handle fh;
-							zend_stream_init_fp(&fh, VCWD_FOPEN(ini_file, "r"), ini_file);
-							if (fh.handle.fp) {
+							FILE *file = VCWD_FOPEN(ini_file, "r");
+							if (file) {
+								zend_stream_init_fp(&fh, file, ini_file);
 								if (zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash) == SUCCESS) {
 									/* Here, add it to the list of ini files read */
 									l = (int)strlen(ini_file);
@@ -695,8 +696,8 @@ int php_init_config(void)
 									p = estrndup(ini_file, l);
 									zend_llist_add_element(&scanned_ini_list, &p);
 								}
+								zend_destroy_file_handle(&fh);
 							}
-							zend_destroy_file_handle(&fh);
 						}
 					}
 					free(namelist[i]);
@@ -782,7 +783,17 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename
 				/* Reset active ini section */
 				RESET_ACTIVE_INI_HASH();
 
+#if ZEND_RC_DEBUG
+				/* User inis are parsed during SAPI activate (part of the request),
+				 * but persistently allocated to allow caching. This is fine as long as
+				 * strings are duplicated in php_ini_activate_config(). */
+				bool orig_rc_debug = zend_rc_debug;
+				zend_rc_debug = false;
+#endif
 				ret = zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, target_hash);
+#if ZEND_RC_DEBUG
+				zend_rc_debug = orig_rc_debug;
+#endif
 				if (ret == SUCCESS) {
 					/* FIXME: Add parsed file to the list of user files read? */
 				}
@@ -802,8 +813,10 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 	zval *data;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(source_hash, str, data) {
-		zend_alter_ini_entry_ex(str, Z_STR_P(data), modify_type, stage, 0);
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(source_hash, str, data) {
+		zend_string *data_str = zend_string_dup(Z_STR_P(data), 0);
+		zend_alter_ini_entry_ex(str, data_str, modify_type, stage, 0);
+		zend_string_release(data_str);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */

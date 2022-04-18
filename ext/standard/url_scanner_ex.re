@@ -333,7 +333,7 @@ enum {
 #define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR
 #define STD_ARGS ctx, start, xp
 
-#if SCANNER_DEBUG
+#ifdef SCANNER_DEBUG
 #define scdebug(x) printf x
 #else
 #define scdebug(x)

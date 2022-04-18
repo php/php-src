@@ -29,13 +29,25 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Time in a.m/p.m notation--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d:%d:%d %s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(11) "08:08:08 AM"
 
 --Time in 24 hour notation--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d:%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(5) "08:08"
 
 --Current time %H:%M:%S format--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d:%d:%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(8) "08:08:08"

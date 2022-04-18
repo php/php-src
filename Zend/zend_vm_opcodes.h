@@ -128,7 +128,6 @@ END_EXTERN_C()
 #define ZEND_JMP                         42
 #define ZEND_JMPZ                        43
 #define ZEND_JMPNZ                       44
-#define ZEND_JMPZNZ                      45
 #define ZEND_JMPZ_EX                     46
 #define ZEND_JMPNZ_EX                    47
 #define ZEND_CASE                        48
@@ -285,7 +284,8 @@ END_EXTERN_C()
 #define ZEND_CHECK_UNDEF_ARGS           199
 #define ZEND_FETCH_GLOBALS              200
 #define ZEND_VERIFY_NEVER_TYPE          201
+#define ZEND_CALLABLE_CONVERT           202
 
-#define ZEND_VM_LAST_OPCODE             201
+#define ZEND_VM_LAST_OPCODE             202
 
 #endif

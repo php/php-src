@@ -173,7 +173,6 @@ static void _breakiter_no_args_ret_int32(
 		int32_t (BreakIterator::*func)(),
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	char	*msg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 

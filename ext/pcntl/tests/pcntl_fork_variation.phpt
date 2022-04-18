@@ -1,5 +1,5 @@
 --TEST--
-Test function pcntl_fork() by testing the process isolation in the forking hierarchy father -> son -> grandson where father can not knows his grandson
+Test function pcntl_fork() by testing the process isolation in the forking hierarchy father -> son -> grandson where father cannot know his grandson
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com
 Francesco Fullone ff@ideato.it

@@ -48,7 +48,6 @@
 #include "php_syslog.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
@@ -236,9 +235,7 @@ static PHP_INI_MH(OnSetFacility)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetPrecision)
 {
-	zend_long i;
-
-	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	zend_long i = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (i >= -1) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -251,9 +248,7 @@ static PHP_INI_MH(OnSetPrecision)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetSerializePrecision)
 {
-	zend_long i;
-
-	ZEND_ATOL(i, ZSTR_VAL(new_value));
+	zend_long i = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (i >= -1) {
 		PG(serialize_precision) = i;
 		return SUCCESS;
@@ -402,11 +397,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
+		EG(timeout_seconds) = ZEND_ATOL(ZSTR_VAL(new_value));
 		return SUCCESS;
 	}
 	zend_unset_timeout();
-	ZEND_ATOL(EG(timeout_seconds), ZSTR_VAL(new_value));
+	EG(timeout_seconds) = ZEND_ATOL(ZSTR_VAL(new_value));
 	if (stage != PHP_INI_STAGE_DEACTIVATE) {
 		/*
 		 * If we're restoring INI values, we shouldn't reset the timer.
@@ -423,8 +418,6 @@ static PHP_INI_MH(OnUpdateTimeout)
 /* {{{ php_get_display_errors_mode() helper function */
 static zend_uchar php_get_display_errors_mode(zend_string *value)
 {
-	zend_uchar mode;
-
 	if (!value) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
@@ -446,7 +439,7 @@ static zend_uchar php_get_display_errors_mode(zend_string *value)
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
 
-	ZEND_ATOL(mode, ZSTR_VAL(value));
+	zend_uchar mode = ZEND_ATOL(ZSTR_VAL(value));
 	if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 		return PHP_DISPLAY_ERRORS_STDOUT;
 	}
@@ -540,6 +533,10 @@ PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
+	if (memchr(ZSTR_VAL(new_value), '\0', ZSTR_LEN(new_value))
+		|| strpbrk(ZSTR_VAL(new_value), "\r\n")) {
+		return FAILURE;
+	}
 	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (php_internal_encoding_changed) {
 		php_internal_encoding_changed();
@@ -550,6 +547,17 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
 #endif
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH */
+static PHP_INI_MH(OnUpdateDefaultMimeTye)
+{
+	if (memchr(ZSTR_VAL(new_value), '\0', ZSTR_LEN(new_value))
+		|| strpbrk(ZSTR_VAL(new_value), "\r\n")) {
+		return FAILURE;
+	}
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
 
@@ -700,7 +708,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateDefaultCharset,			default_charset,		sapi_globals_struct, sapi_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateDefaultMimeTye,			default_mimetype,		sapi_globals_struct, sapi_globals)
 	STD_PHP_INI_ENTRY("internal_encoding",		NULL,			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("input_encoding",			NULL,			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("output_encoding",		NULL,			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
@@ -1019,7 +1027,8 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
 		}
-		docref = php_strtolower(docref_buf, doclen);
+		zend_str_tolower(docref_buf, doclen);
+		docref = docref_buf;
 	}
 
 	/* we have a docref for a function AND
@@ -1203,7 +1212,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
 		/* no check for PG(last_error_file) is needed since it cannot
 		 * be NULL if PG(last_error_message) is not NULL */
-		if (zend_string_equals(PG(last_error_message), message)
+		if (!zend_string_equals(PG(last_error_message), message)
 			|| (!PG(ignore_repeated_source)
 				&& ((PG(last_error_lineno) != (int)error_lineno)
 					|| !zend_string_equals(PG(last_error_file), error_filename)))) {
@@ -2078,6 +2087,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf);
+	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
 
 	zend_observer_startup();
@@ -2268,6 +2278,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
+	
+	/* freeze the list of observer fcall_init handlers */
+	zend_observer_post_startup();
 
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();
@@ -2355,7 +2368,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_interned_strings_switch_storage(1);
 
 #if ZEND_RC_DEBUG
-	zend_rc_debug = 1;
+	if (retval == SUCCESS) {
+		zend_rc_debug = 1;
+	}
 #endif
 
 	/* we're done */
@@ -2474,7 +2489,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry((char*)primary_file->filename);
+			UpdateIniFromRegistry(ZSTR_VAL(primary_file->filename));
 		}
 #endif
 
@@ -2566,7 +2581,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret)
 	zend_try {
 #ifdef PHP_WIN32
 		if(primary_file->filename) {
-			UpdateIniFromRegistry((char*)primary_file->filename);
+			UpdateIniFromRegistry(ZSTR_VAL(primary_file->filename));
 		}
 #endif
 

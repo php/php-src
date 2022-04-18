@@ -27,7 +27,7 @@
 #include "zend_interfaces.h"
 #include "info.h"
 #include "php_random.h"
-#if HAVE_ARGON2LIB
+#ifdef HAVE_ARGON2LIB
 #include "argon2.h"
 #endif
 
@@ -38,12 +38,8 @@
 static zend_array php_password_algos;
 
 int php_password_algo_register(const char *ident, const php_password_algo *algo) {
-	zval zalgo;
-	ZVAL_PTR(&zalgo, (php_password_algo*)algo);
-	if (zend_hash_str_add(&php_password_algos, ident, strlen(ident), &zalgo)) {
-		return SUCCESS;
-	}
-	return FAILURE;
+	zend_string *key = zend_string_init_interned(ident, strlen(ident), 1);
+	return zend_hash_add_ptr(&php_password_algos, key, (void *) algo) ? SUCCESS : FAILURE;
 }
 
 void php_password_algo_unregister(const char *ident) {
@@ -235,7 +231,7 @@ const php_password_algo php_password_algo_bcrypt = {
 };
 
 
-#if HAVE_ARGON2LIB
+#ifdef HAVE_ARGON2LIB
 /* argon2i/argon2id shared implementation */
 
 static int extract_argon2_parameters(const zend_string *hash,
@@ -431,7 +427,7 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_CS | CONST_PERSISTENT);
 
-#if HAVE_ARGON2LIB
+#ifdef HAVE_ARGON2LIB
 	if (FAILURE == php_password_algo_register("argon2i", &php_password_algo_argon2i)) {
 		return FAILURE;
 	}
@@ -444,7 +440,7 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 #endif
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
-#if HAVE_ARGON2LIB
+#ifdef HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_MEMORY_COST", PHP_PASSWORD_ARGON2_MEMORY_COST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_TIME_COST", PHP_PASSWORD_ARGON2_TIME_COST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2_DEFAULT_THREADS", PHP_PASSWORD_ARGON2_THREADS, CONST_CS | CONST_PERSISTENT);
@@ -499,7 +495,7 @@ static const php_password_algo* php_password_algo_find_zval(zend_string *arg_str
 	switch (arg_long) {
 		case 0: return php_password_algo_default();
 		case 1: return &php_password_algo_bcrypt;
-#if HAVE_ARGON2LIB
+#ifdef HAVE_ARGON2LIB
 		case 2: return &php_password_algo_argon2i;
 		case 3: return &php_password_algo_argon2id;
 #else
@@ -682,7 +678,7 @@ PHP_FUNCTION(password_algos) {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY(&php_password_algos, algo) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_password_algos, algo) {
 		add_next_index_str(return_value, zend_string_copy(algo));
 	} ZEND_HASH_FOREACH_END();
 }

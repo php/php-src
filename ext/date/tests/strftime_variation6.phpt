@@ -32,21 +32,41 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Hour as decimal by 24-hour format--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "18"
 
 --Hour as decimal by 12-hour format--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "06"
 
 --Minute as decimal number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "08"
 
 --AM/PM format for a time--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "PM"
 
 --Second as decimal number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "08"

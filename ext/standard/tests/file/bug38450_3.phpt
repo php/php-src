@@ -4,6 +4,7 @@ Bug #38450 (constructor is not called for classes used in userspace stream wrapp
 <?php
 
 class VariableStream {
+    var $context;
     var $position;
     var $varname;
 
@@ -102,7 +103,7 @@ var_dump($myvar);
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught ArgumentCountError: Too few arguments to function VariableStream::__construct(), 0 passed and exactly 1 expected in %sbug38450_3.php:7
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function VariableStream::__construct(), 0 passed and exactly 1 expected in %sbug38450_3.php:%d
 Stack trace:
 #0 [internal function]: VariableStream->__construct()
 #1 %s(%d): fopen('var://myvar', 'r+')

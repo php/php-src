@@ -18,6 +18,9 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
+#include "zend_string.h"
+#include "php_streams.h"
+
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */

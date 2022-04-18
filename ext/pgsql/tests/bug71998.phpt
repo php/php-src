@@ -13,7 +13,7 @@ include('config.inc');
 
 $db = pg_connect($conn_str);
 
-pg_query("CREATE TABLE tmp_statistics (id integer NOT NULL, remote_addr inet);");
+pg_query($db, "CREATE TABLE tmp_statistics (id integer NOT NULL, remote_addr inet);");
 
 $ips = array(
     /* IPv4*/

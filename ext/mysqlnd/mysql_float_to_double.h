@@ -38,7 +38,7 @@ static inline double mysql_float_to_double(float fp4, int decimals) {
 	char num_buf[MAX_CHAR_BUF_LEN]; /* Over allocated */
 
 	if (decimals < 0) {
-		php_gcvt(fp4, FLT_DIG, '.', 'e', num_buf);
+		zend_gcvt(fp4, FLT_DIG, '.', 'e', num_buf);
 	} else {
 		snprintf(num_buf, MAX_CHAR_BUF_LEN, "%.*F", decimals, fp4);
 	}

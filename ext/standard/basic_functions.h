@@ -128,15 +128,6 @@ PHPAPI extern int basic_globals_id;
 PHPAPI extern php_basic_globals basic_globals;
 #endif
 
-#if HAVE_PUTENV
-typedef struct {
-	char *putenv_string;
-	char *previous_value;
-	char *key;
-	size_t key_len;
-} putenv_entry;
-#endif
-
 PHPAPI zend_string *php_getenv(const char *str, size_t str_len);
 
 PHPAPI double php_get_nan(void);

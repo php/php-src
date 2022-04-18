@@ -19,11 +19,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromdirectory2.phar');
-__HALT_COMPILER();
-?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
 RecursiveDirectoryIterator::__construct(1): Failed to open directory: No such file or directory

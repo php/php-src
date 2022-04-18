@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 13972748dca10a1c291f952b4c24ca73441ba880 */
+ * Stub hash: c7ae14efaeb0e8f5fdd6ddf92574a35bd5c860a1 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
@@ -45,6 +45,12 @@ static zend_class_entry *register_class_php_user_filter(void)
 	zend_string *property_params_name = zend_string_init("params", sizeof("params") - 1, 1);
 	zend_declare_typed_property(class_entry, property_params_name, &property_params_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_params_name);
+
+	zval property_stream_default_value;
+	ZVAL_NULL(&property_stream_default_value);
+	zend_string *property_stream_name = zend_string_init("stream", sizeof("stream") - 1, 1);
+	zend_declare_property_ex(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(property_stream_name);
 
 	return class_entry;
 }

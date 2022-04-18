@@ -7,7 +7,7 @@ Gabriel Caruso (carusogabriel34@gmail.com)
 var_dump(is_countable(new class extends ArrayIterator {}));
 var_dump(is_countable((array) new stdClass()));
 var_dump(is_countable(new class implements Countable {
-    public function count()
+    public function count(): int
     {
         return count(1, 'foo');
     }

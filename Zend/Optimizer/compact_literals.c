@@ -88,7 +88,7 @@ static uint32_t add_static_slot(HashTable     *hash,
                                 uint32_t       op1,
                                 uint32_t       op2,
                                 uint32_t       kind,
-                                int           *cache_size)
+                                uint32_t       *cache_size)
 {
 	uint32_t ret;
 	zval *class_name = &op_array->literals[op1];
@@ -150,7 +150,8 @@ static zend_string *create_str_cache_key(zval *literal, uint32_t flags)
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
-	int i, j, n, *map, cache_size;
+	int i, j, n, *map;
+	uint32_t cache_size;
 	zval zv, *pos;
 	literal_info *info;
 	int l_null = -1;

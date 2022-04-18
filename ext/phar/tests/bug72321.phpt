@@ -21,6 +21,5 @@ DONE
 rmdir(__DIR__."/test72321");
 ?>
 --EXPECTF--
-Warning: PharData::extractTo(): %s in %sbug72321.php on line %d
 Extraction from phar "%s72321_2.zip" failed: Cannot extract "AAAAAAAAxxxxBBBBCCCCCCCCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/b/c", could not create directory "test72321/AAAAAAAAxxxxBBBBCCCCCCCCxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/b"
 DONE

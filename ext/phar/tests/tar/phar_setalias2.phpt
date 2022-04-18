@@ -42,8 +42,6 @@ try {
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.tar');
-__HALT_COMPILER();
 ?>
 --EXPECTF--
 hio

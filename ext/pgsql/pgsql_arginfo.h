@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a3e16a1168698458b7de376533cb8e10e1725bd */
+ * Stub hash: 35f41dd74485f921feddc223085dea520f8d816e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -374,7 +374,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_prepare, 0, 3, MAY_BE_LO
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_send_execute arginfo_pg_send_query_params
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_execute, 0, 3, MAY_BE_LONG|MAY_BE_BOOL)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_get_result, 0, 1, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
@@ -676,7 +680,7 @@ static zend_class_entry *register_class_PgSql_Connection(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Connection", class_PgSql_Connection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -687,7 +691,7 @@ static zend_class_entry *register_class_PgSql_Result(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Result", class_PgSql_Result_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -698,7 +702,7 @@ static zend_class_entry *register_class_PgSql_Lob(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "PgSql", "Lob", class_PgSql_Lob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

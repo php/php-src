@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "phpdbg.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/php_string.h"
 
@@ -299,6 +298,23 @@ PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
 	/* find cached prompt */
 	if (PHPDBG_G(prompt)[1]) {
 		return PHPDBG_G(prompt)[1];
+	}
+
+	uint32_t pos = 0,
+			 end = strlen(PHPDBG_G(prompt)[0]);
+	bool unicode_warned = false;
+
+	while (pos < end) {
+		if (PHPDBG_G(prompt)[0][pos] & 0x80) {
+			PHPDBG_G(prompt)[0][pos] = '?';
+
+			if (!unicode_warned) {
+				zend_error(E_WARNING,
+					"prompt contains unsupported unicode characters");
+				unicode_warned = true;
+			}
+		}
+		pos++;
 	}
 
 	/* create cached prompt */
@@ -686,7 +702,7 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 			zend_string_release(str);
 			} break;
 		case IS_RESOURCE:
-			spprintf(&decode, 0, "Rsrc #%d", Z_RES_HANDLE_P(zv));
+			spprintf(&decode, 0, "Rsrc #" ZEND_LONG_FMT, Z_RES_HANDLE_P(zv));
 			break;
 		case IS_ARRAY:
 			spprintf(&decode, 0, "array(%d)", zend_hash_num_elements(Z_ARR_P(zv)));

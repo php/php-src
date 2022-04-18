@@ -59,7 +59,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->s = two->s - one->s;
 	rt->us = two->us - one->us;
 
-	rt->days = fabs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
+	rt->days = timelib_diff_days(one, two);
 
 	/* Fall Back: Cater for transition period, where rt->invert is 0, but there are negative numbers */
 	if (one->dst == 1 && two->dst == 0) {
@@ -90,7 +90,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	/* Do corrections for "Type 3" times */
-	if (one->zone_type == 3 && two->zone_type == 3) {
+	if (one->zone_type == 3 && two->zone_type == 3 && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
 		if (one->dst == 1 && two->dst == 0) { /* Fall Back */
 			if (two->tz_info) {
 				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
@@ -130,7 +130,11 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		}
 	} else {
 		/* Then for all the others */
-		rt->h -= dst_h_corr + (two->dst - one->dst);
+		if (one->zone_type == 3 && two->zone_type == 3) {
+			rt->h -= dst_h_corr;
+		} else {
+			rt->h -= dst_h_corr + (two->dst - one->dst);
+		}
 		rt->i -= dst_m_corr;
 
 		timelib_do_rel_normalize(rt->invert ? one : two, rt);
@@ -142,6 +146,37 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	return rt;
 }
+
+
+int timelib_diff_days(timelib_time *one, timelib_time *two)
+{
+	int days = 0;
+
+	if (timelib_same_timezone(one, two)) {
+		timelib_time *earliest, *latest;
+		double earliest_time, latest_time;
+
+		if (timelib_time_compare(one, two) < 0) {
+			earliest = one;
+			latest = two;
+		} else {
+			earliest = two;
+			latest = one;
+		}
+		timelib_hmsf_to_decimal_hour(earliest->h, earliest->i, earliest->s, earliest->us, &earliest_time);
+		timelib_hmsf_to_decimal_hour(latest->h, latest->i, latest->s, latest->us, &latest_time);
+
+		days = llabs(timelib_epoch_days_from_time(one) - timelib_epoch_days_from_time(two));
+		if (latest_time < earliest_time && days > 0) {
+			days--;
+		}
+	} else {
+		days = fabs(floor(one->sse - two->sse) / 86400);
+	}
+
+	return days;
+}
+
 
 timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 {
@@ -203,6 +238,19 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 	return t;
 }
 
+static void do_range_limit(timelib_sll start, timelib_sll end, timelib_sll adj, timelib_sll *a, timelib_sll *b)
+{
+	if (*a < start) {
+		*b -= (start - *a - 1) / adj + 1;
+		*a += adj * ((start - *a - 1) / adj + 1);
+	}
+	if (*a >= end) {
+		*b += *a / adj;
+		*a -= adj * (*a / adj);
+	}
+}
+
+
 timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interval)
 {
 	int bias = 1;
@@ -215,6 +263,8 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 		memcpy(&t->relative, interval, sizeof(timelib_rel_time));
 
 		timelib_update_ts(t, NULL);
+
+		timelib_update_from_sse(t);
 	} else {
 		if (interval->invert) {
 			bias = -1;
@@ -228,12 +278,16 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
+		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse += bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+		timelib_update_from_sse(t);
 		t->us += interval->us * bias;
+		if (bias == -1 && interval->us > 0) {
+			t->sse--;
+		}
 		timelib_do_normalize(t);
 	}
 
-	timelib_update_from_sse(t);
 	if (t->zone_type == TIMELIB_ZONETYPE_ID) {
 		timelib_set_timezone(t, t->tz_info);
 	}
@@ -267,8 +321,13 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
+		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
 		t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+		timelib_update_from_sse(t);
 		t->us -= interval->us * bias;
+		if (bias == -1 && interval->us > 0) {
+			t->sse++;
+		}
 		timelib_do_normalize(t);
 	}
 

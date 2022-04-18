@@ -14,6 +14,8 @@ open_basedir=.
  * Note: Using error_reporting=E_ALL & ~E_NOTICE to suppress "Trying to get property of non-object" notices.
  */
 class StreamExploiter {
+    public $context;
+
     public function stream_close (  ) {
         $doc = new DOMDocument;
         $doc->resolveExternals = true;

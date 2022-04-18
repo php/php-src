@@ -125,6 +125,7 @@ struct _zend_compiler_globals {
 	HashTable *memoized_exprs;
 	int memoize_mode;
 
+	void   *map_ptr_real_base;
 	void   *map_ptr_base;
 	size_t  map_ptr_size;
 	size_t  map_ptr_last;
@@ -264,6 +265,10 @@ struct _zend_executor_globals {
 	bool record_errors;
 	uint32_t num_errors;
 	zend_error_info **errors;
+
+	/* Override filename or line number of thrown errors and exceptions */
+	zend_string *filename_override;
+	zend_long lineno_override;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

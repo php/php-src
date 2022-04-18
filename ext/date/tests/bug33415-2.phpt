@@ -89,14 +89,6 @@ $strtotime_tstamp = strtotime("next Sunday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Sunday            02:00:00\n\n";
 
-print "TZ=America/Guyana - Is it OK for this to be 0:45 AM? yes\n";
-date_default_timezone_set('America/Guyana');
-$tStamp = mktime (17, 17, 17, 1, 2031, 1970);
-print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Thursday", $tStamp);
-print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Thursday            00:45:00\n\n";
-
 print "TZ=Asia/Tehran - Is it OK for this to be 0:30 AM? yes\n";
 date_default_timezone_set('Asia/Tehran');
 $tStamp = mktime (17, 17, 17, 1, 2855, 1970);
@@ -137,14 +129,6 @@ print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Saturday +2 hours", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Saturday            02:30:00\n\n";
-
-print "TZ=Pacific/Niue - Is it OK for this to be 0:30 AM? yes\n";
-date_default_timezone_set('Pacific/Niue');
-$tStamp = mktime (17, 17, 17, 1, 3189, 1970);
-print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
-$strtotime_tstamp = strtotime("next Sunday", $tStamp);
-print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
-print "wanted=Sunday            00:30:00\n\n";
 
 print "TZ=Pacific/Port_Moresby - Is it OK for this to be 10 AM? No DST
 or timezone transition.\n";
@@ -265,11 +249,6 @@ tStamp=Sunday 1981-03-22 17:17:17 -02 0
 result=Sunday 1981-03-29 02:00:00 +00 1
 wanted=Sunday            02:00:00
 
-TZ=America/Guyana - Is it OK for this to be 0:45 AM? yes
-tStamp=Thursday 1975-07-24 17:17:17 -0345 0
-result=Thursday 1975-07-31 00:45:00 -03 0
-wanted=Thursday            00:45:00
-
 TZ=Asia/Tehran - Is it OK for this to be 0:30 AM? yes
 tStamp=Tuesday 1977-10-25 17:17:17 +0330 0
 result=Tuesday 1977-11-01 00:30:00 +04 0
@@ -295,11 +274,6 @@ TZ=Pacific/Nauru - Is it OK for this to be 0:30? yes
 tStamp=Saturday 1979-02-03 17:17:17 +1130 0
 result=Saturday 1979-02-10 02:30:00 +12 0
 wanted=Saturday            02:30:00
-
-TZ=Pacific/Niue - Is it OK for this to be 0:30 AM? yes
-tStamp=Sunday 1978-09-24 17:17:17 -1130 0
-result=Sunday 1978-10-01 00:30:00 -11 0
-wanted=Sunday            00:30:00
 
 TZ=Pacific/Port_Moresby - Is it OK for this to be 10 AM? No DST
 or timezone transition.

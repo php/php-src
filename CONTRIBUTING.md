@@ -35,7 +35,7 @@ If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
 [the supported version page](https://www.php.net/supported-versions.php) are
 supported). For example, at the time of writing, the lowest supported version is
-PHP 7.3, which corresponds to the `PHP-7.3` branch in Git. Please also make sure
+PHP 8.0, which corresponds to the `PHP-8.0` branch in Git. Please also make sure
 you add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
 
 Pull requests implementing RFCs should be submitted against `master`.
@@ -58,8 +58,8 @@ and build PHP source code. We recommend to look at our
 
 ## Filing bugs
 
-Bugs can be filed on the [PHP bug tracker](https://bugs.php.net/). If this is
-the first time you've filed a bug, we suggest reading the
+Bugs can be filed on [GitHub Issues](https://github.com/php/php-src/issues/new/choose).
+If this is the first time you've filed a bug, we suggest reading the
 [guide to reporting a bug](https://bugs.php.net/how-to-report.php).
 
 Where possible, please include a self-contained reproduction case!
@@ -80,7 +80,7 @@ repository. Mailing list subscription is explained on the
 [mailing lists page](https://www.php.net/mailing-lists.php).
 
 You may also want to read
-[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/entry/the_mysterious_php_rfc_process)
+[The Mysterious PHP RFC Process](https://blogs.oracle.com/opal/post/the-mysterious-php-rfc-process-and-how-you-can-change-the-web)
 for additional notes on the best way to approach submitting an RFC.
 
 ## Writing tests
@@ -329,11 +329,12 @@ Currently we have the following branches in use:
 
 | Branch    |           |
 | --------- | --------- |
-| master    | Active development branch for PHP 8.1, which is open for backwards incompatible changes and major internal API changes. |
+| master    | Active development branch for PHP 8.2, which is open for backwards incompatible changes and major internal API changes. |
+| PHP-8.1   | Is used to release the PHP 8.1.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-8.0   | Is used to release the PHP 8.0.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-7.4   | Is used to release the PHP 7.4.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-7.3   | Is used to release the PHP 7.3.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-7.2   | Is used to release the PHP 7.2.x series. This is an old stable version and is open for security fixes only. |
+| PHP-7.4   | Is used to release the PHP 7.4.x series. This is an old stable version and is open for security fixes only. |
+| PHP-7.3   | This branch is closed. |
+| PHP-7.2   | This branch is closed. |
 | PHP-7.1   | This branch is closed. |
 | PHP-7.0   | This branch is closed. |
 | PHP-5.6   | This branch is closed. |
@@ -348,8 +349,8 @@ Currently we have the following branches in use:
 The next few rules are more of a technical nature:
 
 1. All non-security bugfix changes should first go to the lowest bugfix branch
-   (i.e. 7.3) and then get merged up to all other branches. All security fixes
-   should go to the lowest security fixes branch (i.e 7.2). If a change is not
+   (i.e. 8.0) and then get merged up to all other branches. All security fixes
+   should go to the lowest security fixes branch (i.e 7.4). If a change is not
    needed for later branches (i.e. fixes for features which were dropped from
    later branches) an empty merge should be done.
 

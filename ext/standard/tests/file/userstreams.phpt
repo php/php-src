@@ -81,6 +81,7 @@ class uselessstream
 
 class mystream
 {
+    public $context;
     public $path;
     public $mode;
     public $options;

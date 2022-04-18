@@ -4,16 +4,15 @@ Trying implicit reconnect after wait_timeout and KILL using mysqli_ping()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (stristr(mysqli_get_client_info(), 'mysqlnd'))
+require_once 'skipifconnectfailure.inc';
+if ($IS_MYSQLND)
     die("skip: test for libmysql");
 ?>
 --INI--
 mysqli.reconnect=1
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once "table.inc";
 
     if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot create second database connection, [%d] %s\n",
@@ -125,6 +124,10 @@ mysqli.reconnect=1
     mysqli_close($link);
     mysqli_close($link2);
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 done!

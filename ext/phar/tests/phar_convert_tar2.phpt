@@ -44,7 +44,6 @@ var_dump($phar->getStub());
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>

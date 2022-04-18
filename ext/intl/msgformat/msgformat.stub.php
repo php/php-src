@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class MessageFormatter
 {
     public function __construct(string $locale, string $pattern) {}
@@ -25,16 +26,18 @@ class MessageFormatter
     public static function formatMessage(string $locale, string $pattern, array $values): string|false {}
 
     /**
+     * @return array<int, int|float|string>|false
      * @tentative-return-type
      * @alias msgfmt_parse
      */
     public function parse(string $string): array|false {}
 
     /**
+     * @return array<int, int|float|string>|false
      * @tentative-return-type
      * @alias msgfmt_parse_message
      */
-    public static function parseMessage(string $locale, string $pattern, string $message): array|false|null {}
+    public static function parseMessage(string $locale, string $pattern, string $message): array|false {}
 
     /**
      * @tentative-return-type

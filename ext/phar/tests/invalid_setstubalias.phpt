@@ -33,11 +33,6 @@ try {
 }
 
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
-?>
 --EXPECTF--
 Cannot set stub ".phar/stub.php" directly in phar "%sinvalid_setstubalias.phar.tar", use setStub
 Cannot set alias ".phar/alias.txt" directly in phar "%sinvalid_setstubalias.phar.tar", use setAlias

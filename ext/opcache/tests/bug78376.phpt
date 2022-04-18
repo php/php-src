@@ -13,7 +13,8 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+const CNST = 'bbbb';
 var_dump(\A::$a);
 ?>
 --EXPECT--
-string(4) "aaaa"
+string(4) "bbbb"

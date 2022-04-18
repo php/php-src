@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlCalendar
 {
     private function __construct() {}
@@ -74,6 +75,7 @@ class IntlCalendar
     public function getActualMinimum(int $field): int|false {}
 
     /**
+     * @return array<int, string>
      * @tentative-return-type
      * @alias intlcal_get_available_locales
      */
@@ -220,6 +222,7 @@ class IntlCalendar
     /**
      * @param int|bool $value
      * @alias intlcal_roll
+     * @tentative-return-type
      */
     public function roll(int $field, $value): bool {}
 
@@ -279,6 +282,7 @@ class IntlCalendar
     public function toDateTime(): DateTime|false {}
 }
 
+/** @not-serializable */
 class IntlGregorianCalendar extends IntlCalendar
 {
     /**

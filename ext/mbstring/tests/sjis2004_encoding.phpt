@@ -60,9 +60,23 @@ echo "Unicode -> SJIS-2004 conversion works on all valid characters\n";
 findInvalidChars($fromUnicode, $invalidChars, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidChars, $fromUnicode, 'UTF-16BE', 'SJIS-2004', '%');
 echo "Unicode -> SJIS-2004 conversion works on all invalid characters\n";
+
+// Some pairs of Unicode codepoints are represented by a single character in SJIS-2004
+// Test the case where the first codepoint looks like it might be one of these pairs...
+// but the second one doesn't match
+convertValidString("\x30\x4B\x00A", "\x82\xA9A", 'UTF-16BE', 'SJIS-2004', false);
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "SJIS-2004", "UTF-8");
+convertInvalidString("\x81\x20", "%", "SJIS-2004", "UTF-8");
+convertInvalidString("\xFC\xF5", "%", "SJIS-2004", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 SJIS-2004 verification and conversion works for all valid characters
 SJIS-2004 verification and conversion rejects all invalid characters
 Unicode -> SJIS-2004 conversion works on all valid characters
 Unicode -> SJIS-2004 conversion works on all invalid characters
+Done!

@@ -16,7 +16,7 @@ $nx->statName("a",ZIPARCHIVE::FL_UNCHANGED);
 --CLEAN--
 <?php
 $fname = __DIR__."/test53885.zip";
-unlink($fname);
+@unlink($fname);
 ?>
 --EXPECTF--
 Deprecated: ZipArchive::open(): Using empty file as ZipArchive is deprecated in %s

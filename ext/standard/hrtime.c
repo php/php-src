@@ -134,7 +134,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 #endif
 }/*}}}*/
 
-#if ZEND_ENABLE_ZVAL_LONG64
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 #define PHP_RETURN_HRTIME(t) RETURN_LONG((zend_long)t)
 #else
 #ifdef _WIN32
@@ -159,7 +159,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 	from an arbitrary point in time. If an optional boolean argument is
 	passed, returns an integer on 64-bit platforms or float on 32-bit
 	containing the current high-resolution time in nanoseconds. The
-	delivered timestamp is monotonic and can not be adjusted. */
+	delivered timestamp is monotonic and cannot be adjusted. */
 PHP_FUNCTION(hrtime)
 {
 #if HRTIME_AVAILABLE

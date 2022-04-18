@@ -860,4 +860,4 @@ void jpeg_gdIOCtx_dest (j_compress_ptr cinfo, gdIOCtx * outfile)
 	dest->outfile = outfile;
 }
 
-#endif /* HAVE_JPEG */
+#endif /* HAVE_LIBJPEG */

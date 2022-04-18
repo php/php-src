@@ -5,14 +5,14 @@ Bug #49269 (Ternary operator fails on Iterator object when used inside foreach d
 class TestObject implements Iterator
 {
     public $n = 0;
-    function valid()
+    function valid(): bool
     {
         return ($this->n < 3);
     }
-    function current() {return $this->n;}
-    function next() {$this->n++;}
-    function key() { }
-    function rewind() {$this->n = 0;}
+    function current(): mixed {return $this->n;}
+    function next(): void {$this->n++;}
+    function key(): mixed { }
+    function rewind(): void {$this->n = 0;}
 }
 
 

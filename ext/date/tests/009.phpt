@@ -23,14 +23,29 @@ var_dump(gmstrftime("blah", $t));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Function strftime() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "Tue Tuesday Jun June Tue Jun 27 00:00:00 2006 %s
 %s %"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(5) "%q %a"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(4) "blah"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "Mon Monday Jun June Mon Jun 26 21:00:00 2006 %s
 %s %"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(5) "%q %a"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(4) "blah"
 Done

@@ -24,10 +24,6 @@ foreach ($bads as $bad) {
 }
 echo 'done' . PHP_EOL;
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/bug65414.phar');
-?>
 --EXPECT--
 .phar/injected-1.txt:Cannot create any files in magic ".phar" directory
 /.phar/injected-2.txt:Cannot create any files in magic ".phar" directory

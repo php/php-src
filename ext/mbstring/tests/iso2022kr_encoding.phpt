@@ -96,9 +96,18 @@ testValid("\x0E\x0E\x0F\x0E\x0Fabc", "\x00a\x00b\x00c", false);
 
 echo "Escapes behave as expected\n";
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x1B", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$)", "%", "ISO-2022-KR", "UTF-8");
+convertInvalidString("\x1B$)C\x0E\x7C\x84", "%", "ISO-2022-KR", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 Empty string OK
 ASCII support OK
 KS X 1001 support OK
 Escapes behave as expected
+Done!

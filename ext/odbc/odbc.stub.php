@@ -60,7 +60,10 @@ function odbc_fetch_row($statement, ?int $row = null): bool {}
 /** @param resource $statement */
 function odbc_result($statement, string|int $field): string|bool|null {}
 
-/** @param resource $statement */
+/**
+ * @param resource $statement
+ * @deprecated
+ */
 function odbc_result_all($statement, string $format = ""): int|false {}
 
 /** @param resource $statement */

@@ -29,10 +29,11 @@
 #include "php_snmp.h"
 
 #include "zend_exceptions.h"
+#include "zend_smart_string.h"
 #include "ext/spl/spl_exceptions.h"
 #include "snmp_arginfo.h"
 
-#if HAVE_SNMP
+#ifdef HAVE_SNMP
 
 #include <sys/types.h>
 #include <errno.h>
@@ -152,8 +153,6 @@ struct objid_query {
 #ifdef COMPILE_DL_SNMP
 ZEND_GET_MODULE(snmp)
 #endif
-
-/* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
 
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(snmp)
@@ -433,7 +432,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	}
 
 	if ((st & SNMP_CMD_SET) && objid_query->count > objid_query->step) {
-		php_snmp_error(getThis(), PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES, "Can not fit all OIDs for SET query into one packet, using multiple queries");
+		php_snmp_error(getThis(), PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES, "Cannot fit all OIDs for SET query into one packet, using multiple queries");
 	}
 
 	while (keepwalking) {
@@ -704,12 +703,22 @@ static bool php_snmp_parse_oid(
 					pptr = ZSTR_VAL(type_str);
 					objid_query->vars[objid_query->count].type = *pptr;
 				} else if (type_ht) {
-					while (idx_type < type_ht->nNumUsed) {
-						tmp_type = &type_ht->arData[idx_type].val;
-						if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
-							break;
+					if (HT_IS_PACKED(type_ht)) {
+						while (idx_type < type_ht->nNumUsed) {
+							tmp_type = &type_ht->arPacked[idx_type];
+							if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
+								break;
+							}
+							idx_type++;
 						}
-						idx_type++;
+					} else {
+						while (idx_type < type_ht->nNumUsed) {
+							tmp_type = &type_ht->arData[idx_type].val;
+							if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
+								break;
+							}
+							idx_type++;
+						}
 					}
 					if (idx_type < type_ht->nNumUsed) {
 						convert_to_string(tmp_type);
@@ -731,12 +740,22 @@ static bool php_snmp_parse_oid(
 				if (value_str) {
 					objid_query->vars[objid_query->count].value = ZSTR_VAL(value_str);
 				} else if (value_ht) {
-					while (idx_value < value_ht->nNumUsed) {
-						tmp_value = &value_ht->arData[idx_value].val;
-						if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
-							break;
+					if (HT_IS_PACKED(value_ht)) {
+						while (idx_value < value_ht->nNumUsed) {
+							tmp_value = &value_ht->arPacked[idx_value];
+							if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
+								break;
+							}
+							idx_value++;
 						}
-						idx_value++;
+					} else {
+						while (idx_value < value_ht->nNumUsed) {
+							tmp_value = &value_ht->arData[idx_value].val;
+							if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
+								break;
+							}
+							idx_value++;
+						}
 					}
 					if (idx_value < value_ht->nNumUsed) {
 						convert_to_string(tmp_value);
@@ -846,7 +865,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if HAVE_GETADDRINFO && HAVE_IPV6 && HAVE_INET_NTOP
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
@@ -938,7 +957,37 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 		return true;
 	}
 
-	zend_value_error("Authentication protocol must be either \"MD5\" or \"SHA\"");
+#ifdef HAVE_SNMP_SHA256
+	if (zend_string_equals_literal_ci(prot, "SHA256")) {
+		s->securityAuthProto = usmHMAC192SHA256AuthProtocol;
+		s->securityAuthProtoLen = sizeof(usmHMAC192SHA256AuthProtocol) / sizeof(oid);
+		return true;
+	}
+#endif
+
+#ifdef HAVE_SNMP_SHA512
+	if (zend_string_equals_literal_ci(prot, "SHA512")) {
+		s->securityAuthProto = usmHMAC384SHA512AuthProtocol;
+		s->securityAuthProtoLen = sizeof(usmHMAC384SHA512AuthProtocol) / sizeof(oid);
+		return true;
+	}
+#endif
+
+	smart_string err = {0};
+
+	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
+#ifdef HAVE_SNMP_SHA256
+	smart_string_appends(&err, " or \"SHA256\"");
+#endif
+#ifdef HAVE_SNMP_SHA512
+	smart_string_appends(&err, " or \"SHA512\"");
+#endif
+#ifndef DISABLE_MD5
+	smart_string_appends(&err, " or \"MD5\"");
+#endif
+	smart_string_0(&err);
+	zend_value_error("%s", err.c);
+	smart_string_free(&err);
 	return false;
 }
 /* }}} */
@@ -1772,7 +1821,7 @@ static HashTable *php_snmp_get_properties(zend_object *object)
 	obj = php_snmp_fetch_object(object);
 	props = zend_std_get_properties(object);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_snmp_properties, key, hnd) {
 		if (!hnd->read_func || hnd->read_func(obj, &rv) != SUCCESS) {
 			ZVAL_NULL(&rv);
 		}
@@ -1970,7 +2019,7 @@ PHP_MINIT_FUNCTION(snmp)
 
 	init_snmp("snmpapp");
 	/* net-snmp corrupts the CTYPE locale during initialization. */
-	setlocale(LC_CTYPE, "C");
+	zend_reset_lc_ctype_locale();
 
 #ifdef NETSNMP_DS_LIB_DONT_PERSIST_STATE
 	/* Prevent update of the snmpapp.conf file */

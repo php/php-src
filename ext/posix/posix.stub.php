@@ -29,6 +29,10 @@ function posix_setegid(int $group_id): bool {}
 #endif
 
 #ifdef HAVE_GETGROUPS
+/**
+ * @return array<int, int>|false
+ * @refcount 1
+ */
 function posix_getgroups(): array|false {}
 #endif
 
@@ -52,8 +56,16 @@ function posix_getpgid(int $process_id): int|false {}
 function posix_getsid(int $process_id): int|false {}
 #endif
 
+/**
+ * @return array<string, string>|false
+ * @refcount 1
+ */
 function posix_uname(): array|false {}
 
+/**
+ * @return array<string, int>|false
+ * @refcount 1
+ */
 function posix_times(): array|false {}
 
 
@@ -79,15 +91,35 @@ function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 
 
 function posix_access(string $filename, int $flags = 0): bool {}
 
+/**
+ * @return array<string, int|string|array|null>|false
+ * @refcount 1
+ */
 function posix_getgrnam(string $name): array|false {}
 
+/**
+ * @return array<string, int|string|array|null>|false
+ * @refcount 1
+ */
 function posix_getgrgid(int $group_id): array|false {}
 
+/**
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function posix_getpwnam(string $username): array|false {}
 
+/**
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function posix_getpwuid(int $user_id): array|false {}
 
 #ifdef HAVE_GETRLIMIT
+/**
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function posix_getrlimit(): array|false {}
 #endif
 

@@ -1,176 +1,55 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.0alpha3
+?? ??? ????, PHP 8.2.0alpha1
+
+- CLI:
+  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
 
 - Core:
-  . Fixed bug #81202 (powerpc64 build fails on fibers). (krakjoe)
-  . Fixed bug #80072 (Cyclic unserialize in TMPVAR operand may leak). (Nikita)
-
-- Curl:
-  . Fixed bug #81085 (Support CURLOPT_SSLCERT_BLOB for cert strings).
-    (camporter)
-
-- Reflection:
-  . Fixed bug #81200 (no way to determine if Closure is static). (krakjoe)
-
-24 Jun 2021, PHP 8.1.0alpha2
-
-- Core:
-  . Fixed bug #81163 (__sleep allowed to return non-array). (krakjoe)
-
-- Opcache:
-  . Fixed bug #81133 (building opcache with phpize fails). (krakjoe)
-  . Fixed bug #81136 (opcache header not installed). (krakjoe)
-
-- PDO OCI:
-  . Fixed bug #77120 (Support 'success with info' at connection).
-    (Sergei Morozov)
-    
-- phpdbg:
-  . Fixed bug #81135 (unknown help topic causes assertion failure). (krakjoe)
-
-- SPL:
-  . Fixed bug #81112 (Special json_encode behavior for SplFixedArray). (Nikita)
-  . Fixed bug #80945 ("Notice: Undefined index" on unset() ArrayObject
-    non-existing key). (Nikita)
-    
-- Standard:
-  . Fixed bug #81137 (hrtime breaks build on OSX before Sierra). (krakjoe)
-
-10 Jun 2021, PHP 8.1.0alpha1
-
-- Core:
-  . Fixed inclusion order for phpize builds on Windows. (cmb)
-  . Added missing hashtable insertion APIs for arr/obj/ref. (Sara)
-  . Fixed bug #75474 (function scope static variables are not bound to a unique
-    function). (Nikita)
-  . Fixed bug #53826 (__callStatic fired in base class through a parent call if
-    the method is private). (Nikita)
-  . Implemented FR #77372 (Relative file path is removed from uploaded file).
-    (Björn Tantau)
-  . Fixed bug #81076 (incorrect debug info on Closures with implicit binds).
-    (krakjoe)
- 
- - Standard:
-  . Fixed bug #77627 (method_exists on Closure::__invoke inconsistency).
-    (krakjoe)
-
-- Date:
-  . Fixed bug #52480 (Incorrect difference using DateInterval) (Derick)
-  . Fixed bug #62326 (date_diff() function returns false result) (Derick)
-  . Fixed bug #64992 (dst not handled past 2038) (Derick)
-  . Fixed bug #65003 (Wrong date diff) (Derick)
-  . Fixed bug #66545 (DateTime. diff returns negative values) (Derick)
-  . Fixed bug #68503 (date_diff on two dates with timezone set localised
-    returns wrong results) (Derick)
-  . Fixed bug #69806 (Incorrect date from timestamp) (Derick)
-  . Fixed bug #71700 (Extra day on diff between begin and end of march 2016)
-    (Derick)
-  . Fixed bug #71826 (DateTime::diff confuse on timezone 'Asia/Tokyo') (Derick)
-  . Fixed bug #73460 (Datetime add not realising it already applied DST
-    change) (Derick)
-  . Fixed bug #74173 (DateTimeImmutable::getTimestamp() triggers DST switch in
-    incorrect time) (Derick)
-  . Fixed bug #74274 (Handling DST transitions correctly) (Derick)
-  . Fixed bug #74524 (Date diff is bad calculated, in same time zone) (Derick)
-  . Fixed bug #75167 (DateTime::add does only care about backward DST
-    transition, not forward) (Derick)
-  . Fixed bug #76032 (DateTime->diff having issues with leap days for
-    timezones ahead of UTC) (Derick)
-  . Fixed bug #76374 (Date difference varies according day time) (Derick)
-  . Fixed bug #77571 (DateTime's diff DateInterval incorrect in timezones from
-    UTC+01:00 to UTC+12:00 (Derick)
-  . Fixed bug #78452 (diff makes wrong in hour for Asia/Tehran) (Derick)
-  . Fixed bug #79452 (DateTime::diff() generates months differently between
-    time zones) (Derick)
-  . Fixed bug #79698 (timelib mishandles future timestamps (triggered by 'zic
-    -b slim')) (Derick)
-  . Fixed bug #79716 (Invalid date time created (with day "00")) (Derick)
-  . Fixed bug #80610 (DateTime calculate wrong with DateInterval) (Derick)
-  . Fixed bug #80664 (DateTime objects behave incorrectly around DST
-    transition) (Derick)
-  . Fixed bug #80913 (DateTime(Immutable)::sub around DST yield incorrect
-    time) (Derick)
+  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
+  . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
 
 - FPM:
-  . Added openmetrics status format. (Cees-Jan Kiewiet)
-  . Enable process renaming on macOS. (devnexen)
-  . Added pm.max_spawn_rate option to configure max spawn child processes rate.
-    (Paulius Sapragonas)
-  . Fixed bug #65800 (Events port mechanism). (psumbera)
+  . Emit error for invalid port setting. (David Carlier)
+  . Added extra check for FPM proc dumpable on SELinux based systems.
+    (David Carlier)
+  . Added support for listening queue on macOS. (David Carlier)
 
-- FTP:
-  . Convert resource<ftp> to object \FTP\Connection. (Sara)
+- Intl:
+  . Update all grandfathered language tags with preferred values
+  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
 
-- GD:
-  . Convert resource<gd font> to object \GdFont. (Sara)
+- OCI8:
+  . Added oci8.prefetch_lob_size directive to tune LOB query performance
+  . Support for building against Oracle Client libraries 10.1 and 10.2 has been
+    dropped. Oracle Client libraries 11.2 or newer are now required.
 
-- hash:
-  . Implemented FR #68109 (Add MurmurHash V3). (Anatol, Michael)
-  . Implemented FR #73385 (Add xxHash support). (Anatol)
-
-- LDAP:
-  . Convert resource<ldap link> to object \LDAP\Connection. (Máté)
-  . Convert resource<ldap result> to object \LDAP\Result. (Máté)
-  . Convert resource<ldap result entry> to object \LDAP\ResultEntry. (Máté)
-
-- MySQLi:
-  . Fixed bug #70372 (Emulate mysqli_fetch_all() for libmysqlclient). (Nikita)
-  . Fixed bug #80330 (Replace language in APIs and source code/docs).
-    (Darek Ślusarczyk)
-  . Fixed bug #80329 (Add option to specify LOAD DATA LOCAL white list folder
-    (including libmysql)). (Darek Ślusarczyk)
-
-- MySQLnd:
-  . Fixed bug #80761 (PDO uses too much memory). (Nikita)
-
-- OPcache:
-  . Added inheritance cache. (Dmitry)
-
-- OpenSSL:
-  . Bump minimal OpenSSL version to 1.0.2. (Jakub Zelenka)
-
-- PCRE:
-  . Bundled PCRE2 is 10.37.
-
-- PDO:
-  . Fixed bug #40913 (PDO_MYSQL: PDO::PARAM_LOB does not bind to a stream for
-    fetching a BLOB). (Nikita)
-
-. PDO MySQL:
-  . Fixed bug #80908 (PDO::lastInsertId() return wrong). (matt)
-  . Fixed bug #81037 (PDO discards error message text from prepared
-    statement). (Kamil Tekiela)
-
-. PDO ODBC:
-  . Implement PDO_ATTR_SERVER_VERSION and PDO_ATTR_SERVER_INFO for
-    PDO::getAttribute(). (Calvin Buckley)
-
-. PDO SQLite:
-  . Fixed bug #38334 (Proper data-type support for PDO_SQLITE). (Nikita)
-
-- PgSQL:
-  . Convert resource<pgsql link> to object \PgSql\Connection. (Máté)
-  . Convert resource<pgsql result> to object \PgSql\Result. (Máté)
-  . Convert resource<pgsql large object> to object \PgSql\Lob. (Máté)
-
-- PSpell:
-  . Convert resource<pspell> to object \PSpell\Dictionary. (Sara)
-  . Convert resource<pspell config> to object \PSpell\Config. (Sara)
-
-- readline:
-  . Fixed bug #72998 (invalid read in readline completion). (krakjoe)
-
-- Reflection:
-  . Implement ReflectionFunctionAbstract::getClosureUsedVariables (krakjoe)
+- PDO_ODBC:
+  . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
+    Buckley)
 
 - Sodium:
-  . Added the XChaCha20 stream cipher functions. (P.I.E. Security Team)
-  . Added the Ristretto255 functions, which are available in libsodium 1.0.18.
-    (P.I.E. Security Team)
+  . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 
-- SPL:
-  . Fixed bug #80724 (FilesystemIterator::FOLLOW_SYMLINKS remove KEY_AS_FILE
-    from bitmask). (Cameron Porter)
+- SQLite3:
+  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
+
+- Standard:
+  . net_get_interfaces() also reports wireless network interfaces on Windows.
+    (Yurun)
+  . Finished AVIF support in getimagesize(). (Yannis Guyon)
+  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
+    (ilutov)
+  . New function memory_reset_peak_usage(). (Patrick Allaert)
+
+- Zip:
+  . add ZipArchive::clearError() method
+  . add ZipArchive::getStreamName() method
+  . add ZipArchive::getStreamIndex() method
+
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -30,5 +30,6 @@ $c = new C;
 $c->callFuncInParent('Which function will be called??');
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Callables of the form ["C", "parent::func"] are deprecated in %s on line %d
 B::func called

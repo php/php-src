@@ -1,4 +1,4 @@
-.TH @program_prefix@phpdbg 1 "2021" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpdbg 1 "2022" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpdbg \- The interactive PHP debugger
 .SH SYNOPSIS
@@ -48,10 +48,6 @@ Override .phpgdbinit location (implies -I)
 .TP
 .B \-I
 Ignore .phpdbginit (default init file)
-.TP
-.B \-O \fIfile\fR
-Set oplog output to
-.IR file
 .TP
 .B \-r
 Jump straight to run

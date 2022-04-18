@@ -15,7 +15,7 @@ require_once('skipifconnectfailure.inc');
     if (!$stmt = mysqli_stmt_init($link))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    // Yes, amazing, eh? AFAIK a work around of a constructor bug...
+    // Yes, amazing, eh? AFAIK a workaround of a constructor bug...
     try {
         mysqli_stmt_close($stmt);
     } catch (Error $exception) {

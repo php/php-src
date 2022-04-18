@@ -4,6 +4,7 @@ Stats executed during include path resolution should be silent
 <?php
 
 class StreamWrapper {
+    public $context;
     public function url_stat($path, $flags) {
         $path = str_replace('test://', 'file://', $path);
         if ($flags & STREAM_URL_STAT_QUIET) {

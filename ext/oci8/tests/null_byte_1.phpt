@@ -23,7 +23,7 @@ echo "Test 1: Import\n";
 
 $lob = oci_new_descriptor($c, OCI_D_LOB);
 try {
-    $lob->savefile("/tmp/abc\0def");
+    $lob->saveFile("/tmp/abc\0def");
 } catch (ValueError $e) {
        echo $e->getMessage(), "\n";
 }
@@ -39,6 +39,6 @@ try {
 ?>
 --EXPECT--
 Test 1: Import
-OCILob::savefile(): Argument #1 ($filename) must not contain any null bytes
+OCILob::saveFile(): Argument #1 ($filename) must not contain any null bytes
 Test 2: Export
 OCILob::export(): Argument #1 ($filename) must not contain any null bytes

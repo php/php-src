@@ -3,6 +3,8 @@ Bug #71287 (Error message contains hexadecimal instead of decimal number)
 --FILE--
 <?php
 class Stream {
+    public $context;
+
     public function stream_open($path, $mode, $options, $opened_path) {
         return true;
     }

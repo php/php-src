@@ -14,6 +14,10 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __sun
+/* to enable 'new' ancillary data layout instead */
+# define _XPG4_2
+#endif
 #include <php.h>
 #include "php_sockets.h"
 #include "sendrecvmsg.h"
@@ -121,8 +125,13 @@ static void init_ancillary_registry(void)
 #endif
 
 #ifdef SO_PASSCRED
+#ifdef ANC_CREDS_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
+#else
+	PUT_ENTRY(sizeof(struct cmsgcred), 0, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS);
+#endif
 #endif
 
 #ifdef SCM_RIGHTS
@@ -436,7 +445,11 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SO_PASSCRED
+#ifdef SCM_CREDENTIALS
 	REGISTER_LONG_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
+#else
+	REGISTER_LONG_CONSTANT("SCM_CREDS",		SCM_CREDS,	CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
 #endif
 

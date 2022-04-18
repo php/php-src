@@ -12,7 +12,7 @@ include("skipif.inc");
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-$result = pg_query("select 'a' union select 'b'");
+$result = pg_query($db, "select 'a' union select 'b'");
 
 try {
     var_dump(pg_fetch_array($result, -1));

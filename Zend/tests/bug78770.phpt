@@ -19,5 +19,6 @@ class Test {
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
+Deprecated: Use of "self" in callables is deprecated in %s on line %d
 ===DONE===

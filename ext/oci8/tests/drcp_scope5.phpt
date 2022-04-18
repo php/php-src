@@ -55,6 +55,7 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
+Deprecated: Directive oci8.old_oci_close_semantics is deprecated%s
 This is with a OCI_PCONNECT
 resource(%d) of type (oci8 persistent connection)
 Update done-- DEPT value has been set to NEWDEPT

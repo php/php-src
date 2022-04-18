@@ -314,6 +314,17 @@ for ($i = 0; $i < 100; $i++) {
 	testValid($testString, $convertsTo, false);
 }
 
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\xE0", "%", "ISO-2022-JP-2004", "UTF-8");
+convertInvalidString("\x1B\$(X", "%", "ISO-2022-JP-2004", "UTF-8"); // Invalid escape
+convertInvalidString("\x1B\$B!", "%", "ISO-2022-JP-2004", "UTF-8"); // Truncated character
+
+// Test sequences of 2 Unicode codepoints which convert to a single character in ISO-2022-JP-2004
+testValidString("\x02\x54\x03\x00", "\x1B\$(Q+H\x1B(B", "UTF-16BE", "ISO-2022-JP-2004");
+// Including the case where such a codepoint is followed by one which it can't combine with
+testValidString("\x02\x54\x00A", "\x1B\$(Q+8\x1B(BA", "UTF-16BE", "ISO-2022-JP-2004");
+
 echo "All done!\n";
 
 ?>

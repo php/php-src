@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlDateFormatter
 {
     /**
@@ -134,6 +135,7 @@ class IntlDateFormatter
 
     /**
      * @param int $offset
+     * @return array<string, int>|false
      * @tentative-return-type
      * @alias datefmt_localtime
      */

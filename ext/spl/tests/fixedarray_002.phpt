@@ -6,23 +6,23 @@ class A extends SplFixedArray {
     public $prop1 = NULL;
     public $prop2 = NULL;
 
-    public function count() {
+    public function count(): int {
         return 2;
     }
 
-    public function offsetGet($n) {
+    public function offsetGet($n): mixed {
         echo "A::offsetGet\n";
         return parent::offsetGet($n);
     }
-    public function offsetSet($n, $v) {
+    public function offsetSet($n, $v): void {
         echo "A::offsetSet\n";
-        return parent::offsetSet($n, $v);
+        parent::offsetSet($n, $v);
     }
-    public function offsetUnset($n) {
+    public function offsetUnset($n): void {
         echo "A::offsetUnset\n";
-        return parent::offsetUnset($n);
+        parent::offsetUnset($n);
     }
-    public function offsetExists($n) {
+    public function offsetExists($n): bool {
         echo "A::offsetExists\n";
         return parent::offsetExists($n);
     }

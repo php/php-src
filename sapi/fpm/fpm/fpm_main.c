@@ -200,7 +200,7 @@ static void print_modules(void) /* {{{ */
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
-	ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+	ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
 		php_printf("%s\n", module->name);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
@@ -323,7 +323,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			char *s;
-			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s\r\n", SG(sapi_headers).http_status_line);
+			len = slprintf(buf, SAPI_CGI_MAX_HEADER_LENGTH, "%s", SG(sapi_headers).http_status_line);
 			if ((s = strchr(SG(sapi_headers).http_status_line, ' '))) {
 				response_status = atoi((s + 1));
 			}
@@ -340,7 +340,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 				(s - SG(sapi_headers).http_status_line) >= 5 &&
 				strncasecmp(SG(sapi_headers).http_status_line, "HTTP/", 5) == 0
 			) {
-				len = slprintf(buf, sizeof(buf), "Status:%s\r\n", s);
+				len = slprintf(buf, sizeof(buf), "Status:%s", s);
 				response_status = atoi((s + 1));
 			} else {
 				h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
@@ -363,9 +363,9 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 						err++;
 					}
 					if (err->str) {
-						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->str);
+						len = slprintf(buf, sizeof(buf), "Status: %d %s", SG(sapi_headers).http_response_code, err->str);
 					} else {
-						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
+						len = slprintf(buf, sizeof(buf), "Status: %d", SG(sapi_headers).http_response_code);
 					}
 				}
 			}
@@ -373,6 +373,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 
 		if (!has_status) {
 			PHPWRITE_H(buf, len);
+			PHPWRITE_H("\r\n", 2);
 			ignore_status = 1;
 		}
 	}

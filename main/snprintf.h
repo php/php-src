@@ -66,12 +66,7 @@ Example:
 #ifndef SNPRINTF_H
 #define SNPRINTF_H
 
-typedef int bool_int;
-
-typedef enum {
-	NO = 0, YES = 1
-} boolean_e;
-
+#include <stdbool.h>
 
 BEGIN_EXTERN_C()
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
@@ -80,12 +75,13 @@ PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) ZEND_ATTRIBUTE_FOR
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
 PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_0cvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(char format, double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len);
+		 bool add_dp, int precision, char dec_point, bool * is_negative, char *buf, size_t *len);
 
 END_EXTERN_C()
+
+#define php_gcvt zend_gcvt
 
 #ifdef slprintf
 #undef slprintf
@@ -131,31 +127,10 @@ typedef enum {
 	LM_LONG_DOUBLE,
 } length_modifier_e;
 
-#ifdef PHP_WIN32
-# define WIDE_INT		__int64
-#elif SIZEOF_LONG_LONG
-# define WIDE_INT		long long
-#else
-# define WIDE_INT		long
-#endif
-typedef WIDE_INT wide_int;
-typedef unsigned WIDE_INT u_wide_int;
+PHPAPI char * ap_php_conv_10(int64_t num, bool is_unsigned,
+	   bool * is_negative, char *buf_end, size_t *len);
 
-PHPAPI char * ap_php_conv_10(wide_int num, bool_int is_unsigned,
-	   bool_int * is_negative, char *buf_end, size_t *len);
-
-PHPAPI char * ap_php_conv_p2(u_wide_int num, int nbits,
+PHPAPI char * ap_php_conv_p2(uint64_t num, int nbits,
 		 char format, char *buf_end, size_t *len);
-
-/* The maximum precision that's allowed for float conversion. Does not include
- * decimal separator, exponent, sign, terminator. Currently does not affect
- * the modes e/f, only g/k/H, as those have a different limit enforced at
- * another level (see NDIG in php_conv_fp()).
- * Applies to the formatting functions of both spprintf.c and snprintf.c, which
- * use equally sized buffers of MAX_BUF_SIZE = 512 to hold the result of the
- * call to php_gcvt().
- * This should be reasonably smaller than MAX_BUF_SIZE (I think MAX_BUF_SIZE - 9
- * should be enough, but let's give some more space) */
-#define FORMAT_CONV_MAX_PRECISION 500
 
 #endif /* SNPRINTF_H */

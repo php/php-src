@@ -6,7 +6,7 @@ mysqli
 <?php
 require_once('skipifconnectfailure.inc');
 
-if (stristr(mysqli_get_client_info(), 'mysqlnd'))
+if ($IS_MYSQLND)
     die("skip: test for libmysql");
 ?>
 --FILE--

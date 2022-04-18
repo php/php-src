@@ -67,7 +67,7 @@ PHPAPI MYSQLND *
 zval_to_mysqlnd(zval * zv, const unsigned int client_api_capabilities, unsigned int * save_client_api_capabilities)
 {
 	MYSQLND_REVERSE_API *api;
-	ZEND_HASH_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
+	ZEND_HASH_MAP_FOREACH_PTR(&mysqlnd_api_ext_ht, api) {
 		if (api->conversion_cb) {
 			MYSQLND *retval = api->conversion_cb(zv);
 			if (retval) {

@@ -3,7 +3,7 @@ SplHeap using a compare function returning by-reference
 --FILE--
 <?php
 class Heap extends SplMinHeap {
-    public function &compare($a, $b) {
+    public function &compare($a, $b): int {
         return $a;
     }
 }

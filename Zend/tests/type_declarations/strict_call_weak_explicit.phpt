@@ -15,6 +15,6 @@ function_declared_in_weak_mode(1.0);
 --EXPECTF--
 Fatal error: Uncaught TypeError: function_declared_in_weak_mode(): Argument #1 ($x) must be of type int, float given, called in %s:%d
 Stack trace:
-#0 %s(%d): function_declared_in_weak_mode(1)
+#0 %s(%d): function_declared_in_weak_mode(1.0)
 #1 {main}
   thrown in %sstrict_call_weak_explicit_2.inc on line 5

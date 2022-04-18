@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ea788bc7779d9c340b9fb3ad72fa0571df9341e */
+ * Stub hash: 2b1726dd5652839a37e533e20dfcf6782b3c766d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -39,7 +39,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_exec, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_raw, 0, 2, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_raw, 0, 2, IS_ARRAY, 1)
 	ZEND_ARG_OBJ_INFO(0, ftp, FTP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -286,7 +286,7 @@ static zend_class_entry *register_class_FTP_Connection(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "FTP", "Connection", class_FTP_Connection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

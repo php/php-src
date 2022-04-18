@@ -43,5 +43,5 @@ object(DateInterval)#%d (16) {
   ["have_special_relative"]=>
   int(0)
   ["f"]=>
-  float(-1)
+  float(0)
 }

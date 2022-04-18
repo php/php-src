@@ -19,7 +19,7 @@
 #include "crc32.h"
 #include "crc32_x86.h"
 
-#if HAVE_AARCH64_CRC32
+#ifdef HAVE_AARCH64_CRC32
 # include <arm_acle.h>
 # if defined(__linux__)
 #  include <sys/auxv.h>
@@ -63,7 +63,7 @@ static inline int has_crc32_insn() {
 #  pragma GCC push_options
 #  pragma GCC target ("+nothing+crc")
 # endif
-static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
+static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	while (nr >= sizeof(uint64_t)) {
 		crc = __crc32d(crc, *(uint64_t *)p);
 		p += sizeof(uint64_t);
@@ -91,7 +91,7 @@ static uint32_t crc32_aarch64(uint32_t crc, char *p, size_t nr) {
 
 PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 {
-#if HAVE_AARCH64_CRC32
+#ifdef HAVE_AARCH64_CRC32
 	if (has_crc32_insn()) {
 		crc = crc32_aarch64(crc, p, nr);
 		return crc;

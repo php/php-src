@@ -17,8 +17,13 @@ try {
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }
+try {
+    $bar->value = 1;
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
-$intBar = Foo::Bar;
+$intBar = IntFoo::Bar;
 try {
     $intBar->name = 'Baz';
 } catch (Error $e) {
@@ -29,9 +34,16 @@ try {
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }
+try {
+    $intBar->value2 = 1;
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECT--
-Enum properties are immutable
-Enum properties are immutable
-Enum properties are immutable
+Cannot modify readonly property Foo::$name
+Cannot create dynamic property Foo::$value
+Cannot modify readonly property IntFoo::$name
+Cannot modify readonly property IntFoo::$value
+Cannot create dynamic property IntFoo::$value2

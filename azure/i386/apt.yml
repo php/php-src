@@ -15,14 +15,12 @@ steps:
                               re2c \
                               locales \
                               language-pack-de \
-                              libglib2.0-dev:i386 \
                               libssl-dev:i386 \
                               zlib1g-dev:i386 \
                               libxml2-dev:i386 \
                               libgmp-dev:i386 \
                               libicu-dev:i386 \
                               libtidy-dev:i386 \
-                              libenchant-dev:i386 \
                               libaspell-dev:i386 \
                               libpspell-dev:i386 \
                               libsasl2-dev:i386 \

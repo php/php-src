@@ -1,5 +1,5 @@
 --TEST--
-Check that SplObjectStorage::current returns NULL when storage is empty
+Check that SplObjectStorage::current() throws when iterator invalid
 --CREDITS--
 PHPNW Testfest 2009 - Simon Westcott (swestcott@gmail.com)
 --FILE--
@@ -7,8 +7,14 @@ PHPNW Testfest 2009 - Simon Westcott (swestcott@gmail.com)
 
 $s = new SplObjectStorage();
 
-var_dump($s->current());
+var_dump($s->valid());
+try {
+    var_dump($s->current());
+} catch (RuntimeException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
-NULL
+bool(false)
+Called current() on invalid iterator

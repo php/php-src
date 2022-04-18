@@ -20,7 +20,6 @@
 
 #include "php.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 #include "curl_private.h"
 #include "curl_file_arginfo.h"
 
@@ -39,14 +38,14 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_STR_OR_NULL(postname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_string(curl_CURLFile_class, Z_OBJ_P(cf), "name", sizeof("name")-1, ZSTR_VAL(fname));
+	zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "name", sizeof("name")-1, fname);
 
 	if (mime) {
-		zend_update_property_string(curl_CURLFile_class, Z_OBJ_P(cf), "mime", sizeof("mime")-1, ZSTR_VAL(mime));
+		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "mime", sizeof("mime")-1, mime);
 	}
 
 	if (postname) {
-		zend_update_property_string(curl_CURLFile_class, Z_OBJ_P(cf), "postname", sizeof("postname")-1, ZSTR_VAL(postname));
+		zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(cf), "postname", sizeof("postname")-1, postname);
 	}
 }
 
@@ -72,7 +71,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 
 	ZEND_PARSE_PARAMETERS_NONE();
 	res = zend_read_property(curl_CURLFile_class, Z_OBJ_P(ZEND_THIS), name, name_len, 1, &rv);
-	ZVAL_COPY_DEREF(return_value, res);
+	RETURN_COPY_DEREF(res);
 }
 
 static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
@@ -83,7 +82,7 @@ static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_string(curl_CURLFile_class, Z_OBJ_P(ZEND_THIS), name, name_len, ZSTR_VAL(arg));
+	zend_update_property_str(curl_CURLFile_class, Z_OBJ_P(ZEND_THIS), name, name_len, arg);
 }
 
 /* {{{ Get file name */
@@ -147,8 +146,6 @@ ZEND_METHOD(CURLStringFile, __construct)
 void curlfile_register_class(void)
 {
 	curl_CURLFile_class = register_class_CURLFile();
-	curl_CURLFile_class->serialize = zend_class_serialize_deny;
-	curl_CURLFile_class->unserialize = zend_class_unserialize_deny;
 
 	curl_CURLStringFile_class = register_class_CURLStringFile();
 }

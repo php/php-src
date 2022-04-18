@@ -5,6 +5,7 @@ memory_limit=5M
 report_memleaks=0
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class X {
     public $x;
     public function __construct() { $this->x = [$this]; }

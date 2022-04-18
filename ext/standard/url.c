@@ -728,7 +728,7 @@ no_name_header:
 
 				if ((prev_val = zend_hash_str_find(Z_ARRVAL_P(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
 					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
-				} else { /* some headers may occur more than once, therefor we need to remake the string into an array */
+				} else { /* some headers may occur more than once, therefore we need to remake the string into an array */
 					convert_to_array(prev_val);
 					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}

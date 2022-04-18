@@ -70,7 +70,8 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
-; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
+; Set the process dumpable flag (PR_SET_DUMPABLE prctl for Linux or
+; PROC_TRACE_CTL procctl for FreeBSD) even if the process user
 ; or group is different than the master process user. It allows to create process
 ; core dump and ptrace the process for the pool user.
 ; Default Value: no

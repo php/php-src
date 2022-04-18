@@ -17,7 +17,9 @@
    +----------------------------------------------------------------------+
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include "php.h"
 #include "php_globals.h"
 #include "php_memory_streams.h"
@@ -148,7 +150,7 @@ static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 }
 
 /* {{{ wrapper error reporting */
-void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
+static void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
 {
 	char *tmp;
 	char *msg;
@@ -218,7 +220,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	}
 }
 
-void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
+static void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper)
 {
 	if (wrapper && FG(wrapper_errors)) {
 		zend_hash_str_del(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
@@ -535,7 +537,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-PHPAPI int _php_stream_fill_read_buffer(php_stream *stream, size_t size)
+PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
@@ -776,7 +778,7 @@ PHPAPI zend_string *php_stream_read_to_str(php_stream *stream, size_t len)
 	return str;
 }
 
-PHPAPI int _php_stream_eof(php_stream *stream)
+PHPAPI bool _php_stream_eof(php_stream *stream)
 {
 	/* if there is data in the buffer, it's not EOF */
 	if (stream->writepos - stream->readpos > 0) {
@@ -813,7 +815,7 @@ PHPAPI int _php_stream_getc(php_stream *stream)
 	return EOF;
 }
 
-PHPAPI int _php_stream_puts(php_stream *stream, const char *buf)
+PHPAPI bool _php_stream_puts(php_stream *stream, const char *buf)
 {
 	size_t len;
 	char newline[2] = "\n"; /* is this OK for Win? */
@@ -1034,7 +1036,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 	const char *found_delim = NULL;
 	size_t	buffered_len,
 			tent_ret_len;			/* tentative returned length */
-	int	has_delim = delim_len > 0;
+	bool	has_delim = delim_len > 0;
 
 	if (maxlen == 0) {
 		return NULL;
@@ -1144,12 +1146,7 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		buf += justwrote;
 		count -= justwrote;
 		didwrite += justwrote;
-
-		/* Only screw with the buffer if we can seek, otherwise we lose data
-		 * buffered from fifos and sockets */
-		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-			stream->position += justwrote;
-		}
+		stream->position += justwrote;
 	}
 
 	return didwrite;
@@ -1509,9 +1506,9 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	 * result may be inaccurate, as the filter may inflate or deflate the
 	 * number of bytes that we can read.  In order to avoid an upsize followed
 	 * by a downsize of the buffer, overestimate by the step size (which is
-	 * 2K).  */
+	 * 8K).  */
 	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
-		max_len = ssbuf.sb.st_size + step;
+		max_len = MAX(ssbuf.sb.st_size - src->position, 0) + step;
 	} else {
 		max_len = step;
 	}
@@ -1542,7 +1539,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 }
 
 /* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */
-PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
+PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC)
 {
 	char buf[CHUNK_SIZE];
 	size_t haveread = 0;
@@ -1654,7 +1651,7 @@ ZEND_ATTRIBUTE_DEPRECATED
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC)
 {
 	size_t len;
-	int ret = _php_stream_copy_to_stream_ex(src, dest, maxlen, &len STREAMS_REL_CC);
+	zend_result ret = _php_stream_copy_to_stream_ex(src, dest, maxlen, &len STREAMS_REL_CC);
 	if (ret == SUCCESS && len == 0 && maxlen != 0) {
 		return 1;
 	}
@@ -1722,18 +1719,17 @@ int php_init_stream_wrappers(int module_number)
 		) ? SUCCESS : FAILURE;
 }
 
-int php_shutdown_stream_wrappers(int module_number)
+void php_shutdown_stream_wrappers(int module_number)
 {
 	zend_hash_destroy(&url_stream_wrappers_hash);
 	zend_hash_destroy(php_get_stream_filters_hash_global());
 	zend_hash_destroy(php_stream_xport_get_hash());
-	return SUCCESS;
 }
 
 /* Validate protocol scheme names during registration
  * Must conform to /^[a-zA-Z0-9+.-]+$/
  */
-static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsigned int protocol_len)
+static inline zend_result php_stream_wrapper_scheme_validate(const char *protocol, unsigned int protocol_len)
 {
 	unsigned int i;
 
@@ -1750,10 +1746,10 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 }
 
 /* API for registering GLOBAL wrappers */
-PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper)
+PHPAPI zend_result php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper)
 {
-	unsigned int protocol_len = (unsigned int)strlen(protocol);
-	int ret;
+	size_t protocol_len = strlen(protocol);
+	zend_result ret;
 	zend_string *str;
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
@@ -1766,7 +1762,7 @@ PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_strea
 	return ret;
 }
 
-PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
+PHPAPI zend_result php_unregister_url_stream_wrapper(const char *protocol)
 {
 	return zend_hash_str_del(&url_stream_wrappers_hash, protocol, strlen(protocol));
 }
@@ -1779,7 +1775,7 @@ static void clone_wrapper_hash(void)
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper)
+PHPAPI zend_result php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper)
 {
 	if (php_stream_wrapper_scheme_validate(ZSTR_VAL(protocol), ZSTR_LEN(protocol)) == FAILURE) {
 		return FAILURE;
@@ -1792,7 +1788,7 @@ PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_s
 	return zend_hash_add_ptr(FG(stream_wrappers), protocol, wrapper) ? SUCCESS : FAILURE;
 }
 
-PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol)
+PHPAPI zend_result php_unregister_url_stream_wrapper_volatile(zend_string *protocol)
 {
 	if (!FG(stream_wrappers)) {
 		clone_wrapper_hash();
@@ -1830,7 +1826,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, protocol, n))) {
 			char *tmp = estrndup(protocol, n);
 
-			php_strtolower(tmp, n);
+			zend_str_tolower(tmp, n);
 			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, tmp, n))) {
 				char wrapper_name[32];
 
@@ -2255,7 +2251,7 @@ PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
 	return zend_hash_str_find(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname));
 }
 
-PHPAPI int php_stream_context_set_option(php_stream_context *context,
+PHPAPI void php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue)
 {
 	zval *wrapperhash;
@@ -2271,7 +2267,6 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	Z_TRY_ADDREF_P(optionvalue);
 	SEPARATE_ARRAY(wrapperhash);
 	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
-	return SUCCESS;
 }
 /* }}} */
 
@@ -2300,12 +2295,12 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 	unsigned int nfiles = 0;
 
 	if (!namelist) {
-		return FAILURE;
+		return -1;
 	}
 
 	stream = php_stream_opendir(dirname, REPORT_ERRORS, context);
 	if (!stream) {
-		return FAILURE;
+		return -1;
 	}
 
 	while (php_stream_readdir(stream, &sdp)) {
@@ -2317,7 +2312,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 					/* overflow */
 					php_stream_closedir(stream);
 					efree(vector);
-					return FAILURE;
+					return -1;
 				}
 				vector_size *= 2;
 			}
@@ -2331,7 +2326,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 			/* overflow */
 			php_stream_closedir(stream);
 			efree(vector);
-			return FAILURE;
+			return -1;
 		}
 	}
 	php_stream_closedir(stream);

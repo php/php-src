@@ -533,7 +533,8 @@ PHP_METHOD(DOMDocument, createElement)
 
 	node = xmlNewDocNode(docp, NULL, (xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -558,9 +559,10 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	node =  xmlNewDocFragment(docp);
+	node = xmlNewDocFragment(docp);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -589,7 +591,8 @@ PHP_METHOD(DOMDocument, createTextNode)
 
 	node = xmlNewDocText(docp, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -618,7 +621,8 @@ PHP_METHOD(DOMDocument, createComment)
 
 	node = xmlNewDocComment(docp, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -647,7 +651,8 @@ PHP_METHOD(DOMDocument, createCDATASection)
 
 	node = xmlNewCDataBlock(docp, (xmlChar *) value, value_len);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ(node, &ret, intern);
@@ -681,7 +686,8 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 
 	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	node->doc = docp;
@@ -717,7 +723,8 @@ PHP_METHOD(DOMDocument, createAttribute)
 
 	node = xmlNewDocProp(docp, (xmlChar *) name, NULL);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);
@@ -752,7 +759,8 @@ PHP_METHOD(DOMDocument, createEntityReference)
 
 	node = xmlNewReference(docp, (xmlChar *) name);
 	if (!node) {
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);

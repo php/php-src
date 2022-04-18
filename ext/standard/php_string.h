@@ -18,14 +18,14 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
-#if defined(ZTS)
+#ifdef ZTS
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 PHP_MINIT_FUNCTION(nl_langinfo);
 #endif
-#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
 #endif
 
@@ -59,11 +59,7 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
-PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
-PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
-
-#if defined(_REENTRANT)
+#ifdef _REENTRANT
 # ifdef PHP_WIN32
 #  include <wchar.h>
 # endif

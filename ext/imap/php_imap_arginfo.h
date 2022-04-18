@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 39a8d1ff3f13e3c0263d7c56e5d42ab3a2314c88 */
+ * Stub hash: 00bd9062b8e8abe8479c184265c3b8863ce2d7b4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_open, 0, 3, IMAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
@@ -107,7 +107,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_delete, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, imap, IMAP\\Connection, 0)
-	ZEND_ARG_TYPE_INFO(0, message_num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message_nums, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -524,7 +524,7 @@ static zend_class_entry *register_class_IMAP_Connection(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "IMAP", "Connection", class_IMAP_Connection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

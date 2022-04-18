@@ -35,7 +35,6 @@
 #include "fileinfo_arginfo.h"
 #include "fopen_wrappers.h" /* needed for is_url */
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 
 /* {{{ macros and type definitions */
 typedef struct _php_fileinfo {
@@ -109,8 +108,6 @@ PHP_MINIT_FUNCTION(finfo)
 {
 	finfo_class_entry = register_class_finfo();
 	finfo_class_entry->create_object = finfo_objects_new;
-	finfo_class_entry->serialize = zend_class_serialize_deny;
-	finfo_class_entry->unserialize = zend_class_unserialize_deny;
 
 	/* copy the standard object handlers to you handler table */
 	memcpy(&finfo_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -132,10 +129,7 @@ PHP_MINIT_FUNCTION(finfo)
 #ifdef MAGIC_RAW
 	REGISTER_LONG_CONSTANT("FILEINFO_RAW",			MAGIC_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
-#if 0
-	/* seems not usable yet. */
 	REGISTER_LONG_CONSTANT("FILEINFO_APPLE",		MAGIC_APPLE, CONST_CS|CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("FILEINFO_EXTENSION",	MAGIC_EXTENSION, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
@@ -338,7 +332,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				break;
 
 			default:
-				zend_argument_type_error(2, "must be of type resource|string, %s given", zend_zval_type_name(what));
+				zend_argument_type_error(1, "must be of type resource|string, %s given", zend_zval_type_name(what));
 				RETURN_THROWS();
 		}
 

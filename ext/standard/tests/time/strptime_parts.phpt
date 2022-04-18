@@ -5,7 +5,7 @@ Test strptime() function : basic functionality
 if (!function_exists('strptime')) {
     die("skip - strptime() function not available in this build");
 }
-if (!strftime('%Z')) die('skip strftime does not support %Z');
+if (!@strftime('%Z')) die('skip strftime does not support %Z');
 ?>
 --FILE--
 <?php
@@ -47,20 +47,32 @@ var_dump($res["tm_year"]);
 
 setlocale(LC_ALL, $orig);
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing strptime() : basic functionality ***
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(20)
 int(1)
 int(10)
 int(2)
 int(6)
 int(63)
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(20)
 int(1)
 int(10)
 int(2)
 int(6)
 int(163)
+
+Deprecated: Function strftime() is deprecated in %s on line %d
+
+Deprecated: Function strptime() is deprecated in %s on line %d
 int(0)
 int(1)
 int(10)

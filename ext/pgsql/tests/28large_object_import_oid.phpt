@@ -84,14 +84,26 @@ try {
 
 echo "OK";
 ?>
---EXPECT--
+--EXPECTF--
 import LO from int
 import LO from string
 import LO using default connection
+
+Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_lo_unlink(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
+
+Deprecated: pg_lo_import(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Invalid OID value passed
 Invalid OID value passed
+
+Deprecated: pg_lo_import(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Invalid OID value passed
 Invalid OID value passed
+
+Deprecated: pg_lo_import(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OID value must be of type string|int, bool given
 OID value must be of type string|int, array given
 OID value must be of type string|int, stdClass given

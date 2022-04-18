@@ -3,23 +3,35 @@
 /** @generate-class-entries */
 
 namespace PgSql {
-    /** @strict-properties */
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Connection
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Result
     {
     }
 
-    /** @strict-properties */
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
     final class Lob
     {
     }
+
 }
 
 namespace {
+
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
     function pg_pconnect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
@@ -28,6 +40,7 @@ namespace {
 
     function pg_close(?PgSql\Connection $connection = null): bool {}
 
+    /** @refcount 1 */
     function pg_dbname(?PgSql\Connection $connection = null): string {}
 
     function pg_last_error(?PgSql\Connection $connection = null): string {}
@@ -38,22 +51,36 @@ namespace {
      */
     function pg_errormessage(?PgSql\Connection $connection = null): string {}
 
+    /** @refcount 1 */
     function pg_options(?PgSql\Connection $connection = null): string {}
 
+    /** @refcount 1 */
     function pg_port(?PgSql\Connection $connection = null): string {}
 
+    /** @refcount 1 */
     function pg_tty(?PgSql\Connection $connection = null): string {}
 
+    /** @refcount 1 */
     function pg_host(?PgSql\Connection $connection = null): string {}
 
+    /**
+     * @return array<string, int|string|null>
+     * @refcount 1
+     */
     function pg_version(?PgSql\Connection $connection = null): array {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_parameter_status($connection, string $name = UNKNOWN): string|false {}
 
     function pg_ping(?PgSql\Connection $connection = null): bool {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_query($connection, string $query = UNKNOWN): PgSql\Result|false {}
 
     /**
@@ -65,15 +92,20 @@ namespace {
     /**
      * @param PgSql\Connection|string $connection
      * @param string|array $query
+     * @refcount 1
      */
     function pg_query_params($connection, $query, array $params = UNKNOWN): PgSql\Result|false {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_prepare($connection, string $statement_name, string $query = UNKNOWN): PgSql\Result|false {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @param string|array $statement_name
+     * @refcount 1
      */
     function pg_execute($connection, $statement_name, array $params = UNKNOWN): PgSql\Result|false {}
 
@@ -105,6 +137,7 @@ namespace {
 
     function pg_field_table(PgSql\Result $result, int $field, bool $oid_only = false): string|int|false {}
 
+    /** @refcount 1 */
     function pg_field_name(PgSql\Result $result, int $field): string {}
 
     /**
@@ -129,6 +162,7 @@ namespace {
      */
     function pg_fieldtype(PgSql\Result $result, int $field): string {}
 
+    /** @refcount 1 */
     function pg_field_type_oid(PgSql\Result $result, int $field): string|int {}
 
     function pg_field_num(PgSql\Result $result, string $field): int {}
@@ -139,7 +173,10 @@ namespace {
      */
     function pg_fieldnum(PgSql\Result $result, string $field): int {}
 
-    /** @param string|int $row */
+    /**
+     * @param string|int $row
+     * @refcount 1
+     */
     function pg_fetch_result(PgSql\Result $result, $row, string|int $field = UNKNOWN): string|false|null {}
 
     /**
@@ -149,16 +186,37 @@ namespace {
      */
     function pg_result(PgSql\Result $result, $row, string|int $field = UNKNOWN): string|false|null {}
 
+    /**
+     * @return array<int|string, string|null>|false
+     * @refcount 1
+     */
     function pg_fetch_row(PgSql\Result $result, ?int $row = null, int $mode = PGSQL_NUM): array|false {}
 
+    /**
+     * @return array<int|string, string|null>|false
+     * @refcount 1
+     */
     function pg_fetch_assoc(PgSql\Result $result, ?int $row = null): array|false {}
 
+    /**
+     * @return array<int|string, string|null>|false
+     * @refcount 1
+     */
     function pg_fetch_array(PgSql\Result $result, ?int $row = null, int $mode = PGSQL_BOTH): array|false {}
 
+    /** @refcount 1 */
     function pg_fetch_object(PgSql\Result $result, ?int $row = null, string $class = "stdClass", array $constructor_args = []): object|false {}
 
+    /**
+     * @return array<int, array>
+     * @refcount 1
+     */
     function pg_fetch_all(PgSql\Result $result, int $mode = PGSQL_ASSOC): array {}
 
+    /**
+     * @return array<int, string|null>
+     * @refcount 1
+     */
     function pg_fetch_all_columns(PgSql\Result $result, int $field = 0): array {}
 
     function pg_result_seek(PgSql\Result $result, int $row): bool {}
@@ -173,9 +231,7 @@ namespace {
      */
     function pg_fieldprtlen(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
-    /**
-     * @param string|int $row
-     */
+    /** @param string|int $row */
     function pg_field_is_null(PgSql\Result $result, $row, string|int $field = UNKNOWN): int|false {}
 
     /**
@@ -193,6 +249,7 @@ namespace {
      */
     function pg_freeresult(PgSql\Result $result): bool {}
 
+    /** @refcount 1 */
     function pg_last_oid(PgSql\Result $result): string|int|false {}
 
     /**
@@ -208,6 +265,7 @@ namespace {
     /**
      * @param PgSql\Connection $connection
      * @param string|int $oid
+     * @refcount 1
      */
     function pg_lo_create($connection = UNKNOWN, $oid = UNKNOWN): string|int|false {}
 
@@ -236,6 +294,7 @@ namespace {
     /**
      * @param PgSql\Connection $connection
      * @param string|int $oid
+     * @refcount 1
      */
     function pg_lo_open($connection, $oid = UNKNOWN, string $mode = UNKNOWN): PgSql\Lob|false {}
 
@@ -255,6 +314,7 @@ namespace {
      */
     function pg_loclose(PgSql\Lob $lob): bool {}
 
+    /** @refcount 1 */
     function pg_lo_read(PgSql\Lob $lob, int $length = 8192): string|false {}
 
     /**
@@ -283,6 +343,7 @@ namespace {
      * @param PgSql\Connection|string $connection
      * @param string|int $filename
      * @param string|int $oid
+     * @refcount 1
      */
     function pg_lo_import($connection, $filename = UNKNOWN, $oid = UNKNOWN): string|int|false {}
 
@@ -343,26 +404,45 @@ namespace {
     /** @param PgSql\Connection|string $connection */
     function pg_put_line($connection, string $query = UNKNOWN): bool {}
 
+    /**
+     * @return array<int, string>|false
+     * @refcount 1
+     */
     function pg_copy_to(PgSql\Connection $connection, string $table_name, string $separator = "\t", string $null_as = "\\\\N"): array|false {}
 
     function pg_copy_from(PgSql\Connection $connection, string $table_name, array $rows, string $separator = "\t", string $null_as = "\\\\N"): bool {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_escape_string($connection, string $string = UNKNOWN): string {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_escape_bytea($connection, string $string = UNKNOWN): string {}
 
+    /** @refcount 1 */
     function pg_unescape_bytea(string $string): string {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_escape_literal($connection, string $string = UNKNOWN): string|false {}
 
-    /** @param PgSql\Connection|string $connection */
+    /**
+     * @param PgSql\Connection|string $connection
+     * @refcount 1
+     */
     function pg_escape_identifier($connection, string $string = UNKNOWN): string|false {}
 
+    /** @refcount 1 */
     function pg_result_error(PgSql\Result $result): string|false {}
 
+    /** @refcount 1 */
     function pg_result_error_field(PgSql\Result $result, int $field_code): string|false|null {}
 
     function pg_connection_status(PgSql\Connection $connection): int {}
@@ -381,32 +461,57 @@ namespace {
 
     function pg_send_prepare(PgSql\Connection $connection, string $statement_name, string $query): int|bool {}
 
-    function pg_send_execute(PgSql\Connection $connection, string $query, array $params): int|bool {}
+    function pg_send_execute(PgSql\Connection $connection, string $statement_name, array $params): int|bool {}
 
+    /** @refcount 1 */
     function pg_get_result(PgSql\Connection $connection): PgSql\Result|false {}
 
+    /** @refcount 1 */
     function pg_result_status(PgSql\Result $result, int $mode = PGSQL_STATUS_LONG): string|int {}
 
+    /**
+     * @return array<int|string, int|string>
+     * @refcount 1
+     */
     function pg_get_notify(PgSql\Connection $connection, int $mode = PGSQL_ASSOC): array|false {}
 
     function pg_get_pid(PgSql\Connection $connection): int {}
 
-    /** @return resource|false */
+    /**
+     * @return resource|false
+     * @refcount 1
+     */
     function pg_socket(PgSql\Connection $connection) {}
 
     function pg_consume_input(PgSql\Connection $connection): bool {}
 
     function pg_flush(PgSql\Connection $connection): int|bool {}
 
+    /**
+     * @return array<string, array>|false
+     * @refcount 1
+     */
     function pg_meta_data(PgSql\Connection $connection, string $table_name, bool $extended = false): array|false {}
 
+    /**
+     * @return array<string, mixed>|false
+     * @refcount 1
+     */
     function pg_convert(PgSql\Connection $connection, string $table_name, array $values, int $flags = 0): array|false {}
 
+    /** @refcount 1 */
     function pg_insert(PgSql\Connection $connection, string $table_name, array $values, int $flags = PGSQL_DML_EXEC): PgSql\Result|string|bool {}
 
+    /** @refcount 1 */
     function pg_update(PgSql\Connection $connection, string $table_name, array $values, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
+    /** @refcount 1 */
     function pg_delete(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC): string|bool {}
 
+    /**
+     * @return array<int, array>|string|false
+     * @refcount 1
+     */
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+
 }

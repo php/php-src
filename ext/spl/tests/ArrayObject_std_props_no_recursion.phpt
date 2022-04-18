@@ -13,7 +13,10 @@ $c->prop = 'c';
 var_dump((array) $c);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property ArrayObject::$prop is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayObject::$prop is deprecated in %s on line %d
 array(3) {
   [0]=>
   int(1)
@@ -22,6 +25,8 @@ array(3) {
   [2]=>
   int(3)
 }
+
+Deprecated: Creation of dynamic property ArrayObject::$prop is deprecated in %s on line %d
 array(1) {
   ["prop"]=>
   string(1) "c"

@@ -51,7 +51,7 @@ unlink($fn);
 --CLEAN--
 <?php
 $fn = __DIR__ . "/test76422";
-unlink($fn);
+@unlink($fn);
 ?>
 --EXPECT--
 bool(true)

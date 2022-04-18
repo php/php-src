@@ -1202,7 +1202,6 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	char *pos;
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
 	char halt_stub[] = "__HALT_COMPILER();";
-	char *tmp;
 
 	php_stream *stubfile, *oldfile;
 	int free_user_stub, closeoldfile = 0;
@@ -1305,9 +1304,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			free_user_stub = 0;
 		}
 
-		tmp = estrndup(user_stub, len);
-		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
-			efree(tmp);
+		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
 			if (error) {
 				spprintf(error, 0, "illegal stub for zip-based phar \"%s\"", phar->fname);
 			}
@@ -1316,8 +1313,6 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			}
 			return EOF;
 		}
-		pos = user_stub + (pos - tmp);
-		efree(tmp);
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();
@@ -1420,7 +1415,7 @@ fperror:
 
 	memcpy(eocd.signature, "PK\5\6", 4);
 	if (!phar->is_data && !phar->sig_flags) {
-		phar->sig_flags = PHAR_SIG_SHA1;
+		phar->sig_flags = PHAR_SIG_SHA256;
 	}
 	if (phar->sig_flags) {
 		PHAR_SET_16(eocd.counthere, zend_hash_num_elements(&phar->manifest) + 1);

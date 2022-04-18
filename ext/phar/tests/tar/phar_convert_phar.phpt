@@ -39,7 +39,6 @@ var_dump(strlen($phar->getStub()));
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.3.phar');
 __HALT_COMPILER();

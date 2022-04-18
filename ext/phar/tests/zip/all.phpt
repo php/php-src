@@ -41,8 +41,10 @@ var_dump($phar->getMetadata());
 var_dump($phar['a']->getMetadata());
 ?>
 --CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
+<?php
+@unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php');
+?>
 --EXPECT--
 bool(false)
 bool(false)

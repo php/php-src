@@ -1,5 +1,9 @@
 --TEST--
 ReflectionClass::isSubclassOf() - fixed crash for unbound anonymous class
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Anon class is linked during preloading');
+?>
 --FILE--
 <?php
 class X {

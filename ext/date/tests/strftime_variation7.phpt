@@ -30,13 +30,25 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Day of the month as a decimal number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "08"
 
 --Day of the year as a decimal number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(3) "221"
 
 --Day of the week as a decimal number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(1) "5"

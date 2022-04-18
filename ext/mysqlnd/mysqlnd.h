@@ -107,9 +107,8 @@ PHPAPI void mysqlnd_debug(const char *mode);
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
-#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), MYSQLND_SEND_QUERY_EXPLICIT, NULL, NULL)
-#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data, MYSQLND_REAP_RESULT_EXPLICIT)
-#define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result))
+#define mysqlnd_async_query(conn, query_str, query_len)	((conn)->data)->m->send_query((conn)->data, (query_str), (query_len), NULL, NULL)
+#define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data)
 
 PHPAPI enum_func_status mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num);
 
@@ -177,8 +176,6 @@ PHPAPI void mysqlnd_free_param_bind_dtor(MYSQLND_PARAM_BIND * param_bind);
 PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind);
 
 
-PHPAPI const char * mysqlnd_field_type_name(const enum mysqlnd_field_types field_type);
-
 /* LOAD DATA LOCAL */
 PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
@@ -232,7 +229,6 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 #define mysqlnd_stmt_free_result_bind(stmt,bind)	(stmt)->m->free_result_bind((stmt), (bind))
 #define mysqlnd_stmt_bind_result(stmt,bind)			(stmt)->m->bind_result((stmt), (bind))
 #define mysqlnd_stmt_bind_one_result(s,no)			(s)->m->bind_one_result((s), (no))
-#define mysqlnd_stmt_param_metadata(stmt)			(stmt)->m->get_parameter_metadata((stmt))
 #define mysqlnd_stmt_result_metadata(stmt)			(stmt)->m->get_result_metadata((stmt))
 
 #define	mysqlnd_stmt_free_result(stmt)				(stmt)->m->free_result((stmt))

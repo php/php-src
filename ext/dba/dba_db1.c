@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_DB1
+#ifdef DBA_DB1
 #include "php_db1.h"
 
 #ifdef DB1_INCLUDE_FILE
@@ -30,9 +30,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#define DB1_DATA dba_db1_data *dba = info->dbf
-#define DB1_GKEY DBT gkey; gkey.data = (char *) key; gkey.size = keylen
 
 typedef struct {
 	DB  *dbp;
@@ -44,11 +41,7 @@ DBA_OPEN_FUNC(db1)
 	DB		*db;
 
 	int gmode;
-	int filemode = 0644;
-
-	if (info->argc > 0) {
-		filemode = zval_get_long(&info->argv[0]);
-	}
+	int filemode = info->file_permission;
 
 	gmode = 0;
 	switch (info->mode) {
@@ -84,82 +77,91 @@ DBA_OPEN_FUNC(db1)
 
 DBA_CLOSE_FUNC(db1)
 {
-	DB1_DATA;
+	dba_db1_data *dba = info->dbf;
 	dba->dbp->close(dba->dbp);
 	pefree(info->dbf, info->flags&DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	memset(&gval, 0, sizeof(gval));
 	if (dba->dbp->get(dba->dbp, &gkey, &gval, 0) == RET_SUCCESS) {
-		if (newlen) *newlen = gval.size;
-		return estrndup(gval.data, gval.size);
+		return zend_string_init(gval.data, gval.size, /* persistent */ false);
 	}
 	return NULL;
 }
 
 DBA_UPDATE_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
 
-	gval.data = (char *) val;
-	gval.size = vallen;
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
+
+	gval.data = ZSTR_VAL(val);
+	gval.size = ZSTR_LEN(val);
 
 	return dba->dbp->put(dba->dbp, &gkey, &gval, mode == 1 ? R_NOOVERWRITE : 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
 
 DBA_EXISTS_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gval;
-	DB1_DATA;
-	DB1_GKEY;
+	DBT gkey;
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	return dba->dbp->get(dba->dbp, &gkey, &gval, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
 
 DBA_DELETE_FUNC(db1)
 {
-	DB1_DATA;
-	DB1_GKEY;
+	dba_db1_data *dba = info->dbf;
+	DBT gkey;
+
+	gkey.data = ZSTR_VAL(key);
+	gkey.size = ZSTR_LEN(key);
 
 	return dba->dbp->del(dba->dbp, &gkey, 0) != RET_SUCCESS ? FAILURE : SUCCESS;
 }
 
 DBA_FIRSTKEY_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gkey;
 	DBT gval;
-	DB1_DATA;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
 
 	if (dba->dbp->seq(dba->dbp, &gkey, &gval, R_FIRST) == RET_SUCCESS) {
-		if (newlen) *newlen = gkey.size;
-		return estrndup(gkey.data, gkey.size);
+		return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 	}
 	return NULL;
 }
 
 DBA_NEXTKEY_FUNC(db1)
 {
+	dba_db1_data *dba = info->dbf;
 	DBT gkey;
 	DBT gval;
-	DB1_DATA;
 
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
 
 	if (dba->dbp->seq(dba->dbp, &gkey, &gval, R_NEXT) == RET_SUCCESS) {
-		if (newlen) *newlen = gkey.size;
-		return estrndup(gkey.data, gkey.size);
+		return zend_string_init(gkey.data, gkey.size, /* persistent */ false);
 	}
 	return NULL;
 }

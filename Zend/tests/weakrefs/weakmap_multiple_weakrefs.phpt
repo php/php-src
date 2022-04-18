@@ -12,6 +12,7 @@ $map2 = new WeakMap;
 $map2[$obj] = 1;
 $map3 = clone $map2;
 
+var_dump($ref === WeakReference::create($obj));
 var_dump($ref->get(), $map, $map2, $map3);
 unset($obj);
 var_dump($ref->get(), $map, $map2, $map3);
@@ -31,6 +32,7 @@ unset($obj);
 
 ?>
 --EXPECT--
+bool(true)
 object(stdClass)#1 (0) {
 }
 object(WeakMap)#3 (1) {

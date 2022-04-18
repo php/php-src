@@ -544,7 +544,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->local_infile);
 			break;
 
-#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
 		case PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY:
 		{
 			const char* local_infile_directory = NULL;
@@ -765,7 +765,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		}
 
-#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
 		zend_string *local_infile_directory = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, NULL);
 		if (local_infile_directory && !php_check_open_basedir(ZSTR_VAL(local_infile_directory))) {
 			if (mysql_options(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, (const char *)ZSTR_VAL(local_infile_directory))) {

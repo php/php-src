@@ -250,7 +250,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           com_dotnet
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2003 - 2005)
-                     Christoph M. Becker <cmb@php.net> (2018 - 2020)
+                     Christoph M. Becker <cmb@php.net> (2018 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Windows
 SINCE:               5.0
@@ -313,7 +313,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2002 - 2016)
-                     Christoph M. Becker <cmb@php.net> (2015 - 2020)
+                     Christoph M. Becker <cmb@php.net> (2015 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------

@@ -35,7 +35,6 @@
 #include "php_ini.h"
 #include "php_streams.h"
 #include "Zend/zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -481,8 +480,6 @@ PHP_MINIT_FUNCTION(imap)
 
 	php_imap_ce = register_class_IMAP_Connection();
 	php_imap_ce->create_object = imap_object_create;
-	php_imap_ce->serialize = zend_class_serialize_deny;
-	php_imap_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&imap_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	imap_object_handlers.offset = XtOffsetOf(php_imap_object, std);
@@ -491,7 +488,7 @@ PHP_MINIT_FUNCTION(imap)
 	imap_object_handlers.clone_obj = NULL;
 
 	/* lets allow NIL */
-	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS | CONST_DEPRECATED);
 
 	/* plug in our gets */
 	mail_parameters(NIL, SET_GETS, (void *) NIL);
@@ -707,11 +704,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
 		if (EG(error_reporting) & E_NOTICE) {
-			ecur = IMAPG(imap_errorstack);
-			while (ecur != NIL) {
-				php_error_docref(NULL, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
-				ecur = ecur->next;
-			}
+			zend_try {
+				ecur = IMAPG(imap_errorstack);
+				while (ecur != NIL) {
+					php_error_docref(NULL, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
+					ecur = ecur->next;
+				}
+			} zend_end_try();
 		}
 		mail_free_errorlist(&IMAPG(imap_errorstack));
 		IMAPG(imap_errorstack) = NIL;
@@ -720,11 +719,13 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 	if (IMAPG(imap_alertstack) != NIL) {
 		/* output any remaining alerts at E_NOTICE level */
 		if (EG(error_reporting) & E_NOTICE) {
-			acur = IMAPG(imap_alertstack);
-			while (acur != NIL) {
-				php_error_docref(NULL, E_NOTICE, "%s", acur->LTEXT);
-				acur = acur->next;
-			}
+			zend_try {
+				acur = IMAPG(imap_alertstack);
+				while (acur != NIL) {
+					php_error_docref(NULL, E_NOTICE, "%s", acur->LTEXT);
+					acur = acur->next;
+				}
+			} zend_end_try();
 		}
 		mail_free_stringlist(&IMAPG(imap_alertstack));
 		IMAPG(imap_alertstack) = NIL;
@@ -3192,10 +3193,10 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->parameter = tmp_param;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
-				if(Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if(Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
-					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+					ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						CHECK_HEADER_INJECTION(key, 0, "body disposition key");
 						disp_param = mail_newbody_parameter();
@@ -3232,10 +3233,10 @@ PHP_FUNCTION(imap_mail_compose)
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
-					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+					ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						CHECK_HEADER_INJECTION(key, 0, "body type.parameters key");
 						disp_param = mail_newbody_parameter();
@@ -3314,10 +3315,10 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->parameter = tmp_param;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type.parameters", sizeof("type.parameters") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
-					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+					ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						CHECK_HEADER_INJECTION(key, 0, "body type.parameters key");
 						disp_param = mail_newbody_parameter();
@@ -3354,10 +3355,10 @@ PHP_FUNCTION(imap_mail_compose)
 				memcpy(bod->disposition.type, Z_STRVAL_P(pvalue), Z_STRLEN_P(pvalue)+1);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "disposition", sizeof("disposition") - 1)) != NULL) {
-				if (Z_TYPE_P(pvalue) == IS_ARRAY) {
+				if (Z_TYPE_P(pvalue) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(pvalue))) {
 					disp_param = tmp_param = NULL;
 					SEPARATE_ARRAY(pvalue);
-					ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
+					ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(pvalue), key, disp_data) {
 						if (key == NULL) continue;
 						CHECK_HEADER_INJECTION(key, 0, "body disposition key");
 						disp_param = mail_newbody_parameter();
@@ -3994,7 +3995,7 @@ static int _php_rfc822_len(char *str)
 	 */
 	len = strlen(str) + 2;
 	p = str;
-	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
+	/* rfc822_cat() will escape all " and \ characters, therefore we need to increase
 	 * our buffer length to account for these characters.
 	 */
 	while ((p = strpbrk(p, "\\\""))) {

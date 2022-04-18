@@ -8,6 +8,7 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 
 function simplexml_import_dom(SimpleXMLElement|DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
+/** @not-serializable */
 class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
     /** @tentative-return-type */
@@ -43,7 +44,7 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
     public function addChild(string $qualifiedName, ?string $value = null, ?string $namespace = null): ?SimpleXMLElement {}
 
     /** @tentative-return-type */
-    public function addAttribute(string $qualifiedName, ?string $value = null, ?string $namespace = null): void {}
+    public function addAttribute(string $qualifiedName, string $value, ?string $namespace = null): void {}
 
     /** @tentative-return-type */
     public function getName(): string {}

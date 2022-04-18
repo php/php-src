@@ -619,7 +619,20 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 
-void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization);
+/**
+ * Group: WebP
+ *
+ * Constant: gdWebpLossless
+ *
+ * Lossless quality threshold. When image quality is greater than or equal to
+ * <gdWebpLossless>, the image will be written in the lossless WebP format.
+ *
+ * See also:
+ *   - <gdImageWebpCtx>
+ */
+#define gdWebpLossless 101
+
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
@@ -628,7 +641,6 @@ gdImagePtr gdImageCreateFromGif(FILE *fd);
 gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
 
-//TODO: we may not need all of these
 void gdImageAvif(gdImagePtr im, FILE *outfile);
 void gdImageAvifEx(gdImagePtr im, FILE *outfile, int quality, int speed);
 void *gdImageAvifPtr(gdImagePtr im, int *size);

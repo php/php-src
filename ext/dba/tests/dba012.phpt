@@ -40,5 +40,5 @@ Warning: ini_set(): No such handler: does_not_exist in %sdba012.php on line %d
 resource(%d) of type (dba)
 Test 2
 
-Warning: dba_open(%stest0.dbm,n): No default handler selected in %sdba012.php on line %d
+Warning: dba_open(): No default handler selected in %sdba012.php on line %d
 bool(false)

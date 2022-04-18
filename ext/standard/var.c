@@ -27,6 +27,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 #include "zend_enum.h"
+#include "zend_exceptions.h"
 /* }}} */
 
 struct php_serialize_data {
@@ -194,7 +195,7 @@ again:
 		}
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-			php_printf("%sresource(%d) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
+			php_printf("%sresource(" ZEND_LONG_FMT ") of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
 			break;
 		}
 		case IS_REFERENCE:
@@ -379,7 +380,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
-		php_printf("resource(%d) of type (%s) refcount(%u)\n", Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
+		php_printf("resource(" ZEND_LONG_FMT ") of type (%s) refcount(%u)\n", Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
 	case IS_REFERENCE:
@@ -479,7 +480,6 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
-	char tmp_str[PHP_DOUBLE_MAX_LENGTH];
 	zend_string *ztmp, *ztmp2;
 	zend_ulong index;
 	zend_string *key;
@@ -507,17 +507,8 @@ again:
 			smart_str_append_long(buf, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
-			smart_str_appends(buf, tmp_str);
-			/* Without a decimal point, PHP treats a number literal as an int.
-			 * This check even works for scientific notation, because the
-			 * mantissa always contains a decimal point.
-			 * We need to check for finiteness, because INF, -INF and NAN
-			 * must not have a decimal point added.
-			 */
-			if (zend_finite(Z_DVAL_P(struc)) && NULL == strchr(tmp_str, '.')) {
-				smart_str_appendl(buf, ".0", 2);
-			}
+			smart_str_append_double(
+				buf, Z_DVAL_P(struc), (int) PG(serialize_precision), /* zero_fraction */ true);
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), "'\\", 2);
@@ -671,7 +662,11 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 
 	data->n += 1;
 
-	if (!is_ref && (Z_TYPE_P(var) != IS_OBJECT || Z_REFCOUNT_P(var) == 1)) {
+	if (is_ref) {
+		/* pass */
+	} else if (Z_TYPE_P(var) != IS_OBJECT) {
+		return 0;
+	} else if (Z_REFCOUNT_P(var) == 1 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
 		return 0;
 	}
 
@@ -1037,8 +1032,8 @@ again:
 			return;
 
 		case IS_DOUBLE: {
-			char tmp_str[PHP_DOUBLE_MAX_LENGTH];
-			php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
+			char tmp_str[ZEND_DOUBLE_MAX_LENGTH];
+			zend_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', tmp_str);
 
 			size_t len = strlen(tmp_str);
 			char *res = smart_str_extend(buf, 2 + len + 1);
@@ -1057,6 +1052,12 @@ again:
 				zend_class_entry *ce = Z_OBJCE_P(struc);
 				bool incomplete_class;
 				uint32_t count;
+
+				if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
+					zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed",
+						ZSTR_VAL(ce->name));
+					return;
+				}
 
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
 					PHP_CLASS_ATTRIBUTES;
@@ -1157,7 +1158,7 @@ again:
 				}
 
 				if (ce != PHP_IC_ENTRY) {
-					zval *zv = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP), 1);
+					zval *zv = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_SLEEP));
 
 					if (zv) {
 						HashTable *ht;
@@ -1474,6 +1475,14 @@ PHP_FUNCTION(memory_get_peak_usage) {
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(zend_memory_peak_usage(real_usage));
+}
+/* }}} */
+
+/* {{{ Resets the peak PHP memory usage */
+PHP_FUNCTION(memory_reset_peak_usage) {
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_memory_reset_peak_usage();
 }
 /* }}} */
 

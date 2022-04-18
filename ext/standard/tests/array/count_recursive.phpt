@@ -58,7 +58,7 @@ class count_class implements Countable {
   public $var_public;
   protected $var_protected;
 
-  public function count() {
+  public function count(): int {
     return 3;
   }
 }

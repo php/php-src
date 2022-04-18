@@ -12,10 +12,7 @@ unset ($unset_var);
 $fp = fopen(__FILE__, "r");
 
 // get an object
-class sample  {
-}
-
-$obj = new sample();
+$obj = new stdClass();
 $obj->MyInt = 99;
 $obj->MyFloat = 123.45;
 $obj->MyBool = true;

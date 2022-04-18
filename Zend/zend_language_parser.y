@@ -154,6 +154,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_PRIVATE       "'private'"
 %token <ident> T_PROTECTED     "'protected'"
 %token <ident> T_PUBLIC        "'public'"
+%token <ident> T_READONLY      "'readonly'"
 %token <ident> T_VAR           "'var'"
 %token <ident> T_UNSET         "'unset'"
 %token <ident> T_ISSET         "'isset'"
@@ -279,7 +280,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
-%type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
+%type <num> method_modifiers non_empty_member_modifiers member_modifier
+%type <num> optional_property_modifiers property_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
@@ -305,7 +307,7 @@ reserved_non_modifiers:
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
 ;
 
 ampersand:
@@ -769,19 +771,24 @@ attributed_parameter:
 	|	parameter				{ $$ = $1; }
 ;
 
-optional_visibility_modifier:
+optional_property_modifiers:
 		%empty					{ $$ = 0; }
-	|	T_PUBLIC				{ $$ = ZEND_ACC_PUBLIC; }
+	|	optional_property_modifiers property_modifier
+			{ $$ = zend_add_member_modifier($1, $2); if (!$$) { YYERROR; } }
+
+property_modifier:
+		T_PUBLIC				{ $$ = ZEND_ACC_PUBLIC; }
 	|	T_PROTECTED				{ $$ = ZEND_ACC_PROTECTED; }
 	|	T_PRIVATE				{ $$ = ZEND_ACC_PRIVATE; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
 ;
 
 parameter:
-		optional_visibility_modifier optional_type_without_static
+		optional_property_modifiers optional_type_without_static
 		is_reference is_variadic T_VARIABLE backup_doc_comment
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
 					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
-	|	optional_visibility_modifier optional_type_without_static
+	|	optional_property_modifiers optional_type_without_static
 		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
 					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
@@ -853,6 +860,7 @@ return_type:
 argument_list:
 		'(' ')'	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	'(' non_empty_argument_list possible_comma ')' { $$ = $2; }
+	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create(ZEND_AST_CALLABLE_CONVERT); }
 ;
 
 non_empty_argument_list:
@@ -1000,6 +1008,7 @@ member_modifier:
 	|	T_STATIC				{ $$ = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$ = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
 ;
 
 property_list:
@@ -1120,7 +1129,7 @@ expr:
 	|	expr T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
 	|	expr T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_AND, $1, $3); }
 	|	expr '^' expr	{ $$ = zend_ast_create_binary_op(ZEND_BW_XOR, $1, $3); }
-	|	expr '.' expr 	{ $$ = zend_ast_create_binary_op(ZEND_CONCAT, $1, $3); }
+	|	expr '.' expr 	{ $$ = zend_ast_create_concat_op($1, $3); }
 	|	expr '+' expr 	{ $$ = zend_ast_create_binary_op(ZEND_ADD, $1, $3); }
 	|	expr '-' expr 	{ $$ = zend_ast_create_binary_op(ZEND_SUB, $1, $3); }
 	|	expr '*' expr	{ $$ = zend_ast_create_binary_op(ZEND_MUL, $1, $3); }

@@ -43,7 +43,7 @@ typedef struct _optimizer_call_info {
 	uint32_t       func_arg_num;
 } optimizer_call_info;
 
-static void zend_delete_call_instructions(zend_op *opline)
+static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opline)
 {
 	int call = 0;
 
@@ -73,17 +73,7 @@ static void zend_delete_call_instructions(zend_op *opline)
 			case ZEND_SEND_VAL:
 			case ZEND_SEND_VAR:
 				if (call == 0) {
-					if (opline->op1_type == IS_CONST) {
-						MAKE_NOP(opline);
-					} else if (opline->op1_type == IS_CV) {
-						opline->opcode = ZEND_CHECK_VAR;
-						opline->extended_value = 0;
-						opline->result.var = 0;
-					} else {
-						opline->opcode = ZEND_FREE;
-						opline->extended_value = 0;
-						opline->result.var = 0;
-					}
+					zend_optimizer_convert_to_free_op1(op_array, opline);
 				}
 				break;
 		}
@@ -144,7 +134,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				MAKE_NOP(opline);
 			}
 
-			zend_delete_call_instructions(opline-1);
+			zend_delete_call_instructions(op_array, opline-1);
 		}
 	}
 }
@@ -188,6 +178,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
 			case ZEND_DO_FCALL_BY_NAME:
+			case ZEND_CALLABLE_CONVERT:
 				call--;
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
@@ -199,14 +190,18 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
 						fcall->op2.constant = fcall->op2.constant + 1;
-						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
+						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
+							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
+						}
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
 						fcall->op2.constant = fcall->op2.constant + 1;
-						opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
+						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
+							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
+						}
 					} else if (fcall->opcode == ZEND_INIT_STATIC_METHOD_CALL
 							|| fcall->opcode == ZEND_INIT_METHOD_CALL
 							|| fcall->opcode == ZEND_NEW) {
@@ -216,7 +211,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 
 					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
-					 && call_stack[call].try_inline) {
+							&& call_stack[call].try_inline
+							&& opline->opcode != ZEND_CALLABLE_CONVERT) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
 					}
 				}

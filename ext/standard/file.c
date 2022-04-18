@@ -65,7 +65,7 @@
 #include "php_string.h"
 #include "file.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
 # else
@@ -153,11 +153,19 @@ static void file_globals_dtor(php_file_globals *file_globals_p)
 #endif
 }
 
+static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
+{
+	if (zend_ini_parse_bool(new_value)) {
+		zend_error(E_DEPRECATED, "auto_detect_line_endings is deprecated");
+	}
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_agent", NULL, PHP_INI_ALL, OnUpdateString, user_agent, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("from", NULL, PHP_INI_ALL, OnUpdateString, from_address, php_file_globals, file_globals)
 	STD_PHP_INI_ENTRY("default_socket_timeout", "60", PHP_INI_ALL, OnUpdateLong, default_socket_timeout, php_file_globals, file_globals)
-	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateBool, auto_detect_line_endings, php_file_globals, file_globals)
+	STD_PHP_INI_BOOLEAN("auto_detect_line_endings", "0", PHP_INI_ALL, OnUpdateAutoDetectLineEndings, auto_detect_line_endings, php_file_globals, file_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
@@ -238,7 +246,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 # ifdef PF_INET6
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
 # elif defined(AF_INET6)
@@ -300,8 +308,8 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("FILE_APPEND",					PHP_FILE_APPEND,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT",		PHP_FILE_NO_DEFAULT_CONTEXT,		CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILE_TEXT",						0,									CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("FILE_BINARY",					0,									CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 
 #ifdef HAVE_FNMATCH
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_CS | CONST_PERSISTENT);
@@ -482,7 +490,7 @@ PHP_FUNCTION(get_meta_tags)
 		} else if (tok == TOK_CLOSETAG) {
 			if (have_name) {
 				/* For BC */
-				php_strtolower(name, strlen(name));
+				zend_str_tolower(name, strlen(name));
 				if (have_content) {
 					add_assoc_string(return_value, name, value);
 				} else {
@@ -900,7 +908,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL, E_WARNING, "%d is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -1061,8 +1069,6 @@ PHPAPI PHP_FUNCTION(fgets)
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval *res;
-	char buf[2];
-	int result;
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1071,15 +1077,12 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	result = php_stream_getc(stream);
+	int result = php_stream_getc(stream);
 
 	if (result == EOF) {
 		RETVAL_FALSE;
 	} else {
-		buf[0] = result;
-		buf[1] = '\0';
-
-		RETURN_STRINGL(buf, 1);
+		RETURN_CHAR(result);
 	}
 }
 /* }}} */
@@ -2141,12 +2144,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 									 * assign all the data from the start of
 									 * the enclosure to end of data to the
 									 * last element */
-									if ((size_t)temp_len > (size_t)(limit - buf)) {
-										goto quit_loop_2;
-									}
-									zend_array_destroy(Z_ARR_P(return_value));
-									RETVAL_FALSE;
-									goto out;
+									goto quit_loop_2;
 								}
 
 								temp_len += new_len;
@@ -2297,7 +2295,6 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 		add_next_index_stringl(return_value, temp, comp_end - temp);
 	} while (inc_len > 0);
 
-out:
 	efree(temp);
 	if (stream) {
 		efree(buf);
@@ -2384,7 +2381,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				}
 
 				if (ch == '<' || ch == '>') {
-					/* Was just an apostrohpe */
+					/* Was just an apostrophe */
 					md->ulc = 1;
 					md->lc = ch;
 				}

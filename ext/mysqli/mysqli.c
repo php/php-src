@@ -398,7 +398,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 
 	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
-	ZEND_HASH_FOREACH_PTR(props, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(props, entry) {
 		zval rv;
 		zval *value;
 
@@ -596,7 +596,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_FILE", MYSQL_READ_DEFAULT_FILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
-#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOAD_DATA_LOCAL_DIR", MYSQL_OPT_LOAD_DATA_LOCAL_DIR, CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
@@ -772,6 +772,12 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_RELEASE", TRANS_COR_RELEASE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_NO_RELEASE", TRANS_COR_NO_RELEASE, CONST_CS | CONST_PERSISTENT);
 
+#ifdef MARIADB_BASE_VERSION
+	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", 1, CONST_CS | CONST_PERSISTENT);
+#else
+	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", 0, CONST_CS | CONST_PERSISTENT);
+#endif
+
 
 #ifdef MYSQLI_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
@@ -827,23 +833,6 @@ PHP_RINIT_FUNCTION(mysqli)
 }
 /* }}} */
 
-#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
-static void php_mysqli_persistent_helper_for_every(void *p)
-{
-	mysqlnd_end_psession((MYSQLND *) p);
-} /* }}} */
-
-
-static int php_mysqli_persistent_helper_once(zend_rsrc_list_entry *le)
-{
-	if (le->type == php_le_pmysqli()) {
-		mysqli_plist_entry *plist = (mysqli_plist_entry *) le->ptr;
-		zend_ptr_stack_apply(&plist->free_links, php_mysqli_persistent_helper_for_every);
-	}
-	return ZEND_HASH_APPLY_KEEP;
-} /* }}} */
-#endif
-
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(mysqli)
@@ -856,10 +845,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
-#if defined(A0) && defined(MYSQLI_USE_MYSQLND)
-	/* psession is being called when the connection is freed - explicitly or implicitly */
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) php_mysqli_persistent_helper_once);
-#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -994,7 +980,11 @@ PHP_METHOD(mysqli_result, __construct)
 	}
 
 	if (!result) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
+	}
+	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+		php_mysqli_report_index("from previous query", mysqli_server_status(mysql->mysql));
 	}
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -1053,7 +1043,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 					EMPTY_SWITCH_DEFAULT_CASE()
 				}
 				/* even though lval is declared as unsigned, the value
-				 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+				 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
 				 * use MYSQLI_LL_SPEC.
 				 */
 				snprintf(tmp, sizeof(tmp), (mysql_fetch_field_direct(result, i)->flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
@@ -1082,6 +1072,17 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	}
 #else
 	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
+	/* TODO: We don't have access to the connection object at this point, so we use low-level
+	 * mysqlnd APIs to access the error information. We should try to pass through the connection
+	 * object instead. */
+	if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+		MYSQLND_CONN_DATA *conn = result->conn;
+		unsigned error_no = conn->m->get_error_no(conn);
+		if (error_no) {
+			php_mysqli_report_error(
+				conn->m->get_sqlstate(conn), error_no, conn->m->get_error_str(conn));
+		}
+	}
 #endif
 }
 /* }}} */
@@ -1138,11 +1139,13 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
 		object_init_ex(return_value, ce);
+		HashTable *prop_table = zend_symtable_to_proptable(Z_ARR(dataset));
+		zval_ptr_dtor(&dataset);
 		if (!ce->default_properties_count && !ce->__set) {
-			Z_OBJ_P(return_value)->properties = Z_ARR(dataset);
+			Z_OBJ_P(return_value)->properties = prop_table;
 		} else {
-			zend_merge_properties(return_value, Z_ARRVAL(dataset));
-			zval_ptr_dtor(&dataset);
+			zend_merge_properties(return_value, prop_table);
+			zend_array_release(prop_table);
 		}
 
 		if (ce->constructor) {

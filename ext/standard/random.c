@@ -29,9 +29,9 @@
 #ifdef __linux__
 # include <sys/syscall.h>
 #endif
-#if defined(__OpenBSD__) || defined(__NetBSD__) || defined(__FreeBSD__)
+#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
-# if __FreeBSD__ && __FreeBSD_version > 1200000
+# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || defined(__sun)
 #  include <sys/random.h>
 # endif
 #endif
@@ -99,8 +99,8 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 #else
 	size_t read_bytes = 0;
 	ssize_t n;
-#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000)
-	/* Linux getrandom(2) syscall or FreeBSD getrandom(2) function*/
+#if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || defined(__sun)
+	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD getrandom(2) function*/
 	/* Keep reading until we get enough entropy */
 	while (read_bytes < size) {
 		/* Below, (bytes + read_bytes)  is pointer arithmetic.
@@ -147,7 +147,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		struct stat st;
 
 		if (fd < 0) {
-#if HAVE_DEV_URANDOM
+#ifdef HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
 #endif
 			if (fd < 0) {

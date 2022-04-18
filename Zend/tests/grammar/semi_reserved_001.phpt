@@ -45,6 +45,7 @@ class Obj
     function array(){ echo __METHOD__, PHP_EOL; }
     function print(){ echo __METHOD__, PHP_EOL; }
     function echo(){ echo __METHOD__, PHP_EOL; }
+    function readonly(){ echo __METHOD__, PHP_EOL; }
     function require(){ echo __METHOD__, PHP_EOL; }
     function require_once(){ echo __METHOD__, PHP_EOL; }
     function return(){ echo __METHOD__, PHP_EOL; }
@@ -125,6 +126,7 @@ $obj->throw();
 $obj->array();
 $obj->print();
 $obj->echo();
+$obj->readonly();
 $obj->require();
 $obj->require_once();
 $obj->return();
@@ -205,6 +207,7 @@ Obj::throw
 Obj::array
 Obj::print
 Obj::echo
+Obj::readonly
 Obj::require
 Obj::require_once
 Obj::return

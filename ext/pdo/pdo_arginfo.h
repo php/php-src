@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5cb75e0f0869651dd616b11c3bd0d407deb3c6df */
+ * Stub hash: 8d975a20d009e827f8d72ac19b94b55870b6bf9c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pdo_drivers, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -24,6 +24,12 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 
 	INIT_CLASS_ENTRY(ce, "PDOException", class_PDOException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+
+	zval property_code_default_value;
+	ZVAL_LONG(&property_code_default_value, 0);
+	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_string_release(property_code_name);
 
 	zval property_errorInfo_default_value;
 	ZVAL_NULL(&property_errorInfo_default_value);

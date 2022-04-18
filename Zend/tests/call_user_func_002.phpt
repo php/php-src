@@ -31,11 +31,11 @@ try {
 ?>
 --EXPECTF--
 string(3) "foo"
-call_user_func(): Argument #1 ($function) must be a valid callback, class "foo" not found
-call_user_func(): Argument #1 ($function) must be a valid callback, class "" not found
+call_user_func(): Argument #1 ($callback) must be a valid callback, class "foo" not found
+call_user_func(): Argument #1 ($callback) must be a valid callback, class "" not found
 
 Warning: Undefined variable $foo in %s on line %d
-call_user_func(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
+call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object
 
 Warning: Undefined variable $foo in %s on line %d
-call_user_func(): Argument #1 ($function) must be a valid callback, first array member is not a valid class name or object
+call_user_func(): Argument #1 ($callback) must be a valid callback, first array member is not a valid class name or object

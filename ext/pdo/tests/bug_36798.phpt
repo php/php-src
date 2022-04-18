@@ -11,7 +11,8 @@ PDOTest::skip();
 
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))){
     if (!strpos(strtolower(getenv('PDOTEST_DSN')), 'charset=we8mswin1252')) die('skip expected output valid for Oracle with WE8MSWIN1252 character set');
-
+} elseif (!strncasecmp(getenv('PDOTEST_DSN'), 'dblib', strlen('dblib'))) {
+    die('skip not for pdo_dblib');
 }
 
 ?>

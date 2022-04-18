@@ -51,7 +51,6 @@ var_dump($phar['a']->isCompressed());
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
 --EXPECT--

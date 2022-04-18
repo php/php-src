@@ -172,10 +172,10 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 	}
 }
 
-PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage)
+PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, int codepage)
 {
 	OLECHAR *olestring = NULL;
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 	switch (V_VT(v)) {
 		case VT_EMPTY:
@@ -271,9 +271,9 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 }
 
 
-PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
+PHP_COM_DOTNET_API zend_result php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 {
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 	switch (V_VT(dstvar) & ~VT_BYREF) {
 	case VT_EMPTY:
@@ -510,7 +510,7 @@ PHP_FUNCTION(variant_set)
 		obj->typeinfo = NULL;
 	}
 	if (obj->sink_dispatch) {
-		php_com_object_enable_event_sink(obj, FALSE);
+		php_com_object_enable_event_sink(obj, /* enable */ false);
 		IDispatch_Release(obj->sink_dispatch);
 		obj->sink_dispatch = NULL;
 	}

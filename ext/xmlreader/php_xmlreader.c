@@ -610,7 +610,6 @@ PHP_METHOD(XMLReader, getParserProperty)
 {
 	zval *id;
 	zend_long property;
-	int retval = -1;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &property) == FAILURE) {
@@ -620,9 +619,12 @@ PHP_METHOD(XMLReader, getParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
-		retval = xmlTextReaderGetParserProp(intern->ptr,property);
+	if (!intern || !intern->ptr) {
+		zend_throw_error(NULL, "Cannot access parser properties before loading data");
+		RETURN_THROWS();
 	}
+
+	int retval = xmlTextReaderGetParserProp(intern->ptr,property);
 	if (retval == -1) {
 		zend_argument_value_error(1, "must be a valid parser property");
 		RETURN_THROWS();
@@ -961,7 +963,6 @@ PHP_METHOD(XMLReader, setParserProperty)
 {
 	zval *id;
 	zend_long property;
-	int retval = -1;
 	bool value;
 	xmlreader_object *intern;
 
@@ -972,9 +973,12 @@ PHP_METHOD(XMLReader, setParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
-		retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
+	if (!intern || !intern->ptr) {
+		zend_throw_error(NULL, "Cannot access parser properties before loading data");
+		RETURN_THROWS();
 	}
+
+	int retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
 	if (retval == -1) {
 		zend_argument_value_error(1, "must be a valid parser property");
 		RETURN_THROWS();

@@ -126,13 +126,14 @@ function test_pow() {
 test_pow();
 
 class Y {
+    public $x;
     function __toString() {
         return "y";
     }
 }
 function test_concat() {
     $x = new Y;
-    $x->x= $x;
+    $x->x = $x;
     @$x .= "x";
     $n = gc_collect_cycles();
     echo ".=\t$n\n";

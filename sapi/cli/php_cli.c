@@ -193,7 +193,7 @@ static void print_modules(void) /* {{{ */
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 0);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
-	ZEND_HASH_FOREACH_PTR(&sorted_registry, module) {
+	ZEND_HASH_MAP_FOREACH_PTR(&sorted_registry, module) {
 		php_printf("%s\n", module->name);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&sorted_registry);
@@ -1085,6 +1085,7 @@ do_repeat:
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zend_object_release(EG(exception));
 						EG(exception) = NULL;
+						EG(exit_status) = 1;
 					} else {
 						zend_print_zval(&ref, 0);
 						zend_write("\n", 1);
@@ -1196,7 +1197,7 @@ int main(int argc, char *argv[])
 #if defined(PHP_WIN32) && defined(_DEBUG)
 	{
 		char *tmp = getenv("PHP_WIN32_DEBUG_HEAP");
-		if (tmp && zend_atoi(tmp, 0)) {
+		if (tmp && ZEND_ATOL(tmp)) {
 			int tmp_flag;
 			_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 			_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);

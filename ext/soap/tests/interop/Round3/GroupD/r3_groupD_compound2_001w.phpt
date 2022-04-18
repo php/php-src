@@ -8,19 +8,10 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class Person {
-    function __construct($a=NULL, $i=NULL, $n=NULL, $m=NULL) {
-        $this->Age = $a;
-        $this->ID = $i;
-        $this->Name = $n;
-        $this->Male = $m;
-    }
+    function __construct(public $Age, public $ID, public $Name, public $Male) {}
 }
 class Employee {
-    function __construct($person=NULL,$id=NULL,$salary=NULL) {
-        $this->person = $person;
-        $this->ID = $id;
-        $this->salary = $salary;
-    }
+    function __construct(public $person, public $ID, public $salary) {}
 }
 $person = new Person(32,12345,'Shane',TRUE);
 $employee = new Employee($person,12345,1000000.00);

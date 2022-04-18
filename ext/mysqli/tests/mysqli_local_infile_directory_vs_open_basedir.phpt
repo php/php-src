@@ -4,17 +4,17 @@ mysqli.local_infile_directory vs open_basedir
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die("skip Cannot connect to MySQL");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
 
-include_once("local_infile_tools.inc");
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_allowed_by_server($link))
-	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+    die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
 mysqli_close($link);
-
 ?>
 --INI--
 open_basedir={PWD}
@@ -54,7 +54,7 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		$host, $user, $db, $port, $socket);
 }
 
-if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
+if (!$link->query('DROP TABLE IF EXISTS test')) {
 	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 

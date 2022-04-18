@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70374ed7b55604eb98e85148d7ff19e79258ce92 */
+ * Stub hash: bf10c37919483ac04bc1f788ac6e59b5edab295e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -8,6 +8,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_nullable_array_return,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_void_return, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_compile_string, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, source_string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated, 0, 0, IS_VOID, 0)
@@ -51,6 +57,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_weakmap_attach, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_weakmap_remove, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_zend_weakmap_dump arginfo_zend_test_array_return
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_zend_get_unit_enum, 0, 0, ZendTestUnitEnum, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_parameter_with_attribute, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -71,6 +95,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_ZendSubNS_namespaced_func
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestParameterAttribute___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override arginfo_zend_test_parameter_with_attribute
+
+#define arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
+
+#define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
+
 #define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
@@ -81,6 +115,7 @@ ZEND_END_ARG_INFO()
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
+static ZEND_FUNCTION(zend_test_compile_string);
 static ZEND_FUNCTION(zend_test_deprecated);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
@@ -91,6 +126,11 @@ static ZEND_FUNCTION(zend_string_or_object_or_null);
 static ZEND_FUNCTION(zend_string_or_stdclass);
 static ZEND_FUNCTION(zend_string_or_stdclass_or_null);
 static ZEND_FUNCTION(zend_iterable);
+static ZEND_FUNCTION(zend_weakmap_attach);
+static ZEND_FUNCTION(zend_weakmap_remove);
+static ZEND_FUNCTION(zend_weakmap_dump);
+static ZEND_FUNCTION(zend_get_unit_enum);
+static ZEND_FUNCTION(zend_test_parameter_with_attribute);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -98,6 +138,10 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
+static ZEND_METHOD(ZendTestParameterAttribute, __construct);
+static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
+static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
+static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
@@ -107,6 +151,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
+	ZEND_FE(zend_test_compile_string, arginfo_zend_test_compile_string)
 	ZEND_DEP_FE(zend_test_deprecated, arginfo_zend_test_deprecated)
 	ZEND_FE(zend_create_unterminated_string, arginfo_zend_create_unterminated_string)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
@@ -117,6 +162,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
 	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
 	ZEND_FE(zend_iterable, arginfo_zend_iterable)
+	ZEND_FE(zend_weakmap_attach, arginfo_zend_weakmap_attach)
+	ZEND_FE(zend_weakmap_remove, arginfo_zend_weakmap_remove)
+	ZEND_FE(zend_weakmap_dump, arginfo_zend_weakmap_dump)
+	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
+	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
@@ -149,6 +199,35 @@ static const zend_function_entry class__ZendTestTrait_methods[] = {
 
 
 static const zend_function_entry class_ZendTestAttribute_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestParameterAttribute_methods[] = {
+	ZEND_ME(ZendTestParameterAttribute, __construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestClassWithMethodWithParameterAttribute_methods[] = {
+	ZEND_ME(ZendTestClassWithMethodWithParameterAttribute, no_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(ZendTestClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestChildClassWithMethodWithParameterAttribute_methods[] = {
+	ZEND_ME(ZendTestChildClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestUnitEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestStringEnum_methods[] = {
 	ZEND_FE_END
 };
 
@@ -220,12 +299,18 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	property_classUnionProp_type_list->num_types = 2;
 	property_classUnionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_stdClass, 0, 0);
 	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Iterator, 0, 0);
-	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_PTR(property_classUnionProp_type_list, _ZEND_TYPE_LIST_BIT, 0, MAY_BE_NULL);
+	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_UNION(property_classUnionProp_type_list, MAY_BE_NULL);
 	zval property_classUnionProp_default_value;
 	ZVAL_NULL(&property_classUnionProp_default_value);
 	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
 	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
 	zend_string_release(property_classUnionProp_name);
+
+	zval property_readonlyProp_default_value;
+	ZVAL_UNDEF(&property_readonlyProp_default_value);
+	zend_string *property_readonlyProp_name = zend_string_init("readonlyProp", sizeof("readonlyProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_readonlyProp_name);
 
 	return class_entry;
 }
@@ -268,6 +353,76 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	return class_entry;
 }
 
+static zend_class_entry *register_class_ZendTestParameterAttribute(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestParameterAttribute", class_ZendTestParameterAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_parameter_default_value;
+	ZVAL_UNDEF(&property_parameter_default_value);
+	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
+	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_parameter_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttribute(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestClassWithMethodWithParameterAttribute", class_ZendTestClassWithMethodWithParameterAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParameterAttribute(zend_class_entry *class_entry_ZendTestClassWithMethodWithParameterAttribute)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestChildClassWithMethodWithParameterAttribute", class_ZendTestChildClassWithMethodWithParameterAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_ZendTestClassWithMethodWithParameterAttribute);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestUnitEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestUnitEnum", IS_UNDEF, class_ZendTestUnitEnum_methods);
+
+	zend_enum_add_case_cstr(class_entry, "Foo", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Bar", NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestStringEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestStringEnum", IS_STRING, class_ZendTestStringEnum_methods);
+
+	zval enum_case_Foo_value;
+	zend_string *enum_case_Foo_value_str = zend_string_init("Test1", sizeof("Test1") - 1, 1);
+	ZVAL_STR(&enum_case_Foo_value, enum_case_Foo_value_str);
+	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
+
+	zval enum_case_Bar_value;
+	zend_string *enum_case_Bar_value_str = zend_string_init("Test2", sizeof("Test2") - 1, 1);
+	ZVAL_STR(&enum_case_Bar_value, enum_case_Bar_value_str);
+	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
+
+	zval enum_case_Baz_value;
+	zend_string *enum_case_Baz_value_str = zend_string_init("Test2\\a", sizeof("Test2\\a") - 1, 1);
+	ZVAL_STR(&enum_case_Baz_value, enum_case_Baz_value_str);
+	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_ZendTestNS_Foo(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -284,6 +439,13 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS2", "Foo", class_ZendTestNS2_Foo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zend_string *property_foo_class_ZendTestNS2_ZendSubNS_Foo = zend_string_init("ZendTestNS2\\ZendSubNS\\Foo", sizeof("ZendTestNS2\\ZendSubNS\\Foo")-1, 1);
+	zval property_foo_default_value;
+	ZVAL_UNDEF(&property_foo_default_value);
+	zend_string *property_foo_name = zend_string_init("foo", sizeof("foo") - 1, 1);
+	zend_declare_typed_property(class_entry, property_foo_name, &property_foo_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_foo_class_ZendTestNS2_ZendSubNS_Foo, 0, 0));
+	zend_string_release(property_foo_name);
 
 	return class_entry;
 }

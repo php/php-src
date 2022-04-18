@@ -1998,7 +1998,6 @@ PHP_METHOD(SimpleXMLElement, valid)
 PHP_METHOD(SimpleXMLElement, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2009,8 +2008,7 @@ PHP_METHOD(SimpleXMLElement, current)
 		RETURN_THROWS();
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 /* }}} */
 
@@ -2083,7 +2081,6 @@ PHP_METHOD(SimpleXMLElement, hasChildren)
 PHP_METHOD(SimpleXMLElement, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2093,8 +2090,7 @@ PHP_METHOD(SimpleXMLElement, getChildren)
 		return; /* return NULL */
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 
 static zend_object_handlers sxe_object_handlers;
@@ -2623,7 +2619,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 	}
 
-	if (nodep->type == XML_ELEMENT_NODE) {
+	if (nodep && nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
 			ce = sxe_class_entry;
 			fptr_count = NULL;
@@ -2699,9 +2695,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
-
-	sxe_class_entry->serialize = zend_class_serialize_deny;
-	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
 	/* TODO: Why do we have two variables for this? */
 	ce_SimpleXMLElement = sxe_class_entry;

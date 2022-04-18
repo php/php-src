@@ -238,7 +238,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		HT_FLAGS(new_object->properties) |=
 			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
 
-		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
+		ZEND_HASH_MAP_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {
 				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
 			} else {

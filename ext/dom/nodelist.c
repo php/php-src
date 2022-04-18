@@ -31,6 +31,50 @@
 * Since:
 */
 
+static int get_nodelist_length(dom_object *obj)
+{
+	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
+	if (!objmap) {
+		return 0;
+	}
+
+	if (objmap->ht) {
+		return xmlHashSize(objmap->ht);
+	}
+
+	if (objmap->nodetype == DOM_NODESET) {
+		HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
+		return zend_hash_num_elements(nodeht);
+	}
+
+	xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
+	if (!nodep) {
+		return 0;
+	}
+
+	int count = 0;
+	if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+		xmlNodePtr curnode = nodep->children;
+		if (curnode) {
+			count++;
+			while (curnode->next != NULL) {
+				count++;
+				curnode = curnode->next;
+			}
+		}
+	} else {
+		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+		} else {
+			nodep = nodep->children;
+		}
+		dom_get_elements_by_tag_name_ns_raw(
+			nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
+	}
+
+	return count;
+}
+
 /* {{{ length	int
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-203510337
@@ -38,46 +82,7 @@ Since:
 */
 int dom_nodelist_length_read(dom_object *obj, zval *retval)
 {
-	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep, curnode;
-	int count = 0;
-	HashTable *nodeht;
-
-	objmap = (dom_nnodemap_object *)obj->ptr;
-	if (objmap != NULL) {
-		if (objmap->ht) {
-			count = xmlHashSize(objmap->ht);
-		} else {
-			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = HASH_OF(&objmap->baseobj_zv);
-				count = zend_hash_num_elements(nodeht);
-			} else {
-				nodep = dom_object_get_node(objmap->baseobj);
-				if (nodep) {
-					if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-						curnode = nodep->children;
-						if (curnode) {
-							count++;
-							while (curnode->next != NULL) {
-								count++;
-								curnode = curnode->next;
-							}
-						}
-					} else {
-						if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-							nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-						} else {
-							nodep = nodep->children;
-						}
-						curnode = dom_get_elements_by_tag_name_ns_raw(
-							nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
-					}
-				}
-			}
-		}
-	}
-
-	ZVAL_LONG(retval, count);
+	ZVAL_LONG(retval, get_nodelist_length(obj));
 	return SUCCESS;
 }
 
@@ -94,9 +99,7 @@ PHP_METHOD(DOMNodeList, count)
 	}
 
 	intern = Z_DOMOBJ_P(id);
-	if(dom_nodelist_length_read(intern, return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	RETURN_LONG(get_nodelist_length(intern));
 }
 /* }}} end dom_nodelist_count */
 

@@ -39,7 +39,6 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
-#include "Zend/zend_interfaces.h"
 #include "pgsql_arginfo.h"
 
 #ifdef HAVE_PGSQL
@@ -78,8 +77,15 @@
 		zend_throw_error(NULL, "No PostgreSQL connection opened yet"); \
 		RETURN_THROWS(); \
 	}
+
+/* This is a bit hacky as the macro usage is "link = FETCH_DEFAULT_LINK();" */
 #define FETCH_DEFAULT_LINK() \
-	(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL)
+		(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL); \
+		php_error_docref(NULL, E_DEPRECATED, "Automatic fetching of PostgreSQL connection is deprecated")
+
+/* Used only when creating a connection */
+#define FETCH_DEFAULT_LINK_NO_WARNING() \
+		(PGG(default_link) ? pgsql_link_from_obj(PGG(default_link)) : NULL)
 
 #define CHECK_PGSQL_LINK(link_handle) \
 	if (link_handle->conn == NULL) { \
@@ -433,8 +439,6 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_link_ce = register_class_PgSql_Connection();
 	pgsql_link_ce->create_object = pgsql_link_create_object;
-	pgsql_link_ce->serialize = zend_class_serialize_deny;
-	pgsql_link_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pgsql_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_link_object_handlers.offset = XtOffsetOf(pgsql_link_handle, std);
@@ -445,8 +449,6 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_result_ce = register_class_PgSql_Result();
 	pgsql_result_ce->create_object = pgsql_result_create_object;
-	pgsql_result_ce->serialize = zend_class_serialize_deny;
-	pgsql_result_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pgsql_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_result_object_handlers.offset = XtOffsetOf(pgsql_result_handle, std);
@@ -457,8 +459,6 @@ PHP_MINIT_FUNCTION(pgsql)
 
 	pgsql_lob_ce = register_class_PgSql_Lob();
 	pgsql_lob_ce->create_object = pgsql_lob_create_object;
-	pgsql_lob_ce->serialize = zend_class_serialize_deny;
-	pgsql_lob_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pgsql_lob_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pgsql_lob_object_handlers.offset = XtOffsetOf(pgLofp, std);
@@ -850,7 +850,7 @@ PHP_FUNCTION(pg_close)
 	link = Z_PGSQL_LINK_P(pgsql_link);
 	CHECK_PGSQL_LINK(link);
 
-	if (link == FETCH_DEFAULT_LINK()) {
+	if (link == FETCH_DEFAULT_LINK_NO_WARNING()) {
 		GC_DELREF(PGG(default_link));
 		PGG(default_link) = NULL;
 	}
@@ -1536,7 +1536,7 @@ PHP_FUNCTION(pg_last_notice)
 			zend_argument_value_error(2, "must be one of PGSQL_NOTICE_LAST, PGSQL_NOTICE_ALL, or PGSQL_NOTICE_CLEAR");
 			RETURN_THROWS();
 	}
-	RETURN_FALSE;
+	ZEND_UNREACHABLE();
 }
 
 static inline bool is_valid_oid_string(zend_string *oid, Oid *return_oid)
@@ -2021,7 +2021,7 @@ PHP_FUNCTION(pg_fetch_object)
 PHP_FUNCTION(pg_fetch_all)
 {
 	zval *result;
-	long result_type = PGSQL_ASSOC;
+	zend_long result_type = PGSQL_ASSOC;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
@@ -3007,7 +3007,7 @@ PHP_FUNCTION(pg_end_copy)
 	int result = 0;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r!", &pgsql_link, pgsql_link_ce) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &pgsql_link, pgsql_link_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -4584,6 +4584,7 @@ PHP_PGSQL_API zend_result php_pgsql_convert(PGconn *pg_link, const zend_string *
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(values), field, val) {
 		skip_field = 0;
+		ZVAL_DEREF(val);
 		ZVAL_NULL(&new_val);
 
 		/* TODO: Check when meta data can be broken and see if can use assertions instead */
@@ -5879,7 +5880,7 @@ PHP_FUNCTION(pg_select)
 	pgsql_link_handle *link;
 	zend_string *table;
 	zend_ulong option = PGSQL_DML_EXEC;
-	long result_type = PGSQL_ASSOC;
+	zend_long result_type = PGSQL_ASSOC;
 	PGconn *pg_link;
 	zend_string *sql = NULL;
 

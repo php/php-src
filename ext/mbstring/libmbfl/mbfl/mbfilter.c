@@ -95,6 +95,7 @@
 #include "filters/mbfilter_utf8.h"
 
 #include "eaw_table.h"
+#include "rare_cp_bitvec.h"
 
 /* hex character table "0123456789ABCDEF" */
 static char mbfl_hexchar_table[] = {
@@ -149,52 +150,32 @@ mbfl_buffer_converter_new(
 	return convd;
 }
 
-
-void
-mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
+void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd)
 {
-	if (convd != NULL) {
-		if (convd->filter1) {
-			mbfl_convert_filter_delete(convd->filter1);
-		}
-		if (convd->filter2) {
-			mbfl_convert_filter_delete(convd->filter2);
-		}
-		mbfl_memory_device_clear(&convd->device);
-		efree((void*)convd);
+	mbfl_convert_filter_delete(convd->filter1);
+	if (convd->filter2) {
+		mbfl_convert_filter_delete(convd->filter2);
+	}
+	mbfl_memory_device_clear(&convd->device);
+	efree((void*)convd);
+}
+
+void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
+{
+	if (convd->filter2) {
+		convd->filter2->illegal_mode = mode;
+	} else {
+		convd->filter1->illegal_mode = mode;
 	}
 }
 
-int
-mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode)
+void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar)
 {
-	if (convd != NULL) {
-		if (convd->filter2 != NULL) {
-			convd->filter2->illegal_mode = mode;
-		} else if (convd->filter1 != NULL) {
-			convd->filter1->illegal_mode = mode;
-		} else {
-			return 0;
-		}
+	if (convd->filter2) {
+		convd->filter2->illegal_substchar = substchar;
+	} else {
+		convd->filter1->illegal_substchar = substchar;
 	}
-
-	return 1;
-}
-
-int
-mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar)
-{
-	if (convd != NULL) {
-		if (convd->filter2 != NULL) {
-			convd->filter2->illegal_substchar = substchar;
-		} else if (convd->filter1 != NULL) {
-			convd->filter1->illegal_substchar = substchar;
-		} else {
-			return 0;
-		}
-	}
-
-	return 1;
 }
 
 size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string)
@@ -223,59 +204,30 @@ size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *str
 	return p - string->val;
 }
 
-
-int
-mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
+void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd)
 {
-	if (convd == NULL) {
-		return -1;
-	}
-
-	if (convd->filter1 != NULL) {
-		mbfl_convert_filter_flush(convd->filter1);
-	}
-
-	return 0;
+	mbfl_convert_filter_flush(convd->filter1);
 }
 
-mbfl_string *
-mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result)
+mbfl_string* mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result)
 {
-	if (convd == NULL || result == NULL) {
-		return NULL;
-	}
 	result->encoding = convd->to;
 	return mbfl_memory_device_result(&convd->device, result);
 }
 
-mbfl_string *
-mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string,
-				  mbfl_string *result)
+mbfl_string* mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result)
 {
-	if (convd == NULL || string == NULL || result == NULL) {
-		return NULL;
-	}
 	mbfl_buffer_converter_feed(convd, string);
-	if (convd->filter1 != NULL) {
-		mbfl_convert_filter_flush(convd->filter1);
-	}
+	mbfl_convert_filter_flush(convd->filter1);
 	result->encoding = convd->to;
 	return mbfl_memory_device_result(&convd->device, result);
 }
 
 size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 {
-	size_t num_illegalchars = 0;
+	size_t num_illegalchars = convd->filter1->num_illegalchar;
 
-	if (convd == NULL) {
-		return 0;
-	}
-
-	if (convd->filter1 != NULL) {
-		num_illegalchars += convd->filter1->num_illegalchar;
-	}
-
-	if (convd->filter2 != NULL) {
+	if (convd->filter2) {
 		num_illegalchars += convd->filter2->num_illegalchar;
 	}
 
@@ -285,26 +237,54 @@ size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd)
 /*
  * encoding detector
  */
-static int mbfl_estimate_encoding_likelihood(int c, void* data)
+static int mbfl_estimate_encoding_likelihood(int input_cp, void *void_data)
 {
-	mbfl_convert_filter *filter = *((mbfl_convert_filter**)data);
-	uintptr_t *score = (uintptr_t*)(&filter->opaque);
+	mbfl_encoding_detector_data *data = void_data;
+	unsigned int c = input_cp;
 
-	/* Receive wchars decoded from test string using candidate encoding
-	 * If the test string was invalid in the candidate encoding, we assume
-	 * it's the wrong one. */
-	if (c & MBFL_WCSGROUP_THROUGH) {
-		filter->num_illegalchar++;
-	} else if (php_unicode_is_cntrl(c) || php_unicode_is_private(c)) {
-		/* Otherwise, count how many control characters and 'private use'
-		 * codepoints we see. Those are rarely used and may indicate that
-		 * the candidate encoding is not the right one. */
-		*score += 10;
-	} else if (php_unicode_is_punct(c)) {
-		/* Punctuation is also less common than letters/digits */
-		(*score)++;
+	/* Receive wchars decoded from input string using candidate encoding.
+	 * If the string was invalid in the candidate encoding, we assume
+	 * it's the wrong one. Otherwise, give the candidate many 'demerits'
+	 * for each 'rare' codepoint found, a smaller number for each ASCII
+	 * punctuation character, and 1 for all other codepoints.
+	 *
+	 * The 'common' codepoints should cover the vast majority of
+	 * codepoints we are likely to see in practice, while only covering
+	 * a small minority of the entire Unicode encoding space. Why?
+	 * Well, if the test string happens to be valid in an incorrect
+	 * candidate encoding, the bogus codepoints which it decodes to will
+	 * be more or less random. By treating the majority of codepoints as
+	 * 'rare', we ensure that in almost all such cases, the bogus
+	 * codepoints will include plenty of 'rares', thus giving the
+	 * incorrect candidate encoding lots of demerits. See
+	 * common_codepoints.txt for the actual list used.
+	 *
+	 * So, why give extra demerits for ASCII punctuation characters? It's
+	 * because there are some text encodings, like UTF-7, HZ, and ISO-2022,
+	 * which deliberately only use bytes in the ASCII range. When
+	 * misinterpreted as ASCII/UTF-8, strings in these encodings will
+	 * have an unusually high number of ASCII punctuation characters.
+	 * So giving extra demerits for such characters will improve
+	 * detection accuracy for UTF-7 and similar encodings.
+	 *
+	 * Finally, why 1 demerit for all other characters? That penalizes
+	 * long strings, meaning we will tend to choose a candidate encoding
+	 * in which the test string decodes to a smaller number of
+	 * codepoints. That prevents single-byte encodings in which almost
+	 * every possible input byte decodes to a 'common' codepoint from
+	 * being favored too much. */
+	if (c == MBFL_BAD_INPUT) {
+		data->num_illegalchars++;
+	} else if (c > 0xFFFF) {
+		data->score += 40;
+	} else if (c >= 0x21 && c <= 0x2F) {
+		data->score += 6;
+	} else if ((rare_codepoint_bitvec[c >> 5] >> (c & 0x1F)) & 1) {
+		data->score += 30;
+	} else {
+		data->score += 1;
 	}
-	return c;
+	return 0;
 }
 
 mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict)
@@ -315,12 +295,17 @@ mbfl_encoding_detector *mbfl_encoding_detector_new(const mbfl_encoding **elist, 
 
 	mbfl_encoding_detector *identd = emalloc(sizeof(mbfl_encoding_detector));
 	identd->filter_list = ecalloc(elistsz, sizeof(mbfl_convert_filter*));
+	identd->filter_data = ecalloc(elistsz, sizeof(mbfl_encoding_detector_data));
+
+	int filter_list_size = 0;
 	for (int i = 0; i < elistsz; i++) {
-		identd->filter_list[i] = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
-			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_list[i]);
-		identd->filter_list[i]->opaque = (void*)0;
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(elist[i], &mbfl_encoding_wchar,
+			mbfl_estimate_encoding_likelihood, NULL, &identd->filter_data[filter_list_size]);
+		if (filter) {
+			identd->filter_list[filter_list_size++] = filter;
+		}
 	}
-	identd->filter_list_size = elistsz;
+	identd->filter_list_size = filter_list_size;
 	identd->strict = strict;
 	return identd;
 }
@@ -331,6 +316,7 @@ void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd)
 		mbfl_convert_filter_delete(identd->filter_list[i]);
 	}
 	efree(identd->filter_list);
+	efree(identd->filter_data);
 	efree(identd);
 }
 
@@ -344,9 +330,10 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 	while (n--) {
 		for (int i = 0; i < num; i++) {
 			mbfl_convert_filter *filter = identd->filter_list[i];
-			if (!filter->num_illegalchar) {
+			mbfl_encoding_detector_data *data = &identd->filter_data[i];
+			if (!data->num_illegalchars) {
 				(*filter->filter_function)(*p, filter);
-				if (filter->num_illegalchar) {
+				if (data->num_illegalchars) {
 					bad++;
 				}
 			}
@@ -357,11 +344,9 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 		p++;
 	}
 
-	if (identd->strict) {
-		for (int i = 0; i < num; i++) {
-			mbfl_convert_filter *filter = identd->filter_list[i];
-			(filter->filter_flush)(filter);
-		}
+	for (int i = 0; i < num; i++) {
+		mbfl_convert_filter *filter = identd->filter_list[i];
+		(filter->filter_flush)(filter);
 	}
 
 	return 0;
@@ -369,14 +354,15 @@ int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *str
 
 const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd)
 {
-	uintptr_t best_score = UINT_MAX; /* Low score is 'better' */
+	size_t best_score = SIZE_MAX; /* Low score is 'better' */
 	const mbfl_encoding *enc = NULL;
 
 	for (int i = 0; i < identd->filter_list_size; i++) {
 		mbfl_convert_filter *filter = identd->filter_list[i];
-		if (!filter->num_illegalchar && (uintptr_t)filter->opaque < best_score) {
+		mbfl_encoding_detector_data *data = &identd->filter_data[i];
+		if (!data->num_illegalchars && data->score < best_score) {
 			enc = filter->from;
-			best_score = (uintptr_t)filter->opaque;
+			best_score = data->score;
 		}
 	}
 
@@ -395,16 +381,10 @@ mbfl_convert_encoding(
 	size_t n;
 	unsigned char *p;
 	mbfl_memory_device device;
-	mbfl_convert_filter *filter1;
-	mbfl_convert_filter *filter2;
+	mbfl_convert_filter *filter1 = NULL;
+	mbfl_convert_filter *filter2 = NULL;
 
 	/* initialize */
-	if (toenc == NULL || string == NULL || result == NULL) {
-		return NULL;
-	}
-
-	filter1 = NULL;
-	filter2 = NULL;
 	if (mbfl_convert_filter_get_vtbl(string->encoding, toenc) != NULL) {
 		filter1 = mbfl_convert_filter_new(string->encoding, toenc, mbfl_memory_device_output, 0, &device);
 	} else {
@@ -471,54 +451,42 @@ static int
 filter_count_output(int c, void *data)
 {
 	(*(size_t *)data)++;
-	return c;
+	return 0;
 }
 
-size_t
-mbfl_strlen(const mbfl_string *string)
+size_t mbfl_strlen(const mbfl_string *string)
 {
-	size_t len, n, k;
-	unsigned char *p;
+	size_t len = 0;
 	const mbfl_encoding *encoding = string->encoding;
 
-	len = 0;
 	if (encoding->flag & MBFL_ENCTYPE_SBCS) {
 		len = string->len;
 	} else if (encoding->flag & MBFL_ENCTYPE_WCS2) {
 		len = string->len/2;
 	} else if (encoding->flag & MBFL_ENCTYPE_WCS4) {
 		len = string->len/4;
-	} else if (encoding->mblen_table != NULL) {
+	} else if (encoding->mblen_table) {
 		const unsigned char *mbtab = encoding->mblen_table;
-		n = 0;
-		p = string->val;
-		k = string->len;
-		/* count */
-		if (p != NULL) {
-			while (n < k) {
-				unsigned m = mbtab[*p];
-				n += m;
-				p += m;
-				len++;
-			}
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
+			p += mbtab[*p];
+			len++;
+		}
+	} else if (encoding->to_wchar) {
+		uint32_t wchar_buf[128];
+		unsigned char *in = string->val;
+		size_t in_len = string->len;
+		unsigned int state = 0;
+
+		while (in_len) {
+			len += encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
 		}
 	} else {
-		/* wchar filter */
-		mbfl_convert_filter *filter = mbfl_convert_filter_new(
-		  string->encoding,
-		  &mbfl_encoding_wchar,
-		  filter_count_output, 0, &len);
-		if (filter == NULL) {
-			return (size_t) -1;
-		}
-		/* count */
-		n = string->len;
-		p = string->val;
-		if (p != NULL) {
-			while (n > 0) {
-				(*filter->filter_function)(*p++, filter);
-				n--;
-			}
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_output, 0, &len);
+		ZEND_ASSERT(filter);
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
+			(*filter->filter_function)(*p++, filter);
 		}
 		mbfl_convert_filter_delete(filter);
 	}
@@ -587,7 +555,7 @@ retry:
 	}
 
 	pc->output++;
-	return c;
+	return 0;
 }
 
 static const unsigned char *mbfl_find_offset_utf8(
@@ -741,9 +709,7 @@ mbfl_substr_count(
 	  needle->encoding,
 	  &mbfl_encoding_wchar,
 	  mbfl_wchar_device_output, 0, &pc.needle);
-	if (filter == NULL) {
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	mbfl_convert_filter_feed_string(filter, needle->val, needle->len);
 	mbfl_convert_filter_flush(filter);
 	mbfl_convert_filter_delete(filter);
@@ -760,10 +726,7 @@ mbfl_substr_count(
 	  haystack->encoding,
 	  &mbfl_encoding_wchar,
 	  collector_strpos, 0, &pc);
-	if (filter == NULL) {
-		mbfl_wchar_device_clear(&pc.needle);
-		return MBFL_ERROR_ENCODING;
-	}
+	ZEND_ASSERT(filter);
 	pc.start = 0;
 	pc.output = 0;
 	pc.needle_pos = 0;
@@ -819,7 +782,7 @@ collector_substr(int c, void* data)
 
 	pc->output++;
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -1257,66 +1220,74 @@ mbfl_strcut(
 	return result;
 }
 
-
-/*
- *  strwidth
- */
-static size_t is_fullwidth(int c)
+/* Some East Asian characters, when printed at a terminal (or the like), require double
+ * the usual amount of horizontal space. We call these "fullwidth" characters. */
+static size_t character_width(unsigned int c)
 {
-	int i;
-
-	if (c < mbfl_eaw_table[0].begin) {
-		return 0;
+	if (c < FIRST_DOUBLEWIDTH_CODEPOINT) {
+		return 1;
 	}
 
-	for (i = 0; i < sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]); i++) {
-		if (mbfl_eaw_table[i].begin <= c && c <= mbfl_eaw_table[i].end) {
-			return 1;
+	/* Do a binary search to see if we fall in any of the fullwidth ranges */
+	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	while (lo < hi) {
+		int probe = (lo + hi) / 2;
+		if (c < mbfl_eaw_table[probe].begin) {
+			hi = probe;
+		} else if (c > mbfl_eaw_table[probe].end) {
+			lo = probe + 1;
+		} else {
+			return 2;
 		}
 	}
 
+	return 1;
+}
+
+static int filter_count_width(int c, void* data)
+{
+	(*(size_t *)data) += character_width(c);
 	return 0;
 }
 
-static int
-filter_count_width(int c, void* data)
+size_t mbfl_strwidth(mbfl_string *string)
 {
-	(*(size_t *)data) += (is_fullwidth(c) ? 2: 1);
-	return c;
-}
+	if (!string->len) {
+		return 0;
+	}
 
-size_t
-mbfl_strwidth(mbfl_string *string)
-{
-	size_t len, n;
-	unsigned char *p;
-	mbfl_convert_filter *filter;
+	size_t width = 0;
 
-	len = 0;
-	if (string->len > 0 && string->val != NULL) {
-		/* wchar filter */
-		filter = mbfl_convert_filter_new(
-		    string->encoding,
-		    &mbfl_encoding_wchar,
-		    filter_count_width, 0, &len);
-		if (filter == NULL) {
-			mbfl_convert_filter_delete(filter);
-			return -1;
+	if (string->encoding->to_wchar) {
+		uint32_t wchar_buf[128];
+		unsigned char *in = string->val;
+		size_t in_len = string->len;
+		unsigned int state = 0;
+
+		while (in_len) {
+			size_t out_len = string->encoding->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+			while (out_len) {
+				/* NOTE: 'bad input' marker will be counted as 1 unit of width
+				 * If text conversion is performed with an ordinary ASCII character as
+				 * the 'replacement character', this will give us the correct display width. */
+				width += character_width(wchar_buf[--out_len]);
+			}
 		}
+	} else {
+		mbfl_convert_filter *filter = mbfl_convert_filter_new(string->encoding, &mbfl_encoding_wchar, filter_count_width, 0, &width);
+		ZEND_ASSERT(filter);
 
 		/* feed data */
-		p = string->val;
-		n = string->len;
-		while (n > 0) {
+		unsigned char *p = string->val, *e = p + string->len;
+		while (p < e) {
 			(*filter->filter_function)(*p++, filter);
-			n--;
 		}
 
 		mbfl_convert_filter_flush(filter);
 		mbfl_convert_filter_delete(filter);
 	}
 
-	return len;
+	return width;
 }
 
 
@@ -1346,7 +1317,7 @@ collector_strimwidth(int c, void* data)
 		break;
 	default:
 		if (pc->outchar >= pc->from) {
-			pc->outwidth += (is_fullwidth(c) ? 2: 1);
+			pc->outwidth += character_width(c);
 
 			if (pc->outwidth > pc->width) {
 				if (pc->status == 0) {
@@ -1355,7 +1326,8 @@ collector_strimwidth(int c, void* data)
 				}
 				pc->status++;
 				(*pc->decoder->filter_function)(c, pc->decoder);
-				c = -1;
+				pc->outchar++;
+				return -1;
 			} else {
 				(*pc->decoder->filter_function)(c, pc->decoder);
 			}
@@ -1364,7 +1336,7 @@ collector_strimwidth(int c, void* data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -1380,9 +1352,6 @@ mbfl_strimwidth(
 	size_t n, mkwidth;
 	unsigned char *p;
 
-	if (string == NULL || result == NULL) {
-		return NULL;
-	}
 	mbfl_string_init(result);
 	result->encoding = string->encoding;
 	mbfl_memory_device_init(&pc.device, MIN(string->len, width), 0);
@@ -1614,7 +1583,7 @@ mime_header_encoder_block_collector(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -1684,7 +1653,7 @@ mime_header_encoder_collector(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -1696,7 +1665,7 @@ mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *res
 		mbfl_memory_device_strncat(&pe->outdev, "\x3f\x3d", 2);		/* ?= */
 	} else if (pe->tmpdev.pos > 0) {
 		if (pe->outdev.pos > 0) {
-			if ((pe->outdev.pos - pe->linehead + pe->tmpdev.pos) > 74) {
+			if ((pe->outdev.pos - pe->linehead + pe->tmpdev.pos + pe->firstindent) > 74) {
 				mbfl_memory_device_strncat(&pe->outdev, pe->lwsp, pe->lwsplen);
 			} else {
 				mbfl_memory_device_output(0x20, &pe->outdev);
@@ -2033,7 +2002,7 @@ mime_header_decoder_collector(int c, void* data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 mbfl_string *
@@ -2161,8 +2130,8 @@ collector_encode_htmlnumericentity(int c, void *data)
 		if (c >= mapelm[0] && c <= mapelm[1]) {
 			s = (c + mapelm[2]) & mapelm[3];
 			if (s >= 0) {
-				(*pc->decoder->filter_function)(0x26, pc->decoder);	/* '&' */
-				(*pc->decoder->filter_function)(0x23, pc->decoder);	/* '#' */
+				(*pc->decoder->filter_function)('&', pc->decoder);
+				(*pc->decoder->filter_function)('#', pc->decoder);
 				r = 100000000;
 				s %= r;
 				while (r > 0) {
@@ -2176,9 +2145,9 @@ collector_encode_htmlnumericentity(int c, void *data)
 				}
 				if (!f) {
 					f = 1;
-					(*pc->decoder->filter_function)(mbfl_hexchar_table[0], pc->decoder);
+					(*pc->decoder->filter_function)('0', pc->decoder);
 				}
-				(*pc->decoder->filter_function)(0x3b, pc->decoder);		/* ';' */
+				(*pc->decoder->filter_function)(';', pc->decoder);
 			}
 		}
 		if (f) {
@@ -2190,7 +2159,7 @@ collector_encode_htmlnumericentity(int c, void *data)
 		(*pc->decoder->filter_function)(c, pc->decoder);
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -2201,38 +2170,38 @@ collector_decode_htmlnumericentity(int c, void *data)
 
 	switch (pc->status) {
 	case 1:
-		if (c == 0x23) {	/* '#' */
+		if (c == '#') {
 			pc->status = 2;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 2:
-		if (c == 0x78) {	/* 'x' */
+		if (c == 'x') {
 			pc->status = 4;
-		} else if (c >= 0x30 && c <= 0x39) { /* '0' - '9' */
-			pc->cache = c - 0x30;
+		} else if (c >= '0' && c <= '9') {
+			pc->cache = c - '0';
 			pc->status = 3;
 			pc->digit = 1;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 3:
 		s = 0;
 		f = 0;
-		if (c >= 0x30 && c <= 0x39) {	/* '0' - '9' */
+		if (c >= '0' && c <= '9') {
 			s = pc->cache;
 			if (pc->digit > 9 || s > INT_MAX/10) {
 				pc->status = 0;
 				f = 1;
 			} else {
-				s = s*10 + (c - 0x30);
+				s = s*10 + (c - '0');
 				pc->cache = s;
 				pc->digit++;
 			}
@@ -2248,7 +2217,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 				if (d >= mapelm[0] && d <= mapelm[1]) {
 					f = 0;
 					(*pc->decoder->filter_function)(d, pc->decoder);
-					if (c != 0x3b) {	/* ';' */
+					if (c != ';') {
 						(*pc->decoder->filter_function)(c, pc->decoder);
 					}
 					break;
@@ -2257,8 +2226,8 @@ collector_decode_htmlnumericentity(int c, void *data)
 			}
 		}
 		if (f) {
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			r = 1;
 			n = pc->digit;
 			while (n > 1) {
@@ -2275,43 +2244,41 @@ collector_decode_htmlnumericentity(int c, void *data)
 		}
 		break;
 	case 4:
-		if (c >= 0x30 && c <= 0x39) { /* '0' - '9' */
-			pc->cache = c - 0x30;
+		if (c >= '0' && c <= '9') {
+			pc->cache = c - '0';
 			pc->status = 5;
 			pc->digit = 1;
-		} else if (c >= 0x41 && c <= 0x46) { /* 'A' - 'F'  */
-			pc->cache = c - 0x41 + 10;
+		} else if (c >= 'A' && c <= 'F') {
+			pc->cache = c - 'A' + 10;
 			pc->status = 5;
 			pc->digit = 1;
-		} else if (c >= 0x61 && c <= 0x66) { /* 'a' - 'f'  */
-			pc->cache = c - 0x61 + 10;
+		} else if (c >= 'a' && c <= 'f') {
+			pc->cache = c - 'a' + 10;
 			pc->status = 5;
 			pc->digit = 1;
 		} else {
 			pc->status = 0;
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			(*pc->decoder->filter_function)(c, pc->decoder);
 		}
 		break;
 	case 5:
 		s = 0;
 		f = 0;
-		if ((c >= 0x30 && c <= 0x39) ||
-			(c >= 0x41 && c <= 0x46) ||
-			(c >= 0x61 && c <= 0x66)) {	/* '0' - '9' or 'a' - 'f'  */
+		if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
 			if (pc->digit > 9) {
 				pc->status = 0;
 				s = pc->cache;
 				f = 1;
 			} else {
-				if (c >= 0x30 && c <= 0x39) {
-					s = pc->cache*16 + (c - 0x30);
-				} else if (c >= 0x41 && c <= 0x46)  {
-					s = pc->cache*16 + (c - 0x41 + 10);
+				if (c >= '0' && c <= '9') {
+					s = pc->cache*16 + (c - '0');
+				} else if (c >= 'A' && c <= 'F')  {
+					s = pc->cache*16 + (c - 'A' + 10);
 				} else {
-					s = pc->cache*16 + (c - 0x61 + 10);
+					s = pc->cache*16 + (c - 'a' + 10);
 				}
 				pc->cache = s;
 				pc->digit++;
@@ -2328,7 +2295,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 				if (d >= mapelm[0] && d <= mapelm[1]) {
 					f = 0;
 					(*pc->decoder->filter_function)(d, pc->decoder);
-					if (c != 0x3b) {	/* ';' */
+					if (c != ';') {
 						(*pc->decoder->filter_function)(c, pc->decoder);
 					}
 					break;
@@ -2337,9 +2304,9 @@ collector_decode_htmlnumericentity(int c, void *data)
 			}
 		}
 		if (f) {
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			r = 1;
 			n = pc->digit;
 			while (n > 0) {
@@ -2358,7 +2325,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 		}
 		break;
 	default:
-		if (c == 0x26) {	/* '&' */
+		if (c == '&') {
 			pc->status = 1;
 		} else {
 			(*pc->decoder->filter_function)(c, pc->decoder);
@@ -2366,7 +2333,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 static int
@@ -2383,9 +2350,9 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 		if (c >= mapelm[0] && c <= mapelm[1]) {
 			s = (c + mapelm[2]) & mapelm[3];
 			if (s >= 0) {
-				(*pc->decoder->filter_function)(0x26, pc->decoder);	/* '&' */
-				(*pc->decoder->filter_function)(0x23, pc->decoder);	/* '#' */
-				(*pc->decoder->filter_function)(0x78, pc->decoder);	/* 'x' */
+				(*pc->decoder->filter_function)('&', pc->decoder);
+				(*pc->decoder->filter_function)('#', pc->decoder);
+				(*pc->decoder->filter_function)('x', pc->decoder);
 				r = 0x1000000;
 				s %= r;
 				while (r > 0) {
@@ -2399,9 +2366,9 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 				}
 				if (!f) {
 					f = 1;
-					(*pc->decoder->filter_function)(mbfl_hexchar_table[0], pc->decoder);
+					(*pc->decoder->filter_function)('0', pc->decoder);
 				}
-				(*pc->decoder->filter_function)(0x3b, pc->decoder);		/* ';' */
+				(*pc->decoder->filter_function)(';', pc->decoder);
 			}
 		}
 		if (f) {
@@ -2413,7 +2380,7 @@ collector_encode_hex_htmlnumericentity(int c, void *data)
 		(*pc->decoder->filter_function)(c, pc->decoder);
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
@@ -2424,15 +2391,15 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 	if (pc->status) {
 		switch (pc->status) {
 		case 1: /* '&' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
 			break;
 		case 2: /* '#' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 			break;
 		case 3: /* '0'-'9' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
 
 			s = pc->cache;
 			r = 1;
@@ -2450,14 +2417,14 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 
 			break;
 		case 4: /* 'x' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 			break;
 		case 5: /* '0'-'9','a'-'f' */
-			(*pc->decoder->filter_function)(0x26, pc->decoder);		/* '&' */
-			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
-			(*pc->decoder->filter_function)(0x78, pc->decoder);		/* 'x' */
+			(*pc->decoder->filter_function)('&', pc->decoder);
+			(*pc->decoder->filter_function)('#', pc->decoder);
+			(*pc->decoder->filter_function)('x', pc->decoder);
 
 			s = pc->cache;
 			r = 1;
@@ -2474,8 +2441,6 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 				r /= 16;
 				(*pc->decoder->filter_function)(mbfl_hexchar_table[d], pc->decoder);
 			}
-			break;
-		default:
 			break;
 		}
 	}
@@ -2502,9 +2467,6 @@ mbfl_html_numeric_entity(
 	size_t n;
 	unsigned char *p;
 
-	if (string == NULL || result == NULL) {
-		return NULL;
-	}
 	mbfl_string_init(result);
 	result->encoding = string->encoding;
 	mbfl_memory_device_init(&device, string->len, 0);

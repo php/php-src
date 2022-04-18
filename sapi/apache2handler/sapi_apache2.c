@@ -363,10 +363,15 @@ static void php_apache_sapi_log_message_ex(const char *msg, request_rec *r)
 	}
 }
 
-static double php_apache_sapi_get_request_time(void)
+static zend_result php_apache_sapi_get_request_time(double *request_time)
 {
 	php_struct *ctx = SG(server_context);
-	return ((double) ctx->r->request_time) / 1000000.0;
+	if (!ctx) {
+		return FAILURE;
+	}
+
+	*request_time = ((double) ctx->r->request_time) / 1000000.0;
+	return SUCCESS;
 }
 
 extern zend_module_entry php_apache_module;
@@ -519,7 +524,7 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx)
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
 	if (content_length) {
-		ZEND_ATOL(SG(request_info).content_length, content_length);
+		SG(request_info).content_length = ZEND_ATOL(content_length);
 	} else {
 		SG(request_info).content_length = 0;
 	}
@@ -557,7 +562,7 @@ typedef struct {
 		zend_string *str;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php_module);
 
-		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
 		} ZEND_HASH_FOREACH_END();
 	}

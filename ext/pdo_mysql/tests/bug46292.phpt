@@ -15,6 +15,8 @@ MySQLPDOTest::skip();
 
 
     class myclass {
+        public $value;
+
         public function __construct() {
             printf("%s()\n", __METHOD__);
         }

@@ -8,6 +8,7 @@ pdo_sqlite
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
+#[AllowDynamicProperties]
 class Person {
     public $test = NULL;
     public function __construct() {

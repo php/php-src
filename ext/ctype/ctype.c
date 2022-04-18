@@ -61,113 +61,118 @@ static PHP_MINFO_FUNCTION(ctype)
 }
 /* }}} */
 
-/* {{{ ctype */
-#define CTYPE(iswhat, allow_digits, allow_minus) \
-	zval *c; \
-	ZEND_PARSE_PARAMETERS_START(1, 1); \
-		Z_PARAM_ZVAL(c) \
-	ZEND_PARSE_PARAMETERS_END(); \
-	if (Z_TYPE_P(c) == IS_LONG) { \
-		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
-			RETURN_BOOL(iswhat((int)Z_LVAL_P(c))); \
-		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
-			RETURN_BOOL(iswhat((int)Z_LVAL_P(c) + 256)); \
-		} else if (Z_LVAL_P(c) >= 0) { \
-			RETURN_BOOL(allow_digits); \
-		} else { \
-			RETURN_BOOL(allow_minus); \
-		} \
-	} else if (Z_TYPE_P(c) == IS_STRING) { \
-		char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c); \
-		if (e == p) {	\
-			RETURN_FALSE;	\
-		}	\
-		while (p < e) { \
-			if(!iswhat((int)*(unsigned char *)(p++))) { \
-				RETURN_FALSE; \
-			} \
-		} \
-		RETURN_TRUE; \
-	} else { \
-		RETURN_FALSE; \
-	} \
+static void ctype_impl(
+		INTERNAL_FUNCTION_PARAMETERS, int (*iswhat)(int), bool allow_digits, bool allow_minus) {
+	zval *c;
 
-/* }}} */
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_ZVAL(c)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(c) == IS_STRING) {
+		char *p = Z_STRVAL_P(c), *e = Z_STRVAL_P(c) + Z_STRLEN_P(c);
+		if (e == p) {
+			RETURN_FALSE;
+		}
+		while (p < e) {
+			if (!iswhat((int)*(unsigned char *)(p++))) {
+				RETURN_FALSE;
+			}
+		}
+		RETURN_TRUE;
+	}
+
+	php_error_docref(NULL, E_DEPRECATED,
+		"Argument of type %s will be interpreted as string in the future", zend_zval_type_name(c));
+	if (Z_TYPE_P(c) == IS_LONG) {
+		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) {
+			RETURN_BOOL(iswhat((int)Z_LVAL_P(c)));
+		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) {
+			RETURN_BOOL(iswhat((int)Z_LVAL_P(c) + 256));
+		} else if (Z_LVAL_P(c) >= 0) {
+			RETURN_BOOL(allow_digits);
+		} else {
+			RETURN_BOOL(allow_minus);
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 /* {{{ Checks for alphanumeric character(s) */
 PHP_FUNCTION(ctype_alnum)
 {
-	CTYPE(isalnum, 1, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isalnum, 1, 0);
 }
 /* }}} */
 
 /* {{{ Checks for alphabetic character(s) */
 PHP_FUNCTION(ctype_alpha)
 {
-	CTYPE(isalpha, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isalpha, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for control character(s) */
 PHP_FUNCTION(ctype_cntrl)
 {
-	CTYPE(iscntrl, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, iscntrl, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for numeric character(s) */
 PHP_FUNCTION(ctype_digit)
 {
-	CTYPE(isdigit, 1, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isdigit, 1, 0);
 }
 /* }}} */
 
 /* {{{ Checks for lowercase character(s)  */
 PHP_FUNCTION(ctype_lower)
 {
-	CTYPE(islower, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, islower, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for any printable character(s) except space */
 PHP_FUNCTION(ctype_graph)
 {
-	CTYPE(isgraph, 1, 1);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isgraph, 1, 1);
 }
 /* }}} */
 
 /* {{{ Checks for printable character(s) */
 PHP_FUNCTION(ctype_print)
 {
-	CTYPE(isprint, 1, 1);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isprint, 1, 1);
 }
 /* }}} */
 
 /* {{{ Checks for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
-	CTYPE(ispunct, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ispunct, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for whitespace character(s)*/
 PHP_FUNCTION(ctype_space)
 {
-	CTYPE(isspace, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isspace, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for uppercase character(s) */
 PHP_FUNCTION(ctype_upper)
 {
-	CTYPE(isupper, 0, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isupper, 0, 0);
 }
 /* }}} */
 
 /* {{{ Checks for character(s) representing a hexadecimal digit */
 PHP_FUNCTION(ctype_xdigit)
 {
-	CTYPE(isxdigit, 1, 0);
+	ctype_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, isxdigit, 1, 0);
 }
 /* }}} */
 

@@ -57,6 +57,7 @@ typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_da
 ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
 
 ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
+ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs
 ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_deactivate(void);
 ZEND_API void zend_observer_shutdown(void);
@@ -78,10 +79,17 @@ typedef void (*zend_observer_error_cb)(int type, zend_string *error_filename, ui
 ZEND_API void zend_observer_error_register(zend_observer_error_cb callback);
 void zend_observer_error_notify(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
+typedef void (*zend_observer_fiber_init_handler)(zend_fiber_context *initializing);
 typedef void (*zend_observer_fiber_switch_handler)(zend_fiber_context *from, zend_fiber_context *to);
+typedef void (*zend_observer_fiber_destroy_handler)(zend_fiber_context *destroying);
 
+ZEND_API void zend_observer_fiber_init_register(zend_observer_fiber_init_handler handler);
 ZEND_API void zend_observer_fiber_switch_register(zend_observer_fiber_switch_handler handler);
+ZEND_API void zend_observer_fiber_destroy_register(zend_observer_fiber_destroy_handler handler);
+
+ZEND_API void ZEND_FASTCALL zend_observer_fiber_init_notify(zend_fiber_context *initializing);
 ZEND_API void ZEND_FASTCALL zend_observer_fiber_switch_notify(zend_fiber_context *from, zend_fiber_context *to);
+ZEND_API void ZEND_FASTCALL zend_observer_fiber_destroy_notify(zend_fiber_context *destroying);
 
 END_EXTERN_C()
 

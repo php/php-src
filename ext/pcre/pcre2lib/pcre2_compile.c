@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2020 University of Cambridge
+          New API code Copyright (c) 2016-2021 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,7 @@ static BOOL
 
 static int
   check_lookbehinds(uint32_t *, uint32_t **, parsed_recurse_check *,
-    compile_block *);
+    compile_block *, int *);
 
 
 /*************************************************
@@ -782,12 +782,15 @@ are allowed. */
 #define PUBLIC_COMPILE_EXTRA_OPTIONS \
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
     PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES|PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL| \
-    PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX)
+    PCRE2_EXTRA_ESCAPED_CR_IS_LF|PCRE2_EXTRA_ALT_BSUX| \
+    PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)
 
 /* Compile time error code numbers. They are given names so that they can more
 easily be tracked. When a new number is added, the tables called eint1 and
 eint2 in pcre2posix.c may need to be updated, and a new error text must be
-added to compile_error_texts in pcre2_error.c. */
+added to compile_error_texts in pcre2_error.c. Also, the error codes in
+pcre2.h.in must be updated - their values are exactly 100 greater than these
+values. */
 
 enum { ERR0 = COMPILE_ERROR_BASE,
        ERR1,  ERR2,  ERR3,  ERR4,  ERR5,  ERR6,  ERR7,  ERR8,  ERR9,  ERR10,
@@ -799,7 +802,7 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -7799,6 +7802,16 @@ for (;; pptr++)
       }
 #endif
 
+    /* \K is forbidden in lookarounds since 10.38 because that's what Perl has
+    done. However, there's an option, in case anyone was relying on it. */
+
+    if (cb->assert_depth > 0 && meta_arg == ESC_K &&
+        (cb->cx->extra_options & PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK) == 0)
+      {
+      *errorcodeptr = ERR99;
+      return 0;
+      }
+
     /* For the rest (including \X when Unicode is supported - if not it's
     faulted at parse time), the OP value is the escape value when PCRE2_UCP is
     not set; if it is set, these escapes do not show up here because they are
@@ -9148,7 +9161,7 @@ for (;; pptr++)
     case META_LOOKAHEAD:
     case META_LOOKAHEADNOT:
     case META_LOOKAHEAD_NA:
-    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb);
+    *errcodeptr = check_lookbehinds(pptr + 1, &pptr, recurses, cb, lcptr);
     if (*errcodeptr != 0) return -1;
 
     /* Ignore any qualifiers that follow a lookahead assertion. */
@@ -9488,16 +9501,16 @@ Arguments
   retptr    if not NULL, return the ket pointer here
   recurses  chain of recurse_check to catch mutual recursion
   cb        points to the compile block
+  lcptr     points to loop counter
 
 Returns:    0 on success, or an errorcode (cb->erroroffset will be set)
 */
 
 static int
 check_lookbehinds(uint32_t *pptr, uint32_t **retptr,
-  parsed_recurse_check *recurses, compile_block *cb)
+  parsed_recurse_check *recurses, compile_block *cb, int *lcptr)
 {
 int errorcode = 0;
-int loopcount = 0;
 int nestlevel = 0;
 
 cb->erroroffset = PCRE2_UNSET;
@@ -9623,7 +9636,7 @@ for (; *pptr != META_END; pptr++)
     case META_LOOKBEHIND:
     case META_LOOKBEHINDNOT:
     case META_LOOKBEHIND_NA:
-    if (!set_lookbehind_lengths(&pptr, &errorcode, &loopcount, recurses, cb))
+    if (!set_lookbehind_lengths(&pptr, &errorcode, lcptr, recurses, cb))
       return errorcode;
     break;
     }
@@ -10078,7 +10091,8 @@ lengths. */
 
 if (has_lookbehind)
   {
-  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb);
+  int loopcount = 0;
+  errorcode = check_lookbehinds(cb.parsed_pattern, NULL, NULL, &cb, &loopcount);
   if (errorcode != 0) goto HAD_CB_ERROR;
   }
 

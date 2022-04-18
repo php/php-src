@@ -398,7 +398,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	array_init_size(return_value, zend_hash_num_elements(headers));
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(headers, key, value) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, value) {
 		ZVAL_STRING(&tmp, value);
 		zend_symtable_update(Z_ARRVAL_P(return_value), key, &tmp);
 	} ZEND_HASH_FOREACH_END();
@@ -1152,7 +1152,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 #endif
 
 	/* basic */
-	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, SG(request_info).request_method, client->request.request_uri);
+	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, php_http_method_str(client->request.request_method), client->request.request_uri);
 	if (!basic_buf) {
 		return;
 	}
@@ -1384,26 +1384,28 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
 	vpath = p;
-	if (request->vpath_len > 0 && request->vpath[0] != '/') {
-		*p++ = DEFAULT_SLASH;
-	}
-	q = request->vpath + request->vpath_len;
-	while (q > request->vpath) {
-		if (*q-- == '.') {
-			is_static_file = 1;
-			break;
+	if (request->vpath_len != 0) {
+		if (request->vpath[0] != '/') {
+			*p++ = DEFAULT_SLASH;
 		}
-	}
-	memmove(p, request->vpath, request->vpath_len);
+		q = request->vpath + request->vpath_len;
+		while (q > request->vpath) {
+			if (*q-- == '.') {
+				is_static_file = 1;
+				break;
+			}
+		}
+		memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
-	q = p + request->vpath_len;
-	do {
-		if (*q == '/') {
-			*q = '\\';
-		}
-	} while (q-- > p);
+		q = p + request->vpath_len;
+		do {
+			if (*q == '/') {
+				*q = '\\';
+			}
+		} while (q-- > p);
 #endif
-	p += request->vpath_len;
+		p += request->vpath_len;
+	}
 	*p = '\0';
 	q = p;
 	while (q > buf) {
@@ -2126,8 +2128,6 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup()) {
-		/* should never be happen */
-		destroy_request_info(&SG(request_info));
 		return FAILURE;
 	}
 	PG(during_request_startup) = 0;
@@ -2198,9 +2198,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 
 	if (server->router || !is_static_file) {
 		if (FAILURE == php_cli_server_request_startup(server, client)) {
-			SG(server_context) = NULL;
-			php_cli_server_close_connection(server, client);
-			destroy_request_info(&SG(request_info));
+			php_cli_server_request_shutdown(server, client);
 			return SUCCESS;
 		}
 	}
@@ -2375,14 +2373,14 @@ static char *php_cli_server_parse_addr(const char *addr, int *pport) {
 	return pestrndup(addr, end - addr, 1);
 }
 
-static void php_cli_server_startup_workers() {
+static void php_cli_server_startup_workers(void) {
 	char *workers = getenv("PHP_CLI_SERVER_WORKERS");
 	if (!workers) {
 		return;
 	}
 
 #if HAVE_FORK
-	ZEND_ATOL(php_cli_server_workers_max, workers);
+	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;
 

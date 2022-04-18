@@ -32,6 +32,9 @@ foreach ($stmt as $data)
 
 class Test
 {
+    public $val;
+    public $grp;
+
     function __construct($name = 'N/A')
     {
         echo __METHOD__ . "($name)\n";

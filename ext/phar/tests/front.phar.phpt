@@ -5,6 +5,10 @@ default_charset=UTF-8
 opcache.validate_timestamps=1
 --EXTENSIONS--
 phar
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Unknown failure');
+?>
 --ENV--
 SCRIPT_NAME=/front.phar.php
 REQUEST_URI=/front.phar.php/index.php

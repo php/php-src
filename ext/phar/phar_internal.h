@@ -88,6 +88,8 @@
 #define PHAR_SIG_SHA256           0x0003
 #define PHAR_SIG_SHA512           0x0004
 #define PHAR_SIG_OPENSSL          0x0010
+#define PHAR_SIG_OPENSSL_SHA256   0x0011
+#define PHAR_SIG_OPENSSL_SHA512   0x0012
 
 /* flags byte for each file adheres to these bitmasks.
    All unused values are reserved */

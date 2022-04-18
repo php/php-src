@@ -23,7 +23,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "Zend/zend_interfaces.h"
 #include "php_shmop.h"
 #include "shmop_arginfo.h"
 
@@ -110,8 +109,6 @@ PHP_MINIT_FUNCTION(shmop)
 {
 	shmop_ce = register_class_Shmop();
 	shmop_ce->create_object = shmop_create_object;
-	shmop_ce->serialize = zend_class_serialize_deny;
-	shmop_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&shmop_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	shmop_object_handlers.offset = XtOffsetOf(php_shmop, std);
@@ -238,7 +235,7 @@ PHP_FUNCTION(shmop_read)
 		RETURN_THROWS();
 	}
 
-	if (count < 0 || start > (INT_MAX - count) || start + count > shmop->size) {
+	if (count < 0 || start > (ZEND_LONG_MAX - count) || start + count > shmop->size) {
 		zend_argument_value_error(3, "is out of range");
 		RETURN_THROWS();
 	}

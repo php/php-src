@@ -4,6 +4,7 @@ PDO_DBLIB: Out of memory on large recordsets
 pdo_dblib
 --SKIPIF--
 <?php
+if (getenv('SKIP_REPEAT')) die('skip May fail on repeat');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--

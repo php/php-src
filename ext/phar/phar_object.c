@@ -1239,9 +1239,13 @@ PHP_METHOD(Phar, getSupportedSignatures)
 	add_next_index_stringl(return_value, "SHA-512", 7);
 #ifdef PHAR_HAVE_OPENSSL
 	add_next_index_stringl(return_value, "OpenSSL", 7);
+	add_next_index_stringl(return_value, "OpenSSL_SHA256", 14);
+	add_next_index_stringl(return_value, "OpenSSL_SHA512", 14);
 #else
 	if (zend_hash_str_exists(&module_registry, "openssl", sizeof("openssl")-1)) {
 		add_next_index_stringl(return_value, "OpenSSL", 7);
+		add_next_index_stringl(return_value, "OpenSSL_SHA256", 14);
+		add_next_index_stringl(return_value, "OpenSSL_SHA512", 14);
 	}
 #endif
 }
@@ -1381,6 +1385,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
 	php_stream_statbuf ssb;
+	char ch;
 
 	value = iter->funcs->get_current_data(iter);
 
@@ -1501,7 +1506,7 @@ phar_spl_fileinfo:
 		base = temp;
 		base_len = strlen(base);
 
-		if (strstr(fname, base)) {
+		if (fname_len >= base_len && strncmp(fname, base, base_len) == 0 && ((ch = fname[base_len - IS_SLASH(base[base_len - 1])]) == '\0' || IS_SLASH(ch))) {
 			str_key_len = fname_len - base_len;
 
 			if (str_key_len <= 0) {
@@ -2245,7 +2250,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	phar_metadata_tracker_copy(&phar->metadata_tracker, &source->metadata_tracker, phar->is_persistent);
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
-	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&source->manifest, entry) {
 
 		newentry = *entry;
 
@@ -3003,6 +3008,8 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 		case PHAR_SIG_MD5:
 		case PHAR_SIG_SHA1:
 		case PHAR_SIG_OPENSSL:
+		case PHAR_SIG_OPENSSL_SHA256:
+		case PHAR_SIG_OPENSSL_SHA512:
 			if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 				RETURN_THROWS();
@@ -3041,19 +3048,25 @@ PHP_METHOD(Phar, getSignature)
 		add_assoc_stringl(return_value, "hash", phar_obj->archive->signature, phar_obj->archive->sig_len);
 		switch(phar_obj->archive->sig_flags) {
 			case PHAR_SIG_MD5:
-				add_assoc_stringl(return_value, "hash_type", "MD5", 3);
+				add_assoc_string(return_value, "hash_type", "MD5");
 				break;
 			case PHAR_SIG_SHA1:
-				add_assoc_stringl(return_value, "hash_type", "SHA-1", 5);
+				add_assoc_string(return_value, "hash_type", "SHA-1");
 				break;
 			case PHAR_SIG_SHA256:
-				add_assoc_stringl(return_value, "hash_type", "SHA-256", 7);
+				add_assoc_string(return_value, "hash_type", "SHA-256");
 				break;
 			case PHAR_SIG_SHA512:
-				add_assoc_stringl(return_value, "hash_type", "SHA-512", 7);
+				add_assoc_string(return_value, "hash_type", "SHA-512");
 				break;
 			case PHAR_SIG_OPENSSL:
-				add_assoc_stringl(return_value, "hash_type", "OpenSSL", 7);
+				add_assoc_string(return_value, "hash_type", "OpenSSL");
+				break;
+			case PHAR_SIG_OPENSSL_SHA256:
+				add_assoc_string(return_value, "hash_type", "OpenSSL_SHA256");
+				break;
+			case PHAR_SIG_OPENSSL_SHA512:
+				add_assoc_string(return_value, "hash_type", "OpenSSL_SHA512");
 				break;
 			default:
 				unknown = strpprintf(0, "Unknown (%u)", phar_obj->archive->sig_flags);
@@ -3759,11 +3772,7 @@ PHP_METHOD(Phar, offsetUnset)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
 			}
-
-			RETURN_TRUE;
 		}
-	} else {
-		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -4260,13 +4269,13 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 
 	if (!search) {
 		/* nothing to match -- extract all files */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else if ('/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
 		/* ends in "/" -- extract all entries having that prefix */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (0 != strncmp(ZSTR_VAL(search), entry->filename, ZSTR_LEN(search))) continue;
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
@@ -5068,6 +5077,8 @@ void phar_object_init(void) /* {{{ */
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA256", PHAR_SIG_OPENSSL_SHA256)
+	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA512", PHAR_SIG_OPENSSL_SHA512)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)

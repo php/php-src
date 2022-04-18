@@ -311,7 +311,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
 		}
 
-		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
+		if (mimetype != NULL && (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || (output_context->op & PHP_OUTPUT_HANDLER_START))) {
 			size_t len;
 			char *p = strstr(get_output_encoding(), "//");
 
@@ -1578,6 +1578,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						}
 
 						err = _php_iconv_appendl(pretval, ZSTR_VAL(decoded_text), ZSTR_LEN(decoded_text), cd);
+						if (err == PHP_ICONV_ERR_SUCCESS) {
+							err = _php_iconv_appendl(pretval, NULL, 0, cd);
+						}
 						zend_string_release_ex(decoded_text, 0);
 
 						if (err != PHP_ICONV_ERR_SUCCESS) {
@@ -1716,13 +1719,6 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 	if (next_pos != NULL) {
 		*next_pos = p1;
-	}
-
-	if (cd != (iconv_t)(-1)) {
-		_php_iconv_appendl(pretval, NULL, 0, cd);
-	}
-	if (cd_pl != (iconv_t)(-1)) {
-		_php_iconv_appendl(pretval, NULL, 0, cd_pl);
 	}
 
 	smart_str_0(pretval);

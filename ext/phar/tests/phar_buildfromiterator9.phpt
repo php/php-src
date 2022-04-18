@@ -14,25 +14,25 @@ class myIterator implements Iterator
     {
         $this->a = $a;
     }
-    function next() {
+    function next(): void {
         echo "next\n";
-        return next($this->a);
+        next($this->a);
     }
-    function current() {
+    function current(): mixed {
         echo "current\n";
         return current($this->a);
     }
-    function key() {
+    function key(): mixed {
         echo "key\n";
         return key($this->a);
     }
-    function valid() {
+    function valid(): bool {
         echo "valid\n";
-        return current($this->a);
+        return (bool) current($this->a);
     }
-    function rewind() {
+    function rewind(): void {
         echo "rewind\n";
-        return reset($this->a);
+        reset($this->a);
     }
 }
 try {

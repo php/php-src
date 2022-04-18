@@ -40,7 +40,7 @@ array(2) {
     ["s"]=>
     int(-1)
     ["f"]=>
-    float(-1)
+    float(0)
     ["weekday"]=>
     int(-1)
     ["weekday_behavior"]=>

@@ -29,7 +29,7 @@ dumpType($rp->getType());
 
 interface y {}
 class x implements Y, Countable {
-    public function count() {}
+    public function count(): int { return 0; }
 }
 $test = new Test;
 $test->prop = new x;
@@ -67,13 +67,13 @@ Allows null: false
   Name: Countable
   String: Countable
   Allows Null: false
-Type x&y&Countable:
+Type X&Y&Countable:
 Allows null: false
-  Name: x
-  String: x
+  Name: X
+  String: X
   Allows Null: false
-  Name: y
-  String: y
+  Name: Y
+  String: Y
   Allows Null: false
   Name: Countable
   String: Countable

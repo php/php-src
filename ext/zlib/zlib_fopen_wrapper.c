@@ -15,7 +15,9 @@
    +----------------------------------------------------------------------+
  */
 
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 
 #include "php.h"
 #include "php_zlib.h"

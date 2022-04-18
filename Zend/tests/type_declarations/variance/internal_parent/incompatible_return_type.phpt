@@ -13,5 +13,5 @@ class MyDateTimeZone extends DateTimeZone
 var_dump(MyDateTimeZone::listIdentifiers());
 ?>
 --EXPECTF--
-Deprecated: Return type of MyDateTimeZone::listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): string should either be compatible with DateTimeZone::listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array, or the #[ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s on line %d
+Deprecated: Return type of MyDateTimeZone::listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): string should either be compatible with DateTimeZone::listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array, or the #[\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice in %s on line %d
 string(0) ""

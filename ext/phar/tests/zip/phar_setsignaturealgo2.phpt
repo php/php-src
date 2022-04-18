@@ -79,7 +79,7 @@ array(2) {
   ["hash"]=>
   string(%d) "%s"
   ["hash_type"]=>
-  string(5) "SHA-1"
+  string(7) "SHA-256"
 }
 array(2) {
   ["hash"]=>

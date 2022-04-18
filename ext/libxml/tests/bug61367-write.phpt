@@ -8,6 +8,8 @@ open_basedir=.
 <?php
 
 class StreamExploiter {
+    public $context;
+
     public function stream_close (  ) {
         $doc = new DOMDocument;
         $doc->appendChild($doc->createTextNode('hello'));

@@ -95,6 +95,17 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_NS_FENTRY(ns, zend_name, name, arg_info, flags)		ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, #zend_name), name, arg_info, flags)
 
 #define ZEND_NS_RAW_FENTRY(ns, zend_name, name, arg_info, flags)	ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, zend_name), name, arg_info, flags)
+/**
+ * Note that if you are asserting that a function is compile-time evaluable, you are asserting that
+ *
+ * 1. The function will always have the same result for the same arguments
+ * 2. The function does not depend on global state such as ini settings or locale (e.g. mb_strtolower), number_format(), etc.
+ * 3. The function does not have side effects. It is okay if they throw
+ *    or warn on invalid arguments, as we detect this and will discard the evaluation result.
+ * 4. The function will not take an unreasonable amount of time or memory to compute on code that may be seen in practice.
+ *    (e.g. str_repeat is special cased to check the length instead of using this)
+ */
+#define ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(name, arg_info) ZEND_RAW_FENTRY(#name, zif_##name, arg_info, ZEND_ACC_COMPILE_TIME_EVAL)
 
 /* Same as ZEND_NS_NAMED_FE */
 #define ZEND_NS_RAW_NAMED_FE(ns, zend_name, name, arg_info)			ZEND_NS_RAW_FENTRY(ns, #zend_name, name, arg_info, 0)
@@ -292,6 +303,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
 		class_container.iterator_funcs_ptr = NULL;				\
+		class_container.arrayaccess_funcs_ptr = NULL;			\
 		class_container.info.internal.module = NULL;			\
 		class_container.info.internal.builtin_functions = functions;	\
 	}
@@ -378,7 +390,6 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
-#define IS_CALLABLE_CHECK_SILENT      (1<<3)
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);
@@ -416,8 +427,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type);
 ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_type);
 
 static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry *ce) {
-	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_CONSTANTS) && ZEND_MAP_PTR(ce->mutable_data)) {
 		zend_class_mutable_data *mutable_data =
 			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		if (mutable_data && mutable_data->constants_table) {
@@ -431,8 +441,7 @@ static zend_always_inline HashTable *zend_class_constants_table(zend_class_entry
 }
 
 static zend_always_inline zval *zend_class_default_properties_table(zend_class_entry *ce) {
-	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES)
-	 && (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if ((ce->ce_flags & ZEND_ACC_HAS_AST_PROPERTIES) && ZEND_MAP_PTR(ce->mutable_data)) {
 		zend_class_mutable_data *mutable_data =
 			(zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
 		return mutable_data->default_properties_table;
@@ -475,10 +484,8 @@ ZEND_API const char *zend_get_type_by_const(int type);
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
-#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
 #define ZEND_NUM_ARGS()						EX_NUM_ARGS()
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(); return; }
-#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
@@ -648,6 +655,9 @@ ZEND_API void zend_fcall_info_argn(zend_fcall_info *fci, uint32_t argc, ...);
  */
 ZEND_API zend_result zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *retval, zval *args);
 
+/* Can only return FAILURE if EG(active) is false during late engine shutdown.
+ * If the call or call setup throws, EG(exception) will be set and the retval
+ * will be UNDEF. Otherwise, the retval will be a non-UNDEF value. */
 ZEND_API zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache);
 
 /* Call the provided zend_function with the given params.
@@ -681,6 +691,13 @@ static zend_always_inline void zend_call_known_instance_method_with_1_params(
 ZEND_API void zend_call_known_instance_method_with_2_params(
 		zend_function *fn, zend_object *object, zval *retval_ptr, zval *param1, zval *param2);
 
+/* Call method if it exists. Return FAILURE if method does not exist or call failed.
+ * If FAILURE is returned, retval will be UNDEF. As such, destroying retval unconditionally
+ * is legal. */
+ZEND_API zend_result zend_call_method_if_exists(
+		zend_object *object, zend_string *method_name, zval *retval,
+		uint32_t param_count, zval *params);
+
 ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t name_length, bool is_ref, int num_symbol_tables, ...);
 
 ZEND_API zend_result zend_delete_global_variable(zend_string *name);
@@ -691,20 +708,30 @@ ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API zend_result zend_set_local_var(zend_string *name, zval *value, bool force);
 ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *value, bool force);
 
-static zend_always_inline zend_result zend_forbid_dynamic_call(const char *func_name)
+static zend_always_inline zend_result zend_forbid_dynamic_call(void)
 {
 	zend_execute_data *ex = EG(current_execute_data);
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
-		zend_throw_error(NULL, "Cannot call %s dynamically", func_name);
+		zend_throw_error(NULL, "Cannot call %s() dynamically", get_active_function_name());
 		return FAILURE;
 	}
 
 	return SUCCESS;
 }
 
-ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce);
+ZEND_API ZEND_COLD const char *zend_get_object_type_case(const zend_class_entry *ce, bool upper_case);
+
+static zend_always_inline const char *zend_get_object_type(const zend_class_entry *ce)
+{
+	return zend_get_object_type_case(ce, false);
+}
+
+static zend_always_inline const char *zend_get_object_type_uc(const zend_class_entry *ce)
+{
+	return zend_get_object_type_case(ce, true);
+}
 
 ZEND_API bool zend_is_iterable(zval *iterable);
 
@@ -803,6 +830,7 @@ END_EXTERN_C()
 #define RETVAL_OBJ_COPY(r)				ZVAL_OBJ_COPY(return_value, r)
 #define RETVAL_COPY(zv)					ZVAL_COPY(return_value, zv)
 #define RETVAL_COPY_VALUE(zv)			ZVAL_COPY_VALUE(return_value, zv)
+#define RETVAL_COPY_DEREF(zv)			ZVAL_COPY_DEREF(return_value, zv)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE					ZVAL_FALSE(return_value)
 #define RETVAL_TRUE						ZVAL_TRUE(return_value)
@@ -828,6 +856,7 @@ END_EXTERN_C()
 #define RETURN_OBJ_COPY(r)				do { RETVAL_OBJ_COPY(r); return; } while (0)
 #define RETURN_COPY(zv)					do { RETVAL_COPY(zv); return; } while (0)
 #define RETURN_COPY_VALUE(zv)			do { RETVAL_COPY_VALUE(zv); return; } while (0)
+#define RETURN_COPY_DEREF(zv)			do { RETVAL_COPY_DEREF(zv); return; } while (0)
 #define RETURN_ZVAL(zv, copy, dtor)		do { RETVAL_ZVAL(zv, copy, dtor); return; } while (0)
 #define RETURN_FALSE					do { RETVAL_FALSE; return; } while (0)
 #define RETURN_TRUE						do { RETVAL_TRUE; return; } while (0)

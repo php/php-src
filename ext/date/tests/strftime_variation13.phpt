@@ -30,17 +30,33 @@ foreach($inputs as $key =>$value) {
 *** Testing strftime() : usage variation ***
 
 --Century number--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "20"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "20"
 
 --Month Date Year--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(%d) "%d/%d/%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(8) "08/08/08"
 
 --Year with century--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(4) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(4) "2008"
 
 --Year without century--
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "%d"
+
+Deprecated: Function strftime() is deprecated in %s on line %d
 string(2) "08"

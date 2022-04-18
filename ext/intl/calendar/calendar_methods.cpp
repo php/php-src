@@ -424,6 +424,7 @@ U_CFUNC PHP_FUNCTION(intlcal_roll)
 
 	if (Z_TYPE_P(zvalue) == IS_FALSE || Z_TYPE_P(zvalue) == IS_TRUE) {
 		value = Z_TYPE_P(zvalue) == IS_TRUE ? 1 : -1;
+		php_error_docref(NULL, E_DEPRECATED, "Passing bool is deprecated, use 1 or -1 instead");
 	} else {
 		value = zval_get_long(zvalue);
 		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(value, 3);

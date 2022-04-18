@@ -8,6 +8,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
 ?>
 --INI--
 date.timezone = UTC
+error_reporting=E_ALL&~E_DEPRECATED
 --FILE--
 <?php
     setlocale(LC_ALL, 'Japanese_Japan.932');

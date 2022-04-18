@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class ResourceBundle implements IteratorAggregate, Countable
 {
     public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
@@ -26,6 +27,7 @@ class ResourceBundle implements IteratorAggregate, Countable
     public function count(): int {}
 
     /**
+     * @return array<int, string>|false
      * @tentative-return-type
      * @alias resourcebundle_locales
      */

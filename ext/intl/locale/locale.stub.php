@@ -35,6 +35,7 @@ class Locale
     public static function getRegion(string $locale): ?string {}
 
     /**
+     * @return array<string, string>|false|null
      * @tentative-return-type
      * @alias locale_get_keywords
      */

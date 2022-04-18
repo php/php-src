@@ -13,6 +13,15 @@ function test(\SplObjectStorage $definitions = null) {
     $definitions[$argument] = 1;
     $definitions[$argument] += 1;
 }
+function test2() {
+    $a[[]] = $undef;
+}
+function test3() {
+    foreach (range(0, $undef) as $v) { }
+}
+function test4() {
+    var_dump(range(0, ~$u));
+}
 
 ?>
 ===DONE===

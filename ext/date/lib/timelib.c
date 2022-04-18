@@ -35,7 +35,7 @@
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
 
-const char *timelib_error_messages[9] = {
+const char *timelib_error_messages[10] = {
 	"No error",
 	"Can not allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
@@ -44,6 +44,8 @@ const char *timelib_error_messages[9] = {
 	"The version used in this timezone identifier is unsupported",
 	"No timezone with this name could be found",
 	"A 'slim' timezone file has been detected",
+	"The embedded POSIX string is not valid",
+	"The embedded POSIX string is empty"
 };
 
 const char *timelib_get_error_message(int error_code)
@@ -198,10 +200,19 @@ void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
 
 void timelib_hms_to_decimal_hour(int hour, int min, int sec, double *h)
 {
-	if (hour > 0) {
+	if (hour >= 0) {
 		*h = ((double)hour + (double)min / 60 + (double)sec / 3600);
 	} else {
 		*h = ((double)hour - (double)min / 60 - (double)sec / 3600);
+	}
+}
+
+void timelib_hmsf_to_decimal_hour(int hour, int min, int sec, int us, double *h)
+{
+	if (hour >= 0) {
+		*h = ((double)hour + (double)min / MINS_PER_HOUR + (double)sec / SECS_PER_HOUR) + (double)us / USECS_PER_HOUR;
+	} else {
+		*h = ((double)hour - (double)min / MINS_PER_HOUR - (double)sec / SECS_PER_HOUR) - (double)us / USECS_PER_HOUR;
 	}
 }
 

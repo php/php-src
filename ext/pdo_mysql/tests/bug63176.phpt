@@ -20,6 +20,7 @@ class PDO3 extends PDO {
 
 
 class ModelA {
+    public $db;
     public function __construct($h) {
         var_dump($h);
         if ($h) {

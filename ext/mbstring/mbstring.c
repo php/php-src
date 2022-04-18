@@ -36,6 +36,8 @@
 #include "libmbfl/mbfl/mbfilter_wchar.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
+#include "libmbfl/filters/mbfilter_htmlent.h"
+#include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
 #include "libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.h"
@@ -216,6 +218,16 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 		if (!encoding) {
 			zend_argument_value_error(arg_num, "must be a valid encoding, \"%s\" given", ZSTR_VAL(encoding_name));
 			return NULL;
+		} else if (encoding->no_encoding <= mbfl_no_encoding_qprint) {
+			if (encoding == &mbfl_encoding_base64) {
+				php_error_docref(NULL, E_DEPRECATED, "Handling Base64 via mbstring is deprecated; use base64_encode/base64_decode instead");
+			} else if (encoding == &mbfl_encoding_qprint) {
+				php_error_docref(NULL, E_DEPRECATED, "Handling QPrint via mbstring is deprecated; use quoted_printable_encode/quoted_printable_decode instead");
+			} else if (encoding == &mbfl_encoding_html_ent) {
+				php_error_docref(NULL, E_DEPRECATED, "Handling HTML entities via mbstring is deprecated; use htmlspecialchars, htmlentities, or mb_encode_numericentity/mb_decode_numericentity instead");
+			} else if (encoding == &mbfl_encoding_uuencode) {
+				php_error_docref(NULL, E_DEPRECATED, "Handling Uuencode via mbstring is deprecated; use convert_uuencode/convert_uudecode instead");
+			}
 		}
 
 		if (last_encoding_name) {
@@ -280,7 +292,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		included_auto = 0;
 		p1 = tmpstr;
 		while (1) {
-			char *comma = (char *) php_memnstr(p1, ",", 1, endp);
+			char *comma = memchr(p1, ',', endp - p1);
 			char *p = comma ? comma : endp;
 			*p = '\0';
 			/* trim spaces */
@@ -562,7 +574,7 @@ static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
 			*resp++ = start[++i];
 		} else {
-			size_t j = php_mb_mbchar_bytes_ex(start+i, (const mbfl_encoding *)encoding);
+			size_t j = php_mb_mbchar_bytes(start+i, (const mbfl_encoding *)encoding);
 
 			while (j-- > 0 && i < len) {
 				*resp++ = start[i++];
@@ -594,7 +606,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 				++pos;
 			}
 		} else {
-			pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+			pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
 
 		}
 	}
@@ -607,7 +619,7 @@ static char *php_mb_rfc1867_getword(const zend_encoding *encoding, char **line, 
 	res = estrndup(*line, pos - *line);
 
 	while (*pos == stop) {
-		pos += php_mb_mbchar_bytes_ex(pos, (const mbfl_encoding *)encoding);
+		pos += php_mb_mbchar_bytes(pos, (const mbfl_encoding *)encoding);
 	}
 
 	*line = pos;
@@ -651,8 +663,8 @@ static char *php_mb_rfc1867_basename(const zend_encoding *encoding, char *filena
 	 * the full path of the file on the user's filesystem, which means that unless
 	 * the user does basename() they get a bogus file name. Until IE's user base drops
 	 * to nill or problem is fixed this code must remain enabled for all systems. */
-	s = php_mb_safe_strrchr_ex(filename, '\\', filename_len, (const mbfl_encoding *)encoding);
-	s2 = php_mb_safe_strrchr_ex(filename, '/', filename_len, (const mbfl_encoding *)encoding);
+	s = php_mb_safe_strrchr(filename, '\\', filename_len, (const mbfl_encoding *)encoding);
+	s2 = php_mb_safe_strrchr(filename, '/', filename_len, (const mbfl_encoding *)encoding);
 
 	if (s && s2) {
 		if (s > s2) {
@@ -1699,6 +1711,10 @@ PHP_FUNCTION(mb_str_split)
 		RETURN_THROWS();
 	}
 
+	if (ZSTR_LEN(str) == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
 	p = ZSTR_VAL(str); /* string cursor pointer */
 	last = ZSTR_VAL(str) + ZSTR_LEN(str); /* last string char pointer */
 
@@ -1819,11 +1835,7 @@ PHP_FUNCTION(mb_strlen)
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_strlen(&string);
-	/* Only way this can fail is if the conversion creation fails
-	 * this would imply some sort of memory allocation failure which is a bug */
-	ZEND_ASSERT(!mbfl_is_error(n));
-	RETVAL_LONG(n);
+	RETVAL_LONG(mbfl_strlen(&string));
 }
 /* }}} */
 
@@ -2255,9 +2267,7 @@ PHP_FUNCTION(mb_strwidth)
 		RETURN_THROWS();
 	}
 
-	size_t n = mbfl_strwidth(&string);
-	ZEND_ASSERT(n != (size_t) -1);
-	RETVAL_LONG(n);
+	RETVAL_LONG(mbfl_strwidth(&string));
 }
 /* }}} */
 
@@ -2491,6 +2501,23 @@ try_again:
 }
 /* }}} */
 
+static void remove_non_encodings_from_elist(const mbfl_encoding **elist, size_t *size)
+{
+	/* mbstring supports some 'text encodings' which aren't really text encodings
+	 * at all, but really 'byte encodings', like Base64, QPrint, and so on.
+	 * These should never be returned by `mb_detect_encoding`. */
+	int shift = 0;
+	for (int i = 0; i < *size; i++) {
+		const mbfl_encoding *encoding = elist[i];
+		if (encoding->no_encoding <= mbfl_no_encoding_charset_min) {
+			shift++; /* Remove this encoding from the list */
+		} else if (shift) {
+			elist[i - shift] = encoding;
+		}
+	}
+	*size -= shift;
+}
+
 /* {{{ Returns converted string in desired encoding */
 PHP_FUNCTION(mb_convert_encoding)
 {
@@ -2531,6 +2558,10 @@ PHP_FUNCTION(mb_convert_encoding)
 		free_from_encodings = 0;
 	}
 
+	if (num_from_encodings > 1) {
+		remove_non_encodings_from_elist(from_encodings, &num_from_encodings);
+	}
+
 	if (!num_from_encodings) {
 		efree(ZEND_VOIDP(from_encodings));
 		zend_argument_value_error(3, "must specify at least one encoding");
@@ -2538,7 +2569,16 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (input_str) {
-		/* new encoding */
+		if (num_from_encodings == 1) {
+			const mbfl_encoding *from_encoding = from_encodings[0];
+			if (from_encoding->to_wchar && to_encoding->from_wchar) {
+				unsigned int num_errors = 0;
+				RETVAL_STR(mb_fast_convert(input_str, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors));
+				MBSTRG(illegalchars) += num_errors;
+				goto out;
+			}
+		}
+
 		size_t size;
 		char *ret = php_mb_convert_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str),
 			to_encoding, from_encodings, num_from_encodings, &size);
@@ -2556,6 +2596,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		RETVAL_ARR(tmp);
 	}
 
+out:
 	if (free_from_encodings) {
 		efree(ZEND_VOIDP(from_encodings));
 	}
@@ -2709,14 +2750,27 @@ PHP_FUNCTION(mb_detect_encoding)
 		RETURN_THROWS();
 	}
 
+	if (free_elist) {
+		remove_non_encodings_from_elist(elist, &size);
+		if (size == 0) {
+			efree(ZEND_VOIDP(elist));
+			RETURN_FALSE;
+		}
+	}
+
 	if (ZEND_NUM_ARGS() < 3) {
 		strict = MBSTRG(strict_detection);
 	}
 
-	mbfl_string_init(&string);
-	string.val = (unsigned char *)str;
-	string.len = str_len;
-	ret = mbfl_identify_encoding(&string, elist, size, strict);
+	if (strict && size == 1) {
+		/* If there is only a single candidate encoding, mb_check_encoding is faster */
+		ret = (php_mb_check_encoding(str, str_len, *elist)) ? *elist : NULL;
+	} else {
+		mbfl_string_init(&string);
+		string.val = (unsigned char *)str;
+		string.len = str_len;
+		ret = mbfl_identify_encoding(&string, elist, size, strict);
+	}
 
 	if (free_elist) {
 		efree(ZEND_VOIDP(elist));
@@ -2845,6 +2899,12 @@ PHP_FUNCTION(mb_decode_mimeheader)
 }
 /* }}} */
 
+char mb_convert_kana_flags[17] = {
+	'A', 'R', 'N', 'S', 'K', 'H', 'M', 'C',
+	'a', 'r', 'n', 's', 'k', 'h', 'm', 'c',
+	'V'
+};
+
 /* {{{ Conversion between full-width character and half-width character (Japanese) */
 PHP_FUNCTION(mb_convert_kana)
 {
@@ -2863,70 +2923,78 @@ PHP_FUNCTION(mb_convert_kana)
 
 	string.val = (unsigned char*)string_val;
 
-	/* "Zen" is 全, or "full"; "Han" is 半, or "half"
-	 * This refers to "fullwidth" or "halfwidth" variants of characters used for writing Japanese */
 	if (optstr != NULL) {
 		char *p = optstr, *e = p + optstr_len;
 		opt = 0;
+next_option:
 		while (p < e) {
-			switch (*p++) {
-			case 'A':
-				opt |= MBFL_FILT_TL_HAN2ZEN_ALL;
-				break;
-			case 'a':
-				opt |= MBFL_FILT_TL_ZEN2HAN_ALL;
-				break;
-			case 'R':
-				opt |= MBFL_FILT_TL_HAN2ZEN_ALPHA;
-				break;
-			case 'r':
-				opt |= MBFL_FILT_TL_ZEN2HAN_ALPHA;
-				break;
-			case 'N':
-				opt |= MBFL_FILT_TL_HAN2ZEN_NUMERIC;
-				break;
-			case 'n':
-				opt |= MBFL_FILT_TL_ZEN2HAN_NUMERIC;
-				break;
-			case 'S':
-				opt |= MBFL_FILT_TL_HAN2ZEN_SPACE;
-				break;
-			case 's':
-				opt |= MBFL_FILT_TL_ZEN2HAN_SPACE;
-				break;
-			case 'K':
-				opt |= MBFL_FILT_TL_HAN2ZEN_KATAKANA;
-				break;
-			case 'k':
-				opt |= MBFL_FILT_TL_ZEN2HAN_KATAKANA;
-				break;
-			case 'H':
-				opt |= MBFL_FILT_TL_HAN2ZEN_HIRAGANA;
-				break;
-			case 'h':
-				opt |= MBFL_FILT_TL_ZEN2HAN_HIRAGANA;
-				break;
-			case 'V':
-				opt |= MBFL_FILT_TL_HAN2ZEN_GLUE;
-				break;
-			case 'C':
-				opt |= MBFL_FILT_TL_ZEN2HAN_HIRA2KANA;
-				break;
-			case 'c':
-				opt |= MBFL_FILT_TL_ZEN2HAN_KANA2HIRA;
-				break;
-			case 'M':
-				/* TODO: figure out what 'M' and 'm' are for, and rename the constant
-				 * to something meaningful */
-				opt |= MBFL_FILT_TL_HAN2ZEN_COMPAT1;
-				break;
-			case 'm':
-				opt |= MBFL_FILT_TL_ZEN2HAN_COMPAT1;
-				break;
+			/* Walk through option string and convert to bit vector
+			 * See mbfilter_tl_jisx0201_jisx0208.h for the values used */
+			char c = *p++;
+			if (c == 'A') {
+				opt |= MBFL_HAN2ZEN_ALL | MBFL_HAN2ZEN_ALPHA | MBFL_HAN2ZEN_NUMERIC;
+			} else if (c == 'a') {
+				opt |= MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC;
+			} else {
+				for (int i = 0; i < sizeof(mb_convert_kana_flags) / sizeof(char); i++) {
+					if (c == mb_convert_kana_flags[i]) {
+						opt |= (1 << i);
+						goto next_option;
+					}
+				}
+
+				zend_argument_value_error(2, "contains invalid flag: '%c'", c);
+				RETURN_THROWS();
+			}
+		}
+
+		/* Check for illegal combinations of options */
+		if (((opt & 0xFF00) >> 8) & opt) {
+			/* It doesn't make sense to convert the same type of characters from halfwidth to
+			 * fullwidth and then back to halfwidth again. Neither does it make sense to convert
+			 * FW hiragana to FW katakana and then back again. */
+			int badflag = ((opt & 0xFF00) >> 8) & opt, i;
+			for (i = 0; (badflag & 1) == 0; badflag >>= 1, i++);
+			char flag1 = mb_convert_kana_flags[i], flag2 = mb_convert_kana_flags[i+8];
+			if ((flag1 == 'R' || flag1 == 'N') && (opt & MBFL_HAN2ZEN_ALL))
+				flag1 = 'A';
+			if ((flag2 == 'r' || flag2 == 'n') && (opt & MBFL_ZEN2HAN_ALL))
+				flag2 = 'a';
+			zend_argument_value_error(2, "must not combine '%c' and '%c' flags", flag1, flag2);
+			RETURN_THROWS();
+		}
+
+		if ((opt & MBFL_HAN2ZEN_HIRAGANA) && (opt & MBFL_HAN2ZEN_KATAKANA)) {
+			/* We can either convert all HW kana to FW hiragana, or to FW katakana, but not both */
+			zend_argument_value_error(2, "must not combine 'H' and 'K' flags");
+			RETURN_THROWS();
+		}
+
+		/* We can either convert all FW kana to HW hiragana, or all FW kana to HW katakana,
+		 * or all FW hiragana to FW katakana, or all FW katakana to FW hiragana, but not
+		 * more than one of these */
+		if (opt & MBFL_ZEN2HAN_HIRAGANA) {
+			if (opt & MBFL_ZEN2HAN_KATAKANA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'k' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_HIRA2KATA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'C' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_KATA2HIRA) {
+				zend_argument_value_error(2, "must not combine 'h' and 'c' flags");
+				RETURN_THROWS();
+			}
+		} else if (opt & MBFL_ZEN2HAN_KATAKANA) {
+			if (opt & MBFL_ZENKAKU_HIRA2KATA) {
+				zend_argument_value_error(2, "must not combine 'k' and 'C' flags");
+				RETURN_THROWS();
+			} else if (opt & MBFL_ZENKAKU_KATA2HIRA) {
+				zend_argument_value_error(2, "must not combine 'k' and 'c' flags");
+				RETURN_THROWS();
 			}
 		}
 	} else {
-		opt = MBFL_FILT_TL_HAN2ZEN_KATAKANA | MBFL_FILT_TL_HAN2ZEN_GLUE;
+		opt = MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE;
 	}
 
 	/* encoding */
@@ -3250,15 +3318,7 @@ PHP_FUNCTION(mb_decode_numericentity)
 /* }}} */
 
 /* {{{ Sends an email message with MIME scheme */
-
-#define SKIP_LONG_HEADER_SEP_MBSTRING(str, pos)										\
-	if (str[pos] == '\r' && str[pos + 1] == '\n' && (str[pos + 2] == ' ' || str[pos + 2] == '\t')) {	\
-		pos += 2;											\
-		while (str[pos + 1] == ' ' || str[pos + 1] == '\t') {							\
-			pos++;											\
-		}												\
-		continue;											\
-	}
+#define CRLF "\r\n"
 
 static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
 {
@@ -3365,9 +3425,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 							if (fld_name != NULL && fld_val != NULL) {
 								zval val;
-								/* FIXME: some locale free implementation is
-								 * really required here,,, */
-								php_strtoupper(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+								zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
 								ZVAL_STR(&val, fld_val);
 
 								zend_hash_update(ht, fld_name, &val);
@@ -3413,11 +3471,8 @@ out:
 		}
 		if (fld_name != NULL && fld_val != NULL) {
 			zval val;
-			/* FIXME: some locale free implementation is
-			 * really required here,,, */
-			php_strtoupper(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
+			zend_str_tolower(ZSTR_VAL(fld_name), ZSTR_LEN(fld_name));
 			ZVAL_STR(&val, fld_val);
-
 			zend_hash_update(ht, fld_name, &val);
 
 			zend_string_release_ex(fld_name, 0);
@@ -3503,7 +3558,7 @@ PHP_FUNCTION(mb_send_mail)
 		_php_mbstr_parse_mail_headers(&ht_headers, ZSTR_VAL(str_headers), ZSTR_LEN(str_headers));
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TYPE", sizeof("CONTENT-TYPE") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-type", sizeof("content-type") - 1))) {
 		char *tmp;
 		char *param_name;
 		char *charset = NULL;
@@ -3539,7 +3594,7 @@ PHP_FUNCTION(mb_send_mail)
 		suppressed_hdrs.cnt_type = 1;
 	}
 
-	if ((s = zend_hash_str_find(&ht_headers, "CONTENT-TRANSFER-ENCODING", sizeof("CONTENT-TRANSFER-ENCODING") - 1))) {
+	if ((s = zend_hash_str_find(&ht_headers, "content-transfer-encoding", sizeof("content-transfer-encoding") - 1))) {
 		const mbfl_encoding *_body_enc;
 
 		ZEND_ASSERT(Z_TYPE_P(s) == IS_STRING);
@@ -3569,15 +3624,20 @@ PHP_FUNCTION(mb_send_mail)
 			to_r[to_len - 1] = '\0';
 		}
 		for (i = 0; to_r[i]; i++) {
-		if (iscntrl((unsigned char) to_r[i])) {
-			/* According to RFC 822, section 3.1.1 long headers may be separated into
-			 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
-			 * To prevent these separators from being replaced with a space, we use the
-			 * SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
-			 */
-			SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
-			to_r[i] = ' ';
-		}
+			if (iscntrl((unsigned char) to_r[i])) {
+				/* According to RFC 822, section 3.1.1 long headers may be separated into
+				 * parts using CRLF followed at least one linear-white-space character ('\t' or ' ').
+				 * To prevent these separators from being replaced with a space, we skip over them. */
+				if (to_r[i] == '\r' && to_r[i + 1] == '\n' && (to_r[i + 2] == ' ' || to_r[i + 2] == '\t')) {
+					i += 2;
+					while (to_r[i + 1] == ' ' || to_r[i + 1] == '\t') {
+						i++;
+					}
+					continue;
+				}
+
+				to_r[i] = ' ';
+			}
 		}
 	} else {
 		to_r = to;
@@ -3591,7 +3651,7 @@ PHP_FUNCTION(mb_send_mail)
 			|| orig_str.encoding->no_encoding == mbfl_no_encoding_pass) {
 		orig_str.encoding = mbfl_identify_encoding(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size), MBSTRG(strict_detection));
 	}
-	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, "\n", sizeof("Subject: [PHP-jp nnnnnnnn]"));
+	pstr = mbfl_mime_header_encode(&orig_str, &conv_str, tran_cs, head_enc, CRLF, sizeof("Subject: [PHP-jp nnnnnnnn]" CRLF) - 1);
 	if (pstr != NULL) {
 		subject_buf = subject = (char *)pstr->val;
 	}
@@ -3630,14 +3690,14 @@ PHP_FUNCTION(mb_send_mail)
 		n = ZSTR_LEN(str_headers);
 		mbfl_memory_device_strncat(&device, p, n);
 		if (n > 0 && p[n - 1] != '\n') {
-			mbfl_memory_device_strncat(&device, "\n", 1);
+			mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 		}
 		zend_string_release_ex(str_headers, 0);
 	}
 
-	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
+	if (!zend_hash_str_exists(&ht_headers, "mime-version", sizeof("mime-version") - 1)) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER1, sizeof(PHP_MBSTR_MAIL_MIME_HEADER1) - 1);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 
 	if (!suppressed_hdrs.cnt_type) {
@@ -3648,7 +3708,7 @@ PHP_FUNCTION(mb_send_mail)
 			mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER3, sizeof(PHP_MBSTR_MAIL_MIME_HEADER3) - 1);
 			mbfl_memory_device_strcat(&device, p);
 		}
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 	if (!suppressed_hdrs.cnt_trans_enc) {
 		mbfl_memory_device_strncat(&device, PHP_MBSTR_MAIL_MIME_HEADER4, sizeof(PHP_MBSTR_MAIL_MIME_HEADER4) - 1);
@@ -3657,9 +3717,10 @@ PHP_FUNCTION(mb_send_mail)
 			p = "7bit";
 		}
 		mbfl_memory_device_strcat(&device, p);
-		mbfl_memory_device_strncat(&device, "\n", 1);
+		mbfl_memory_device_strncat(&device, CRLF, sizeof(CRLF)-1);
 	}
 
+	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_unput(&device);
 	mbfl_memory_device_output('\0', &device);
 	str_headers = zend_string_init((char *)device.buffer, strlen((char *)device.buffer), 0);
@@ -3696,7 +3757,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 }
 
-#undef SKIP_LONG_HEADER_SEP_MBSTRING
+#undef CRLF
 #undef MAIL_ASCIIZ_CHECK_MBSTRING
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
 #undef PHP_MBSTR_MAIL_MIME_HEADER2
@@ -3854,10 +3915,10 @@ PHP_FUNCTION(mb_get_info)
 
 static int mbfl_filt_check_errors(int c, void* data)
 {
-	if (c & MBFL_WCSGROUP_THROUGH) {
+	if (c == MBFL_BAD_INPUT) {
 		(*((mbfl_convert_filter**)data))->num_illegalchar++;
 	}
-	return c;
+	return 0;
 }
 
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
@@ -3953,6 +4014,9 @@ PHP_FUNCTION(mb_check_encoding)
 	} else if (input_str) {
 		RETURN_BOOL(php_mb_check_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), encoding));
 	} else {
+		php_error_docref(NULL, E_DEPRECATED,
+			"Calling mb_check_encoding() without argument is deprecated");
+
 		/* FIXME: Actually check all inputs, except $_FILES file content. */
 		RETURN_BOOL(MBSTRG(illegalchars) == 0);
 	}
@@ -3992,13 +4056,12 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		mbfl_convert_filter_feed_string(filter, (unsigned char*)str, str_len);
 		mbfl_convert_filter_flush(filter);
 
-		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] >= MBFL_WCSGROUP_UCS4MAX) {
-			mbfl_convert_filter_delete(filter);
-			mbfl_wchar_device_clear(&dev);
-			return -1;
+		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] == MBFL_BAD_INPUT) {
+			cp = -1;
+		} else {
+			cp = dev.buffer[0];
 		}
 
-		cp = dev.buffer[0];
 		mbfl_convert_filter_delete(filter);
 		mbfl_wchar_device_clear(&dev);
 		return cp;
@@ -4044,8 +4107,7 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
 	zend_string *ret;
-	char* buf;
-	size_t buf_len;
+	char buf[4];
 
 	enc = php_mb_get_encoding(enc_name, enc_name_arg_num);
 	if (!enc) {
@@ -4092,21 +4154,16 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 		return ret;
 	}
 
-	buf_len = 4;
-	buf = (char *) emalloc(buf_len + 1);
 	buf[0] = (cp >> 24) & 0xff;
 	buf[1] = (cp >> 16) & 0xff;
 	buf[2] = (cp >>  8) & 0xff;
 	buf[3] = cp & 0xff;
-	buf[4] = 0;
 
-	char *ret_str;
 	size_t ret_len;
 	long orig_illegalchars = MBSTRG(illegalchars);
 	MBSTRG(illegalchars) = 0;
-	ret_str = php_mb_convert_encoding_ex(buf, buf_len, enc, &mbfl_encoding_ucs4be, &ret_len);
+	char *ret_str = php_mb_convert_encoding_ex(buf, 4, enc, &mbfl_encoding_ucs4be, &ret_len);
 	if (MBSTRG(illegalchars) != 0) {
-		efree(buf);
 		efree(ret_str);
 		MBSTRG(illegalchars) = orig_illegalchars;
 		return NULL;
@@ -4116,7 +4173,6 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	efree(ret_str);
 	MBSTRG(illegalchars) = orig_illegalchars;
 
-	efree(buf);
 	return ret;
 }
 
@@ -4175,10 +4231,6 @@ static void php_mb_populate_current_detect_order_list(void)
 	const mbfl_encoding **entry = 0;
 	size_t nentries;
 
-	if (MBSTRG(current_detect_order_list)) {
-		return;
-	}
-
 	if (MBSTRG(detect_order_list) && MBSTRG(detect_order_list_size)) {
 		nentries = MBSTRG(detect_order_list_size);
 		entry = (const mbfl_encoding **)safe_emalloc(nentries, sizeof(mbfl_encoding*), 0);
@@ -4204,8 +4256,7 @@ static int php_mb_encoding_translation(void)
 }
 /* }}} */
 
-/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes_ex() */
-MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc)
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc)
 {
 	if (enc) {
 		if (enc->mblen_table) {
@@ -4220,17 +4271,8 @@ MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *e
 	}
 	return 1;
 }
-/* }}} */
 
-/* {{{ MBSTRING_API size_t php_mb_mbchar_bytes() */
-MBSTRING_API size_t php_mb_mbchar_bytes(const char *s)
-{
-	return php_mb_mbchar_bytes_ex(s, MBSTRG(internal_encoding));
-}
-/* }}} */
-
-/* {{{ MBSTRING_API char *php_mb_safe_strrchr_ex() */
-MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
+MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc)
 {
 	const char *p = s;
 	char *last=NULL;
@@ -4243,7 +4285,7 @@ MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t 
 				if ((unsigned char)*p == (unsigned char)c) {
 					last = (char *)p;
 				}
-				nb = php_mb_mbchar_bytes_ex(p, enc);
+				nb = php_mb_mbchar_bytes(p, enc);
 				if (nb == 0) {
 					return NULL; /* something is going wrong! */
 				}
@@ -4258,7 +4300,7 @@ MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t 
 			if ((unsigned char)*p == (unsigned char)c) {
 				last = (char *)p;
 			}
-			nbytes_char = php_mb_mbchar_bytes_ex(p, enc);
+			nbytes_char = php_mb_mbchar_bytes(p, enc);
 			if (bcnt < nbytes_char) {
 				return NULL;
 			}
@@ -4268,14 +4310,6 @@ MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c, size_t 
 	}
 	return last;
 }
-/* }}} */
-
-/* {{{ MBSTRING_API char *php_mb_safe_strrchr() */
-MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes)
-{
-	return php_mb_safe_strrchr_ex(s, c, nbytes, MBSTRG(internal_encoding));
-}
-/* }}} */
 
 /* {{{ MBSTRING_API int php_mb_stripos() */
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *enc)

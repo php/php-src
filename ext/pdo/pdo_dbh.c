@@ -31,7 +31,6 @@
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
-#include "zend_interfaces.h"
 #include "pdo_dbh_arginfo.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
@@ -420,6 +419,10 @@ options:
 	}
 
 	/* the connection failed; things will tidy up in free_storage */
+	if (is_persistent) {
+		dbh->refcount--;
+	}
+
 	/* XXX raise exception */
 	zend_restore_error_handling(&zeh);
 	if (!EG(exception)) {
@@ -1188,7 +1191,7 @@ PHP_METHOD(PDO, getAvailableDrivers)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -1326,8 +1329,6 @@ void pdo_dbh_init(void)
 {
 	pdo_dbh_ce = register_class_PDO();
 	pdo_dbh_ce->create_object = pdo_dbh_new;
-	pdo_dbh_ce->serialize = zend_class_serialize_deny;
-	pdo_dbh_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);

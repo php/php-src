@@ -8,6 +8,9 @@ zend_test
 if (getenv("SKIP_REPEAT")) {
     die("skip pass registration does not need repeat");
 }
+if (getenv("SKIP_PRELOAD")) {
+    die("skip Not compatible with preload");
+}
 ?>
 --INI--
 opcache.enable_cli=1

@@ -15,7 +15,7 @@ $serverCode = <<<'CODE'
     $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
     $ctx = stream_context_create(['ssl' => [
         'local_cert' => '%s',
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
@@ -32,7 +32,7 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     phpt_wait();

@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.1.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
+AC_INIT([PHP],[8.2.0-dev],[https://bugs.php.net],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -224,9 +224,6 @@ AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
 case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-    if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
-      enable_libgcc=yes
-    fi
     ;;
   *dgux*)
     CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
@@ -263,11 +260,17 @@ AC_MSG_CHECKING([whether we are using musl libc])
 if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
 then
   AC_MSG_RESULT(yes)
-  CPPFLAGS="$CPPFLAGS -D__MUSL__"
+  AC_DEFINE([__MUSL__], [1], [Define when using musl libc])
 else
   AC_MSG_RESULT(no)
 fi
 
+dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
+if test "$ac_cv_safe_to_define___extensions__" = yes ; then
+  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
+  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+  AC_MSG_RESULT(yes)
+fi
 
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
@@ -584,6 +587,7 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
+memcntl \
 memmove \
 mkstemp \
 mmap \
@@ -612,6 +616,7 @@ vasprintf \
 asprintf \
 nanosleep \
 memmem \
+memrchr \
 )
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
@@ -1189,11 +1194,13 @@ fi
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
+AC_ARG_ENABLE([fiber-asm],
+  [AS_HELP_STRING([--disable-fiber-asm],
+    [Disable the use of boost fiber assembly files])],
+  [fiber_asm=$enableval], [fiber_asm='yes'])
+
 PHP_HELP_SEPARATOR([Zend:])
 PHP_CONFIGURE_PART(Configuring Zend)
-
-AC_MSG_CHECKING(for fiber switching context)
-fibers="yes"
 
 AS_CASE([$host_cpu],
   [x86_64*|amd64*], [fiber_cpu="x86_64"],
@@ -1202,6 +1209,7 @@ AS_CASE([$host_cpu],
   [arm*], [fiber_cpu="arm32"],
   [ppc64*|powerpc64*], [fiber_cpu="ppc64"],
   [ppc*|powerpc*], [fiber_cpu="ppc32"],
+  [riscv64*], [fiber_cpu="riscv64"],
   [s390x*], [fiber_cpu="s390x"],
   [mips64*], [fiber_cpu="mips64"],
   [mips*], [fiber_cpu="mips32"],
@@ -1210,6 +1218,7 @@ AS_CASE([$host_cpu],
 
 AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
+  [aix*|os400*], [fiber_os="aix"],
   [fiber_os="other"]
 )
 
@@ -1220,6 +1229,7 @@ AS_CASE([$fiber_cpu],
   [arm32], [fiber_asm_file_prefix="arm_aapcs"],
   [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
   [ppc32], [fiber_asm_file_prefix="ppc32_sysv"],
+  [riscv64], [fiber_asm_file_prefix="riscv64_sysv"],
   [s390x], [fiber_asm_file_prefix="s390x_sysv"],
   [mips64], [fiber_asm_file_prefix="mips64_n64"],
   [mips32], [fiber_asm_file_prefix="mips32_o32"],
@@ -1228,17 +1238,30 @@ AS_CASE([$fiber_cpu],
 
 if test "$fiber_os" = 'mac'; then
   fiber_asm_file="combined_sysv_macho_gas"
+elif test "$fiber_os" = 'aix'; then
+  # AIX uses a different calling convention (shared with non-_CALL_ELF Linux).
+  # The AIX assembler isn't GNU, but the file is compatible.
+  fiber_asm_file="${fiber_asm_file_prefix}_xcoff_gas"
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
   fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
 else
-  fibers="no"
+  fiber_asm="no"
 fi
 
-if test "$fibers" = 'yes'; then
+if test "$fiber_asm" = 'yes'; then
+  AC_MSG_CHECKING([for fiber switching context])
+  AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S)
   AC_MSG_RESULT([$fiber_asm_file])
 else
-  AC_MSG_ERROR([Unable to determine platform!])
+  if test "$fiber_os" = 'mac'; then
+    AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
+  fi
+  AC_CHECK_HEADER(ucontext.h, [
+    AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
+  ], [
+       AC_MSG_ERROR([fibers not available on this platform])
+  ])
 fi
 
 LIBZEND_BASIC_CHECKS
@@ -1496,8 +1519,14 @@ fi
 
 if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
-    CFLAGS="$CFLAGS -fsanitize=undefined"
-    CXXFLAGS="$CXXFLAGS -fsanitize=undefined"
+    CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    CXXFLAGS="$CXXFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    AX_CHECK_COMPILE_FLAG([-fno-sanitize=object-size], [
+      dnl Disable object-size sanitizer, because it is incompatible with our zend_function
+      dnl union, and this can't be easily fixed.
+      CFLAGS="$CFLAGS -fno-sanitize=object-size"
+      CXXFLAGS="$CFLAGS -fno-sanitize=object-size"
+    ])
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
 
@@ -1603,7 +1632,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
     zend_list.c zend_builtin_functions.c zend_attributes.c zend_execute.c \
-    zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
+    zend_ini.c zend_sort.c zend_multibyte.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \

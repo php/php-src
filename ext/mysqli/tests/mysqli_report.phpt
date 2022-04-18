@@ -4,12 +4,10 @@ mysqli_report()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
     if (true !== ($tmp = mysqli_report(-1)))
         printf("[002] Expecting boolean/true even for invalid flags, got %s/%s\n", gettype($tmp), $tmp);
 
@@ -28,7 +26,7 @@ require_once('skipifconnectfailure.inc');
     if (true !== ($tmp = mysqli_report(MYSQLI_REPORT_OFF)))
         printf("[008] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-    require('table.inc');
+    require_once 'table.inc';
 
     /*
     Internal macro MYSQL_REPORT_ERROR
@@ -311,7 +309,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECTF--
 Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'BAR; FOO' at line 1 in %s on line %d
@@ -331,13 +329,9 @@ Warning: mysqli_rollback(): (%s/%d): Commands out of sync; you can't run this co
 
 Warning: mysqli_stmt_prepare(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
 
-Warning: mysqli_next_result(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
-
 Warning: mysqli_next_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
-
-Warning: mysqli_next_result(): (%s/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
 Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0

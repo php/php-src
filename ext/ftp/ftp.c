@@ -1108,8 +1108,6 @@ bail:
 zend_long
 ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len)
 {
-	zend_long res;
-
 	if (ftp == NULL) {
 		return -1;
 	}
@@ -1122,8 +1120,7 @@ ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	if (!ftp_getresp(ftp) || ftp->resp != 213) {
 		return -1;
 	}
-	ZEND_ATOL(res, ftp->inbuf);
-	return res;
+	return ZEND_ATOL(ftp->inbuf);
 }
 /* }}} */
 

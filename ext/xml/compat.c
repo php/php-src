@@ -563,16 +563,8 @@ XML_Parse(XML_Parser parser, const XML_Char *data, int data_len, int is_final)
 {
 	int error;
 
-	if (parser->parser->lastError.level >= XML_ERR_WARNING) {
-		return 0;
-	}
-
 	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
-	if (error) {
-		return 0;
-	} else {
-		return 1;
-	}
+	return !error && parser->parser->lastError.level <= XML_ERR_WARNING;
 }
 
 PHP_XML_API int

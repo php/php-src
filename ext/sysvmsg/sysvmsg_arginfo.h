@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6744b81ba4b0b5db62ffe04255c35519e17be7c2 */
+ * Stub hash: 7acab08abf78d75df333fccd6c47266823a92103 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_msg_get_queue, 0, 1, SysvMessageQueue, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -75,7 +75,7 @@ static zend_class_entry *register_class_SysvMessageQueue(void)
 
 	INIT_CLASS_ENTRY(ce, "SysvMessageQueue", class_SysvMessageQueue_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
