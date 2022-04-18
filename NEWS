@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #76003 (FPM /status reports wrong number of active processe).
     (Jakub Zelenka)
   . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
+  . Fixed comment in kqueue remove callback log message. (David Carlier)
 
 - MySQLi:
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
