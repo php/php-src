@@ -264,10 +264,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 
 				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
-					if (ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
-						/* We won't convert it into_DO_FCALL to emit error at run-time */
-						call_stack[call - 1].opline = NULL;
-					} else {
+					if (!ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
 						opline->opcode = ZEND_SEND_VAL;
 					}
 				}
