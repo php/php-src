@@ -2027,7 +2027,9 @@ propagate_arg:
 					 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 						break;
 					}
-					ADD_OP1_TRACE_GUARD();
+					if (opline->op1_type != IS_UNUSED && op1_type == IS_OBJECT) {
+						ADD_OP1_TRACE_GUARD();
+					}
 					break;
 				case ZEND_INIT_METHOD_CALL:
 					if (opline->op2_type != IS_CONST
