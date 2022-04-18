@@ -191,11 +191,11 @@ static int fpm_event_kqueue_remove(struct fpm_event_s *ev) /* {{{ */
 	EV_SET(&k, ev->fd, EVFILT_READ, flags, 0, 0, (void *)ev);
 
 	if (kevent(kfd, &k, 1, NULL, 0, NULL) < 0) {
-		zlog(ZLOG_ERROR, "kevent: unable to add event");
+		zlog(ZLOG_ERROR, "kevent: unable to delete event");
 		return -1;
 	}
 
-	/* mark the vent as not registered */
+	/* mark the event as not registered */
 	ev->index = -1;
 	return 0;
 }
