@@ -24,6 +24,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
   . Fixed comment in kqueue remove callback log message. (David Carlier)
+  . Fixed ACL build check on MacOS. (David Carlier)
 
 - Iconv:
   . Fixed bug GH-8218 (ob_end_clean does not reset Content-Encoding header).
