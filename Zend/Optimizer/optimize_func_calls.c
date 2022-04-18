@@ -139,6 +139,20 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 	}
 }
 
+/* arg_num is 1-based here, to match SEND encoding. */
+static bool has_known_send_mode(const optimizer_call_info *info, uint32_t arg_num)
+{
+	if (!info->func) {
+		return false;
+	}
+
+	/* For prototype functions we should not make assumptions about arguments that are not part of
+	 * the signature: And inheriting method can add an optional by-ref argument. */
+	return !info->is_prototype
+		|| arg_num <= info->func->common.num_args
+		|| (info->func->common.fn_flags & ZEND_ACC_VARIADIC);
+}
+
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline = op_array->opcodes;
@@ -251,7 +265,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				break;
 			case ZEND_SEND_VAL_EX:
-				if (call_stack[call - 1].func) {
+				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					if (opline->op2_type == IS_CONST) {
 						call_stack[call - 1].try_inline = 0;
 						break;
@@ -266,7 +280,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				break;
 			case ZEND_CHECK_FUNC_ARG:
-				if (call_stack[call - 1].func) {
+				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					if (opline->op2_type == IS_CONST) {
 						call_stack[call - 1].try_inline = 0;
 						call_stack[call - 1].func_arg_num = (uint32_t)-1;
@@ -279,7 +293,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				break;
 			case ZEND_SEND_VAR_EX:
 			case ZEND_SEND_FUNC_ARG:
-				if (call_stack[call - 1].func) {
+				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					if (opline->op2_type == IS_CONST) {
 						call_stack[call - 1].try_inline = 0;
 						break;
@@ -294,7 +308,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				break;
 			case ZEND_SEND_VAR_NO_REF_EX:
-				if (call_stack[call - 1].func) {
+				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					if (opline->op2_type == IS_CONST) {
 						call_stack[call - 1].try_inline = 0;
 						break;
