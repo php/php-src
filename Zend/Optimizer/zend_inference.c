@@ -3455,6 +3455,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			if (opline->opcode != ZEND_FETCH_STATIC_PROP_R
 					&& opline->opcode != ZEND_FETCH_STATIC_PROP_IS) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+				ce = NULL;
 			} else {
 				if (!result_may_be_separated(ssa, ssa_op)) {
 					tmp &= ~MAY_BE_RC1;
