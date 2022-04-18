@@ -23,6 +23,8 @@
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
+/* this file actually lives in main/ */
+#include "php_odbc_utils.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 #include "zend_exceptions.h"
@@ -428,97 +430,6 @@ static const struct pdo_dbh_methods odbc_methods = {
 	NULL /* get_gc */
 };
 
-/**
- * Determines if a string matches the ODBC quoting rules.
- *
- * A valid quoted string begins with a '{', ends with a '}', and has no '}'
- * inside of the string that aren't repeated (as to be escaped).
- *
- * These rules are what .NET also follows.
- */
-static bool is_odbc_quoted(const char *str)
-{
-	if (!str) {
-		return false;
-	}
-	/* ODBC quotes are curly braces */
-	if (str[0] != '{') {
-		return false;
-	}
-	/* Check for } that aren't doubled up or at the end of the string */
-	size_t length = strlen(str);
-	for (size_t i = 0; i < length; i++) {
-		if (str[i] == '}' && str[i + 1] == '}') {
-			/* Skip over so we don't count it again */
-			i++;
-		} else if (str[i] == '}' && str[i + 1] != '\0') {
-			/* If not at the end, not quoted */
-			return false;
-		}
-	}
-	return true;
-}
-
-/**
- * Determines if a value for a connection string should be quoted.
- *
- * The ODBC specification mentions:
- * "Because of connection string and initialization file grammar, keywords and
- * and attribute values that contain the characters []{}(),;?*=!@ not enclosed
- * with braces should be avoided."
- *
- * Note that it assumes that the string is *not* already quoted. You should
- * check beforehand.
- */
-static bool should_odbc_quote(const char *str)
-{
-	return strpbrk(str, "[]{}(),;?*=!@") != NULL;
-}
-
-/**
- * Estimates the worst-case scenario for a quoted version of a string's size.
- */
-static size_t estimate_odbc_quote_length(const char *in_str)
-{
-	/* Assume all '}'. Include '{,' '}', and the null terminator too */
-	return (strlen(in_str) * 2) + 3;
-}
-
-/**
- * Quotes a string with ODBC rules.
- *
- * Some characters (curly braces, semicolons) are special and must be quoted.
- * In the case of '}' in a quoted string, they must be escaped SQL style; that
- * is, repeated.
- */
-static size_t odbc_quote(char *out_str, const char *in_str, size_t out_str_size)
-{
-	*out_str++ = '{';
-	out_str_size--;
-	while (out_str_size > 2) {
-		if (*in_str == '\0') {
-			break;
-		} else if (*in_str == '}' && out_str_size - 1 > 2) {
-			/* enough room to append */
-			*out_str++ = '}';
-			*out_str++ = *in_str++;
-			out_str_size -= 2;
-		} else if (*in_str == '}') {
-			/* not enough, truncate here */
-			break;
-		} else {
-			*out_str++ = *in_str++;
-			out_str_size--;
-		}
-	}
-	/* append termination */
-	*out_str++ = '}';
-	*out_str++ = '\0';
-	out_str_size -= 2;
-	/* return how many characters were left */
-	return strlen(in_str);
-}
-
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
 {
 	pdo_odbc_db_handle *H;
@@ -584,28 +495,28 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			&& !strstr(dbh->data_source, "PWD=");
 		if (is_uid_set && is_pwd_set) {
 			char *uid = NULL, *pwd = NULL;
-			bool should_quote_uid = !is_odbc_quoted(dbh->username) && should_odbc_quote(dbh->username);
-			bool should_quote_pwd = !is_odbc_quoted(dbh->password) && should_odbc_quote(dbh->password);
+			bool should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
+			bool should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
 			bool connection_string_fail = false;
 			if (should_quote_uid) {
-				size_t estimated_length = estimate_odbc_quote_length(dbh->username);
+				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
 				uid = emalloc(estimated_length);
 				if (!uid) {
 					connection_string_fail = true;
 					goto connection_string_fail;
 				}
-				odbc_quote(uid, dbh->username, estimated_length);
+				php_odbc_connstr_quote(uid, dbh->username, estimated_length);
 			} else {
 				uid = dbh->username;
 			}
 			if (should_quote_pwd) {
-				size_t estimated_length = estimate_odbc_quote_length(dbh->password);
+				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
 				pwd = emalloc(estimated_length);
 				if (!pwd) {
 					connection_string_fail = true;
 					goto connection_string_fail;
 				}
-				odbc_quote(pwd, dbh->password, estimated_length);
+				php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
 			} else {
 				pwd = dbh->password;
 			}
