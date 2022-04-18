@@ -1721,6 +1721,10 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	}
 
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
+		if (ssa->vars[var_num].definition >= 0 
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_NULL(tmp);
 		return tmp;
 	}
