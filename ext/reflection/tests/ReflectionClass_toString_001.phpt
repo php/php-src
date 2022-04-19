@@ -15,7 +15,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
     Constant [ public int IS_FINAL ] { 32 }
-    Constant [ public int IS_READONLY ] { 32768 }
+    Constant [ public int IS_READONLY ] { 65536 }
   }
 
   - Static properties [0] {
