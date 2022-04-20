@@ -55,6 +55,9 @@
 # if HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
 # endif
+# ifdef SO_MEMINFO
+#  include <linux/sock_diag.h>
+# endif
 #endif
 
 #include <stddef.h>
@@ -549,6 +552,9 @@ static PHP_MINIT_FUNCTION(sockets)
 #endif
 #ifdef SO_INCOMING_CPU
 	REGISTER_LONG_CONSTANT("SO_INCOMING_CPU",   SO_INCOMING_CPU,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_MEMINFO
+	REGISTER_LONG_CONSTANT("SO_MEMINFO", SO_MEMINFO,        CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef TCP_NODELAY
 	REGISTER_LONG_CONSTANT("TCP_NODELAY",   TCP_NODELAY,    CONST_CS | CONST_PERSISTENT);
@@ -1836,6 +1842,37 @@ PHP_FUNCTION(socket_get_option)
 				add_assoc_long(return_value, "sec", tv.tv_sec);
 				add_assoc_long(return_value, "usec", tv.tv_usec);
 				return;
+#ifdef SO_MEMINFO
+			case SO_MEMINFO: {
+				uint32_t minfo[SK_MEMINFO_VARS];
+				optlen = sizeof(minfo);
+
+				if (getsockopt(php_sock->bsd_socket, level, optname, (char*)minfo, &optlen) != 0) {
+					PHP_SOCKET_ERROR(php_sock, "Unable to retrieve socket option", errno);
+					RETURN_FALSE;
+				}
+
+				if (UNEXPECTED(optlen != sizeof(minfo))) {
+					// unlikely since the kernel fills up the whole array if getsockopt succeeded
+					// but just an extra precaution in case.
+					php_error_docref(NULL, E_WARNING, "Unable to retrieve all socket meminfo data");
+					RETURN_FALSE;
+				}
+
+				array_init(return_value);
+
+				add_assoc_long(return_value, "rmem_alloc", minfo[SK_MEMINFO_RMEM_ALLOC]);
+				add_assoc_long(return_value, "rcvbuf", minfo[SK_MEMINFO_RCVBUF]);
+				add_assoc_long(return_value, "wmem_alloc", minfo[SK_MEMINFO_WMEM_ALLOC]);
+				add_assoc_long(return_value, "sndbuf", minfo[SK_MEMINFO_SNDBUF]);
+				add_assoc_long(return_value, "fwd_alloc", minfo[SK_MEMINFO_FWD_ALLOC]);
+				add_assoc_long(return_value, "wmem_queued", minfo[SK_MEMINFO_WMEM_QUEUED]);
+				add_assoc_long(return_value, "optmem", minfo[SK_MEMINFO_OPTMEM]);
+				add_assoc_long(return_value, "backlog", minfo[SK_MEMINFO_BACKLOG]);
+				add_assoc_long(return_value, "drops", minfo[SK_MEMINFO_DROPS]);
+				return;
+			}
+#endif
 #ifdef SO_ACCEPTFILTER
 			case SO_ACCEPTFILTER: {
 

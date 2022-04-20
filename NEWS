@@ -53,6 +53,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
+  . Added SO_MEMINFO socket option. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
