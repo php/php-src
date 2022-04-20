@@ -99,6 +99,8 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # ifdef MAP_ALIGNED_SUPER
 #    define MAP_HUGETLB MAP_ALIGNED_SUPER
 # endif
+#else
+static zend_long minlgsz = -1;
 #endif
 
 #ifndef REAL_PAGE_SIZE
@@ -456,7 +458,7 @@ static void *zend_mm_mmap(size_t size)
 #ifdef _WIN64
 	// For now enabling only for 64 bits, seems more costly than benefitial otherwise
 	// ZEND_MM_CHUNK_SIZE being the minimum large page size too.
-	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
+	if (zend_mm_use_huge_pages && minlgsz == ZEND_MM_CHUNK_SIZE && size == ZEND_MM_CHUNK_SIZE) {
 		ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES, PAGE_READWRITE);
 		if (ptr != NULL) {
 			return ptr;
@@ -2912,6 +2914,8 @@ ZEND_API void start_memory_manager(void)
 #  elif defined(_SC_PAGE_SIZE)
 	REAL_PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
 #  endif
+#else
+	minlgsz = (zend_long)GetLargePageMinimum();
 #endif
 }
 
