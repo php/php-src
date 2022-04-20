@@ -29,4 +29,4 @@ array(0) {
 }
 object(Generator)#2 (0) {
 }
-baz(): Return value must be of type Traversable|array, int returned
+baz(): Return value must be of type iterable, int returned

@@ -1194,6 +1194,25 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
 
+	// TODO also handle case when iterable is in a union type?
+	// This would allow to remove the zend_type_to_string_ex() shim in Reflection
+	/* BC for iterable type */
+	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) && ZEND_TYPE_HAS_NAME(type)) {
+		uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+		if (type_mask != MAY_BE_ARRAY && type_mask != MAY_BE_ARRAY|MAY_BE_NULL) {
+			goto standard_resolve;
+		}
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
+
+		if (type_mask == MAY_BE_NULL) {
+			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_string_release(str);
+			return nullable_str;
+		}
+		return str;
+	}
+
+	standard_resolve:
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
