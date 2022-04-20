@@ -655,21 +655,18 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterators_advance(HashTable *ht, HashPosit
 	}
 }
 
-static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key, bool known_hash)
+/* Hash must be known and precomputed before */
+static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, const zend_string *key)
 {
-	zend_ulong h;
+	zend_ulong key_hash = ZSTR_H(key);
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
 
-	if (known_hash) {
-		h = ZSTR_H(key);
-		ZEND_ASSERT(h != 0 && "Hash must be known");
-	} else {
-		h = zend_string_hash_val(key);
-	}
+	ZEND_ASSERT(key_hash != 0 && "Hash must be known");
+
 	arData = ht->arData;
-	nIndex = h | ht->nTableMask;
+	nIndex = key_hash | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
 
 	if (UNEXPECTED(idx == HT_INVALID_IDX)) {
@@ -681,7 +678,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 	}
 
 	while (1) {
-		if (p->h == ZSTR_H(key) &&
+		if (p->h == key_hash &&
 		    EXPECTED(p->key) &&
 		    zend_string_equal_content(p->key, key)) {
 			return p;
@@ -758,7 +755,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			zend_hash_packed_to_hash(ht);
 		}
 	} else if ((flag & HASH_ADD_NEW) == 0 || ZEND_DEBUG) {
-		p = zend_hash_find_bucket(ht, key, 1);
+		p = zend_hash_find_bucket(ht, key);
 
 		if (p) {
 			zval *data;
@@ -1166,7 +1163,8 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_set_bucket_key(HashTable *ht, Bucket *b, 
 	HT_ASSERT_RC1(ht);
 	ZEND_ASSERT(!HT_IS_PACKED(ht));
 
-	p = zend_hash_find_bucket(ht, key, 0);
+	(void)zend_string_hash_val(key);
+	p = zend_hash_find_bucket(ht, key);
 	if (UNEXPECTED(p)) {
 		return (p == b) ? &p->val : NULL;
 	}
@@ -2526,17 +2524,18 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key, 0);
+	(void)zend_string_hash_val(key);
+	p = zend_hash_find_bucket(ht, key);
 	return p ? &p->val : NULL;
 }
 
-ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
+ZEND_API zval* ZEND_FASTCALL zend_hash_find_known_hash(const HashTable *ht, const zend_string *key)
 {
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key, 1);
+	p = zend_hash_find_bucket(ht, key);
 	return p ? &p->val : NULL;
 }
 
