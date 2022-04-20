@@ -247,7 +247,7 @@ TypeError: callableF(): Argument #1 ($param) must be of type ?callable, int give
 Stack trace:
 #0 %s(52): callableF(1)
 #1 {main}
-TypeError: iterableF(): Argument #1 ($param) must be of type Traversable|array|null, int given, called in %s:%d
+TypeError: iterableF(): Argument #1 ($param) must be of type ?iterable, int given, called in %s:%d
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
@@ -283,7 +283,7 @@ TypeError: returnCallable(): Return value must be of type ?callable, int returne
 Stack trace:
 #0 %s(138): returnCallable()
 #1 {main}
-TypeError: returnIterable(): Return value must be of type Traversable|array|null, int returned in %s:%d
+TypeError: returnIterable(): Return value must be of type ?iterable, int returned in %s:%d
 Stack trace:
 #0 %s(148): returnIterable()
 #1 {main}
@@ -307,7 +307,7 @@ TypeError: returnMissingCallable(): Return value must be of type ?callable, none
 Stack trace:
 #0 %s(194): returnMissingCallable()
 #1 {main}
-TypeError: returnMissingIterable(): Return value must be of type Traversable|array|null, none returned in %s:%d
+TypeError: returnMissingIterable(): Return value must be of type ?iterable, none returned in %s:%d
 Stack trace:
 #0 %s(203): returnMissingIterable()
 #1 {main}

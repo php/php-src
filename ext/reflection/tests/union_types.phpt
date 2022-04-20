@@ -75,7 +75,7 @@ Allows null: true
   Name: null
   String: null
   Allows Null: true
-Type X|Traversable|array|bool:
+Type X|iterable|bool:
 Allows null: false
   Name: X
   String: X

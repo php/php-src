@@ -1193,40 +1193,39 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+	bool has_name = ZEND_TYPE_HAS_NAME(type);
 
-	// TODO also handle case when iterable is in a union type?
-	// This would allow to remove the zend_type_to_string_ex() shim in Reflection
-	/* BC for iterable type */
-	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) && ZEND_TYPE_HAS_NAME(type)) {
-		uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-		if (type_mask != MAY_BE_ARRAY && type_mask != MAY_BE_ARRAY|MAY_BE_NULL) {
-			goto standard_resolve;
-		}
+	/* BC for iterable type as a single type */
+	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
-
-		if (type_mask == MAY_BE_NULL) {
-			zend_string *nullable_str = zend_string_concat2("?", 1, ZSTR_VAL(str), ZSTR_LEN(str));
-			zend_string_release(str);
-			return nullable_str;
+		/* Remove array bit */
+		type_mask &= ~MAY_BE_ARRAY;
+		/* If it has a type name it must be Traversable, ignore it */
+		if (has_name) {
+			has_name = false;
 		}
-		return str;
 	}
 
-	standard_resolve:
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 			zend_string *name = ZEND_TYPE_NAME(*list_type);
+			/* BC for iterable type in a union type */
+			if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(*list_type) && zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_TRAVERSABLE)))) {
+				/* Remove array bit */
+				type_mask &= ~MAY_BE_ARRAY;
+				str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
+				continue;
+			}
 			zend_string *resolved = resolve_class_name(name, scope);
 			str = add_type_string(str, resolved, is_intersection);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_HAS_NAME(type)) {
+	} else if (has_name) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
-
-	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 
 	if (type_mask == MAY_BE_ANY) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_MIXED), /* is_intersection */ false);
@@ -6168,7 +6167,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE), 0, 0);
 				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_NAME_BIT;
 				ZEND_TYPE_FULL_MASK(iterable) |= MAY_BE_ARRAY;
-				/* Set iterable bit for BC compat during Reflection */
+				/* Set iterable bit for BC compat during Reflection and string representation of type */
 				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_ITERABLE_BIT;
 				/* Inform that the type list is a union type */
 				ZEND_TYPE_FULL_MASK(iterable) |= _ZEND_TYPE_UNION_BIT;

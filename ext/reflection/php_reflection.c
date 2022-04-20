@@ -3016,17 +3016,9 @@ ZEND_METHOD(ReflectionType, allowsNull)
 }
 /* }}} */
 
-/* BC for iterable */
-static zend_string *zend_type_to_string_ex(zend_type type) {
-	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
-		return ZSTR_KNOWN(ZEND_STR_ITERABLE);
-	}
-	return zend_type_to_string(type);
-}
-
 static zend_string *zend_type_to_string_without_null(zend_type type) {
 	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-	return zend_type_to_string_ex(type);
+	return zend_type_to_string(type);
 }
 
 /* {{{ Return the text of the type hint */
@@ -3040,7 +3032,7 @@ ZEND_METHOD(ReflectionType, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string_ex(param->type));
+	RETURN_STR(zend_type_to_string(param->type));
 }
 /* }}} */
 
@@ -3058,7 +3050,7 @@ ZEND_METHOD(ReflectionNamedType, getName)
 	if (param->legacy_behavior) {
 		RETURN_STR(zend_type_to_string_without_null(param->type));
 	}
-	RETURN_STR(zend_type_to_string_ex(param->type));
+	RETURN_STR(zend_type_to_string(param->type));
 }
 /* }}} */
 
@@ -3106,6 +3098,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+			/* BC for iterable type */
 			if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(*list_type))) {
 				has_iterable = true;
 			}
