@@ -1,7 +1,10 @@
 --TEST--
 Bug #68547 (Exif Header component value check error)
 --SKIPIF--
-<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+<?php
+if (!extension_loaded('mbstring')) print 'skip mbstring extension not available';
+if (!extension_loaded('exif')) print 'skip exif extension not available';
+?>
 --FILE--
 <?php
 var_dump(exif_read_data(__DIR__ . DIRECTORY_SEPARATOR . 'bug68547.jpg'));
