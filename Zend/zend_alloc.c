@@ -452,7 +452,18 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 static void *zend_mm_mmap(size_t size)
 {
 #ifdef _WIN32
-	void *ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+	void *ptr;
+#ifdef _WIN64
+	// For now enabling only for 64 bits, seems more costly than benefitial otherwise
+	// ZEND_MM_CHUNK_SIZE being the minimum large page size too.
+	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
+		ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE | MEM_LARGE_PAGES, PAGE_READWRITE);
+		if (ptr != NULL) {
+			return ptr;
+		}
+	}
+#endif
+	ptr = VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
 	if (ptr == NULL) {
 #if ZEND_MM_ERROR
