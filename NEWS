@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
   . Fixed comment in kqueue remove callback log message. (David Carlier)
 
+- Intl:
+  . Fixed bug GH-8364 (msgfmt_format $values may not support references). (cmb)
+
 - MySQLi:
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
     (cmb)
