@@ -35,6 +35,10 @@ PHP 8.2 UPGRADE NOTES
     * SplFileObject::ftell()
     * SplFileObject::fgetc()
     * SplFileObject::fpassthru()
+  . SplFileObject::hasChildren() now has a tentative return type of false,
+    previously it was bool
+  . SplFileObject::getChildren() now has a tentative return type of null,
+    previously it was ?RecursiveIterator
 
 ========================================
 2. New Features
@@ -44,6 +48,8 @@ PHP 8.2 UPGRADE NOTES
   . Added the #[\SensitiveParameter] attribute to redact sensitive data in
     backtraces.
     RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
+  . It is now possible to use null and false as standalone types.
+    RFC: https://wiki.php.net/rfc/null-false-standalone-types
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
