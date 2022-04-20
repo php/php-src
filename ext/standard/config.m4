@@ -460,7 +460,8 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
+                            random.c net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c \
+                            odbc_utils.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
