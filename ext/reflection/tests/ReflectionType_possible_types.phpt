@@ -20,11 +20,7 @@ $functions = [
 foreach ($functions as $function) {
     $reflectionFunc = new ReflectionFunction($function);
     $returnType = $reflectionFunc->getReturnType();
-    if ($returnType instanceof ReflectionNamedType) {
-        var_dump($returnType->getName());
-    } else {
-        var_dump(implode('|', $returnType->getTypes()));
-    }
+    var_dump($returnType->getName());
 }
 ?>
 --EXPECT--
