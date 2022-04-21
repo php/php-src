@@ -3918,12 +3918,14 @@ class TestFile
             throw new BorkageException("tests must start with --TEST-- [{$this->fileName}]");
         }
 
+        $linenum = 1;
         $section = 'TEST';
         $secfile = false;
         $secdone = false;
 
         while (!feof($fp)) {
             $line = fgets($fp);
+            $linenum++;
 
             if ($line === false) {
                 break;
@@ -3950,6 +3952,14 @@ class TestFile
 
             // Add to the section text.
             if (!$secdone) {
+                // prepend new lines so the section code match the original line numbers
+                if ($this->sections[$section] === '' && preg_match('~^\s*<\?php(?=\s)~', $line, $matches)) {
+                    $posAfterOpenTag = strlen($matches[0]);
+                    $line = substr($line, 0, $posAfterOpenTag)
+                        . str_repeat("\n", $linenum - 1)
+                        . substr($line, $posAfterOpenTag);
+                }
+
                 $this->sections[$section] .= $line;
             }
 
