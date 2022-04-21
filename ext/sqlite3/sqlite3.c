@@ -592,7 +592,7 @@ PHP_METHOD(SQLite3, query)
 
 	return_code = sqlite3_step(result->stmt_obj->stmt);
 	/* START */
-	/* Copy step error code in result struct for SQLite3Result::fetcharray() */
+	/* Copy step error code in result struct to pass it to SQLite3Result::fetcharray() */
 	result->last_error = return_code; 
 	/* END */
 
@@ -1808,7 +1808,7 @@ PHP_METHOD(SQLite3Stmt, execute)
 			result->column_names = NULL;
 			result->column_count = -1;
 			/* START */
-			/* Do not reset the query just pass the step error code in result struct for SQLite3Result::fetcharray() */
+			/* Do not reset the query just pass the step error code in 'result' struct to SQLite3Result::fetcharray() */
 			result->last_error = return_code; 
 			/* END */
 			ZVAL_OBJ_COPY(&result->stmt_obj_zval, Z_OBJ_P(object));
@@ -1957,11 +1957,16 @@ PHP_METHOD(SQLite3Result, fetchArray)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	/* START */
-	/* Get result code stored in result struct, returned by Sqlite3::query(), SQLite3Stmt::execute() or previous SQLite3Result::fetchArray() */
-	ret = result_obj->last_error;
-	/* Process error code first and then execute another step, after switch, ONLY if ret = SQLITE_ROW */
-	/* ret = sqlite3_step(result_obj->stmt_obj->stmt); */
+	/* Get result code stored in 'result_obj' struct, initialized by Sqlite3::query(), SQLite3Stmt::execute() */
+	/* The first time we call SQLite3Result->fetchArray(), skip step and process the step result of Sqlite3::query() or SQLite3Stmt::execute() */
+	/* The first time we call SQLite3Result->fetchArray(), the step result stored in 'last_error' can only be SQLITE_ROW or SQLITE_DONE */
+	/* From the second call to SQLite3Result->fetchArray() onwards, 'last_error' will be -1 and therefore step will be executed */
+	ret = result_obj->last_error; 
+	if (ret == -1) {
+		ret = sqlite3_step(result_obj->stmt_obj->stmt);
+	}
 	/* END */
+	
 	switch (ret) {
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
@@ -2005,6 +2010,12 @@ PHP_METHOD(SQLite3Result, fetchArray)
 					zend_symtable_add_new(Z_ARR_P(return_value), result_obj->column_names[i], &data);
 				}
 			}
+			
+			/* START */
+			/* Intialize to -1 so on the second call to SQLite3Result->fetchArray() onwards, step is executed */
+			result_obj->last_error = -1; 
+			/* END */
+			
 			break;
 
 		case SQLITE_DONE:
@@ -2013,14 +2024,7 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 		default:
 			php_sqlite3_error(result_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
-			/* START */
-			RETURN_FALSE;
-			/* END */
 	}
-	/* START */
-	/* Step result set ONLY if ret == SQLITE_ROW and store error code in result struct for next SQLite3Result::fetcharray() */
-	result_obj->last_error = sqlite3_step(result_obj->stmt_obj->stmt); 
-	/* END */	
 }
 /* }}} */
 
