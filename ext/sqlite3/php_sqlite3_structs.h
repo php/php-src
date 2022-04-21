@@ -106,9 +106,9 @@ struct _php_sqlite3_result_object  {
 	php_sqlite3_db_object *db_obj;
 	php_sqlite3_stmt *stmt_obj;
 	zval stmt_obj_zval;
+	
 	/* START */
 	/* Store the last step error code from Sqlite3::query(), SQlite3Stmt::execute() to passe it to SQLite3Result::fetchArray() */
-	/* Also stores last step error from last SQLite3Result::fetchArray() */
 	int last_error;
 	/* END */
 
