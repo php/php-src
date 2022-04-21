@@ -591,6 +591,10 @@ PHP_METHOD(SQLite3, query)
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
 	return_code = sqlite3_step(result->stmt_obj->stmt);
+	/* START */
+	/* Copy step error code in result struct for SQLite3Result::fetcharray() */
+	result->last_error = return_code; 
+	/* END */
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -601,7 +605,11 @@ PHP_METHOD(SQLite3, query)
 			free_item->stmt_obj = stmt_obj;
 			free_item->stmt_obj_zval = stmt;
 			zend_llist_add_element(&(db_obj->free_list), &free_item);
-			sqlite3_reset(result->stmt_obj->stmt);
+			/* START */
+			/* Main problem. This resets the query and forces SQLite3Result::fetcharray() to execute it again */
+			/* So we have to disable it to avoid a double execution of the query */
+			/*sqlite3_reset(result->stmt_obj->stmt);*/
+			/* END */
 			break;
 		}
 		default:
@@ -1787,7 +1795,10 @@ PHP_METHOD(SQLite3Stmt, execute)
 		case SQLITE_ROW: /* Valid Row */
 		case SQLITE_DONE: /* Valid but no results */
 		{
-			sqlite3_reset(stmt_obj->stmt);
+			/* START */
+			/* Main problem. This resets the query and forces SQLite3Result::fetcharray() to execute it again */
+			/*sqlite3_reset(stmt_obj->stmt);*/
+			/* END */
 			object_init_ex(return_value, php_sqlite3_result_entry);
 			result = Z_SQLITE3_RESULT_P(return_value);
 
@@ -1796,6 +1807,10 @@ PHP_METHOD(SQLite3Stmt, execute)
 			result->stmt_obj = stmt_obj;
 			result->column_names = NULL;
 			result->column_count = -1;
+			/* START */
+			/* Do not reset the query just pass the step error code in result struct for SQLite3Result::fetcharray() */
+			result->last_error = return_code; 
+			/* END */
 			ZVAL_OBJ_COPY(&result->stmt_obj_zval, Z_OBJ_P(object));
 
 			break;
@@ -1941,7 +1956,12 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
-	ret = sqlite3_step(result_obj->stmt_obj->stmt);
+	/* START */
+	/* Get result code stored in result struct, returned by Sqlite3::query(), SQLite3Stmt::execute() or previous SQLite3Result::fetchArray() */
+	ret = result_obj->last_error;
+	/* Process error code first and then execute another step, after switch, ONLY if ret = SQLITE_ROW */
+	/* ret = sqlite3_step(result_obj->stmt_obj->stmt); */
+	/* END */
 	switch (ret) {
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
@@ -1993,7 +2013,14 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 		default:
 			php_sqlite3_error(result_obj->db_obj, "Unable to execute statement: %s", sqlite3_errmsg(sqlite3_db_handle(result_obj->stmt_obj->stmt)));
+			/* START */
+			RETURN_FALSE;
+			/* END */
 	}
+	/* START */
+	/* Step result set ONLY if ret == SQLITE_ROW and store error code in result struct for next SQLite3Result::fetcharray() */
+	result_obj->last_error = sqlite3_step(result_obj->stmt_obj->stmt); 
+	/* END */	
 }
 /* }}} */
 
