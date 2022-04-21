@@ -364,6 +364,7 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
+PHP_CHECK_FUNC(copy_file_range)
 PHP_CHECK_FUNC(dlopen, dl, root)
 PHP_CHECK_FUNC(dlsym, dl, root)
 if test "$ac_cv_func_dlopen" = "yes"; then
