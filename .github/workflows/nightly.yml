@@ -93,6 +93,8 @@ jobs:
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
   MACOS:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -149,3 +151,5 @@ jobs:
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
