@@ -9,4 +9,4 @@ runs:
         scripts/dev/genfiles
         Zend/zend_vm_gen.php
         build/gen_stub.php -f
-        git add . -N && git diff --exit-code
+        git add . -Nu && git diff --exit-code
