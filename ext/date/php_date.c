@@ -2045,6 +2045,8 @@ static zend_object *date_object_clone_interval(zend_object *this_ptr) /* {{{ */
 	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->civil_or_wall = old_obj->civil_or_wall;
+	new_obj->from_string = old_obj->from_string;
 	new_obj->initialized = old_obj->initialized;
 	if (old_obj->diff) {
 		new_obj->diff = timelib_rel_time_clone(old_obj->diff);
