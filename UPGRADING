@@ -25,6 +25,19 @@ PHP 8.2 UPGRADE NOTES
   . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
     previously it was DateTimeImmutable
 
+- ODBC:
+  . The ODBC extension now escapes the username and password for the case when
+    both a connection string and username/password are passed, and the string
+    must be appended to. Before, user values containing values needing escaping
+    could have created a malformed connection string, or injected values from
+    user-provided data. The escaping rules should be identical to the .NET BCL
+    DbConnectionOptions behaviour.
+
+- PDO_ODBC:
+  . The PDO_ODBC extension also escapes the username and password when a
+    connection string is passed. See the change to the ODBC extension for
+    further details.
+
 - Standard:
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
@@ -66,6 +79,13 @@ PHP 8.2 UPGRADE NOTES
     function to tune LOB query performance by reducing the number of
     round-trips between PHP and Oracle Database when fetching LOBS. This is
     usable with Oracle Database 12.2 or later.
+
+- ODBC:
+  . Added odbc_connection_string_is_quoted, odbc_connection_string_should_quote,
+    and odbc_connection_string_quote. These are primarily used behind the scenes
+    in the ODBC and PDO_ODBC extensions, but is exposed to userland for easier
+    unit testing, and for user applications and libraries to perform quoting
+    themselves.
 
 - PCRE:
   . Added support for the "n" (NO_AUTO_CAPTURE) modifier, which makes simple
