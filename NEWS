@@ -42,9 +42,13 @@ PHP                                                                        NEWS
   . Support for building against Oracle Client libraries 10.1 and 10.2 has been
     dropped. Oracle Client libraries 11.2 or newer are now required.
 
+- ODBC:
+  . Automatically quote username and password when needed. (Calvin Buckley)
+
 - PDO_ODBC:
   . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
     Buckley)
+  . Automatically quote username and password when needed. (Calvin Buckley)
 
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
