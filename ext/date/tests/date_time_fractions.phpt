@@ -77,8 +77,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 2016-10-03 13:20:06.724934
 2016-10-03 13:20:07.103123

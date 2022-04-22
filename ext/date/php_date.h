@@ -72,6 +72,7 @@ static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
 struct _php_interval_obj {
 	timelib_rel_time *diff;
 	int               civil_or_wall;
+	bool              from_string;
 	bool              initialized;
 	zend_object       std;
 };

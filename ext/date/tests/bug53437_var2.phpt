@@ -31,8 +31,8 @@ object(DateInterval)#1 (%d) {
   int(0)
   ["days"]=>
   bool(false)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 object(DateInterval)#2 (%d) {
   ["y"]=>
@@ -53,6 +53,6 @@ object(DateInterval)#2 (%d) {
   int(0)
   ["days"]=>
   bool(false)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }

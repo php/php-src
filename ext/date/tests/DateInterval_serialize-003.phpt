@@ -36,8 +36,8 @@ object(DateInterval)#1 (10) {
   int(0)
   ["days"]=>
   bool(false)
-  ["have_special_relative"]=>
-  int(1)
+  ["from_string"]=>
+  bool(false)
 }
 
 

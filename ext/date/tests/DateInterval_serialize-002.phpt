@@ -59,13 +59,13 @@ object(DateInterval)#3 (10) {
   int(0)
   ["days"]=>
   int(15820)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 
 
 Serialised object:
-string(340) "O:12:"DateInterval":16:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:15820;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
+string(388) "O:12:"DateInterval":18:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:15820;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;s:13:"civil_or_wall";i:1;s:11:"from_string";b:0;}"
 
 
 Unserialised object:
@@ -88,13 +88,13 @@ object(DateInterval)#4 (10) {
   int(0)
   ["days"]=>
   int(15820)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 
 
 Calling __serialize manually:
-array(16) {
+array(%d) {
   ["y"]=>
   int(43)
   ["m"]=>
@@ -109,16 +109,16 @@ array(16) {
   int(27)
   ["f"]=>
   float(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  int(15820)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>
   int(0)
   ["first_last_day_of"]=>
   int(0)
-  ["invert"]=>
-  int(0)
-  ["days"]=>
-  int(15820)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
@@ -127,6 +127,10 @@ array(16) {
   int(0)
   ["have_special_relative"]=>
   int(0)
+  ["civil_or_wall"]=>
+  int(1)
+  ["from_string"]=>
+  bool(false)
 }
 
 
@@ -150,6 +154,6 @@ object(DateInterval)#5 (10) {
   int(0)
   ["days"]=>
   int(15820)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }

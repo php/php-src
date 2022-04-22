@@ -40,8 +40,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(2)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 int(0)
 int(0)

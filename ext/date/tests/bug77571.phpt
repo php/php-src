@@ -23,5 +23,5 @@ DateInterval Object
     [f] => 0
     [invert] => 0
     [days] => 35
-    [have_special_relative] => 0
+    [from_string] => 
 )

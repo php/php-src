@@ -2077,11 +2077,6 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
 	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
-	if (include_fakes) {
-		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
-	}
 	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
 	if (intervalobj->diff->days != -99999) {
 		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
@@ -2090,12 +2085,19 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
 	if (include_fakes) {
+		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
+		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
+		PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
 		PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
 		PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
 		PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
+		PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+		ZVAL_LONG(&zv, (zend_long)intervalobj->civil_or_wall);
+		zend_hash_str_update(props, "civil_or_wall", strlen("civil_or_wall"), &zv);
 	}
-	/* Records whether this is a special relative interval that can't be serialized */
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+	/* Records whether this is a special relative interval that needs to be recreated from a string */
+	ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+	zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
 
 #undef PHP_DATE_INTERVAL_ADD_PROPERTY
 }
@@ -3095,7 +3097,7 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 	intobj = Z_PHPINTERVAL_P(interval);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
-	if (intobj->diff->have_special_relative) {
+	if (intobj->diff->have_weekday_relative || intobj->diff->have_special_relative) {
 		php_error_docref(NULL, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
 		return;
 	}
@@ -4223,7 +4225,7 @@ PHP_METHOD(DateInterval, __serialize)
 	intervalobj = Z_PHPINTERVAL_P(object);
 	DATE_CHECK_INITIALIZED(intervalobj->initialized, DateInterval);
 
-	if (intervalobj->diff->have_special_relative) {
+	if (intervalobj->diff->have_weekday_relative || intervalobj->diff->have_special_relative) {
 		zend_throw_exception_ex(NULL, 0, "Serializing special relative time specifications is not supported");
 	}
 

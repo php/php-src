@@ -22,5 +22,5 @@ DateInterval Object
     [f] => 0.920541
     [invert] => 1
     [days] => 227
-    [have_special_relative] => 0
+    [from_string] => 
 )

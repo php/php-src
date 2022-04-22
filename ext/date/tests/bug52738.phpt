@@ -31,5 +31,5 @@ di Object
     [f] => 0
     [invert] => 0
     [days] => 
-    [have_special_relative] => 0
+    [from_string] => 
 )

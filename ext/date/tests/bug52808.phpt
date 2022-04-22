@@ -44,8 +44,8 @@ object(DateInterval)#%d (%d) {
   int(1)
   ["days"]=>
   int(437)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 object(DateInterval)#%d (%d) {
   ["y"]=>
@@ -66,8 +66,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(294)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 object(DateInterval)#%d (%d) {
   ["y"]=>
@@ -88,8 +88,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(294)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 Failed to parse interval (2007-05-11T15:30:00Z/)
 Failed to parse interval (2007-05-11T15:30:00Z)
