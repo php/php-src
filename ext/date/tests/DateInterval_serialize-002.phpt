@@ -65,7 +65,7 @@ object(DateInterval)#3 (10) {
 
 
 Serialised object:
-string(388) "O:12:"DateInterval":18:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:15820;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;s:13:"civil_or_wall";i:1;s:11:"from_string";b:0;}"
+string(172) "O:12:"DateInterval":10:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:15820;s:11:"from_string";b:0;}"
 
 
 Unserialised object:
@@ -113,22 +113,6 @@ array(%d) {
   int(0)
   ["days"]=>
   int(15820)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
-  ["civil_or_wall"]=>
-  int(1)
   ["from_string"]=>
   bool(false)
 }

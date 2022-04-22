@@ -73,6 +73,7 @@ struct _php_interval_obj {
 	timelib_rel_time *diff;
 	int               civil_or_wall;
 	bool              from_string;
+	zend_string      *date_string;
 	bool              initialized;
 	zend_object       std;
 };

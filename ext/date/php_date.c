@@ -2063,9 +2063,18 @@ static HashTable *date_object_get_gc_interval(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTable *props, bool include_fakes)
+static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTable *props)
 {
 	zval zv;
+
+	/* Records whether this is a special relative interval that needs to be recreated from a string */
+	if (intervalobj->from_string) {
+		ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+		zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
+		ZVAL_STR(&zv, intervalobj->date_string);
+		zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
+		return;
+	}
 
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
 	ZVAL_LONG(&zv, (zend_long)intervalobj->diff->f); \
@@ -2086,18 +2095,6 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	if (include_fakes) {
-		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
-		PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
-		ZVAL_LONG(&zv, (zend_long)intervalobj->civil_or_wall);
-		zend_hash_str_update(props, "civil_or_wall", strlen("civil_or_wall"), &zv);
-	}
-	/* Records whether this is a special relative interval that needs to be recreated from a string */
 	ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
 	zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
 
@@ -2115,7 +2112,7 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 		return props;
 	}
 
-	date_interval_object_to_hash(intervalobj, props, false);
+	date_interval_object_to_hash(intervalobj, props);
 
 	return props;
 } /* }}} */
@@ -2183,6 +2180,9 @@ static void date_object_free_storage_interval(zend_object *object) /* {{{ */
 {
 	php_interval_obj *intern = php_interval_obj_from_obj(object);
 
+	if (intern->date_string) {
+		zend_string_release(intern->date_string);
+	}
 	timelib_rel_time_dtor(intern->diff);
 	zend_object_std_dtor(&intern->std);
 } /* }}} */
@@ -4114,6 +4114,35 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 		timelib_rel_time_dtor((*intobj)->diff);
 	}
 
+	/* If we have a date_string, use that instead */
+	zval *date_str = zend_hash_str_find(myht, "date_string", strlen("date_string"));
+	if (date_str && Z_TYPE_P(date_str) == IS_STRING) {
+		timelib_time   *time;
+		timelib_error_container *err = NULL;
+
+		time = timelib_strtotime(Z_STRVAL_P(date_str), Z_STRLEN_P(date_str), &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+
+		if (err->error_count > 0)  {
+			php_error_docref(NULL,
+				E_WARNING,
+				"Unknown or bad format (%s) at position %d (%c) while unserializing: %s",
+				Z_STRVAL_P(date_str),
+				err->error_messages[0].position,
+				err->error_messages[0].character ? err->error_messages[0].character : ' ', err->error_messages[0].message);
+		}
+
+		(*intobj)->diff = timelib_rel_time_clone(&time->relative);
+		(*intobj)->initialized = 1;
+		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
+		(*intobj)->from_string = true;
+		(*intobj)->date_string = zend_string_copy(Z_STR_P(date_str));
+
+		timelib_time_dtor(time);
+		timelib_error_container_dtor(err);
+
+		return;
+	}
+
 	/* Set new value */
 	(*intobj)->diff = timelib_rel_time_ctor();
 
@@ -4193,6 +4222,7 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 			(*intobj)->civil_or_wall = val;
 		}
 	}
+
 	(*intobj)->initialized = 1;
 } /* }}} */
 
@@ -4227,13 +4257,9 @@ PHP_METHOD(DateInterval, __serialize)
 	intervalobj = Z_PHPINTERVAL_P(object);
 	DATE_CHECK_INITIALIZED(intervalobj->initialized, DateInterval);
 
-	if (intervalobj->diff->have_weekday_relative || intervalobj->diff->have_special_relative) {
-		zend_throw_exception_ex(NULL, 0, "Serializing special relative time specifications is not supported");
-	}
-
 	array_init(return_value);
 	myht = Z_ARRVAL_P(return_value);
-	date_interval_object_to_hash(intervalobj, myht, true);
+	date_interval_object_to_hash(intervalobj, myht);
 }
 /* }}} */
 
@@ -4300,6 +4326,8 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
 	diobj->civil_or_wall = PHP_DATE_CIVIL;
+	diobj->from_string = true;
+	diobj->date_string = zend_string_copy(time_str);
 
 cleanup:
 	timelib_time_dtor(time);
