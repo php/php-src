@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #76003 (FPM /status reports wrong number of active processe).
     (Jakub Zelenka)
+  . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
 
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
