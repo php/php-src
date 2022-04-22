@@ -1,5 +1,5 @@
 --TEST--
-Bug #8421: Attributes that target functions are not valid for anonymous functions defined within a method
+Bug GH-8421: Attributes that target functions are not valid for anonymous functions defined within a method
 --FILE--
 <?php
 #[Attribute(Attribute::TARGET_FUNCTION)]
