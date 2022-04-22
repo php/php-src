@@ -1871,7 +1871,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (fptr->common.scope) {
+	if (fptr->common.scope && !(fptr->common.fn_flags & ZEND_ACC_CLOSURE)) {
 		target = ZEND_ATTRIBUTE_TARGET_METHOD;
 	} else {
 		target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
