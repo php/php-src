@@ -33,7 +33,7 @@ PHP_MINIT_FUNCTION(string_intrin);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
 #define strnatcasecmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
-PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
+PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
