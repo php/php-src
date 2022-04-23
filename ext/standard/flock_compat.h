@@ -35,18 +35,18 @@
 PHPAPI int php_flock(int fd, int operation);
 
 #ifndef HAVE_FLOCK
-#	define LOCK_SH 1
-#	define LOCK_EX 2
-#	define LOCK_NB 4
-#	define LOCK_UN 8
+#	define LOCK_SH (1 << 0)
+#	define LOCK_EX (1 << 1)
+#	define LOCK_NB (1 << 2)
+#	define LOCK_UN (1 << 3)
 PHPAPI int flock(int fd, int operation);
 #endif
 
 /* Userland LOCK_* constants */
-#define PHP_LOCK_SH 1
-#define PHP_LOCK_EX 2
-#define PHP_LOCK_UN 3
-#define PHP_LOCK_NB 4
+#define PHP_LOCK_SH (1 << 0)
+#define PHP_LOCK_EX (1 << 1)
+#define PHP_LOCK_UN ((1 << 0) | (1 << 1))
+#define PHP_LOCK_NB (1 << 2)
 
 #ifdef PHP_WIN32
 # ifdef EWOULDBLOCK
