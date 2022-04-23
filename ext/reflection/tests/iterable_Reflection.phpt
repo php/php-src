@@ -3,16 +3,14 @@ iterable Type in Reflection
 --FILE--
 <?php
 
-$functions = [
-    function(): iterable {},
-];
+$function = function(): iterable {};
 
-foreach ($functions as $function) {
-    $reflectionFunc = new ReflectionFunction($function);
-    $returnType = $reflectionFunc->getReturnType();
-    var_dump($returnType->getName());
+$reflectionFunc = new ReflectionFunction($function);
+$returnType = $reflectionFunc->getReturnType();
+var_dump($returnType::class);
+foreach ($returnType->getTypes() as $type) {
+    var_dump($type->getName());
 }
-
 
 class PropIterableTypeTest {
     public iterable $iterable;
@@ -20,14 +18,18 @@ class PropIterableTypeTest {
 
 $reflector = new ReflectionClass(PropIterableTypeTest::class);
 
-foreach ($reflector->getProperties() as $name => $property) {
-    if ($property->hasType()) {
-        printf("public %s $%s;\n",
-            $property->getType()->getName(), $property->getName());
-    } else printf("public $%s;\n", $property->getName());
+[$property] = $reflector->getProperties();
+$iterableType = $property->getType();
+var_dump($iterableType::class);
+foreach ($iterableType->getTypes() as $type) {
+    var_dump($type->getName());
 }
 
 ?>
 --EXPECT--
-string(17) "Traversable|array"
-public Traversable|array $iterable;
+string(19) "ReflectionUnionType"
+string(11) "Traversable"
+string(5) "array"
+string(19) "ReflectionUnionType"
+string(11) "Traversable"
+string(5) "array"

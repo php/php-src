@@ -1330,7 +1330,7 @@ typedef enum {
 } reflection_type_kind;
 
 /* For backwards compatibility reasons, we need to return T|null style unions
- * and transformation from iterable to Traversable|array
+ * ~~and transformation from iterable to Traversable|array~~
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
 static reflection_type_kind get_type_kind(zend_type type) {
@@ -1346,9 +1346,11 @@ static reflection_type_kind get_type_kind(zend_type type) {
 
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
 		/* BC support for 'iterable' type */
+		/*
 		if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
 			return NAMED_TYPE;
 		}
+		*/
 		if (type_mask_without_null != 0) {
 			return UNION_TYPE;
 		}

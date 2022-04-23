@@ -1193,8 +1193,6 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
-	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-	bool has_name = ZEND_TYPE_HAS_NAME(type);
 
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
@@ -1205,9 +1203,11 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			str = add_type_string(str, resolved, is_intersection);
 			zend_string_release(resolved);
 		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (has_name) {
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		str = resolve_class_name(ZEND_TYPE_NAME(type), scope);
 	}
+
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 
 	if (type_mask == MAY_BE_ANY) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_MIXED), /* is_intersection */ false);
