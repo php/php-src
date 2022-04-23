@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Added extra check for FPM proc dumpable on SELinux based systems.
     (David Carlier)
   . Added support for listening queue on macOS. (David Carlier)
+  . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
