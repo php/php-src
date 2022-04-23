@@ -95,6 +95,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8080 (ReflectionClass::getConstants() depends on def. order).
     (cmb)
+  . Fixed bug GH-8421 (Closures should accept attributes with 
+    Attribute::TARGET_FUNCTION). (ollieread)
 
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
