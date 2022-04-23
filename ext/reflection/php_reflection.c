@@ -3087,7 +3087,6 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	reflection_object *intern;
 	type_reference *param;
 	uint32_t type_mask;
-	bool has_iterable = false;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -3098,10 +3097,6 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
-			/* BC for iterable type */
-			if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(*list_type))) {
-				has_iterable = true;
-			}
 			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
@@ -3121,7 +3116,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);
 	}
-	if ((type_mask & MAY_BE_ARRAY) && !has_iterable) {
+	if ((type_mask & MAY_BE_ARRAY)) {
 		append_type_mask(return_value, MAY_BE_ARRAY);
 	}
 	if (type_mask & MAY_BE_STRING) {

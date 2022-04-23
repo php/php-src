@@ -29,4 +29,4 @@ class TestScalar extends Test {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of TestScalar::method(): int must be compatible with Test::method(): iterable in %s on line %d
+Fatal error: Declaration of TestScalar::method(): int must be compatible with Test::method(): Traversable|array in %s on line %d

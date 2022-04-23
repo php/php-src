@@ -268,7 +268,7 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
-		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags)) \
+		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
 	{ (void *) (ptr), \

@@ -1196,29 +1196,11 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 	bool has_name = ZEND_TYPE_HAS_NAME(type);
 
-	/* BC for iterable type as a single type */
-	if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
-		/* Remove array bit */
-		type_mask &= ~MAY_BE_ARRAY;
-		/* If it has a type name it must be Traversable, ignore it */
-		if (has_name) {
-			has_name = false;
-		}
-	}
-
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		bool is_intersection = ZEND_TYPE_IS_INTERSECTION(type);
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 			zend_string *name = ZEND_TYPE_NAME(*list_type);
-			/* BC for iterable type in a union type */
-			if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(*list_type) && zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_TRAVERSABLE)))) {
-				/* Remove array bit */
-				type_mask &= ~MAY_BE_ARRAY;
-				str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_ITERABLE), /* is_intersection */ false);
-				continue;
-			}
 			zend_string *resolved = resolve_class_name(name, scope);
 			str = add_type_string(str, resolved, is_intersection);
 			zend_string_release(resolved);
