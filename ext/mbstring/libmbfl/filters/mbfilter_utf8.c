@@ -240,7 +240,7 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			if ((e - p) >= 2) {
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
-				if ((c2 & 0xC0) != 0x80 || !((c2 >= 0x80 && c2 <= 0xBF) && ((c == 0xE0 && c2 >= 0xA0) || (c == 0xED && c2 < 0xA0) || (c > 0xE0 && c != 0xED)))) {
+				if ((c2 & 0xC0) != 0x80 || (c == 0xE0 && c2 < 0xA0) || (c == 0xED && c2 >= 0xA0)) {
 					*out++ = MBFL_BAD_INPUT;
 					p -= 2;
 				} else if ((c3 & 0xC0) != 0x80) {
@@ -285,7 +285,7 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				*out++ = MBFL_BAD_INPUT;
 				if (p < e) {
 					unsigned char c2 = *p;
-					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || c == 0xF2 || c == 0xF3) {
+					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90)) {
 						while (p < e && (*p & 0xC0) == 0x80) {
 							p++;
 						}
