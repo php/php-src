@@ -50,6 +50,7 @@ steps:
         --enable-sysvmsg \
         --with-ffi \
         --enable-zend-test \
+        --enable-dl-test=shared \
         --with-ldap \
         --with-ldap-sasl \
         --with-password-argon2 \

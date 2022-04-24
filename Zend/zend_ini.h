@@ -72,7 +72,9 @@ ZEND_API void zend_copy_ini_directives(void);
 ZEND_API void zend_ini_sort_entries(void);
 
 ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number);
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type);
 ZEND_API void zend_unregister_ini_entries(int module_number);
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type);
 ZEND_API void zend_ini_refresh_caches(int stage);
 ZEND_API zend_result zend_alter_ini_entry(zend_string *name, zend_string *new_value, int modify_type, int stage);
 ZEND_API zend_result zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, int modify_type, int stage, bool force_change);
