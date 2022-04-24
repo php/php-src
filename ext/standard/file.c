@@ -30,6 +30,10 @@
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "zend_smart_str.h"
+#ifdef HAVE_COPYFILE_H
+#include <copyfile.h>
+#define HAVE_DIRECT_COPY_FILE 1
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1649,6 +1653,18 @@ PHP_FUNCTION(copy)
 }
 /* }}} */
 
+#ifdef HAVE_DIRECT_COPY_FILE
+static int _php_direct_copy_file(const char *src, const char *dest)
+{
+#ifdef HAVE_COPYFILE
+	const int mask = COPYFILE_DATA;
+	return copyfile(src, dest, 0, mask) == 0 ? SUCCESS : FAILURE;
+#else
+	// TODO: win32 CopyFileW ?
+#endif
+}
+#endif
+
 /* {{{ php_copy_file */
 PHPAPI int php_copy_file(const char *src, const char *dest)
 {
@@ -1734,6 +1750,9 @@ no_stat:
 		}
 	}
 safe_to_copy:
+#if defined(HAVE_DIRECT_COPY_FILE)
+	return _php_direct_copy_file(src, dest);
+#endif
 
 	srcstream = php_stream_open_wrapper_ex(src, "rb", src_flg | REPORT_ERRORS, NULL, ctx);
 
