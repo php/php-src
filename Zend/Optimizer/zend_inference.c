@@ -4053,6 +4053,8 @@ uint32_t zend_get_return_info_from_signature_only(
 	if ((func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& !(func->common.fn_flags & ZEND_ACC_GENERATOR)) {
 		type |= MAY_BE_REF;
+		*ce = NULL;
+		*ce_is_instanceof = 0;
 	}
 	return type;
 }
@@ -4136,7 +4138,7 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 				tmp |= t1;
 
 				if (ssa_op && info->ssa.var_info &&
-				    ssa_op->op1_use >= 0 &&
+				    ssa_op->op1_use >= 0 && !(t1 & MAY_BE_REF) &&
 				    info->ssa.var_info[ssa_op->op1_use].ce) {
 					arg_ce = info->ssa.var_info[ssa_op->op1_use].ce;
 					arg_is_instanceof = info->ssa.var_info[ssa_op->op1_use].is_instanceof;
