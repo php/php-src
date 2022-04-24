@@ -221,6 +221,9 @@ PHP 8.2 UPGRADE NOTES
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
 
+- PCRE:
+  . NUL characters (\0) in pattern strings are now supported.
+
 - SQLite3:
   . sqlite3.defensive is now PHP_INI_USER.
 

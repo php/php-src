@@ -24,6 +24,9 @@ GD:
 - ODBC:
   . Fixed handling of single-key connection strings. (Calvin Buckley)
 
+- PCRE:
+  . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
+
 - PDO_ODBC:
   . Fixed handling of single-key connection strings. (Calvin Buckley)
 
