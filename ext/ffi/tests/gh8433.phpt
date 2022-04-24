@@ -1,5 +1,9 @@
 --TEST--
 GH-8433 (Assigning function pointers to structs in FFI leaks memory)
+--EXTENSIONS--
+ffi
+--INI--
+ffi.enable=1
 --FILE--
 <?php
 
