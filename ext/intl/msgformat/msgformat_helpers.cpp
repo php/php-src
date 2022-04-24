@@ -392,6 +392,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	zend_ulong		 num_index;
 
 	ZEND_HASH_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
+		ZVAL_DEREF(elem);
 		Formattable& formattable = fargs[argNum];
 		UnicodeString& key = farg_names[argNum];
 		Formattable::Type argType = Formattable::kObject, //unknown

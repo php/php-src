@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
 
+- Intl:
+  . Fixed bug GH-8364 (msgfmt_format $values may not support references). (cmb)
+
 - MBString:
   . Number of error markers emitted for invalid UTF-8 text matches WHATWG specification.
     This is a return to the behavior of PHP 8.0 and earlier. (alexdowad)
