@@ -3487,6 +3487,9 @@ static uint32_t zend_compile_args(
 					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 						opcode = ZEND_SEND_VAR_NO_REF;
 					} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
+						/* For IS_VAR operands, SEND_VAL will pass through the operand without
+						 * dereferencing, so it will use a by-ref pass if the call returned by-ref
+						 * and a by-value pass if it returned by-value. */
 						opcode = ZEND_SEND_VAL;
 					} else {
 						opcode = ZEND_SEND_VAR;
