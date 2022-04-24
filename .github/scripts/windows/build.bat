@@ -38,7 +38,7 @@ if not exist "%SDK_RUNNER%" (
 	exit /b 3
 )
 
-cmd /c %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\appveyor\build_task.bat
+cmd /c %SDK_RUNNER% -t %APPVEYOR_BUILD_FOLDER%\.github\scripts\windows\build_task.bat
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0

@@ -2,12 +2,7 @@ version: "{branch}.build.{build}"
 
 image: Visual Studio 2019
 
-branches:
-        except:
-                - PHP-5.6
-                - PHP-7.0
-
-clone_depth: 64
+clone_depth: 1
 
 skip_commits:
   files:
@@ -41,7 +36,7 @@ environment:
                 - THREAD_SAFE: 1
                   OPCACHE: 1
                   PARALLEL: -j2
-                  INTRINSICS: AVX
+                  INTRINSICS: AVX2
 
 services:
         # the setup scripts have to be touched, once some other db version is used
@@ -51,10 +46,10 @@ services:
 
 platform:
         - x64
-          #        - x86
+        #- x86
 
 build_script:
-        - appveyor\build.bat
+        - .github\scripts\windows\build.bat
 
 test_script:
-        - appveyor\test.bat
+        - .github\scripts\windows\test.bat
