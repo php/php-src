@@ -2436,12 +2436,6 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
-		if (!str_idx_regex) {
-			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
-			RETVAL_NULL();
-			goto error;
-		}
-
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
