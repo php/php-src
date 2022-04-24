@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8289 (Exceptions thrown within a yielded from iterator are
     not rethrown into the generator). (Bob)
 
+- FFI:
+  . Fixed bug GH-8433 (Assigning function pointers to structs in FFI leaks).
+    (Bob)
+
 - FPM:
   . Fixed bug #76003 (FPM /status reports wrong number of active processe).
     (Jakub Zelenka)

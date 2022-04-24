@@ -863,6 +863,14 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 	if (callback_data->fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(callback_data->fcc.function_handler));
 	}
+	for (int i = 0; i < callback_data->arg_count; ++i) {
+		if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
+			efree(callback_data->arg_types[i]);
+		}
+	}
+	if (callback_data->ret_type->type == FFI_TYPE_STRUCT) {
+		efree(callback_data->ret_type);
+	}
 	efree(callback_data);
 }
 /* }}} */
@@ -916,6 +924,8 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	if (ret_type->kind != ZEND_FFI_TYPE_VOID) {
 		zend_ffi_zval_to_cdata(ret, ret_type, &retval);
 	}
+
+	zval_ptr_dtor(&retval);
 }
 /* }}} */
 
@@ -966,6 +976,11 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 			callback_data->arg_types[n] = zend_ffi_get_type(arg_type);
 			if (!callback_data->arg_types[n]) {
 				zend_ffi_pass_unsupported(arg_type);
+				for (int i = 0; i < n; ++i) {
+					if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
+						efree(callback_data->arg_types[i]);
+					}
+				}
 				efree(callback_data);
 				ffi_closure_free(callback);
 				return NULL;
@@ -976,6 +991,11 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	callback_data->ret_type = zend_ffi_get_type(ZEND_FFI_TYPE(type->func.ret_type));
 	if (!callback_data->ret_type) {
 		zend_ffi_return_unsupported(type->func.ret_type);
+		for (int i = 0; i < callback_data->arg_count; ++i) {
+			if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
+				efree(callback_data->arg_types[i]);
+			}
+		}
 		efree(callback_data);
 		ffi_closure_free(callback);
 		return NULL;
@@ -983,13 +1003,20 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 
 	if (ffi_prep_cif(&callback_data->cif, type->func.abi, callback_data->arg_count, callback_data->ret_type, callback_data->arg_types) != FFI_OK) {
 		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback CIF");
-		efree(callback_data);
-		ffi_closure_free(callback);
-		return NULL;
+		goto free_on_failure;
 	}
 
 	if (ffi_prep_closure_loc(callback, &callback_data->cif, zend_ffi_callback_trampoline, callback_data, code) != FFI_OK) {
 		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback");
+free_on_failure: ;
+		for (int i = 0; i < callback_data->arg_count; ++i) {
+			if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
+				efree(callback_data->arg_types[i]);
+			}
+		}
+		if (callback_data->ret_type->type == FFI_TYPE_STRUCT) {
+			efree(callback_data->ret_type);
+		}
 		efree(callback_data);
 		ffi_closure_free(callback);
 		return NULL;
