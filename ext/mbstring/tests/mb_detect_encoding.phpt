@@ -58,6 +58,12 @@ END:VCARD
 ';
 echo mb_detect_encoding($test, ['UTF-8', 'UTF-16']), "\n";
 
+$test = 'Dušan';
+echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-8
+
+$test = 'Živko';
+echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-8
+
 // We once had a problem where all kind of strings would be detected as 'UUENCODE'
 echo mb_detect_encoding('abc', ['UUENCODE', 'UTF-8']), "\n";
 echo mb_detect_encoding('abc', ['UUENCODE', 'QPrint', 'HTML-ENTITIES', 'Base64', '7bit', '8bit', 'SJIS']), "\n";
@@ -243,6 +249,8 @@ JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
 ISO-8859-1
+UTF-8
+UTF-8
 UTF-8
 UTF-8
 UTF-8
