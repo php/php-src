@@ -323,6 +323,8 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_IS:
 		case ZEND_FETCH_UNSET:
 		case ZEND_FETCH_FUNC_ARG:
+		case ZEND_ISSET_ISEMPTY_VAR:
+		case ZEND_UNSET_VAR:
 			TO_STRING_NOWARN(val);
 			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
 				opline->opcode = ZEND_FAST_CONCAT;
