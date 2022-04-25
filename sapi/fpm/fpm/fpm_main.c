@@ -1586,6 +1586,8 @@ int main(int argc, char *argv[])
 			case 'd':
 				/* define ini entries on command line */
 				php_ini_builder_define(&ini_builder, php_optarg);
+				/* main can terminate without finishing or deiniting the ini builder, call finish each iteration to avoid leaking the buffer */
+				cgi_sapi_module.ini_entries = php_ini_builder_finish(&ini_builder);
 				break;
 
 			case 'y':
