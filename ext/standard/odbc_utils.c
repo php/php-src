@@ -31,7 +31,6 @@ PHP_FUNCTION(odbc_connection_string_is_quoted)
 	ZEND_PARSE_PARAMETERS_END();
 
 	bool is_quoted = php_odbc_connstr_is_quoted(ZSTR_VAL(str));
-//fprintf(stderr, "!%s!%d!\n", ZSTR_VAL(str), is_quoted);
 
 	RETURN_BOOL(is_quoted);
 }
@@ -46,7 +45,6 @@ PHP_FUNCTION(odbc_connection_string_should_quote)
 
 	bool should_quote = php_odbc_connstr_should_quote(ZSTR_VAL(str));
 
-//fprintf(stderr, "!%s!%d!\n", ZSTR_VAL(str), should_quote);
 	RETURN_BOOL(should_quote);
 }
 
