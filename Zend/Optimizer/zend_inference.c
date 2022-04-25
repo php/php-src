@@ -2708,6 +2708,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 						tmp |= MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING;
 					}
 				}
+				if (!tmp) {
+					tmp = MAY_BE_NULL;
+				}
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
