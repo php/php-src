@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
 
+- Iconv:
+  . Fixed bug GH-8218 (ob_end_clean does not reset Content-Encoding header).
+    (cmb)
+
 - Intl:
   . Fixed bug GH-8364 (msgfmt_format $values may not support references). (cmb)
 
@@ -49,6 +53,10 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed php://temp does not preserve file-position when switched to temporary
     file. (Bernd Holzmüller)
+
+- zlib:
+  . Fixed bug GH-8218 (ob_end_clean does not reset Content-Encoding header).
+    (cmb)
 
 14 Apr 2022, PHP 8.1.5
 
