@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.8
 
+- Core:
+  . Fixed bug GH-8338 (Intel CET is disabled unintentionally). (Chen, Hu)
+
 - MBString:
   . mb_detect_encoding recognizes all letters in Czech alphabet (alexdowad)
   . mb_detect_encoding recognizes all letters in Hungarian alphabet (alexdowad)

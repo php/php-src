@@ -141,7 +141,7 @@ typedef struct {
 
 /* These functions are defined in assembler files provided by boost.context (located in "Zend/asm"). */
 extern void *make_fcontext(void *sp, size_t size, void (*fn)(boost_context_data));
-extern boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
+extern ZEND_INDIRECT_RETURN boost_context_data jump_fcontext(void *to, zend_fiber_transfer *transfer);
 #endif
 
 ZEND_API zend_class_entry *zend_ce_fiber;
