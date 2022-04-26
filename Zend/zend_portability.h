@@ -679,4 +679,10 @@ extern "C++" {
 # define ZEND_VOIDP(ptr) (ptr)
 #endif
 
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 9000
+# define ZEND_INDIRECT_RETURN __attribute__((__indirect_return__))
+#else
+# define ZEND_INDIRECT_RETURN
+#endif
+
 #endif /* ZEND_PORTABILITY_H */

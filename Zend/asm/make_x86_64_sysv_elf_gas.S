@@ -24,12 +24,18 @@
  *                                                                                      *
  ****************************************************************************************/
 
+# if defined __CET__
+#  include <cet.h>
+# else
+#  define _CET_ENDBR
+# endif
 .file "make_x86_64_sysv_elf_gas.S"
 .text
 .globl make_fcontext
 .type make_fcontext,@function
 .align 16
 make_fcontext:
+    _CET_ENDBR
     /* first arg of make_fcontext() == top of context-stack */
     movq  %rdi, %rax
 
@@ -66,11 +72,13 @@ make_fcontext:
 trampoline:
     /* store return address on stack */
     /* fix stack alignment */
+    _CET_ENDBR
     push %rbp
     /* jump to context-function */
     jmp *%rbx
 
 finish:
+    _CET_ENDBR
     /* exit code is zero */
     xorq  %rdi, %rdi
     /* exit application */
