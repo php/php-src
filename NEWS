@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed potential race condition during resource ID allocation. (ryancaicse)
   . Fixed bug GH-8133 (Preloading of constants containing arrays with enums
     segfaults). (ilutov)
+  . Fixed Haiku ZTS builds. (David Carlier)
 
 - Date:
   . Fixed bug GH-7752 (DateTimeZone::getTransitions() returns insufficient
