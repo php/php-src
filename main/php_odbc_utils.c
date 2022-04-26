@@ -38,9 +38,6 @@
  */
 PHPAPI bool php_odbc_connstr_is_quoted(const char *str)
 {
-	if (!str) {
-		return false;
-	}
 	/* ODBC quotes are curly braces */
 	if (str[0] != '{') {
 		return false;
