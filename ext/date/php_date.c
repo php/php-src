@@ -1333,7 +1333,7 @@ PHP_FUNCTION(localtime)
 
 	tzi = get_timezone_info();
 	if (!tzi) {
-		return;
+		RETURN_THROWS();
 	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(getdate)
 
 	tzi = get_timezone_info();
 	if (!tzi) {
-		return;
+		RETURN_THROWS();
 	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
@@ -4483,7 +4483,7 @@ PHP_FUNCTION(date_default_timezone_get)
 
 	default_tz = get_timezone_info();
 	if (!default_tz) {
-		return;
+		RETURN_THROWS();
 	}
 	RETVAL_STRING(default_tz->name);
 }
@@ -4542,7 +4542,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	/* Initialize time struct */
 	tzi = get_timezone_info();
 	if (!tzi) {
-		return;
+		RETURN_THROWS();
 	}
 	t = timelib_time_ctor();
 	t->tz_info = tzi;
@@ -4616,7 +4616,7 @@ PHP_FUNCTION(date_sun_info)
 	/* Initialize time struct */
 	tzi = get_timezone_info();
 	if (!tzi) {
-		return;
+		RETURN_THROWS();
 	}
 	t = timelib_time_ctor();
 	t->tz_info = tzi;
