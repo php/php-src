@@ -106,6 +106,14 @@ convertValidString("\x76\x20\x00a\x00b", "\x1B$)C\x0E\x74\x30\x0Fab", "UTF-16BE"
 // 0x7E, resulting in a failed assertion
 convertInvalidString("\x0E~/", "%", "ISO-2022-KR", "UTF-8");
 
+// Regression test: The old implementation would wrongly convert some codepoints
+// which are not in KS X 1001 at all to 'random' characters in KS X 1001
+convertInvalidString("\xFF\x86", "\x1B\$)C%", "UTF-16BE", "ISO-2022-KR");
+
+// Regression test: The old implementation would sometimes emit an extra 0x0F ('shift out')
+// character at the end of a string, although the string was already ending in ASCII mode
+convertValidString("\x68\x46\x00a", "\x1B\$)C\x0E\x68\x46\x0Fa", "UTF-16BE", "ISO-2022-KR", false);
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x1B", "%", "ISO-2022-KR", "UTF-8");

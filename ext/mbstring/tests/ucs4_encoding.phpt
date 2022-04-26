@@ -12,7 +12,13 @@ testValidString("\x00\x00\xFE\xFF\x00\x00\x30\x01", "\x30\x01", "UCS-4", "UTF-16
 testValidString("\x02\x30\x00\x00", "\x30\x02", "UCS-4LE", "UTF-16BE");
 testValidString("\x00\x00\x30\x03", "\x30\x03", "UCS-4BE", "UTF-16BE");
 
+// Truncated input
 convertInvalidString("\x01\x02\x03", "%", "UCS-4", "UTF-8");
+
+
+// Codepoint above U+10FFFF
+convertInvalidString("\x00\x11\x00\x00", "%", "UCS-4BE", "UTF-8");
+convertInvalidString("\x00\x00\x11\x00", "%", "UCS-4LE", "UTF-8");
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
