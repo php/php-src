@@ -71,6 +71,11 @@ static void validate_allow_dynamic_properties(
 	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to interface");
 	}
+	if (scope->ce_flags & ZEND_ACC_READONLY_CLASS) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to readonly class %s",
+			ZSTR_VAL(scope->name)
+		);
+	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 }
 
