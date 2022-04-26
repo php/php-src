@@ -1035,6 +1035,9 @@ PHP_FUNCTION(strtotime)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
 
 	now = timelib_time_ctor();
 	now->tz_info = tzi;
@@ -1094,6 +1097,9 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		timelib_unixtime2gmt(now, (timelib_sll) php_time());
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return;
+		}
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(now, (timelib_sll) php_time());
@@ -1215,6 +1221,9 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		timelib_unixtime2gmt(ts, (timelib_sll) timestamp);
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return;
+		}
 		ts->tz_info = tzi;
 		ts->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(ts, (timelib_sll) timestamp);
@@ -1323,6 +1332,9 @@ PHP_FUNCTION(localtime)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
@@ -1374,6 +1386,9 @@ PHP_FUNCTION(getdate)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
@@ -2265,6 +2280,9 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 		tzi = dateobj->time->tz_info;
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return 0;
+		}
 	}
 
 	now = timelib_time_ctor();
@@ -4535,6 +4553,9 @@ PHP_FUNCTION(date_default_timezone_get)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	default_tz = get_timezone_info();
+	if (!default_tz) {
+		return;
+	}
 	RETVAL_STRING(default_tz->name);
 }
 /* }}} */
@@ -4590,8 +4611,11 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	altitude = 90 - zenith;
 
 	/* Initialize time struct */
-	t = timelib_time_ctor();
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
+	t = timelib_time_ctor();
 	t->tz_info = tzi;
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 
@@ -4661,8 +4685,11 @@ PHP_FUNCTION(date_sun_info)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize time struct */
-	t = timelib_time_ctor();
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
+	t = timelib_time_ctor();
 	t->tz_info = tzi;
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(t, time);
