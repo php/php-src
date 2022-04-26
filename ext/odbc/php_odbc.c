@@ -2183,14 +2183,9 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 				char *uid_quoted = NULL, *pwd_quoted = NULL;
 				bool should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
 				bool should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
-				bool connection_string_fail = false;
 				if (should_quote_uid) {
 					size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
 					uid_quoted = emalloc(estimated_length);
-					if (!uid_quoted) {
-						connection_string_fail = true;
-						goto connection_string_fail;
-					}
 					php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
 				} else {
 					uid_quoted = uid;
@@ -2198,31 +2193,16 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 				if (should_quote_pwd) {
 					size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
 					pwd_quoted = emalloc(estimated_length);
-					if (!pwd_quoted) {
-						connection_string_fail = true;
-						goto connection_string_fail;
-					}
 					php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
 				} else {
 					pwd_quoted = pwd;
 				}
 				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid_quoted, pwd_quoted);
-connection_string_fail:
 				if (uid_quoted && should_quote_uid) {
 					efree(uid_quoted);
 				}
 				if (pwd_quoted && should_quote_pwd) {
 					efree(pwd_quoted);
-				}
-				/*
-				 * In the PDO version, we fail, but we don't
-				 * really have the facility for that, so fall
-				 * back to the old unquoted case. Note that
-				 * the success case hasn't been allocated, so
-				 * it should be safe.
-				 */
-				if (connection_string_fail) {
-					spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid, pwd);
 				}
 			} else {
 				ldb_len = strlen(db)+1;

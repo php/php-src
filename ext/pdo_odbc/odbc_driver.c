@@ -497,14 +497,9 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			char *uid = NULL, *pwd = NULL;
 			bool should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
 			bool should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
-			bool connection_string_fail = false;
 			if (should_quote_uid) {
 				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
 				uid = emalloc(estimated_length);
-				if (!uid) {
-					connection_string_fail = true;
-					goto connection_string_fail;
-				}
 				php_odbc_connstr_quote(uid, dbh->username, estimated_length);
 			} else {
 				uid = dbh->username;
@@ -512,10 +507,6 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (should_quote_pwd) {
 				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
 				pwd = emalloc(estimated_length);
-				if (!pwd) {
-					connection_string_fail = true;
-					goto connection_string_fail;
-				}
 				php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
 			} else {
 				pwd = dbh->password;
@@ -524,24 +515,14 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 				+ strlen(uid) + strlen(pwd)
 				+ strlen(";UID=;PWD=") + 1;
 			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
-			if (dsn == NULL) {
-				connection_string_fail = true;
-				/* XXX: Do we inform the caller? */
-				goto connection_string_fail;
-			}
 			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, uid, pwd);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
-			/* Convoluted label to handle freeing in this scope */
-connection_string_fail:
 			if (uid && should_quote_uid) {
 				efree(uid);
 			}
 			if (pwd && should_quote_pwd) {
 				efree(pwd);
-			}
-			if (connection_string_fail) {
-				goto fail;
 			}
 		}
 
