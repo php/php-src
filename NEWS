@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2022, PHP 8.0.19
+?? ??? 2022, PHP 8.0.20
+
+
+12 May 2022, PHP 8.0.19
 
 - Core:
   . Fixed bug GH-8289 (Exceptions thrown within a yielded from iterator are
