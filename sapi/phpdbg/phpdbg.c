@@ -864,7 +864,10 @@ static ssize_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t c
 	while (data->fd >= 0) {
 		struct stat stat[3];
 		memset(stat, 0, sizeof(stat));
-		if (((fstat(fileno(stderr), &stat[2]) < 0) & (fstat(fileno(stdout), &stat[0]) < 0)) | (fstat(data->fd, &stat[1]) < 0)) {
+		int stat_stderr = fstat(fileno(stderr), &stat[2]);
+		int stat_stdout = fstat(fileno(stdout), &stat[0]);
+		int stat_datafd = fstat(data->fd, &stat[1]);
+		if ((stat_stderr < 0 && stat_stdout < 0) || stat_datafd < 0) {
 			break;
 		}
 
