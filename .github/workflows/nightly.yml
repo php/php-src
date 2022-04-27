@@ -612,7 +612,6 @@ jobs:
     name: "${{ matrix.branch.name }}_WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: windows-2019
     env:
-      APPVEYOR_REPO_BRANCH: "${{ github.ref_name }}"
       PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
       PHP_BUILD_OBJ_DIR: c:\obj
       PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk

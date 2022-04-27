@@ -9,13 +9,13 @@ set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
 
-if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
-	set BRANCH=%APPVEYOR_REPO_BRANCH:~4,3%
-	set STABILITY=stable
-) else (
-	set BRANCH=master
+call %~dp0find-target-branch.bat
+if "%BRANCH%" equ "master" (
 	set STABILITY=staging
+) else (
+	set STABILITY=stable
 )
+
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
 if not exist "%DEPS_DIR%" (
 	echo "%DEPS_DIR%" doesn't exist
