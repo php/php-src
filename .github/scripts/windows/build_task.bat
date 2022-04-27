@@ -70,7 +70,7 @@ cmd /c configure.bat ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
-	--with-test-ini-ext-exclude=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp,opcache
+	--with-test-ini-ext-exclude=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
 if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO /S
