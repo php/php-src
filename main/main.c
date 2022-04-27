@@ -1960,24 +1960,6 @@ int php_register_extensions(zend_module_entry * const * ptr, int count)
 	return SUCCESS;
 }
 
-/* A very long time ago php_module_startup() was refactored in a way
- * which broke calling it with more than one additional module.
- * This alternative to php_register_extensions() works around that
- * by walking the shallower structure.
- *
- * See algo: https://bugs.php.net/bug.php?id=63159
- */
-static int php_register_extensions_bc(zend_module_entry *ptr, int count)
-{
-	while (count--) {
-		if (zend_register_internal_module(ptr++) == NULL) {
-			return FAILURE;
-		}
-	}
-	return SUCCESS;
-}
-/* }}} */
-
 #ifdef PHP_WIN32
 static _invalid_parameter_handler old_invalid_parameter_handler;
 
@@ -2012,11 +1994,12 @@ void dummy_invalid_parameter_handler(
 #endif
 
 /* {{{ php_module_startup */
-int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
+zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
-	int retval = SUCCESS, module_number=0;	/* for REGISTER_INI_ENTRIES() */
+	zend_result retval = SUCCESS;
+	int module_number = 0;	/* for REGISTER_INI_ENTRIES() */
 	char *php_os;
 	zend_module_entry *module;
 
@@ -2243,7 +2226,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* start additional PHP extensions */
-	php_register_extensions_bc(additional_modules, num_additional_modules);
+	if (additional_module && (zend_register_internal_module(additional_module) == NULL)) {
+		return FAILURE;
+	}
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
@@ -2278,7 +2263,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
-	
+
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
 

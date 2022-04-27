@@ -498,7 +498,7 @@ const zend_function_entry server_additional_functions[] = {
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
-	return php_module_startup(sapi_module, &cli_server_module_entry, 1);
+	return php_module_startup(sapi_module, &cli_server_module_entry);
 } /* }}} */
 
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */

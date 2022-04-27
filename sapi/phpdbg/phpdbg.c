@@ -706,7 +706,7 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
-	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
+	if (php_module_startup(module, &sapi_phpdbg_module_entry) == FAILURE) {
 		return FAILURE;
 	}
 
