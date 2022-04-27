@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a88dcbd2386a47eaae2f234c405970f4da21e760 */
+ * Stub hash: b1c51fabe59bba6706500365f3eb7d9676d625f6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1747,16 +1747,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getrusage, 0, 0, MAY_BE_ARRAY|MA
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_is_quoted, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_odbc_connection_string_should_quote arginfo_odbc_connection_string_is_quoted
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_quote, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
 #define arginfo_pack arginfo_sprintf
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_unpack, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -2720,9 +2710,6 @@ ZEND_FUNCTION(gettimeofday);
 #if defined(HAVE_GETRUSAGE)
 ZEND_FUNCTION(getrusage);
 #endif
-ZEND_FUNCTION(odbc_connection_string_is_quoted);
-ZEND_FUNCTION(odbc_connection_string_should_quote);
-ZEND_FUNCTION(odbc_connection_string_quote);
 ZEND_FUNCTION(pack);
 ZEND_FUNCTION(unpack);
 ZEND_FUNCTION(password_get_info);
@@ -3367,9 +3354,6 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_GETRUSAGE)
 	ZEND_FE(getrusage, arginfo_getrusage)
 #endif
-	ZEND_FE(odbc_connection_string_is_quoted, arginfo_odbc_connection_string_is_quoted)
-	ZEND_FE(odbc_connection_string_should_quote, arginfo_odbc_connection_string_should_quote)
-	ZEND_FE(odbc_connection_string_quote, arginfo_odbc_connection_string_quote)
 	ZEND_FE(pack, arginfo_pack)
 	ZEND_FE(unpack, arginfo_unpack)
 	ZEND_FE(password_get_info, arginfo_password_get_info)

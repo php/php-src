@@ -1604,14 +1604,6 @@ function gettimeofday(bool $as_float = false): array|float {}
 function getrusage(int $mode = 0): array|false {}
 #endif
 
-/* odbc_utils.c */
-
-function odbc_connection_string_is_quoted(string $str): bool {}
-
-function odbc_connection_string_should_quote(string $str): bool {}
-
-function odbc_connection_string_quote(string $str): string {}
-
 /* pack.c */
 
 /** @refcount 1 */

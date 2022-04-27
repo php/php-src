@@ -1,5 +1,7 @@
 --TEST--
 Test common ODBC string functionality
+--EXTENSIONS--
+odbc
 --FILE--
 <?php
 

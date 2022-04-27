@@ -197,3 +197,11 @@ function odbc_tableprivileges($odbc, ?string $catalog, string $schema, string $t
  */
 function odbc_columnprivileges($odbc, ?string $catalog, string $schema, string $table, string $column) {}
 #endif
+
+/* odbc_utils.c */
+
+function odbc_connection_string_is_quoted(string $str): bool {}
+
+function odbc_connection_string_should_quote(string $str): bool {}
+
+function odbc_connection_string_quote(string $str): string {}
