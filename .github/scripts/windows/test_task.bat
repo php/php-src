@@ -58,7 +58,7 @@ if /i "%GITHUB_ACTIONS%" equ "True" (
     set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
     set PDO_MYSQL_TEST_PASS=%MYSQL_TEST_PASSWD%
     set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
-    "C:\Program Files\MySql\MySQL Server 5.7\bin\mysql.exe" --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
+    mysql --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
     if %errorlevel% neq 0 exit /b 3
 
     set PGUSER=postgres
@@ -66,7 +66,7 @@ if /i "%GITHUB_ACTIONS%" equ "True" (
     rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
     echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> ext\pgsql\tests\config.inc
     set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-    "C:\Program Files\PostgreSQL\10\bin\createdb.exe" test
+    "%PGBIN%\createdb.exe" test
     if %errorlevel% neq 0 exit /b 3
 
     set ODBC_TEST_USER=sa
