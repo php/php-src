@@ -18,11 +18,6 @@ var_dump(array_reduce($a, 'sum'));
 echo 'Done' . PHP_EOL;
 ?>
 --EXPECTF--
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
 <!-- init '%s%eobserver_zend_call_function_%d.php' -->
 <file '%s%eobserver_zend_call_function_%d.php'>
   <!-- init sum() -->

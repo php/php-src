@@ -651,8 +651,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
 
-	/* Register legacy iterable function */
-	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
+	/* Register legacy iterable function, this generates E_CORE_WARNING on startup */
+	//zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

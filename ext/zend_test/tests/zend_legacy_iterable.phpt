@@ -1,5 +1,10 @@
 --TEST--
 Test that legacy IS_ITERABLE arg info type generates a notice
+--SKIPIF--
+<?php
+if (true) {
+    die('skip only if testing startup warnings contaminate all test');
+}
 --EXTENSIONS--
 zend_test
 --FILE--

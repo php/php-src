@@ -86,11 +86,6 @@ var_dump($attribute->newInstance());
 
 ?>
 --EXPECTF--
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
 array(1) {
   [0]=>
   string(6) "value1"
