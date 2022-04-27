@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.6
+28 Apr 2022, PHP 8.1.6RC1
 
 - Core:
   . Fixed bug GH-8310 (Registry settings are no longer recognized). (cmb)
