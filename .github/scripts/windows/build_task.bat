@@ -5,31 +5,27 @@ if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-if /i "%APPVEYOR%" equ "True" (
-    rmdir /s /q C:\cygwin >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q C:\cygwin64 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q C:\mingw >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q C:\mingw-w64 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q C:\msys64 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-    rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
-    if %errorlevel% neq 0 exit /b 3
-)
-if /i "%GITHUB_ACTIONS%" equ "True" (
-    rem rmdir takes several minutes rename instead only
-    ren "C:\msys64" "C:\trash-msys64"
-    if %errorlevel% neq 0 exit /b 3
-)
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
+rem rmdir takes several minutes rename instead only
+if /i "%GITHUB_ACTIONS%" equ "True" ren "C:\msys64" "C:\trash-msys64"
+if %errorlevel% neq 0 exit /b 3
 del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL

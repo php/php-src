@@ -27,53 +27,45 @@ if /i "%APPVEYOR%" equ "True" (
     set MYSQL_TEST_PORT=3306
     set MYSQL_TEST_USER=root
     set MYSQL_TEST_PASSWD=Password12!
-    set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
-    set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
-    set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
-    set PDO_MYSQL_TEST_PASS=%MYSQL_TEST_PASSWD%
-    set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
-    "C:\Program Files\MySql\MySQL Server 5.7\bin\mysql.exe" --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
-    if %errorlevel% neq 0 exit /b 3
-
     set PGUSER=postgres
     set PGPASSWORD=Password12!
-    rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
-    echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> ext\pgsql\tests\config.inc
-    set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-    "C:\Program Files\PostgreSQL\10\bin\createdb.exe" test
-    if %errorlevel% neq 0 exit /b 3
-
     set ODBC_TEST_USER=sa
     set ODBC_TEST_PASS=Password12!
-    set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=^(local^)\SQL2017;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
-    set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 )
 if /i "%GITHUB_ACTIONS%" equ "True" (
     set MYSQL_TEST_HOST=127.0.0.1
     set MYSQL_TEST_PORT=3307
     set MYSQL_TEST_USER=root
     set MYSQL_TEST_PASSWD=mysql_Pass11
-    set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
-    set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
-    set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
-    set PDO_MYSQL_TEST_PASS=%MYSQL_TEST_PASSWD%
-    set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
-    mysql --user=%MYSQL_TEST_USER% -e "CREATE DATABASE IF NOT EXISTS test"
-    if %errorlevel% neq 0 exit /b 3
-
     set PGUSER=postgres
     set PGPASSWORD=postgresql_Pass11
-    rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
-    echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> ext\pgsql\tests\config.inc
-    set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-    "%PGBIN%\createdb.exe" test
-    if %errorlevel% neq 0 exit /b 3
-
     set ODBC_TEST_USER=sa
     set ODBC_TEST_PASS=mssql_Pass11
-    set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=^(local^)\SQLEXPRESS;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
-    set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 )
+set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
+set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
+set PDO_MYSQL_TEST_USER=%MYSQL_TEST_USER%
+set PDO_MYSQL_TEST_PASS=%MYSQL_TEST_PASSWD%
+set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
+rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%
+echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> ext\pgsql\tests\config.inc
+set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
+if /i "%APPVEYOR%" equ "True" (
+    set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=^(local^)\SQL2017;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
+    set TMP_MYSQL_BIN=%ProgramFiles%\MySql\MySQL Server 5.7\bin
+    set TMP_POSTGRESQL_BIN=%ProgramFiles%\PostgreSQL\10\bin
+)
+if /i "%GITHUB_ACTIONS%" equ "True" (
+    set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=^(local^)\SQLEXPRESS;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
+    set TMP_MYSQL_BIN=C:\mysql\bin
+    set TMP_POSTGRESQL_BIN=%PGBIN%
+)
+set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
+
+"%TMP_MYSQL_BIN%\mysql.exe" --host=%PDO_MYSQL_TEST_HOST% --port=%MYSQL_TEST_PORT% --user=%MYSQL_TEST_USER% --password=%MYSQL_TEST_PASSWD% -e "CREATE DATABASE IF NOT EXISTS test"
+if %errorlevel% neq 0 exit /b 3
+"%TMP_POSTGRESQL_BIN%\createdb.exe" test
+if %errorlevel% neq 0 exit /b 3
 
 rem prepare for ext/openssl
 rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
