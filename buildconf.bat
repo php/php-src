@@ -1,4 +1,5 @@
 @echo off
+
 cscript /nologo /e:jscript win32\build\buildconf.js %*
 SET PHP_BUILDCONF_PATH=%~dp0
 copy %PHP_BUILDCONF_PATH%\win32\build\configure.bat %PHP_BUILDCONF_PATH% > nul
