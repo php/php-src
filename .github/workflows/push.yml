@@ -131,3 +131,35 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  WINDOWS_X64:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - x64: true
+            zts: false
+          - x64: true
+            zts: true
+          - x64: false
+            zts: false
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: windows-2019
+    env:
+      APPVEYOR_REPO_BRANCH: "${{ github.ref_name }}"
+      PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+      PHP_BUILD_OBJ_DIR: c:\obj
+      PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
+      PHP_BUILD_CRT: vs16
+      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
+      THREAD_SAFE: "${{ matrix.zts && '1' || '' }}"
+      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
+    steps:
+      - name: git checkout 1/2
+        run: git config --global core.autocrlf false && git config --global core.eol lf
+      - name: git checkout 2/2
+        uses: actions/checkout@v2
+      - name: Build
+        run: .github/scripts/windows/build.bat
+      - name: Test
+        run: .github/scripts/windows/test.bat

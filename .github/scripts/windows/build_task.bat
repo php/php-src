@@ -5,30 +5,34 @@ if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" (
+    rmdir /s /q C:\cygwin >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q C:\cygwin64 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q C:\mingw >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q C:\mingw-w64 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q C:\msys64 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+    rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
+    if %errorlevel% neq 0 exit /b 3
+)
+if /i "%GITHUB_ACTIONS%" equ "True" (
+    rem rmdir takes several minutes rename instead only
+    ren "C:\msys64" "C:\trash-msys64"
+    if %errorlevel% neq 0 exit /b 3
+)
+del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-if "%APPVEYOR%" equ "True" del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
-if %errorlevel% neq 0 exit /b 3
-
-cd /D %APPVEYOR_BUILD_FOLDER%
+del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 
 if /i "%APPVEYOR_REPO_BRANCH:~0,4%" equ "php-" (
@@ -53,13 +57,17 @@ if %errorlevel% neq 0 exit /b 3
 cmd /c buildconf.bat --force
 if %errorlevel% neq 0 exit /b 3
 
-if "%THREAD_SAFE%" equ "0" set ADD_CONF=%ADD_CONF% --disable-zts
+if "%THREAD_SAFE%" equ "" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
 set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
-if "%OPCACHE%" equ "0" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
+if "%OPCACHE%" equ "" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
 
-set CFLAGS=/W1 /WX
+if "%PLATFORM%" == "x86" (
+	set CFLAGS=/W1
+) else (
+	set CFLAGS=/W1 /WX
+)
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
@@ -72,7 +80,4 @@ cmd /c configure.bat ^
 	--with-test-ini-ext-exclude=%EXT_EXCLUDE_FROM_TEST%
 if %errorlevel% neq 0 exit /b 3
 
-nmake /NOLOGO
-if %errorlevel% neq 0 exit /b 3
-
-exit /b 0
+nmake /NOLOGO /S
