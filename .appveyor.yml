@@ -11,9 +11,6 @@ skip_commits:
     - UPGRADING
     - UPGRADING.INTERNALS
 
-cache:
-        - c:\build-cache
-
 environment:
         PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
         PHP_BUILD_OBJ_DIR: c:\obj
