@@ -1,25 +1,31 @@
 --TEST--
-gen_stub.php: nested namespaced typed properties test.
+Test that legacy IS_ITERABLE arg info type generates a notice
 --EXTENSIONS--
 zend_test
 --FILE--
 <?php
 
-$foo = new \ZendTestNS2\Foo();
-var_dump($foo);
-$foo->foo = new \ZendTestNS2\ZendSubNS\Foo();
-var_dump($foo);
+function gen() {
+    yield 1;
+};
+
+var_dump(zend_iterable_legacy([], null));
+var_dump(zend_iterable_legacy([], []));
+var_dump(zend_iterable_legacy(gen(), null));
+var_dump(zend_iterable_legacy(gen(), gen()));
+
 ?>
---EXPECTF--
+==DONE==
+--EXPECT--
 Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
 
 Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-object(ZendTestNS2\Foo)#%d (%d) {
-  ["foo"]=>
-  uninitialized(ZendTestNS2\ZendSubNS\Foo)
+array(0) {
 }
-object(ZendTestNS2\Foo)#%d (%d) {
-  ["foo"]=>
-  object(ZendTestNS2\ZendSubNS\Foo)#%d (%d) {
-  }
+array(0) {
 }
+object(Generator)#1 (0) {
+}
+object(Generator)#1 (0) {
+}
+==DONE==

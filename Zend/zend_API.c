@@ -2784,6 +2784,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			num_args++;
 		}
 
+		bool rebuild_arginfo = false;
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && num_args) {
 			uint32_t i;
@@ -2791,6 +2792,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				zend_internal_arg_info *arg_info = &reg_function->internal_function.arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
+					if (ZEND_TYPE_IS_ITERABLE_FALLBACK(arg_info->type)) {
+						zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
+							" regenerate the argument info via the php-src gen_stub build script");
+						rebuild_arginfo = true;
+					}
 				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
 #if ZEND_DEBUG
@@ -2807,13 +2813,17 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 		if (reg_function->common.arg_info &&
 		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+			/* Treat return type as an extra argument */
+			num_args++;
+			rebuild_arginfo = true;
+		}
+
+		if (rebuild_arginfo) {
 			/* convert "const char*" class type names into "zend_string*" */
 			uint32_t i;
 			zend_arg_info *arg_info = reg_function->common.arg_info - 1;
 			zend_arg_info *new_arg_info;
 
-			/* Treat return type as an extra argument */
-			num_args++;
 			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
 			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 			reg_function->common.arg_info = new_arg_info + 1;
@@ -2855,6 +2865,12 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 							j++;
 						}
 					}
+				}
+				if (ZEND_TYPE_IS_ITERABLE_FALLBACK(new_arg_info[i].type)) {
+					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+						(new_arg_info[i].type.type_mask|_ZEND_TYPE_UNION_BIT|MAY_BE_ARRAY));
+					memcpy(&new_arg_info[i].type, &legacy_iterable, sizeof(zend_type));
+					//return FAILURE;
 				}
 			}
 		}

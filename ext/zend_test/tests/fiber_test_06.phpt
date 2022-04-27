@@ -29,6 +29,9 @@ var_dump($fiber->resume('2')); // NULL
 
 ?>
 --EXPECT--
+Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
+
+Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
 int(10)
 int(1)
 string(1) "1"
