@@ -1971,6 +1971,20 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
+/* {{{ Get a byte size from the ini byte size shorthand */
+PHP_FUNCTION(ini_bytes)
+{
+	char *shorthand;
+	size_t shorthand_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(shorthand, shorthand_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_atol(shorthand, shorthand_len));
+}
+/* }}} */
+
 /* {{{ Get a configuration option */
 PHP_FUNCTION(ini_get)
 {

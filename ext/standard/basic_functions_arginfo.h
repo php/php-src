@@ -489,6 +489,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_get, 0, 1, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_bytes, 0, 1, MAY_BE_LONG)
+	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_get_all, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extension, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, details, _IS_BOOL, 0, "true")
@@ -2359,6 +2363,7 @@ ZEND_FUNCTION(highlight_file);
 ZEND_FUNCTION(php_strip_whitespace);
 ZEND_FUNCTION(highlight_string);
 ZEND_FUNCTION(ini_get);
+ZEND_FUNCTION(ini_bytes);
 ZEND_FUNCTION(ini_get_all);
 ZEND_FUNCTION(ini_set);
 ZEND_FUNCTION(ini_restore);
@@ -2990,6 +2995,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(php_strip_whitespace, arginfo_php_strip_whitespace)
 	ZEND_FE(highlight_string, arginfo_highlight_string)
 	ZEND_FE(ini_get, arginfo_ini_get)
+	ZEND_FE(ini_bytes, arginfo_ini_bytes)
 	ZEND_FE(ini_get_all, arginfo_ini_get_all)
 	ZEND_FE(ini_set, arginfo_ini_set)
 	ZEND_FALIAS(ini_alter, ini_set, arginfo_ini_alter)
