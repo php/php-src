@@ -638,6 +638,13 @@ static int format_default_value(smart_str *str, zval *value) {
 			format_default_value(str, zv);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
+	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		zend_object *obj = Z_OBJ_P(value);
+		zend_class_entry *class = obj->ce;
+		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
+		smart_str_append(str, class->name);
+		smart_str_appends(str, "::");
+		smart_str_append(str, Z_STR_P(zend_enum_fetch_case_name(obj)));
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");

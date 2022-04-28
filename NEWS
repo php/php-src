@@ -141,6 +141,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-8080 (ReflectionClass::getConstants() depends on def. order).
     (cmb)
+  . Fixed bug GH-8444 (Fix ReflectionProperty::__toString() of properties
+    containing instantiated enums). (ilutov)
 
 - Zlib:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
