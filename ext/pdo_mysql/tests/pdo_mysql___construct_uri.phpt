@@ -18,7 +18,7 @@ MySQLPDOTest::skip();
             $dsn = MySQLPDOTest::getDSN();
             $user = PDO_MYSQL_TEST_USER;
             $pass = PDO_MYSQL_TEST_PASS;
-            $uri = sprintf('uri:file://%s', (substr(PHP_OS, 0, 3) == 'WIN' ? str_replace('\\', '/', $file) : $file));
+            $uri = 'uri:file://' . $file;
 
             if ($fp = @fopen($file, 'w')) {
                 // ok, great we can create a file with a DSN in it
@@ -38,8 +38,8 @@ MySQLPDOTest::skip();
             }
 
             if ($fp = @fopen($file, 'w')) {
-                fwrite($fp, sprintf('mysql:dbname=letshopeinvalid;%s%s',
-                    chr(0), $dsn));
+                $dsnUnknownDatabase = preg_replace('~dbname=[^;]+~', 'dbname=letshopeinvalid', $dsn);
+                fwrite($fp, $dsnUnknownDatabase);
                 fclose($fp);
                 clearstatcache();
                 assert(file_exists($file));
@@ -49,9 +49,8 @@ MySQLPDOTest::skip();
                     $expected = array(
                         "SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'",
                         "SQLSTATE[42000] [1049] Unknown database 'letshopeinvalid'",
-                        "SQLSTATE[HY000] [2002] No such file or directory"
                     );
-                    printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), chr(0) test, %s\n",
+                    printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), %s\n",
                     $uri, $dsn,
                     $file, filesize($file), file_get_contents($file),
                     (in_array($e->getMessage(), $expected) ? 'EXPECTED ERROR' : $e->getMessage()));
@@ -73,5 +72,5 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-[003] URI=uri:file://%spdomuri.tst, DSN=mysql%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql%sdbname=letshopeinvalid%s'), chr(0) test, EXPECTED ERROR
+[003] URI=uri:file://%spdomuri.tst, DSN=mysql:%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql:%sdbname=letshopeinvalid%S'), EXPECTED ERROR
 done!
