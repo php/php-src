@@ -1,11 +1,11 @@
 @echo off
 
-findstr /m "PHP_VERSION_ID 800" %~dp0..\..\..\main\php_version.h
+findstr /m "PHP_VERSION_ID 800" %~dp0..\..\..\main\php_version.h >nul 2>&1
 if %errorlevel% equ 0 (
     set BRANCH=8.0
     goto :eof
 )
-findstr /m "PHP_VERSION_ID 810" %~dp0..\..\..\main\php_version.h
+findstr /m "PHP_VERSION_ID 810" %~dp0..\..\..\main\php_version.h >nul 2>&1
 if %errorlevel% equ 0 (
     set BRANCH=8.1
     goto :eof

@@ -5,32 +5,32 @@ if /i "%APPVEYOR%%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >NUL 2>NUL
+if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
 rem rmdir takes several minutes rename instead only
 pushd C:\
 if /i "%GITHUB_ACTIONS%" equ "True" ren msys64 msys64-del
 if %errorlevel% neq 0 exit /b 3
 popd
-del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
+del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
+del /f /q C:\Windows\System32\libssl-1_1-x64.dll >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
 
 call %~dp0find-target-branch.bat

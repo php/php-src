@@ -68,15 +68,15 @@ if %errorlevel% neq 0 exit /b 3
 if %errorlevel% neq 0 exit /b 3
 
 rem prepare for ext/openssl
-rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
-rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
+rmdir /s /q C:\OpenSSL-Win32 >nul 2>&1
+rmdir /s /q C:\OpenSSL-Win64 >nul 2>&1
 if "%PLATFORM%" == "x86" (
 	set OPENSSLDIR="C:\Program Files (x86)\Common Files\SSL"
 ) else (
 	set OPENSSLDIR="C:\Program Files\Common Files\SSL"
 )
 if /i "%GITHUB_ACTIONS%" equ "True" (
-    rmdir /s /q %OPENSSLDIR% >NUL 2>NUL
+    rmdir /s /q %OPENSSLDIR% >nul 2>&1
 )
 mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
