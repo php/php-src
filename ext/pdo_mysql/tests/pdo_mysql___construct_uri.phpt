@@ -38,7 +38,8 @@ MySQLPDOTest::skip();
             }
 
             if ($fp = @fopen($file, 'w')) {
-                $dsnUnknownDatabase = preg_replace('~dbname=[^;]+~', 'dbname=letshopeinvalid', $dsn);
+                $dsnUnknownDatabase = preg_replace('~dbname=[^;]+~', 'dbname=letshopeinvalid', $dsn)
+                    . chr(0) . ';host=nonsense;unix_socket=nonsense';
                 fwrite($fp, $dsnUnknownDatabase);
                 fclose($fp);
                 clearstatcache();
@@ -60,8 +61,6 @@ MySQLPDOTest::skip();
 
         }
 
-        /* TODO: safe mode */
-
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s\n",
             $e->getMessage(),
@@ -72,5 +71,5 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-[003] URI=uri:file://%spdomuri.tst, DSN=mysql:%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql:%sdbname=letshopeinvalid%S'), EXPECTED ERROR
+[003] URI=uri:file://%spdomuri.tst, DSN=mysql:%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql:%sdbname=letshopeinvalid%snonsense'), EXPECTED ERROR
 done!
