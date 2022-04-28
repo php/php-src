@@ -600,3 +600,49 @@ jobs:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+  WINDOWS:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
+        x64: [true, false]
+        zts: [true, false]
+    name: "${{ matrix.branch.name }}_WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: windows-2019
+    env:
+      APPVEYOR_REPO_BRANCH: "${{ github.ref_name }}"
+      PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+      PHP_BUILD_OBJ_DIR: c:\obj
+      PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
+      PHP_BUILD_CRT: vs16
+      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
+      THREAD_SAFE: "${{ matrix.zts && '1' || '' }}"
+      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
+    steps:
+      - name: git checkout 1/2
+        run: git config --global core.autocrlf false && git config --global core.eol lf
+      - name: git checkout 2/2
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: Setup MySQL
+        run: |
+          choco install mysql -y --no-progress --params="/port:3307"
+          mysql.exe --port=3307 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql_Pass11'; FLUSH PRIVILEGES;"
+          mysql.exe --port=3307 --user=root --password="mysql_Pass11" -e "SELECT 1;"
+      - name: Setup MSSQL
+        run: |
+          choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=mssql_Pass11"
+          sqlcmd -S "(local)\SQLEXPRESS" -U sa -P "mssql_Pass11" -Q "SELECT 1;"
+      - name: Setup PostgreSQL
+        run: |
+          Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
+          pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'postgresql_Pass11';" }
+          pwsh -Command { $env:PGPASSWORD="postgresql_Pass11"; & "$env:PGBIN\psql" -U postgres -c "SELECT 1;" }
+      - name: Build
+        run: .github/scripts/windows/build.bat
+      - name: Test
+        run: .github/scripts/windows/test.bat

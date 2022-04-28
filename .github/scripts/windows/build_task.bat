@@ -60,9 +60,6 @@ if %errorlevel% neq 0 exit /b 3
 if "%THREAD_SAFE%" equ "" set ADD_CONF=%ADD_CONF% --disable-zts
 if "%INTRINSICS%" neq "" set ADD_CONF=%ADD_CONF% --enable-native-intrinsics=%INTRINSICS%
 
-set EXT_EXCLUDE_FROM_TEST=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp
-if "%OPCACHE%" equ "" set EXT_EXCLUDE_FROM_TEST=%EXT_EXCLUDE_FROM_TEST%,opcache
-
 if "%PLATFORM%" == "x86" (
 	set CFLAGS=/W1
 ) else (
@@ -77,7 +74,7 @@ cmd /c configure.bat ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
 	--with-php-build=%DEPS_DIR% ^
 	%ADD_CONF% ^
-	--with-test-ini-ext-exclude=%EXT_EXCLUDE_FROM_TEST%
+	--with-test-ini-ext-exclude=snmp,oci8_12c,pdo_oci,pdo_firebird,ldap,imap,ftp,opcache
 if %errorlevel% neq 0 exit /b 3
 
 nmake /NOLOGO /S

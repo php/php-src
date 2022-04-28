@@ -19,6 +19,7 @@ on:
       - '**'
 jobs:
   LINUX_X64:
+    if: false
     strategy:
       fail-fast: false
       matrix:
@@ -131,17 +132,15 @@ jobs:
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  WINDOWS_X64:
+  WINDOWS:
     strategy:
       fail-fast: false
       matrix:
         include:
           - x64: true
             zts: false
-          - x64: true
-            zts: true
           - x64: false
-            zts: false
+            zts: true
     name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: windows-2019
     env:
@@ -159,6 +158,20 @@ jobs:
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout 2/2
         uses: actions/checkout@v2
+      - name: Setup MySQL
+        run: |
+          choco install mysql -y --no-progress --params="/port:3307"
+          mysql.exe --port=3307 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql_Pass11'; FLUSH PRIVILEGES;"
+          mysql.exe --port=3307 --user=root --password="mysql_Pass11" -e "SELECT 1;"
+      - name: Setup MSSQL
+        run: |
+          choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=mssql_Pass11"
+          sqlcmd -S "(local)\SQLEXPRESS" -U sa -P "mssql_Pass11" -Q "SELECT 1;"
+      - name: Setup PostgreSQL
+        run: |
+          Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
+          pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'postgresql_Pass11';" }
+          pwsh -Command { $env:PGPASSWORD="postgresql_Pass11"; & "$env:PGBIN\psql" -U postgres -c "SELECT 1;" }
       - name: Build
         run: .github/scripts/windows/build.bat
       - name: Test
