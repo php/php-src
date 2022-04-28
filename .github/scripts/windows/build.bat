@@ -13,7 +13,7 @@ mkdir "%PHP_BUILD_CACHE_BASE_DIR%"
 mkdir "%PHP_BUILD_OBJ_DIR%"
 
 echo Cloning remote SDK repository
-git clone -q --branch %SDK_BRANCH% %SDK_REMOTE% --depth 1 "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
+git clone -q  -c advice.detachedHead=false --branch %SDK_BRANCH% %SDK_REMOTE% --depth 1 "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1
 
 for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a
 echo Got SDK version %GOT_SDK_VER%
