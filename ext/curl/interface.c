@@ -2061,15 +2061,17 @@ static void free_cb(void *arg) /* {{{ */
 /* }}} */
 #endif
 
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 static inline CURLcode add_simple_field(curl_mime *mime, zend_string *string_key, zval *current)
+#else
+static inline CURLcode add_simple_field(struct HttpPost **first, struct HttpPost **last, zend_string *string_key, zval *current)
+#endif
 {
 	CURLcode error = CURLE_OK;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	curl_mimepart *part;
 	CURLcode form_error;
 #else
-	struct HttpPost *first = NULL;
-	struct HttpPost *last  = NULL;
 	CURLFORMcode form_error;
 #endif
 	zend_string *postval, *tmp_postval;
@@ -2091,7 +2093,7 @@ static inline CURLcode add_simple_field(curl_mime *mime, zend_string *string_key
 	/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
 		* must be explicitly cast to long in curl_formadd
 		* use since curl needs a long not an int. */
-	form_error = curl_formadd(&first, &last,
+	form_error = curl_formadd(first, last,
 		CURLFORM_COPYNAME, ZSTR_VAL(string_key),
 		CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
 		CURLFORM_COPYCONTENTS, ZSTR_VAL(postval),
@@ -2303,14 +2305,22 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			zval *current_element;
 
 			ZEND_HASH_FOREACH_VAL(HASH_OF(current), current_element) {
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 				add_simple_field(mime, string_key, current_element);
+#else
+				add_simple_field(&first, &last, string_key, current_element);
+#endif
 			} ZEND_HASH_FOREACH_END();
 
 			zend_string_release_ex(string_key, 0);
 			continue;
 		}
 
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 		add_simple_field(mime, string_key, current);
+#else
+		add_simple_field(&first, &last, string_key, current);
+#endif
 
 		zend_string_release_ex(string_key, 0);
 	} ZEND_HASH_FOREACH_END();
