@@ -1,5 +1,5 @@
 --TEST--
-Bug #69425: Use After Free in unserialize()
+Bug #69425 (Use After Free in unserialize())
 --FILE--
 <?php
 
@@ -22,11 +22,11 @@ $data = unserialize('a:2:{i:0;O:12:"DateInterval":1:{s:1:"y";R:1;}i:1;i:2;}');
 var_dump($data);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 array(2) {
   [0]=>
-  object(DateInterval)#1 (16) {
+  object(DateInterval)#1 (%d) {
     ["y"]=>
     int(-1)
     ["m"]=>
@@ -41,24 +41,12 @@ array(2) {
     int(-1)
     ["f"]=>
     float(0)
-    ["weekday"]=>
-    int(-1)
-    ["weekday_behavior"]=>
-    int(-1)
-    ["first_last_day_of"]=>
-    int(-1)
     ["invert"]=>
     int(0)
     ["days"]=>
     int(-1)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(-1)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
+    ["from_string"]=>
+    bool(false)
   }
   [1]=>
   int(2)

@@ -480,6 +480,10 @@ class DateInterval
      */
     public function format(string $format): string {}
 
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
