@@ -56,7 +56,7 @@ object(DateInterval)#%d (%d) {
   bool(false)
 }
 string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;s:11:"from_string";b:0;}"
-DateInterval::__set_state(array(
+\DateInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
    'd' => 0,

@@ -4,6 +4,8 @@ Test DateInterval::__serialize and DateInterval::__unserialize
 <?php
 date_default_timezone_set("Europe/London");
 
+// the 15:30 gets ignored, as it's not a "relative" interval.
+// See: https://github.com/php/php-src/issues/8458
 $d = DateInterval::createFromDateString('next weekday 15:30');
 echo "Original object:\n";
 var_dump($d);
@@ -28,6 +30,11 @@ $d->__unserialize(
 	]
 );
 var_dump($d);
+
+echo "\n\nUsed serialised interval:\n";
+$now = new DateTimeImmutable("2022-04-22 16:25:11 BST");
+var_dump($now->add($e));
+var_dump($now->sub($e));
 ?>
 --EXPECTF--
 Original object:
@@ -67,4 +74,25 @@ object(DateInterval)#3 (2) {
   bool(true)
   ["date_string"]=>
   string(18) "next weekday 15:30"
+}
+
+
+Used serialised interval:
+object(DateTimeImmutable)#4 (3) {
+  ["date"]=>
+  string(26) "2022-04-25 16:25:11.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "BST"
+}
+
+Warning: DateTimeImmutable::sub(): Only non-special relative time specifications are supported for subtraction in %s on line %d
+object(DateTimeImmutable)#4 (3) {
+  ["date"]=>
+  string(26) "2022-04-22 16:25:11.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "BST"
 }

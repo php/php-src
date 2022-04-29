@@ -18,6 +18,11 @@ var_dump($e);
 
 echo "\n\nCalling __serialize manually:\n";
 var_dump($d->__serialize());
+
+echo "\n\nUsed serialised interval:\n";
+$now = new DateTimeImmutable("2022-04-22 16:25:11 BST");
+var_dump($now->add($e));
+var_dump($now->sub($e));
 ?>
 --EXPECTF--
 Original object:
@@ -96,4 +101,23 @@ array(%d) {
   bool(false)
   ["from_string"]=>
   bool(false)
+}
+
+
+Used serialised interval:
+object(DateTimeImmutable)#4 (3) {
+  ["date"]=>
+  string(26) "2024-04-26 22:33:11.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "BST"
+}
+object(DateTimeImmutable)#4 (3) {
+  ["date"]=>
+  string(26) "2020-04-18 10:17:11.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(3) "BST"
 }
