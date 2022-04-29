@@ -205,11 +205,19 @@ interface DateTimeInterface
 
     /** @tentative-return-type */
     public function __wakeup(): void;
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 }
 
 class DateTime implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
@@ -317,6 +325,10 @@ class DateTime implements DateTimeInterface
 class DateTimeImmutable implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
@@ -440,6 +452,10 @@ class DateTimeZone
      * @alias timezone_identifiers_list
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
