@@ -5015,17 +5015,9 @@ static HashTable *date_object_get_gc_period(zend_object *object, zval **table, i
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ */
+static void date_period_object_to_hash(php_period_obj *period_obj, HashTable *props)
 {
-	HashTable		*props;
-	zval			 zv;
-	php_period_obj	*period_obj;
-
-	period_obj = php_period_obj_from_obj(object);
-	props = zend_std_get_properties(object);
-	if (!period_obj->start) {
-		return props;
-	}
+	zval zv;
 
 	if (period_obj->start) {
 		php_date_obj *date_obj;
@@ -5074,6 +5066,20 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 
 	ZVAL_BOOL(&zv, period_obj->include_start_date);
 	zend_hash_str_update(props, "include_start_date", sizeof("include_start_date")-1, &zv);
+}
+
+static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ */
+{
+	HashTable		*props;
+	php_period_obj	*period_obj;
+
+	period_obj = php_period_obj_from_obj(object);
+	props = zend_std_get_properties(object);
+	if (!period_obj->start) {
+		return props;
+	}
+
+	date_period_object_to_hash(period_obj, props);
 
 	return props;
 } /* }}} */
@@ -5173,6 +5179,46 @@ PHP_METHOD(DatePeriod, __set_state)
 
 	object_init_ex(return_value, date_ce_period);
 	period_obj = Z_PHPPERIOD_P(return_value);
+	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DatePeriod, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_period_obj   *period_obj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	period_obj = Z_PHPPERIOD_P(object);
+	DATE_CHECK_INITIALIZED(period_obj->start, DatePeriod);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_period_object_to_hash(period_obj, myht);
+}
+/* }}} */
+
+
+/* {{{ */
+PHP_METHOD(DatePeriod, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_period_obj   *period_obj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	period_obj = Z_PHPPERIOD_P(object);
+	myht = Z_ARRVAL_P(array);
+
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
 	}

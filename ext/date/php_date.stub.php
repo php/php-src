@@ -513,6 +513,10 @@ class DatePeriod implements IteratorAggregate
     /** @tentative-return-type */
     public function getRecurrences(): ?int {}
 
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
