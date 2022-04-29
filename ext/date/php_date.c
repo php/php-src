@@ -2074,7 +2074,7 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 	if (intervalobj->from_string) {
 		ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
 		zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
-		ZVAL_STR(&zv, intervalobj->date_string);
+		ZVAL_STR_COPY(&zv, intervalobj->date_string);
 		zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
 		return;
 	}
@@ -2185,6 +2185,7 @@ static void date_object_free_storage_interval(zend_object *object) /* {{{ */
 
 	if (intern->date_string) {
 		zend_string_release(intern->date_string);
+		intern->date_string = NULL;
 	}
 	timelib_rel_time_dtor(intern->diff);
 	zend_object_std_dtor(&intern->std);
