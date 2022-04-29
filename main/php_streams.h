@@ -65,7 +65,7 @@ END_EXTERN_C()
 
 #define php_stream_fopen_with_path_rel(filename, mode, path, opened, options) _php_stream_fopen_with_path((filename), (mode), (path), (opened), (options) STREAMS_REL_CC)
 
-#define php_stream_fopen_from_fd_rel(fd, mode, persistent_id)	 _php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_REL_CC)
+#define php_stream_fopen_from_fd_rel(fd, mode, persistent_id, zero_position)	 _php_stream_fopen_from_fd((fd), (mode), (persistent_id), (zero_position) STREAMS_REL_CC)
 #define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC)
 
 #define php_stream_fopen_from_pipe_rel(file, mode)	 _php_stream_fopen_from_pipe((file), (mode) STREAMS_REL_CC)

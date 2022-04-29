@@ -37,6 +37,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   - zend_object_count_elements_t
   - zend_object_get_closure_t
   - zend_object_do_operation_t
+* Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
+  if this a newly created file so the current file offset needs not to be checked.
 
 ========================
 2. Build system changes

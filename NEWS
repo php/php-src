@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     enums). (ilutov)
   . Fixed bug GH-8810 (Incorrect lineno in backtrace of multi-line function
     calls). (ilutov)
+  . Optimised code path for newly created file with the stream plain wrapper. (Max Kellermann)
 
 - Curl:
   . Added new constants from cURL 7.62 to 7.80. (Pierrick)
