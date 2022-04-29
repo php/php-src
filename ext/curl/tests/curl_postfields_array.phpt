@@ -31,6 +31,7 @@ $options = [
 	CURLOPT_FORBID_REUSE => 1,
 	CURLOPT_TIMEOUT => 1,
 	CURLOPT_POSTFIELDS => $fields,
+	CURLOPT_HTTPHEADER => [ 'Expect:' ],
 ];
 
 $ch = curl_init();
