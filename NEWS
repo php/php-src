@@ -30,6 +30,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug #77023 (FPM cannot shutdown processes). (Jakub Zelenka)
   . Fixed comment in kqueue remove callback log message. (David Carlier)
+  . Fixed ACL build check on MacOS. (David Carlier)
 
 - Hash:
   . Fixed bug #81714 (segfault when serializing finalized HashContext). (cmb)
