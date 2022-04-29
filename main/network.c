@@ -886,10 +886,10 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			}
 #endif
 #ifdef IP_BIND_ADDRESS_NO_PORT
-        {
-            int val = 1;
-            (void) setsockopt(sock, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &val, sizeof(val));
-        }
+			{
+				int val = 1;
+				(void) setsockopt(sock, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &val, sizeof(val));
+			}
 #endif
 			if (local_address_len == 0) {
 				php_error_docref(NULL, E_WARNING, "Invalid IP Address: %s", bindto);
