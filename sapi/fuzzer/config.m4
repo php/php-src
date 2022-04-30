@@ -66,6 +66,9 @@ if test "$PHP_FUZZER" != "no"; then
   if test -n "$enable_mbstring" && test "$enable_mbstring" != "no"; then
     PHP_FUZZER_TARGET([mbstring], PHP_FUZZER_MBSTRING_OBJS)
   fi
+  if test -n "$enable_phar" && test "$enable_phar" != "no"; then
+    PHP_FUZZER_TARGET([phar], PHP_FUZZER_PHAR_OBJS)
+  fi
 
   PHP_SUBST(PHP_FUZZER_BINARIES)
 fi
