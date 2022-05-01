@@ -125,6 +125,9 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "listen.group",              &fpm_conf_set_string,      WPO(listen_group) },
 	{ "listen.mode",               &fpm_conf_set_string,      WPO(listen_mode) },
 	{ "listen.allowed_clients",    &fpm_conf_set_string,      WPO(listen_allowed_clients) },
+#ifdef SO_SETFIB
+	{ "listen.setfib",             &fpm_conf_set_integer,     WPO(listen_setfib) },
+#endif
 	{ "process.priority",          &fpm_conf_set_integer,     WPO(process_priority) },
 	{ "process.dumpable",          &fpm_conf_set_boolean,     WPO(process_dumpable) },
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
@@ -618,6 +621,9 @@ static void *fpm_worker_pool_config_alloc(void) /* {{{ */
 	wp->config->process_dumpable = 0;
 	wp->config->clear_env = 1;
 	wp->config->decorate_workers_output = 1;
+#ifdef SO_SETFIB
+	wp->config->listen_setfib = -1;
+#endif
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -1715,6 +1721,9 @@ static void fpm_conf_dump(void) /* {{{ */
 		zlog(ZLOG_NOTICE, "\tlisten.group = %s",               STR2STR(wp->config->listen_group));
 		zlog(ZLOG_NOTICE, "\tlisten.mode = %s",                STR2STR(wp->config->listen_mode));
 		zlog(ZLOG_NOTICE, "\tlisten.allowed_clients = %s",     STR2STR(wp->config->listen_allowed_clients));
+#ifdef SO_SETFIB
+		zlog(ZLOG_NOTICE, "\tlisten.setfib = %d",              wp->config->listen_setfib);
+#endif
 		if (wp->config->process_priority == 64) {
 			zlog(ZLOG_NOTICE, "\tprocess.priority = undefined");
 		} else {

@@ -62,6 +62,10 @@ listen = 127.0.0.1:9000
 ; Default Value: any
 ;listen.allowed_clients = 127.0.0.1
 
+; Set the associated the route table (FIB). FreeBSD only
+; Default Value: -1
+;listen.setfib = 1
+
 ; Specify the nice(2) priority to apply to the pool processes (only if set)
 ; The value can vary from -19 (highest priority) to 20 (lower priority)
 ; Note: - It will only work if the FPM master process is launched as root

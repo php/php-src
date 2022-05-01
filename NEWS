@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0beta1
 
+- FPM:
+  - Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
+
 07 Jul 2022, PHP 8.2.0alpha3
 
 - Core:
