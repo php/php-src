@@ -82,33 +82,23 @@ mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
 copy %DEPS_DIR%\template\ssl\openssl.cnf %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-rem set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
-set OPENSSL_CONF=
-rem set SSLEAY_CONF=
+if /i "%APPVEYOR%" equ "True" (
+    set OPENSSL_CONF=
+)
 
 rem prepare for enchant
-mkdir C:\usr\local\lib\enchant-2
+mkdir %~d0\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant2_hunspell.dll C:\usr\local\lib\enchant-2
+copy %DEPS_DIR%\bin\libenchant2_hunspell.dll %~d0\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-reg add HKEY_CURRENT_USER\SOFTWARE\Enchant\Config /v Module_Dir /t REG_SZ /d c:\enchant_plugins
+mkdir %~d0\usr\local\share\enchant\hunspell
 if %errorlevel% neq 0 exit /b 3
-set PHP_BUILD_CACHE_ENCHANT_DICT_DIR=%PHP_BUILD_CACHE_BASE_DIR%\enchant_dict
-if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%" (
-	echo Creating %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%
-	mkdir "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%"
-)
-if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
-	echo Fetching enchant dicts
-	pushd %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%
-	del /q *
-	powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
-	unzip dict.zip
-	del /q dict.zip
-	popd
-)
-mkdir %LOCALAPPDATA%\enchant\hunspell
-copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
+echo Fetching enchant dicts
+pushd %~d0\usr\local\share\enchant\hunspell
+powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
+unzip dict.zip
+del /q dict.zip
+popd
 
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" neq "" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
