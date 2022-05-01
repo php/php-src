@@ -396,6 +396,23 @@ AC_DEFUN([AC_FPM_TIMES],
 	])
 ])
 
+AC_DEFUN([AC_FPM_SOCKETROUTE],
+[
+	have_socketroute=no
+	AC_MSG_CHECKING([for SO_SETFIB])
+
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]], [[int x = SO_SETFIB;]])], [
+		have_socketroute=yes
+		AC_MSG_RESULT([yes])
+	], [
+		AC_MSG_RESULT([no])
+	])
+
+	if test $have_socketroute = "yes"; then
+		AC_DEFINE([HAVE_SOCKETROUTE], 1, [do we have socket route capabilities])
+	fi
+])
+
 AC_DEFUN([AC_FPM_KQUEUE],
 [
 	AC_MSG_CHECKING([for kqueue])
@@ -539,6 +556,7 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_LQ
   AC_FPM_SYSCONF
   AC_FPM_TIMES
+  AC_FPM_SOCKETROUTE
   AC_FPM_KQUEUE
   AC_FPM_PORT
   AC_FPM_DEVPOLL

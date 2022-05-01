@@ -71,6 +71,9 @@ struct fpm_global_config_s fpm_global_config = {
 	.systemd_watchdog = 0,
 	.systemd_interval = -1, /* -1 means not set */
 #endif
+#ifdef HAVE_SOCKETROUTE
+	.socketroute = -1, /* -1 means not set */
+#endif
 	.log_buffering = ZLOG_DEFAULT_BUFFERING,
 	.log_limit = ZLOG_DEFAULT_LIMIT
 };
@@ -104,6 +107,9 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "events.mechanism",            &fpm_conf_set_string,          GO(events_mechanism) },
 #ifdef HAVE_SYSTEMD
 	{ "systemd_interval",            &fpm_conf_set_time,            GO(systemd_interval) },
+#endif
+#ifdef HAVE_SOCKETROUTE
+	{ "socket.route",                &fpm_conf_set_integer,         GO(socketroute) },
 #endif
 	{ 0, 0, 0 }
 };

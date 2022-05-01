@@ -44,6 +44,9 @@ struct fpm_global_config_s {
 	int systemd_watchdog;
 	int systemd_interval;
 #endif
+#ifdef HAVE_SOCKETROUTE
+	int socketroute;
+#endif
 };
 
 extern struct fpm_global_config_s fpm_global_config;

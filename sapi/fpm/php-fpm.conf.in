@@ -125,6 +125,10 @@
 ; Default value: 10
 ;systemd_interval = 10
 
+; Sets the routing table for the sockets created within FPM
+; - FreeBSD from 0 up to 65536
+;socket.route = -1
+
 ;;;;;;;;;;;;;;;;;;;;
 ; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
