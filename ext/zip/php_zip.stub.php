@@ -91,7 +91,7 @@ class ZipArchive
     public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE) {}
 
     /** @return bool */
-    public function replaceFile(string $filepath, string $index, int $start = 0, int $length = 0, int $flags = 0) {}
+    public function replaceFile(string $filepath, int $index, int $start = 0, int $length = 0, int $flags = 0) {}
 
     /** @return array|false */
     public function addGlob(string $pattern, int $flags = 0, array $options = []) {}
