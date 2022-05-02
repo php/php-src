@@ -56,7 +56,7 @@ if /i "%APPVEYOR%" equ "True" (
     set TMP_POSTGRESQL_BIN=%ProgramFiles%\PostgreSQL\10\bin
 )
 if /i "%GITHUB_ACTIONS%" equ "True" (
-    set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=^(local^)\SQLEXPRESS;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
+    set ODBC_TEST_DSN=Driver={ODBC Driver 17 for SQL Server};Server=^(local^)\SQLEXPRESS;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
     set TMP_MYSQL_BIN=C:\mysql\bin
     set TMP_POSTGRESQL_BIN=%PGBIN%
 )
