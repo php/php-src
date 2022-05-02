@@ -15,13 +15,13 @@ if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
 if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win32 >nul 2>&1
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-Win64 >nul 2>&1
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win32 >nul 2>&1
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-v11-Win32 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
-if /i "%APPVEYOR%" equ "True" rmdir /s /q c:\OpenSSL-v11-Win64 >nul 2>&1
+if /i "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-v11-Win64 >nul 2>&1
 if %errorlevel% neq 0 exit /b 3
 rem rmdir takes several minutes rename instead only
 pushd C:\

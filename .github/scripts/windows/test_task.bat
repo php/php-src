@@ -105,10 +105,10 @@ if "%THREAD_SAFE%" neq "" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
-mkdir c:\tests_tmp
+mkdir C:\tests_tmp
 
-set TEST_PHP_JUNIT=c:\junit.out.xml
+set TEST_PHP_JUNIT=C:\junit.out.xml
 
 set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=16M
-nmake test TESTS="%OPCACHE_OPTS% -q --offline -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP --color --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp -j2"
+nmake test TESTS="%OPCACHE_OPTS% -q --offline -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP --color --show-diff --show-slow 1000 --set-timeout 120 --temp-source C:\tests_tmp --temp-target C:\tests_tmp -j2"
 if %errorlevel% neq 0 exit /b %errorlevel%
