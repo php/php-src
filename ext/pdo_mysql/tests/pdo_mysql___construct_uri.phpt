@@ -21,7 +21,6 @@ MySQLPDOTest::skip();
             $uri = 'uri:file://' . $file;
 
             if ($fp = @fopen($file, 'w')) {
-                // ok, great we can create a file with a DSN in it
                 fwrite($fp, $dsn);
                 fclose($fp);
                 clearstatcache();
@@ -38,23 +37,17 @@ MySQLPDOTest::skip();
             }
 
             if ($fp = @fopen($file, 'w')) {
-                $dsnUnknownDatabase = preg_replace('~dbname=[^;]+~', 'dbname=letshopeinvalid', $dsn)
-                    . chr(0) . ';host=nonsense;unix_socket=nonsense';
-                fwrite($fp, $dsnUnknownDatabase);
+                fwrite($fp, $dsn . chr(0) . ';host=nonsense;unix_socket=nonsense');
                 fclose($fp);
                 clearstatcache();
                 assert(file_exists($file));
                 try {
                     $db = new PDO($uri, $user, $pass);
                 } catch (PDOException $e) {
-                    $expected = array(
-                        "SQLSTATE[HY000] [1049] Unknown database 'letshopeinvalid'",
-                        "SQLSTATE[42000] [1049] Unknown database 'letshopeinvalid'",
-                    );
                     printf("[003] URI=%s, DSN=%s, File=%s (%d bytes, '%s'), %s\n",
-                    $uri, $dsn,
-                    $file, filesize($file), file_get_contents($file),
-                    (in_array($e->getMessage(), $expected) ? 'EXPECTED ERROR' : $e->getMessage()));
+                        $uri, $dsn,
+                        $file, filesize($file), file_get_contents($file),
+                        $e->getMessage());
                 }
                 unlink($file);
             }
@@ -71,5 +64,4 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-[003] URI=uri:file://%spdomuri.tst, DSN=mysql:%sdbname=%s, File=%spdomuri.tst (%d bytes, 'mysql:%sdbname=letshopeinvalid%snonsense'), EXPECTED ERROR
 done!
