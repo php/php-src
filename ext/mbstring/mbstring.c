@@ -3860,31 +3860,34 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-static int mbfl_filt_check_errors(int c, void* data)
-{
-	if (c == MBFL_BAD_INPUT) {
-		(*((mbfl_convert_filter**)data))->num_illegalchar++;
-	}
-	return 0;
-}
-
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding)
 {
-	mbfl_convert_filter *filter = mbfl_convert_filter_new(encoding, &mbfl_encoding_wchar, mbfl_filt_check_errors, NULL, &filter);
+	uint32_t wchar_buf[128];
+	unsigned char *in = (unsigned char*)input;
+	unsigned int state = 0;
 
-	while (length--) {
-		unsigned char c = *input++;
-		(filter->filter_function)(c, filter);
-		if (filter->num_illegalchar) {
-			mbfl_convert_filter_delete(filter);
+	/* If the input string is not encoded in the given encoding, there is a significant chance
+	 * that this will be seen in the first bytes. Therefore, rather than converting an entire
+	 * buffer of 128 codepoints, convert and check just a few codepoints first */
+	size_t out_len = encoding->to_wchar(&in, &length, wchar_buf, 8, &state);
+	ZEND_ASSERT(out_len <= 8);
+	for (int i = 0; i < out_len; i++) {
+		if (wchar_buf[i] == MBFL_BAD_INPUT) {
 			return 0;
 		}
 	}
 
-	(filter->filter_flush)(filter);
-	int result = !filter->num_illegalchar;
-	mbfl_convert_filter_delete(filter);
-	return result;
+	while (length) {
+		out_len = encoding->to_wchar(&in, &length, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+		for (int i = 0; i < out_len; i++) {
+			if (wchar_buf[i] == MBFL_BAD_INPUT) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
 }
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
