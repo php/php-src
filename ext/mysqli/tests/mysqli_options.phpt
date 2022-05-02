@@ -68,7 +68,7 @@ require_once('skipifconnectfailure.inc');
         $k = $charset['Charset'];
         /* The server currently 17.07.2007 can't handle data sent in ucs2 */
         /* The server currently 16.08.2010 can't handle data sent in utf16 and utf32 */
-        if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32') {
+        if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32' || $charset['Charset'] == 'utf8mb3') {
             continue;
         }
         if (true !== mysqli_options($link, MYSQLI_SET_CHARSET_NAME, $charset['Charset'])) {
