@@ -2925,7 +2925,7 @@ static int zend_jit_setup(void)
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
 	/* Probably, it might be better solution */
 	do {
-		void ***tls_mem = ((void***)__readfsdword(0x2c))[_tls_index];
+		void ***tls_mem = ((void**)__readfsdword(0x2c))[_tls_index];
 		void *val = _tsrm_ls_cache;
 		size_t offset = 0;
 		size_t size = (char*)&_tls_end - (char*)&_tls_start;

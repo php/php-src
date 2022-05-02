@@ -879,7 +879,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							size_t rounded_offset = (range->offset / gran) * gran;
 							delta = range->offset - rounded_offset;
 							loffs = (DWORD)rounded_offset;
+#ifdef _WIN64
 							hoffs = (DWORD)(rounded_offset >> 32);
+#else
+							hoffs = 0;
+#endif
 						}
 
 						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
