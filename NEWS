@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
 
+- Zip:
+  . Fixed type for index in ZipArchive::replaceFile. (Martin Rehberger)
+
 12 May 2022, PHP 8.0.19
 
 - Core:
