@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bf10c37919483ac04bc1f788ac6e59b5edab295e */
+ * Stub hash: 54adf746478423b7e7caa09d417fb97bb9621203 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -75,14 +75,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_parameter_with_attribu
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_is_object, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass___toString, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class__ZendTestClass___toString arginfo_zend_get_current_func_name
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_returnsStatic, 0, 0, IS_STATIC, 0)
 ZEND_END_ARG_INFO()
@@ -131,6 +133,7 @@ static ZEND_FUNCTION(zend_weakmap_remove);
 static ZEND_FUNCTION(zend_weakmap_dump);
 static ZEND_FUNCTION(zend_get_unit_enum);
 static ZEND_FUNCTION(zend_test_parameter_with_attribute);
+static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -167,6 +170,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_weakmap_dump, arginfo_zend_weakmap_dump)
 	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
 	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
+	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
