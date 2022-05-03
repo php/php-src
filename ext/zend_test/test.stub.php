@@ -66,6 +66,8 @@ function zend_weakmap_attach(object $object, mixed $value): bool {}
 function zend_weakmap_remove(object $object): bool {}
 function zend_weakmap_dump(): array {}
 
+function zend_get_current_func_name(): string {}
+
 }
 
 namespace ZendTestNS {
