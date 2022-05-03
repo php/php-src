@@ -368,7 +368,7 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 
 /* Even if we don't build with valgrind support, include the symbol so that valgrind available
  * only at runtime will not result in false positives. */
-#ifndef HAVE_VALGRIND
+#ifndef I_REPLACE_SONAME_FNNAME_ZU
 # define I_REPLACE_SONAME_FNNAME_ZU(soname, fnname) _vgr00000ZU_ ## soname ## _ ## fnname
 #endif
 
