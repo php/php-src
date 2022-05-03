@@ -1988,11 +1988,11 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	zend_function *fptr;
 	HashTable *params;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &params) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	fci.size = sizeof(fci);
 	ZVAL_UNDEF(&fci.function_name);
@@ -2034,11 +2034,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, returnsReference)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
 }
@@ -2051,11 +2051,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNumberOfParameters)
 	zend_function *fptr;
 	uint32_t num_args;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
@@ -2072,11 +2072,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getNumberOfRequiredParameters)
 	reflection_object *intern;
 	zend_function *fptr;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_LONG(fptr->common.required_num_args);
 }
@@ -2090,11 +2090,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameters)
 	uint32_t i, num_args;
 	struct _zend_arg_info *arg_info;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	arg_info= fptr->common.arg_info;
 	num_args = fptr->common.num_args;
@@ -2132,11 +2132,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getExtension)
 	zend_function *fptr;
 	zend_internal_function *internal;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_NULL();
@@ -2158,11 +2158,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getExtensionName)
 	zend_function *fptr;
 	zend_internal_function *internal;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_FALSE;
@@ -3644,11 +3644,11 @@ ZEND_METHOD(ReflectionMethod, getDeclaringClass)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	GET_REFLECTION_OBJECT_PTR(mptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	zend_reflection_class_factory(mptr->common.scope, return_value);
 }
@@ -3660,11 +3660,11 @@ ZEND_METHOD(ReflectionMethod, getPrototype)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	GET_REFLECTION_OBJECT_PTR(mptr);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (!mptr->common.prototype) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
