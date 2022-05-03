@@ -553,7 +553,7 @@ ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
 {
-	if (func->common.scope) {
+	if (func->common.scope && func->common.function_name) {
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
