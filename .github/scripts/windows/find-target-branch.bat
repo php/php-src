@@ -1,13 +1,4 @@
 @echo off
 
-findstr /m "PHP_VERSION_ID 800" %~dp0..\..\..\main\php_version.h >nul 2>&1
-if %errorlevel% equ 0 (
-    set BRANCH=8.0
-    goto :eof
-)
-findstr /m "PHP_VERSION_ID 810" %~dp0..\..\..\main\php_version.h >nul 2>&1
-if %errorlevel% equ 0 (
-    set BRANCH=8.1
-    goto :eof
-)
-set BRANCH=master
+for /f "usebackq tokens=3" %%i in (`findstr PHP_MAJOR_VERSION main\php_version.h`) do set BRANCH=%%i
+for /f "usebackq tokens=3" %%i in (`findstr PHP_MINOR_VERSION main\php_version.h`) do set BRANCH=%BRANCH%.%%i
