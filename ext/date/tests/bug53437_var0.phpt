@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437 (Crash when using unserialized DatePeriod instance), variation 1
+Bug #53437 (Crash when using unserialized DatePeriod instance), variation 0
 --FILE--
 <?php
 $dp = new DatePeriod(new DateTime('2010-01-01 UTC'), new DateInterval('P1D'), 2);
