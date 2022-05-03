@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
 
+- SPL:
+  . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
+
 - Zip:
   . Fixed type for index in ZipArchive::replaceFile. (Martin Rehberger)
 
