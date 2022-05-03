@@ -3660,12 +3660,11 @@ ZEND_METHOD(ReflectionMethod, hasPrototype)
     reflection_object *intern;
     zend_function *mptr;
 
-    GET_REFLECTION_OBJECT_PTR(mptr);
-
     if (zend_parse_parameters_none() == FAILURE) {
         RETURN_THROWS();
     }
 
+    GET_REFLECTION_OBJECT_PTR(mptr);
     RETURN_BOOL(mptr->common.prototype != NULL);
 }
 /* }}} */
