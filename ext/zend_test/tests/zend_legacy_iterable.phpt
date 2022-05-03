@@ -1,10 +1,5 @@
 --TEST--
 Test that legacy IS_ITERABLE arg info type generates a notice
---SKIPIF--
-<?php
-if (true) {
-    die('skip only if testing startup warnings contaminate all test');
-}
 --EXTENSIONS--
 zend_test
 --FILE--
@@ -22,11 +17,6 @@ var_dump(zend_iterable_legacy(gen(), gen()));
 ?>
 ==DONE==
 --EXPECT--
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
-
-Warning: iterable type is now a compile time alias for array|Traversable, regenerate the argument info via the php-src gen_stub build script in Unknown on line 0
 array(0) {
 }
 array(0) {
