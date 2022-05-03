@@ -3654,6 +3654,22 @@ ZEND_METHOD(ReflectionMethod, getDeclaringClass)
 }
 /* }}} */
 
+/* {{{ Returns whether a method has a prototype or not */
+ZEND_METHOD(ReflectionMethod, hasPrototype)
+{
+    reflection_object *intern;
+    zend_function *mptr;
+
+    GET_REFLECTION_OBJECT_PTR(mptr);
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        RETURN_THROWS();
+    }
+
+    RETURN_BOOL(mptr->common.prototype != NULL);
+}
+/* }}} */
+
 /* {{{ Get the prototype */
 ZEND_METHOD(ReflectionMethod, getPrototype)
 {

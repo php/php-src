@@ -205,6 +205,9 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function getPrototype(): ReflectionMethod {}
 
     /** @tentative-return-type */
+    public function hasPrototype(): bool {}
+
+    /** @tentative-return-type */
     public function setAccessible(bool $accessible): void {}
 }
 
