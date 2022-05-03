@@ -203,8 +203,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     /** @tentative-return-type */
     public function getPrototype(): ReflectionMethod {}
-
-    /** @tentative-return-type */
+    
     public function hasPrototype(): bool {}
 
     /** @tentative-return-type */
