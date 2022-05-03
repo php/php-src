@@ -6395,6 +6395,7 @@ ZEND_METHOD(ReflectionReference, getId)
 
 ZEND_METHOD(ReflectionAttribute, __construct)
 {
+	_DO_THROW("Cannot directly instantiate ReflectionAttribute");
 }
 
 ZEND_METHOD(ReflectionAttribute, __clone)
