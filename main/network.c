@@ -920,6 +920,20 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			}
 		}
 #endif
+#ifdef __linux__
+		if (socktype == SOCK_DGRAM) {
+			int val = 1;
+			switch (sa->sa_family)
+			{
+				case AF_INET:
+					setsockopt(sock, SOL_IP, IP_RECVERR, &val, sizeof (val));
+					break;
+				case AF_INET6:
+					setsockopt(sock, SOL_IPV6, IPV6_RECVERR, &val, sizeof (val));
+					break;
+			}
+		}
+#endif
 		n = php_network_connect_socket(sock, sa, socklen, asynchronous,
 				timeout ? &working_timeout : NULL,
 				error_string, error_code);
