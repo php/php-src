@@ -1,7 +1,5 @@
 --TEST--
 public ReflectionMethod ReflectionMethod::hasPrototype ( void );
---CREDITS--
-ollieread - <code@ollie.codes>
 --FILE--
 <?php
 class Hello {
