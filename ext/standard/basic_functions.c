@@ -1971,8 +1971,8 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-/* {{{ Get a byte size from the ini byte size shorthand */
-PHP_FUNCTION(ini_bytes)
+/* {{{ Get interpreted size from the ini shorthand syntax */
+PHP_FUNCTION(ini_parse_quantity)
 {
 	char *shorthand;
 	size_t shorthand_len;
