@@ -249,7 +249,7 @@ function main(): void
     if (getenv('TEST_PHP_LOG_FORMAT')) {
         $log_format = strtoupper(getenv('TEST_PHP_LOG_FORMAT'));
     } else {
-        $log_format = 'LEODS';
+        $log_format = IS_WINDOWS ? 'LEOD' : 'LEODS';
     }
 
     // Check whether a detailed log is wanted.
