@@ -5,6 +5,7 @@ memory_limit=-1
 --SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip gd extension not available');
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstream fix not yet released');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
