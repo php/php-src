@@ -3394,9 +3394,12 @@ function toolset_setup_common_ldlags()
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
 	if (VS_TOOLSET) {
-		if (VCVERS >= 1900) {
-			if (PHP_SECURITY_FLAGS == "yes") {
+        if (PHP_SECURITY_FLAGS == "yes") {
+            if (VCVERS >= 1900) {
 				ADD_FLAG('LDFLAGS', "/GUARD:CF");
+			}
+			if (VCVERS >= 1920) {
+				ADD_FLAG('LDFLAGS', "/CETCOMPAT");
 			}
 		}
 	}
