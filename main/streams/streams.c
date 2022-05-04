@@ -30,6 +30,9 @@
 #include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include <stddef.h>
 #include <fcntl.h>
+#ifdef HAVE_COPYFILE_H
+#include <copyfile.h>
+#endif
 #include "php_streams_int.h"
 
 /* {{{ resource and registration code */
@@ -1575,7 +1578,7 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0);
 		php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0);
 
-		/* clamp to INT_MAX to avoid EOVERFLOW */
+		/* clamp to SSIZE_MAX to avoid EOVERFLOW */
 		const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
 
 		/* copy_file_range() is a Linux-specific system call
@@ -1637,6 +1640,23 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		}
 	}
 #endif // __FreeBSD__
+#elif defined(HAVE_FCOPYFILE)
+	if (php_stream_is(src, PHP_STREAM_IS_STDIO) &&
+	    php_stream_is(dest, PHP_STREAM_IS_STDIO) &&
+	    src->writepos == src->readpos &&
+	    dest->mode[0] == 'w' &&
+	    php_stream_can_cast(src, PHP_STREAM_AS_FD) == SUCCESS &&
+	    php_stream_can_cast(dest, PHP_STREAM_AS_FD) == SUCCESS) {
+		int src_fd, dest_fd;
+
+		php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0);
+		php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0);
+
+		if (fcopyfile(src_fd, dest_fd, 0, COPYFILE_DATA) == 0) {
+			*len = maxlen;
+			return SUCCESS;
+		}
+	}
 #endif // HAVE_COPY_FILE_RANGE
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
