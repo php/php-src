@@ -488,7 +488,7 @@ function ini_alter(string $option, string|int|float|bool|null $value): string|fa
 
 function ini_restore(string $option): void {}
 
-function ini_bytes(string $option): int {}
+function ini_bytes(string $shorthand): int {}
 
 /** @refcount 1 */
 function set_include_path(string $include_path): string|false {}
