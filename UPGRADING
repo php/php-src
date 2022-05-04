@@ -140,6 +140,7 @@ PHP 8.2 UPGRADE NOTES
 
 - Reflection:
   . ReflectionFunction::isAnonymous()
+  . ReflectionMethod::hasPrototype()
 
 - Sodium:
   . sodium_crypto_stream_xchacha20_xor_ic()

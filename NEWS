@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
+  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)

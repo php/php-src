@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f06163b02a76ee7fa526e4662f015201e243743d */
+ * Stub hash: c9656b23db965e890e73d0064005b981ee1991cf */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -168,6 +168,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionMethod_getPrototype, 0, 0, ReflectionMethod, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionMethod_hasPrototype arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionMethod_setAccessible, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, accessible, _IS_BOOL, 0)
@@ -659,6 +661,7 @@ ZEND_METHOD(ReflectionMethod, invoke);
 ZEND_METHOD(ReflectionMethod, invokeArgs);
 ZEND_METHOD(ReflectionMethod, getDeclaringClass);
 ZEND_METHOD(ReflectionMethod, getPrototype);
+ZEND_METHOD(ReflectionMethod, hasPrototype);
 ZEND_METHOD(ReflectionMethod, setAccessible);
 ZEND_METHOD(ReflectionClass, __construct);
 ZEND_METHOD(ReflectionClass, __toString);
@@ -918,6 +921,7 @@ static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, invokeArgs, arginfo_class_ReflectionMethod_invokeArgs, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, getDeclaringClass, arginfo_class_ReflectionMethod_getDeclaringClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, getPrototype, arginfo_class_ReflectionMethod_getPrototype, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionMethod, hasPrototype, arginfo_class_ReflectionMethod_hasPrototype, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionMethod, setAccessible, arginfo_class_ReflectionMethod_setAccessible, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
