@@ -1,7 +1,9 @@
 --TEST--
 Bug #81430 (Attribute instantiation leaves dangling execute_data pointer)
---EXTENSIONS--
-zend_test
+--SKIPIF--
+<?php
+if (!extension_loaded("zend-test")) die("skip zend_test extension not available");
+?>
 --INI--
 memory_limit=20M
 zend_test.observer.enabled=1
