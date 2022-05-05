@@ -107,7 +107,7 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
 
   . The "${var}" and "${expr}" style string interpolations are deprecated and
-    will be removed in PHP 9. Use "$var"/"{$var}" or "${expr}", respectively.
+    will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
     RFC: https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation
 
 - Mbstring:
