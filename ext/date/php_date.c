@@ -2459,8 +2459,10 @@ PHP_METHOD(DateTime, createFromImmutable)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeimmutable_object, date_ce_immutable)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	old_obj = Z_PHPDATE_P(datetimeimmutable_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeImmutable);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2478,8 +2480,10 @@ PHP_METHOD(DateTime, createFromInterface)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeInterface);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2497,8 +2501,10 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 		Z_PARAM_OBJECT_OF_CLASS(datetime_object, date_ce_date)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	old_obj = Z_PHPDATE_P(datetime_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTime);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2516,8 +2522,10 @@ PHP_METHOD(DateTimeImmutable, createFromInterface)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeInterface);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
