@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
     Buckley)
 
+- Reflection:
+  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
+
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 

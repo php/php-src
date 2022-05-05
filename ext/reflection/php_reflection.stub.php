@@ -117,6 +117,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     public function __toString(): string {}
 
+    public function isAnonymous(): bool {}
+
     /**
      * @tentative-return-type
      * @deprecated ReflectionFunction can no longer be constructed for disabled functions
