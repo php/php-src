@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed Haiku ZTS builds. (David Carlier)
 
+- Date:
+  . Fixed bug GH-8471 (Segmentation fault when converting immutable and mutable
+    DateTime instances created using reflection). (Derick)
+
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
 
