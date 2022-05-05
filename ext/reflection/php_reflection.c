@@ -1790,6 +1790,19 @@ ZEND_METHOD(ReflectionFunctionAbstract, isUserDefined)
 }
 /* }}} */
 
+/* {{{ Returns whether this function is an anonymous closure or not */
+ZEND_METHOD(ReflectionFunction, isAnonymous)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) == ZEND_ACC_CLOSURE);
+}
+/* }}} */
+
 /* {{{ Returns whether this function has been disabled or not */
 ZEND_METHOD(ReflectionFunction, isDisabled)
 {
