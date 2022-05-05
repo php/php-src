@@ -717,14 +717,21 @@ static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit
 	return NULL;
 }
 
-static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)
+static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline, const zend_function *func)
 {
-	if (opline->opcode == ZEND_INIT_FCALL
-	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
-	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+	if (opline->opcode == ZEND_INIT_FCALL) {
+		return 0;
+	}
+
+	if (!(func->common.fn_flags & ZEND_ACC_PRELOADED)) {
+		return 1;
+	}
+
+	if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 		return 0;
 	} else if (opline->opcode == ZEND_INIT_METHOD_CALL
-     || opline->opcode == ZEND_INIT_DYNAMIC_CALL) {
+	 || opline->opcode == ZEND_INIT_DYNAMIC_CALL
+	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 		return 1;
 	} else if (opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
 		return (opline->op1_type != IS_CONST || opline->op2_type != IS_CONST);

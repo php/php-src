@@ -9388,11 +9388,59 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	mov r0, EX->func
 		}
 	} else {
-		|	// if (CACHED_PTR(opline->result.num))
+		|	// CACHED_PTR(opline->result.num)
 		|	mov r2, EX->run_time_cache
 		|	mov r0, aword [r2 + opline->result.num]
-		|	test r0, r0
-		|	jz >1
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+		  && func
+		  && opline->opcode != ZEND_INIT_FCALL
+		  && (!(func->common.fn_flags & ZEND_ACC_PRELOADED) || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME)) {
+
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			if (!exit_addr) {
+				return 0;
+			}
+
+			if (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
+				const zend_op *opcodes = func->op_array.opcodes;
+
+				|	test r0, r0
+				|	jz >1
+				|   .if X64
+				||		if (!IS_SIGNED_32BIT(opcodes)) {
+				|			mov64 r1, ((ptrdiff_t)opcodes)
+				|			cmp aword [r0 + offsetof(zend_op_array, opcodes)], r1
+				||		} else {
+				|			cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
+				||		}
+				|	.else
+				|		cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
+				|	.endif
+				|	jne &exit_addr
+			} else {
+				|	.if X64
+				||		if (!IS_SIGNED_32BIT(func)) {
+				|			mov64 r1, ((ptrdiff_t)func)
+				|			cmp r0, r1
+				||		} else {
+				|			cmp r0, func
+				||		}
+				|	.else
+				|		cmp r0, func
+				|	.endif
+				|	jne >2
+				|
+				|	.cold_code
+				|	2:
+				|		test r0, r0
+				|		jnz &exit_addr
+			}
+		} else {
+			|   test r0, r0
+			|	jz >1
+		}
 		|.cold_code
 		|1:
 		if (opline->opcode == ZEND_INIT_FCALL

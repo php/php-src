@@ -6081,10 +6081,8 @@ generic_dynamic_call:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
-						if ((opline->opcode != ZEND_INIT_STATIC_METHOD_CALL
-						  || opline->op1_type != IS_CONST
-						  || opline->op2_type != IS_CONST)
-						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
+						  && zend_jit_may_be_polymorphic_call(opline, (p+1)->func)) {
 							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
@@ -6094,8 +6092,8 @@ generic_dynamic_call:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
-						if (opline->op2_type != IS_CONST
-						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
+						  && zend_jit_may_be_polymorphic_call(opline, (p+1)->func)) {
 							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
 								goto jit_failure;
 							}
@@ -6105,8 +6103,8 @@ generic_dynamic_call:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
-						if (opline->op1_type != IS_CONST
-						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func) {
+						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL && (p+1)->func
+						  && zend_jit_may_be_polymorphic_call(opline, (p+1)->func)) {
 							SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_OBJECT, 1);
 							if (!zend_jit_init_fcall_guard(&dasm_state, 0, (p+1)->func, opline+1)) {
 								goto jit_failure;
@@ -6672,8 +6670,7 @@ done:
 							call_info = call_info->next_callee;
 						}
 						if (!skip_guard
-						 && !zend_jit_may_be_polymorphic_call(init_opline)) {
-							// TODO: recompilation may change target ???
+						 && !zend_jit_may_be_polymorphic_call(init_opline, p->func)) {
 							skip_guard = 1;
 						}
 					}
