@@ -1016,9 +1016,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 void zend_register_standard_ini_entries(void) /* {{{ */
 {
-	int module_number = 0;
-
-	REGISTER_INI_ENTRIES();
+	zend_register_ini_entries_ex(ini_entries, 0, MODULE_PERSISTENT);
 }
 /* }}} */
 
