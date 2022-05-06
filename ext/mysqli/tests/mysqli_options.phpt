@@ -68,7 +68,7 @@ require_once('skipifconnectfailure.inc');
         $k = $charset['Charset'];
         /* The server currently 17.07.2007 can't handle data sent in ucs2 */
         /* The server currently 16.08.2010 can't handle data sent in utf16 and utf32 */
-        /* As of MySQL 8.0.28, utf8mb3 is deprecated, although still reported by `SHOW CHARACTER SET` */
+        /* As of MySQL 8.0.28, `SHOW CHARACTER SET` contains utf8mb3, but that is not yet supported by mysqlnd */
         if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32' || $charset['Charset'] == 'utf8mb3') {
             continue;
         }

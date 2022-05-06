@@ -85,7 +85,7 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
         printf("[016] Cannot get list of character sets\n");
 
     while ($tmp = mysqli_fetch_assoc($res)) {
-        /* As of MySQL 8.0.28, utf8mb3 is deprecated, although still reported by `SHOW CHARACTER SET` */
+        /* As of MySQL 8.0.28, `SHOW CHARACTER SET` contains utf8mb3, but that is not yet supported by mysqlnd */
         if ('ucs2' == $tmp['Charset'] || 'utf16' == $tmp['Charset'] || 'utf32' == $tmp['Charset'] || 'utf16le' == $tmp['Charset'] || 'utf8mb3' == $tmp['Charset'])
             continue;
 
