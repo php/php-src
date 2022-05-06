@@ -2016,7 +2016,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 {
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
-	int retval = SUCCESS, module_number=0;	/* for REGISTER_INI_ENTRIES() */
+	int retval = SUCCESS, module_number=0;
 	char *php_os;
 	zend_module_entry *module;
 
@@ -2194,7 +2194,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
-	REGISTER_INI_ENTRIES();
+	zend_register_ini_entries_ex(ini_entries, module_number, MODULE_PERSISTENT);
 
 	/* Register Zend ini entries */
 	zend_register_standard_ini_entries();
@@ -2278,7 +2278,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
-	
+
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
 
@@ -2389,7 +2389,7 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 /* {{{ php_module_shutdown */
 void php_module_shutdown(void)
 {
-	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
+	int module_number=0;
 
 	module_shutdown = 1;
 
@@ -2420,7 +2420,7 @@ void php_module_shutdown(void)
 	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number);
 
-	UNREGISTER_INI_ENTRIES();
+	zend_unregister_ini_entries_ex(module_number, MODULE_PERSISTENT);
 
 	/* close down the ini config */
 	php_shutdown_config();
