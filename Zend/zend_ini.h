@@ -150,8 +150,8 @@ END_EXTERN_C()
 #define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
 #define INI_ORIG_BOOL(name) ((bool) INI_ORIG_INT(name))
 
-#define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
-#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
+#define REGISTER_INI_ENTRIES() zend_register_ini_entries_ex(ini_entries, module_number, type)
+#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries_ex(module_number, type)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
 #define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)
