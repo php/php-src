@@ -41,6 +41,7 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
+static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns2_foo_class;
 static zend_class_entry *zend_test_ns2_ns_foo_class;
@@ -552,6 +553,20 @@ static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override)
 	RETURN_LONG(4);
 }
 
+static ZEND_METHOD(ZendTestForbidDynamicCall, call)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_forbid_dynamic_call();
+}
+
+static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_forbid_dynamic_call();
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -642,6 +657,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 		ZVAL_PSTRING(&attr->args[0].value, "value4");
 	}
+
+	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
 
 	zend_test_ns_foo_class = register_class_ZendTestNS_Foo();
 	zend_test_ns2_foo_class = register_class_ZendTestNS2_Foo();

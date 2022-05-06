@@ -60,6 +60,11 @@ namespace {
         public function override(string $parameter): int {}
     }
 
+    final class ZendTestForbidDynamicCall {
+        public function call(): void {}
+        public static function callStatic(): void {}
+    }
+
     enum ZendTestUnitEnum {
         case Foo;
         case Bar;
