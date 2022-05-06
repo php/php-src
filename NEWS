@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
 
+- Standard:
+  . Fixed bug GH-8185 (Crash during unloading of extension after dl() in ZTS).
+    (Arnaud)
+
 - Zip:
   . Fixed type for index in ZipArchive::replaceFile. (Martin Rehberger)
 
@@ -56,6 +60,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug GH-8267 (MySQLi uses unsupported format specifier on Windows).
     (cmb)
+
+- OPcache:
+  . Fixed bug GH-8063 (OPcache breaks autoloading after E_COMPILE_ERROR).
+    (Arnaud)
 
 - SPL:
   . Fixed bug GH-8366 (ArrayIterator may leak when calling __construct()).
