@@ -120,6 +120,8 @@ nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set
 
 set EXIT_CODE=%errorlevel%
 
+taskkill /f /im snmpd.exe
+
 appveyor PushArtifact %TEST_PHP_JUNIT%
 
 if %EXIT_CODE% GEQ 1 (
