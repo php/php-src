@@ -54,6 +54,9 @@ function tidy_get_body(tidy $tidy): ?tidyNode {}
 
 class tidy
 {
+    public ?string $errorBuffer = null;
+    public ?string $value = null;
+
     public function __construct(?string $filename = null, array|string|null $config = null, ?string $encoding = null, bool $useIncludePath = false) {}
 
     /**
