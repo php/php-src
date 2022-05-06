@@ -1,6 +1,7 @@
 --TEST--
 Check for exif_read_data, Unicode WinXP tags
 --EXTENSIONS--
+mbstring
 exif
 --SKIPIF--
 <?php
