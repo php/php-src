@@ -122,13 +122,6 @@
 		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
 	}
 
-#define ADD_PROPERTY_NULL(_table, _key) \
-	{ \
-		zval tmp; \
-		ZVAL_NULL(&tmp); \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
 #define ADD_PROPERTY_BOOL(_table, _key, _bool) \
 	{ \
 		zval tmp; \
@@ -585,35 +578,38 @@ static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
 
 static void tidy_doc_update_properties(PHPTidyObj *obj)
 {
-
 	TidyBuffer output;
-	zval temp;
 
 	tidyBufInit(&output);
 	tidySaveBuffer (obj->ptdoc->doc, &output);
 
 	if (output.size) {
-		if (!obj->std.properties) {
-			rebuild_object_properties(&obj->std);
-		}
-		ZVAL_STRINGL(&temp, (char*)output.bp, output.size-1);
-		zend_hash_str_update(obj->std.properties, "value", sizeof("value") - 1, &temp);
+		zend_update_property_stringl(
+			tidy_ce_doc,
+			&obj->std,
+			"value",
+			sizeof("value") - 1,
+			(char*)output.bp,
+			output.size-1
+		);
 	}
 
 	tidyBufFree(&output);
 
 	if (obj->ptdoc->errbuf->size) {
-		if (!obj->std.properties) {
-			rebuild_object_properties(&obj->std);
-		}
-		ZVAL_STRINGL(&temp, (char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1);
-		zend_hash_str_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer") - 1, &temp);
+		zend_update_property_stringl(
+			tidy_ce_doc,
+			&obj->std,
+			"errorBuffer",
+			sizeof("errorBuffer") - 1,
+			(char*)obj->ptdoc->errbuf->bp,
+			obj->ptdoc->errbuf->size-1
+		);
 	}
 }
 
 static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
 {
-
 	TidyBuffer buf;
 	TidyAttr	tempattr;
 	TidyNode	tempnode;
@@ -689,14 +685,6 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
 
 			zend_hash_str_update(obj->std.properties, "child", sizeof("child") - 1, &children);
 
-			break;
-
-		case is_doc:
-			if (!obj->std.properties) {
-				rebuild_object_properties(&obj->std);
-			}
-			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
-			ADD_PROPERTY_NULL(obj->std.properties, value);
 			break;
 	}
 }

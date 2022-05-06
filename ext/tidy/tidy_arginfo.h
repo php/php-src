@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4e5f6c0e7c6b8a6939a13276e3e68d2614a73d7e */
+ * Stub hash: 7ec9389d5540e60e5bffeeca866168f0a6d6835c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -302,6 +302,18 @@ static zend_class_entry *register_class_tidy(void)
 
 	INIT_CLASS_ENTRY(ce, "tidy", class_tidy_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_errorBuffer_default_value;
+	ZVAL_NULL(&property_errorBuffer_default_value);
+	zend_string *property_errorBuffer_name = zend_string_init("errorBuffer", sizeof("errorBuffer") - 1, 1);
+	zend_declare_typed_property(class_entry, property_errorBuffer_name, &property_errorBuffer_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_errorBuffer_name);
+
+	zval property_value_default_value;
+	ZVAL_NULL(&property_value_default_value);
+	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
+	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_value_name);
 
 	return class_entry;
 }
