@@ -166,6 +166,16 @@ class tidy
 
 final class tidyNode
 {
+    public readonly string $value;
+    public readonly string $name;
+    public readonly int $type;
+    public readonly int $line;
+    public readonly int $column;
+    public readonly bool $proprietary;
+    public readonly ?int $id;
+    public readonly ?array $attribute;
+    public readonly ?array $child;
+
     private function __construct() {}
 
     public function hasChildren(): bool {}
