@@ -62,6 +62,7 @@ static inline int has_crc32_insn() {
 # if defined(__GNUC__) && !defined(__clang__)
 #  pragma GCC push_options
 #  pragma GCC target ("+nothing+crc")
+#  pragma GCC optimize("no-reorder-blocks-and-partition")
 # endif
 static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	while (nr >= sizeof(uint64_t)) {
