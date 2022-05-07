@@ -364,7 +364,7 @@ class LogTool
         }
 
         $line = rtrim($line);
-        $pattern = sprintf('/^%s %s: %s$/', self::P_TIME, $type, $expectedMessage);
+        $pattern = sprintf('/^(%s )?%s: %s$/', self::P_TIME, $type, $expectedMessage);
 
         if (preg_match($pattern, $line, $matches) === 0) {
             return $this->error(
