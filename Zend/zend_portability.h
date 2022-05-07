@@ -350,13 +350,25 @@ char *alloca();
 # define ALLOCA_FLAG(name) \
 	bool name;
 # define SET_ALLOCA_FLAG(name) \
-	name = 1
+	name = true
 # define do_alloca_ex(size, limit, use_heap) \
 	((use_heap = (UNEXPECTED((size) > (limit)))) ? emalloc(size) : alloca(size))
 # define do_alloca(size, use_heap) \
 	do_alloca_ex(size, ZEND_ALLOCA_MAX_SIZE, use_heap)
 # define free_alloca(p, use_heap) \
 	do { if (UNEXPECTED(use_heap)) efree(p); } while (0)
+#elif defined(PHP_WIN32)
+# define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
+# define ALLOCA_FLAG(name) \
+	bool name;
+# define SET_ALLOCA_FLAG(name) \
+	name = true
+# define do_alloca_ex(size, limit, use_heap) \
+	((use_heap = (UNEXPECTED((size) > (limit)))) ? emalloc(size) : _malloca(size))
+# define do_alloca(size, use_heap) \
+	do_alloca_ex(size, ZEND_ALLOCA_MAX_SIZE, use_heap)
+# define free_alloca(p, use_heap) \
+	do { if (UNEXPECTED(use_heap)) { efree(p); } else {  _freea(p); } } while (0)
 #else
 # define ALLOCA_FLAG(name)
 # define SET_ALLOCA_FLAG(name)

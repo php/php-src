@@ -9,7 +9,6 @@
 #include <limits.h>
 #ifdef PHP_WIN32
 # define __alignof__ __alignof
-# define alloca _alloca
 #else
 # ifndef HAVE_ALIGNOF
 #  include <stddef.h>
@@ -404,16 +403,19 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 
 	salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
 	key_len = strlen(key);
+	ALLOCA_FLAG(use_heap);
+	char *tmp_key = NULL;
+	char *tmp_salt = NULL;
 
 	if ((key - (char *) 0) % __alignof__ (uint64_t) != 0) {
-		char *tmp = (char *) alloca (key_len + __alignof__ (uint64_t));
+		tmp_key = (char *) do_alloca(key_len + __alignof__ (uint64_t), use_heap);
 		key = copied_key =
-		memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), key, key_len);
+		memcpy(tmp_key + __alignof__(uint64_t) - (tmp_key - (char *) 0) % __alignof__(uint64_t), key, key_len);
 	}
 
 	if ((salt - (char *) 0) % __alignof__ (uint64_t) != 0) {
-		char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint64_t));
-		salt = copied_salt = memcpy(tmp + __alignof__(uint64_t) - (tmp - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
+		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint64_t), use_heap);
+		salt = copied_salt = memcpy(tmp_salt + __alignof__(uint64_t) - (tmp_salt - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
 	}
 
@@ -477,7 +479,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	sha512_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence P.  */
-	cp = p_bytes = alloca(key_len);
+	cp = p_bytes = do_alloca(key_len, use_heap);
 	for (cnt = key_len; cnt >= 64; cnt -= 64) {
 		cp = __php_mempcpy((void *) cp, (const void *)temp_result, 64);
 	}
@@ -496,7 +498,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	sha512_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence S.  */
-	cp = s_bytes = alloca(salt_len);
+	cp = s_bytes = do_alloca(salt_len, use_heap);
 	for (cnt = salt_len; cnt >= 64; cnt -= 64) {
 		cp = __php_mempcpy(cp, temp_result, 64);
 	}
@@ -618,6 +620,14 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	if (copied_salt != NULL) {
 		ZEND_SECURE_ZERO(copied_salt, salt_len);
 	}
+	if (tmp_key != NULL) {
+		free_alloca(tmp_key, use_heap);
+	}
+	if (tmp_salt != NULL) {
+		free_alloca(tmp_salt, use_heap);
+	}
+	free_alloca(p_bytes, use_heap);
+	free_alloca(s_bytes, use_heap);
 
 	return buffer;
 }
