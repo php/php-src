@@ -369,17 +369,18 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
 	salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
 	key_len = strlen(key);
-	ALLOCA_FLAG(use_heap);
 	char *tmp_key = NULL;
+	ALLOCA_FLAG(use_heap_key);
 	char *tmp_salt = NULL;
+	ALLOCA_FLAG(use_heap_salt);
 
 	if ((key - (char *) 0) % __alignof__ (uint32_t) != 0) {
-		tmp_key = (char *) do_alloca(key_len + __alignof__(uint32_t), use_heap);
+		tmp_key = (char *) do_alloca(key_len + __alignof__(uint32_t), use_heap_key);
 		key = copied_key = memcpy(tmp_key + __alignof__(uint32_t) - (tmp_key - (char *) 0) % __alignof__(uint32_t), key, key_len);
 	}
 
 	if ((salt - (char *) 0) % __alignof__(uint32_t) != 0) {
-		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint32_t), use_heap);
+		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint32_t), use_heap_salt);
 		salt = copied_salt =
 		memcpy(tmp_salt + __alignof__(uint32_t) - (tmp_salt - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
@@ -445,7 +446,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence P.  */
-	cp = p_bytes = do_alloca(key_len, use_heap);
+	cp = p_bytes = do_alloca(key_len, use_heap_key);
 	for (cnt = key_len; cnt >= 32; cnt -= 32) {
 		cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
 	}
@@ -463,7 +464,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence S.  */
-	cp = s_bytes = do_alloca(salt_len, use_heap);
+	cp = s_bytes = do_alloca(salt_len, use_heap_salt);
 	for (cnt = salt_len; cnt >= 32; cnt -= 32) {
 		cp = __php_mempcpy(cp, temp_result, 32);
 	}
@@ -574,13 +575,13 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 		ZEND_SECURE_ZERO(copied_salt, salt_len);
 	}
 	if (tmp_key != NULL) {
-		free_alloca(tmp_key, use_heap);
+		free_alloca(tmp_key, use_heap_key);
 	}
 	if (tmp_salt != NULL) {
-		free_alloca(tmp_salt, use_heap);
+		free_alloca(tmp_salt, use_heap_salt);
 	}
-	free_alloca(p_bytes, use_heap);
-	free_alloca(s_bytes, use_heap);
+	free_alloca(p_bytes, use_heap_key);
+	free_alloca(s_bytes, use_heap_salt);
 
 	return buffer;
 }
