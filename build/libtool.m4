@@ -675,10 +675,13 @@ s390*-*linux*|sparc*-*linux*)
   SAVE_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -belf"
   AC_CACHE_CHECK([whether the C compiler needs -belf], lt_cv_cc_needs_belf,
-    [AC_LANG_SAVE
-     AC_LANG_C
-     AC_TRY_LINK([],[],[lt_cv_cc_needs_belf=yes],[lt_cv_cc_needs_belf=no])
-     AC_LANG_RESTORE])
+    [AC_LANG_PUSH([C])
+     AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM([[]], [[]])],
+        [lt_cv_cc_needs_belf=yes],
+        [lt_cv_cc_needs_belf=no]
+     )
+     AC_LANG_POP([C])])
   if test x"$lt_cv_cc_needs_belf" != x"yes"; then
     # this is probably gcc 2.8.0, egcs 1.0 or newer; no need for -belf
     CFLAGS="$SAVE_CFLAGS"
@@ -2738,8 +2741,7 @@ fi
 AC_DEFUN([AC_LIBTOOL_LANG_C_CONFIG], [_LT_AC_LANG_C_CONFIG])
 AC_DEFUN([_LT_AC_LANG_C_CONFIG],
 [lt_save_CC="$CC"
-AC_LANG_SAVE
-AC_LANG_C
+AC_LANG_PUSH([C])
 
 # Source file extension for C test sources.
 ac_ext=c
@@ -2807,7 +2809,7 @@ AC_MSG_RESULT([$enable_static])
 
 AC_LIBTOOL_CONFIG($1)
 
-AC_LANG_RESTORE
+AC_LANG_POP([C])
 CC="$lt_save_CC"
 ])# AC_LIBTOOL_LANG_C_CONFIG
 
@@ -2819,8 +2821,7 @@ CC="$lt_save_CC"
 # AC_LIBTOOL_CONFIG to write the compiler configuration to `libtool'.
 AC_DEFUN([AC_LIBTOOL_LANG_CXX_CONFIG], [_LT_AC_LANG_CXX_CONFIG(CXX)])
 AC_DEFUN([_LT_AC_LANG_CXX_CONFIG],
-[AC_LANG_SAVE
-AC_LANG_CPLUSPLUS
+[AC_LANG_PUSH([C++])
 AC_REQUIRE([AC_PROG_CXX])
 AC_REQUIRE([_LT_AC_PROG_CXXCPP])
 
@@ -3806,7 +3807,7 @@ AC_LIBTOOL_PROG_LD_HARDCODE_LIBPATH($1)
 
 AC_LIBTOOL_CONFIG($1)
 
-AC_LANG_RESTORE
+AC_LANG_POP([C++])
 CC=$lt_save_CC
 LDCXX=$LD
 LD=$lt_save_LD
