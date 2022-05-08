@@ -478,7 +478,7 @@ static uint32_t* handle_base64_end(unsigned char n, unsigned char **p, uint32_t 
 
 static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
-	ZEND_ASSERT(bufsize >= 4); /* This function will infinite-loop if called with a tiny output buffer */
+	ZEND_ASSERT(bufsize >= 5); /* This function will infinite-loop if called with a tiny output buffer */
 
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
@@ -489,7 +489,7 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 	while (p < e && out < limit) {
 		if (base64) {
 			/* Base64 section */
-			if ((limit - out) < 4) {
+			if ((limit - out) < 5) {
 				break;
 			}
 
@@ -631,16 +631,19 @@ static void mb_wchar_to_utf7(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 				MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
 				RESTORE_CONVERSION_STATE();
 			} else {
-				/* Encode codepoint, preceded by any cached bits, as Base64 */
+				/* Encode codepoint, preceded by any cached bits, as Base64
+				 * Make enough space in the output buffer to hold both any bytes that
+				 * we emit right here, plus any finishing byte which might need to
+				 * be emitted if the input string ends abruptly */
 				uint64_t bits;
 				if (w >= MBFL_WCSPLANE_SUPMIN) {
 					/* Must use surrogate pair */
-					MB_CONVERT_BUF_ENSURE(buf, out, limit, 6);
+					MB_CONVERT_BUF_ENSURE(buf, out, limit, 7);
 					w -= 0x10000;
 					bits = ((uint64_t)cache << 32) | 0xD800DC00L | ((w & 0xFFC00) << 6) | (w & 0x3FF);
 					nbits += 32;
 				} else {
-					MB_CONVERT_BUF_ENSURE(buf, out, limit, 3);
+					MB_CONVERT_BUF_ENSURE(buf, out, limit, 4);
 					bits = (cache << 16) | w;
 					nbits += 16;
 				}
