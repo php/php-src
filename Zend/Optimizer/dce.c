@@ -540,18 +540,13 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer
 	/* We have no dedicated phi vector, so we use the whole ssa var vector instead */
 	ctx.instr_worklist_len = zend_bitset_len(op_array->last);
 	ctx.instr_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
-	memset(ctx.instr_worklist, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
 	ctx.phi_worklist_len = zend_bitset_len(ssa->vars_count);
 	ctx.phi_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
-	memset(ctx.phi_worklist, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
 	ctx.phi_worklist_no_val = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
-	memset(ctx.phi_worklist_no_val, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Optimistically assume all instructions and phis to be dead */
 	ctx.instr_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
-	memset(ctx.instr_dead, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
 	ctx.phi_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
-	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
 	 * of the producing instructions, as it combines producing the result with control flow.
