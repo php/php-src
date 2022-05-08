@@ -360,6 +360,7 @@ zend_string* mb_fast_convert(zend_string *str, const mbfl_encoding *from, const 
 
 	while (in_len) {
 		size_t out_len = from->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
 		to->from_wchar(wchar_buf, out_len, &buf, !in_len);
 	}
 
