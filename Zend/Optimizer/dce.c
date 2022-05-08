@@ -523,34 +523,34 @@ static inline bool may_throw_dce_exception(const zend_op *opline) {
 	return opline->opcode == ZEND_ADD_ARRAY_ELEMENT && opline->op2_type == IS_UNUSED;
 }
 
-int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_dtor_effects) {
+int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer_ctx, zend_ssa *ssa, bool reorder_dtor_effects) {
 	int i;
 	zend_ssa_phi *phi;
 	int removed_ops = 0;
 
 	/* DCE of CV operations that changes arguments may affect vararg functions. */
 	bool has_varargs = (ssa->cfg.flags & ZEND_FUNC_VARARG) != 0;
-	ALLOCA_FLAG(use_heap);
 
 	context ctx;
 	ctx.ssa = ssa;
 	ctx.op_array = op_array;
 	ctx.reorder_dtor_effects = reorder_dtor_effects;
 
+	void *checkpoint = zend_arena_checkpoint(optimizer_ctx->arena);
 	/* We have no dedicated phi vector, so we use the whole ssa var vector instead */
 	ctx.instr_worklist_len = zend_bitset_len(op_array->last);
-	ctx.instr_worklist = do_alloca(sizeof(zend_ulong) * ctx.instr_worklist_len, use_heap);
+	ctx.instr_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
 	memset(ctx.instr_worklist, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
 	ctx.phi_worklist_len = zend_bitset_len(ssa->vars_count);
-	ctx.phi_worklist = do_alloca(sizeof(zend_ulong) * ctx.phi_worklist_len, use_heap);
+	ctx.phi_worklist = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
 	memset(ctx.phi_worklist, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
-	ctx.phi_worklist_no_val = do_alloca(sizeof(zend_ulong) * ctx.phi_worklist_len, use_heap);
+	ctx.phi_worklist_no_val = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
 	memset(ctx.phi_worklist_no_val, 0, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Optimistically assume all instructions and phis to be dead */
-	ctx.instr_dead = do_alloca(sizeof(zend_ulong) * ctx.instr_worklist_len, use_heap);
+	ctx.instr_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
 	memset(ctx.instr_dead, 0, sizeof(zend_ulong) * ctx.instr_worklist_len);
-	ctx.phi_dead = do_alloca(sizeof(zend_ulong) * ctx.phi_worklist_len, use_heap);
+	ctx.phi_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
 	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
@@ -665,11 +665,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, bool reorder_d
 		}
 	} FOREACH_PHI_END();
 
-	free_alloca(ctx.instr_worklist, use_heap);
-	free_alloca(ctx.phi_worklist, use_heap);
-	free_alloca(ctx.phi_worklist_no_val, use_heap);
-	free_alloca(ctx.instr_dead, use_heap);
-	free_alloca(ctx.phi_dead, use_heap);
+	zend_arena_release(&optimizer_ctx->arena, checkpoint);
 
 	return removed_ops;
 }
