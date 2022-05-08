@@ -446,7 +446,8 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence P.  */
-	cp = p_bytes = do_alloca(key_len, use_heap_key);
+	ALLOCA_FLAG(use_heap_p_bytes);
+	cp = p_bytes = do_alloca(key_len, use_heap_p_bytes);
 	for (cnt = key_len; cnt >= 32; cnt -= 32) {
 		cp = __php_mempcpy((void *)cp, (const void *)temp_result, 32);
 	}
@@ -464,7 +465,8 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	sha256_finish_ctx(&alt_ctx, temp_result);
 
 	/* Create byte sequence S.  */
-	cp = s_bytes = do_alloca(salt_len, use_heap_salt);
+	ALLOCA_FLAG(use_heap_s_bytes);
+	cp = s_bytes = do_alloca(salt_len, use_heap_s_bytes);
 	for (cnt = salt_len; cnt >= 32; cnt -= 32) {
 		cp = __php_mempcpy(cp, temp_result, 32);
 	}
@@ -580,8 +582,8 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	if (tmp_salt != NULL) {
 		free_alloca(tmp_salt, use_heap_salt);
 	}
-	free_alloca(p_bytes, use_heap_key);
-	free_alloca(s_bytes, use_heap_salt);
+	free_alloca(p_bytes, use_heap_p_bytes);
+	free_alloca(s_bytes, use_heap_s_bytes);
 
 	return buffer;
 }
