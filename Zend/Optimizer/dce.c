@@ -546,7 +546,8 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *optimizer
 
 	/* Optimistically assume all instructions and phis to be dead */
 	ctx.instr_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.instr_worklist_len, sizeof(zend_ulong));
-	ctx.phi_dead = zend_arena_calloc(&optimizer_ctx->arena, ctx.phi_worklist_len, sizeof(zend_ulong));
+	ctx.phi_dead = zend_arena_alloc(&optimizer_ctx->arena, ctx.phi_worklist_len * sizeof(zend_ulong));
+	memset(ctx.phi_dead, 0xff, sizeof(zend_ulong) * ctx.phi_worklist_len);
 
 	/* Mark non-CV phis as live. Even if the result is unused, we generally cannot remove one
 	 * of the producing instructions, as it combines producing the result with control flow.
