@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a0436c43deff3960c15c278644021a039c4946f */
+ * Stub hash: e498f52a68debccd85bf1c086d05563174130e62 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -236,6 +236,11 @@ static const zend_function_entry class_ZendTestStringEnum_methods[] = {
 };
 
 
+static const zend_function_entry class_ZendTestIntEnum_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS_Foo, method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -428,6 +433,25 @@ static zend_class_entry *register_class_ZendTestStringEnum(void)
 	zend_string *enum_case_FortyTwo_value_str = zend_string_init("42", sizeof("42") - 1, 1);
 	ZVAL_STR(&enum_case_FortyTwo_value, enum_case_FortyTwo_value_str);
 	zend_enum_add_case_cstr(class_entry, "FortyTwo", &enum_case_FortyTwo_value);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestIntEnum(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("ZendTestIntEnum", IS_LONG, class_ZendTestIntEnum_methods);
+
+	zval enum_case_Foo_value;
+	ZVAL_LONG(&enum_case_Foo_value, 1);
+	zend_enum_add_case_cstr(class_entry, "Foo", &enum_case_Foo_value);
+
+	zval enum_case_Bar_value;
+	ZVAL_LONG(&enum_case_Bar_value, 3);
+	zend_enum_add_case_cstr(class_entry, "Bar", &enum_case_Bar_value);
+
+	zval enum_case_Baz_value;
+	ZVAL_LONG(&enum_case_Baz_value, -1);
+	zend_enum_add_case_cstr(class_entry, "Baz", &enum_case_Baz_value);
 
 	return class_entry;
 }
