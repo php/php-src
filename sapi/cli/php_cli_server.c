@@ -241,23 +241,23 @@ static const char php_cli_server_css[] = "<style>\n" \
 /* }}} */
 
 #ifdef PHP_WIN32
-int php_cli_server_get_system_time(char *buf) {
+static bool php_cli_server_get_system_time(char *buf) {
 	struct _timeb system_time;
 	errno_t err;
 
 	if (buf == NULL) {
-		return -1;
+		return false;
 	}
 
 	_ftime(&system_time);
 	err = ctime_s(buf, 52, &(system_time.time) );
 	if (err) {
-		return -1;
+		return false;
 	}
-	return 0;
+	return true;
 }
 #else
-int php_cli_server_get_system_time(char *buf) {
+static bool php_cli_server_get_system_time(char *buf) {
 	struct timeval tv;
 	struct tm tm;
 
@@ -266,7 +266,7 @@ int php_cli_server_get_system_time(char *buf) {
 	/* TODO: should be checked for NULL tm/return value */
 	php_localtime_r(&tv.tv_sec, &tm);
 	php_asctime_r(&tm, buf);
-	return 0;
+	return true;
 }
 #endif
 
@@ -331,7 +331,7 @@ static const char *get_template_string(int code) /* {{{ */
 	return NULL;
 } /* }}} */
 
-static void append_http_status_line(smart_str *buffer, int protocol_version, int response_code, int persistent) /* {{{ */
+static void append_http_status_line(smart_str *buffer, int protocol_version, int response_code, bool persistent) /* {{{ */
 {
 	if (!response_code) {
 		response_code = 200;
@@ -348,7 +348,7 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 	smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 } /* }}} */
 
-static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, int persistent) /* {{{ */
+static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, bool persistent) /* {{{ */
 {
 	char *val;
 	struct timeval tv = {0};
@@ -709,7 +709,7 @@ static void sapi_cli_server_log_write(int type, const char *msg) /* {{{ */
 		return;
 	}
 
-	if (php_cli_server_get_system_time(buf) != 0) {
+	if (!php_cli_server_get_system_time(buf)) {
 		memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
 	} else {
 		size_t l = strlen(buf);
@@ -768,12 +768,11 @@ sapi_module_struct cli_server_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 }; /* }}} */
 
-static int php_cli_server_poller_ctor(php_cli_server_poller *poller) /* {{{ */
+static void php_cli_server_poller_ctor(php_cli_server_poller *poller) /* {{{ */
 {
 	FD_ZERO(&poller->rfds);
 	FD_ZERO(&poller->wfds);
 	poller->max_fd = -1;
-	return SUCCESS;
 } /* }}} */
 
 static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
@@ -817,9 +816,10 @@ static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct time
 	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, tv);
 } /* }}} */
 
-static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
+// TODO Return value is unused, refactor?
+static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
 {
-	int retval = SUCCESS;
+	zend_result retval = SUCCESS;
 #ifdef PHP_WIN32
 	struct socket_entry {
 		SOCKET fd;
@@ -1071,7 +1071,7 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	return 0;
 } /* }}} */
 
-static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
+static bool php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
 {
 #ifdef PHP_WIN32
 	int _nbytes_read;
@@ -1093,12 +1093,12 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 		}
 		php_cli_server_chunk_dtor(chunk);
 		pefree(chunk, 1);
-		return 1;
+		return false;
 	}
 	chunk->data.heap.len = _nbytes_read;
 	php_cli_server_buffer_append(&sender->buffer, chunk);
 	*nbytes_read = _nbytes_read;
-	return 0;
+	return true;
 } /* }}} */
 
 #if HAVE_UNISTD_H
@@ -1326,7 +1326,7 @@ out:
 	return retval;
 } /* }}} */
 
-static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
+static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 {
 	req->protocol_version = 0;
 	req->request_uri = NULL;
@@ -1345,7 +1345,6 @@ static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->content_len = 0;
 	req->ext = NULL;
 	req->ext_len = 0;
-	return SUCCESS;
 } /* }}} */
 
 static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
@@ -1559,6 +1558,7 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 	*retval_len = decoded_vpath_end - decoded_vpath;
 } /* }}} */
 
+// TODO Update these functions and php_http_parser.h
 /* {{{ php_cli_server_client_read_request */
 static int php_cli_server_client_read_request_on_message_begin(php_http_parser *parser)
 {
@@ -1759,6 +1759,11 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 	return 0;
 }
 
+/* Returns:
+ -1 when an error occurs
+  0 when the request has not been read (try again?)
+  1 when the request has been read
+*/
 static int php_cli_server_client_read_request(php_cli_server_client *client, char **errstr)
 {
 	char buf[16384];
@@ -1875,11 +1880,12 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	}
 } /* }}} */
 
+// TODO Remove?
 static void destroy_request_info(sapi_request_info *request_info) /* {{{ */
 {
 } /* }}} */
 
-static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, php_socket_t client_sock, struct sockaddr *addr, socklen_t addr_len) /* {{{ */
+static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, php_socket_t client_sock, struct sockaddr *addr, socklen_t addr_len) /* {{{ */
 {
 	client->server = server;
 	client->sock = client_sock;
@@ -1904,12 +1910,11 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	client->current_header_value_len = 0;
 
 	client->post_read_offset = 0;
-	if (FAILURE == php_cli_server_request_ctor(&client->request)) {
-		return FAILURE;
-	}
+
+	php_cli_server_request_ctor(&client->request);
+
 	client->content_sender_initialized = 0;
 	client->file_fd = -1;
-	return SUCCESS;
 } /* }}} */
 
 static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
@@ -1933,7 +1938,7 @@ static void php_cli_server_close_connection(php_cli_server *server, php_cli_serv
 	zend_hash_index_del(&server->clients, client->sock);
 } /* }}} */
 
-static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server_client *client, int status) /* {{{ */
+static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cli_server_client *client, int status) /* {{{ */
 {
 	zend_string *escaped_request_uri = NULL;
 	const char *status_string = get_status_string(status);
@@ -2028,27 +2033,26 @@ fail:
 	return FAILURE;
 } /* }}} */
 
-static int php_cli_server_dispatch_script(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static zend_result php_cli_server_dispatch_script(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	if (strlen(client->request.path_translated) != client->request.path_translated_len) {
 		/* can't handle paths that contain nul bytes */
 		return php_cli_server_send_error_page(server, client, 400);
 	}
-	{
-		zend_file_handle zfd;
-		zend_stream_init_filename(&zfd, SG(request_info).path_translated);
-		zfd.primary_script = 1;
-		zend_try {
-			php_execute_script(&zfd);
-		} zend_end_try();
-		zend_destroy_file_handle(&zfd);
-	}
+
+	zend_file_handle zfd;
+	zend_stream_init_filename(&zfd, SG(request_info).path_translated);
+	zfd.primary_script = 1;
+	zend_try {
+		php_execute_script(&zfd);
+	} zend_end_try();
+	zend_destroy_file_handle(&zfd);
 
 	php_cli_server_log_response(client, SG(sapi_headers).http_response_code, NULL);
 	return SUCCESS;
 } /* }}} */
 
-static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int fd;
 	int status = 200;
@@ -2120,7 +2124,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 }
 /* }}} */
 
-static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
+static zend_result php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
 	char *auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
 	if (NULL != (auth = zend_hash_str_find_ptr(&client->request.headers, "authorization", sizeof("authorization")-1))) {
@@ -2136,16 +2140,16 @@ static int php_cli_server_request_startup(php_cli_server *server, php_cli_server
 }
 /* }}} */
 
-static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
+static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
 	php_request_shutdown(0);
 	php_cli_server_close_connection(server, client);
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
 	SG(rfc1867_uploaded_files) = NULL;
-	return SUCCESS;
 }
 /* }}} */
 
+// TODO Use bool, return value is strange
 static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int decline = 0;
@@ -2184,7 +2188,8 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 }
 /* }}} */
 
-static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+// TODO Return FAILURE on error? Or voidify as return value of function not checked
+static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	int is_static_file  = 0;
 	const char *ext = client->request.ext;
@@ -2211,8 +2216,9 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 	}
 
 	if (!is_static_file) {
+		// TODO What?
 		if (SUCCESS == php_cli_server_dispatch_script(server, client)
-				|| SUCCESS != php_cli_server_send_error_page(server, client, 500)) {
+				|| FAILURE == php_cli_server_send_error_page(server, client, 500)) {
 			if (SG(sapi_headers).http_response_code == 304) {
 				SG(sapi_headers).send_default_content_type = 0;
 			}
@@ -2232,7 +2238,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 			SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
 		}
-		if (SUCCESS != php_cli_server_begin_send_static(server, client)) {
+		if (FAILURE == php_cli_server_begin_send_static(server, client)) {
 			php_cli_server_close_connection(server, client);
 		}
 		SG(server_context) = NULL;
@@ -2245,7 +2251,7 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 }
 /* }}} */
 
-static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
+static void php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_server_ext_mime_type_pair *mime_type_map) /* {{{ */
 {
 	const php_cli_server_ext_mime_type_pair *pair;
 
@@ -2255,8 +2261,6 @@ static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_s
 		size_t ext_len = strlen(pair->ext);
 		zend_hash_str_add_ptr(&server->extension_mime_types, pair->ext, ext_len, (void*)pair->mime_type);
 	}
-
-	return SUCCESS;
 } /* }}} */
 
 static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
@@ -2398,12 +2402,12 @@ static void php_cli_server_startup_workers(void) {
 			 php_cli_server_worker++) {
 			pid_t pid = fork();
 
-			if (pid == FAILURE) {
+			if (pid < 0) {
 				/* no more forks allowed, work with what we have ... */
 				php_cli_server_workers_max =
 					php_cli_server_worker + 1;
 				return;
-			} else if (pid == SUCCESS) {
+			} else if (pid == 0) {
 				return;
 			} else {
 				php_cli_server_workers[php_cli_server_worker] = pid;
@@ -2417,14 +2421,13 @@ static void php_cli_server_startup_workers(void) {
 #endif
 }
 
-static int php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
+static zend_result php_cli_server_ctor(php_cli_server *server, const char *addr, const char *document_root, const char *router) /* {{{ */
 {
-	int retval = SUCCESS;
+	zend_result retval = SUCCESS;
 	char *host = NULL;
 	zend_string *errstr = NULL;
 	char *_document_root = NULL;
 	char *_router = NULL;
-	int err = 0;
 	int port = 3000;
 	php_socket_t server_sock = SOCK_ERR;
 
@@ -2448,10 +2451,7 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 
 	php_cli_server_startup_workers();
 
-	err = php_cli_server_poller_ctor(&server->poller);
-	if (SUCCESS != err) {
-		goto out;
-	}
+	php_cli_server_poller_ctor(&server->poller);
 
 	php_cli_server_poller_add(&server->poller, POLLIN, server_sock);
 
@@ -2485,14 +2485,11 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 		server->router_len = 0;
 	}
 
-	if (php_cli_server_mime_type_ctor(server, mime_type_map) == FAILURE) {
-		retval = FAILURE;
-		goto out;
-	}
+	php_cli_server_mime_type_ctor(server, mime_type_map);
 
 	server->is_running = 1;
 out:
-	if (retval != SUCCESS) {
+	if (retval == FAILURE) {
 		if (host) {
 			pefree(host, 1);
 		}
@@ -2509,40 +2506,43 @@ out:
 	return retval;
 } /* }}} */
 
-static int php_cli_server_recv_event_read_request(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static zend_result php_cli_server_recv_event_read_request(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	char *errstr = NULL;
-	int status = php_cli_server_client_read_request(client, &errstr);
-	if (status < 0) {
-		if (errstr) {
-			if (strcmp(errstr, php_cli_server_request_error_unexpected_eof) == 0 && client->parser.state == s_start_req) {
-				php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE,
-					"%s Closed without sending a request; it was probably just an unused speculative preconnection", client->addr_str);
-			} else {
-				php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "%s Invalid request (%s)", client->addr_str, errstr);
-			}
-			efree(errstr);
-		}
-		php_cli_server_close_connection(server, client);
-		return FAILURE;
-	} else if (status == 1 && client->request.request_method == PHP_HTTP_NOT_IMPLEMENTED) {
-		return php_cli_server_send_error_page(server, client, 501);
-	} else if (status == 1) {
-		php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
-		php_cli_server_dispatch(server, client);
-	} else {
-		php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
-	}
 
-	return SUCCESS;
+	switch (php_cli_server_client_read_request(client, &errstr)) {
+		case -1:
+			if (errstr) {
+				if (strcmp(errstr, php_cli_server_request_error_unexpected_eof) == 0 && client->parser.state == s_start_req) {
+					php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE,
+						"%s Closed without sending a request; it was probably just an unused speculative preconnection", client->addr_str);
+				} else {
+					php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "%s Invalid request (%s)", client->addr_str, errstr);
+				}
+				efree(errstr);
+			}
+			php_cli_server_close_connection(server, client);
+			return FAILURE;
+		case 1:
+			if (client->request.request_method == PHP_HTTP_NOT_IMPLEMENTED) {
+				return php_cli_server_send_error_page(server, client, 501);
+			}
+			php_cli_server_poller_remove(&server->poller, POLLIN, client->sock);
+			php_cli_server_dispatch(server, client);
+			return SUCCESS;
+		case 0:
+			php_cli_server_poller_add(&server->poller, POLLIN, client->sock);
+			return SUCCESS;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
 } /* }}} */
 
-static int php_cli_server_send_event(php_cli_server *server, php_cli_server_client *client) /* {{{ */
+static zend_result php_cli_server_send_event(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
 	if (client->content_sender_initialized) {
 		if (client->file_fd >= 0 && !client->content_sender.buffer.first) {
 			size_t nbytes_read;
-			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read)) {
+			if (!php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read)) {
 				php_cli_server_close_connection(server, client);
 				return FAILURE;
 			}
@@ -2551,14 +2551,14 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 				client->file_fd = -1;
 			}
 		}
-		{
-			size_t nbytes_sent;
-			int err = php_cli_server_content_sender_send(&client->content_sender, client->sock, &nbytes_sent);
-			if (err && err != SOCK_EAGAIN) {
-				php_cli_server_close_connection(server, client);
-				return FAILURE;
-			}
+
+		size_t nbytes_sent;
+		int err = php_cli_server_content_sender_send(&client->content_sender, client->sock, &nbytes_sent);
+		if (err && err != SOCK_EAGAIN) {
+			php_cli_server_close_connection(server, client);
+			return FAILURE;
 		}
+
 		if (!client->content_sender.buffer.first && client->file_fd < 0) {
 			php_cli_server_close_connection(server, client);
 		}
@@ -2569,11 +2569,12 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 
 typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	php_cli_server *server;
-	int(*rhandler)(php_cli_server*, php_cli_server_client*);
-	int(*whandler)(php_cli_server*, php_cli_server_client*);
+	zend_result(*rhandler)(php_cli_server*, php_cli_server_client*);
+	zend_result(*whandler)(php_cli_server*, php_cli_server_client*);
 } php_cli_server_do_event_for_each_fd_callback_params;
 
-static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
+// TODO return FAILURE on failure???
+static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
 	php_cli_server *server = params->server;
@@ -2599,12 +2600,8 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 			return SUCCESS;
 		}
 		client = pemalloc(sizeof(php_cli_server_client), 1);
-		if (FAILURE == php_cli_server_client_ctor(client, server, client_sock, sa, socklen)) {
-			php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "Failed to create a new request object");
-			pefree(sa, 1);
-			closesocket(client_sock);
-			return SUCCESS;
-		}
+
+		php_cli_server_client_ctor(client, server, client_sock, sa, socklen);
 
 		php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Accepted", client->addr_str);
 
@@ -2625,7 +2622,9 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 	return SUCCESS;
 } /* }}} */
 
-static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rhandler)(php_cli_server*, php_cli_server_client*), int(*whandler)(php_cli_server*, php_cli_server_client*)) /* {{{ */
+static void php_cli_server_do_event_for_each_fd(php_cli_server *server,
+	zend_result(*rhandler)(php_cli_server*, php_cli_server_client*),
+	zend_result(*whandler)(php_cli_server*, php_cli_server_client*)) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params params = {
 		server,
@@ -2636,9 +2635,10 @@ static void php_cli_server_do_event_for_each_fd(php_cli_server *server, int(*rha
 	php_cli_server_poller_iter_on_active(&server->poller, &params, php_cli_server_do_event_for_each_fd_callback);
 } /* }}} */
 
-static int php_cli_server_do_event_loop(php_cli_server *server) /* {{{ */
+// TODO Return value of function is not used
+static zend_result php_cli_server_do_event_loop(php_cli_server *server) /* {{{ */
 {
-	int retval = SUCCESS;
+	zend_result retval = SUCCESS;
 	while (server->is_running) {
 		struct timeval tv = { 1, 0 };
 		int n = php_cli_server_poller_poll(&server->poller, &tv);
@@ -2673,6 +2673,7 @@ static void php_cli_server_sigint_handler(int sig) /* {{{ */
 }
 /* }}} */
 
+/* Returns status code */
 int do_cli_server(int argc, char **argv) /* {{{ */
 {
 	char *php_optarg = NULL;
