@@ -234,7 +234,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
-static inline int sapi_cli_select(php_socket_t fd)
+static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
 	struct timeval tv;
@@ -572,7 +572,7 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
 /* {{{ cli_seek_file_begin */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
+static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
@@ -609,9 +609,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
-	int interactive=0;
+	bool interactive = false;
 	const char *param_error=NULL;
-	int hide_argv = 0;
+	bool hide_argv = false;
 	int num_repeats = 1;
 	pid_t pid = getpid();
 
@@ -698,7 +698,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						break;
 					}
 
-					interactive=1;
+					interactive = true;
 				}
 				break;
 
@@ -818,7 +818,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				zend_load_extension(php_optarg);
 				break;
 			case 'H':
-				hide_argv = 1;
+				hide_argv = true;
 				break;
 			case 10:
 				behavior=PHP_MODE_REFLECTION_FUNCTION;
@@ -894,7 +894,7 @@ do_repeat:
 		}
 		if (script_file) {
 			virtual_cwd_activate();
-			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+			if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 				goto err;
 			} else {
 				char real_path[MAXPATHLEN];
@@ -1022,7 +1022,7 @@ do_repeat:
 						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
 					} else {
 						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+							if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 								EG(exit_status) = 1;
 							} else {
 								CG(skip_shebang) = 1;
