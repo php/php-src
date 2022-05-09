@@ -168,8 +168,7 @@ typedef struct php_cli_server_client {
 	php_http_parser parser;
 	unsigned int request_read:1;
 	zend_string *current_header_name;
-	char *current_header_value;
-	size_t current_header_value_len;
+	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
 	size_t post_read_offset;
 	php_cli_server_request request;
@@ -347,19 +346,19 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 
 static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, bool persistent) /* {{{ */
 {
-	char *val;
+	zend_string *val;
 	struct timeval tv = {0};
 
 	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
-		smart_str_appends_ex(buffer, val, persistent);
+		smart_str_append_ex(buffer, val, persistent);
 		smart_str_appends_ex(buffer, "\r\n", persistent);
 	}
 
 	if (!gettimeofday(&tv, NULL)) {
 		zend_string *dt = php_format_date("D, d M Y H:i:s", sizeof("D, d M Y H:i:s") - 1, tv.tv_sec, 0);
 		smart_str_appends_ex(buffer, "Date: ", persistent);
-		smart_str_appends_ex(buffer, dt->val, persistent);
+		smart_str_append_ex(buffer, dt, persistent);
 		smart_str_appends_ex(buffer, " GMT\r\n", persistent);
 		zend_string_release_ex(dt, 0);
 	}
@@ -383,7 +382,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	php_cli_server_client *client;
 	HashTable *headers;
 	zend_string *key;
-	char *value;
+	zend_string *value;
 	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -396,7 +395,8 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	array_init_size(return_value, zend_hash_num_elements(headers));
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, value) {
-		ZVAL_STRING(&tmp, value);
+		// TODO There must be a better way
+		ZVAL_STRING(&tmp, ZSTR_VAL(value));
 		zend_symtable_update(Z_ARRVAL_P(return_value), key, &tmp);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -571,11 +571,11 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 static char *sapi_cli_server_read_cookies(void) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
-	char *val;
+	zend_string *val;
 	if (NULL == (val = zend_hash_str_find_ptr(&client->request.headers, "cookie", sizeof("cookie")-1))) {
 		return NULL;
 	}
-	return val;
+	return ZSTR_VAL(val);
 } /* }}} */
 
 static size_t sapi_cli_server_read_post(char *buf, size_t count_bytes) /* {{{ */
@@ -605,7 +605,7 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	}
 } /* }}} */
 
-static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ {
+static int sapi_cli_server_register_entry_cb(zend_string **entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ {
 	zval *track_vars_array = va_arg(args, zval *);
 	if (hash_key->key) {
 		char *real_key, *key;
@@ -620,9 +620,10 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
 		if (strcmp(key, "CONTENT_TYPE") == 0 || strcmp(key, "CONTENT_LENGTH") == 0) {
-			sapi_cli_server_register_variable(track_vars_array, key, *entry);
+			// TODO make a version specialized for zend_string?
+			sapi_cli_server_register_variable(track_vars_array, key, ZSTR_VAL(*entry));
 		}
-		sapi_cli_server_register_variable(track_vars_array, real_key, *entry);
+		sapi_cli_server_register_variable(track_vars_array, real_key, ZSTR_VAL(*entry));
 		efree(key);
 		efree(real_key);
 	}
@@ -1629,7 +1630,6 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 
 	client->current_header_name = NULL;
 	client->current_header_value = NULL;
-	client->current_header_value_len = 0;
 }
 
 static int php_cli_server_client_read_request_on_header_field(php_http_parser *parser, const char *at, size_t length)
@@ -1637,12 +1637,15 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 	php_cli_server_client *client = parser->data;
 	switch (client->last_header_element) {
 		case HEADER_VALUE:
+			/* Save previous header before creating new one */
 			php_cli_server_client_save_header(client);
 			ZEND_FALLTHROUGH;
 		case HEADER_NONE:
+			/* Create new header field */
 			client->current_header_name = zend_string_init(at, length, /* persistent */ false);
 			break;
 		case HEADER_FIELD: {
+			/* Append header field */
 			zend_string *field = zend_string_concat2(
 				ZSTR_VAL(client->current_header_name), ZSTR_LEN(client->current_header_name), at, length);
 			// Free previous
@@ -1659,23 +1662,24 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 {
 	php_cli_server_client *client = parser->data;
 	switch (client->last_header_element) {
-	case HEADER_FIELD:
-		client->current_header_value = pestrndup(at, length, 1);
-		client->current_header_value_len = length;
-		break;
-	case HEADER_VALUE:
-		{
-			size_t new_length = client->current_header_value_len + length;
-			client->current_header_value = perealloc(client->current_header_value, new_length + 1, 1);
-			memcpy(client->current_header_value + client->current_header_value_len, at, length);
-			client->current_header_value[new_length] = '\0';
-			client->current_header_value_len = new_length;
+		case HEADER_FIELD:
+			/* Previous element was the header field, create the header value */
+			client->current_header_value = zend_string_init(at, length, /* persistent */ true);
+			break;
+		case HEADER_VALUE: {
+			/* Previous element was part of header value, append content to it */
+			size_t old_length = ZSTR_LEN(client->current_header_value);
+			// TODO Release old value?
+			client->current_header_value = zend_string_extend(client->current_header_value, old_length + length, /* persistent */ true);
+			memcpy(ZSTR_VAL(client->current_header_value) + old_length, at, length);
+			// Null terminate
+			ZSTR_VAL(client->current_header_value)[ZSTR_LEN(client->current_header_value)] = '\0';
+			break;
 		}
-		break;
-	case HEADER_NONE:
-		// can't happen
-		assert(0);
-		break;
+		case HEADER_NONE:
+			/* Cannot happen as a header field must have been found before */
+			assert(0);
+			break;
 	}
 	client->last_header_element = HEADER_VALUE;
 	return 0;
@@ -1688,11 +1692,11 @@ static int php_cli_server_client_read_request_on_headers_complete(php_http_parse
 	case HEADER_NONE:
 		break;
 	case HEADER_FIELD:
-		client->current_header_value = pemalloc(1, 1);
-		*client->current_header_value = '\0';
-		client->current_header_value_len = 0;
+		/* Previous element was the header field, set it's value to an empty string */
+		client->current_header_value = ZSTR_EMPTY_ALLOC();
 		ZEND_FALLTHROUGH;
 	case HEADER_VALUE:
+		/* Save last header value */
 		php_cli_server_client_save_header(client);
 		break;
 	}
@@ -1838,7 +1842,7 @@ static size_t php_cli_server_client_send_through(php_cli_server_client *client, 
 
 static void php_cli_server_client_populate_request_info(const php_cli_server_client *client, sapi_request_info *request_info) /* {{{ */
 {
-	char *val;
+	zend_string *val;
 
 	request_info->request_method = php_http_method_str(client->request.request_method);
 	request_info->proto_num = client->request.protocol_version;
@@ -1848,7 +1852,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "content-type", sizeof("content-type")-1))) {
-		request_info->content_type = val;
+		request_info->content_type = ZSTR_VAL(val);
 	}
 } /* }}} */
 
@@ -1876,7 +1880,6 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
 	client->current_header_value = NULL;
-	client->current_header_value_len = 0;
 
 	client->post_read_offset = 0;
 
@@ -2095,10 +2098,10 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 /* }}} */
 
 static zend_result php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client) { /* {{{ */
-	char *auth;
+	zend_string *auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
 	if (NULL != (auth = zend_hash_str_find_ptr(&client->request.headers, "authorization", sizeof("authorization")-1))) {
-		php_handle_auth_data(auth);
+		php_handle_auth_data(ZSTR_VAL(auth));
 	}
 	SG(sapi_headers).http_response_code = 200;
 	if (FAILURE == php_request_startup()) {
