@@ -164,8 +164,7 @@ typedef struct php_cli_server_client {
 	php_socket_t sock;
 	struct sockaddr *addr;
 	socklen_t addr_len;
-	char *addr_str;
-	size_t addr_str_len;
+	zend_string *addr_str;
 	php_http_parser parser;
 	unsigned int request_read:1;
 	char *current_header_name;
@@ -640,9 +639,9 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 	sapi_cli_server_register_variable(track_vars_array, "DOCUMENT_ROOT", client->server->document_root);
 	{
 		char *tmp;
-		if ((tmp = strrchr(client->addr_str, ':'))) {
+		if ((tmp = strrchr(ZSTR_VAL(client->addr_str), ':'))) {
 			char addr[64], port[8];
-			const char *addr_start = client->addr_str, *addr_end = tmp;
+			const char *addr_start = ZSTR_VAL(client->addr_str), *addr_end = tmp;
 			if (addr_start[0] == '[') addr_start++;
 			if (addr_end[-1] == ']') addr_end--;
 
@@ -653,7 +652,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", addr);
 			sapi_cli_server_register_variable(track_vars_array, "REMOTE_PORT", port);
 		} else {
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", client->addr_str);
+			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", ZSTR_VAL(client->addr_str));
 		}
 	}
 	{
@@ -1152,7 +1151,8 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 #endif
 
 	/* basic */
-	spprintf(&basic_buf, 0, "%s [%d]: %s %s", client->addr_str, status, php_http_method_str(client->request.request_method), client->request.request_uri);
+	spprintf(&basic_buf, 0, "%s [%d]: %s %s", ZSTR_VAL(client->addr_str), status,
+		php_http_method_str(client->request.request_method), client->request.request_uri);
 	if (!basic_buf) {
 		return;
 	}
@@ -1891,14 +1891,13 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	client->sock = client_sock;
 	client->addr = addr;
 	client->addr_len = addr_len;
-	{
-		zend_string *addr_str = 0;
 
-		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, NULL, 0);
-		client->addr_str = pestrndup(ZSTR_VAL(addr_str), ZSTR_LEN(addr_str), 1);
-		client->addr_str_len = ZSTR_LEN(addr_str);
-		zend_string_release_ex(addr_str, 0);
-	}
+	// TODO Prevent realloc?
+	zend_string *tmp_addr = NULL;
+	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
+	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	zend_string_release_ex(tmp_addr, /* persistent */ false);
+
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = 0;
 
@@ -1925,7 +1924,7 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 		client->file_fd = -1;
 	}
 	pefree(client->addr, 1);
-	pefree(client->addr_str, 1);
+	zend_string_release_ex(client->addr_str, /* persistent */ true);
 	if (client->content_sender_initialized) {
 		php_cli_server_content_sender_dtor(&client->content_sender);
 	}
@@ -1933,7 +1932,7 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 
 static void php_cli_server_close_connection(php_cli_server *server, php_cli_server_client *client) /* {{{ */
 {
-	php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Closing", client->addr_str);
+	php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Closing", ZSTR_VAL(client->addr_str));
 
 	zend_hash_index_del(&server->clients, client->sock);
 } /* }}} */
@@ -2515,9 +2514,9 @@ static zend_result php_cli_server_recv_event_read_request(php_cli_server *server
 			if (errstr) {
 				if (strcmp(errstr, php_cli_server_request_error_unexpected_eof) == 0 && client->parser.state == s_start_req) {
 					php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE,
-						"%s Closed without sending a request; it was probably just an unused speculative preconnection", client->addr_str);
+						"%s Closed without sending a request; it was probably just an unused speculative preconnection", ZSTR_VAL(client->addr_str));
 				} else {
-					php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "%s Invalid request (%s)", client->addr_str, errstr);
+					php_cli_server_logf(PHP_CLI_SERVER_LOG_ERROR, "%s Invalid request (%s)", ZSTR_VAL(client->addr_str), errstr);
 				}
 				efree(errstr);
 			}
@@ -2605,7 +2604,7 @@ static zend_result php_cli_server_do_event_for_each_fd_callback(void *_params, p
 
 		php_cli_server_client_ctor(client, server, client_sock, sa, socklen);
 
-		php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Accepted", client->addr_str);
+		php_cli_server_logf(PHP_CLI_SERVER_LOG_MESSAGE, "%s Accepted", ZSTR_VAL(client->addr_str));
 
 		zend_hash_index_update_ptr(&server->clients, client_sock, client);
 
