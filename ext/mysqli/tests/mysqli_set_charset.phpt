@@ -86,7 +86,8 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
         printf("[016] Cannot get list of character sets\n");
 
     while ($tmp = mysqli_fetch_assoc($res)) {
-        if ('ucs2' == $tmp['Charset'] || 'utf16' == $tmp['Charset'] || 'utf32' == $tmp['Charset'] || 'utf16le' == $tmp['Charset'])
+        /* As of MySQL 8.0.28, `SHOW CHARACTER SET` contains utf8mb3, but that is not yet supported by mysqlnd */
+        if ('ucs2' == $tmp['Charset'] || 'utf16' == $tmp['Charset'] || 'utf32' == $tmp['Charset'] || 'utf16le' == $tmp['Charset'] || 'utf8mb3' == $tmp['Charset'])
             continue;
 
         /* Uncomment to see where it hangs - var_dump($tmp); flush(); */
