@@ -556,6 +556,25 @@ class Client
     }
 
     /**
+     * Append response data.
+     *
+     * @param $resp Response
+     * @param $type Either err or our
+     *
+     * @throws \Exception
+     */
+    private function fcgi_stream_append($resp, $type) {
+        if (isset($this->_requests[$resp['requestId']][$type . '_finished'])) {
+            throw new \Exception('FCGI_STD' . strtoupper($type) . ' stream already finished by empty record');
+        }
+        if ($resp['content'] === '') {
+            $this->_requests[$resp['requestId']][$type . '_finished'] = true;
+        } else {
+            $this->_requests[$resp['requestId']][$type . '_response'] .= $resp['content'];
+        }
+    }
+
+    /**
      * Blocking call that waits for response data of the specific request
      *
      * @param int $requestId
@@ -593,13 +612,12 @@ class Client
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
                     $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_ERR;
-                    $this->_requests[$resp['requestId']]['err_response'] .= $resp['content'];
+                    $this->fcgi_stream_append($resp, 'err');
                 } else {
-                    $this->_requests[$resp['requestId']]['out_response'] .= $resp['content'];
+                    $this->fcgi_stream_append($resp, 'out');
                 }
                 $this->_requests[$resp['requestId']]['response'] .= $resp['content'];
-            }
-            if ($resp['type'] == self::END_REQUEST) {
+            } elseif ($resp['type'] == self::END_REQUEST) {
                 $this->_requests[$resp['requestId']]['state'] = self::REQ_STATE_OK;
                 if ($resp['requestId'] == $requestId) {
                     break;
