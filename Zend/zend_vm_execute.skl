@@ -144,12 +144,3 @@ ZEND_API int zend_vm_kind(void)
 {
 	return ZEND_VM_KIND;
 }
-
-ZEND_API bool zend_gcc_global_regs(void)
-{
-#if defined(HAVE_GCC_GLOBAL_REGS)
-        return 1;
-#else
-        return 0;
-#endif
-}
