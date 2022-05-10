@@ -230,6 +230,7 @@ php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
 			stream->orig_path = estrdup(path);
+			stream->wrapper = (php_stream_wrapper *) &php_stream_zip_wrapper;
 		}
 	}
 
