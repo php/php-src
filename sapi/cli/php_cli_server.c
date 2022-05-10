@@ -1622,10 +1622,12 @@ static int php_cli_server_client_read_request_on_fragment(php_http_parser *parse
 static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* strip off the colon */
-	// TODO Need to duplicate original header and make persistent?
+	zend_string *perm_header_name = zend_string_dup(client->current_header_name, /* persistent */ true);
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
-	zend_hash_add_ptr(&client->request.headers_original_case, client->current_header_name, client->current_header_value);
+	zend_hash_add_ptr(&client->request.headers_original_case, perm_header_name, client->current_header_value);
+
+	zend_string_release_ex(client->current_header_name, /* persistent */ false);
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 
 	client->current_header_name = NULL;
