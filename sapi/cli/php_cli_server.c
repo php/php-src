@@ -817,7 +817,7 @@ static int php_cli_server_poller_poll(php_cli_server_poller *poller, struct time
 } /* }}} */
 
 // TODO Return value is unused, refactor?
-static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
+static zend_result php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, zend_result(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
 {
 	zend_result retval = SUCCESS;
 #ifdef PHP_WIN32
