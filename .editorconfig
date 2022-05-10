@@ -30,5 +30,17 @@ indent_size              = 4
 indent_style             = space
 max_line_length          = 80
 
+[*.{css,js}] # CSS and JS files
+indent_size              = 4
+indent_style             = space
+max_line_length          = 80
+
+[*.{py,pyw}] # Python files
+indent_size              = 4
+indent_style             = space
+max_line_length          = 80
+
+
+
 [*.patch]
 trim_trailing_whitespace = false
