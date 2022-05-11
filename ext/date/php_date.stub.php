@@ -683,6 +683,13 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
+    public readonly ?DateTimeInterface $start;
+    public ?DateTimeInterface $current;
+    public readonly ?DateTimeInterface $end;
+    public readonly ?DateInterval $interval;
+    public readonly int $recurrences;
+    public readonly bool $include_start_date;
+
     /**
      * @var int
      * @cname PHP_DATE_PERIOD_EXCLUDE_START_DATE
