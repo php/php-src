@@ -3251,10 +3251,11 @@ static zend_always_inline int _zend_update_type_info(
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 				}
-				if (opline->opcode == ZEND_FETCH_DIM_RW
+				if ((key_type & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING))
+						&& (opline->opcode == ZEND_FETCH_DIM_RW
 						|| opline->opcode == ZEND_FETCH_DIM_W
 						|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
-						|| opline->opcode == ZEND_FETCH_LIST_W) {
+						|| opline->opcode == ZEND_FETCH_LIST_W)) {
 					j = ssa_vars[ssa_op->result_def].use_chain;
 					if (j < 0) {
 						/* no uses */
