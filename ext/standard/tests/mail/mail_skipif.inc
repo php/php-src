@@ -1,5 +1,4 @@
 <?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
 
 if( substr(PHP_OS, 0, 3) == 'WIN' && extension_loaded('sockets')) {
     // be sure mail server is accessible... on PHP 5.3.13 release build, using test-pack PHP-5.3-r1af8b3f,
@@ -12,8 +11,8 @@ if( substr(PHP_OS, 0, 3) == 'WIN' && extension_loaded('sockets')) {
 }
 
 // Change these to make tests run successfully
-$mailbox  = '{localhost}';
-$username = 'webmaster@example.com';
+$mailbox  = '{127.0.0.1:143}';
+$username = 'webmaster@something.com';
 $password = 'p4ssw0rd';
 $options = OP_HALFOPEN; // this should be enough to verify server present
 $retries = 0; // don't retry connect on failure
