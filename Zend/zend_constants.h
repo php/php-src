@@ -26,6 +26,7 @@
 #define CONST_PERSISTENT		(1<<0)				/* Persistent */
 #define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
 #define CONST_DEPRECATED		(1<<2)				/* Deprecated */
+#define CONST_OWNED				(1<<3)				/* constant should be destroyed together with class */
 
 #define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
 
