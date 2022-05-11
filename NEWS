@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Curl:
   . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
 
+- Date:
+  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
+    non-relative items are present). (Derick)
+
 - FPM:
   . Emit error for invalid port setting. (David Carlier)
   . Added extra check for FPM proc dumpable on SELinux based systems.

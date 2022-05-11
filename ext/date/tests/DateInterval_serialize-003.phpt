@@ -4,9 +4,7 @@ Test DateInterval::__serialize and DateInterval::__unserialize
 <?php
 date_default_timezone_set("Europe/London");
 
-// the 15:30 gets ignored, as it's not a "relative" interval.
-// See: https://github.com/php/php-src/issues/8458
-$d = DateInterval::createFromDateString('next weekday 15:30');
+$d = DateInterval::createFromDateString('next weekday');
 echo "Original object:\n";
 var_dump($d);
 
@@ -26,7 +24,7 @@ $d = new DateInterval('P2Y4DT6H8M');
 $d->__unserialize(
 	[
 		'from_string' => true,
-		'date_string' => 'next weekday 15:30',
+		'date_string' => 'next weekday',
 	]
 );
 var_dump($d);
@@ -42,12 +40,12 @@ object(DateInterval)#1 (%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
-  string(18) "next weekday 15:30"
+  string(%d) "next weekday"
 }
 
 
 Serialised object:
-string(92) "O:12:"DateInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:18:"next weekday 15:30";}"
+string(%d) "O:12:"DateInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:%d:"next weekday";}"
 
 
 Unserialised object:
@@ -55,7 +53,7 @@ object(DateInterval)#2 (2) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
-  string(18) "next weekday 15:30"
+  string(%d) "next weekday"
 }
 
 
@@ -64,7 +62,7 @@ array(2) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
-  string(18) "next weekday 15:30"
+  string(%d) "next weekday"
 }
 
 
@@ -73,7 +71,7 @@ object(DateInterval)#3 (2) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
-  string(18) "next weekday 15:30"
+  string(%d) "next weekday"
 }
 
 
