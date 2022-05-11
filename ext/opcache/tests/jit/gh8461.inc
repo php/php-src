@@ -9,7 +9,7 @@ class UniqueList
 
     private $foo;
 
-    public function __construt($b)
+    public function __construct($b)
     {
         global $x;
         $x++;

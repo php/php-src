@@ -9,7 +9,7 @@ class UniqueList
 
     private $foo;
 
-    public function __construt($b)
+    public function __construct($b)
     {
         global $x;
         $x++;
@@ -28,7 +28,7 @@ class UniqueListLast extends UniqueList
 {
     public function __construct()
     {
-        parent::__construt(self::B);
+        parent::__construct(self::B);
     }
 
     public static function bar() {

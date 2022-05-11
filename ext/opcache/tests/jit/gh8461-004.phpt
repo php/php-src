@@ -31,7 +31,7 @@ if (!isset(opcache_get_status()['scripts'][__DIR__ . '/gh8461-004.inc'])) {
 
         private $foo;
 
-        public function __construt($b)
+        public function __construct($b)
         {
             global $y;
             $y++;
@@ -45,7 +45,7 @@ class UniqueListLast extends UniqueList
 {
     public function __construct()
     {
-        parent::__construt(self::B);
+        parent::__construct(self::B);
     }
 }
 
