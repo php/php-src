@@ -166,13 +166,13 @@ typedef struct php_cli_server_client {
 	socklen_t addr_len;
 	zend_string *addr_str;
 	php_http_parser parser;
-	unsigned int request_read:1;
+	bool request_read;
 	zend_string *current_header_name;
 	zend_string *current_header_value;
 	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
 	size_t post_read_offset;
 	php_cli_server_request request;
-	unsigned int content_sender_initialized:1;
+	bool content_sender_initialized;
 	php_cli_server_content_sender content_sender;
 	int file_fd;
 } php_cli_server_client;
@@ -1738,7 +1738,7 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 			}
 		}
 	}
-	client->request_read = 1;
+	client->request_read = true;
 	return 0;
 }
 
@@ -1877,7 +1877,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
-	client->request_read = 0;
+	client->request_read = false;
 
 	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
@@ -1887,7 +1887,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 
 	php_cli_server_request_ctor(&client->request);
 
-	client->content_sender_initialized = 0;
+	client->content_sender_initialized = false;
 	client->file_fd = -1;
 } /* }}} */
 
@@ -1926,7 +1926,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 	assert(status_string && content_template);
 
 	php_cli_server_content_sender_ctor(&client->content_sender);
-	client->content_sender_initialized = 1;
+	client->content_sender_initialized = true;
 
 	escaped_request_uri = php_escape_html_entities_ex((const unsigned char *) client->request.request_uri, client->request.request_uri_len, 0, ENT_QUOTES, NULL, /* double_encode */ 0, /* quiet */ 0);
 
@@ -2062,7 +2062,7 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 	}
 
 	php_cli_server_content_sender_ctor(&client->content_sender);
-	client->content_sender_initialized = 1;
+	client->content_sender_initialized = true;
 	client->file_fd = fd;
 
 	{
