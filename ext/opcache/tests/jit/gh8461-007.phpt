@@ -2,6 +2,10 @@
 Bug GH-8461 007 (JIT does not account for function re-compile)
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === "Windows") die("skip Windows does not support preloading");
+?>
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
