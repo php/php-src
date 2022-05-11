@@ -26,6 +26,7 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 #include "zend_sort.h"
+#include "zend_constants.h"
 
 #include "zend_vm.h"
 
@@ -255,7 +256,7 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 			zend_class_constant *c;
 
 			ZEND_HASH_FOREACH_PTR(constants_table, c) {
-				if (c->ce == ce) {
+				if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 					zval_ptr_dtor_nogc(&c->value);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -387,7 +388,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					if (c->ce == ce) {
+					if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 0);
