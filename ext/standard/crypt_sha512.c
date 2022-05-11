@@ -408,6 +408,9 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	char *tmp_salt = NULL;
 	ALLOCA_FLAG(use_heap_salt);
 
+	SET_ALLOCA_FLAG(use_heap_key);
+	SET_ALLOCA_FLAG(use_heap_salt);
+
 	if ((key - (char *) 0) % __alignof__ (uint64_t) != 0) {
 		tmp_key = (char *) do_alloca(key_len + __alignof__ (uint64_t), use_heap_key);
 		key = copied_key =
