@@ -3409,7 +3409,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
-static void accel_deactivate_now()
+static void accel_deactivate_now(void)
 {
 	/* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
 #ifdef ZEND_WIN32
