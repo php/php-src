@@ -266,9 +266,11 @@ static bool php_cli_server_get_system_time(char *buf) {
 }
 #endif
 
+/* Destructor for php_cli_server_request->headers, this frees header value */
 static void char_ptr_dtor_p(zval *zv) /* {{{ */
 {
-	pefree(Z_PTR_P(zv), 1);
+	// TODO free have zend_string* not as a pointer
+	zend_string_release_ex(Z_PTR_P(zv), /* persistent */ true);
 } /* }}} */
 
 static char *get_last_error(void) /* {{{ */
@@ -1339,6 +1341,7 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, char_ptr_dtor_p, 1);
+	/* No destructor is registered as the value pointed by is the same as for &req->headers */
 	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
 	req->content = NULL;
 	req->content_len = 0;
