@@ -2,7 +2,7 @@
 // Change these to make tests run successfully
 $server   = '{127.0.0.1:143}';
 $default_mailbox = $server . "INBOX";
-$domain = "something.com";
+$domain = "example.com";
 $admin_user = "webmaster"; // a user with admin access
 $username = "$admin_user@$domain";
 $password = 'p4ssw0rd';

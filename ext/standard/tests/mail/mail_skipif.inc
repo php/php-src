@@ -12,7 +12,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN' && extension_loaded('sockets')) {
 
 // Change these to make tests run successfully
 $mailbox  = '{127.0.0.1:143}';
-$username = 'webmaster@something.com';
+$username = 'webmaster@example.com';
 $password = 'p4ssw0rd';
 $options = OP_HALFOPEN; // this should be enough to verify server present
 $retries = 0; // don't retry connect on failure
