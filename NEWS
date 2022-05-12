@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - Soap:
   . Fixed bug GH-8578 (Error on wrong parameter on SoapHeader constructor).
     (robertnisipeanu)
+  . Fixed bug GH-8538 (SoapClient may strip parts of nmtokens). (cmb)
 
 - SPL:
   . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
