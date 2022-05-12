@@ -225,10 +225,14 @@ class DateTime implements DateTimeInterface
     /** @tentative-return-type */
     public static function __set_state(array $array): DateTime {}
 
-    /** @tentative-return-type */
-    public static function createFromImmutable(DateTimeImmutable $object): DateTime {}
+    /**
+     * @tentative-return-type
+     * @return static
+     */
+    public static function createFromImmutable(DateTimeImmutable $object): DateTime {} // TODO return type should be static
 
-    public static function createFromInterface(DateTimeInterface $object): DateTime {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTime {} // TODO return type should be static
 
     /**
      * @tentative-return-type
@@ -403,10 +407,14 @@ class DateTimeImmutable implements DateTimeInterface
     /** @tentative-return-type */
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
-    /** @tentative-return-type */
-    public static function createFromMutable(DateTime $object): DateTimeImmutable {}
+    /**
+     * @tentative-return-type
+     * @return static
+     */
+    public static function createFromMutable(DateTime $object): DateTimeImmutable {} // TODO return type should be static
 
-    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {} // TODO return type should be static
 }
 
 class DateTimeZone
