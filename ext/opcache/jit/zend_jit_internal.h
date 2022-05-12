@@ -412,6 +412,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
 #define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -584,6 +585,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
 	uint32_t                  jmp_table_size;/* number of jmp_table slots */
+	const zend_op_array      *op_array;      /* function */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
