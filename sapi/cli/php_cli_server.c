@@ -1653,6 +1653,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 			// Free previous
 			zend_string_release_ex(client->current_header_name, /* persistent */ false);
 			client->current_header_name = field;
+			break;
 		}
 	}
 
