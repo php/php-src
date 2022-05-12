@@ -684,6 +684,7 @@ class DateInterval
 class DatePeriod implements IteratorAggregate
 {
     public readonly ?DateTimeInterface $start;
+    /** @readonly */
     public ?DateTimeInterface $current;
     public readonly ?DateTimeInterface $end;
     public readonly ?DateInterval $interval;

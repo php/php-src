@@ -304,17 +304,13 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 static HashTable *date_object_get_debug_info_timezone(zend_object *object, int *is_temp);
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
-static void create_date_period_datetime(timelib_time *datetime, zend_class_entry *ce, zval *zv);
-static void create_date_period_interval(timelib_rel_time *interval, zval *zv);
-static void initialize_date_period_properties(php_period_obj *period_obj);
-
 static int date_interval_compare_objects(zval *o1, zval *o2);
 static zval *date_interval_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 static zval *date_interval_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot);
 static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
-static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
 static zval *date_period_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
 
 static int date_object_compare_timezone(zval *tz1, zval *tz2);
 
@@ -1398,6 +1394,63 @@ PHP_FUNCTION(getdate)
 	timelib_time_dtor(ts);
 }
 /* }}} */
+
+static void create_date_period_datetime(timelib_time *datetime, zend_class_entry *ce, zval *zv)
+{
+	if (datetime) {
+		php_date_obj *date_obj;
+
+		object_init_ex(zv, ce);
+		date_obj = Z_PHPDATE_P(zv);
+		date_obj->time = timelib_time_clone(datetime);
+	} else {
+		ZVAL_NULL(zv);
+	}
+}
+
+static void create_date_period_interval(timelib_rel_time *interval, zval *zv)
+{
+	if (interval) {
+		php_interval_obj *interval_obj;
+
+		object_init_ex(zv, date_ce_interval);
+		interval_obj = Z_PHPINTERVAL_P(zv);
+		interval_obj->diff = timelib_rel_time_clone(interval);
+		interval_obj->initialized = 1;
+	} else {
+		ZVAL_NULL(zv);
+	}
+}
+
+static void initialize_date_period_properties(php_period_obj *period_obj)
+{
+	zval start_zv, current_zv, end_zv, interval_zv;
+
+	if (UNEXPECTED(!period_obj->std.properties)) {
+		rebuild_object_properties(&period_obj->std);
+	}
+
+	create_date_period_datetime(period_obj->start, period_obj->start_ce, &start_zv);
+	zend_update_property(date_ce_period, &period_obj->std, "start", sizeof("start") - 1, &start_zv);
+	zval_ptr_dtor(&start_zv);
+
+	create_date_period_datetime(period_obj->current, period_obj->start_ce, &current_zv);
+	zend_string *property_name = zend_string_init("current", sizeof("current") - 1, 0);
+	zend_std_write_property(&period_obj->std, property_name, &current_zv, NULL);
+	zval_ptr_dtor(&current_zv);
+	zend_string_release(property_name);
+
+	create_date_period_datetime(period_obj->end, period_obj->start_ce, &end_zv);
+	zend_update_property(date_ce_period, &period_obj->std, "end", sizeof("end") - 1, &end_zv);
+	zval_ptr_dtor(&end_zv);
+
+	create_date_period_interval(period_obj->interval, &interval_zv);
+	zend_update_property(date_ce_period, &period_obj->std, "interval", sizeof("interval") - 1, &interval_zv);
+	zval_ptr_dtor(&interval_zv);
+
+	zend_update_property_long(date_ce_period, &period_obj->std, "recurrences", sizeof("recurrences") - 1, (zend_long) period_obj->recurrences);
+	zend_update_property_bool(date_ce_period, &period_obj->std, "include_start_date", sizeof("include_start_date") - 1, period_obj->include_start_date);
+}
 
 /* define an overloaded iterator structure */
 typedef struct {
@@ -5224,59 +5277,4 @@ static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *
 	}
 
 	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
-}
-
-static void create_date_period_datetime(timelib_time *datetime, zend_class_entry *ce, zval *zv)
-{
-	if (datetime) {
-		php_date_obj *date_obj;
-		object_init_ex(zv, ce);
-		date_obj = Z_PHPDATE_P(zv);
-		date_obj->time = timelib_time_clone(datetime);
-	} else {
-		ZVAL_NULL(zv);
-	}
-}
-
-static void create_date_period_interval(timelib_rel_time *interval, zval *zv)
-{
-	if (interval) {
-		php_interval_obj *interval_obj;
-		object_init_ex(zv, date_ce_interval);
-		interval_obj = Z_PHPINTERVAL_P(zv);
-		interval_obj->diff = timelib_rel_time_clone(interval);
-		interval_obj->initialized = 1;
-	} else {
-		ZVAL_NULL(zv);
-	}
-}
-
-static void initialize_date_period_properties(php_period_obj *period_obj)
-{
-	zval start_zv, current_zv, end_zv, interval_zv;
-
-	if (UNEXPECTED(!period_obj->std.properties)) {
-		rebuild_object_properties(&period_obj->std);
-	}
-
-	create_date_period_datetime(period_obj->start, period_obj->start_ce, &start_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "start", sizeof("start") - 1, &start_zv);
-	zval_ptr_dtor(&start_zv);
-
-	create_date_period_datetime(period_obj->current, period_obj->start_ce, &current_zv);
-	zend_string *property_name = zend_string_init("current", sizeof("current") - 1, 0);
-	zend_std_write_property(&period_obj->std, property_name, &current_zv, NULL);
-	zval_ptr_dtor(&current_zv);
-	zend_string_release(property_name);
-
-	create_date_period_datetime(period_obj->end, period_obj->start_ce, &end_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "end", sizeof("end") - 1, &end_zv);
-	zval_ptr_dtor(&end_zv);
-
-	create_date_period_interval(period_obj->interval, &interval_zv);
-	zend_update_property(date_ce_period, &period_obj->std, "interval", sizeof("interval") - 1, &interval_zv);
-	zval_ptr_dtor(&interval_zv);
-
-	zend_update_property_long(date_ce_period, &period_obj->std, "recurrences", sizeof("recurrences") - 1, (zend_long) period_obj->recurrences);
-	zend_update_property_bool(date_ce_period, &period_obj->std, "include_start_date", sizeof("include_start_date") - 1, period_obj->include_start_date);
 }
