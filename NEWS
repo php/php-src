@@ -8,7 +8,7 @@ PHP                                                                        NEWS
     (Jakub Zelenka, loveharmful)
 
 - OPcache:
-  . Fixed bug #8461 (tracing JIT crash after function/method change).
+  . Fixed bug GH-8461 (tracing JIT crash after function/method change).
     (Arnaud, Dmitry)
 
 - SPL:
