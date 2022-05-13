@@ -2353,39 +2353,15 @@ static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 
 MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len)
 {
-	mbfl_string string, result, *ret;
-	mbfl_buffer_converter *convd;
-	char *output = NULL;
+	unsigned int num_errors = 0;
+	zend_string *result = mb_fast_convert((unsigned char*)input, length, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
 
-	if (output_len) {
-		*output_len = 0;
-	}
+	MBSTRG(illegalchars) += num_errors;
+	*output_len = ZSTR_LEN(result);
 
-	/* initialize string */
-	string.encoding = from_encoding;
-	string.val = (unsigned char *)input;
-	string.len = length;
-
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	mbfl_string_init(&result);
-	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	if (ret) {
-		if (output_len) {
-			*output_len = ret->len;
-		}
-		output = (char *)ret->val;
-	}
-
-	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-	mbfl_buffer_converter_delete(convd);
+	char *output = emalloc(ZSTR_LEN(result) + 1);
+	memcpy(output, ZSTR_VAL(result), ZSTR_LEN(result) + 1);
+	efree(result);
 	return output;
 }
 /* }}} */
@@ -2573,7 +2549,7 @@ PHP_FUNCTION(mb_convert_encoding)
 			const mbfl_encoding *from_encoding = from_encodings[0];
 			if (from_encoding->to_wchar && to_encoding->from_wchar) {
 				unsigned int num_errors = 0;
-				RETVAL_STR(mb_fast_convert(input_str, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors));
+				RETVAL_STR(mb_fast_convert((unsigned char*)ZSTR_VAL(input_str), ZSTR_LEN(input_str), from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors));
 				MBSTRG(illegalchars) += num_errors;
 				goto out;
 			}
