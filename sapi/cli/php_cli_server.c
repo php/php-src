@@ -267,7 +267,7 @@ static bool php_cli_server_get_system_time(char *buf) {
 #endif
 
 /* Destructor for php_cli_server_request->headers, this frees header value */
-static void char_ptr_dtor_p(zval *zv) /* {{{ */
+static void cli_header_value_dtor(zval *zv) /* {{{ */
 {
 	zend_string_release_ex(Z_STR_P(zv), /* persistent */ true);
 } /* }}} */
@@ -1335,7 +1335,7 @@ static void php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->path_info_len = 0;
 	req->query_string = NULL;
 	req->query_string_len = 0;
-	zend_hash_init(&req->headers, 0, NULL, char_ptr_dtor_p, 1);
+	zend_hash_init(&req->headers, 0, NULL, cli_header_value_dtor, 1);
 	/* No destructor is registered as the value pointed by is the same as for &req->headers */
 	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
 	req->content = NULL;
@@ -1876,7 +1876,8 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	client->addr = addr;
 	client->addr_len = addr_len;
 
-	// TODO Prevent realloc?
+	// TODO To prevent the reallocation need to retrieve a persistent string
+	// Create a new php_network_populate_name_from_sockaddr_ex() API with a persistent flag?
 	zend_string *tmp_addr = NULL;
 	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
 	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
