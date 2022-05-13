@@ -6904,7 +6904,7 @@ static void zend_find_implicit_binds(closure_info *info, zend_ast_decl *func_dec
 
 static void zend_find_minimal_implicit_binds(closure_info *info, zend_op_array *op_array)
 {
-	zend_arena *arena = zend_arena_create(1024);
+	void *checkpoint = zend_arena_checkpoint(CG(arena));
 	zend_cfg cfg;
 	uint32_t set_size;
 	int i;
@@ -6913,8 +6913,8 @@ static void zend_find_minimal_implicit_binds(closure_info *info, zend_op_array *
 	int blocks_count;
 	HashTable min_uses;
 
-	zend_build_cfg(&arena, op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &cfg);
-	zend_cfg_build_predecessors(&arena, &cfg);
+	zend_build_cfg(&CG(arena), op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &cfg);
+	zend_cfg_build_predecessors(&CG(arena), &cfg);
 	// zend_dump_op_array(op_array, ZEND_DUMP_CFG, "...", &cfg);
 	blocks_count = cfg.blocks_count;
 
@@ -6958,7 +6958,7 @@ static void zend_find_minimal_implicit_binds(closure_info *info, zend_op_array *
 	zend_hash_destroy(&info->uses);
 	info->uses = min_uses;
 
-	zend_arena_destroy(arena);
+	zend_arena_release(&CG(arena), checkpoint);
 	free_alloca(dfg.tmp, use_heap);
 }
 
