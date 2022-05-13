@@ -1430,6 +1430,7 @@ PHP_FUNCTION(getdate)
 #define PHP_DATE_TIMEZONE_PER_COUNTRY      0x1000
 
 #define PHP_DATE_PERIOD_EXCLUDE_START_DATE 0x0001
+#define PHP_DATE_PERIOD_INCLUDE_END_DATE   0x0002
 
 
 /* define an overloaded iterator structure */
@@ -1470,7 +1471,11 @@ static int date_period_it_has_more(zend_object_iterator *iter)
 	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);
 
 	if (object->end) {
-		return object->current->sse < object->end->sse ? SUCCESS : FAILURE;
+		if (object->include_end_date) {
+			return object->current->sse <= object->end->sse ? SUCCESS : FAILURE;
+		} else {
+			return object->current->sse < object->end->sse ? SUCCESS : FAILURE;
+		}
 	} else {
 		return (iterator->current_index < object->recurrences) ? SUCCESS : FAILURE;
 	}
@@ -1734,6 +1739,7 @@ static void date_register_classes(void) /* {{{ */
 	zend_declare_class_constant_long(date_ce_period, const_name, sizeof(const_name)-1, value);
 
 	REGISTER_PERIOD_CLASS_CONST_STRING("EXCLUDE_START_DATE", PHP_DATE_PERIOD_EXCLUDE_START_DATE);
+	REGISTER_PERIOD_CLASS_CONST_STRING("INCLUDE_END_DATE", PHP_DATE_PERIOD_INCLUDE_END_DATE);
 } /* }}} */
 
 static zend_object *date_object_new_date(zend_class_entry *class_type) /* {{{ */
@@ -4567,9 +4573,10 @@ PHP_METHOD(DatePeriod, __construct)
 
 	/* options */
 	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
+	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
 
 	/* recurrrences */
-	dpobj->recurrences = recurrences + dpobj->include_start_date;
+	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
 
 	dpobj->initialized = 1;
 }
