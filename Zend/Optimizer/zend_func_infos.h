@@ -134,7 +134,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_GD_BMP)
     F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif
-    F0("imagecolorset", MAY_BE_FALSE|MAY_BE_NULL),
     F1("imagecolorsforindex", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
     F1("imagegetclip", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
 #if defined(HAVE_GD_FREETYPE)
@@ -508,13 +507,12 @@ static const func_info_t func_infos[] = {
     F1("long2ip", MAY_BE_STRING|MAY_BE_FALSE),
     F1("getenv", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
     F1("getopt", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
     F1("time_nanosleep", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_BOOL),
 #endif
     F1("get_current_user", MAY_BE_STRING),
     FN("get_cfg_var", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
     F1("error_get_last", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_NULL),
-    F0("register_shutdown_function", MAY_BE_FALSE|MAY_BE_NULL),
     F1("highlight_file", MAY_BE_STRING|MAY_BE_BOOL),
     F1("php_strip_whitespace", MAY_BE_STRING),
     F1("highlight_string", MAY_BE_STRING|MAY_BE_BOOL),
@@ -522,10 +520,10 @@ static const func_info_t func_infos[] = {
     F1("set_include_path", MAY_BE_STRING|MAY_BE_FALSE),
     F1("get_include_path", MAY_BE_STRING|MAY_BE_FALSE),
     F1("print_r", MAY_BE_STRING|MAY_BE_BOOL),
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
     F1("getservbyport", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
     F1("getprotobynumber", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
     F1("parse_ini_file", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_NULL|MAY_BE_FALSE),
@@ -538,7 +536,7 @@ static const func_info_t func_infos[] = {
 #endif
     F1("get_browser", MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_FALSE),
     F1("crypt", MAY_BE_STRING),
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
     F1("strptime", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
 #if defined(HAVE_GETHOSTNAME)
@@ -547,7 +545,7 @@ static const func_info_t func_infos[] = {
     F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
     F1("gethostbyname", MAY_BE_STRING),
     F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
     F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif
     F1("md5", MAY_BE_STRING),
@@ -573,7 +571,7 @@ static const func_info_t func_infos[] = {
     F1("get_html_translation_table", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
     F1("bin2hex", MAY_BE_STRING),
     F1("hex2bin", MAY_BE_STRING|MAY_BE_FALSE),
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
     F1("nl_langinfo", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
     F1("wordwrap", MAY_BE_STRING),
@@ -619,7 +617,6 @@ static const func_info_t func_infos[] = {
 #endif
     F1("exec", MAY_BE_STRING|MAY_BE_FALSE),
     F1("system", MAY_BE_STRING|MAY_BE_FALSE),
-    F0("passthru", MAY_BE_FALSE|MAY_BE_NULL),
     F1("escapeshellcmd", MAY_BE_STRING),
     F1("escapeshellarg", MAY_BE_STRING),
     F1("shell_exec", MAY_BE_STRING|MAY_BE_FALSE|MAY_BE_NULL),
@@ -701,7 +698,7 @@ static const func_info_t func_infos[] = {
     F1("stream_socket_server", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_accept", MAY_BE_RESOURCE|MAY_BE_FALSE),
     F1("stream_socket_recvfrom", MAY_BE_STRING|MAY_BE_FALSE),
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_SOCKETPAIR)
     F1("stream_socket_pair", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_FALSE),
 #endif
     F1("stream_get_contents", MAY_BE_STRING|MAY_BE_FALSE),

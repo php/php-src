@@ -53,11 +53,11 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 
 #define META_DEF_BUFSIZE 8192
 
-#define PHP_FILE_USE_INCLUDE_PATH 1
-#define PHP_FILE_IGNORE_NEW_LINES 2
-#define PHP_FILE_SKIP_EMPTY_LINES 4
-#define PHP_FILE_APPEND 8
-#define PHP_FILE_NO_DEFAULT_CONTEXT 16
+#define PHP_FILE_USE_INCLUDE_PATH (1 << 0)
+#define PHP_FILE_IGNORE_NEW_LINES (1 << 1)
+#define PHP_FILE_SKIP_EMPTY_LINES (1 << 2)
+#define PHP_FILE_APPEND (1 << 3)
+#define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
@@ -96,7 +96,7 @@ typedef struct {
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 	int pclose_wait;
-#if defined(HAVE_GETHOSTBYNAME_R)
+#ifdef HAVE_GETHOSTBYNAME_R
 	struct hostent tmp_host_info;
 	char *tmp_host_buf;
 	size_t tmp_host_buf_len;

@@ -25,7 +25,7 @@
 #include "basic_functions.h"
 #include "dir_arginfo.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(closedir)
 }
 /* }}} */
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 /* {{{ Change root directory */
 PHP_FUNCTION(chroot)
 {
@@ -342,9 +342,9 @@ PHP_FUNCTION(getcwd)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 	ret = VCWD_GETCWD(path, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 	ret = VCWD_GETWD(path);
 #endif
 

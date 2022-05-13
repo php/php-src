@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "ext/pcre/php_pcre.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -113,6 +114,53 @@ typedef struct _spl_recursive_it_iterator {
 	zend_object_iterator   intern;
 } spl_recursive_it_iterator;
 
+typedef struct _spl_cbfilter_it_intern {
+	zend_fcall_info       fci;
+	zend_fcall_info_cache fcc;
+	zend_object           *object;
+} _spl_cbfilter_it_intern;
+
+typedef struct _spl_dual_it_object {
+	struct {
+		zval                 zobject;
+		zend_class_entry     *ce;
+		zend_object          *object;
+		zend_object_iterator *iterator;
+	} inner;
+	struct {
+		zval                 data;
+		zval                 key;
+		zend_long            pos;
+	} current;
+	dual_it_type             dit_type;
+	union {
+		struct {
+			zend_long             offset;
+			zend_long             count;
+		} limit;
+		struct {
+			zend_long             flags; /* CIT_* */
+			zend_string          *zstr;
+			zval             zchildren;
+			zval             zcache;
+		} caching;
+		struct {
+			zval                  zarrayit;
+			zend_object_iterator *iterator;
+		} append;
+		struct {
+			zend_long        flags;
+			zend_long        preg_flags;
+			pcre_cache_entry *pce;
+			zend_string      *regex;
+			regex_mode       mode;
+			int              use_flags;
+		} regex;
+		_spl_cbfilter_it_intern *cbfilter;
+	} u;
+	zend_object              std;
+} spl_dual_it_object;
+
 static zend_object_handlers spl_handlers_rec_it_it;
 static zend_object_handlers spl_handlers_dual_it;
 
@@ -122,6 +170,12 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 /* }}} */
 
 #define Z_SPLRECURSIVE_IT_P(zv)  spl_recursive_it_from_obj(Z_OBJ_P((zv)))
+
+static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
+} /* }}} */
+
+#define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
 
 #define SPL_FETCH_AND_CHECK_DUAL_IT(var, objzval) 												\
 	do { 																						\
@@ -816,7 +870,7 @@ PHP_METHOD(RecursiveIteratorIterator, callGetChildren)
 
 	zobject = &object->iterators[object->level].zobject;
 	if (Z_TYPE_P(zobject) == IS_UNDEF) {
-		return;
+		RETURN_NULL();
 	} else {
 		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, &object->iterators[object->level].getchildren, "getchildren", return_value);
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
@@ -3127,6 +3181,9 @@ PHP_FUNCTION(iterator_to_array)
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser) /* {{{ */
 {
+	if (UNEXPECTED(*(zend_long*)puser == ZEND_LONG_MAX)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
 	(*(zend_long*)puser)++;
 	return ZEND_HASH_APPLY_KEEP;
 }

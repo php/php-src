@@ -14,10 +14,11 @@ mb_substitute_character(0x25);
 var_dump(mb_convert_encoding("ABC", "7bit", "ASCII"));
 var_dump(mb_convert_encoding("\x80", "7bit", "ASCII"));
 var_dump(mb_convert_encoding("ABC", "8bit", "7bit"));
+var_dump(mb_check_encoding(chr(255), '7bit'));
 echo "7bit done\n";
 
 // "8bit"
-var_dump(mb_convert_encoding("\x01\x00", "8bit", "UTF-16BE")); // codepoints over 0xFF are illegal or '8-bit'
+var_dump(mb_convert_encoding("\x01\x00", "8bit", "UTF-16BE")); // codepoints over 0xFF are illegal for '8-bit'
 echo "8bit done\n";
 
 ?>
@@ -25,6 +26,7 @@ echo "8bit done\n";
 string(3) "ABC"
 string(1) "%"
 string(3) "ABC"
+bool(false)
 7bit done
 string(1) "%"
 8bit done

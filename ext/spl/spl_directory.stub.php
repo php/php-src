@@ -123,10 +123,16 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     /** @tentative-return-type */
     public function valid(): bool {}
 
-    /** @return int */
+    /**
+     * @tentative-return-type
+     * @return int
+     */
     public function key(): mixed {} // TODO change return type to string
 
-    /** @return DirectoryIterator */
+    /**
+     * @tentative-return-type
+     * @return DirectoryIterator
+     */
     public function current(): mixed {} // TODO narrow return type
 
     /** @tentative-return-type */
@@ -273,10 +279,10 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     public function getMaxLineLen(): int {}
 
     /** @tentative-return-type */
-    public function hasChildren(): bool {}
+    public function hasChildren(): false {}
 
     /** @tentative-return-type */
-    public function getChildren(): ?RecursiveIterator {}
+    public function getChildren(): null {}
 
     /** @tentative-return-type */
     public function seek(int $line): void {}

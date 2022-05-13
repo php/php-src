@@ -69,7 +69,7 @@ const struct mbfl_convert_vtbl vtbl_7bit_8bit = {
 
 int mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter)
 {
-	return (*filter->output_function)(c, filter->data);
+	return (*filter->output_function)(c < 0x80 ? c : MBFL_BAD_INPUT, filter->data);
 }
 
 

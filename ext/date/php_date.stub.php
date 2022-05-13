@@ -205,11 +205,19 @@ interface DateTimeInterface
 
     /** @tentative-return-type */
     public function __wakeup(): void;
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 }
 
 class DateTime implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
@@ -218,9 +226,10 @@ class DateTime implements DateTimeInterface
     public static function __set_state(array $array): DateTime {}
 
     /** @tentative-return-type */
-    public static function createFromImmutable(DateTimeImmutable $object): DateTime {}
+    public static function createFromImmutable(DateTimeImmutable $object): static {}
 
-    public static function createFromInterface(DateTimeInterface $object): DateTime {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTime {} // TODO return type should be static
 
     /**
      * @tentative-return-type
@@ -318,6 +327,10 @@ class DateTimeImmutable implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
@@ -392,9 +405,10 @@ class DateTimeImmutable implements DateTimeInterface
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
     /** @tentative-return-type */
-    public static function createFromMutable(DateTime $object): DateTimeImmutable {}
+    public static function createFromMutable(DateTime $object): static {}
 
-    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {} // TODO return type should be static
 }
 
 class DateTimeZone
@@ -441,6 +455,10 @@ class DateTimeZone
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
@@ -463,6 +481,10 @@ class DateInterval
      * @alias date_interval_format
      */
     public function format(string $format): string {}
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
@@ -492,6 +514,10 @@ class DatePeriod implements IteratorAggregate
 
     /** @tentative-return-type */
     public function getRecurrences(): ?int {}
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
     public function __wakeup(): void {}

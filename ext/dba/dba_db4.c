@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if DBA_DB4
+#ifdef DBA_DB4
 #include "php_db4.h"
 #include <sys/stat.h>
 

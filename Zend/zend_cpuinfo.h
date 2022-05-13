@@ -208,7 +208,7 @@ static inline int zend_cpu_supports_avx2(void) {
 /* __builtin_cpu_supports has pclmul from gcc9 */
 #if PHP_HAVE_BUILTIN_CPU_SUPPORTS && (!defined(__GNUC__) || (ZEND_GCC_VERSION >= 9000))
 ZEND_NO_SANITIZE_ADDRESS
-static inline int zend_cpu_supports_pclmul() {
+static inline int zend_cpu_supports_pclmul(void) {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
 #endif

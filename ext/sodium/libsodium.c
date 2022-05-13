@@ -1578,6 +1578,49 @@ PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor)
 
 	RETURN_NEW_STR(ciphertext);
 }
+
+PHP_FUNCTION(sodium_crypto_stream_xchacha20_xor_ic)
+{
+	zend_string   *ciphertext;
+	unsigned char *key;
+	unsigned char *msg;
+	unsigned char *nonce;
+	zend_long      ic;
+
+	size_t         ciphertext_len;
+	size_t         key_len;
+	size_t         msg_len;
+	size_t         nonce_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssls",
+									&msg, &msg_len,
+									&nonce, &nonce_len,
+									&ic,
+									&key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (nonce_len != crypto_stream_xchacha20_NONCEBYTES) {
+		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (key_len != crypto_stream_xchacha20_KEYBYTES) {
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES bytes long");
+		RETURN_THROWS();
+	}
+	ciphertext_len = msg_len;
+	ciphertext = zend_string_checked_alloc((size_t) ciphertext_len, 0);
+	if (crypto_stream_xchacha20_xor_ic((unsigned char *) ZSTR_VAL(ciphertext), msg,
+									   (unsigned long long) msg_len, nonce,
+									   (uint64_t) ic, key) != 0) {
+		zend_string_free(ciphertext);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(ciphertext)[ciphertext_len] = 0;
+
+	RETURN_NEW_STR(ciphertext);
+}
 #endif
 
 #ifdef crypto_pwhash_SALTBYTES

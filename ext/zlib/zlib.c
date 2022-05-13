@@ -281,7 +281,7 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 		return FAILURE;
 	}
 
-	if (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
+	if (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || ((output_context->op & PHP_OUTPUT_HANDLER_START) && !(output_context->op & PHP_OUTPUT_HANDLER_FINAL))) {
 		int flags;
 
 		if (SUCCESS == php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags)) {

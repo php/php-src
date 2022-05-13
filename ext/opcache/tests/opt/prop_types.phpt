@@ -50,7 +50,7 @@ BB0:
 0000 RETURN int(1)
 
 noScope:
-     ; (lines=10, args=1, vars=1, tmps=1, ssa_vars=5, no_loops)
+     ; (lines=10, args=1, vars=1, tmps=4, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -62,15 +62,15 @@ BB0:
 0001 INIT_FCALL 3 %d string("var_dump")
 0002 #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("public")
 0003 SEND_VAL #2.T1 [bool] 1
-0004 #3.T1 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("protected")
-0005 SEND_VAL #3.T1 [any] 2
-0006 #4.T1 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("private")
-0007 SEND_VAL #4.T1 [any] 3
+0004 #3.T2 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("protected")
+0005 SEND_VAL #3.T2 [any] 2
+0006 #4.T3 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("private")
+0007 SEND_VAL #4.T3 [any] 3
 0008 DO_ICALL
 0009 RETURN null
 
 Test::inTest:
-     ; (lines=9, args=0, vars=0, tmps=1, ssa_vars=3, no_loops)
+     ; (lines=9, args=0, vars=0, tmps=4, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -80,15 +80,15 @@ BB0:
 0000 INIT_FCALL 3 %d string("var_dump")
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
-0003 #1.T0 [long] = FETCH_OBJ_R THIS string("protected")
-0004 SEND_VAL #1.T0 [long] 2
-0005 #2.T0 [double] = FETCH_OBJ_R THIS string("private")
-0006 SEND_VAL #2.T0 [double] 3
+0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")
+0004 SEND_VAL #1.T1 [long] 2
+0005 #2.T2 [double] = FETCH_OBJ_R THIS string("private")
+0006 SEND_VAL #2.T2 [double] 3
 0007 DO_ICALL
 0008 RETURN null
 
 Test::inTestWithTest2:
-     ; (lines=10, args=1, vars=1, tmps=1, ssa_vars=5, no_loops)
+     ; (lines=10, args=1, vars=1, tmps=4, ssa_vars=5, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -100,15 +100,15 @@ BB0:
 0001 INIT_FCALL 3 %d string("var_dump")
 0002 #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("public")
 0003 SEND_VAL #2.T1 [bool] 1
-0004 #3.T1 [long] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
-0005 SEND_VAL #3.T1 [long] 2
-0006 #4.T1 [double] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("private")
-0007 SEND_VAL #4.T1 [double] 3
+0004 #3.T2 [long] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
+0005 SEND_VAL #3.T2 [long] 2
+0006 #4.T3 [double] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("private")
+0007 SEND_VAL #4.T3 [double] 3
 0008 DO_ICALL
 0009 RETURN null
 
 Test2::inTest2:
-     ; (lines=9, args=0, vars=0, tmps=1, ssa_vars=3, no_loops)
+     ; (lines=9, args=0, vars=0, tmps=4, ssa_vars=3, no_loops)
      ; (before dfa pass)
      ; %s
      ; return  [null] RANGE[0..0]
@@ -118,9 +118,9 @@ BB0:
 0000 INIT_FCALL 3 %d string("var_dump")
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
-0003 #1.T0 [long] = FETCH_OBJ_R THIS string("protected")
-0004 SEND_VAL #1.T0 [long] 2
-0005 #2.T0 [array of [any, ref]] = FETCH_OBJ_R THIS string("private")
-0006 SEND_VAL #2.T0 [array of [any, ref]] 3
+0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")
+0004 SEND_VAL #1.T1 [long] 2
+0005 #2.T2 [array of [any, ref]] = FETCH_OBJ_R THIS string("private")
+0006 SEND_VAL #2.T2 [array of [any, ref]] 3
 0007 DO_ICALL
 0008 RETURN null

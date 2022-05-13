@@ -1191,6 +1191,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 
 		/* Get the element we want to insert before */
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
+		ZEND_ASSERT(element != NULL);
 
 		ZVAL_COPY(&elem->data, value);
 		SPL_LLIST_RC(elem) = 1;
@@ -1214,7 +1215,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_dllist_object_get_debug_info(Z_OBJ_P(ZEND_THIS)));

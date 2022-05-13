@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ed5328c35c17c591847feba6cb00f5badb2b446c */
+ * Stub hash: b1c51fabe59bba6706500365f3eb7d9676d625f6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -413,14 +413,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usleep, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_time_nanosleep, 0, 2, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, nanoseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_time_sleep_until, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -459,7 +459,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_forward_static_call_array arginfo_call_user_func_array
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_shutdown_function, 0, 1, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_shutdown_function, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -519,27 +519,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ignore_user_abort, 0, 0, IS_LONG
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getservbyname, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, service, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getservbyport, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobyname, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_getprotobynumber, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -599,7 +599,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strptime, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
@@ -623,18 +623,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_gethostbynamel, 0, 1, MAY_BE_ARR
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_check_record, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"MX\"")
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 #define arginfo_checkdnsrr arginfo_dns_check_record
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "DNS_ANY")
@@ -644,7 +644,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARR
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_INFO(1, hosts)
@@ -652,7 +652,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
@@ -661,7 +661,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftok, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, project_id, IS_STRING, 0)
@@ -820,7 +820,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strcspn arginfo_strspn
 
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_nl_langinfo, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, item, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -1113,7 +1113,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chdir, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chroot, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1151,7 +1151,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_system, 0, 1, MAY_BE_STRING|MAY_
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, result_code, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_passthru, 0, 1, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_passthru, 0, 1, IS_FALSE, 1)
 	ZEND_ARG_TYPE_INFO(0, command, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, result_code, "null")
 ZEND_END_ARG_INFO()
@@ -1415,14 +1415,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chgrp, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, group, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lchown, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, user, MAY_BE_STRING|MAY_BE_LONG, NULL)
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lchgrp, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, group, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -1434,7 +1434,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chmod, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_touch, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mtime, IS_LONG, 1, "null")
@@ -1951,7 +1951,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _I
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_SOCKETPAIR)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
@@ -2021,7 +2021,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_stream_set_chunk_size arginfo_stream_set_write_buffer
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2029,7 +2029,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BO
 ZEND_END_ARG_INFO()
 #endif
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 #define arginfo_socket_set_timeout arginfo_stream_set_timeout
 #endif
 
@@ -2174,6 +2174,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_memory_get_usage, 0, 0, IS_LONG,
 ZEND_END_ARG_INFO()
 
 #define arginfo_memory_get_peak_usage arginfo_memory_get_usage
+
+#define arginfo_memory_reset_peak_usage arginfo_flush
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_version_compare, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, version1, IS_STRING, 0)
@@ -2332,10 +2334,10 @@ ZEND_FUNCTION(getopt);
 ZEND_FUNCTION(flush);
 ZEND_FUNCTION(sleep);
 ZEND_FUNCTION(usleep);
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_FUNCTION(time_nanosleep);
 #endif
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 ZEND_FUNCTION(time_sleep_until);
 #endif
 ZEND_FUNCTION(get_current_user);
@@ -2361,16 +2363,16 @@ ZEND_FUNCTION(print_r);
 ZEND_FUNCTION(connection_aborted);
 ZEND_FUNCTION(connection_status);
 ZEND_FUNCTION(ignore_user_abort);
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 ZEND_FUNCTION(getservbyname);
 #endif
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 ZEND_FUNCTION(getservbyport);
 #endif
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 ZEND_FUNCTION(getprotobyname);
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 ZEND_FUNCTION(getprotobynumber);
 #endif
 ZEND_FUNCTION(register_tick_function);
@@ -2388,7 +2390,7 @@ ZEND_FUNCTION(sys_getloadavg);
 ZEND_FUNCTION(get_browser);
 ZEND_FUNCTION(crc32);
 ZEND_FUNCTION(crypt);
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 ZEND_FUNCTION(strptime);
 #endif
 #if defined(HAVE_GETHOSTNAME)
@@ -2397,19 +2399,19 @@ ZEND_FUNCTION(gethostname);
 ZEND_FUNCTION(gethostbyaddr);
 ZEND_FUNCTION(gethostbyname);
 ZEND_FUNCTION(gethostbynamel);
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_check_record);
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_get_record);
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 ZEND_FUNCTION(dns_get_mx);
 #endif
 #if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 ZEND_FUNCTION(net_get_interfaces);
 #endif
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 ZEND_FUNCTION(ftok);
 #endif
 ZEND_FUNCTION(hrtime);
@@ -2457,7 +2459,7 @@ ZEND_FUNCTION(bin2hex);
 ZEND_FUNCTION(hex2bin);
 ZEND_FUNCTION(strspn);
 ZEND_FUNCTION(strcspn);
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 ZEND_FUNCTION(nl_langinfo);
 #endif
 ZEND_FUNCTION(strcoll);
@@ -2527,7 +2529,7 @@ ZEND_FUNCTION(opendir);
 ZEND_FUNCTION(dir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 ZEND_FUNCTION(chroot);
 #endif
 ZEND_FUNCTION(getcwd);
@@ -2606,14 +2608,14 @@ ZEND_FUNCTION(stat);
 ZEND_FUNCTION(lstat);
 ZEND_FUNCTION(chown);
 ZEND_FUNCTION(chgrp);
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_FUNCTION(lchown);
 #endif
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 ZEND_FUNCTION(lchgrp);
 #endif
 ZEND_FUNCTION(chmod);
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 ZEND_FUNCTION(touch);
 #endif
 ZEND_FUNCTION(clearstatcache);
@@ -2757,7 +2759,7 @@ ZEND_FUNCTION(stream_socket_enable_crypto);
 #if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
 #endif
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_SOCKETPAIR)
 ZEND_FUNCTION(stream_socket_pair);
 #endif
 ZEND_FUNCTION(stream_copy_to_stream);
@@ -2777,7 +2779,7 @@ ZEND_FUNCTION(stream_isatty);
 ZEND_FUNCTION(sapi_windows_vt100_support);
 #endif
 ZEND_FUNCTION(stream_set_chunk_size);
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 ZEND_FUNCTION(stream_set_timeout);
 #endif
 ZEND_FUNCTION(gettype);
@@ -2824,6 +2826,7 @@ ZEND_FUNCTION(serialize);
 ZEND_FUNCTION(unserialize);
 ZEND_FUNCTION(memory_get_usage);
 ZEND_FUNCTION(memory_get_peak_usage);
+ZEND_FUNCTION(memory_reset_peak_usage);
 ZEND_FUNCTION(version_compare);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_set);
@@ -2961,10 +2964,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(flush, arginfo_flush)
 	ZEND_FE(sleep, arginfo_sleep)
 	ZEND_FE(usleep, arginfo_usleep)
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 	ZEND_FE(time_nanosleep, arginfo_time_nanosleep)
 #endif
-#if HAVE_NANOSLEEP
+#if defined(HAVE_NANOSLEEP)
 	ZEND_FE(time_sleep_until, arginfo_time_sleep_until)
 #endif
 	ZEND_FE(get_current_user, arginfo_get_current_user)
@@ -2992,16 +2995,16 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(connection_aborted, arginfo_connection_aborted)
 	ZEND_FE(connection_status, arginfo_connection_status)
 	ZEND_FE(ignore_user_abort, arginfo_ignore_user_abort)
-#if HAVE_GETSERVBYNAME
+#if defined(HAVE_GETSERVBYNAME)
 	ZEND_FE(getservbyname, arginfo_getservbyname)
 #endif
-#if HAVE_GETSERVBYPORT
+#if defined(HAVE_GETSERVBYPORT)
 	ZEND_FE(getservbyport, arginfo_getservbyport)
 #endif
-#if HAVE_GETPROTOBYNAME
+#if defined(HAVE_GETPROTOBYNAME)
 	ZEND_FE(getprotobyname, arginfo_getprotobyname)
 #endif
-#if HAVE_GETPROTOBYNUMBER
+#if defined(HAVE_GETPROTOBYNUMBER)
 	ZEND_FE(getprotobynumber, arginfo_getprotobynumber)
 #endif
 	ZEND_FE(register_tick_function, arginfo_register_tick_function)
@@ -3019,7 +3022,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_browser, arginfo_get_browser)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(crc32, arginfo_crc32)
 	ZEND_FE(crypt, arginfo_crypt)
-#if HAVE_STRPTIME
+#if defined(HAVE_STRPTIME)
 	ZEND_DEP_FE(strptime, arginfo_strptime)
 #endif
 #if defined(HAVE_GETHOSTNAME)
@@ -3028,25 +3031,25 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gethostbyaddr, arginfo_gethostbyaddr)
 	ZEND_FE(gethostbyname, arginfo_gethostbyname)
 	ZEND_FE(gethostbynamel, arginfo_gethostbynamel)
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_check_record, arginfo_dns_check_record)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FALIAS(checkdnsrr, dns_check_record, arginfo_checkdnsrr)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_get_record, arginfo_dns_get_record)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FE(dns_get_mx, arginfo_dns_get_mx)
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 	ZEND_FALIAS(getmxrr, dns_get_mx, arginfo_getmxrr)
 #endif
 #if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
 	ZEND_FE(net_get_interfaces, arginfo_net_get_interfaces)
 #endif
-#if HAVE_FTOK
+#if defined(HAVE_FTOK)
 	ZEND_FE(ftok, arginfo_ftok)
 #endif
 	ZEND_FE(hrtime, arginfo_hrtime)
@@ -3094,7 +3097,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hex2bin, arginfo_hex2bin)
 	ZEND_FE(strspn, arginfo_strspn)
 	ZEND_FE(strcspn, arginfo_strcspn)
-#if HAVE_NL_LANGINFO
+#if defined(HAVE_NL_LANGINFO)
 	ZEND_FE(nl_langinfo, arginfo_nl_langinfo)
 #endif
 	ZEND_FE(strcoll, arginfo_strcoll)
@@ -3167,7 +3170,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)
 	ZEND_FE(chdir, arginfo_chdir)
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 	ZEND_FE(chroot, arginfo_chroot)
 #endif
 	ZEND_FE(getcwd, arginfo_getcwd)
@@ -3248,14 +3251,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(lstat, arginfo_lstat)
 	ZEND_FE(chown, arginfo_chown)
 	ZEND_FE(chgrp, arginfo_chgrp)
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 	ZEND_FE(lchown, arginfo_lchown)
 #endif
-#if HAVE_LCHOWN
+#if defined(HAVE_LCHOWN)
 	ZEND_FE(lchgrp, arginfo_lchgrp)
 #endif
 	ZEND_FE(chmod, arginfo_chmod)
-#if HAVE_UTIME
+#if defined(HAVE_UTIME)
 	ZEND_FE(touch, arginfo_touch)
 #endif
 	ZEND_FE(clearstatcache, arginfo_clearstatcache)
@@ -3402,7 +3405,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SHUTDOWN)
 	ZEND_FE(stream_socket_shutdown, arginfo_stream_socket_shutdown)
 #endif
-#if HAVE_SOCKETPAIR
+#if defined(HAVE_SOCKETPAIR)
 	ZEND_FE(stream_socket_pair, arginfo_stream_socket_pair)
 #endif
 	ZEND_FE(stream_copy_to_stream, arginfo_stream_copy_to_stream)
@@ -3425,10 +3428,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sapi_windows_vt100_support, arginfo_sapi_windows_vt100_support)
 #endif
 	ZEND_FE(stream_set_chunk_size, arginfo_stream_set_chunk_size)
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 	ZEND_FE(stream_set_timeout, arginfo_stream_set_timeout)
 #endif
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 	ZEND_FALIAS(socket_set_timeout, stream_set_timeout, arginfo_socket_set_timeout)
 #endif
 	ZEND_FE(gettype, arginfo_gettype)
@@ -3479,6 +3482,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(unserialize, arginfo_unserialize)
 	ZEND_FE(memory_get_usage, arginfo_memory_get_usage)
 	ZEND_FE(memory_get_peak_usage, arginfo_memory_get_peak_usage)
+	ZEND_FE(memory_reset_peak_usage, arginfo_memory_reset_peak_usage)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(version_compare, arginfo_version_compare)
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)

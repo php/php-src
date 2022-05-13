@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if HAVE_DBA
+#ifdef HAVE_DBA
 
 #include "php_ini.h"
 #include <stdio.h>
@@ -160,72 +160,72 @@ static zend_string* php_dba_make_key(HashTable *key)
 /* {{{ globals */
 
 static dba_handler handler[] = {
-#if DBA_GDBM
+#ifdef DBA_GDBM
 	DBA_HND(gdbm, DBA_LOCK_EXT) /* Locking done in library if set */
 #endif
-#if DBA_DBM
+#ifdef DBA_DBM
 	DBA_HND(dbm, DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_NDBM
+#ifdef DBA_NDBM
 	DBA_HND(ndbm, DBA_LOCK_ALL) /* Could be done in library: filemode = 0644 + S_ENFMT */
 #endif
-#if DBA_CDB
+#ifdef DBA_CDB
 	DBA_HND(cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_CDB_BUILTIN
+#ifdef DBA_CDB_BUILTIN
 	DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_DB1
+#ifdef DBA_DB1
 	DBA_HND(db1, DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_DB2
+#ifdef DBA_DB2
 	DBA_HND(db2, DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_DB3
+#ifdef DBA_DB3
 	DBA_HND(db3, DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_DB4
+#ifdef DBA_DB4
 	DBA_HND(db4, DBA_LOCK_ALL) /* No lock in lib */
 #endif
-#if DBA_INIFILE
+#ifdef DBA_INIFILE
 	DBA_HND(inifile, DBA_STREAM_OPEN|DBA_LOCK_ALL|DBA_CAST_AS_FD) /* No lock in lib */
 #endif
-#if DBA_FLATFILE
+#ifdef DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL|DBA_NO_APPEND) /* No lock in lib */
 #endif
-#if DBA_QDBM
+#ifdef DBA_QDBM
 	DBA_HND(qdbm, DBA_LOCK_EXT)
 #endif
-#if DBA_TCADB
+#ifdef DBA_TCADB
 	DBA_HND(tcadb, DBA_LOCK_ALL)
 #endif
-#if DBA_LMDB
+#ifdef DBA_LMDB
 	DBA_HND(lmdb, DBA_LOCK_EXT)
 #endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
-#if DBA_FLATFILE
+#ifdef DBA_FLATFILE
 #define DBA_DEFAULT "flatfile"
-#elif DBA_DB4
+#elif defined(DBA_DB4)
 #define DBA_DEFAULT "db4"
-#elif DBA_DB3
+#elif defined(DBA_DB3)
 #define DBA_DEFAULT "db3"
-#elif DBA_DB2
+#elif defined(DBA_DB2)
 #define DBA_DEFAULT "db2"
-#elif DBA_DB1
+#elif defined(DBA_DB1)
 #define DBA_DEFAULT "db1"
-#elif DBA_GDBM
+#elif defined(DBA_GDBM)
 #define DBA_DEFAULT "gdbm"
-#elif DBA_NBBM
+#elif defined(DBA_NBBM)
 #define DBA_DEFAULT "ndbm"
-#elif DBA_DBM
+#elif defined(DBA_DBM)
 #define DBA_DEFAULT "dbm"
-#elif DBA_QDBM
+#elif defined(DBA_QDBM)
 #define DBA_DEFAULT "qdbm"
-#elif DBA_TCADB
+#elif defined(DBA_TCADB)
 #define DBA_DEFAULT "tcadb"
-#elif DBA_LMDB
+#elif defined(DBA_LMDB)
 #define DBA_DEFAULT "lmdb"
 #else
 #define DBA_DEFAULT ""

@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlCalendar
 {
     private function __construct() {}
@@ -281,6 +282,7 @@ class IntlCalendar
     public function toDateTime(): DateTime|false {}
 }
 
+/** @not-serializable */
 class IntlGregorianCalendar extends IntlCalendar
 {
     /**

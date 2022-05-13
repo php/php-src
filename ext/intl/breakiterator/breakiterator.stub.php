@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlBreakIterator implements IteratorAggregate
 {
     /** @tentative-return-type */
@@ -69,6 +70,7 @@ class IntlBreakIterator implements IteratorAggregate
     public function getIterator(): Iterator {}
 }
 
+/** @not-serializable */
 class IntlRuleBasedBreakIterator extends IntlBreakIterator
 {
     public function __construct(string $rules, bool $compiled = false) {}
@@ -86,6 +88,7 @@ class IntlRuleBasedBreakIterator extends IntlBreakIterator
     public function getRuleStatusVec(): array|false {}
 }
 
+/** @not-serializable */
 class IntlCodePointBreakIterator extends IntlBreakIterator
 {
     /** @tentative-return-type */

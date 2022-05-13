@@ -373,8 +373,9 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	/* MariaDB always sends 5.5.5 before version string: 5.5.5 was never released,
 		so just ignore it */
-	if (!strncmp((char *) p, MARIADB_RPL_VERSION_HACK, sizeof(MARIADB_RPL_VERSION_HACK) - 1))
-		p+= sizeof(MARIADB_RPL_VERSION_HACK) - 1;
+	if (!strncmp((char *) p, MARIADB_RPL_VERSION_HACK, sizeof(MARIADB_RPL_VERSION_HACK) - 1)) {
+		p += sizeof(MARIADB_RPL_VERSION_HACK) - 1;
+	}
 
 	packet->server_version = estrdup((char *)p);
 	p+= strlen(packet->server_version) + 1; /* eat the '\0' */

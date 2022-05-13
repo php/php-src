@@ -21,11 +21,16 @@
 #include "zend_API.h"
 #include "zend_attributes.h"
 #include "zend_attributes_arginfo.h"
+#include "zend_exceptions.h"
 #include "zend_smart_str.h"
 
 ZEND_API zend_class_entry *zend_ce_attribute;
 ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
 ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
+ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
+ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
+
+static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
 static HashTable internal_attributes;
 
@@ -91,6 +96,53 @@ ZEND_METHOD(AllowDynamicProperties, __construct)
 	ZEND_PARSE_PARAMETERS_NONE();
 }
 
+ZEND_METHOD(SensitiveParameter, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(SensitiveParameterValue, __construct)
+{
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_update_property(zend_ce_sensitive_parameter_value, Z_OBJ_P(ZEND_THIS), "value", strlen("value"), value);
+}
+
+ZEND_METHOD(SensitiveParameterValue, getValue)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	ZVAL_COPY(return_value, OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0));
+}
+
+ZEND_METHOD(SensitiveParameterValue, __debugInfo)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_EMPTY_ARRAY();
+}
+
+static zend_object *attributes_sensitive_parameter_value_new(zend_class_entry *ce)
+{
+	zend_object *object;
+
+	object = zend_objects_new(ce);
+	object->handlers = &attributes_object_handlers_sensitive_parameter_value;
+
+	object_properties_init(object, ce);
+
+	return object;
+}
+
+static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
+{
+	return NULL;
+}
+
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
 {
 	if (attributes) {
@@ -112,10 +164,8 @@ static zend_attribute *get_attribute_str(HashTable *attributes, const char *str,
 		zend_attribute *attr;
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
-			if (attr->offset == offset && ZSTR_LEN(attr->lcname) == len) {
-				if (0 == memcmp(ZSTR_VAL(attr->lcname), str, len)) {
-					return attr;
-				}
+			if (attr->offset == offset && zend_string_equals_cstr(attr->lcname, str, len)) {
+				return attr;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -205,6 +255,7 @@ ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *
 static void attr_free(zval *v)
 {
 	zend_attribute *attr = Z_PTR_P(v);
+	bool persistent = attr->flags & ZEND_ATTRIBUTE_PERSISTENT;
 
 	zend_string_release(attr->name);
 	zend_string_release(attr->lcname);
@@ -213,10 +264,14 @@ static void attr_free(zval *v)
 		if (attr->args[i].name) {
 			zend_string_release(attr->args[i].name);
 		}
-		zval_ptr_dtor(&attr->args[i].value);
+		if (persistent) {
+			zval_internal_ptr_dtor(&attr->args[i].value);
+		} else {
+			zval_ptr_dtor(&attr->args[i].value);
+		}
 	}
 
-	pefree(attr, attr->flags & ZEND_ATTRIBUTE_PERSISTENT);
+	pefree(attr, persistent);
 }
 
 ZEND_API zend_attribute *zend_add_attribute(HashTable **attributes, zend_string *name, uint32_t argc, uint32_t flags, uint32_t offset, uint32_t lineno)
@@ -310,6 +365,16 @@ void zend_register_attribute_ce(void)
 	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
 	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties, ZEND_ATTRIBUTE_TARGET_CLASS);
 	attr->validator = validate_allow_dynamic_properties;
+
+	zend_ce_sensitive_parameter = register_class_SensitiveParameter();
+	attr = zend_internal_attribute_register(zend_ce_sensitive_parameter, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+
+	memcpy(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
+	attributes_object_handlers_sensitive_parameter_value.get_properties_for = attributes_sensitive_parameter_value_get_properties_for;
+
+	/* This is not an actual attribute, thus the zend_internal_attribute_register() call is missing. */
+	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
+	zend_ce_sensitive_parameter_value->create_object = attributes_sensitive_parameter_value_new;
 }
 
 void zend_attributes_shutdown(void)

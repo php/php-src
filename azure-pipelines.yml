@@ -27,31 +27,11 @@ schedules:
         - master
 
 jobs:
-  - template: azure/job.yml
-    parameters:
-      configurationName: DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
-  - template: azure/job.yml
-    parameters:
-      configurationName: RELEASE_ZTS
-      configurationParameters: '--disable-debug --enable-zts'
   - template: azure/i386/job.yml
     parameters:
       configurationName: I386_DEBUG_ZTS
       configurationParameters: '--enable-debug --enable-zts'
-  - template: azure/macos/job.yml
-    parameters:
-      configurationName: MACOS_DEBUG_NTS
-      configurationParameters: '--enable-debug --disable-zts'
   - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
-    - template: azure/job.yml
-      parameters:
-        configurationName: DEBUG_ZTS
-        configurationParameters: '--enable-debug --enable-zts'
-    - template: azure/job.yml
-      parameters:
-        configurationName: RELEASE_NTS
-        configurationParameters: '--disable-debug --disable-zts'
     - template: azure/i386/job.yml
       parameters:
         configurationName: I386_DEBUG_NTS
@@ -64,30 +44,6 @@ jobs:
       parameters:
         configurationName: I386_RELEASE_ZTS
         configurationParameters: '--disable-debug --enable-zts'
-    - template: azure/macos/job.yml
-      parameters:
-        configurationName: MACOS_DEBUG_ZTS
-        configurationParameters: '--enable-debug --enable-zts'
-    - template: azure/macos/job.yml
-      parameters:
-        configurationName: MACOS_RELEASE_NTS
-        configurationParameters: '--disable-debug --disable-zts'
-    - template: azure/macos/job.yml
-      parameters:
-        configurationName: MACOS_RELEASE_ZTS
-        configurationParameters: '--disable-debug --enable-zts'
-    - template: azure/job.yml
-      parameters:
-        configurationName: DEBUG_ZTS_ASAN_UBSAN
-        configurationParameters: '--enable-debug --enable-zts --enable-address-sanitizer --enable-undefined-sanitizer'
-        runTestsParameters: --asan
-        timeoutInMinutes: 360
-    - template: azure/msan_job.yml
-      parameters:
-        configurationName: DEBUG_ZTS_MSAN
-        configurationParameters: '--enable-debug --enable-zts'
-        runTestsParameters: --msan
-        timeoutInMinutes: 120
     - template: azure/community_job.yml
       parameters:
         configurationName: COMMUNITY

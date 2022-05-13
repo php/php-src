@@ -58,7 +58,7 @@ microseconds = true
 2016-10-02 00:00:00.000000
 2016-10-03 12:00:00.000000
 2016-10-17 12:47:18.081921
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -73,24 +73,12 @@ object(DateInterval)#%d (16) {
   int(0)
   ["f"]=>
   float(0.378189)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
   ["invert"]=>
   int(0)
   ["days"]=>
   int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }
 2016-10-03 13:20:06.724934
 2016-10-03 13:20:07.103123

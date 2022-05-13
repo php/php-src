@@ -88,7 +88,7 @@ Content-Type: application/soap+xml; charset=UTF-8
 Accept: application/soap+xml, application/dime, multipart/related, text/*
 SOAPAction: "urn:adressen#adressen#SetAda"
 Expect: 100-continue
-Content-Length: ${len}
+Content-Length: {$len}
 HDRS;
         if ($b) {
             $hdrs .="\nContent-Encoding: gzip";

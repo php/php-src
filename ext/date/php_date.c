@@ -882,6 +882,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 		/* day */
 		case 'd': case 'j': retval = (int) t->d; break;
 
+		case 'N': retval = (int) timelib_iso_day_of_week(t->y, t->m, t->d); break;
 		case 'w': retval = (int) timelib_day_of_week(t->y, t->m, t->d); break;
 		case 'z': retval = (int) timelib_day_of_year(t->y, t->m, t->d); break;
 
@@ -896,6 +897,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime)
 		case 'L': retval = (int) timelib_is_leap((int) t->y); break;
 		case 'y': retval = (int) (t->y % 100); break;
 		case 'Y': retval = (int) t->y; break;
+		case 'o': retval = (int) isoyear; break; /* iso year */
 
 		/* Swatch Beat a.k.a. Internet Time */
 		case 'B':
@@ -1035,6 +1037,9 @@ PHP_FUNCTION(strtotime)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		return;
+	}
 
 	now = timelib_time_ctor();
 	now->tz_info = tzi;
@@ -1094,6 +1099,9 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		timelib_unixtime2gmt(now, (timelib_sll) php_time());
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return;
+		}
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(now, (timelib_sll) php_time());
@@ -1215,6 +1223,9 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gmt)
 		timelib_unixtime2gmt(ts, (timelib_sll) timestamp);
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return;
+		}
 		ts->tz_info = tzi;
 		ts->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(ts, (timelib_sll) timestamp);
@@ -1323,6 +1334,9 @@ PHP_FUNCTION(localtime)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		RETURN_THROWS();
+	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
@@ -1374,6 +1388,9 @@ PHP_FUNCTION(getdate)
 	}
 
 	tzi = get_timezone_info();
+	if (!tzi) {
+		RETURN_THROWS();
+	}
 	ts = timelib_time_ctor();
 	ts->tz_info = tzi;
 	ts->zone_type = TIMELIB_ZONETYPE_ID;
@@ -1451,16 +1468,6 @@ static int date_period_it_has_more(zend_object_iterator *iter)
 {
 	date_period_it *iterator = (date_period_it *)iter;
 	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);
-	timelib_time   *it_time = object->current;
-
-	/* apply modification if it's not the first iteration */
-	if (!object->include_start_date || iterator->current_index > 0) {
-		it_time->have_relative = 1;
-		it_time->relative = *object->interval;
-		it_time->sse_uptodate = 0;
-		timelib_update_ts(it_time, NULL);
-		timelib_update_from_sse(it_time);
-	}
 
 	if (object->end) {
 		return object->current->sse < object->end->sse ? SUCCESS : FAILURE;
@@ -1502,10 +1509,23 @@ static void date_period_it_current_key(zend_object_iterator *iter, zval *key)
 }
 /* }}} */
 
+static void date_period_advance(timelib_time *it_time, timelib_rel_time *interval)
+{
+	it_time->have_relative = 1;
+	it_time->relative = *interval;
+	it_time->sse_uptodate = 0;
+	timelib_update_ts(it_time, NULL);
+	timelib_update_from_sse(it_time);
+}
+
 /* {{{ date_period_it_move_forward */
 static void date_period_it_move_forward(zend_object_iterator *iter)
 {
-	date_period_it   *iterator = (date_period_it *)iter;
+	date_period_it *iterator = (date_period_it *)iter;
+	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);
+	timelib_time   *it_time = object->current;
+
+	date_period_advance(it_time, object->interval);
 
 	iterator->current_index++;
 	date_period_it_invalidate_current(iter);
@@ -1525,7 +1545,13 @@ static void date_period_it_rewind(zend_object_iterator *iter)
 		zend_throw_error(NULL, "DatePeriod has not been initialized correctly");
 		return;
 	}
+
 	iterator->object->current = timelib_time_clone(iterator->object->start);
+
+	if (!iterator->object->include_start_date) {
+		date_period_advance(iterator->object->current, iterator->object->interval);
+	}
+
 	date_period_it_invalidate_current(iter);
 }
 /* }}} */
@@ -1787,28 +1813,9 @@ static HashTable *date_object_get_gc_timezone(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
+static void date_object_to_hash(php_date_obj *dateobj, HashTable *props)
 {
-	HashTable *props;
 	zval zv;
-	php_date_obj *dateobj;
-
-	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
-		case ZEND_PROP_PURPOSE_SERIALIZE:
-		case ZEND_PROP_PURPOSE_VAR_EXPORT:
-		case ZEND_PROP_PURPOSE_JSON:
-		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			break;
-		default:
-			return zend_std_get_properties_for(object, purpose);
-	}
-
-	dateobj = php_date_obj_from_obj(object);
-	props = zend_array_dup(zend_std_get_properties(object));
-	if (!dateobj->time) {
-		return props;
-	}
 
 	/* first we add the date and time in ISO format */
 	ZVAL_STR(&zv, date_format("Y-m-d H:i:s.u", sizeof("Y-m-d H:i:s.u")-1, dateobj->time, 1));
@@ -1841,6 +1848,31 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 		}
 		zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
 	}
+}
+
+static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose) /* {{{ */
+{
+	HashTable *props;
+	php_date_obj *dateobj;
+
+	switch (purpose) {
+		case ZEND_PROP_PURPOSE_DEBUG:
+		case ZEND_PROP_PURPOSE_SERIALIZE:
+		case ZEND_PROP_PURPOSE_VAR_EXPORT:
+		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			break;
+		default:
+			return zend_std_get_properties_for(object, purpose);
+	}
+
+	dateobj = php_date_obj_from_obj(object);
+	props = zend_array_dup(zend_std_get_properties(object));
+	if (!dateobj->time) {
+		return props;
+	}
+
+	date_object_to_hash(dateobj, props);
 
 	return props;
 } /* }}} */
@@ -1939,10 +1971,20 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 	}
 }
 
+void date_timezone_object_to_hash(php_timezone_obj *tzobj, HashTable *props)
+{
+	zval zv;
+
+	ZVAL_LONG(&zv, tzobj->type);
+	zend_hash_str_update(props, "timezone_type", strlen("timezone_type"), &zv);
+
+	php_timezone_to_string(tzobj, &zv);
+	zend_hash_str_update(props, "timezone", strlen("timezone"), &zv);
+}
+
 static HashTable *date_object_get_properties_for_timezone(zend_object *object, zend_prop_purpose purpose) /* {{{ */
 {
 	HashTable *props;
-	zval zv;
 	php_timezone_obj *tzobj;
 
 	switch (purpose) {
@@ -1962,11 +2004,7 @@ static HashTable *date_object_get_properties_for_timezone(zend_object *object, z
 		return props;
 	}
 
-	ZVAL_LONG(&zv, tzobj->type);
-	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
-
-	php_timezone_to_string(tzobj, &zv);
-	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+	date_timezone_object_to_hash(tzobj, props);
 
 	return props;
 } /* }}} */
@@ -2009,6 +2047,11 @@ static zend_object *date_object_clone_interval(zend_object *this_ptr) /* {{{ */
 	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
+	new_obj->civil_or_wall = old_obj->civil_or_wall;
+	new_obj->from_string = old_obj->from_string;
+	if (old_obj->date_string) {
+		new_obj->date_string = zend_string_copy(old_obj->date_string);
+	}
 	new_obj->initialized = old_obj->initialized;
 	if (old_obj->diff) {
 		new_obj->diff = timelib_rel_time_clone(old_obj->diff);
@@ -2025,16 +2068,17 @@ static HashTable *date_object_get_gc_interval(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
+static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTable *props)
 {
-	HashTable *props;
 	zval zv;
-	php_interval_obj *intervalobj;
 
-	intervalobj = php_interval_obj_from_obj(object);
-	props = zend_std_get_properties(object);
-	if (!intervalobj->initialized) {
-		return props;
+	/* Records whether this is a special relative interval that needs to be recreated from a string */
+	if (intervalobj->from_string) {
+		ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+		zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
+		ZVAL_STR_COPY(&zv, intervalobj->date_string);
+		zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
+		return;
 	}
 
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
@@ -2049,9 +2093,6 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
 	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
 	if (intervalobj->diff->days != -99999) {
 		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
@@ -2059,10 +2100,24 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+	ZVAL_BOOL(&zv, (zend_bool)intervalobj->from_string);
+	zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
+
+#undef PHP_DATE_INTERVAL_ADD_PROPERTY
+}
+
+static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
+{
+	HashTable *props;
+	php_interval_obj *intervalobj;
+
+	intervalobj = php_interval_obj_from_obj(object);
+	props = zend_std_get_properties(object);
+	if (!intervalobj->initialized) {
+		return props;
+	}
+
+	date_interval_object_to_hash(intervalobj, props);
 
 	return props;
 } /* }}} */
@@ -2130,6 +2185,10 @@ static void date_object_free_storage_interval(zend_object *object) /* {{{ */
 {
 	php_interval_obj *intern = php_interval_obj_from_obj(object);
 
+	if (intern->date_string) {
+		zend_string_release(intern->date_string);
+		intern->date_string = NULL;
+	}
 	timelib_rel_time_dtor(intern->diff);
 	zend_object_std_dtor(&intern->std);
 } /* }}} */
@@ -2256,6 +2315,9 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 		tzi = dateobj->time->tz_info;
 	} else {
 		tzi = get_timezone_info();
+		if (!tzi) {
+			return 0;
+		}
 	}
 
 	now = timelib_time_ctor();
@@ -2432,8 +2494,10 @@ PHP_METHOD(DateTime, createFromImmutable)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeimmutable_object, date_ce_immutable)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	old_obj = Z_PHPDATE_P(datetimeimmutable_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeImmutable);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2451,8 +2515,10 @@ PHP_METHOD(DateTime, createFromInterface)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeInterface);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2470,8 +2536,10 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 		Z_PARAM_OBJECT_OF_CLASS(datetime_object, date_ce_date)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	old_obj = Z_PHPDATE_P(datetime_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTime);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2489,8 +2557,10 @@ PHP_METHOD(DateTimeImmutable, createFromInterface)
 		Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	old_obj = Z_PHPDATE_P(datetimeinterface_object);
+	DATE_CHECK_INITIALIZED(old_obj->time, DateTimeInterface);
+
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, return_value);
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
@@ -2590,6 +2660,84 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	dateobj = Z_PHPDATE_P(return_value);
+	if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_object_to_hash(dateobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTimeImmutable);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_object_to_hash(dateobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dateobj = Z_PHPDATE_P(object);
+	myht = Z_ARRVAL_P(array);
+
+	if (!php_date_initialize_from_hash(&dateobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dateobj = Z_PHPDATE_P(object);
+	myht = Z_ARRVAL_P(array);
+
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
 	}
@@ -2965,7 +3113,7 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 	intobj = Z_PHPINTERVAL_P(interval);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
-	if (intobj->diff->have_special_relative) {
+	if (intobj->diff->have_weekday_relative || intobj->diff->have_special_relative) {
 		php_error_docref(NULL, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
 		return;
 	}
@@ -3013,6 +3161,12 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time *t)
 {
+	/* Free abbreviation if already set */
+	if (tzobj->initialized && tzobj->type == TIMELIB_ZONETYPE_ABBR) {
+		timelib_free(tzobj->tzi.z.abbr);
+	}
+
+	/* Set new values */
 	tzobj->initialized = 1;
 	tzobj->type = t->zone_type;
 
@@ -3389,7 +3543,7 @@ PHP_FUNCTION(date_diff)
 }
 /* }}} */
 
-static zend_result timezone_initialize(php_timezone_obj *tzobj, const char *tz, size_t tz_len) /* {{{ */
+static bool timezone_initialize(php_timezone_obj *tzobj, const char *tz, size_t tz_len) /* {{{ */
 {
 	timelib_time *dummy_t = ecalloc(1, sizeof(timelib_time));
 	int           dst, not_found;
@@ -3398,19 +3552,19 @@ static zend_result timezone_initialize(php_timezone_obj *tzobj, const char *tz, 
 	if (strlen(tz) != tz_len) {
 		php_error_docref(NULL, E_WARNING, "Timezone must not contain null bytes");
 		efree(dummy_t);
-		return FAILURE;
+		return false;
 	}
 
 	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (not_found) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
 		efree(dummy_t);
-		return FAILURE;
+		return false;
 	} else {
 		set_timezone_from_timelib_time(tzobj, dummy_t);
 		timelib_free(dummy_t->tz_abbr);
 		efree(dummy_t);
-		return SUCCESS;
+		return true;
 	}
 } /* }}} */
 
@@ -3425,7 +3579,7 @@ PHP_FUNCTION(timezone_open)
 	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
-	if (FAILURE == timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz))) {
+	if (!timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz))) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -3450,25 +3604,25 @@ PHP_METHOD(DateTimeZone, __construct)
 }
 /* }}} */
 
-static zend_result php_date_timezone_initialize_from_hash(zval **return_value, php_timezone_obj **tzobj, HashTable *myht) /* {{{ */
+static bool php_date_timezone_initialize_from_hash(zval **return_value, php_timezone_obj **tzobj, HashTable *myht) /* {{{ */
 {
 	zval            *z_timezone_type;
 
 	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type") - 1)) == NULL) {
-		return FAILURE;
+		return false;
 	}
 
 	zval *z_timezone;
 
 	if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone") - 1)) == NULL) {
-		return FAILURE;
+		return false;
 	}
 
 	if (Z_TYPE_P(z_timezone_type) != IS_LONG) {
-		return FAILURE;
+		return false;
 	}
 	if (Z_TYPE_P(z_timezone) != IS_STRING) {
-		return FAILURE;
+		return false;
 	}
 	return timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone), Z_STRLEN_P(z_timezone));
 } /* }}} */
@@ -3488,7 +3642,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
-	if (php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) == FAILURE) {
+	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Timezone initialization failed");
 		zval_ptr_dtor(return_value);
 	}
@@ -3508,8 +3662,47 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	if (php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) == FAILURE) {
+	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Timezone initialization failed");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeZone, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_timezone_obj *tzobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	tzobj = Z_PHPTIMEZONE_P(object);
+	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_timezone_object_to_hash(tzobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeZone, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_timezone_obj *tzobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	tzobj = Z_PHPTIMEZONE_P(object);
+	myht = Z_ARRVAL_P(array);
+
+	if (!php_date_timezone_initialize_from_hash(&object, &tzobj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
 	}
 }
 /* }}} */
@@ -3631,6 +3824,15 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[i].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
+#define add_from_tto(to,ts) \
+		array_init(&element); \
+		add_assoc_long(&element, "ts",     ts); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0)); \
+		add_assoc_long(&element, "offset", (to)->offset); \
+		add_assoc_bool(&element, "isdst",  (to)->is_dst); \
+		add_assoc_string(&element, "abbr", (to)->abbr); \
+		add_next_index_zval(return_value, &element);
+
 #define add_last() add(tzobj->tzi.tz->bit64.timecnt - 1, timestamp_begin)
 
 	array_init(return_value);
@@ -3660,7 +3862,13 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	if (!found) {
 		if (tzobj->tzi.tz->bit64.timecnt > 0) {
-			add_last();
+			if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
+				timelib_time_offset *tto = timelib_get_time_zone_info(timestamp_begin, tzobj->tzi.tz);
+				add_from_tto(tto, timestamp_begin);
+				timelib_time_offset_dtor(tto);
+			} else {
+				add_last();
+			}
 		} else {
 			add_nominal();
 		}
@@ -3673,31 +3881,34 @@ PHP_FUNCTION(timezone_transitions_get)
 				return;
 			}
 		}
-		if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
-			int i, j;
-			timelib_sll start_y, end_y, dummy_m, dummy_d;
-			timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
+	}
+	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
+		int i, j;
+		timelib_sll start_y, end_y, dummy_m, dummy_d;
+		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
-			/* Find out year for last transition */
-			timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
+		/* Find out year for last transition */
+		timelib_unixtime2date(last_transition_ts, &start_y, &dummy_m, &dummy_d);
 
-			/* Find out year for final boundary timestamp */
-			timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
+		/* Find out year for final boundary timestamp */
+		timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
 
-			for (i = start_y; i <= end_y; i++) {
-				timelib_posix_transitions transitions = { 0 };
+		for (i = start_y; i <= end_y; i++) {
+			timelib_posix_transitions transitions = { 0 };
 
-				timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
+			timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
 
-				for (j = 0; j < transitions.count; j++) {
-					if (transitions.times[j] <= last_transition_ts) {
-						continue;
-					}
-					if (transitions.times[j] > timestamp_end) {
-						return;
-					}
-					add_by_index(transitions.types[j], transitions.times[j]);
+			for (j = 0; j < transitions.count; j++) {
+				if (transitions.times[j] <= last_transition_ts) {
+					continue;
 				}
+				if (transitions.times[j] < timestamp_begin) {
+					continue;
+				}
+				if (transitions.times[j] > timestamp_end) {
+					return;
+				}
+				add_by_index(transitions.types[j], transitions.times[j]);
 			}
 		}
 	}
@@ -3912,6 +4123,41 @@ PHP_METHOD(DateInterval, __construct)
 
 static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
+	/* If ->diff is already set, then we need to free it first */
+	if ((*intobj)->diff) {
+		timelib_rel_time_dtor((*intobj)->diff);
+	}
+
+	/* If we have a date_string, use that instead */
+	zval *date_str = zend_hash_str_find(myht, "date_string", strlen("date_string"));
+	if (date_str && Z_TYPE_P(date_str) == IS_STRING) {
+		timelib_time   *time;
+		timelib_error_container *err = NULL;
+
+		time = timelib_strtotime(Z_STRVAL_P(date_str), Z_STRLEN_P(date_str), &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+
+		if (err->error_count > 0)  {
+			php_error_docref(NULL,
+				E_WARNING,
+				"Unknown or bad format (%s) at position %d (%c) while unserializing: %s",
+				Z_STRVAL_P(date_str),
+				err->error_messages[0].position,
+				err->error_messages[0].character ? err->error_messages[0].character : ' ', err->error_messages[0].message);
+		}
+
+		(*intobj)->diff = timelib_rel_time_clone(&time->relative);
+		(*intobj)->initialized = 1;
+		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
+		(*intobj)->from_string = true;
+		(*intobj)->date_string = zend_string_copy(Z_STR_P(date_str));
+
+		timelib_time_dtor(time);
+		timelib_error_container_dtor(err);
+
+		return;
+	}
+
+	/* Set new value */
 	(*intobj)->diff = timelib_rel_time_ctor();
 
 #define PHP_DATE_INTERVAL_READ_PROPERTY(element, member, itype, def) \
@@ -3990,6 +4236,7 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 			(*intobj)->civil_or_wall = val;
 		}
 	}
+
 	(*intobj)->initialized = 1;
 } /* }}} */
 
@@ -4009,6 +4256,44 @@ PHP_METHOD(DateInterval, __set_state)
 	php_date_instantiate(date_ce_interval, return_value);
 	intobj = Z_PHPINTERVAL_P(return_value);
 	php_date_interval_initialize_from_hash(&return_value, &intobj, myht);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateInterval, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_interval_obj *intervalobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	intervalobj = Z_PHPINTERVAL_P(object);
+	DATE_CHECK_INITIALIZED(intervalobj->initialized, DateInterval);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_interval_object_to_hash(intervalobj, myht);
+}
+/* }}} */
+
+
+/* {{{ */
+PHP_METHOD(DateInterval, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_interval_obj *intervalobj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	intervalobj = Z_PHPINTERVAL_P(object);
+	myht = Z_ARRVAL_P(array);
+
+	php_date_interval_initialize_from_hash(&object, &intervalobj, myht);
 }
 /* }}} */
 
@@ -4050,11 +4335,19 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 		goto cleanup;
 	}
 
+	if (time->have_date || time->have_time || time->have_zone) {
+		php_error_docref(NULL, E_WARNING, "String '%s' contains non-relative elements", ZSTR_VAL(time_str));
+		RETVAL_FALSE;
+		goto cleanup;
+	}
+
 	php_date_instantiate(date_ce_interval, return_value);
 	diobj = Z_PHPINTERVAL_P(return_value);
 	diobj->diff = timelib_rel_time_clone(&time->relative);
 	diobj->initialized = 1;
 	diobj->civil_or_wall = PHP_DATE_CIVIL;
+	diobj->from_string = true;
+	diobj->date_string = zend_string_copy(time_str);
 
 cleanup:
 	timelib_time_dtor(time);
@@ -4508,6 +4801,9 @@ PHP_FUNCTION(date_default_timezone_get)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	default_tz = get_timezone_info();
+	if (!default_tz) {
+		RETURN_THROWS();
+	}
 	RETVAL_STRING(default_tz->name);
 }
 /* }}} */
@@ -4563,8 +4859,11 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, bool calc_s
 	altitude = 90 - zenith;
 
 	/* Initialize time struct */
-	t = timelib_time_ctor();
 	tzi = get_timezone_info();
+	if (!tzi) {
+		RETURN_THROWS();
+	}
+	t = timelib_time_ctor();
 	t->tz_info = tzi;
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 
@@ -4634,8 +4933,11 @@ PHP_FUNCTION(date_sun_info)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize time struct */
-	t = timelib_time_ctor();
 	tzi = get_timezone_info();
+	if (!tzi) {
+		RETURN_THROWS();
+	}
+	t = timelib_time_ctor();
 	t->tz_info = tzi;
 	t->zone_type = TIMELIB_ZONETYPE_ID;
 	timelib_unixtime2local(t, time);
@@ -4729,17 +5031,9 @@ static HashTable *date_object_get_gc_period(zend_object *object, zval **table, i
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ */
+static void date_period_object_to_hash(php_period_obj *period_obj, HashTable *props)
 {
-	HashTable		*props;
-	zval			 zv;
-	php_period_obj	*period_obj;
-
-	period_obj = php_period_obj_from_obj(object);
-	props = zend_std_get_properties(object);
-	if (!period_obj->start) {
-		return props;
-	}
+	zval zv;
 
 	if (period_obj->start) {
 		php_date_obj *date_obj;
@@ -4788,6 +5082,20 @@ static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ 
 
 	ZVAL_BOOL(&zv, period_obj->include_start_date);
 	zend_hash_str_update(props, "include_start_date", sizeof("include_start_date")-1, &zv);
+}
+
+static HashTable *date_object_get_properties_period(zend_object *object) /* {{{ */
+{
+	HashTable		*props;
+	php_period_obj	*period_obj;
+
+	period_obj = php_period_obj_from_obj(object);
+	props = zend_std_get_properties(object);
+	if (!period_obj->start) {
+		return props;
+	}
+
+	date_period_object_to_hash(period_obj, props);
 
 	return props;
 } /* }}} */
@@ -4887,6 +5195,46 @@ PHP_METHOD(DatePeriod, __set_state)
 
 	object_init_ex(return_value, date_ce_period);
 	period_obj = Z_PHPPERIOD_P(return_value);
+	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
+		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DatePeriod, __serialize)
+{
+	zval             *object = ZEND_THIS;
+	php_period_obj   *period_obj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	period_obj = Z_PHPPERIOD_P(object);
+	DATE_CHECK_INITIALIZED(period_obj->start, DatePeriod);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+	date_period_object_to_hash(period_obj, myht);
+}
+/* }}} */
+
+
+/* {{{ */
+PHP_METHOD(DatePeriod, __unserialize)
+{
+	zval             *object = ZEND_THIS;
+	php_period_obj   *period_obj;
+	zval             *array;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	period_obj = Z_PHPPERIOD_P(object);
+	myht = Z_ARRVAL_P(array);
+
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
 	}

@@ -37,7 +37,7 @@ $ora_sql =
       end loop;
       dbms_lob.createtemporary(b, false);
       dbms_lob.converttoblob(b, c, dbms_lob.lobmaxsize, dest_offset, src_offset, dbms_lob.default_csid, ctx, warn);
-      insert /*+ APPEND */ into ${schema}${table_name} (id, clob, blob) values (j, c, b);
+      insert /*+ APPEND */ into {$schema}{$table_name} (id, clob, blob) values (j, c, b);
     end loop;
     commit;
   end;";
@@ -108,7 +108,7 @@ var_dump($r);
 
 print("Test 2 - CLOB with current oci8.prefetch_lob_size\n");
 
-$sql = "select clob from ${schema}${table_name}" . " order by id";
+$sql = "select clob from {$schema}{$table_name}" . " order by id";
 $locarr = get_clob_loc($c, $sql, -1);
 $inlinearr = get_clob_inline($c, $sql, -1);
 
@@ -136,7 +136,7 @@ check_clobs($locarr, $inlinearr);
 
 print("Test 5 - BLOB with current ocig8.prefetch_lob_size \n");
 
-$sql = "select blob from ${schema}${table_name}" . " order by id";
+$sql = "select blob from {$schema}{$table_name}" . " order by id";
 $locarr = get_blob_loc($c, $sql, -1);
 
 print(count($locarr) . "\n");

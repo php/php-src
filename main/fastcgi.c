@@ -1590,10 +1590,10 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		memcpy(req->out_pos, str, len);
 		req->out_pos += len;
 	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
-		if (!req->out_hdr) {
-			open_packet(req, type);
-		}
 		if (limit > 0) {
+			if (!req->out_hdr) {
+				open_packet(req, type);
+			}
 			memcpy(req->out_pos, str, limit);
 			req->out_pos += limit;
 		}
@@ -1742,7 +1742,7 @@ void fcgi_free_mgmt_var_cb(zval *zv)
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+const char *fcgi_get_last_client_ip(void)
 {
 	static char str[INET6_ADDRSTRLEN];
 

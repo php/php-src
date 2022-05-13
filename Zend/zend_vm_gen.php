@@ -2865,7 +2865,7 @@ function gen_vm($def, $skel) {
                             out($f, "\t\t\t\t\tbreak;\n");
                             out($f, "\t\t\t\t}\n");
                         }
-                        out($f, "\t\t\t\tspec = ${spec_dsc['spec_code']};\n");
+                        out($f, "\t\t\t\tspec = {$spec_dsc['spec_code']};\n");
                         if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
                             out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
                             out($f, "\t\t\t\t\tzend_swap_operands(op);\n");

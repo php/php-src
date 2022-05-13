@@ -397,7 +397,8 @@ static inline bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_o
 	switch (opline->opcode) {
 		case ZEND_FREE:
 			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
-			if (!may_be_refcounted(ctx->ssa->var_info[ssa_op->op1_use].type)) {
+			if ((ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) != 0
+			 && !may_be_refcounted(ctx->ssa->var_info[ssa_op->op1_use].type)) {
 				return 0;
 			}
 			ZEND_FALLTHROUGH;

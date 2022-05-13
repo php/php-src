@@ -4529,9 +4529,9 @@ PHP_FUNCTION(array_change_key_case)
 			entry = zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 		} else {
 			if (change_to_upper) {
-				new_key = php_string_toupper(string_key);
+				new_key = zend_string_toupper(string_key);
 			} else {
-				new_key = php_string_tolower(string_key);
+				new_key = zend_string_tolower(string_key);
 			}
 			entry = zend_hash_update(Z_ARRVAL_P(return_value), new_key, entry);
 			zend_string_release_ex(new_key, 0);

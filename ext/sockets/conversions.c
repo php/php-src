@@ -1,3 +1,7 @@
+#ifdef __sun
+/* to enable 'new' ancillary data layout instead */
+# define _XPG4_2
+#endif
 #include "sockaddr_conv.h"
 #include "conversions.h"
 #include "sendrecvmsg.h" /* for ancillary registry */

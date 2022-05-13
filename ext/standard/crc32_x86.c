@@ -323,7 +323,7 @@ typedef size_t (*crc32_x86_simd_func_t)(X86_CRC32_TYPE type, uint32_t *crc, cons
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static crc32_x86_simd_func_t resolve_crc32_x86_simd_update() {
+static crc32_x86_simd_func_t resolve_crc32_x86_simd_update(void) {
 	if (zend_cpu_supports_sse42() && zend_cpu_supports_pclmul()) {
 		return crc32_sse42_pclmul_update;
 	}

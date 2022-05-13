@@ -21,6 +21,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
+#include "php_ini_builder.h"
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "zend_interfaces.h"
@@ -131,7 +132,7 @@ const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"max_execution_time=0\n"
-	"max_input_time=-1\n\0";
+	"max_input_time=-1\n";
 
 
 const opt_struct OPTIONS[] = {
@@ -233,7 +234,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
-static inline int sapi_cli_select(php_socket_t fd)
+static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
 	struct timeval tv;
@@ -406,10 +407,7 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 
 static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, NULL);
 }
 /* }}} */
 
@@ -574,7 +572,7 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
 /* {{{ cli_seek_file_begin */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
+static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
@@ -611,9 +609,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
-	int interactive=0;
+	bool interactive = false;
 	const char *param_error=NULL;
-	int hide_argv = 0;
+	bool hide_argv = false;
 	int num_repeats = 1;
 	pid_t pid = getpid();
 
@@ -700,7 +698,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						break;
 					}
 
-					interactive=1;
+					interactive = true;
 				}
 				break;
 
@@ -820,7 +818,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				zend_load_extension(php_optarg);
 				break;
 			case 'H':
-				hide_argv = 1;
+				hide_argv = true;
 				break;
 			case 10:
 				behavior=PHP_MODE_REFLECTION_FUNCTION;
@@ -896,7 +894,7 @@ do_repeat:
 		}
 		if (script_file) {
 			virtual_cwd_activate();
-			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+			if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 				goto err;
 			} else {
 				char real_path[MAXPATHLEN];
@@ -1024,7 +1022,7 @@ do_repeat:
 						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
 					} else {
 						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+							if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 								EG(exit_status) = 1;
 							} else {
 								CG(skip_shebang) = 1;
@@ -1176,8 +1174,7 @@ int main(int argc, char *argv[])
 	char *php_optarg = NULL;
 	int php_optind = 1, use_extended_info = 0;
 	char *ini_path_override = NULL;
-	char *ini_entries = NULL;
-	size_t ini_entries_len = 0;
+	struct php_ini_builder ini_builder;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
 
@@ -1239,6 +1236,8 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
+	php_ini_builder_init(&ini_builder);
+
 	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2))!=-1) {
 		switch (c) {
 			case 'c':
@@ -1250,37 +1249,10 @@ int main(int argc, char *argv[])
 			case 'n':
 				ini_ignore = 1;
 				break;
-			case 'd': {
+			case 'd':
 				/* define ini entries on command line */
-				size_t len = strlen(php_optarg);
-				char *val;
-
-				if ((val = strchr(php_optarg, '='))) {
-					val++;
-					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
-						memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-						ini_entries_len += (val - php_optarg);
-						memcpy(ini_entries + ini_entries_len, "\"", 1);
-						ini_entries_len++;
-						memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-						ini_entries_len += len - (val - php_optarg);
-						memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
-						ini_entries_len += sizeof("\n\0\"") - 2;
-					} else {
-						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
-						memcpy(ini_entries + ini_entries_len, php_optarg, len);
-						memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
-						ini_entries_len += len + sizeof("\n\0") - 2;
-					}
-				} else {
-					ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
-					memcpy(ini_entries + ini_entries_len, php_optarg, len);
-					memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
-					ini_entries_len += len + sizeof("=1\n\0") - 2;
-				}
+				php_ini_builder_define(&ini_builder, php_optarg);
 				break;
-			}
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			case 'S':
 				sapi_module = &cli_server_sapi_module;
@@ -1317,18 +1289,10 @@ exit_loop:
 	sapi_module->executable_location = argv[0];
 
 	if (sapi_module == &cli_sapi_module) {
-		if (ini_entries) {
-			ini_entries = realloc(ini_entries, ini_entries_len + sizeof(HARDCODED_INI));
-			memmove(ini_entries + sizeof(HARDCODED_INI) - 2, ini_entries, ini_entries_len + 1);
-			memcpy(ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI) - 2);
-		} else {
-			ini_entries = malloc(sizeof(HARDCODED_INI));
-			memcpy(ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
-		}
-		ini_entries_len += sizeof(HARDCODED_INI) - 2;
+		php_ini_builder_prepend_literal(&ini_builder, HARDCODED_INI);
 	}
 
-	sapi_module->ini_entries = ini_entries;
+	sapi_module->ini_entries = php_ini_builder_finish(&ini_builder);
 
 	/* startup after we get the above ini override se we get things right */
 	if (sapi_module->startup(sapi_module) == FAILURE) {
@@ -1375,9 +1339,7 @@ out:
 	if (ini_path_override) {
 		free(ini_path_override);
 	}
-	if (ini_entries) {
-		free(ini_entries);
-	}
+	php_ini_builder_deinit(&ini_builder);
 	if (module_started) {
 		php_module_shutdown();
 	}

@@ -444,10 +444,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
-			zval_ptr_dtor(value);
 			if ((min_range_set && (lval < min_range)) || (max_range_set && (lval > max_range))) {
 				goto error;
 			}
+			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
@@ -504,7 +504,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(char * domain, int len, zend_long flags) /* {{{ */
+static int _php_filter_validate_domain(char * domain, size_t len, zend_long flags) /* {{{ */
 {
 	char *e, *s, *t;
 	size_t l;
@@ -517,7 +517,7 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 	t = e - 1;
 
 	/* Ignore trailing dot */
-	if (*t == '.') {
+	if (l > 0 && *t == '.') {
 		e = t;
 		l--;
 	}

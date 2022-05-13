@@ -7,23 +7,68 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
+  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
+  . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
+  . Support huge pages on MacOS. (David CARLIER)
+
+- Curl:
+  . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+
+- Date:
+  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
+    non-relative items are present). (Derick)
+  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
+    Year). (Pavel Djundik)
+
+- FPM:
+  . Emit error for invalid port setting. (David Carlier)
+  . Added extra check for FPM proc dumpable on SELinux based systems.
+    (David Carlier)
+  . Added support for listening queue on macOS. (David Carlier)
+  . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
+  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
 
 - OCI8:
   . Added oci8.prefetch_lob_size directive to tune LOB query performance
   . Support for building against Oracle Client libraries 10.1 and 10.2 has been
     dropped. Oracle Client libraries 11.2 or newer are now required.
 
+- PDO_ODBC:
+  . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
+    Buckley)
+
+- Reflection:
+  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
+  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
+
+- Sodium:
+  . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
+
+- SQLite3:
+  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
+
+- Streams:
+  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
+    (Cristian Rodríguez)
+
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.
     (Yurun)
   . Finished AVIF support in getimagesize(). (Yannis Guyon)
+  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
+    (ilutov)
+  . New function memory_reset_peak_usage(). (Patrick Allaert)
 
 - Zip:
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method
   . add ZipArchive::getStreamIndex() method
+
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

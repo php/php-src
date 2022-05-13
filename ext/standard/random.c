@@ -147,7 +147,7 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw)
 		struct stat st;
 
 		if (fd < 0) {
-#if HAVE_DEV_URANDOM
+#ifdef HAVE_DEV_URANDOM
 			fd = open("/dev/urandom", O_RDONLY);
 #endif
 			if (fd < 0) {

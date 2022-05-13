@@ -1379,13 +1379,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 						dup_partial_object(&zv, op1);
 						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ
-								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
+						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
-							zval_ptr_dtor_nogc(&tmp1);
 						} else {
 							SET_RESULT(result, &tmp1);
 						}
+						zval_ptr_dtor_nogc(&tmp1);
+						zval_ptr_dtor_nogc(&tmp2);
 						SET_RESULT(op1, &zv);
 						zval_ptr_dtor_nogc(&zv);
 						break;
@@ -1721,6 +1721,10 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	}
 
 	if (!(info->type & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_NULL))) {
+		if (ssa->vars[var_num].definition >= 0 
+		 && ctx->scdf.op_array->opcodes[ssa->vars[var_num].definition].opcode == ZEND_VERIFY_RETURN_TYPE) {
+			return NULL;
+		}
 		ZVAL_NULL(tmp);
 		return tmp;
 	}
@@ -2108,21 +2112,31 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);
 				}
 				return 0;
-			} else {
-				zend_ssa_remove_result_def(ssa, ssa_op);
-				if (opline->opcode == ZEND_DO_ICALL) {
-					removed_ops = remove_call(ctx, opline, ssa_op);
-				} else if (opline->opcode == ZEND_TYPE_CHECK
-						&& (opline->op1_type & (IS_VAR|IS_TMP_VAR))
-						&& (!value_known(&ctx->values[ssa_op->op1_use])
-							|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op1_use])
-							|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op1_use]))) {
+			} else if ((opline->op2_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op2_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op2_use]))) {
+				return 0;
+			} else if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
+					&& (!value_known(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_ARRAY(&ctx->values[ssa_op->op1_use])
+						|| IS_PARTIAL_OBJECT(&ctx->values[ssa_op->op1_use]))) {
+				if (opline->opcode == ZEND_TYPE_CHECK
+				 || opline->opcode == ZEND_BOOL) {
+					zend_ssa_remove_result_def(ssa, ssa_op);
 					/* For TYPE_CHECK we may compute the result value without knowing the
 					 * operand, based on type inference information. Make sure the operand is
 					 * freed and leave further cleanup to DCE. */
 					opline->opcode = ZEND_FREE;
 					opline->result_type = IS_UNUSED;
 					removed_ops++;
+				} else {
+					return 0;
+				}
+			} else {
+				zend_ssa_remove_result_def(ssa, ssa_op);
+				if (opline->opcode == ZEND_DO_ICALL) {
+					removed_ops = remove_call(ctx, opline, ssa_op);
 				} else {
 					zend_ssa_remove_instr(ssa, opline, ssa_op);
 					removed_ops++;

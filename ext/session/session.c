@@ -472,6 +472,9 @@ static void php_session_save_current_state(int write) /* {{{ */
 
 	if (write) {
 		IF_SESSION_VARS() {
+			zend_string *handler_class_name = PS(mod_user_class_name);
+			const char *handler_function_name;
+
 			if (PS(mod_data) || PS(mod_user_implemented)) {
 				zend_string *val;
 
@@ -483,12 +486,15 @@ static void php_session_save_current_state(int write) /* {{{ */
 						&& zend_string_equals(val, PS(session_vars))
 					) {
 						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
+						handler_function_name = handler_class_name != NULL ? "updateTimestamp" : "update_timestamp";
 					} else {
 						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
+						handler_function_name = "write";
 					}
 					zend_string_release_ex(val, 0);
 				} else {
 					ret = PS(mod)->s_write(&PS(mod_data), PS(id), ZSTR_EMPTY_ALLOC(), PS(gc_maxlifetime));
+					handler_function_name = "write";
 				}
 			}
 
@@ -499,9 +505,14 @@ static void php_session_save_current_state(int write) /* {{{ */
 									 "is correct (%s)",
 									 PS(mod)->s_name,
 									 PS(save_path));
+				} else if (handler_class_name != NULL) {
+					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
+									 "defined save handler. (session.save_path: %s, handler: %s::%s)", PS(save_path),
+									 ZSTR_VAL(handler_class_name), handler_function_name);
 				} else {
 					php_error_docref(NULL, E_WARNING, "Failed to write session data using user "
-									 "defined save handler. (session.save_path: %s)", PS(save_path));
+									 "defined save handler. (session.save_path: %s, handler: %s)", PS(save_path),
+									 handler_function_name);
 				}
 			}
 		}
@@ -2042,6 +2053,12 @@ PHP_FUNCTION(session_set_save_handler)
 			++i;
 		} ZEND_HASH_FOREACH_END();
 
+
+		if (PS(mod_user_class_name)) {
+			zend_string_release(PS(mod_user_class_name));
+		}
+		PS(mod_user_class_name) = zend_string_copy(Z_OBJCE_P(obj)->name);
+
 		if (register_shutdown) {
 			/* create shutdown function */
 			php_shutdown_function_entry shutdown_function_entry;
@@ -2093,6 +2110,11 @@ PHP_FUNCTION(session_set_save_handler)
 
 	if (save_handler_check_session() == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (PS(mod_user_class_name)) {
+		zend_string_release(PS(mod_user_class_name));
+		PS(mod_user_class_name) = NULL;
 	}
 
 	/* remove shutdown function */
@@ -2775,6 +2797,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->session_status = php_session_none;
 	ps_globals->default_mod = NULL;
 	ps_globals->mod_user_implemented = 0;
+	ps_globals->mod_user_class_name = NULL;
 	ps_globals->mod_user_is_open = 0;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = 0;

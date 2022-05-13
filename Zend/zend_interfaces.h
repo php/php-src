@@ -55,6 +55,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter);
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter);
+ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n);
 
 ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *iterator);
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref);

@@ -181,6 +181,14 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 }
 /* }}} */
 
+ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
+{
+	zend_user_iterator *iter = (zend_user_iterator*)_iter;
+	*table = &iter->it.data;
+	*n = 1;
+	return NULL;
+}
+
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
 	zend_user_it_valid,
@@ -189,7 +197,7 @@ static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator =
 	zend_user_it_move_forward,
 	zend_user_it_rewind,
 	zend_user_it_invalidate_current,
-	NULL, /* get_gc */
+	zend_user_it_get_gc,
 };
 
 /* {{{ zend_user_it_get_iterator */
@@ -258,7 +266,8 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 			}
 		}
 	}
-	zend_error_noreturn(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
+	zend_error_noreturn(E_CORE_ERROR, "%s %s must implement interface %s as part of either %s or %s",
+		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(zend_ce_traversable->name),
 		ZSTR_VAL(zend_ce_iterator->name),

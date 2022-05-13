@@ -13,8 +13,17 @@ function dumpType(ReflectionUnionType $rt) {
     }
 }
 
+function dumpBCType(ReflectionNamedType $rt) {
+    echo "Type $rt:\n";
+    echo "  Name: " . $rt->getName() . "\n";
+    echo "  String: " . (string) $rt . "\n";
+    echo "  Allows Null: " . ($rt->allowsNull() ? "true" : "false") . "\n";
+}
+
 function test1(): X|Y|int|float|false|null { }
 function test2(): X|iterable|bool { }
+function test3(): null|false { }
+function test4(): ?false { }
 
 class Test {
     public X|Y|int $prop;
@@ -22,6 +31,8 @@ class Test {
 
 dumpType((new ReflectionFunction('test1'))->getReturnType());
 dumpType((new ReflectionFunction('test2'))->getReturnType());
+dumpBCType((new ReflectionFunction('test3'))->getReturnType());
+dumpBCType((new ReflectionFunction('test4'))->getReturnType());
 
 $rc = new ReflectionClass(Test::class);
 $rp = $rc->getProperty('prop');
@@ -75,6 +86,14 @@ Allows null: false
   Name: bool
   String: bool
   Allows Null: false
+Type ?false:
+  Name: false
+  String: ?false
+  Allows Null: true
+Type ?false:
+  Name: false
+  String: ?false
+  Allows Null: true
 Type X|Y|int:
 Allows null: false
   Name: X

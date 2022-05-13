@@ -1053,7 +1053,7 @@ PHP_METHOD(SplPriorityQueue, current)
 PHP_METHOD(SplHeap, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_heap_object_get_debug_info(spl_ce_SplHeap, Z_OBJ_P(ZEND_THIS)));
@@ -1063,7 +1063,7 @@ PHP_METHOD(SplHeap, __debugInfo)
 PHP_METHOD(SplPriorityQueue, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_heap_object_get_debug_info(spl_ce_SplPriorityQueue, Z_OBJ_P(ZEND_THIS)));

@@ -192,6 +192,9 @@ void init_executor(void) /* {{{ */
 	EG(num_errors) = 0;
 	EG(errors) = NULL;
 
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
+
 	zend_fiber_init();
 	zend_weakrefs_init();
 
@@ -329,6 +332,18 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 						ZVAL_UNDEF(&c->value);
 					}
 				} ZEND_HASH_FOREACH_END();
+
+				/* properties may contain objects as well */
+				if (ce->default_properties_table) {
+					zval *p = ce->default_properties_table;
+					zval *end = p + ce->default_properties_count;
+
+					while (p != end) {
+						i_zval_ptr_dtor(p);
+						ZVAL_UNDEF(p);
+						p++;
+					}
+				}
 			}
 
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
@@ -450,6 +465,8 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
 		}
+
+		ZEND_ASSERT(EG(filename_override) == NULL);
 	}
 
 #if ZEND_DEBUG
@@ -541,7 +558,7 @@ ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 
 ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* {{{ */
 {
-	if (func->common.scope) {
+	if (func->common.scope && func->common.function_name) {
 		return zend_create_member_string(func->common.scope->name, func->common.function_name);
 	}
 
@@ -579,21 +596,18 @@ ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t a
 
 ZEND_API const char *zend_get_executed_filename(void) /* {{{ */
 {
-	zend_execute_data *ex = EG(current_execute_data);
-
-	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-		ex = ex->prev_execute_data;
-	}
-	if (ex) {
-		return ZSTR_VAL(ex->func->op_array.filename);
-	} else {
-		return "[no active file]";
-	}
+	zend_string *filename = zend_get_executed_filename_ex();
+	return filename != NULL ? ZSTR_VAL(filename) : "[no active file]";
 }
 /* }}} */
 
 ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 {
+	zend_string *filename_override = EG(filename_override);
+	if (filename_override != NULL) {
+		return filename_override;
+	}
+
 	zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
@@ -609,6 +623,11 @@ ZEND_API zend_string *zend_get_executed_filename_ex(void) /* {{{ */
 
 ZEND_API uint32_t zend_get_executed_lineno(void) /* {{{ */
 {
+	zend_long lineno_override = EG(lineno_override);
+	if (lineno_override != -1) {
+		return lineno_override;
+	}
+
 	zend_execute_data *ex = EG(current_execute_data);
 
 	while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
@@ -1798,8 +1817,7 @@ ZEND_API zend_result zend_set_local_var_str(const char *name, size_t len, zval *
 
 				do {
 					if (ZSTR_H(*str) == h &&
-					    ZSTR_LEN(*str) == len &&
-					    memcmp(ZSTR_VAL(*str), name, len) == 0) {
+					    zend_string_equals_cstr(*str, name, len)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
 						zval_ptr_dtor(var);
 						ZVAL_COPY_VALUE(var, value);

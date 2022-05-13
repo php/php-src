@@ -487,8 +487,16 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		/* Force UID and PWD to be set in the DSN */
 		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
 				&& !strstr(dbh->data_source, "UID")) {
-			char *dsn;
-			spprintf(&dsn, 0, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
+			/* XXX: Do we check if password is null? */
+			size_t new_dsn_size = strlen(dbh->data_source)
+				+ strlen(dbh->username) + strlen(dbh->password)
+				+ strlen(";UID=;PWD=") + 1;
+			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
+			if (dsn == NULL) {
+				/* XXX: Do we inform the caller? */
+				goto fail;
+			}
+			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
 		}

@@ -65,7 +65,7 @@
 #include "php_string.h"
 #include "file.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #  include "win32/pwd.h"
 # else
@@ -246,7 +246,7 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 # ifdef PF_INET6
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_CS|CONST_PERSISTENT);
 # elif defined(AF_INET6)

@@ -35,7 +35,7 @@ $ora_sql =
       end loop;
       dbms_lob.createtemporary(b, false);
       dbms_lob.converttoblob(b, c, dbms_lob.lobmaxsize, dest_offset, src_offset, dbms_lob.default_csid, ctx, warn);
-      insert /*+ APPEND */ into ${schema}${table_name} (id, clob, blob) values (j, c, b);
+      insert /*+ APPEND */ into {$schema}{$table_name} (id, clob, blob) values (j, c, b);
     end loop;
     commit;
   end;";
@@ -119,7 +119,7 @@ try {
 
 print("Test 3 - CLOB prefetch_lob_size 100000\n");
 
-$sql = "select clob from ${schema}${table_name}" . " order by id";
+$sql = "select clob from {$schema}{$table_name}" . " order by id";
 $locarr = get_clob_loc($c, $sql, 100000);
 $inlinearr = get_clob_inline($c, $sql, 100000);
 
@@ -138,7 +138,7 @@ check_clobs($locarr, $inlinearr);
 
 print("Test 4 - BLOB prefetch_lob_size 100000\n");
 
-$sql = "select blob from ${schema}${table_name}" . " order by id";
+$sql = "select blob from {$schema}{$table_name}" . " order by id";
 $locarr = get_blob_loc($c, $sql, 100000);
 
 print(count($locarr) . "\n");

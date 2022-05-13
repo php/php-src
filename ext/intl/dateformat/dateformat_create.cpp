@@ -45,7 +45,7 @@ extern "C" {
 	 UDAT_PATTERN == (i))
 
 /* {{{ */
-static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
+static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
 	zval		*object;
 	char	*locale_str;
@@ -80,6 +80,11 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG_OR_NULL(calendar_obj, Calendar_ce_ptr, calendar_long, calendar_is_null)
 		Z_PARAM_STRING_OR_NULL(pattern_str, pattern_str_len)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
+
+	if (error_handling != NULL) {
+		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
+		*error_handling_replaced = 1;
+	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
@@ -189,7 +194,7 @@ error:
 U_CFUNC PHP_FUNCTION( datefmt_create )
 {
     object_init_ex( return_value, IntlDateFormatter_ce_ptr );
-    if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+    if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_NULL();
 	}
@@ -200,18 +205,20 @@ U_CFUNC PHP_FUNCTION( datefmt_create )
 U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 {
 	zend_error_handling error_handling;
+	bool error_handling_replaced = 0;
 
-	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);
 	/* return_value param is being changed, therefore we will always return
 	 * NULL here */
 	return_value = ZEND_THIS;
-	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU) == FAILURE) {
+	if (datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, &error_handling, &error_handling_replaced) == FAILURE) {
 		if (!EG(exception)) {
 			zend_string *err = intl_error_get_message(NULL);
 			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
 			zend_string_release_ex(err, 0);
 		}
 	}
-	zend_restore_error_handling(&error_handling);
+	if (error_handling_replaced) {
+		zend_restore_error_handling(&error_handling);
+	}
 }
 /* }}} */

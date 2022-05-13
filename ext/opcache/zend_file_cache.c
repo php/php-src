@@ -253,15 +253,18 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	len = ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	ret = (void*)(info->str_size | Z_UL(1));
 	zend_shared_alloc_register_xlat_entry(str, ret);
-	if (info->str_size + len > ZSTR_LEN((zend_string*)ZCG(mem))) {
+
+	zend_string *s = (zend_string*)ZCG(mem);
+	if (info->str_size + len > ZSTR_LEN(s)) {
 		size_t new_len = info->str_size + len;
-		ZCG(mem) = (void*)zend_string_realloc(
-			(zend_string*)ZCG(mem),
+		s = zend_string_realloc(
+			s,
 			((_ZSTR_HEADER_SIZE + 1 + new_len + 4095) & ~0xfff) - (_ZSTR_HEADER_SIZE + 1),
 			0);
+		ZCG(mem) = (void*)s;
 	}
 
-	zend_string *new_str = (zend_string *) (ZSTR_VAL((zend_string*)ZCG(mem)) + info->str_size);
+	zend_string *new_str = (zend_string *) (ZSTR_VAL(s) + info->str_size);
 	memcpy(new_str, str, len);
 	GC_ADD_FLAGS(new_str, IS_STR_INTERNED);
 	GC_DEL_FLAGS(new_str, IS_STR_PERMANENT|IS_STR_CLASS_NAME_MAP_PTR);
@@ -269,7 +272,7 @@ static void *zend_file_cache_serialize_interned(zend_string              *str,
 	return ret;
 }
 
-static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
+static void *zend_file_cache_unserialize_interned(zend_string *str, bool in_shm)
 {
 	str = (zend_string*)((char*)ZCG(mem) + ((size_t)(str) & ~Z_UL(1)));
 	if (!in_shm) {
@@ -1006,14 +1009,34 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	return filename;
 }
 
-int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
+/**
+ * Helper function for zend_file_cache_script_store().
+ *
+ * @return true on success, false on error
+ */
+static bool zend_file_cache_script_write(int fd, const zend_persistent_script *script, const zend_file_cache_metainfo *info, const void *buf, const zend_string *s)
+{
+#ifdef HAVE_SYS_UIO_H
+	const struct iovec vec[] = {
+		{ .iov_base = (void *)info, .iov_len = sizeof(*info) },
+		{ .iov_base = (void *)buf, .iov_len = script->size },
+		{ .iov_base = (void *)ZSTR_VAL(s), .iov_len = info->str_size },
+	};
+
+	return writev(fd, vec, sizeof(vec) / sizeof(vec[0])) == (ssize_t)(sizeof(*info) + script->size + info->str_size);
+#else
+	return ZEND_LONG_MAX >= (zend_long)(sizeof(*info) + script->size + info->str_size) &&
+		write(fd, info, sizeof(*info)) == sizeof(*info) &&
+		write(fd, buf, script->size) == script->size &&
+		write(fd, ZSTR_VAL(s), info->str_size) == info->str_size;
+#endif
+}
+
+int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 {
 	int fd;
 	char *filename;
 	zend_file_cache_metainfo info;
-#ifdef HAVE_SYS_UIO_H
-	struct iovec vec[3];
-#endif
 	void *mem, *buf;
 
 #ifdef HAVE_JIT
@@ -1058,16 +1081,18 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 	zend_shared_alloc_init_xlat_table();
 	if (!in_shm) {
-		script->corrupted = 1; /* used to check if script restored to SHM or process memory */
+		script->corrupted = true; /* used to check if script restored to SHM or process memory */
 	}
 	zend_file_cache_serialize(script, &info, buf);
 	if (!in_shm) {
-		script->corrupted = 0;
+		script->corrupted = false;
 	}
 	zend_shared_alloc_destroy_xlat_table();
 
+	zend_string *const s = (zend_string*)ZCG(mem);
+
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
 
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
@@ -1077,40 +1102,17 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	__msan_unpoison(buf, script->size);
 #endif
 
-#ifdef HAVE_SYS_UIO_H
-	vec[0].iov_base = (void *)&info;
-	vec[0].iov_len = sizeof(info);
-	vec[1].iov_base = buf;
-	vec[1].iov_len = script->size;
-	vec[2].iov_base = ZSTR_VAL((zend_string*)ZCG(mem));
-	vec[2].iov_len = info.str_size;
-
-	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
+	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release_ex((zend_string*)ZCG(mem), 0);
+		zend_string_release_ex(s, 0);
 		close(fd);
 		efree(mem);
 		zend_file_cache_unlink(filename);
 		efree(filename);
 		return FAILURE;
 	}
-#else
-	if (ZEND_LONG_MAX < (zend_long)(sizeof(info) + script->size + info.str_size) ||
-		write(fd, &info, sizeof(info)) != sizeof(info) ||
-		write(fd, buf, script->size) != script->size ||
-		write(fd, ((zend_string*)ZCG(mem))->val, info.str_size) != info.str_size
-		) {
-		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release_ex((zend_string*)ZCG(mem), 0);
-		close(fd);
-		efree(mem);
-		zend_file_cache_unlink(filename);
-		efree(filename);
-		return FAILURE;
-	}
-#endif
 
-	zend_string_release_ex((zend_string*)ZCG(mem), 0);
+	zend_string_release_ex(s, 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
@@ -1744,9 +1746,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_file_cache_metainfo info;
 	zend_accel_hash_entry *bucket;
 	void *mem, *checkpoint, *buf;
-	int cache_it = 1;
+	bool cache_it = true;
 	unsigned int actual_checksum;
-	int ok;
+	bool ok;
 
 	if (!full_path) {
 		return NULL;
@@ -1866,13 +1868,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 			goto use_process_mem;
 		}
 
-#if defined(__AVX__) || defined(__SSE2__)
-		/* Align to 64-byte boundary */
-		buf = zend_shared_alloc(info.mem_size + 64);
-		buf = (void*)(((zend_uintptr_t)buf + 63L) & ~63L);
-#else
-		buf = zend_shared_alloc(info.mem_size);
-#endif
+		buf = zend_shared_alloc_aligned(info.mem_size);
 
 		if (!buf) {
 			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
@@ -1884,18 +1880,18 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	} else {
 use_process_mem:
 		buf = mem;
-		cache_it = 0;
+		cache_it = false;
 	}
 
 	ZCG(mem) = ((char*)mem + info.mem_size);
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
 	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
 
-	ok = 1;
+	ok = true;
 	zend_try {
 		zend_file_cache_unserialize(script, buf);
 	} zend_catch {
-		ok = 0;
+		ok = false;
 	} zend_end_try();
 	if (!ok) {
 		if (cache_it) {
@@ -1908,7 +1904,7 @@ use_process_mem:
 		}
 	}
 
-	script->corrupted = 0;
+	script->corrupted = false;
 
 	if (cache_it) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);

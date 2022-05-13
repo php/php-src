@@ -665,6 +665,22 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 		}
 		func->common.arg_info = new_arg_info + 1;
 	}
+	if (old_func->common.attributes) {
+		zend_attribute *old_attr;
+
+		func->common.attributes = NULL;
+
+		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
+			uint32_t i;
+			zend_attribute *attr;
+
+			attr = zend_add_attribute(&func->common.attributes, old_attr->name, old_attr->argc, old_attr->flags, old_attr->offset, old_attr->lineno);
+
+			for (i = 0 ; i < old_attr->argc; i++) {
+				ZVAL_DUP(&attr->args[i].value, &old_attr->args[i].value);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
@@ -1000,9 +1016,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 
 void zend_register_standard_ini_entries(void) /* {{{ */
 {
-	int module_number = 0;
-
-	REGISTER_INI_ENTRIES();
+	zend_register_ini_entries_ex(ini_entries, 0, MODULE_PERSISTENT);
 }
 /* }}} */
 
@@ -1232,8 +1246,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
 
-	zend_observer_deactivate();
-
 	zend_try {
 		shutdown_scanner();
 	} zend_end_try();
@@ -1312,6 +1324,10 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
+	bool orig_record_errors;
+	uint32_t orig_num_errors;
+	zend_error_info **orig_errors;
+	zend_result res;
 
 	/* If we're executing a function during SCCP, count any warnings that may be emitted,
 	 * but don't perform any other error handling. */
@@ -1405,7 +1421,20 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 				CG(in_compilation) = 0;
 			}
 
-			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
+			orig_record_errors = EG(record_errors);
+			orig_num_errors = EG(num_errors);
+			orig_errors = EG(errors);
+			EG(record_errors) = false;
+			EG(num_errors) = 0;
+			EG(errors) = NULL;
+
+			res = call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params);
+
+			EG(record_errors) = orig_record_errors;
+			EG(num_errors) = orig_num_errors;
+			EG(errors) = orig_errors;
+
+			if (res == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(orig_type, error_filename, error_lineno, message);

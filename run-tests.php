@@ -103,12 +103,12 @@ Options:
                 Do not delete 'all' files, 'php' test file, 'skip' or 'clean'
                 file.
 
-    --set-timeout [n]
-                Set timeout for individual tests, where [n] is the number of
+    --set-timeout <n>
+                Set timeout for individual tests, where <n> is the number of
                 seconds. The default value is 60 seconds, or 300 seconds when
                 testing for memory leaks.
 
-    --context [n]
+    --context <n>
                 Sets the number of lines of surrounding context to print for diffs.
                 The default value is 3.
 
@@ -119,8 +119,8 @@ Options:
                 'mem'. The result types get written independent of the log format,
                 however 'diff' only exists when a test fails.
 
-    --show-slow [n]
-                Show all tests that took longer than [n] milliseconds to run.
+    --show-slow <n>
+                Show all tests that took longer than <n> milliseconds to run.
 
     --no-clean  Do not execute clean section if any.
 
@@ -530,7 +530,11 @@ function main(): void
                     $just_save_results = true;
                     break;
                 case '--set-timeout':
-                    $environment['TEST_TIMEOUT'] = $argv[++$i];
+                    $timeout = $argv[++$i] ?? '';
+                    if (!preg_match('/^\d+$/', $timeout)) {
+                        error("'$timeout' is not a valid number of seconds, try e.g. --set-timeout 60 for 1 minute");
+                    }
+                    $environment['TEST_TIMEOUT'] = intval($timeout, 10);
                     break;
                 case '--context':
                     $context_line_count = $argv[++$i] ?? '';
@@ -545,7 +549,11 @@ function main(): void
                     }
                     break;
                 case '--show-slow':
-                    $slow_min_ms = $argv[++$i];
+                    $slow_min_ms = $argv[++$i] ?? '';
+                    if (!preg_match('/^\d+$/', $slow_min_ms)) {
+                        error("'$slow_min_ms' is not a valid number of milliseconds, try e.g. --show-slow 1000 for 1 second");
+                    }
+                    $slow_min_ms = intval($slow_min_ms, 10);
                     break;
                 case '--temp-source':
                     $temp_source = $argv[++$i];
@@ -2799,10 +2807,10 @@ case "$1" in
     lldb -- {$orig_cmd}
     ;;
 "valgrind")
-    USE_ZEND_ALLOC=0 valgrind $2 ${orig_cmd}
+    USE_ZEND_ALLOC=0 valgrind $2 {$orig_cmd}
     ;;
 "rr")
-    rr record $2 ${orig_cmd}
+    rr record $2 {$orig_cmd}
     ;;
 *)
     {$orig_cmd}

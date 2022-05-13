@@ -373,8 +373,6 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	MYSQLND_CONN_DATA * conn = stmt? stmt->conn : NULL;
-	MYSQLND_STMT * s_to_prepare = s;
-	MYSQLND_STMT_DATA * stmt_to_prepare = stmt;
 
 	DBG_ENTER("mysqlnd_stmt::prepare");
 	if (!stmt || !conn) {
@@ -390,76 +388,15 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	SET_EMPTY_ERROR(conn->error_info);
 
 	if (stmt->state > MYSQLND_STMT_INITTED) {
-		/* See if we have to clean the wire */
-		if (stmt->state == MYSQLND_STMT_WAITING_USE_OR_STORE) {
-			/* Do implicit use_result and then flush the result */
-			stmt->default_rset_handler = s->m->use_result;
-			stmt->default_rset_handler(s);
-		}
-		/* No 'else' here please :) */
-		if (stmt->state > MYSQLND_STMT_WAITING_USE_OR_STORE && stmt->result) {
-			stmt->result->m.skip_result(stmt->result);
-		}
 		/*
-		  Create a new test statement, which we will prepare, but if anything
-		  fails, we will scrap it.
+		  Create a new prepared statement and destroy the previous one.
 		*/
-		s_to_prepare = conn->m->stmt_init(conn);
+		MYSQLND_STMT * s_to_prepare = conn->m->stmt_init(conn);
 		if (!s_to_prepare) {
 			goto fail;
 		}
-		stmt_to_prepare = s_to_prepare->data;
-	}
+		MYSQLND_STMT_DATA * stmt_to_prepare = s_to_prepare->data;
 
-	{
-		enum_func_status ret = FAIL;
-		const MYSQLND_CSTRING query_string = {query, query_len};
-
-		ret = conn->command->stmt_prepare(conn, query_string);
-		if (FAIL == ret) {
-			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-			goto fail;
-		}
-	}
-
-	if (FAIL == mysqlnd_stmt_read_prepare_response(s_to_prepare)) {
-		goto fail;
-	}
-
-	if (stmt_to_prepare->param_count) {
-		if (FAIL == mysqlnd_stmt_skip_metadata(s_to_prepare) ||
-			FAIL == mysqlnd_stmt_prepare_read_eof(s_to_prepare))
-		{
-			goto fail;
-		}
-	}
-
-	/*
-	  Read metadata only if there is actual result set.
-	  Beware that SHOW statements bypass the PS framework and thus they send
-	  no metadata at prepare.
-	*/
-	if (stmt_to_prepare->field_count) {
-		MYSQLND_RES * result = conn->m->result_init(stmt_to_prepare->field_count);
-		if (!result) {
-			SET_OOM_ERROR(conn->error_info);
-			goto fail;
-		}
-		/* Allocate the result now as it is needed for the reading of metadata */
-		stmt_to_prepare->result = result;
-
-		result->conn = conn->m->get_reference(conn);
-
-		result->type = MYSQLND_RES_PS_BUF;
-
-		if (FAIL == result->m.read_result_metadata(result, conn) ||
-			FAIL == mysqlnd_stmt_prepare_read_eof(s_to_prepare))
-		{
-			goto fail;
-		}
-	}
-
-	if (stmt_to_prepare != stmt) {
 		/* swap */
 		size_t real_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 		char * tmp_swap = mnd_emalloc(real_size);
@@ -474,16 +411,60 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 		}
 		s_to_prepare->m->dtor(s_to_prepare, TRUE);
 	}
+
+	{
+		enum_func_status ret = FAIL;
+		const MYSQLND_CSTRING query_string = {query, query_len};
+
+		ret = conn->command->stmt_prepare(conn, query_string);
+		if (FAIL == ret) {
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
+			goto fail;
+		}
+	}
+
+	if (FAIL == mysqlnd_stmt_read_prepare_response(s)) {
+		goto fail;
+	}
+
+	if (stmt->param_count) {
+		if (FAIL == mysqlnd_stmt_skip_metadata(s) ||
+			FAIL == mysqlnd_stmt_prepare_read_eof(s))
+		{
+			goto fail;
+		}
+	}
+
+	/*
+	  Read metadata only if there is actual result set.
+	  Beware that SHOW statements bypass the PS framework and thus they send
+	  no metadata at prepare.
+	*/
+	if (stmt->field_count) {
+		MYSQLND_RES * result = conn->m->result_init(stmt->field_count);
+		if (!result) {
+			SET_OOM_ERROR(conn->error_info);
+			goto fail;
+		}
+		/* Allocate the result now as it is needed for the reading of metadata */
+		stmt->result = result;
+
+		result->conn = conn->m->get_reference(conn);
+
+		result->type = MYSQLND_RES_PS_BUF;
+
+		if (FAIL == result->m.read_result_metadata(result, conn) ||
+			FAIL == mysqlnd_stmt_prepare_read_eof(s))
+		{
+			goto fail;
+		}
+	}
+
 	stmt->state = MYSQLND_STMT_PREPARED;
 	DBG_INF("PASS");
 	DBG_RETURN(PASS);
 
 fail:
-	if (stmt_to_prepare != stmt && s_to_prepare) {
-		s_to_prepare->m->dtor(s_to_prepare, TRUE);
-	}
-	stmt->state = MYSQLND_STMT_INITTED;
-
 	DBG_INF("FAIL");
 	DBG_RETURN(FAIL);
 }

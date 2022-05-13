@@ -365,8 +365,10 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 		GC_ADDREF(ht);
 	}
 	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
-	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-		zend_array_destroy(ht);
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+		if (!GC_REFCOUNT(ht)) {
+			zend_array_destroy(ht);
+		}
 		return 0;
 	}
 	return EG(exception) == NULL;
@@ -808,8 +810,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 				execute_data = EG(current_execute_data);
 				opline = EX(opline);
 				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+					if (GC_REFCOUNT(ht)) {
+						zend_array_destroy(ht);
+					}
 					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 						if (EG(exception)) {
 							ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -836,8 +840,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
 			zend_use_resource_as_offset(dim);
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-				zend_array_destroy(ht);
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -916,6 +922,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 						ZVAL_NULL(EX_VAR(opline->result.var));
 					}
 				}
+				if (opline->opcode == ZEND_ASSIGN_DIM
+				 && ((opline+1)->op1_type & (IS_VAR | IS_TMP_VAR))) {
+					zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+				}
 				return NULL;
 			}
 			ZEND_FALLTHROUGH;
@@ -933,8 +943,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 				execute_data = EG(current_execute_data);
 				opline = EX(opline);
 				zend_incompatible_double_to_long_error(Z_DVAL_P(dim));
-				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-					zend_array_destroy(ht);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+					if (!GC_REFCOUNT(ht)) {
+						zend_array_destroy(ht);
+					}
 					if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 						if (EG(exception)) {
 							ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -961,8 +973,10 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			execute_data = EG(current_execute_data);
 			opline = EX(opline);
 			zend_use_resource_as_offset(dim);
-			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
-				zend_array_destroy(ht);
+			if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
+				if (!GC_REFCOUNT(ht)) {
+					zend_array_destroy(ht);
+				}
 				if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 					if (EG(exception)) {
 						ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -2306,6 +2320,20 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref(zend_reference *ref, z
 	}
 }
 
+static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref_tmp(zend_reference *ref, zval *val, binary_op_type binary_op)
+{
+	zval z_copy;
+
+	binary_op(&z_copy, &ref->val, val);
+	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(&ref->val);
+		ZVAL_COPY_VALUE(&ref->val, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
+	}
+	zval_ptr_dtor_nogc(val);
+}
+
 static void ZEND_FASTCALL zend_jit_only_vars_by_reference(zval *arg)
 {
 	ZVAL_NEW_REF(arg, arg);
@@ -2345,6 +2373,9 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 	zend_throw_error(NULL,
 		"Attempt to increment/decrement property \"%s\" on %s",
 		property_name, zend_zval_type_name(container));
+	if (opline->op1_type == IS_VAR) {
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_invalid_property_assign(zval *container, const char *property_name)

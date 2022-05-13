@@ -82,7 +82,7 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 	zend_hash_destroy(&intern->storage);
 } /* }}} */
 
-static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zend_object *obj) {
+static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage *intern, zend_object *obj) {
 	if (UNEXPECTED(intern->fptr_get_hash)) {
 		zval param;
 		zval rv;
@@ -218,12 +218,12 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 	return pelement;
 } /* }}} */
 
-static int spl_object_storage_detach(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
+static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
 {
 	if (EXPECTED(!(intern->flags & SOS_OVERRIDDEN_UNSET_DIMENSION))) {
 		return zend_hash_index_del(&intern->storage, obj->handle);
 	}
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	zend_hash_key key;
 	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
 		return ret;
@@ -544,7 +544,7 @@ PHP_METHOD(SplObjectStorage, offsetGet)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
-		return;
+		RETURN_NULL();
 	}
 
 	element = spl_object_storage_get(intern, &key);
@@ -723,7 +723,7 @@ PHP_METHOD(SplObjectStorage, getInfo)
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
-		return;
+		RETURN_NULL();
 	}
 	ZVAL_COPY(return_value, &element->inf);
 } /* }}} */
@@ -740,7 +740,7 @@ PHP_METHOD(SplObjectStorage, setInfo)
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
-		return;
+		RETURN_NULL();
 	}
 	zval_ptr_dtor(&element->inf);
 	ZVAL_COPY(&element->inf, inf);
@@ -1008,7 +1008,7 @@ PHP_METHOD(SplObjectStorage, __unserialize)
 PHP_METHOD(SplObjectStorage, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_object_storage_debug_info(Z_OBJ_P(ZEND_THIS)));

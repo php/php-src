@@ -31,7 +31,7 @@
 #include "ext/standard/head.h"
 #include "php_string.h"
 #include "pack.h"
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
@@ -39,7 +39,7 @@
 #endif
 #endif
 #include "fsock.h"
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

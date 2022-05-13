@@ -20,58 +20,112 @@ final class mysqli_driver
 
 class mysqli
 {
-    /** @link mysqli.affected-rows */
+    /**
+     * @readonly
+     * @link mysqli.affected-rows
+     */
     public int|string $affected_rows;
 
-    /** @link mysqli.get-client-info */
+    /**
+     * @readonly
+     * @link mysqli.get-client-info
+     */
     public string $client_info;
 
-    /** @link mysqli.get-client-version */
+    /**
+     * @readonly
+     * @link mysqli.get-client-version
+     */
     public int $client_version;
 
-    /** @link mysqli.connect-errno */
+    /**
+     * @readonly
+     * @link mysqli.connect-errno
+     */
     public int $connect_errno;
 
-    /** @link mysqli.connect-error */
+    /**
+     * @readonly
+     * @link mysqli.connect-error
+     */
     public ?string $connect_error;
 
-    /** @link mysqli.errno */
+    /**
+     * @readonly
+     * @link mysqli.errno
+     */
     public int $errno;
 
-    /** @link mysqli.error */
+    /**
+     * @readonly
+     * @link mysqli.error
+     */
     public string $error;
 
-    /** @link mysqli.error-list */
+    /**
+     * @readonly
+     * @link mysqli.error-list
+     */
     public array $error_list;
 
-    /** @link mysqli.field-count */
+    /**
+     * @readonly
+     * @link mysqli.field-count
+     */
     public int $field_count;
 
-    /** @link mysqli.get-host-info */
+    /**
+     * @readonly
+     * @link mysqli.get-host-info
+     */
     public string $host_info;
 
-    /** @link mysqli.info */
+    /**
+     * @readonly
+     * @link mysqli.info
+     */
     public ?string $info;
 
-    /** @link mysqli.insert-id */
+    /**
+     * @readonly
+     * @link mysqli.insert-id
+     */
     public int|string $insert_id;
 
-    /** @link mysqli.get-server-info */
+    /**
+     * @readonly
+     * @link mysqli.get-server-info
+     */
     public string $server_info;
 
-    /** @link mysqli.get-server-version */
+    /**
+     * @readonly
+     * @link mysqli.get-server-version
+     */
     public int $server_version;
 
-    /** @link mysqli.sqlstate */
+    /**
+     * @readonly
+     * @link mysqli.sqlstate
+     */
     public string $sqlstate;
 
-    /** @link mysqli.get-proto-info */
+    /**
+     * @readonly
+     * @link mysqli.get-proto-info
+     */
     public int $protocol_version;
 
-    /** @link mysqli.thread-id */
+    /**
+     * @readonly
+     * @link mysqli.thread-id
+     */
     public int $thread_id;
 
-    /** @link mysqli.warning-count */
+    /**
+     * @readonly
+     * @link mysqli.warning-count
+     */
     public int $warning_count;
 
     public function __construct(
@@ -373,16 +427,28 @@ class mysqli
 
 class mysqli_result implements IteratorAggregate
 {
-    /** @link mysqli-result.current-field */
+    /**
+     * @readonly
+     * @link mysqli-result.current-field
+     */
     public int $current_field;
 
-    /** @link mysqli-result.field-count */
+    /**
+     * @readonly
+     * @link mysqli-result.field-count
+     */
     public int $field_count;
 
-    /** @link mysqli-result.lengths */
+    /**
+     * @readonly
+     * @link mysqli-result.lengths
+     */
     public ?array $lengths;
 
-    /** @link mysqli-result.num-rows */
+    /**
+     * @readonly
+     * @link mysqli-result.num-rows
+     */
     public int|string $num_rows;
 
     public int $type;
@@ -480,31 +546,58 @@ class mysqli_result implements IteratorAggregate
 
 class mysqli_stmt
 {
-    /** @link mysqli-stmt.affected-rows */
+    /**
+     * @readonly
+     * @link mysqli-stmt.affected-rows
+     */
     public int|string $affected_rows;
 
-    /** @link mysqli-stmt.insert-id */
+    /**
+     * @readonly
+     * @link mysqli-stmt.insert-id
+     */
     public int|string $insert_id;
 
-    /** @link mysqli-stmt.num-rows */
+    /**
+     * @readonly
+     * @link mysqli-stmt.num-rows
+     */
     public int|string $num_rows;
 
-    /** @link mysqli-stmt.param-count */
+    /**
+     * @readonly
+     * @link mysqli-stmt.param-count
+     */
     public int $param_count;
 
-    /** @link mysqli-stmt.field-count */
+    /**
+     * @readonly
+     * @link mysqli-stmt.field-count
+     */
     public int $field_count;
 
-    /** @link mysqli-stmt.errno */
+    /**
+     * @readonly
+     * @link mysqli-stmt.errno
+     */
     public int $errno;
 
-    /** @link mysqli-stmt.error */
+    /**
+     * @readonly
+     * @link mysqli-stmt.error
+     */
     public string $error;
 
-    /** @link mysqli-stmt.error-list */
+    /**
+     * @readonly
+     * @link mysqli-stmt.error-list
+     */
     public array $error_list;
 
-    /** @link mysqli-stmt.sqlstate */
+    /**
+     * @readonly
+     * @link mysqli-stmt.sqlstate
+     */
     public string $sqlstate;
 
     public int $id;

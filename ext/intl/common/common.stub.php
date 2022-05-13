@@ -2,6 +2,7 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlIterator implements Iterator
 {
     /** @tentative-return-type */

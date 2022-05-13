@@ -288,9 +288,9 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 		tsrm_resource_type *_tmp;
 		_tmp = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
 		if (!_tmp) {
-			tsrm_mutex_unlock(tsmm_mutex);
 			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
 			*rsrc_id = 0;
+			tsrm_mutex_unlock(tsmm_mutex);
 			return 0;
 		}
 		resource_types_table = _tmp;
@@ -331,10 +331,10 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 
 	size = TSRM_ALIGNED_SIZE(size);
 	if (tsrm_reserved_size - tsrm_reserved_pos < size) {
-		tsrm_mutex_unlock(tsmm_mutex);
 		TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate space for fast resource"));
 		*rsrc_id = 0;
 		*offset = 0;
+		tsrm_mutex_unlock(tsmm_mutex);
 		return 0;
 	}
 
@@ -346,9 +346,9 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 		tsrm_resource_type *_tmp;
 		_tmp = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
 		if (!_tmp) {
-			tsrm_mutex_unlock(tsmm_mutex);
 			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
 			*rsrc_id = 0;
+			tsrm_mutex_unlock(tsmm_mutex);
 			return 0;
 		}
 		resource_types_table = _tmp;
@@ -736,13 +736,15 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 #if defined(__APPLE__) && defined(__x86_64__)
     // TODO: Implement support for fast JIT ZTS code ???
 	return 0;
-#elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
+	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
 	size_t ret;
 
 	asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
           : "=r" (ret));
 	return ret;
-#elif defined(__i386__) && defined(__GNUC__) && !defined(__FreeBSD__) && !defined(__OpenBSD__)
+#elif defined(__i386__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
+	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
 	size_t ret;
 
 	asm ("leal _tsrm_ls_cache@ntpoff,%0"

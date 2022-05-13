@@ -430,7 +430,7 @@ function sleep(int $seconds): int {}
 
 function usleep(int $microseconds): void {}
 
-#if HAVE_NANOSLEEP
+#ifdef HAVE_NANOSLEEP
 /**
  * @return array<string, int>|bool
  * @refcount 1
@@ -464,8 +464,7 @@ function forward_static_call(callable $callback, mixed ...$args): mixed {}
 
 function forward_static_call_array(callable $callback, array $args): mixed {}
 
-/** @return false|null */
-function register_shutdown_function(callable $callback, mixed ...$args): ?bool {}
+function register_shutdown_function(callable $callback, mixed ...$args): void {}
 
 /** @refcount 1 */
 function highlight_file(string $filename, bool $return = false): string|bool {}
@@ -509,20 +508,20 @@ function connection_status(): int {}
 
 function ignore_user_abort(?bool $enable = null): int {}
 
-#if HAVE_GETSERVBYNAME
+#ifdef HAVE_GETSERVBYNAME
 function getservbyname(string $service, string $protocol): int|false {}
 #endif
 
-#if HAVE_GETSERVBYPORT
+#ifdef HAVE_GETSERVBYPORT
 /** @refcount 1 */
 function getservbyport(int $port, string $protocol): string|false {}
 #endif
 
-#if HAVE_GETPROTOBYNAME
+#ifdef HAVE_GETPROTOBYNAME
 function getprotobyname(string $protocol): int|false {}
 #endif
 
-#if HAVE_GETPROTOBYNUMBER
+#ifdef HAVE_GETPROTOBYNUMBER
 /** @refcount 1 */
 function getprotobynumber(int $protocol): string|false {}
 #endif
@@ -583,7 +582,7 @@ function crypt(string $string, string $salt): string {}
 
 /* datetime.c */
 
-#if HAVE_STRPTIME
+#ifdef HAVE_STRPTIME
 /**
  * @return array<string, int|string>|false
  * @deprecated
@@ -611,7 +610,7 @@ function gethostbyname(string $hostname): string {}
  */
 function gethostbynamel(string $hostname): array|false {}
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
 /** @alias dns_check_record */
@@ -647,7 +646,7 @@ function net_get_interfaces(): array|false {}
 
 /* ftok.c */
 
-#if HAVE_FTOK
+#ifdef HAVE_FTOK
 function ftok(string $filename, string $project_id): int {}
 #endif
 
@@ -781,7 +780,7 @@ function strspn(string $string, string $characters, int $offset = 0, ?int $lengt
 
 function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 /** @refcount 1 */
 function nl_langinfo(int $item): string|false {}
 #endif
@@ -1041,7 +1040,7 @@ function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
 function chroot(string $directory): bool {}
 #endif
 
@@ -1087,11 +1086,8 @@ function exec(string $command, &$output = null, &$result_code = null): string|fa
  */
 function system(string $command, &$result_code = null): string|false {}
 
-/**
- * @param int $result_code
- * @return false|null
- */
-function passthru(string $command, &$result_code = null): ?bool {}
+/** @param int $result_code */
+function passthru(string $command, &$result_code = null): false|null {}
 
 /** @refcount 1 */
 function escapeshellcmd(string $command): string {}
@@ -1323,7 +1319,7 @@ function chown(string $filename, string|int $user): bool {}
 
 function chgrp(string $filename, string|int $group): bool {}
 
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 function lchown(string $filename, string|int $user): bool {}
 
 function lchgrp(string $filename, string|int $group): bool {}
@@ -1331,7 +1327,7 @@ function lchgrp(string $filename, string|int $group): bool {}
 
 function chmod(string $filename, int $permissions): bool {}
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 function touch(string $filename, ?int $mtime = null, ?int $atime = null): bool {}
 #endif
 
@@ -1796,7 +1792,7 @@ function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_method 
 function stream_socket_shutdown($stream, int $mode): bool {}
 #endif
 
-#if HAVE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
 /**
  * @return array<int, resource>|false
  * @refcount 1
@@ -1888,7 +1884,7 @@ function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
 /** @param resource $stream */
 function stream_set_chunk_size($stream, int $size): int {}
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
 /** @param resource $stream */
 function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 
@@ -2056,6 +2052,8 @@ function unserialize(string $data, array $options = []): mixed {}
 function memory_get_usage(bool $real_usage = false): int {}
 
 function memory_get_peak_usage(bool $real_usage = false): int {}
+
+function memory_reset_peak_usage(): void {}
 
 /* versioning.c */
 

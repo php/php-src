@@ -24,7 +24,7 @@
 
 #include "SAPI.h"
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -65,7 +65,7 @@ PHPAPI PHP_FUNCTION(dl)
 }
 /* }}} */
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 
 /* {{{ php_load_shlib */
 PHPAPI void *php_load_shlib(const char *path, char **errp)

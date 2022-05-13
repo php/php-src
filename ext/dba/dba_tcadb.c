@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_TCADB
+#ifdef DBA_TCADB
 #include "php_tcadb.h"
 
 #ifdef TCADB_INCLUDE_FILE

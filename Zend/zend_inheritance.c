@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_enum.h"
 #include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
@@ -1285,7 +1286,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface) /* {{{ */
 {
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
-		zend_error_noreturn(E_CORE_ERROR, "Class %s could not implement interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+		zend_error_noreturn(E_CORE_ERROR, "%s %s could not implement interface %s", zend_get_object_type_uc(ce), ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
 	}
 	/* This should be prevented by the class lookup logic. */
 	ZEND_ASSERT(ce != iface);
@@ -1610,7 +1611,8 @@ static bool do_inherit_constant_check(
 
 	if (old_constant->ce != parent_constant->ce && old_constant->ce != ce) {
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Class %s inherits both %s::%s and %s::%s, which is ambiguous",
+			"%s %s inherits both %s::%s and %s::%s, which is ambiguous",
+			zend_get_object_type_uc(ce),
 			ZSTR_VAL(ce->name),
 			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
 			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name));
@@ -1631,6 +1633,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 				ct = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(ct, c, sizeof(zend_class_constant));
 				c = ct;
+				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
@@ -1729,7 +1732,10 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 			if (interfaces[j] == iface) {
 				if (j >= num_parent_interfaces) {
 					efree(interfaces);
-					zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(iface->name));
+					zend_error_noreturn(E_COMPILE_ERROR, "%s %s cannot implement previously implemented interface %s",
+						zend_get_object_type_uc(ce),
+						ZSTR_VAL(ce->name),
+						ZSTR_VAL(iface->name));
 					return;
 				}
 				/* skip duplications */
@@ -2311,6 +2317,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	zend_function *func;
 	zend_abstract_info ai;
 	bool is_explicit_abstract = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
+	bool can_be_abstract = (ce->ce_flags & ZEND_ACC_ENUM) == 0;
 	memset(&ai, 0, sizeof(ai));
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, func) {
@@ -2324,9 +2331,10 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 
 	if (ai.cnt) {
-		zend_error_noreturn(E_ERROR, !is_explicit_abstract
-			? "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
-			: "Class %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+		zend_error_noreturn(E_ERROR, !is_explicit_abstract && can_be_abstract
+			? "%s %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
+			: "%s %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+			zend_get_object_type_uc(ce),
 			ZSTR_VAL(ce->name), ai.cnt,
 			ai.cnt > 1 ? "s" : "",
 			DISPLAY_ABSTRACT_FN(0),
@@ -2758,101 +2766,113 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 #endif
 
 	bool orig_record_errors = EG(record_errors);
-	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
-		if (is_cacheable) {
-			if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
-				zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
-				if (ret) {
-					if (traits_and_interfaces) {
-						free_alloca(traits_and_interfaces, use_heap);
-					}
-					zv = zend_hash_find_known_hash(CG(class_table), key);
-					Z_CE_P(zv) = ret;
-					return ret;
+
+	if (ce->ce_flags & ZEND_ACC_IMMUTABLE && is_cacheable) {
+		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
+			zend_class_entry *ret = zend_inheritance_cache_get(ce, parent, traits_and_interfaces);
+			if (ret) {
+				if (traits_and_interfaces) {
+					free_alloca(traits_and_interfaces, use_heap);
 				}
-
-				/* Make sure warnings (such as deprecations) thrown during inheritance
-				 * will be recoreded in the inheritance cache. */
-				zend_begin_record_errors();
-			} else {
-				is_cacheable = 0;
+				zv = zend_hash_find_known_hash(CG(class_table), key);
+				Z_CE_P(zv) = ret;
+				return ret;
 			}
-			proto = ce;
+
+			/* Make sure warnings (such as deprecations) thrown during inheritance
+			 * will be recorded in the inheritance cache. */
+			zend_begin_record_errors();
+		} else {
+			is_cacheable = 0;
 		}
-		/* Lazy class loading */
-		ce = zend_lazy_class_load(ce);
-		zv = zend_hash_find_known_hash(CG(class_table), key);
-		Z_CE_P(zv) = ce;
-	} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
-		/* Lazy class loading */
-		ce = zend_lazy_class_load(ce);
-		ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
-		zv = zend_hash_find_known_hash(CG(class_table), key);
-		Z_CE_P(zv) = ce;
+		proto = ce;
 	}
 
-	if (CG(unlinked_uses)) {
-		zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t) ce);
-	}
-
-	orig_linking_class = CG(current_linking_class);
-	CG(current_linking_class) = is_cacheable ? ce : NULL;
-
-	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		/* Only register builtin enum methods during inheritance to avoid persisting them in
-		 * opcache. */
-		zend_enum_register_funcs(ce);
-	}
-
-	if (parent) {
-		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
-			add_dependency_obligation(ce, parent);
+	zend_try {
+		if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+			zv = zend_hash_find_known_hash(CG(class_table), key);
+			Z_CE_P(zv) = ce;
+		} else if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
+			/* Lazy class loading */
+			ce = zend_lazy_class_load(ce);
+			ce->ce_flags &= ~ZEND_ACC_FILE_CACHED;
+			zv = zend_hash_find_known_hash(CG(class_table), key);
+			Z_CE_P(zv) = ce;
 		}
-		zend_do_inheritance(ce, parent);
-	}
-	if (ce->num_traits) {
-		zend_do_bind_traits(ce, traits_and_interfaces);
-	}
-	if (ce->num_interfaces) {
-		/* Also copy the parent interfaces here, so we don't need to reallocate later. */
-		uint32_t num_parent_interfaces = parent ? parent->num_interfaces : 0;
-		zend_class_entry **interfaces = emalloc(
-			sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
 
-		if (num_parent_interfaces) {
-			memcpy(interfaces, parent->interfaces,
-				sizeof(zend_class_entry *) * num_parent_interfaces);
+		if (CG(unlinked_uses)) {
+			zend_hash_index_del(CG(unlinked_uses), (zend_long)(zend_uintptr_t) ce);
 		}
-		memcpy(interfaces + num_parent_interfaces, traits_and_interfaces + ce->num_traits,
-				sizeof(zend_class_entry *) * ce->num_interfaces);
 
-		zend_do_implement_interfaces(ce, interfaces);
-	} else if (parent && parent->num_interfaces) {
-		zend_do_inherit_interfaces(ce, parent);
-	}
-	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
-		&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
-	) {
-		zend_verify_abstract_class(ce);
-	}
-	if (ce->ce_flags & ZEND_ACC_ENUM) {
-		zend_verify_enum(ce);
-	}
+		orig_linking_class = CG(current_linking_class);
+		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
-	/* Normally Stringable is added during compilation. However, if it is imported from a trait,
-	 * we need to explicilty add the interface here. */
-	if (ce->__tostring && !(ce->ce_flags & ZEND_ACC_TRAIT)
+		if (ce->ce_flags & ZEND_ACC_ENUM) {
+			/* Only register builtin enum methods during inheritance to avoid persisting them in
+			 * opcache. */
+			zend_enum_register_funcs(ce);
+		}
+
+		if (parent) {
+			if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
+				add_dependency_obligation(ce, parent);
+			}
+			zend_do_inheritance(ce, parent);
+		}
+		if (ce->num_traits) {
+			zend_do_bind_traits(ce, traits_and_interfaces);
+		}
+		if (ce->num_interfaces) {
+			/* Also copy the parent interfaces here, so we don't need to reallocate later. */
+			uint32_t num_parent_interfaces = parent ? parent->num_interfaces : 0;
+			zend_class_entry **interfaces = emalloc(
+					sizeof(zend_class_entry *) * (ce->num_interfaces + num_parent_interfaces));
+
+			if (num_parent_interfaces) {
+				memcpy(interfaces, parent->interfaces,
+					   sizeof(zend_class_entry *) * num_parent_interfaces);
+			}
+			memcpy(interfaces + num_parent_interfaces, traits_and_interfaces + ce->num_traits,
+				   sizeof(zend_class_entry *) * ce->num_interfaces);
+
+			zend_do_implement_interfaces(ce, interfaces);
+		} else if (parent && parent->num_interfaces) {
+			zend_do_inherit_interfaces(ce, parent);
+		}
+		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
+			&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
+				) {
+			zend_verify_abstract_class(ce);
+		}
+		if (ce->ce_flags & ZEND_ACC_ENUM) {
+			zend_verify_enum(ce);
+		}
+
+		/* Normally Stringable is added during compilation. However, if it is imported from a trait,
+		 * we need to explicilty add the interface here. */
+		if (ce->__tostring && !(ce->ce_flags & ZEND_ACC_TRAIT)
 			&& !zend_class_implements_interface(ce, zend_ce_stringable)) {
-		ZEND_ASSERT(ce->__tostring->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
-		ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
-		ce->num_interfaces++;
-		ce->interfaces = perealloc(ce->interfaces,
-			sizeof(zend_class_entry *) * ce->num_interfaces, ce->type == ZEND_INTERNAL_CLASS);
-		ce->interfaces[ce->num_interfaces - 1] = zend_ce_stringable;
-		do_interface_implementation(ce, zend_ce_stringable);
-	}
+			ZEND_ASSERT(ce->__tostring->common.fn_flags & ZEND_ACC_TRAIT_CLONE);
+			ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
+			ce->num_interfaces++;
+			ce->interfaces = perealloc(ce->interfaces,
+									   sizeof(zend_class_entry *) * ce->num_interfaces, ce->type == ZEND_INTERNAL_CLASS);
+			ce->interfaces[ce->num_interfaces - 1] = zend_ce_stringable;
+			do_interface_implementation(ce, zend_ce_stringable);
+		}
 
-	zend_build_properties_info_table(ce);
+		zend_build_properties_info_table(ce);
+	} zend_catch {
+		/* Do not leak recorded errors to the next linked class. */
+		if (!orig_record_errors) {
+			EG(record_errors) = false;
+			zend_free_recorded_errors();
+		}
+		zend_bailout();
+	} zend_end_try();
+
 	EG(record_errors) = orig_record_errors;
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
@@ -3021,22 +3041,29 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		orig_linking_class = CG(current_linking_class);
 		CG(current_linking_class) = is_cacheable ? ce : NULL;
 
-		if (is_cacheable) {
-			zend_begin_record_errors();
-		}
+		zend_try{
+			if (is_cacheable) {
+				zend_begin_record_errors();
+			}
 
-		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
-		if (parent_ce && parent_ce->num_interfaces) {
-			zend_do_inherit_interfaces(ce, parent_ce);
-		}
-		zend_build_properties_info_table(ce);
-		if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
-			zend_verify_abstract_class(ce);
-		}
-		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
-		ce->ce_flags |= ZEND_ACC_LINKED;
+			zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+			if (parent_ce && parent_ce->num_interfaces) {
+				zend_do_inherit_interfaces(ce, parent_ce);
+			}
+			zend_build_properties_info_table(ce);
+			if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+				zend_verify_abstract_class(ce);
+			}
+			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
+			ce->ce_flags |= ZEND_ACC_LINKED;
 
-		CG(current_linking_class) = orig_linking_class;
+			CG(current_linking_class) = orig_linking_class;
+		} zend_catch {
+			EG(record_errors) = false;
+			zend_free_recorded_errors();
+			zend_bailout();
+		} zend_end_try();
+
 		EG(record_errors) = false;
 
 		if (is_cacheable) {

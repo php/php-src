@@ -610,12 +610,12 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
-	new_persistent_script->corrupted = 0;
+	new_persistent_script->corrupted = false;
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
-		new_persistent_script->corrupted = 1;
+		new_persistent_script->corrupted = true;
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
@@ -645,7 +645,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	zend_persist_early_bindings_calc(
 		new_persistent_script->num_early_bindings, new_persistent_script->early_bindings);
 
-	new_persistent_script->corrupted = 0;
+	new_persistent_script->corrupted = false;
 
 	ZCG(current_persistent_script) = NULL;
 

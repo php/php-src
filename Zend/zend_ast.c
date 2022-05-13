@@ -763,6 +763,12 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 			break;
 		case ZEND_AST_CONST_ENUM_INIT:
 		{
+			// Preloading will attempt to resolve constants but objects can't be stored in shm
+			// Aborting here to store the const AST instead
+			if (CG(in_compilation)) {
+				return FAILURE;
+			}
+
 			zend_ast *class_name_ast = ast->child[0];
 			zend_string *class_name = zend_ast_get_str(class_name_ast);
 
@@ -775,13 +781,6 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 				: NULL;
 
 			zend_class_entry *ce = zend_lookup_class(class_name);
-			if (!ce) {
-				/* Class may not be available when resolving constants on a dynamically
-				 * declared enum during preloading. */
-				ZEND_ASSERT(CG(compiler_options) & ZEND_COMPILE_PRELOAD);
-				return FAILURE;
-			}
-
 			zend_enum_new(result, ce, case_name, case_value_zv);
 			break;
 		}
@@ -789,7 +788,29 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast
 		{
 			zend_string *class_name = zend_ast_get_str(ast->child[0]);
 			zend_string *const_name = zend_ast_get_str(ast->child[1]);
-			zval *zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
+			zval *zv;
+			bool bailout = 0;
+
+			zend_string *previous_filename;
+			zend_long previous_lineno;
+			if (scope) {
+				previous_filename = EG(filename_override);
+				previous_lineno = EG(lineno_override);
+				EG(filename_override) = scope->info.user.filename;
+				EG(lineno_override) = zend_ast_get_lineno(ast);
+			}
+			zend_try {
+				zv = zend_get_class_constant_ex(class_name, const_name, scope, ast->attr);
+			} zend_catch {
+				bailout = 1;
+			}  zend_end_try();
+			if (scope) {
+				EG(filename_override) = previous_filename;
+				EG(lineno_override) = previous_lineno;
+			}
+			if (bailout) {
+				zend_bailout();
+			}
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
@@ -951,6 +972,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		zend_ast *new = (zend_ast*)buf;
 		new->kind = ast->kind;
 		new->attr = ast->attr;
+		new->lineno = ast->lineno;
 		buf = (void*)((char*)buf + zend_ast_size(children));
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {

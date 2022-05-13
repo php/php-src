@@ -22,6 +22,10 @@ require_once(__DIR__.'/../../dba/tests/test.inc');
 require_once(__DIR__.'/../../dba/tests/dba_handler.inc');
 
 ?>
+--CLEAN--
+<?php
+require_once(__DIR__.'/../../dba/tests/clean.inc');
+?>
 --EXPECTF--
 database handler: %s
 3NYNYY

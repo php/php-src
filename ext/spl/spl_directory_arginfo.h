@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: eab71d8a7172dba2dac3c6fa97b2064c7a99191f */
+ * Stub hash: 3ada856cfa2e50708b43125f819706176b1953f7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -102,7 +102,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key
@@ -254,9 +254,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileObject_getMaxLineLen arginfo_class_FilesystemIterator_getFlags
 
-#define arginfo_class_SplFileObject_hasChildren arginfo_class_SplFileInfo_isWritable
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_hasChildren, 0, 0, IS_FALSE, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SplFileObject_getChildren, 0, 0, RecursiveIterator, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_getChildren, 0, 0, IS_NULL, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_seek, 0, 1, IS_VOID, 0)

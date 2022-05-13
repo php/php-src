@@ -1096,9 +1096,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								}
 
 								if ((tmp_val != NULL) && (tmp != NULL) &&
-									(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
-									(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s),
-									 ZSTR_LEN(tmp->hash_key)) == 0)) {
+									zend_string_equals(tmp->hash_key, hashed_details.s)) {
 									connection = tmp;
 									GC_ADDREF(connection->id);
 								}
@@ -2120,8 +2118,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 		}
 		zend_register_persistent_resource_ex(session_pool->spool_hash_key, session_pool, le_psessionpool);
 	} else if (spool_out_le->type == le_psessionpool &&
-		ZSTR_LEN(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == ZSTR_LEN(spool_hashed_details.s) &&
-		memcmp(ZSTR_VAL(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key), ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s)) == 0) {
+		zend_string_equals(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key, spool_hashed_details.s)) {
 		/* retrieve the cached session pool */
 		session_pool = (php_oci_spool *)(spool_out_le->ptr);
 	}

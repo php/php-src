@@ -2970,7 +2970,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	if (module->module_started
 	 && !module->module_shutdown_func
 	 && module->type == MODULE_TEMPORARY) {
-		zend_unregister_ini_entries(module->module_number);
+		zend_unregister_ini_entries_ex(module->module_number, module->type);
 	}
 
 	/* Deinitialize module globals */
@@ -4783,14 +4783,16 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
+ZEND_API ZEND_COLD const char *zend_get_object_type_case(const zend_class_entry *ce, bool upper_case) /* {{{ */
 {
-	if(ce->ce_flags & ZEND_ACC_TRAIT) {
-		return "trait";
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return upper_case ? "Trait" : "trait";
 	} else if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		return "interface";
+		return upper_case ? "Interface" : "interface";
+	} else if (ce->ce_flags & ZEND_ACC_ENUM) {
+		return upper_case ? "Enum" : "enum";
 	} else {
-		return "class";
+		return upper_case ? "Class" : "class";
 	}
 }
 /* }}} */

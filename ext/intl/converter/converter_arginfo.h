@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2a6d8499e1a2d414130e366783a1c084f47a3293 */
+ * Stub hash: 0ab2d741996611bbfcfb07462bc184a02f353585 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_UConverter___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destination_encoding, IS_STRING, 1, "null")
@@ -125,6 +125,7 @@ static zend_class_entry *register_class_UConverter(void)
 
 	INIT_CLASS_ENTRY(ce, "UConverter", class_UConverter_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

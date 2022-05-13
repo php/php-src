@@ -19,6 +19,12 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Date:
+  . DateTime::createFromImmutable() now has a tentative return type of static,
+    previously it was DateTime
+  . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
+    previously it was DateTimeImmutable
+
 - Standard:
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
@@ -27,9 +33,29 @@ PHP 8.2 UPGRADE NOTES
     array_change_key_case and sorting with SORT_FLAG_CASE use ASCII case
     conversion.
 
+- SPL:
+  . The following methods now enforce their signature:
+    * SplFileInfo::_bad_state_ex()
+    * SplFileObject::getCsvControl()
+    * SplFileObject::fflush()
+    * SplFileObject::ftell()
+    * SplFileObject::fgetc()
+    * SplFileObject::fpassthru()
+  . SplFileObject::hasChildren() now has a tentative return type of false,
+    previously it was bool
+  . SplFileObject::getChildren() now has a tentative return type of null,
+    previously it was ?RecursiveIterator
+
 ========================================
 2. New Features
 ========================================
+
+- Core:
+  . Added the #[\SensitiveParameter] attribute to redact sensitive data in
+    backtraces.
+    RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
+  . It is now possible to use null and false as standalone types.
+    RFC: https://wiki.php.net/rfc/null-false-standalone-types
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
@@ -86,6 +112,10 @@ PHP 8.2 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
 
+  . The "${var}" and "${expr}" style string interpolations are deprecated and
+    will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
+    RFC: https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation
+
 - Mbstring:
   . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
     deprecated for all Mbstring functions. Unlike all the other text
@@ -114,6 +144,17 @@ PHP 8.2 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Reflection:
+  . ReflectionFunction::isAnonymous()
+  . ReflectionMethod::hasPrototype()
+
+- Sodium:
+  . sodium_crypto_stream_xchacha20_xor_ic()
+
+- Standard:
+  . The peak memory usage can now be reset to the current usage thanks to
+    memory_reset_peak_usage().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -126,8 +167,19 @@ PHP 8.2 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Intl:
+  . IntlBreakIterator, IntlRuleBasedBreakIterator, IntlCodePointBreakIterator,
+    IntlPartsIterator, IntlCalendar, IntlCalendar, Collator, IntlIterator,
+    UConverter, IntlDateFormatter, IntlDatePatternGenerator, MessageFormatter,
+    ResourceBundle, Spoofchecker, IntlTimeZone and Transliterator instances are
+    no longer serializable. Previously, they could be serialized, but
+    unserialization yielded unusable objects or failed.
+
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
+
+- SQLite3:
+  . sqlite3.defensive is now PHP_INI_USER.
 
 - Standard:
   . getimagesize() now reports the actual image dimensions, bits and channels
@@ -144,6 +196,9 @@ PHP 8.2 UPGRADE NOTES
 
 - COM_DOTNET:
   . LOCALE_NEUTRAL
+
+- Curl:
+  . CURLOPT_XFERINFOFUNCTION
 
 - Sockets:
   . SO_INCOMING_CPU
