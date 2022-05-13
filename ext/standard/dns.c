@@ -384,7 +384,7 @@ static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 PHP_FUNCTION(dns_check_record)
 {
 	HEADER *hp;
-	querybuf answer;
+	querybuf answer = {0};
 	char *hostname;
 	size_t hostname_len;
 	zend_string *rectype = NULL;
@@ -470,7 +470,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	long n, i;
 	u_short s;
 	u_char *tp, *p;
-	char name[MAXHOSTNAMELEN];
+	char name[MAXHOSTNAMELEN] = {0};
 	int have_v6_break = 0, in_v6_break = 0;
 
 	ZVAL_UNDEF(subarray);
@@ -839,7 +839,7 @@ PHP_FUNCTION(dns_get_record)
 	struct __res_state *handle = &state;
 #endif
 	HEADER *hp;
-	querybuf answer;
+	querybuf answer = {0};
 	u_char *cp = NULL, *end = NULL;
 	int n, qd, an, ns = 0, ar = 0;
 	int type, first_query = 1, store_results = 1;
@@ -1069,8 +1069,8 @@ PHP_FUNCTION(dns_get_mx)
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;
-	querybuf answer;
-	char buf[MAXHOSTNAMELEN];
+	querybuf answer = {0};
+	char buf[MAXHOSTNAMELEN] = {0};
 	HEADER *hp;
 	u_char *cp, *end;
 	int i;

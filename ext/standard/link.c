@@ -94,7 +94,7 @@ PHP_FUNCTION(linkinfo)
 	char *link;
 	char *dirname;
 	size_t link_len;
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
