@@ -1876,8 +1876,11 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	client->addr = addr;
 	client->addr_len = addr_len;
 
-	php_network_populate_name_from_sockaddr(addr, addr_len, &client->addr_str, NULL, 0);
-	GC_ADDREF(client->addr_str);
+	// TODO Prevent realloc?
+	zend_string *tmp_addr = NULL;
+	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
+	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = false;
@@ -1902,7 +1905,7 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 		client->file_fd = -1;
 	}
 	pefree(client->addr, 1);
-	zend_string_release_ex(client->addr_str, /* persistent */ false);
+	zend_string_release_ex(client->addr_str, /* persistent */ true);
 
 	/* Headers must be sent */
 	assert(client->current_header_name == NULL);
