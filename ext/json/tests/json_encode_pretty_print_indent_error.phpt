@@ -16,7 +16,4 @@ try {
 
 ?>
 --EXPECT--
-*** Testing json_encode() : error conditions ***
-
--- Testing json_encode() function (JSON_PRETTY_PRINT) with negative indentation --
 json_encode(): Argument #4 ($indent) must be a number greater than or equal to 0
