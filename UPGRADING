@@ -222,6 +222,9 @@ PHP 8.2 UPGRADE NOTES
     the configuration option --with-oci8 has been dropped. --with-oci8-11g,
     --with-oci8-12c and --with-oci8-19 are still supported.
 
+- Zip:
+  . The Zip extension is now built as shared library (DLL) by default.
+
 ========================================
 13. Other Changes
 ========================================

@@ -77,5 +77,7 @@ PHP                                                                        NEWS
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method
   . add ZipArchive::getStreamIndex() method
+  . On Windows, the Zip extension is now built as shared library (DLL) by
+    default. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
