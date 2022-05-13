@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e59995a9cd647f36164468dd2ae4c11239e3405f */
+ * Stub hash: b108fc78cb6cba93a85f6b529d2ff847dea8e592 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_json_encode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, depth, IS_LONG, 0, "512")
-	ZEND_ARG_TYPE_MASK(0, indent, MAY_BE_STRING|MAY_BE_LONG, "4")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, indent, IS_LONG, 0, "4")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_json_decode, 0, 1, IS_MIXED, 0)

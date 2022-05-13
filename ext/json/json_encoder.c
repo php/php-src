@@ -59,9 +59,9 @@ static inline void php_json_pretty_print_char(smart_str *buf, int options, char 
 
 static inline void php_json_pretty_print_indent(smart_str *buf, int options, php_json_encoder *encoder) /* {{{ */
 {
-	int i;
+	size_t i;
 
-	int indent_length = encoder->indent_str ? ZSTR_LEN(encoder->indent_str) : 0;
+	size_t indent_length = encoder->indent_str ? ZSTR_LEN(encoder->indent_str) : 0;
 	if (!indent_length) {
 		return;
 	}
