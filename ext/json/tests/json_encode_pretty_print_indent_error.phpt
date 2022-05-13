@@ -2,9 +2,6 @@
 json_encode() with JSON_PRETTY_PRINT with negative indentation
 --FILE--
 <?php
-echo "*** Testing json_encode() : error conditions ***\n";
-
-echo "\n-- Testing json_encode() function (JSON_PRETTY_PRINT) with negative indentation --\n";
 
 $data = [
     'key' => 4,
