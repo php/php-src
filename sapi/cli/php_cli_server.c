@@ -1623,12 +1623,14 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	zval tmp;
 	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
+	zend_string *perm_header_name = zend_string_dup(client->current_header_name, /* persistent */ true);
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 
 	/* Add the wrapped zend_string to the HashTable */
 	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
+	zend_hash_add(&client->request.headers_original_case, perm_header_name, &tmp);
 
+	zend_string_release_ex(client->current_header_name, /* persistent */ false);
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 
 	client->current_header_name = NULL;
