@@ -52,7 +52,7 @@ PHP                                                                        NEWS
 
 - Streams:
   . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
-  (Cristian Rodríguez)
+    (Cristian Rodríguez)
 
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.
