@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.
     (Jakub Zelenka, loveharmful)
 
+- OPcache:
+  . Fixed bug #8461 (tracing JIT crash after function/method change).
+    (Arnaud, Dmitry)
+
 - SPL:
   . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
 
