@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "php.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
 #include "zend_ini.h"
@@ -908,6 +909,9 @@ static inline int ct_eval_func_call(
 
 			ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
 			if (!ini_entry) {
+				if (PG(enable_dl)) {
+					return FAILURE;
+				}
 				ZVAL_FALSE(result);
 			} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
 				return FAILURE;
