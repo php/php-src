@@ -832,7 +832,7 @@ local function parseoperand(param, isqword)
       if t.disp then break end
 
       -- [reg+xreg...]
-      local xreg, tailx = match(tailr, "^+%s*([@%w_:]+)%s*(.*)$")
+      local xreg, tailx = match(tailr, "^%+%s*([@%w_:]+)%s*(.*)$")
       xreg, t.xreg, tp = rtexpr(xreg)
       if not t.xreg then
 	-- [reg+-expr]

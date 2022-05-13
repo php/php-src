@@ -4,10 +4,8 @@ Bug #70322 (ZipArchive::close() doesn't indicate errors)
 We want to test whether ZipArchive::close() returns FALSE and raises a warning
 on failure, so we force the failure by adding a file to the archive, which we
 delete before closing.
---SKIPIF--
-<?php
-if (!extension_loaded('zip')) die('skip requires zip extension');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zipfile = __DIR__ . '/bug70322.zip';

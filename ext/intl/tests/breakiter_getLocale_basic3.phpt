@@ -1,7 +1,8 @@
 --TEST--
 IntlBreakIterator::getLocale(): basic test
+--EXTENSIONS--
+intl
 --SKIPIF--
-<?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '64.0') < 0) die('skip for ICU >= 64.0'); ?>
 --FILE--
 <?php

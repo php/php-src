@@ -21,14 +21,14 @@
 
 #include "php.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #if PHP_USE_PHP_CRYPT_R
 # include "php_crypt_r.h"
 # include "crypt_freesec.h"
 #else
-# if HAVE_CRYPT_H
+# ifdef HAVE_CRYPT_H
 #  if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
 #   define _GNU_SOURCE
 #  endif

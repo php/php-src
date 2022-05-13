@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_convert() (9.0+)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

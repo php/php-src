@@ -143,7 +143,7 @@ DetectKanjiCode (unsigned char *str)
 	      else if (c >= 224 && c <= 239)
 		{
 		  whatcode = EUCORSJIS;
-		  while (c >= 64 && c != '\0' && whatcode == EUCORSJIS)
+		  while (c >= 64 && whatcode == EUCORSJIS)
 		    {
 		      if (c >= 129)
 			{

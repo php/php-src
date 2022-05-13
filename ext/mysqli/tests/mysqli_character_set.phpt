@@ -1,8 +1,9 @@
 --TEST--
 Fetching results from tables of different charsets.
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 
 if (!function_exists('mysqli_set_charset')) {
@@ -44,7 +45,8 @@ if (!function_exists('mysqli_set_charset')) {
         /* The server currently 17.07.2007 can't handle data sent in ucs2 */
         /* The server currently 16.08.2010 can't handle data sent in utf16 and utf32 */
         /* The server currently 02.09.2011 can't handle data sent in utf16le */
-        if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32' || 'utf16le' == $charset['Charset']) {
+        /* As of MySQL 8.0.28, `SHOW CHARACTER SET` contains utf8mb3, but that is not yet supported by mysqlnd */
+        if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32' || 'utf16le' == $charset['Charset'] || 'utf8mb3' == $charset['Charset']) {
             continue;
         }
 

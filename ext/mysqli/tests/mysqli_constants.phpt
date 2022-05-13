@@ -1,9 +1,7 @@
 --TEST--
 Constants exported by ext/mysqli
---SKIPIF--
-<?php
-require_once 'skipif.inc';
-?>
+--EXTENSIONS--
+mysqli
 --INI--
 mysqli.allow_local_infile=1
 --FILE--
@@ -49,6 +47,7 @@ $expected_constants = array(
     "MYSQLI_GROUP_FLAG" 				=> true,
     "MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED"=> true,
     "MYSQLI_SERVER_QUERY_NO_INDEX_USED"	=> true,
+    "MYSQLI_IS_MARIADB"                 => true,
 
     "MYSQLI_TYPE_DECIMAL"				=> true,
     "MYSQLI_TYPE_TINY"					=> true,
@@ -182,7 +181,7 @@ if ($IS_MYSQLND) {
     $expected_constants["MYSQLI_TYPE_JSON"]	= true;
 }
 
-if ($version > 80210 || $IS_MYSQLND) {
+if (($version > 80021 && $constants['mysqli']['MYSQLI_IS_MARIADB']) || $IS_MYSQLND) {
     $expected_constants['MYSQLI_OPT_LOAD_DATA_LOCAL_DIR'] = true;
 }
 

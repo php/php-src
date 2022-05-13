@@ -8,4 +8,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of Foo::__toString(): bool must be compatible with Stringable::__toString(): string in %s on line %d
+Fatal error: Foo::__toString(): Return type must be string when declared in %s on line %d

@@ -1,7 +1,7 @@
 --TEST--
 Test if function aliases still exist.
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 var_dump(function_exists('ocifreecursor'));

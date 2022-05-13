@@ -1,7 +1,7 @@
 --TEST--
 oci_execute() and invalid execute mode
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

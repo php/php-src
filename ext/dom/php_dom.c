@@ -405,7 +405,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 
 	object_str = zend_string_init("(object value omitted)", sizeof("(object value omitted)")-1, 0);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
 
 		if (entry->read_func(obj, &value) == FAILURE || !string_key) {
@@ -429,7 +429,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 
 static HashTable* dom_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
 {
-       return dom_get_debug_info_helper(object, is_temp);
+	return dom_get_debug_info_helper(object, is_temp);
 }
 /* }}} */
 
@@ -440,7 +440,7 @@ void *php_dom_export_node(zval *object) /* {{{ */
 
 	intern = (php_libxml_node_object *) Z_DOMOBJ_P(object);
 	if (intern->node) {
-  		nodep = intern->node->node;
+		nodep = intern->node->node;
 	}
 
 	return nodep;
@@ -548,7 +548,6 @@ void dom_nnodemap_objects_free_storage(zend_object *object);
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
-static void dom_nnodemap_object_dtor(zend_object *object);
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
 #endif
@@ -568,7 +567,6 @@ PHP_MINIT_FUNCTION(dom)
 
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
-	dom_nnodemap_object_handlers.dtor_obj = dom_nnodemap_object_dtor;
 	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
 	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
@@ -758,9 +756,9 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_entity_prop_handlers, "publicId", sizeof("publicId")-1, dom_entity_public_id_read, NULL);
 	dom_register_prop_handler(&dom_entity_prop_handlers, "systemId", sizeof("systemId")-1, dom_entity_system_id_read, NULL);
 	dom_register_prop_handler(&dom_entity_prop_handlers, "notationName", sizeof("notationName")-1, dom_entity_notation_name_read, NULL);
-	dom_register_prop_handler(&dom_entity_prop_handlers, "actualEncoding", sizeof("actualEncoding")-1, dom_entity_actual_encoding_read, dom_entity_actual_encoding_write);
-	dom_register_prop_handler(&dom_entity_prop_handlers, "encoding", sizeof("encoding")-1, dom_entity_encoding_read, dom_entity_encoding_write);
-	dom_register_prop_handler(&dom_entity_prop_handlers, "version", sizeof("version")-1, dom_entity_version_read, dom_entity_version_write);
+	dom_register_prop_handler(&dom_entity_prop_handlers, "actualEncoding", sizeof("actualEncoding")-1, dom_entity_actual_encoding_read, NULL);
+	dom_register_prop_handler(&dom_entity_prop_handlers, "encoding", sizeof("encoding")-1, dom_entity_encoding_read, NULL);
+	dom_register_prop_handler(&dom_entity_prop_handlers, "version", sizeof("version")-1, dom_entity_version_read, NULL);
 	zend_hash_merge(&dom_entity_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, dom_entity_class_entry->name, &dom_entity_prop_handlers);
 
@@ -1050,13 +1048,10 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 /* }}} */
 #endif
 
-static void dom_nnodemap_object_dtor(zend_object *object) /* {{{ */
+void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 {
-	dom_object *intern;
-	dom_nnodemap_object *objmap;
-
-	intern = php_dom_obj_from_obj(object);
-	objmap = (dom_nnodemap_object *)intern->ptr;
+	dom_object *intern = php_dom_obj_from_obj(object);
+	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
 
 	if (objmap) {
 		if (objmap->local) {
@@ -1071,12 +1066,6 @@ static void dom_nnodemap_object_dtor(zend_object *object) /* {{{ */
 		efree(objmap);
 		intern->ptr = NULL;
 	}
-}
-/* }}} */
-
-void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
-{
-	dom_object *intern = php_dom_obj_from_obj(object);
 
 	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
 
@@ -1255,7 +1244,7 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
 		nodep = nodep->parent;
 	}
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} end dom_hierarchy */
 

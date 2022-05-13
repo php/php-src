@@ -1,5 +1,7 @@
 --TEST--
 Test session_set_save_handler() function : variation
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

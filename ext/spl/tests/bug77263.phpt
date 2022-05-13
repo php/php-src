@@ -9,11 +9,11 @@ touch("$dir/file1");
 touch("$dir/subdir/file2");
 
 class Filter1 extends RecursiveFilterIterator {
-    public function accept() { return $this->getInnerIterator()->getSubPathname() != ''; }
+    public function accept(): bool { return $this->getInnerIterator()->getSubPathname() != ''; }
 }
 
 class Filter2 extends RecursiveFilterIterator {
-    public function accept() { return $this->getInnerIterator()->getSubPathname() != ' '; }
+    public function accept(): bool { return $this->getInnerIterator()->getSubPathname() != ' '; }
 }
 
 $iterator = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS );

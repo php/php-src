@@ -1,9 +1,10 @@
 --TEST--
 mb_split() empty match
 --
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
 --FILE--

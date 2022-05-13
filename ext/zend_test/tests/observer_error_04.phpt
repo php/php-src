@@ -1,8 +1,8 @@
 --TEST--
 Observer: fatal errors caught with zend_try will not fire end handlers prematurely
---SKIPIF--
-<?php if (!extension_loaded('zend_test')) die('skip: zend_test extension required'); ?>
-<?php if (!extension_loaded('soap')) die('skip: soap extension required'); ?>
+--EXTENSIONS--
+zend_test
+soap
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1

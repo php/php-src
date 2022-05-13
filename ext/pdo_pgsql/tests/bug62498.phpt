@@ -1,8 +1,10 @@
 --TEST--
 PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 64-bit
+--EXTENSIONS--
+pdo
+pdo_pgsql
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
@@ -57,7 +59,7 @@ array(9) {
     ["native_type"]=>
     string(4) "int2"
     ["pdo_type"]=>
-    int(2)
+    int(1)
     ["name"]=>
     string(7) "int2col"
     ["len"]=>
@@ -76,7 +78,7 @@ array(9) {
     ["native_type"]=>
     string(4) "int4"
     ["pdo_type"]=>
-    int(2)
+    int(1)
     ["name"]=>
     string(7) "int4col"
     ["len"]=>
@@ -95,7 +97,7 @@ array(9) {
     ["native_type"]=>
     string(4) "int8"
     ["pdo_type"]=>
-    int(2)
+    int(1)
     ["name"]=>
     string(7) "int8col"
     ["len"]=>
@@ -114,7 +116,7 @@ array(9) {
     ["native_type"]=>
     string(7) "varchar"
     ["pdo_type"]=>
-    int(3)
+    int(2)
     ["name"]=>
     string(9) "stringcol"
     ["len"]=>
@@ -133,7 +135,7 @@ array(9) {
     ["native_type"]=>
     string(4) "bool"
     ["pdo_type"]=>
-    int(1)
+    int(5)
     ["name"]=>
     string(7) "boolcol"
     ["len"]=>
@@ -152,7 +154,7 @@ array(9) {
     ["native_type"]=>
     string(4) "date"
     ["pdo_type"]=>
-    int(3)
+    int(2)
     ["name"]=>
     string(7) "datecol"
     ["len"]=>
@@ -171,7 +173,7 @@ array(9) {
     ["native_type"]=>
     string(4) "text"
     ["pdo_type"]=>
-    int(3)
+    int(2)
     ["name"]=>
     string(7) "textcol"
     ["len"]=>
@@ -190,7 +192,7 @@ array(9) {
     ["native_type"]=>
     string(9) "timestamp"
     ["pdo_type"]=>
-    int(3)
+    int(2)
     ["name"]=>
     string(5) "tscol"
     ["len"]=>
@@ -209,7 +211,7 @@ array(9) {
     ["native_type"]=>
     string(5) "bytea"
     ["pdo_type"]=>
-    int(4)
+    int(3)
     ["name"]=>
     string(8) "byteacol"
     ["len"]=>

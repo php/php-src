@@ -241,22 +241,4 @@ PHPAPI int php_output_handler_alias_register(const char *handler_name, size_t ha
 
 END_EXTERN_C()
 
-
-PHP_FUNCTION(ob_start);
-PHP_FUNCTION(ob_flush);
-PHP_FUNCTION(ob_clean);
-PHP_FUNCTION(ob_end_flush);
-PHP_FUNCTION(ob_end_clean);
-PHP_FUNCTION(ob_get_flush);
-PHP_FUNCTION(ob_get_clean);
-PHP_FUNCTION(ob_get_contents);
-PHP_FUNCTION(ob_get_length);
-PHP_FUNCTION(ob_get_level);
-PHP_FUNCTION(ob_get_status);
-PHP_FUNCTION(ob_implicit_flush);
-PHP_FUNCTION(ob_list_handlers);
-
-PHP_FUNCTION(output_add_rewrite_var);
-PHP_FUNCTION(output_reset_rewrite_vars);
-
 #endif

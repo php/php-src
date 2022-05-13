@@ -1,7 +1,7 @@
 --TEST--
 DRCP: oci_pconnect() and oci_connect() with different character sets
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

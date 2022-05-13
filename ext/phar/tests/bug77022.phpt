@@ -1,8 +1,9 @@
 --TEST--
 Phar: Bug #77022: PharData always creates new files with mode 0666
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) die("skip not for Windows")
 ?>
 --FILE--

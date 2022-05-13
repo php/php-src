@@ -13,6 +13,8 @@ session.gc_maxlifetime=300
 session.save_path=
 session.name=PHPSESSID
 url_rewriter.hosts=
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

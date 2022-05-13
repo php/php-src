@@ -16,6 +16,7 @@ interface Reflector extends Stringable
 {
 }
 
+/** @not-serializable */
 abstract class ReflectionFunctionAbstract implements Reflector
 {
     public string $name;
@@ -45,12 +46,15 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function isVariadic(): bool {}
 
     /** @tentative-return-type */
+    public function isStatic(): bool {}
+
+    /** @tentative-return-type */
     public function getClosureThis(): ?object {}
 
     /** @tentative-return-type */
     public function getClosureScopeClass(): ?ReflectionClass {}
 
-    public function getClosureUsedVariables() : array {}
+    public function getClosureUsedVariables(): array {}
 
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
@@ -113,6 +117,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     public function __toString(): string {}
 
+    public function isAnonymous(): bool {}
+
     /**
      * @tentative-return-type
      * @deprecated ReflectionFunction can no longer be constructed for disabled functions
@@ -129,6 +135,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function getClosure(): Closure {}
 }
 
+/** @not-serializable */
 final class ReflectionGenerator
 {
     public function __construct(Generator $generator) {}
@@ -176,9 +183,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function isFinal(): bool {}
 
     /** @tentative-return-type */
-    public function isStatic(): bool {}
-
-    /** @tentative-return-type */
     public function isConstructor(): bool {}
 
     /** @tentative-return-type */
@@ -202,10 +206,13 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @tentative-return-type */
     public function getPrototype(): ReflectionMethod {}
 
+    public function hasPrototype(): bool {}
+
     /** @tentative-return-type */
     public function setAccessible(bool $accessible): void {}
 }
 
+/** @not-serializable */
 class ReflectionClass implements Reflector
 {
     public string $name;
@@ -371,7 +378,6 @@ class ReflectionClass implements Reflector
     /** @tentative-return-type */
     public function getShortName(): string {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
@@ -380,6 +386,7 @@ class ReflectionObject extends ReflectionClass
     public function __construct(object $object) {}
 }
 
+/** @not-serializable */
 class ReflectionProperty implements Reflector
 {
     public string $name;
@@ -416,6 +423,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isStatic(): bool {}
 
+    public function isReadOnly(): bool {}
+
     /** @tentative-return-type */
     public function isDefault(): bool {}
 
@@ -444,10 +453,10 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getDefaultValue(): mixed {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
+/** @not-serializable */
 class ReflectionClassConstant implements Reflector
 {
     public string $name;
@@ -475,6 +484,8 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function isProtected(): bool {}
 
+    public function isFinal(): bool {}
+
     /** @tentative-return-type */
     public function getModifiers(): int {}
 
@@ -484,12 +495,12 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
     public function isEnumCase(): bool {}
 }
 
+/** @not-serializable */
 class ReflectionParameter implements Reflector
 {
     public string $name;
@@ -567,10 +578,10 @@ class ReflectionParameter implements Reflector
 
     public function isPromoted(): bool {}
 
-    /** @tentative-return-type */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 }
 
+/** @not-serializable */
 abstract class ReflectionType implements Stringable
 {
     /** @implementation-alias ReflectionClass::__clone */
@@ -596,6 +607,12 @@ class ReflectionUnionType extends ReflectionType
     public function getTypes(): array {}
 }
 
+class ReflectionIntersectionType extends ReflectionType
+{
+    public function getTypes(): array {}
+}
+
+/** @not-serializable */
 class ReflectionExtension implements Reflector
 {
     public string $name;
@@ -641,6 +658,7 @@ class ReflectionExtension implements Reflector
     public function isTemporary(): bool {}
 }
 
+/** @not-serializable */
 class ReflectionZendExtension implements Reflector
 {
     public string $name;
@@ -668,6 +686,7 @@ class ReflectionZendExtension implements Reflector
     public function getCopyright(): string {}
 }
 
+/** @not-serializable */
 final class ReflectionReference
 {
     public static function fromArrayElement(array $array, int|string $key): ?ReflectionReference {}
@@ -680,7 +699,8 @@ final class ReflectionReference
     private function __construct() {}
 }
 
-final class ReflectionAttribute
+/** @not-serializable */
+class ReflectionAttribute implements Reflector
 {
     public function getName(): string {}
     public function getTarget(): int {}
@@ -688,12 +708,14 @@ final class ReflectionAttribute
     public function getArguments(): array {}
     public function newInstance(): object {}
 
+    public function __toString(): string {}
+
     private function __clone(): void {}
 
     private function __construct() {}
 }
 
-final class ReflectionEnum extends ReflectionClass
+class ReflectionEnum extends ReflectionClass
 {
     public function __construct(object|string $objectOrClass) {}
 
@@ -705,7 +727,7 @@ final class ReflectionEnum extends ReflectionClass
 
     public function isBacked(): bool {}
 
-    public function getBackingType(): ReflectionType|null {}
+    public function getBackingType(): ?ReflectionType {}
 }
 
 class ReflectionEnumUnitCase extends ReflectionClassConstant
@@ -721,13 +743,14 @@ class ReflectionEnumUnitCase extends ReflectionClassConstant
     public function getValue(): UnitEnum {}
 }
 
-final class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
+class ReflectionEnumBackedCase extends ReflectionEnumUnitCase
 {
     public function __construct(object|string $class, string $constant) {}
 
     public function getBackingValue(): int|string {}
 }
 
+/** @not-serializable */
 final class ReflectionFiber
 {
     public function __construct(Fiber $fiber) {}

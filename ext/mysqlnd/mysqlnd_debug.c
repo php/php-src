@@ -430,12 +430,21 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 
 			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",
 					"number of functions: %d", zend_hash_num_elements(&self->function_profiles));
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
 				self->m->log_va(self, __LINE__, __FILE__, -1, "info : ",
-						"%-40s\tcalls=%5llu  own_slow=%5llu  in_calls_slow=%5llu  total_slow=%5llu"
-						"   min_own=%5llu  max_own=%7llu  avg_own=%7llu   "
-						"   min_in_calls=%5llu  max_in_calls=%7llu  avg_in_calls=%7llu"
-						"   min_total=%5llu  max_total=%7llu  avg_total=%7llu"
+						"%-40s\tcalls=%5" PRIu64
+						"  own_slow=%5" PRIu64
+						"  in_calls_slow=%5" PRIu64
+						"  total_slow=%5" PRIu64
+						"   min_own=%5" PRIu64
+						"  max_own=%7" PRIu64
+						"  avg_own=%7" PRIu64
+						"      min_in_calls=%5" PRIu64
+						"  max_in_calls=%7" PRIu64
+						"  avg_in_calls=%7" PRIu64
+						"   min_total=%5" PRIu64
+						"  max_total=%7" PRIu64
+						"  avg_total=%7" PRIu64
 						,ZSTR_VAL(string_key)
 						,(uint64_t) f_profile->calls
 						,(uint64_t) f_profile->own_underporm_calls

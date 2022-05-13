@@ -1,10 +1,7 @@
 --TEST--
 Test socket_addrinfo_lookup()
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 try {

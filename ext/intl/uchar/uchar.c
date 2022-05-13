@@ -38,7 +38,7 @@ static inline int convert_cp(UChar32* pcp, zend_string *string_codepoint, zend_l
 
 static zend_never_inline int parse_code_point_param(INTERNAL_FUNCTION_PARAMETERS, UChar32 *cp) {
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
 	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);

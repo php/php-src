@@ -1,5 +1,7 @@
 --TEST--
 registering $_SESSION should not segfault
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

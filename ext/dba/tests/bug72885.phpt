@@ -1,5 +1,7 @@
 --TEST--
 Bug #72885 flatfile: dba_fetch() fails to read replaced entry
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = "flatfile";

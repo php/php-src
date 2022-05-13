@@ -1,8 +1,9 @@
 --TEST--
 Bug #51903 (simplexml_load_file() doesn't use HTTP headers)
+--EXTENSIONS--
+simplexml
 --SKIPIF--
 <?php
-if (!extension_loaded('simplexml')) die('skip simplexml extension not available');
 if (@!include "./ext/standard/tests/http/server.inc") die('skip server.inc not available');
 http_server_skipif();
 ?>

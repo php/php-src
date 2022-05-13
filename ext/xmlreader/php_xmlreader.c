@@ -610,7 +610,6 @@ PHP_METHOD(XMLReader, getParserProperty)
 {
 	zval *id;
 	zend_long property;
-	int retval = -1;
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &property) == FAILURE) {
@@ -620,9 +619,12 @@ PHP_METHOD(XMLReader, getParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
-		retval = xmlTextReaderGetParserProp(intern->ptr,property);
+	if (!intern || !intern->ptr) {
+		zend_throw_error(NULL, "Cannot access parser properties before loading data");
+		RETURN_THROWS();
 	}
+
+	int retval = xmlTextReaderGetParserProp(intern->ptr,property);
 	if (retval == -1) {
 		zend_argument_value_error(1, "must be a valid parser property");
 		RETURN_THROWS();
@@ -961,7 +963,6 @@ PHP_METHOD(XMLReader, setParserProperty)
 {
 	zval *id;
 	zend_long property;
-	int retval = -1;
 	bool value;
 	xmlreader_object *intern;
 
@@ -972,9 +973,12 @@ PHP_METHOD(XMLReader, setParserProperty)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
-		retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
+	if (!intern || !intern->ptr) {
+		zend_throw_error(NULL, "Cannot access parser properties before loading data");
+		RETURN_THROWS();
 	}
+
+	int retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
 	if (retval == -1) {
 		zend_argument_value_error(1, "must be a valid parser property");
 		RETURN_THROWS();
@@ -1040,7 +1044,7 @@ PHP_METHOD(XMLReader, XML)
 
 	inputbfr = xmlParserInputBufferCreateMem(source, source_len, XML_CHAR_ENCODING_NONE);
 
-    if (inputbfr != NULL) {
+	if (inputbfr != NULL) {
 /* Get the URI of the current script so that we can set the base directory in libxml */
 #ifdef HAVE_GETCWD
 		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
@@ -1150,7 +1154,6 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
-	xmlreader_object_handlers.dtor_obj = zend_objects_destroy_object;
 	xmlreader_object_handlers.free_obj = xmlreader_objects_free_storage;
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;

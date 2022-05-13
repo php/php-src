@@ -1,10 +1,8 @@
 --TEST--
 #79029 (Use After Free's in XMLReader / XMLWriter)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) print "skip xmlwriter extension not available";
-if (!extension_loaded("xmlreader")) print "skip xmlreader extension not available";
-?>
+--EXTENSIONS--
+xmlwriter
+xmlreader
 --FILE--
 <?php
 $x = array( new XMLWriter() );

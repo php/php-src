@@ -1,9 +1,7 @@
 --TEST--
 Bug #69579 (Internal trait double-free)
---SKIPIF--
-<?php
-if (!extension_loaded('zend_test')) die('skip zend_test extension not loaded');
-?>
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 

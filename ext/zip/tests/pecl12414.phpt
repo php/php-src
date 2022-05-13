@@ -1,10 +1,11 @@
 --TEST--
 Bug #12414 ( extracting files from damaged archives)
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /*$ */
-if(!extension_loaded('zip')) die('skip');
- ?>
+?>
 --FILE--
 <?php
 $filename = 'MYLOGOV2.GFX';

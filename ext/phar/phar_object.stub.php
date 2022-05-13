@@ -46,7 +46,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null): ?PharData {}
 
     /** @return bool */
-    public function copy(string $to, string $from) {} // TODO make return type void
+    public function copy(string $from, string $to) {} // TODO make return type void
 
     /** @tentative-return-type */
     public function count(int $mode = COUNT_NORMAL): int {}
@@ -106,7 +106,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param string $localName
      * @tentative-return-type
      */
-    public function offsetGet($localName): PharFileInfo {}
+    public function offsetGet($localName): SplFileInfo {}
 
     /**
      * @param string $localName
@@ -119,7 +119,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param string $localName
      * @tentative-return-type
      */
-    public function offsetUnset($localName): bool {}
+    public function offsetUnset($localName): void {}
 
     /** @tentative-return-type */
     public function setAlias(string $alias): bool {}
@@ -261,7 +261,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::copy
      */
-    public function copy(string $to, string $from) {} // TODO make return type void
+    public function copy(string $from, string $to) {} // TODO make return type void
 
     /**
      * @tentative-return-type
@@ -371,7 +371,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::offsetGet
      */
-    public function offsetGet($localName): PharFileInfo {}
+    public function offsetGet($localName): SplFileInfo {}
 
     /**
      * @param string $localName
@@ -386,7 +386,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @tentative-return-type
      * @implementation-alias Phar::offsetUnset
      */
-    public function offsetUnset($localName): bool {}
+    public function offsetUnset($localName): void {}
 
     /**
      * @tentative-return-type

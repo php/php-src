@@ -104,5 +104,5 @@ main (int argc, char *argv[])
   gdImageDestroy (im);
 
   return 0;
-#endif /* HAVE_FREETYPE */
+#endif /* HAVE_LIBFREETYPE */
 }

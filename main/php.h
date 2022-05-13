@@ -22,7 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20201009
+#define PHP_API_VERSION 20210903
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -70,7 +70,6 @@
 #	else
 #		define PHPAPI
 #	endif
-#	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
 #endif
@@ -246,13 +245,7 @@ typedef unsigned int socklen_t;
 #define INT_MIN (- INT_MAX - 1)
 #endif
 
-/* double limits */
-#include <float.h>
-#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
-#define PHP_DOUBLE_MAX_LENGTH (3 + DBL_MANT_DIG - DBL_MIN_EXP)
-#else
-#define PHP_DOUBLE_MAX_LENGTH 1080
-#endif
+#define PHP_DOUBLE_MAX_LENGTH ZEND_DOUBLE_MAX_LENGTH
 
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
@@ -351,6 +344,7 @@ END_EXTERN_C()
 #define phpin zendin
 
 #define php_memnstr zend_memnstr
+#define php_memnistr zend_memnistr
 
 /* functions */
 BEGIN_EXTERN_C()

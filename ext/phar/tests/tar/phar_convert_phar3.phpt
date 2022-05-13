@@ -1,8 +1,8 @@
 --TEST--
 Phar::convertToPhar() bzipped
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip"); ?>
+--EXTENSIONS--
+phar
+bz2
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -43,8 +43,6 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.bz2');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.bz2');
-__HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)

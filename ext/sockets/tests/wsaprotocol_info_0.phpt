@@ -1,13 +1,13 @@
 --TEST--
 Winsock export/import socket, basic test
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip.. Windows only test');
 }
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 ?>
 --FILE--
 <?php

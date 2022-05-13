@@ -1,7 +1,7 @@
 #ifndef PHP_INIFILE_H
 #define PHP_INIFILE_H
 
-#if DBA_INIFILE
+#ifdef DBA_INIFILE
 
 #include "php_dba.h"
 

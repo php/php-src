@@ -58,11 +58,11 @@ jobs:
             --enable-calendar \
             --enable-ftp \
             --with-pspell=/usr \
-            --with-enchant=/usr \
             --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \
             --enable-zend-test \
+            --enable-dl-test=shared \
             --with-mhash \
             --with-sodium \
             --enable-dba \

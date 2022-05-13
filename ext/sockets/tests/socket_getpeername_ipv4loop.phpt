@@ -3,12 +3,8 @@ ext/sockets - socket_getpeername_ipv4loop - basic test
 --CREDITS--
 Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
---SKIPIF--
-<?php
-        if (!extension_loaded('sockets')) {
-                die('skip sockets extension not available.');
-        }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
     /* Bind and connect sockets to localhost */

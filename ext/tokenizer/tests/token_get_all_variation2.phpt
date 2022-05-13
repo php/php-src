@@ -1,7 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with different arithmetic operators
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 /*

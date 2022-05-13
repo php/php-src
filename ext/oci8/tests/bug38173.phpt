@@ -1,5 +1,7 @@
 --TEST--
 Bug #38173 (Freeing nested cursors causes OCI8 to segfault)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

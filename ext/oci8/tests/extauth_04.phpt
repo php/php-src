@@ -1,8 +1,9 @@
 --TEST--
 Test External Authentication errors on Windows
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
 ?>
 --FILE--

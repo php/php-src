@@ -1,7 +1,7 @@
 --TEST--
 Unicode standard conformance test (ill-formed UTF sequences.)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 function chk_enc($str, $n, $enc = "UTF-8") {
@@ -15,7 +15,6 @@ function chk_enc($str, $n, $enc = "UTF-8") {
 }
 
 mb_substitute_character(0xfffd);
-
 
 echo "UTF-8 redundancy\n";
 var_dump(chk_enc("\x31\x32\x33", 0));

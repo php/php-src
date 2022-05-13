@@ -29,7 +29,7 @@ unset($fiber); // Destroy fiber object, executing finally block.
 echo "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 fiber
 inner finally
 outer finally

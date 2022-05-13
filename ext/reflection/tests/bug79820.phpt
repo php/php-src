@@ -3,6 +3,7 @@ Bug #79820: Use after free when type duplicated into ReflectionProperty gets res
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class Test {
     public stdClass $prop;
 }

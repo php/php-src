@@ -239,7 +239,7 @@ function ocifetchinto($statement, &$result, int $mode = OCI_NUM): int|false {}
  * @param resource $statement
  * @param array $output
  */
-function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, int $flags = 0): int {}
+function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, int $flags = OCI_FETCHSTATEMENT_BY_COLUMN | OCI_ASSOC): int {}
 
 /**
  * @param resource $statement
@@ -247,7 +247,7 @@ function oci_fetch_all($statement, &$output, int $offset = 0, int $limit = -1, i
  * @alias oci_fetch_all
  * @deprecated
  */
-function ocifetchstatement($statement, &$output, int $offset = 0, int $limit = -1, int $flags = 0): int {}
+function ocifetchstatement($statement, &$output, int $offset = 0, int $limit = -1, int $flags = OCI_FETCHSTATEMENT_BY_COLUMN | OCI_ASSOC): int {}
 
 /** @param resource $statement */
 function oci_fetch_object($statement, int $mode = OCI_ASSOC | OCI_RETURN_NULLS): stdClass|false {}
@@ -326,11 +326,16 @@ function oci_pconnect(string $username, string $password, ?string $connection_st
  */
 function ociplogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
-/** @param resource|null $connection_or_statement */
+/**
+ * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
+ * @refcount 1
+ */
 function oci_error($connection_or_statement = null): array|false {}
 
 /**
  * @param resource|null $connection_or_statement
+ * @return array<string, int|string>|false
  * @alias oci_error
  * @deprecated
  */
@@ -375,6 +380,9 @@ function oci_set_prefetch($statement, int $rows): bool {}
  * @deprecated
  */
 function ocisetprefetch($statement, int $rows): bool {}
+
+/** @param resource $statement */
+function oci_set_prefetch_lob($statement, int $prefetch_lob_size): bool {}
 
 /** @param resource $connection */
 function oci_set_client_identifier($connection, string $client_id): bool {}
@@ -559,7 +567,7 @@ class OCILob {
      * @alias oci_lob_import
      * @tentative-return-type
      */
-    public function savefile(string $filename): bool {}
+    public function saveFile(string $filename): bool {}
 
     /**
      * @alias oci_lob_load
@@ -637,19 +645,19 @@ class OCILob {
      * @alias ocisetbufferinglob
      * @tentative-return-type
      */
-    public function setbuffering(bool $mode): bool {}
+    public function setBuffering(bool $mode): bool {}
 
     /**
      * @alias ocigetbufferinglob
      * @tentative-return-type
      */
-    public function getbuffering(): bool {}
+    public function getBuffering(): bool {}
 
     /**
      * @alias oci_lob_export
      * @tentative-return-type
      */
-    public function writetofile(string $filename, ?int $offset = null, ?int $length = null): bool {}
+    public function writeToFile(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
     /**
      * @alias oci_lob_export
@@ -658,7 +666,7 @@ class OCILob {
     public function export(string $filename, ?int $offset = null, ?int $length = null): bool {}
 
     /** @tentative-return-type */
-    public function writetemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
+    public function writeTemporary(string $data, int $type = OCI_TEMP_CLOB): bool {}
 
     /** @tentative-return-type */
     public function close(): bool {}
@@ -699,7 +707,7 @@ class OCICollection {
      * @alias oci_collection_element_assign
      * @tentative-return-type
      */
-    public function assignelem(int $index, string $value): bool {}
+    public function assignElem(int $index, string $value): bool {}
 
     /**
      * @alias oci_collection_size

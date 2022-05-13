@@ -1,10 +1,10 @@
 --TEST--
 Persistent connections - limits (-1, unlimited)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_persistent=1
@@ -12,9 +12,7 @@ mysqli.max_persistent=-1
 mysqli.max_links=-1
 --FILE--
 <?php
-    require_once("connect.inc");
-    // opens a regular connection
-    require_once("table.inc");
+    require_once "table.inc";
 
     if (!$res = mysqli_query($link, "SELECT 'works..' as _desc"))
         printf("[001] Cannot run query, [%d] %s\n",
@@ -86,7 +84,7 @@ mysqli.max_links=-1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 Regular connection 1 - 'works..'

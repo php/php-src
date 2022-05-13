@@ -491,11 +491,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					}
 					zval_ptr_dtor(parameter);
 
-					switch (P->len) {
-						case SQL_NULL_DATA:
-							ZVAL_NULL(parameter);
-							break;
-						default:
+					if (P->len >= 0) {
 							ZVAL_STRINGL(parameter, P->outbuf, P->len);
 							switch (pdo_odbc_ucs22utf8(stmt, P->is_unicode, parameter)) {
 								case PDO_ODBC_CONV_FAIL:
@@ -505,6 +501,8 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								case PDO_ODBC_CONV_OK:
 									break;
 							}
+					} else {
+						ZVAL_NULL(parameter);
 					}
 				}
 				return 1;
@@ -615,7 +613,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		rc = SQLBindCol(S->stmt, colno+1,
 			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
 			S->cols[colno].data,
- 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
+			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
 		if (rc != SQL_SUCCESS) {
 			pdo_odbc_stmt_error("SQLBindCol");

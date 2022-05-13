@@ -133,7 +133,8 @@ static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	NULL,
 	string_enum_current_move_forward,
 	string_enum_rewind,
-	zoi_with_current_invalidate_current
+	zoi_with_current_invalidate_current,
+	NULL, /* get_gc */
 };
 
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object)
@@ -216,7 +217,7 @@ PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
 	if (data) {
-		ZVAL_COPY_DEREF(return_value, data);
+		RETURN_COPY_DEREF(data);
 	}
 }
 
@@ -295,7 +296,6 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;
-	IntlIterator_handlers.dtor_obj = zend_objects_destroy_object;
 	IntlIterator_handlers.free_obj = IntlIterator_objects_free;
 
 }

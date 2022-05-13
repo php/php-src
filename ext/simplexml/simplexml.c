@@ -1294,7 +1294,7 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	}
 	sxe->xpath->node = nodeptr;
 
- 	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
+	ns = xmlGetNsList((xmlDocPtr) sxe->document->ptr, nodeptr);
 	if (ns != NULL) {
 		while (ns[nsnbr] != NULL) {
 			nsnbr++;
@@ -1998,7 +1998,6 @@ PHP_METHOD(SimpleXMLElement, valid)
 PHP_METHOD(SimpleXMLElement, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2009,8 +2008,7 @@ PHP_METHOD(SimpleXMLElement, current)
 		RETURN_THROWS();
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 /* }}} */
 
@@ -2083,7 +2081,6 @@ PHP_METHOD(SimpleXMLElement, hasChildren)
 PHP_METHOD(SimpleXMLElement, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
-	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2093,8 +2090,7 @@ PHP_METHOD(SimpleXMLElement, getChildren)
 		return; /* return NULL */
 	}
 
-	data = &sxe->iter.data;
-	ZVAL_COPY_DEREF(return_value, data);
+	RETURN_COPY_DEREF(&sxe->iter.data);
 }
 
 static zend_object_handlers sxe_object_handlers;
@@ -2146,13 +2142,14 @@ sxe_object_clone(zend_object *object)
 }
 /* }}} */
 
-/* {{{ sxe_object_dtor() */
-static void sxe_object_dtor(zend_object *object)
+/* {{{ sxe_object_free_storage() */
+static void sxe_object_free_storage(zend_object *object)
 {
-	/* dtor required to cleanup iterator related data properly */
 	php_sxe_object *sxe;
 
 	sxe = php_sxe_fetch_object(object);
+
+	zend_object_std_dtor(&sxe->zo);
 
 	if (!Z_ISUNDEF(sxe->iter.data)) {
 		zval_ptr_dtor(&sxe->iter.data);
@@ -2171,17 +2168,6 @@ static void sxe_object_dtor(zend_object *object)
 		zval_ptr_dtor(&sxe->tmp);
 		ZVAL_UNDEF(&sxe->tmp);
 	}
-}
-/* }}} */
-
-/* {{{ sxe_object_free_storage() */
-static void sxe_object_free_storage(zend_object *object)
-{
-	php_sxe_object *sxe;
-
-	sxe = php_sxe_fetch_object(object);
-
-	zend_object_std_dtor(&sxe->zo);
 
 	php_libxml_node_decrement_resource((php_libxml_node_object *)sxe);
 
@@ -2633,7 +2619,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
 	}
 
-	if (nodep->type == XML_ELEMENT_NODE) {
+	if (nodep && nodep->type == XML_ELEMENT_NODE) {
 		if (!ce) {
 			ce = sxe_class_entry;
 			fptr_count = NULL;
@@ -2691,7 +2677,6 @@ PHP_MINIT_FUNCTION(simplexml)
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
-	sxe_object_handlers.dtor_obj = sxe_object_dtor;
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
 	sxe_object_handlers.clone_obj = sxe_object_clone;
 	sxe_object_handlers.read_property = sxe_property_read;
@@ -2710,9 +2695,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
-
-	sxe_class_entry->serialize = zend_class_serialize_deny;
-	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
 	/* TODO: Why do we have two variables for this? */
 	ce_SimpleXMLElement = sxe_class_entry;

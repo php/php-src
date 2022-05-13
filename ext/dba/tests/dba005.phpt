@@ -1,5 +1,7 @@
 --TEST--
 DBA FirstKey/NextKey Loop Test With 5 Items
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');

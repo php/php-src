@@ -1,8 +1,9 @@
 --TEST--
 Bug #33263 (mysqli_real_connect in __construct)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -12,7 +13,7 @@ require_once('skipifconnectfailure.inc');
     class test extends mysqli
     {
         public function __construct($host, $user, $passwd, $db, $port, $socket) {
-            parent::init();
+            parent::__construct();
             parent::real_connect($host, $user, $passwd, $db, $port, $socket);
         }
     }

@@ -23,5 +23,5 @@ var_dump(Foo::Bar->value);
 
 ?>
 --EXPECT--
-Cannot acquire reference to property Foo::$value
+Cannot modify readonly property Foo::$value
 int(0)

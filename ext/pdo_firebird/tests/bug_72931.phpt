@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: Bug 72931 Insert returning fails on Firebird 3
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --ENV--

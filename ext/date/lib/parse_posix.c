@@ -25,6 +25,37 @@
 #include "timelib.h"
 #include "timelib_private.h"
 
+// This section adds the missing 'strndup' implementation on Windows.
+#if TIMELIB_USE_BUILTIN_STRNDUP == 1
+# include <stdlib.h>
+# include <string.h>
+
+/**
+ * char* timelib_strndup(const char* s, size_t n)
+ *
+ * Returns a pointer to a copy of 's' with at most 'n' characters
+ * in memory obtained from 'malloc', or 'NULL' if insufficient
+ * memory was available.  The result is always 'NULL' terminated.
+ */
+static char* timelib_strndup(const char* s, size_t n)
+{
+	char* result;
+	size_t len = strlen(s);
+
+	if (n < len) {
+		len = n;
+	}
+
+	result = (char*)malloc(len + 1);
+	if (!result) {
+		return 0;
+	}
+
+	result[len] = '\0';
+	return (char*)memcpy(result, s, len);
+}
+#endif
+
 /* Forwards declrations */
 static timelib_posix_trans_info *timelib_posix_trans_info_ctor(void);
 static void timelib_posix_trans_info_dtor(timelib_posix_trans_info* ts);
@@ -374,12 +405,6 @@ timelib_posix_str* timelib_parse_posix_str(const char *posix)
 	return tmp;
 }
 
-typedef struct _posix_transitions {
-	size_t      count;
-	timelib_sll times[6];
-	timelib_sll types[6];
-} posix_transitions;
-
 static const int month_lengths[2][MONTHS_PER_YEAR] = {
 	{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }, // normal year
 	{ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }  // leap year
@@ -472,7 +497,7 @@ timelib_sll timelib_ts_at_start_of_year(timelib_sll year)
 	);
 }
 
-static void calc_transitions_for_year(timelib_tzinfo *tz, timelib_sll year, posix_transitions *transitions)
+void timelib_get_transitions_for_year(timelib_tzinfo *tz, timelib_sll year, timelib_posix_transitions *transitions)
 {
 	timelib_sll trans_begin; /* Since start of the year */
 	timelib_sll trans_end;
@@ -505,14 +530,10 @@ static void calc_transitions_for_year(timelib_tzinfo *tz, timelib_sll year, posi
 
 ttinfo* timelib_fetch_posix_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib_sll *transition_time)
 {
-	timelib_sll       year;
-	timelib_time      dummy;
-	posix_transitions transitions = { 0 };
+	timelib_sll               year;
+	timelib_time              dummy;
+	timelib_posix_transitions transitions = { 0 };
 	size_t            i;
-
-	/* Find 'year' (UTC) for 'ts' */
-	timelib_unixtime2gmt(&dummy, ts);
-	year = dummy.y;
 
 	/* If there is no second (dst_end) information, the UTC offset is valid for the whole year, so no need to
 	 * do clever logic */
@@ -523,10 +544,14 @@ ttinfo* timelib_fetch_posix_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, 
 		return &(tz->type[tz->posix_info->type_index_std_type]);
 	}
 
+	/* Find 'year' (UTC) for 'ts' */
+	timelib_unixtime2gmt(&dummy, ts);
+	year = dummy.y;
+
 	/* Calculate transition times for 'year-1', 'year', and 'year+1' */
-	calc_transitions_for_year(tz, year - 1, &transitions);
-	calc_transitions_for_year(tz, year,     &transitions);
-	calc_transitions_for_year(tz, year + 1, &transitions);
+	timelib_get_transitions_for_year(tz, year - 1, &transitions);
+	timelib_get_transitions_for_year(tz, year,     &transitions);
+	timelib_get_transitions_for_year(tz, year + 1, &transitions);
 
 	/* Check where the 'ts' falls in the 4 transitions */
 	for (i = 1; i < transitions.count; i++) {

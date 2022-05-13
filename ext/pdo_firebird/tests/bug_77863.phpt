@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: Bug #76488 PDO Firebird does not support boolean datatype in input parameters
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --ENV--

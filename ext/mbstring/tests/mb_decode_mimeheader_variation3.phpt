@@ -1,10 +1,7 @@
 --TEST--
 Test mb_decode_mimeheader() function : variation
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";

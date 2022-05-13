@@ -1,5 +1,7 @@
 --TEST--
 Check various LOB error messages
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -54,7 +56,7 @@ object(OCILob)#%d (1) {
   resource(%d) of type (oci8 descriptor)
 }
 
-Warning: OCILob::writetemporary(): Invalid temporary lob type: %d in %s on line %d
+Warning: OCILob::writeTemporary(): Invalid temporary lob type: %d in %s on line %d
 bool(false)
 int(6)
 bool(true)
@@ -69,7 +71,7 @@ bool(false)
 Warning: OCILob::import(): Can't open file %s in %s on line %d
 bool(false)
 
-Warning: OCILob::savefile(): Can't open file %s in %s on line %d
+Warning: OCILob::saveFile(): Can't open file %s in %s on line %d
 bool(false)
 OCILob::truncate(): Argument #1 ($length) must be greater than or equal to 0
 Done

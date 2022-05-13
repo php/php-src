@@ -202,8 +202,8 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 
 #ifndef HAVE_STRNLEN
 static size_t strnlen(const char *s, size_t maxlen) {
-        char *r = (char *)memchr(s, '\0', maxlen);
-        return r ? r-s : maxlen;
+	char *r = (char *)memchr(s, '\0', maxlen);
+	return r ? r-s : maxlen;
 }
 #endif
 
@@ -497,7 +497,7 @@ bail:
 
 		entry.link = NULL;
 		/* link field is null-terminated unless it has 100 non-null chars.
-		 * Thus we can not use strlen. */
+		 * Thus we cannot use strlen. */
 		linkname_len = strnlen(hdr->linkname, 100);
 		if (entry.tar_type == TAR_LINK) {
 			if (!zend_hash_str_exists(&myphar->manifest, hdr->linkname, linkname_len)) {
@@ -967,7 +967,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	int closeoldfile, free_user_stub;
 	size_t signature_length;
 	struct _phar_pass_tar_info pass;
-	char *buf, *signature, *tmp, sigbuf[8];
+	char *buf, *signature, sigbuf[8];
 	char halt_stub[] = "__HALT_COMPILER();";
 
 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
@@ -1063,9 +1063,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			free_user_stub = 0;
 		}
 
-		tmp = estrndup(user_stub, len);
-		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
-			efree(tmp);
+		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
 			if (error) {
 				spprintf(error, 0, "illegal stub for tar-based phar \"%s\"", phar->fname);
 			}
@@ -1074,8 +1072,6 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			}
 			return EOF;
 		}
-		pos = user_stub + (pos - tmp);
-		efree(tmp);
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();

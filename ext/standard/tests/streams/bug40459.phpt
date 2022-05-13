@@ -6,6 +6,7 @@ allow_url_fopen=1
 <?php
 // Test whether the constructor of the user-space stream wrapper is called when stream functions are called
 class testwrapper {
+    public $context;
     private $constructorCalled = false;
     function __construct() {
         $this->constructorCalled = true;

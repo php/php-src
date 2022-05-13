@@ -27,13 +27,7 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT Z_UL(8)
-# define ZEND_MM_ALIGNMENT_LOG2 Z_L(3)
-#elif ZEND_MM_ALIGNMENT < 4
-# undef ZEND_MM_ALIGNMENT
-# undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT Z_UL(4)
-# define ZEND_MM_ALIGNMENT_LOG2 Z_L(2)
+# error "ZEND_MM_ALIGNMENT was not defined during configure"
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
@@ -229,6 +223,7 @@ ZEND_API bool is_zend_ptr(const void *ptr);
 
 ZEND_API size_t zend_memory_usage(bool real_usage);
 ZEND_API size_t zend_memory_peak_usage(bool real_usage);
+ZEND_API void zend_memory_reset_peak_usage(void);
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\

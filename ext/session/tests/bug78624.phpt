@@ -4,6 +4,8 @@ Test session_set_save_handler() : session_gc() returns the number of deleted rec
 session.name=PHPSESSID
 session.save_handler=files
 session.gc_probability=0
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

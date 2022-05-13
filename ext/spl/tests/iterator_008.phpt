@@ -5,27 +5,27 @@ SPL: InfiniteIterator
 
 class ArrayIteratorEx extends ArrayIterator
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
         parent::rewind();
     }
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         return parent::valid();
     }
-    function current()
+    function current(): mixed
     {
         echo __METHOD__ . "\n";
         return parent::current();
     }
-    function key()
+    function key(): string|int|null
     {
         echo __METHOD__ . "\n";
         return parent::key();
     }
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
         parent::next();

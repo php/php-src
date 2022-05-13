@@ -3,10 +3,8 @@ Test posix_getpwnam() function : basic functionality
 --CREDITS--
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 User Group: PHPSP #phptestfestbrasil
---SKIPIF--
-<?php
-    if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
-?>
+--EXTENSIONS--
+posix
 --FILE--
 <?php
   $uid = posix_geteuid();

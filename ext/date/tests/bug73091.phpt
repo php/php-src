@@ -12,9 +12,7 @@ class foo {
 var_dump(unserialize('O:12:"DateInterval":1:{s:4:"days";O:3:"foo":0:{}}'));
 ?>
 --EXPECTF--
-object(DateInterval)#%d (16) {
-  ["days"]=>
-  int(-1)
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(-1)
   ["m"]=>
@@ -28,21 +26,11 @@ object(DateInterval)#%d (16) {
   ["s"]=>
   int(-1)
   ["f"]=>
-  float(-1)
-  ["weekday"]=>
-  int(-1)
-  ["weekday_behavior"]=>
-  int(-1)
-  ["first_last_day_of"]=>
-  int(-1)
+  float(0)
   ["invert"]=>
   int(0)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
+  ["days"]=>
   int(-1)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }

@@ -1,12 +1,13 @@
 --TEST--
 function test: mysqli_insert_id()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
     if (PHP_INT_SIZE == 8) {
         echo 'skip test valid only for 32bit systems';
         exit;
     }
-    require_once('skipif.inc');
     require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

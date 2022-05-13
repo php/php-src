@@ -20,5 +20,5 @@ try {
 
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from non-compatible float 2.5 to int in %s on line %d
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 Illegal offset type

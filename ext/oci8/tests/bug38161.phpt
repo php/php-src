@@ -1,7 +1,7 @@
 --TEST--
 Bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variable)
---SKIPIF--
-<?php if (!extension_loaded("oci8")) print "skip"; ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

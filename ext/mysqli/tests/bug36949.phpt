@@ -1,8 +1,9 @@
 --TEST--
 Bug #36949 (invalid internal mysqli objects dtor)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

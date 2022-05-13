@@ -1,10 +1,7 @@
 --TEST--
 socket_export_stream: Basic test
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('SKIP sockets extension not available.');
-}
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 

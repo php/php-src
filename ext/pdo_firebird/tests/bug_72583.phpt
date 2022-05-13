@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: Feature 72583 Fetch integers as php integers not as strings
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --ENV--

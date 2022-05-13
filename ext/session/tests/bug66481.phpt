@@ -3,6 +3,8 @@ Bug #66481: Calls to session_name() segfault when session.name is null.
 --INI--
 session.name=
 error_log=
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

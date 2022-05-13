@@ -1,5 +1,7 @@
 --TEST--
 DBA NDBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'ndbm';

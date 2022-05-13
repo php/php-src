@@ -1,5 +1,7 @@
 --TEST--
 oci_lob_write()/erase()/read() with CLOBs
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -109,7 +111,7 @@ object(OCILob)#%d (1) {
   ["descriptor"]=>
   resource(%d) of type (oci8 descriptor)
 }
-int(77)
+int(82)
 int(20)
 array(2) {
   [0]=>
@@ -123,9 +125,9 @@ array(2) {
     resource(%d) of type (oci8 descriptor)
   }
 }
-string(2) "%0%0"
-string(5) "%0%0%0th"
-string(50) "is                     st string. why are you read"
+string(2) "%s"
+string(5) "%s"
+string(50) "%s                    at test string. why are you"
 
 Warning: OCILob::erase(): ORA-22990: %s in %s on line %d
 bool(false)

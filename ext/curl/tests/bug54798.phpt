@@ -1,9 +1,7 @@
 --TEST--
 Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling curl_exec)
---SKIPIF--
-<?php
-include 'skipif.inc';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

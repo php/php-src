@@ -1,8 +1,9 @@
 --TEST--
 PDO ODBC "long" columns
+--EXTENSIONS--
+pdo_odbc
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 // make sure there is an ODBC driver and a DSN, or the test will fail
 include 'ext/pdo/tests/pdo_test.inc';
 $config = PDOTest::get_config('ext/pdo_odbc/tests/common.phpt');

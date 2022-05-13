@@ -2,7 +2,10 @@
 
 /** @generate-class-entries */
 
-/** @strict-properties */
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class Fiber
 {
     public function __construct(callable $callback) {}
@@ -23,7 +26,7 @@ final class Fiber
 
     public function getReturn(): mixed {}
 
-    public static function this(): ?Fiber {}
+    public static function getCurrent(): ?Fiber {}
 
     public static function suspend(mixed $value = null): mixed {}
 }

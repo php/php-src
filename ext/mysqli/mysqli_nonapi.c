@@ -333,7 +333,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, bool is_real_connect, b
 	unsigned int allow_local_infile = MyG(allow_local_infile);
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
 
-#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(MYSQLI_USE_MYSQLND)
 	if (MyG(local_infile_directory) && !php_check_open_basedir(MyG(local_infile_directory))) {
 		mysql_options(mysql->mysql, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, MyG(local_infile_directory));
 	}
@@ -957,6 +957,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	if (FAIL == mysqlnd_reap_async_query(mysql->mysql)) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 
@@ -978,8 +979,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	}
 
 	if (!result) {
-		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql),
-										"%s", mysql_error(mysql->mysql));
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 

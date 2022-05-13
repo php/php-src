@@ -1045,7 +1045,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 								char tmp[22];
 								/* even though lval is declared as unsigned, the value
-								 * may be negative. Therefor we cannot use MYSQLI_LLU_SPEC and must
+								 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
 								 * use MYSQLI_LL_SPEC.
 								 */
 								snprintf(tmp, sizeof(tmp), (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
@@ -1720,7 +1720,7 @@ static int mysqli_options_get_option_zval_type(int option)
 #if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_SERVER_PUBLIC_KEY:
 #endif
-#if MYSQL_VERSION_ID >= 80021 || defined(MYSQLI_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_LOAD_DATA_LOCAL_DIR:
 #endif
 			return IS_STRING;
@@ -1945,7 +1945,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	newstr = zend_string_alloc(2 * escapestr_len, 0);
+	newstr = zend_string_safe_alloc(2, escapestr_len, 0, 0);
 	ZSTR_LEN(newstr) = mysql_real_escape_string_quote(mysql->mysql, ZSTR_VAL(newstr), escapestr, escapestr_len, '\'');
 	newstr = zend_string_truncate(newstr, ZSTR_LEN(newstr), 0);
 

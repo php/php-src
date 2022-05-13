@@ -3701,14 +3701,7 @@ zend_freedtoa(char *s)
  *	   calculation.
  */
 
-ZEND_API char *
-zend_dtoa
-#ifdef KR_headers
-	(dd, mode, ndigits, decpt, sign, rve)
-	double dd; int mode, ndigits, *decpt, *sign; char **rve;
-#else
-	(double dd, int mode, int ndigits, int *decpt, int *sign, char **rve)
-#endif
+ZEND_API char *zend_dtoa(double dd, int mode, int ndigits, int *decpt, bool *sign, char **rve)
 {
  /*	Arguments ndigits, decpt, sign are similar to those
 	of ecvt and fcvt; trailing zeros are suppressed from
@@ -4512,6 +4505,105 @@ ZEND_API double zend_bin_strtod(const char *str, const char **endptr)
 	}
 
 	return value;
+}
+
+ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf)
+{
+	char *digits, *dst, *src;
+	int i, decpt;
+	bool sign;
+	int mode = ndigit >= 0 ? 2 : 0;
+
+	if (mode == 0) {
+		ndigit = 17;
+	}
+	digits = zend_dtoa(value, mode, ndigit, &decpt, &sign, NULL);
+	if (decpt == 9999) {
+		/*
+		 * Infinity or NaN, convert to inf or nan with sign.
+		 * We assume the buffer is at least ndigit long.
+		 */
+		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
+		zend_freedtoa(digits);
+		return (buf);
+	}
+
+	dst = buf;
+	if (sign) {
+		*dst++ = '-';
+	}
+
+	if ((decpt >= 0 && decpt > ndigit) || decpt < -3) { /* use E-style */
+		/* exponential format (e.g. 1.2345e+13) */
+		if (--decpt < 0) {
+			sign = 1;
+			decpt = -decpt;
+		} else {
+			sign = 0;
+		}
+		src = digits;
+		*dst++ = *src++;
+		*dst++ = dec_point;
+		if (*src == '\0') {
+			*dst++ = '0';
+		} else {
+			do {
+				*dst++ = *src++;
+			} while (*src != '\0');
+		}
+		*dst++ = exponent;
+		if (sign) {
+			*dst++ = '-';
+		} else {
+			*dst++ = '+';
+		}
+		if (decpt < 10) {
+			*dst++ = '0' + decpt;
+			*dst = '\0';
+		} else {
+			/* XXX - optimize */
+			int n;
+			for (n = decpt, i = 0; (n /= 10) != 0; i++);
+			dst[i + 1] = '\0';
+			while (decpt != 0) {
+				dst[i--] = '0' + decpt % 10;
+				decpt /= 10;
+			}
+		}
+	} else if (decpt < 0) {
+		/* standard format 0. */
+		*dst++ = '0';   /* zero before decimal point */
+		*dst++ = dec_point;
+		do {
+			*dst++ = '0';
+		} while (++decpt < 0);
+		src = digits;
+		while (*src != '\0') {
+			*dst++ = *src++;
+		}
+		*dst = '\0';
+	} else {
+		/* standard format */
+		for (i = 0, src = digits; i < decpt; i++) {
+			if (*src != '\0') {
+				*dst++ = *src++;
+			} else {
+				*dst++ = '0';
+			}
+		}
+		if (*src != '\0') {
+			if (src == digits) {
+				*dst++ = '0';   /* zero before decimal point */
+			}
+			*dst++ = dec_point;
+			for (i = decpt; digits[i] != '\0'; i++) {
+				*dst++ = digits[i];
+			}
+		}
+		*dst = '\0';
+	}
+	zend_freedtoa(digits);
+	return (buf);
 }
 
 static void destroy_freelist(void)

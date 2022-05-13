@@ -329,7 +329,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				}
 
 				if (zend_string_equals_literal_ci(Z_STR_P(arg1), "parent")) {
-					/* parent entry can not be same as current section -> causes infinite loop! */
+					/* parent entry cannot be same as current section -> causes infinite loop! */
 					if (ctx->current_section_name != NULL &&
 						zend_string_equals_ci(ctx->current_section_name, Z_STR_P(arg2))
 					) {

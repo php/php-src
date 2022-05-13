@@ -50,39 +50,39 @@ grapheme_close_global_iterator( void )
 void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
 	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
-    *sub_str = NULL;
+	*sub_str = NULL;
 
-    if(str_len > INT32_MAX) {
-    	/* We can not return long strings from ICU functions, so we won't here too */
-    	return;
-    }
+	if(str_len > INT32_MAX) {
+		/* We cannot return long strings from ICU functions, so we won't here too */
+		return;
+	}
 
-    /* if "from" position is negative, count start position from the end
-     * of the string
-     */
-    if (f < 0) {
-        f = str_len2 + f;
-        if (f < 0) {
-            f = 0;
-        }
-    } else if (f > str_len2) {
+	/* if "from" position is negative, count start position from the end
+	 * of the string
+	 */
+	if (f < 0) {
+		f = str_len2 + f;
+		if (f < 0) {
+			f = 0;
+		}
+	} else if (f > str_len2) {
 		f = str_len2;
 	}
 
-    /* if "length" position is negative, set it to the length
-     * needed to stop that many chars from the end of the string
-     */
-    if (l < 0) {
-        l = (str_len2 - f) + l;
-        if (l < 0) {
-            l = 0;
-        }
-    } else if (l > str_len2 - f) {
+	/* if "length" position is negative, set it to the length
+	 * needed to stop that many chars from the end of the string
+	 */
+	if (l < 0) {
+		l = (str_len2 - f) + l;
+		if (l < 0) {
+			l = 0;
+		}
+	} else if (l > str_len2 - f) {
 		l = str_len2 - f;
 	}
 
-    *sub_str = str + f;
-    *sub_str_len = l;
+	*sub_str = str + f;
+	*sub_str_len = l;
 }
 /* }}} */
 
@@ -157,16 +157,29 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			goto finish;
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos, &status);
+		usearch_setOffset(src, last ? 0 : offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
 
 	if(last) {
-		char_pos = usearch_last(src, &status);
-		if(char_pos < offset_pos) {
-			/* last one is beyound our start offset */
-			char_pos = USEARCH_DONE;
+		if (offset >= 0) {
+			char_pos = usearch_last(src, &status);
+			if(char_pos < offset_pos) {
+				/* last one is beyond our start offset */
+				char_pos = USEARCH_DONE;
+			}			
+		} else {
+			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
+			int32_t prev_pos = USEARCH_DONE;
+			do {
+				char_pos = usearch_next(src, &status);
+				if (char_pos == USEARCH_DONE || char_pos > offset_pos) {
+					char_pos = prev_pos;
+					break;
+				}
+				prev_pos = char_pos;
+			} while(1);
 		}
 	} else {
 		char_pos = usearch_next(src, &status);
@@ -317,8 +330,7 @@ int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 /* }}} */
 
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
- zend_long
-grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
+zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
 	char *p, *e;
 

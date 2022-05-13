@@ -1,8 +1,9 @@
 --TEST--
 Bug #76999 (mb_regex_set_options() return current options)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 if (!function_exists('mb_regex_set_options')) die('skip mb_regex_set_options() not available');
 ?>
 --FILE--

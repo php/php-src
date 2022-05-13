@@ -1,5 +1,7 @@
 --TEST--
 Bug 73498 Incorrect DELIMITER syntax for pg_copy_to()
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

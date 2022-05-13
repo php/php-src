@@ -2,8 +2,12 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlPartsIterator extends IntlIterator
 {
-    /** @return IntlBreakIterator */
-    public function getBreakIterator() {}
+    /** @tentative-return-type */
+    public function getBreakIterator(): IntlBreakIterator {}
+
+    /** @tentative-return-type */
+    public function getRuleStatus(): int {}
 }

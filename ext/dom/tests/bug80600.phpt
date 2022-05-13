@@ -9,5 +9,5 @@ $doc = new \DOMDocument();
 $doc->loadXML('<a><!-- foo --></a>');
 $doc->documentElement->firstChild->remove();
 echo $doc->saveXML($doc->documentElement);
---EXPECTF--
+--EXPECT--
 <a/>

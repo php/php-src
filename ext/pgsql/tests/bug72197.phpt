@@ -1,5 +1,7 @@
 --TEST--
 Bug #72197 pg_lo_create arbitrary read
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -33,4 +35,6 @@ pg_close($conn);
 --EXPECTF--
 pg_lo_create(): Argument #1 ($connection) must be of type PgSql\Connection when the connection is provided%w
 int(%d)
+
+Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 int(%d)

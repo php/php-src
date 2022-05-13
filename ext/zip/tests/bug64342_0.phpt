@@ -1,9 +1,7 @@
 --TEST--
 Bug #64342 ZipArchive::addFile() has to check file existence (variation 1)
---SKIPIF--
-<?php
-    if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 

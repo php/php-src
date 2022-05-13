@@ -1,7 +1,7 @@
 --TEST--
 token_get_all()
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 
@@ -917,7 +917,14 @@ array(47) {
     int(1)
   }
   [42]=>
-  string(1) "&"
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) "&"
+    [2]=>
+    int(1)
+  }
   [43]=>
   array(3) {
     [0]=>

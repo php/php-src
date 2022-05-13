@@ -19,7 +19,7 @@ var_dump(unserialize($s));
 
 ?>
 --EXPECTF--
-Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 string(18) "a:2:{i:0;N;i:1;N;}"
 array(2) {
   [0]=>

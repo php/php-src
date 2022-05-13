@@ -1,8 +1,9 @@
 --TEST--
 PDO Common: Bug #44861 (scrollable cursor don't work with pgsql)
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 $allowed = array('oci', 'pgsql');

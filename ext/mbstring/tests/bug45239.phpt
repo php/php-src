@@ -4,10 +4,8 @@ Bug #45239 (encoding detector hangs with mbstring.strict_detection enabled)
 mbstring.strict_detection=1
 input_encoding=UTF-8
 internal_encoding=UTF-8
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 mb_internal_encoding("utf-8");

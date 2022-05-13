@@ -1,11 +1,7 @@
 --TEST--
 Bug #72202 (curl_close doesn't close cURL handle)
---SKIPIF--
-<?php
-if (!extension_loaded("curl")) {
-    exit("skip curl extension not loaded");
-}
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 $a = fopen(__FILE__, "r");

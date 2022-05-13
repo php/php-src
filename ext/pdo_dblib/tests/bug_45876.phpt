@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: Does not support get column meta
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--
@@ -31,7 +32,7 @@ array(10) {
   ["native_usertype_id"]=>
   int(%d)
   ["pdo_type"]=>
-  int(3)
+  int(2)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>

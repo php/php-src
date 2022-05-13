@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller no index file 404
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --ENV--
 SCRIPT_NAME=/frontcontroller8.php
 REQUEST_URI=/frontcontroller8.php/

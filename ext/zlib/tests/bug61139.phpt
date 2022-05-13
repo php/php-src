@@ -1,11 +1,7 @@
 --TEST--
 Bug #61139 (gzopen leaks when specifying invalid mode)
---SKIPIF--
-<?php
-if (!extension_loaded('zlib')) {
-    die('skip - zlib extension not loaded');
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 

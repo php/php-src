@@ -1,8 +1,10 @@
 --TEST--
 PDO_DBLIB: Out of memory on large recordsets
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
+if (getenv('SKIP_REPEAT')) die('skip May fail on repeat');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--

@@ -1,8 +1,9 @@
 --TEST--
 Bug #70825 (Cannot fetch multiple values with group in ini file)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
-if (!extension_loaded('dba')) die('skip dba extension not available');
 if (!in_array('inifile', dba_handlers())) die('skip inifile handler not available');
 ?>
 --FILE--
@@ -65,5 +66,5 @@ string(4) "1337"
 --CLEAN--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug70825.ini';
-unlink($filename);
+@unlink($filename);
 ?>

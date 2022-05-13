@@ -571,11 +571,15 @@ void _php_import_environment_variables(zval *array_ptr)
 		import_environment_variable(Z_ARRVAL_P(array_ptr), *env);
 	}
 #else
-	char *environment = GetEnvironmentStringsA();
-	for (char *env = environment; env != NULL && *env; env += strlen(env) + 1) {
-		import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+	wchar_t *environmentw = GetEnvironmentStringsW();
+	for (wchar_t *envw = environmentw; envw != NULL && *envw; envw += wcslen(envw) + 1) {
+		char *env = php_win32_cp_w_to_any(envw);
+		if (env != NULL) {
+			import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+			free(env);
+		}
 	}
-	FreeEnvironmentStringsA(environment);
+	FreeEnvironmentStringsW(environmentw);
 #endif
 
 	tsrm_env_unlock();
@@ -698,8 +702,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
 			Z_TRY_ADDREF_P(src_entry);
 			if (string_key) {
-				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
-						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
+				if (!globals_check || !zend_string_equals_literal(string_key, "GLOBALS")) {
 					zend_hash_update(dest, string_key, src_entry);
 				} else {
 					Z_TRY_DELREF_P(src_entry);

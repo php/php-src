@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL escape functions
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -42,8 +44,8 @@ $data = file_get_contents(FILE_NAME);
 $db   = pg_connect($conn_str);
 
 // Insert binary to DB
-$escaped_data = pg_escape_bytea($data);
-pg_query("DELETE FROM ".$table_name." WHERE num = 10000;");
+$escaped_data = pg_escape_bytea($db, $data);
+pg_query($db, "DELETE FROM ".$table_name." WHERE num = 10000;");
 $sql = "INSERT INTO ".$table_name." (num, bin) VALUES (10000, CAST ('".$escaped_data."' AS BYTEA));";
 pg_query($db, $sql);
 
@@ -71,7 +73,7 @@ for ($i = 0; $i < 2; $i++) {
 // pg_escape_literal/pg_escape_identifier
 $before = "ABC\\ABC\'";
 $expect	 = " E'ABC\\\\ABC\\\\'''";
-$after = pg_escape_literal($before);
+$after = pg_escape_literal($db, $before);
 if ($expect === $after) {
     echo "pg_escape_literal() is Ok\n";
 }
@@ -84,7 +86,7 @@ else {
 
 $before = "ABC\\ABC\'";
 $expect	 = "\"ABC\ABC\'\"";
-$after = pg_escape_identifier($before);
+$after = pg_escape_identifier($db, $before);
 if ($expect === $after) {
     echo "pg_escape_identifier() is Ok\n";
 }
@@ -96,8 +98,11 @@ else {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 pg_escape_string() is Ok
+
+Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 pg_escape_bytea() is Ok
 pg_escape_bytea() actually works with database
 pg_escape_literal() is Ok

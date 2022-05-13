@@ -44,19 +44,18 @@ if (($i = count($expected)) > count($headers))
     return;
 }
 
-do
-{
-    if (strncmp(current($headers), 'Set-Cookie:', 11) !== 0)
-    {
+do {
+    $header = current($headers);
+    if (strncmp($header, 'Set-Cookie:', 11) !== 0) {
         continue;
     }
 
-    if (current($headers) === current($expected))
-    {
+    // If the second rolls over between the time() call and the internal time determination by
+    // setcookie(), we might get Max-Age=4 instead of Max-Age=5.
+    $header = str_replace('Max-Age=4', 'Max-Age=5', $header);
+    if ($header === current($expected)) {
         $i--;
-    }
-    else
-    {
+    } else {
         echo "Header mismatch:\n\tExpected: "
             .current($expected)
             ."\n\tReceived: ".current($headers)."\n";

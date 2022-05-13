@@ -1,11 +1,11 @@
 --TEST--
 show information about extension
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
 include "skipif.inc";
-if (!extension_loaded("session")) {
-    die("skip session extension required");
-}
+
 if (PCRE_JIT_SUPPORT == false) {
     die ("skip not pcre jit support builtin");
 }
@@ -85,7 +85,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> int $flags = 0 ]
         Parameter #4 [ <optional> int $offset = 0 ]
       }
-      - Return [ int|false|null ]
+      - Return [ int|false ]
     }
     Function [ <internal:pcre> function preg_replace ] {
 

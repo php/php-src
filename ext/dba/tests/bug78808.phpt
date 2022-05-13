@@ -1,5 +1,7 @@
 --TEST--
 Bug #78808 ([LMDB] MDB_MAP_FULL: Environment mapsize limit reached)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
 $handler = 'lmdb';

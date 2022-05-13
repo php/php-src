@@ -1,9 +1,7 @@
 --TEST--
 Bug #80223 (imap_mail_compose() leaks envelope on malformed bodies)
---SKIPIF--
-<?php
-if (!extension_loaded('imap')) die('skip imap extension not available');
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 try {

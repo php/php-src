@@ -124,7 +124,11 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	/* Don't store callback if headers have already been sent:
+	 * It won't get used and we won't have a chance to release it. */
+	if (!SG(headers_sent)) {
+		ZVAL_COPY(&SG(callback_func), &fci.function_name);
+	}
 
 	RETURN_TRUE;
 }
@@ -340,7 +344,7 @@ SAPI_API char *sapi_get_default_content_type(void)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header)
 {
-    uint32_t len;
+	uint32_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len);
 	default_header->header_len = len;
@@ -1069,9 +1073,8 @@ SAPI_API double sapi_get_request_time(void)
 {
 	if(SG(global_request_time)) return SG(global_request_time);
 
-	if (sapi_module.get_request_time && SG(server_context)) {
-		SG(global_request_time) = sapi_module.get_request_time();
-	} else {
+	if (!sapi_module.get_request_time
+			|| sapi_module.get_request_time(&SG(global_request_time)) == FAILURE) {
 		struct timeval tp = {0};
 		if (!gettimeofday(&tp, NULL)) {
 			SG(global_request_time) = (double)(tp.tv_sec + tp.tv_usec / 1000000.00);

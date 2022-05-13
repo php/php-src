@@ -5,7 +5,7 @@ Check behaviour of incomplete class
 $serialized = 'O:1:"C":1:{s:1:"p";i:1;}';
 
 $incomplete = unserialize($serialized);
-eval('Class C {}');
+eval('#[AllowDynamicProperties] Class C {}');
 $complete   = unserialize($serialized);
 
 

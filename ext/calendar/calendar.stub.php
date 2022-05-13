@@ -4,8 +4,16 @@
 
 function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
+/**
+ * @return array<string, int|string|null>
+ * @refcount 1
+ */
 function cal_from_jd(int $julian_day, int $calendar): array {}
 
+/**
+ * @return array<int|string, int|string|array>
+ * @refcount 1
+ */
 function cal_info(int $calendar = -1): array {}
 
 function cal_to_jd(int $calendar, int $month, int $day, int $year): int {}

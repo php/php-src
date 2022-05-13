@@ -34,7 +34,6 @@
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 #include "ldap_arginfo.h"
-#include "Zend/zend_interfaces.h"
 
 #ifdef PHP_WIN32
 #include <string.h>
@@ -46,7 +45,6 @@
 #define __STDC__ 1
 #endif
 
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
 #ifdef HAVE_LDAP_SASL
@@ -828,8 +826,6 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_link_ce = register_class_LDAP_Connection();
 	ldap_link_ce->create_object = ldap_link_create_object;
-	ldap_link_ce->serialize = zend_class_serialize_deny;
-	ldap_link_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_link_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_link_object_handlers.offset = XtOffsetOf(ldap_linkdata, std);
@@ -840,8 +836,6 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_result_ce = register_class_LDAP_Result();
 	ldap_result_ce->create_object = ldap_result_create_object;
-	ldap_result_ce->serialize = zend_class_serialize_deny;
-	ldap_result_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_object_handlers.offset = XtOffsetOf(ldap_resultdata, std);
@@ -852,8 +846,6 @@ PHP_MINIT_FUNCTION(ldap)
 
 	ldap_result_entry_ce = register_class_LDAP_ResultEntry();
 	ldap_result_entry_ce->create_object = ldap_result_entry_create_object;
-	ldap_result_entry_ce->serialize = zend_class_serialize_deny;
-	ldap_result_entry_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&ldap_result_entry_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	ldap_result_entry_object_handlers.offset = XtOffsetOf(ldap_result_entry, std);
@@ -2019,7 +2011,8 @@ PHP_FUNCTION(ldap_get_entries)
 			ldap_value_free_len(ldap_value);
 
 			attr_len = strlen(attribute);
-			zend_hash_str_update(Z_ARRVAL(tmp1), php_strtolower(attribute, attr_len), attr_len, &tmp2);
+			zend_str_tolower(attribute, attr_len);
+			zend_hash_str_update(Z_ARRVAL(tmp1), attribute, attr_len, &tmp2);
 			add_index_string(&tmp1, num_attrib, attribute);
 
 			num_attrib++;

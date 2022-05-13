@@ -28,6 +28,4 @@ Doesn't trigger __get.
 Warning: Undefined array key "prop1" in %s on line %d
 Doesn't trigger __set.
 Doesn't trigger __unset.
-
-Warning: Undefined array key "prop3" in %s on line %d
 Shouldn't trigger __isset.

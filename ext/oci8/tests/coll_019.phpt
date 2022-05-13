@@ -1,5 +1,7 @@
 --TEST--
 Test collection Oracle error handling collections and numbers (2)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -80,22 +82,22 @@ Test 0
 Notice: OCICollection::append(): Unknown or unsupported type of element: 113 in %s on line %d
 bool(false)
 
-Notice: OCICollection::assignelem(): Unknown or unsupported type of element: 113 in %s on line %d
+Notice: OCICollection::assignElem(): Unknown or unsupported type of element: 113 in %s on line %d
 bool(false)
 bool(false)
 Test 1
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 2
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 3
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Test 4
@@ -103,7 +105,7 @@ Test 4
 Warning: OCICollection::append(): OCI-01840: input value not long enough for date format in %s on line %d
 bool(false)
 
-Warning: OCICollection::assignelem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
+Warning: OCICollection::assignElem(): OCI-22165: given index [1] must be in the range of %s in %s on line %d
 bool(false)
 bool(false)
 Done

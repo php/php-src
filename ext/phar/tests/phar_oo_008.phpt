@@ -1,7 +1,7 @@
 --TEST--
 Phar object: iterating via SplFileObject
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=0
 --FILE--
@@ -31,19 +31,20 @@ foreach($f as $k => $v)
 
 class MyCSVFile extends SplFileObject
 {
-    function current()
+    function current(): array|false
     {
         return parent::fgetcsv(',', '"');
     }
 }
 
 $phar->setInfoClass('MyCSVFile');
+/** @var MyCSVFile $v */
 $v = $phar['a.csv'];
 
 echo "===3===\n";
 while(!$v->eof())
 {
-    echo $v->key() . "=>" . join('|',$v->fgetcsv()) . "\n";
+    echo $v->key() . "=>" . join('|', $v->fgetcsv()) . "\n";
 }
 
 echo "===4===\n";
@@ -51,31 +52,32 @@ $v->rewind();
 while(!$v->eof())
 {
     $l = $v->fgetcsv();
-    echo $v->key() . "=>" . join('|',$l) . "\n";
+    echo $v->key() . "=>" . join('|', $l) . "\n";
 }
 
 echo "===5===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . join('|', $d) . "\n";
 }
 
 class MyCSVFile2 extends SplFileObject
 {
-    function getCurrentLine()
+    function getCurrentLine(): string
     {
         echo __METHOD__ . "\n";
-        return parent::fgetcsv(',', '"');
+        return implode('|', parent::fgetcsv(',', '"'));
     }
 }
 
 $phar->setInfoClass('MyCSVFile2');
+/** @var MyCSVFile2 $v */
 $v = $phar['a.csv'];
 
 echo "===6===\n";
 foreach($v as $k => $d)
 {
-    echo "$k=>" . join('|',$d) . "\n";
+    echo "$k=>" . $d . "\n";
 }
 
 ?>

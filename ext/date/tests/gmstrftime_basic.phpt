@@ -17,5 +17,9 @@ var_dump( gmstrftime($format) );
 ?>
 --EXPECTF--
 *** Testing gmstrftime() : basic functionality ***
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(20) "Aug 08 2008 08:08:08"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s %d %d %d:%d:%d"

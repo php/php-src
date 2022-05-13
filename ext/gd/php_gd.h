@@ -18,6 +18,9 @@
 #ifndef PHP_GD_H
 #define PHP_GD_H
 
+#include "zend_string.h"
+#include "php_streams.h"
+
 #if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */
@@ -39,6 +42,7 @@
 #define PHP_GDIMG_TYPE_WEBP     11
 #define PHP_GDIMG_TYPE_BMP      12
 #define PHP_GDIMG_TYPE_TGA      13
+#define PHP_GDIMG_TYPE_AVIF     14
 
 #define PHP_IMG_GIF    1
 #define PHP_IMG_JPG    2
@@ -49,6 +53,7 @@
 #define PHP_IMG_WEBP  32
 #define PHP_IMG_BMP   64
 #define PHP_IMG_TGA  128
+#define PHP_IMG_AVIF 256
 
 #ifdef PHP_WIN32
 #	ifdef PHP_GD_EXPORTS
@@ -68,6 +73,7 @@ PHPAPI extern const char php_sig_png[8];
 PHPAPI extern const char php_sig_bmp[2];
 PHPAPI extern const char php_sig_riff[4];
 PHPAPI extern const char php_sig_webp[4];
+PHPAPI extern const char php_sig_avif[4];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

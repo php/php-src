@@ -35,15 +35,16 @@ struct pdo_bound_param_data;
 
 #define PDO_DRIVER_API	20170320
 
+/* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
-	PDO_PARAM_NULL,
-	PDO_PARAM_BOOL,
-	PDO_PARAM_INT,
-	PDO_PARAM_STR,
-	PDO_PARAM_LOB,
+	PDO_PARAM_NULL = 0,
+	PDO_PARAM_BOOL = 5,
+	PDO_PARAM_INT = 1,
+	PDO_PARAM_STR = 2,
+	PDO_PARAM_LOB = 3,
 
 	/* get_col: Not supported (yet?) */
-	PDO_PARAM_STMT, /* hierarchical result set */
+	PDO_PARAM_STMT = 4, /* hierarchical result set */
 
 	/* magic flag to denote a parameter as being input/output */
 	PDO_PARAM_INPUT_OUTPUT = 0x80000000,

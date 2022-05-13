@@ -108,7 +108,7 @@ static void com_iter_move_forwards(zend_object_iterator *iter)
 			return;
 		}
 		I->key++;
-		if (php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key) == 0) {
+		if (!php_com_safearray_get_elem(&I->safe_array, &I->v, (LONG)I->key)) {
 			I->key = (zend_ulong)-1;
 			return;
 		}
@@ -200,7 +200,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	} else {
 		/* can we enumerate it? */
 		if (FAILED(IDispatch_Invoke(V_DISPATCH(&obj->v), DISPID_NEWENUM,
-						&IID_NULL, LOCALE_SYSTEM_DEFAULT, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
+						&IID_NULL, LOCALE_NEUTRAL, DISPATCH_METHOD|DISPATCH_PROPERTYGET,
 						&dp, &v, NULL, NULL))) {
 			goto fail;
 		}

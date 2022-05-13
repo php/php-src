@@ -1,9 +1,7 @@
 --TEST--
 Bug #53579 (stream_get_contents() segfaults on ziparchive streams)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $dirname = __DIR__ . '/';

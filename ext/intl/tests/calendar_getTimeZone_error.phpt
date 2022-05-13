@@ -2,10 +2,8 @@
 IntlCalendar::getTimeZone(): bad arguments
 --INI--
 date.timezone=Atlantic/Azores
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

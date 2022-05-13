@@ -1,7 +1,7 @@
 --TEST--
 Bug #74298 (IntlDateFormatter->format() doesn't return microseconds/fractions)
---SKIPIF--
-<?php if (!extension_loaded('intl')) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 var_dump((new \DateTime('2017-01-01 01:02:03.123456'))->format('Y-m-d\TH:i:s.u'));

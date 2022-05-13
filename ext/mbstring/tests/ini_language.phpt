@@ -1,7 +1,7 @@
 --TEST--
 mbstring.language bug
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --INI--
 internal_encoding=Shift_JIS
 mbstring.language=Japanese

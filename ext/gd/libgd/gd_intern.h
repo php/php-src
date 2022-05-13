@@ -8,6 +8,7 @@
 #define MAX(a,b) ((a)<(b)?(b):(a))
 #endif
 #define MAX3(a,b,c) ((a)<(b)?(MAX(b,c)):(MAX(a,c)))
+#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
 
 #endif
 

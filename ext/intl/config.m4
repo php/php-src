@@ -69,6 +69,8 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_create.cpp \
     dateformat/dateformat_attrcpp.cpp \
     dateformat/dateformat_helpers.cpp \
+    dateformat/datepatterngenerator_class.cpp \
+    dateformat/datepatterngenerator_methods.cpp \
     msgformat/msgformat_helpers.cpp \
     timezone/timezone_class.cpp \
     timezone/timezone_methods.cpp \
@@ -85,6 +87,9 @@ if test "$PHP_INTL" != "no"; then
   PHP_REQUIRE_CXX()
   PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_INTL_STDCXX)
   PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $PHP_INTL_STDCXX $ICU_CXXFLAGS"
+  case $host_alias in
+  *cygwin*) PHP_INTL_CXX_FLAGS="$PHP_INTL_CXX_FLAGS -D_POSIX_C_SOURCE=200809L"
+  esac
   if test "$ext_shared" = "no"; then
     PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
   else

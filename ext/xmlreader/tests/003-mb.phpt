@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, attributes test
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $filename = __DIR__ . '/私はガラスを食べられます_003.xml';

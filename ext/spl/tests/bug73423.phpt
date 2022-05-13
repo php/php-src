@@ -7,39 +7,39 @@ class foo implements \RecursiveIterator
   {
     public $foo = [];
 
-    public Function current ()
+    public Function current(): mixed
       {
         return current ($this->foo);
       }
 
-    public Function key ()
+    public Function key(): mixed
       {
         return key ($this->foo);
       }
 
-    public Function next ()
+    public Function next(): void
       {
         next ($this->foo);
       }
 
-    public Function rewind ()
+    public Function rewind(): void
       {
         reset ($this->foo);
       }
 
-    public Function valid ()
+    public Function valid(): bool
       {
         return current ($this->foo) !== false;
       }
 
-    public Function getChildren ()
+    public Function getChildren(): ?RecursiveIterator
       {
         return current ($this->foo);
       }
 
-    public Function hasChildren ()
+    public Function hasChildren(): bool
       {
-        return (bool) count ($this->foo);
+        return (bool) count($this->foo);
       }
   }
 
@@ -53,7 +53,7 @@ class fooIterator extends \RecursiveFilterIterator
         /* CRASH */
       }
 
-    public Function accept ()
+    public Function accept(): bool
       {
         return true;
       }

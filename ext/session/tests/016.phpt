@@ -1,11 +1,7 @@
 --TEST--
 invalid session.save_path should not cause a segfault
---SKIPIF--
-<?php
-if (!extension_loaded("session")) {
-    die("skip Session module not loaded");
-}
-?>
+--EXTENSIONS--
+session
 --INI--
 session.save_path="123;:/really\\completely:::/invalid;;,23123;213"
 session.use_cookies=0

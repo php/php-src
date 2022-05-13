@@ -1,7 +1,7 @@
 --TEST--
 Phar: delete a file within a tar-based .phar (confirm disk file is changed)
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 phar.require_hash=0

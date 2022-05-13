@@ -1,8 +1,9 @@
 --TEST--
 Request #78912 (INTL Support for accounting format)
+--EXTENSIONS--
+intl
 --SKIPIF--
 <?php
-if (!extension_loaded('intl')) die('skip intl extension not available');
 if (version_compare(INTL_ICU_VERSION, '53.0') < 0) die('skip for ICU >= 53.0');
 ?>
 --FILE--

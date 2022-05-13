@@ -1,7 +1,7 @@
 --TEST--
 Bug #34617 (zend_deactivate: objects_store used after zend_objects_store_destroy is called)
---SKIPIF--
-<?php if (!extension_loaded("xml")) print "skip the xml extension not available"; ?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 class Thing {}

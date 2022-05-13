@@ -67,8 +67,13 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 		return SUCCESS;
 	}
 
+	bool can_extend = (class_type->ce_flags & ZEND_ACC_ENUM) == 0;
+
 	zend_error_noreturn(E_ERROR,
-		"Class %s cannot implement interface %s, extend Exception or Error instead",
+		can_extend
+			? "%s %s cannot implement interface %s, extend Exception or Error instead"
+			: "%s %s cannot implement interface %s",
+		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(interface->name));
 	return FAILURE;
@@ -89,7 +94,7 @@ ZEND_API zend_class_entry *zend_get_exception_base(zend_object *object) /* {{{ *
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous) /* {{{ */
 {
-    zval *previous, *ancestor, *ex;
+	zval *previous, *ancestor, *ex;
 	zval  pv, zv, rv;
 	zend_class_entry *base_ce;
 
@@ -154,7 +159,7 @@ void zend_exception_restore(void) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline bool is_handle_exception_set() {
+static zend_always_inline bool is_handle_exception_set(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	return !execute_data->func
 		|| !ZEND_USER_CODE(execute_data->func->common.type)
@@ -175,6 +180,12 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 
 	if (exception != NULL) {
 		zend_object *previous = EG(exception);
+		if (previous && zend_is_unwind_exit(previous)) {
+			/* Don't replace unwinding exception with different exception. */
+			OBJ_RELEASE(exception);
+			return;
+		}
+
 		zend_exception_set_previous(exception, EG(exception));
 		EG(exception) = exception;
 		if (previous) {
@@ -491,49 +502,28 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 	 */
 
 	ZVAL_DEREF(arg);
-	switch (Z_TYPE_P(arg)) {
-		case IS_NULL:
-			smart_str_appends(str, "NULL, ");
-			break;
-		case IS_STRING:
-			smart_str_appendc(str, '\'');
-			smart_str_append_escaped(str, Z_STRVAL_P(arg), MIN(Z_STRLEN_P(arg), EG(exception_string_param_max_len)));
-			if (Z_STRLEN_P(arg) > EG(exception_string_param_max_len)) {
-				smart_str_appends(str, "...', ");
-			} else {
-				smart_str_appends(str, "', ");
+
+	if (Z_TYPE_P(arg) <= IS_STRING) {
+		smart_str_append_scalar(str, arg, EG(exception_string_param_max_len));
+		smart_str_appends(str, ", ");
+	} else {
+		switch (Z_TYPE_P(arg)) {
+			case IS_RESOURCE:
+				smart_str_appends(str, "Resource id #");
+				smart_str_append_long(str, Z_RES_HANDLE_P(arg));
+				smart_str_appends(str, ", ");
+				break;
+			case IS_ARRAY:
+				smart_str_appends(str, "Array, ");
+				break;
+			case IS_OBJECT: {
+				zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
+				smart_str_appends(str, "Object(");
+				smart_str_appends(str, ZSTR_VAL(class_name));
+				smart_str_appends(str, "), ");
+				zend_string_release_ex(class_name, 0);
+				break;
 			}
-			break;
-		case IS_FALSE:
-			smart_str_appends(str, "false, ");
-			break;
-		case IS_TRUE:
-			smart_str_appends(str, "true, ");
-			break;
-		case IS_RESOURCE:
-			smart_str_appends(str, "Resource id #");
-			smart_str_append_long(str, Z_RES_HANDLE_P(arg));
-			smart_str_appends(str, ", ");
-			break;
-		case IS_LONG:
-			smart_str_append_long(str, Z_LVAL_P(arg));
-			smart_str_appends(str, ", ");
-			break;
-		case IS_DOUBLE: {
-			smart_str_append_printf(str, "%.*G", (int) EG(precision), Z_DVAL_P(arg));
-			smart_str_appends(str, ", ");
-			break;
-		}
-		case IS_ARRAY:
-			smart_str_appends(str, "Array, ");
-			break;
-		case IS_OBJECT: {
-			zend_string *class_name = Z_OBJ_HANDLER_P(arg, get_class_name)(Z_OBJ_P(arg));
-			smart_str_appends(str, "Object(");
-			smart_str_appends(str, ZSTR_VAL(class_name));
-			smart_str_appends(str, "), ");
-			zend_string_release_ex(class_name, 0);
-			break;
 		}
 	}
 }
@@ -547,14 +537,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
-	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
+	file = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_FILE));
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "File name is not a string");
 			smart_str_appends(str, "[unknown file]: ");
 		} else{
 			zend_long line = 0;
-			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
+			tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_LINE));
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
@@ -574,7 +564,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
 	smart_str_appendc(str, '(');
-	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
+	tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);
@@ -871,10 +861,12 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception_ex(zend_class_entry *except
 
 ZEND_API ZEND_COLD zend_object *zend_throw_error_exception(zend_class_entry *exception_ce, zend_string *message, zend_long code, int severity) /* {{{ */
 {
-	zval tmp;
 	zend_object *obj = zend_throw_exception_zstr(exception_ce, message, code);
-	ZVAL_LONG(&tmp, severity);
-	zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	if (exception_ce && instanceof_function(exception_ce, zend_ce_error_exception)) {
+		zval tmp;
+		ZVAL_LONG(&tmp, severity);
+		zend_update_property_ex(zend_ce_error_exception, obj, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
+	}
 	return obj;
 }
 /* }}} */
@@ -1002,10 +994,20 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 }
 /* }}} */
 
+ZEND_API ZEND_COLD zend_object *zend_create_unwind_exit(void)
+{
+	return zend_objects_new(&zend_ce_unwind_exit);
+}
+
+ZEND_API ZEND_COLD zend_object *zend_create_graceful_exit(void)
+{
+	return zend_objects_new(&zend_ce_graceful_exit);
+}
+
 ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_unwind_exit);
+	EG(exception) = zend_create_unwind_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }
@@ -1013,7 +1015,7 @@ ZEND_API ZEND_COLD void zend_throw_unwind_exit(void)
 ZEND_API ZEND_COLD void zend_throw_graceful_exit(void)
 {
 	ZEND_ASSERT(!EG(exception));
-	EG(exception) = zend_objects_new(&zend_ce_graceful_exit);
+	EG(exception) = zend_create_graceful_exit();
 	EG(opline_before_exception) = EG(current_execute_data)->opline;
 	EG(current_execute_data)->opline = EG(exception_op);
 }

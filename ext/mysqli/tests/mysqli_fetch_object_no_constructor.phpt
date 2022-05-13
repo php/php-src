@@ -1,8 +1,9 @@
 --TEST--
 mysqli_fetch_object() - calling constructor on class wo constructor
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -18,7 +19,8 @@ require_once('skipifconnectfailure.inc');
     }
 
     class mysqli_fetch_object_test {
-
+        public $ID;
+        public $label;
         public $a = null;
         public $b = null;
 
@@ -50,6 +52,10 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 No exception with PHP:
 object(mysqli_fetch_object_test)#%d (%d) {
+  ["ID"]=>
+  NULL
+  ["label"]=>
+  NULL
   ["a"]=>
   NULL
   ["b"]=>

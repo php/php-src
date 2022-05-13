@@ -1,5 +1,7 @@
 --TEST--
 Test session_set_save_handler() function: interface wrong
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

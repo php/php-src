@@ -1,8 +1,9 @@
 --TEST--
 XML parser test, object tuple callbacks
+--EXTENSIONS--
+xml
 --SKIPIF--
 <?php
-require_once("skipif.inc");
 XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX parser');
 ?>
 --FILE--

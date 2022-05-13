@@ -87,12 +87,8 @@ Float variable
 Warning: String offset cast occurred in %s on line %d
 string(1) "H"
 Float casted to string compile
-
-Warning: Uninitialized string offset 2147483647 in %s on line %d
 TypeError
 Float string variable
-
-Warning: Uninitialized string offset 2147483647 in %s on line %d
 TypeError
 Attempt to assign
 Float

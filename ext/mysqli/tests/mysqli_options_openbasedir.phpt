@@ -1,8 +1,9 @@
 --TEST--
 mysqli_options() - MYSQLI_OPT_LOCAL_INFILE and open_basedir
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -14,7 +15,7 @@ if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 
 if ($IS_MYSQLND) {
     if (true !== mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1))
-        printf("[002] Can not set MYSQLI_OPT_LOCAL_INFILE although open_basedir is set!\n");
+        printf("[002] Cannot set MYSQLI_OPT_LOCAL_INFILE although open_basedir is set!\n");
 
 } else {
     if (false !== mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1))

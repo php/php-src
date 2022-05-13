@@ -1,7 +1,7 @@
 --TEST--
 Bug #60306 (Characters lost while converting from cp936 to utf8)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $s = "洪仁玕";

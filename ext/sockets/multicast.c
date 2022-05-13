@@ -718,7 +718,7 @@ int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_add
 		return SUCCESS;
 	}
 
-#if !defined(ifr_ifindex) && defined(ifr_index)
+#if !defined(ifr_ifindex) && (defined(ifr_index) || defined(__HAIKU__))
 #define ifr_ifindex ifr_index
 #endif
 
@@ -784,7 +784,7 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 	}
 
 	for (p = if_conf.ifc_buf;
-		 p < if_conf.ifc_buf + if_conf.ifc_len;
+		 p < ((char *)if_conf.ifc_buf) + if_conf.ifc_len;
 		 p += entry_len) {
 		/* p may be misaligned on macos. */
 		struct ifreq cur_req;

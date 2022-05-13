@@ -135,10 +135,10 @@ static ZEND_INI_MH(OnAutoregisterCasesensitive)
 }
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_BOOLEAN("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_BOOLEAN("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
-    STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.allow_dcom",				"0", PHP_INI_SYSTEM, OnUpdateBool, allow_dcom, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.autoregister_verbose",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_verbose, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_BOOLEAN("com.autoregister_typelib",	"0", PHP_INI_ALL, OnUpdateBool, autoreg_on, zend_com_dotnet_globals, com_dotnet_globals)
+	STD_PHP_INI_ENTRY("com.autoregister_casesensitive",	"1", PHP_INI_ALL, OnAutoregisterCasesensitive, autoreg_case_sensitive, zend_com_dotnet_globals, com_dotnet_globals)
 	STD_PHP_INI_ENTRY("com.code_page", "", PHP_INI_ALL, OnUpdateLong, code_page, zend_com_dotnet_globals, com_dotnet_globals)
 	PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, OnTypeLibFileUpdate)
 	PHP_INI_ENTRY("com.dotnet_version", NULL, PHP_INI_SYSTEM, NULL)
@@ -174,21 +174,15 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_variant_class_entry = register_class_variant();
 	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
-	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
-	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
 	tmp = register_class_com(php_com_variant_class_entry);
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 
 #if HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
-	tmp->serialize = zend_class_serialize_deny;
-	tmp->unserialize = zend_class_unserialize_deny;
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -251,6 +245,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	COM_CONST(VARCMP_GT);
 	COM_CONST(VARCMP_NULL);
 	COM_CONST(LOCALE_SYSTEM_DEFAULT);
+	COM_CONST(LOCALE_NEUTRAL);
 
 	COM_CONST(NORM_IGNORECASE);
 	COM_CONST(NORM_IGNORENONSPACE);

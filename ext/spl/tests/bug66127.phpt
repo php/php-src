@@ -21,6 +21,5 @@ unset($items[0][0]);
 crash();
 echo "Worked!\n";
 ?>
---EXPECTF--
-Warning: Undefined array key 0 in %s on line %d
+--EXPECT--
 Worked!

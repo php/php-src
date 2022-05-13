@@ -27,20 +27,20 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    size_t len = strlen(version);
-    char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
-    const char *p;
+	size_t len = strlen(version);
+	char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
+	const char *p;
 
-    if (len == 0) {
-        *buf = '\0';
-        return buf;
-    }
+	if (len == 0) {
+		*buf = '\0';
+		return buf;
+	}
 
-    p = version;
-    q = buf;
-    *q++ = lp = *p++;
+	p = version;
+	q = buf;
+	*q++ = lp = *p++;
 
-    while (*p) {
+	while (*p) {
 /*  s/[-_+]/./g;
  *  s/([^\d\.])([^\D\.])/$1.$2/g;
  *  s/([^\D\.])([^\d\.])/$1.$2/g;
@@ -67,9 +67,9 @@ php_canonicalize_version(const char *version)
 			*q++ = *p;
 		}
 		lp = *p++;
-    }
-    *q++ = '\0';
-    return buf;
+	}
+	*q++ = '\0';
+	return buf;
 }
 
 /* }}} */

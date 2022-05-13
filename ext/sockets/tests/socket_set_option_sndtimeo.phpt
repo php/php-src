@@ -3,12 +3,8 @@ Test if socket_set_option() works, option:SO_SNDTIMEO
 --DESCRIPTION--
 -wrong params
 -set/get params comparison
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-        die('SKIP sockets extension not available.');
-}
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);

@@ -22,6 +22,13 @@ function gen() {
 }
 var_dump([...gen()]);
 
+// Same as previous, but with refcounted string.
+function gen2() {
+    $foo = "2";
+    yield "4" . $foo => 42;
+}
+var_dump([...gen2()]);
+
 ?>
 --EXPECT--
 array(4) {
@@ -51,6 +58,10 @@ array(1) {
 array(1) {
   ["foo"]=>
   int(3)
+}
+array(1) {
+  [0]=>
+  int(42)
 }
 array(1) {
   [0]=>

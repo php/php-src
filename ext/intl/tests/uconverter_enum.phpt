@@ -1,7 +1,7 @@
 --TEST--
 UConverter Enumerations
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $avail = UConverter::getAvailable();

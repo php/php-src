@@ -3,6 +3,8 @@ imap_open() ValueErrors
 --CREDITS--
 Paul Sohier
 #phptestfest utrecht
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
@@ -21,7 +23,7 @@ try {
 }
 
 try {
-    imap_open('', '', '', NIL, -1);
+    imap_open('', '', '', 0, -1);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }

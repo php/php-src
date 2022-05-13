@@ -1,9 +1,7 @@
 --TEST--
 Bug #51936 (Crash with clone XMLReader)
---SKIPIF--
-<?php
-extension_loaded("xmlreader") or die("skip requires xmlreader");
-?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 echo "Test\n";

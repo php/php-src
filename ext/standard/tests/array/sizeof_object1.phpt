@@ -11,7 +11,7 @@ class sizeof_class implements Countable
   private $member2;
   protected $member3;
 
-  public function count()
+  public function count(): int
   {
     return 3; // return the count of member variables in the object
   }

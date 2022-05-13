@@ -1,8 +1,9 @@
 --TEST--
 Bug #77812 (Interactive mode does not support PHP 7.3-style heredoc)
+--EXTENSIONS--
+readline
 --SKIPIF--
 <?php
-if (!extension_loaded('readline')) die('skip readline extension not available');
 if (READLINE_LIB !== "libedit") die('skip libedit only');
 if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>

@@ -1,10 +1,10 @@
 --TEST--
 pcntl_setpriority() - Wrong process identifier
+--EXTENSIONS--
+pcntl
 --SKIPIF--
 <?php
-if (!extension_loaded('pcntl')) {
-    die('skip ext/pcntl not loaded');
-}
+
 if (!function_exists('pcntl_setpriority')) {
     die('skip pcntl_setpriority doesn\'t exist');
 }

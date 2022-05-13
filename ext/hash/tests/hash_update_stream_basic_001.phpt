@@ -2,10 +2,8 @@
 Ensure hash_update_stream() always returns the same hash when $length = 0
 --CREDITS--
 Symeon Charalabides <symeon@systasis.com> - @phpdublin
---SKIPIF--
-<?php
-if (!extension_loaded('openssl')) die('skip openssl extension not available');
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 

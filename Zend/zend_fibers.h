@@ -23,51 +23,94 @@
 #include "zend_API.h"
 #include "zend_types.h"
 
+#define ZEND_FIBER_GUARD_PAGES 1
+
+#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
+#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
+
 BEGIN_EXTERN_C()
+
+typedef enum {
+	ZEND_FIBER_STATUS_INIT,
+	ZEND_FIBER_STATUS_RUNNING,
+	ZEND_FIBER_STATUS_SUSPENDED,
+	ZEND_FIBER_STATUS_DEAD,
+} zend_fiber_status;
+
+typedef enum {
+	ZEND_FIBER_FLAG_THREW     = 1 << 0,
+	ZEND_FIBER_FLAG_BAILOUT   = 1 << 1,
+	ZEND_FIBER_FLAG_DESTROYED = 1 << 2,
+} zend_fiber_flag;
+
+typedef enum {
+	ZEND_FIBER_TRANSFER_FLAG_ERROR = 1 << 0,
+	ZEND_FIBER_TRANSFER_FLAG_BAILOUT = 1 << 1
+} zend_fiber_transfer_flag;
 
 void zend_register_fiber_ce(void);
 void zend_fiber_init(void);
+void zend_fiber_shutdown(void);
 
 extern ZEND_API zend_class_entry *zend_ce_fiber;
 
-typedef struct _zend_fiber_context zend_fiber_context;
+typedef struct _zend_fiber_stack zend_fiber_stack;
 
-typedef void (*zend_fiber_coroutine)(zend_fiber_context *context);
+/* Encapsulates data needed for a context switch. */
+typedef struct _zend_fiber_transfer {
+	/* Fiber that will be switched to / has resumed us. */
+	zend_fiber_context *context;
 
-typedef struct _zend_fiber_stack {
-	void *pointer;
-	size_t size;
+	/* Value to that should be send to (or was received from) a fiber. */
+	zval value;
 
-#ifdef HAVE_VALGRIND
-	int valgrind;
-#endif
+	/* Bitmask of flags defined in enum zend_fiber_transfer_flag. */
+	uint8_t flags;
+} zend_fiber_transfer;
 
-#ifdef __SANITIZE_ADDRESS__
-	const void *prior_pointer;
-	size_t prior_size;
-#endif
-} zend_fiber_stack;
+/* Coroutine functions must populate the given transfer with a new context
+ * and (optional) data before they return. */
+typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
 
-typedef struct _zend_fiber_context {
-	void *self;
-	void *caller;
+struct _zend_fiber_context {
+	/* Pointer to boost.context or ucontext_t data. */
+	void *handle;
+
+	/* Pointer that identifies the fiber type. */
+	void *kind;
+
+	/* Entrypoint function of the fiber. */
 	zend_fiber_coroutine function;
-	zend_fiber_stack stack;
-} zend_fiber_context;
 
-typedef struct _zend_fiber {
-	/* Fiber PHP object handle. */
+	/* Assigned C stack. */
+	zend_fiber_stack *stack;
+
+	/* Fiber status. */
+	zend_fiber_status status;
+
+	/* Reserved for extensions */
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
+};
+
+struct _zend_fiber {
+	/* PHP object handle. */
 	zend_object std;
 
-	/* Status of the fiber, one of the ZEND_FIBER_STATUS_* constants. */
-	zend_uchar status;
+	/* Flags are defined in enum zend_fiber_flag. */
+	uint8_t flags;
+
+	/* Native C fiber context. */
+	zend_fiber_context context;
+
+	/* Fiber that resumed us. */
+	zend_fiber_context *caller;
+
+	/* Fiber that suspended us. */
+	zend_fiber_context *previous;
 
 	/* Callback and info / cache to be used when fiber is started. */
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-
-	/* Context of this fiber, will be initialized during call to Fiber::start(). */
-	zend_fiber_context context;
 
 	/* Current Zend VM execute data being run by the fiber. */
 	zend_execute_data *execute_data;
@@ -75,42 +118,31 @@ typedef struct _zend_fiber {
 	/* Frame on the bottom of the fiber vm stack. */
 	zend_execute_data *stack_bottom;
 
-	/* Exception to be thrown from Fiber::suspend(). */
-	zval *exception;
+	/* Storage for fiber return value. */
+	zval result;
+};
 
-	/* Storage for temporaries and fiber return value. */
-	zval value;
-} zend_fiber;
-
-static const zend_uchar ZEND_FIBER_STATUS_INIT      = 0x0;
-static const zend_uchar ZEND_FIBER_STATUS_SUSPENDED = 0x1;
-static const zend_uchar ZEND_FIBER_STATUS_RUNNING   = 0x2;
-static const zend_uchar ZEND_FIBER_STATUS_RETURNED  = 0x4;
-static const zend_uchar ZEND_FIBER_STATUS_THREW     = 0x8;
-static const zend_uchar ZEND_FIBER_STATUS_SHUTDOWN  = 0x10;
-static const zend_uchar ZEND_FIBER_STATUS_BAILOUT   = 0x20;
-
-static const zend_uchar ZEND_FIBER_STATUS_FINISHED  = 0x2c;
-
-/* These functions create and manipulate a Fiber object, allowing any internal function to start, resume, or suspend a fiber. */
-ZEND_API zend_fiber *zend_fiber_create(const zend_fcall_info *fci, const zend_fcall_info_cache *fci_cache);
-ZEND_API void zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_count, zend_array *named_params, zval *return_value);
-ZEND_API void zend_fiber_suspend(zval *value, zval *return_value);
-ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value);
-ZEND_API void zend_fiber_throw(zend_fiber *fiber, zval *exception, zval *return_value);
-
-/* These functions may be used to create custom fibers (coroutines) using the bundled fiber switching context. */
-ZEND_API zend_bool zend_fiber_init_context(zend_fiber_context *context, zend_fiber_coroutine coroutine, size_t stack_size);
+/* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
+ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
-ZEND_API void zend_fiber_switch_context(zend_fiber_context *to);
-ZEND_API void zend_fiber_suspend_context(zend_fiber_context *current);
+ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
 
-#define ZEND_FIBER_GUARD_PAGES 1
-
-#define ZEND_FIBER_DEFAULT_C_STACK_SIZE (4096 * (((sizeof(void *)) < 8) ? 256 : 512))
-
-#define ZEND_FIBER_VM_STACK_SIZE (1024 * sizeof(zval))
+ZEND_API void zend_fiber_switch_block(void);
+ZEND_API void zend_fiber_switch_unblock(void);
+ZEND_API bool zend_fiber_switch_blocked(void);
 
 END_EXTERN_C()
+
+static zend_always_inline zend_fiber *zend_fiber_from_context(zend_fiber_context *context)
+{
+	ZEND_ASSERT(context->kind == zend_ce_fiber && "Fiber context does not belong to a Zend fiber");
+
+	return (zend_fiber *)(((char *) context) - XtOffsetOf(zend_fiber, context));
+}
+
+static zend_always_inline zend_fiber_context *zend_fiber_get_context(zend_fiber *fiber)
+{
+	return &fiber->context;
+}
 
 #endif

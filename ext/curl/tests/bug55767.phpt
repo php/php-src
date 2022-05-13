@@ -1,9 +1,7 @@
 --TEST--
 Test curl_opt() function with POST params from array with a numeric key
---SKIPIF--
-<?php
-include 'skipif.inc';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
   include 'server.inc';

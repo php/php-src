@@ -1,8 +1,7 @@
 --TEST--
 Attempt to instantiate an IMAP\Connection directly
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 

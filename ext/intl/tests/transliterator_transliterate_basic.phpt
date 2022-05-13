@@ -1,7 +1,7 @@
 --TEST--
 Transliterator::transliterate (basic)
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $t = transliterator_create("Latin; Title");

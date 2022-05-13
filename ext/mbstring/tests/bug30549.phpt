@@ -1,7 +1,7 @@
 --TEST--
 Bug #30549 (incorrect character translations for some ISO8859 charsets)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 test('ISO-8859-7',  array(0xa4 => 0x20ac, 0xa5 => 0x20af, 0xaa => 0x037a));

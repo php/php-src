@@ -1,7 +1,7 @@
 --TEST--
 Bug #49528 (UTF-16 strings prefixed by BOM wrongly converted)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 var_dump(bin2hex(mb_convert_encoding("\xff\xfe\x01\x02\x03\x04", "UCS-2BE", "UTF-16")));

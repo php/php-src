@@ -1,5 +1,7 @@
 --TEST--
 imap_delete() passing a unique ID
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');

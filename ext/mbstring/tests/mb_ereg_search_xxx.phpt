@@ -1,8 +1,9 @@
 --TEST--
 mb_ereg_search() stuff
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip mbstring not available');
 function_exists('mb_ereg_search') or die("skip\n");
 ?>
 --INI--

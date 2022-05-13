@@ -1,5 +1,8 @@
 --TEST--
 Check for exif_read_data, Unicode WinXP tags
+--EXTENSIONS--
+mbstring
+exif
 --SKIPIF--
 <?php
     if (!defined("EXIF_USE_MBSTRING") || !EXIF_USE_MBSTRING) die ('skip mbstring loaded by dl');

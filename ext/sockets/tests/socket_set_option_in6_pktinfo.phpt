@@ -1,10 +1,10 @@
 --TEST--
 socket_set_option() with IPV6_PKTINFO
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 
 require 'ipv6_skipif.inc';
 

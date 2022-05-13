@@ -1,7 +1,7 @@
 --TEST--
 Test output_add_rewrite_var() function basic feature
---SKIPIF--
-<?php if (!extension_loaded("session")) die("skip session support is not available"); ?>
+--EXTENSIONS--
+session
 --INI--
 session.trans_sid_tags="a=href,area=href,frame=src,form="
 url_rewriter.tags="a=href,area=href,frame=src,form="

@@ -1,10 +1,10 @@
 --TEST--
 Bug #63000: Multicast on OSX
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('skip sockets extension not available.');
-}
+
 if (str_contains(PHP_OS, 'FreeBSD')) {
     die('skip option not supported on FreeBSD');
 }

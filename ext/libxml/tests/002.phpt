@@ -1,7 +1,7 @@
 --TEST--
 libxml_get_errors()
---SKIPIF--
-<?php if (!extension_loaded('simplexml')) die('skip simplexml extension not available'); ?>
+--EXTENSIONS--
+simplexml
 --FILE--
 <?php
 

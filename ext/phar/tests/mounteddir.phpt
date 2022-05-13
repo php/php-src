@@ -1,9 +1,7 @@
 --TEST--
 Phar: mounted manifest directory test
---SKIPIF--
-<?php
-if (!extension_loaded("phar")) die("skip");
-?>
+--EXTENSIONS--
+phar
 --CONFLICTS--
 tempmanifest1.phar.php
 --INI--

@@ -1,8 +1,9 @@
 --TEST--
 TLS server rate-limits client-initiated renegotiation
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");

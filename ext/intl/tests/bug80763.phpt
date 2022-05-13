@@ -1,9 +1,7 @@
 --TEST--
 Bug #80763 (msgfmt_format() does not accept DateTime references)
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension not available');
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $today = new DateTime('2021-02-17 12:00:00');

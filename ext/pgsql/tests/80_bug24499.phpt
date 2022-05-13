@@ -1,5 +1,7 @@
 --TEST--
 Bug #24499 (Notice: Undefined property: stdClass::)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -14,12 +16,12 @@ if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-@pg_query("DROP SEQUENCE id_id_seq");
-@pg_query("DROP TABLE id");
-pg_query("CREATE TABLE id (id SERIAL, t INT)");
+@pg_query($dbh, "DROP SEQUENCE id_id_seq");
+@pg_query($dbh, "DROP TABLE id");
+pg_query($dbh, "CREATE TABLE id (id SERIAL, t INT)");
 
 for ($i=0; $i<4; $i++) {
-    pg_query("INSERT INTO id (t) VALUES ($i)");
+    pg_query($dbh, "INSERT INTO id (t) VALUES ($i)");
 }
 
 class Id

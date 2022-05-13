@@ -19,9 +19,7 @@ $a->x[] = $a;
 var_dump(gc_collect_cycles());
 unset($a);
 var_dump(gc_collect_cycles());
-var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(0)
 int(0)
 int(2)

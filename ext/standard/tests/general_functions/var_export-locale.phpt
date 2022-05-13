@@ -236,7 +236,7 @@ class myClass
     $this->public_var = 10;
     $this->public_var1 = new foo();
     $this->private_var = new foo();
-    $this->proected_var = new foo();
+    $this->protected_var = new foo();
   }
 }
 
@@ -914,35 +914,35 @@ string(17) "(object) array(
 
 
 Iteration 2
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 3
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"
 
 
 Iteration 4
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -950,146 +950,140 @@ string(57) "Value::__set_state(array(
 
 
 Iteration 5
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))"
 
 
 Iteration 6
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))
-string(293) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
-   'protected_var' => NULL,
-   'proected_var' => 
-  foo::__set_state(array(
+   'protected_var' => 
+  \foo::__set_state(array(
   )),
 ))"
 
 
 Iteration 7
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 8
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 9
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 Iteration 10
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -1097,11 +1091,11 @@ string(57) "Value::__set_state(array(
 
 
 Iteration 11
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"
 
 *** Testing var_export() with valid null values ***

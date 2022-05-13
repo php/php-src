@@ -113,6 +113,7 @@ var_dump(strcasecmp(10.55555555595555555555555555, 10.555555556));    // int(0)
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 #### Basic and Possible operations ####
 *** comparing the strings in an 
 Array

@@ -8,7 +8,7 @@ Nathaniel McHugh nat@fishtrap.co.uk
 
 class MyHeap extends SplHeap{
 
-public function compare($a, $b){
+public function compare($a, $b): int {
 return $a < $b;
 }
 

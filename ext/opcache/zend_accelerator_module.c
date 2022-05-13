@@ -182,7 +182,7 @@ static ZEND_INI_MH(OnUpdateCounter)
 		*p = val;
 		return SUCCESS;
 	}
-	zend_error(E_WARNING, "Invalid \"%s\" setting. Should be between 0 and 256", ZSTR_VAL(entry->name));
+	zend_error(E_WARNING, "Invalid \"%s\" setting; using default value instead. Should be between 0 and 255", ZSTR_VAL(entry->name));
 	return FAILURE;
 }
 
@@ -649,7 +649,7 @@ ZEND_FUNCTION(opcache_get_status)
 			zend_op_array *op_array;
 
 			array_init(&scripts);
-			ZEND_HASH_FOREACH_PTR(&ZCSG(preload_script)->script.function_table, op_array) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ZCSG(preload_script)->script.function_table, op_array) {
 				add_next_index_str(&scripts, op_array->function_name);
 			} ZEND_HASH_FOREACH_END();
 			add_assoc_zval(&statistics, "functions", &scripts);
@@ -660,7 +660,7 @@ ZEND_FUNCTION(opcache_get_status)
 			zend_string *key;
 
 			array_init(&scripts);
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&ZCSG(preload_script)->script.class_table, key, ce) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ZCSG(preload_script)->script.class_table, key, ce) {
 				if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
 					add_next_index_str(&scripts, key);
 				} else {

@@ -32,7 +32,6 @@
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
 #include "phpdbg_break.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
@@ -41,8 +40,6 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
-#include "phpdbg_wait.h"
-#include "phpdbg_eol.h"
 
 #if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 #error "phpdbg can only be built with CALL zend vm kind"
@@ -89,10 +86,8 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(export,    "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	    "shell a command",                           0 , NULL, "i", 0),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(wait,      "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,     "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
 	PHPDBG_COMMAND_D(next,      "step over next line",                      'n', NULL, 0, PHPDBG_ASYNC_SAFE),
-	PHPDBG_COMMAND_D(eol,       "set EOL",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -149,22 +144,22 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 						break;
 
 						case NUMERIC_METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s#%ld", next->method.class, next->method.name, next->num);
+							spprintf(&buffered, 0, "%s::%s#"ZEND_LONG_FMT, next->method.class, next->method.name, next->num);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case NUMERIC_FUNCTION_PARAM:
-							spprintf(&buffered, 0, "%s#%ld", next->str, next->num);
+							spprintf(&buffered, 0, "%s#"ZEND_LONG_FMT, next->str, next->num);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:%ld", next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:"ZEND_ULONG_FMT, next->file.name, next->file.line);
 							add_next_index_string(&params, buffered);
 						break;
 
 						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#%ld", next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:#"ZEND_ULONG_FMT, next->file.name, next->file.line);
 							add_next_index_string(&params, buffered);
 						break;
 
@@ -270,9 +265,9 @@ static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state) {
 						phpdbg_activate_err_buf(0);
 						if (phpdbg_call_register(&stack) == FAILURE) {
 							if (state->init_file) {
-								phpdbg_output_err_buf("initfailure", "%b file=\"%s\" line=\"%d\" input=\"%s\"", "Unrecognized command in %s:%d: %s, %b!", state->init_file, state->line, input);
+								phpdbg_output_err_buf("Unrecognized command in %s:%d: %s, %s!", state->init_file, state->line, input, PHPDBG_G(err_buf).msg);
 							} else {
-								phpdbg_output_err_buf("initfailure", "%b line=\"%d\" input=\"%s\"", "Unrecognized command on line %d: %s, %b!", state->line, input);
+								phpdbg_output_err_buf("Unrecognized command on line %d: %s, %s!", state->line, input, PHPDBG_G(err_buf).msg);
 							}
 						}
 					break;
@@ -331,7 +326,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init)
 
 			fclose(fp);
 		} else {
-			phpdbg_error("initfailure", "type=\"openfile\" file=\"%s\"", "Failed to open %s for initialization", init_file);
+			phpdbg_error("Failed to open %s for initialization", init_file);
 		}
 
 		if (free_init) {
@@ -418,14 +413,14 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				}
 
 				if (PHPDBG_G(exec)) {
-					phpdbg_notice("exec", "type=\"unset\" context=\"%s\"", "Unsetting old execution context: %s", PHPDBG_G(exec));
+					phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
 					free(PHPDBG_G(exec));
 					PHPDBG_G(exec) = NULL;
 					PHPDBG_G(exec_len) = 0L;
 				}
 
 				if (PHPDBG_G(ops)) {
-					phpdbg_notice("exec", "type=\"unsetops\"", "Destroying compiled opcodes");
+					phpdbg_notice("Destroying compiled opcodes");
 					phpdbg_clean(0, 0);
 				}
 
@@ -437,7 +432,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				*SG(request_info).argv = estrndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 				php_build_argv(NULL, &PG(http_globals)[TRACK_VARS_SERVER]);
 
-				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
+				phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 
 				if (PHPDBG_G(in_execution)) {
 					phpdbg_clean(1, 0);
@@ -446,13 +441,13 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				phpdbg_compile();
 			} else {
-				phpdbg_notice("exec", "type=\"unchanged\"", "Execution context not changed");
+				phpdbg_notice("Execution context not changed");
 			}
 		} else {
-			phpdbg_error("exec", "type=\"invalid\" context=\"%s\"", "Cannot use %s as execution context, not a valid file or symlink", param->str);
+			phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
 		}
 	} else {
-		phpdbg_error("exec", "type=\"notfound\" context=\"%s\"", "Cannot stat %s, ensure the file exists", param->str);
+		phpdbg_error("Cannot stat %s, ensure the file exists", param->str);
 	}
 	return SUCCESS;
 } /* }}} */
@@ -503,7 +498,7 @@ PHPDBG_COMMAND(stdin)
 	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, PHPDBG_G(input_buffer) + PHPDBG_G(input_buflen), PHPDBG_MAX_CMD - PHPDBG_G(input_buflen), -1)) > 0);
 
 	if (bytes < 0) {
-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 		zend_bailout();
 	}
 
@@ -519,7 +514,7 @@ exec_code:
 } /* }}} */
 
 int phpdbg_compile_stdin(zend_string *code) {
-	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code");
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 	zend_string_release(code);
 
 	if (EG(exception)) {
@@ -550,7 +545,7 @@ int phpdbg_compile_stdin(zend_string *code) {
 		memmove(data->buf, data->buf + 2, data->len);
 	}
 
-	phpdbg_notice("compile", "context=\"Standard input code\"", "Successful compilation of stdin input");
+	phpdbg_notice("Successful compilation of stdin input");
 
 	return SUCCESS;
 }
@@ -562,7 +557,7 @@ int phpdbg_compile(void) /* {{{ */
 	size_t len;
 
 	if (!PHPDBG_G(exec)) {
-		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
+		phpdbg_error("No execution context");
 		return FAILURE;
 	}
 
@@ -576,11 +571,11 @@ int phpdbg_compile(void) /* {{{ */
 			zend_bailout();
 		}
 
-		phpdbg_notice("compile", "context=\"%s\"", "Successful compilation of %s", PHPDBG_G(exec));
+		phpdbg_notice("Successful compilation of %s", PHPDBG_G(exec));
 
 		return SUCCESS;
 	} else {
-		phpdbg_error("compile", "type=\"openfailure\" context=\"%s\"", "Could not open file %s", PHPDBG_G(exec));
+		phpdbg_error("Could not open file %s", PHPDBG_G(exec));
 	}
 	zend_destroy_file_handle(&fh);
 	return FAILURE;
@@ -627,7 +622,7 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 PHPDBG_COMMAND(until) /* {{{ */
 {
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
 
@@ -637,7 +632,7 @@ PHPDBG_COMMAND(until) /* {{{ */
 PHPDBG_COMMAND(next) /* {{{ */
 {
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
 
@@ -668,7 +663,7 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 PHPDBG_COMMAND(finish) /* {{{ */
 {
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
 
@@ -685,14 +680,14 @@ PHPDBG_COMMAND(finish) /* {{{ */
 PHPDBG_COMMAND(leave) /* {{{ */
 {
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing");
+		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
 
 	phpdbg_seek_to_end();
 	if (zend_hash_index_exists(&PHPDBG_G(seek), (zend_ulong) phpdbg_user_execute_data(EG(current_execute_data))->opline)) {
 		zend_hash_clean(&PHPDBG_G(seek));
-		phpdbg_notice("leave", "type=\"end\"", "Already at the end of the function");
+		phpdbg_notice("Already at the end of the function");
 		return SUCCESS;
 	} else {
 		PHPDBG_G(flags) |= PHPDBG_IN_LEAVE;
@@ -703,7 +698,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 PHPDBG_COMMAND(frame) /* {{{ */
 {
 	if (!param) {
-		phpdbg_notice("frame", "id=\"%d\"", "Currently in frame #%d", PHPDBG_G(frame).num);
+		phpdbg_notice("Currently in frame #%d", PHPDBG_G(frame).num);
 	} else {
 		phpdbg_switch_frame(param->num);
 	}
@@ -733,9 +728,9 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		msg = zval_get_string(zend_read_property(zend_get_exception_base(ex), ex, ZEND_STRL("string"), 1, &rv));
 	}
 
-	phpdbg_error("exception", "name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"", "Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
+	phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT, ZSTR_VAL(ex->ce->name), ZSTR_VAL(file), line);
 	zend_string_release(file);
-	phpdbg_writeln("exceptionmsg", "msg=\"%s\"", "%s", ZSTR_VAL(msg));
+	phpdbg_writeln("%s", ZSTR_VAL(msg));
 	zend_string_release(msg);
 
 	if (EG(prev_exception)) {
@@ -764,7 +759,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile() == FAILURE) {
-				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
+				phpdbg_error("Failed to compile %s, cannot run", PHPDBG_G(exec));
 				EG(exit_status) = FAILURE;
 				goto out;
 			}
@@ -805,13 +800,13 @@ PHPDBG_COMMAND(run) /* {{{ */
 					}
 
 					if (*p) {
-						phpdbg_error("cmd", "", "Invalid run command, cannot put further arguments after stdin");
+						phpdbg_error("Invalid run command, cannot put further arguments after stdin");
 						goto free_cmd;
 					}
 
 					PHPDBG_G(stdin_file) = fopen(buf, "r");
 					if (PHPDBG_G(stdin_file) == NULL) {
-						phpdbg_error("stdin", "path=\"%s\"", "Could not open '%s' for reading from stdin", buf);
+						phpdbg_error("Could not open '%s' for reading from stdin", buf);
 						goto free_cmd;
 					}
 					efree(buf);
@@ -836,7 +831,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 					*(q++) = *(p++);
 				}
 				if (!*p && sep != ' ') {
-					phpdbg_error("cmd", "", "Invalid run command, unterminated escape sequence");
+					phpdbg_error("Invalid run command, unterminated escape sequence");
 free_cmd:
 					efree(buf);
 					for (i = 0; i < argc; i++) {
@@ -897,11 +892,6 @@ free_cmd:
 			}
 		} zend_end_try();
 
-		if (PHPDBG_G(socket_fd) != -1) {
-			close(PHPDBG_G(socket_fd));
-			PHPDBG_G(socket_fd) = -1;
-		}
-
 		if (restore) {
 			zend_exception_restore();
 			zend_try {
@@ -924,7 +914,7 @@ free_cmd:
 
 		phpdbg_clean(1, 0);
 	} else {
-		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
+		phpdbg_error("Nothing to execute!");
 	}
 
 out:
@@ -933,10 +923,10 @@ out:
 } /* }}} */
 
 int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv) /* {{{ */ {
-	phpdbg_notice("eval", "variable=\"%.*s\"", "Printing variable %.*s", (int) len, name);
-	phpdbg_xml("<eval %r>");
+	phpdbg_notice("Printing variable %.*s", (int) len, name);
+
 	zend_print_zval_r(zv, 0);
-	phpdbg_xml("</eval>");
+
 	phpdbg_out("\n");
 
 	efree(name);
@@ -963,7 +953,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 		phpdbg_try_access {
 			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table), 0, phpdbg_output_ev_variable, 0);
 		} phpdbg_catch_access {
-			phpdbg_error("signalsegv", "", "Could not fetch data, invalid data source");
+			phpdbg_error("Could not fetch data, invalid data source");
 		} phpdbg_end_try_access();
 
 		PHPDBG_OUTPUT_BACKUP_RESTORE();
@@ -982,13 +972,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 				ex = EG(exception);
 				zend_exception_error(EG(exception), E_ERROR);
 			} else {
-				phpdbg_xml("<eval %r>");
-				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					zval *zvp = &retval;
-					phpdbg_xml_var_dump(zvp);
-				}
 				zend_print_zval_r(&retval, 0);
-				phpdbg_xml("</eval>");
 				phpdbg_out("\n");
 				zval_ptr_dtor(&retval);
 			}
@@ -1022,7 +1006,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
+		phpdbg_error("Not executing!");
 		return SUCCESS;
 	}
 
@@ -1040,7 +1024,7 @@ PHPDBG_COMMAND(generator) /* {{{ */
 	int i;
 
 	if (!PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"noexec\"", "Not executing!");
+		phpdbg_error("Not executing!");
 		return SUCCESS;
 	}
 
@@ -1051,15 +1035,15 @@ PHPDBG_COMMAND(generator) /* {{{ */
 			zend_generator *gen = (zend_generator *) *obj;
 			if (gen->execute_data) {
 				if (zend_generator_get_current(gen)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
-					phpdbg_error("generator", "type=\"running\"", "Generator currently running");
+					phpdbg_error("Generator currently running");
 				} else {
 					phpdbg_open_generator_frame(gen);
 				}
 			} else {
-				phpdbg_error("generator", "type=\"closed\"", "Generator already closed");
+				phpdbg_error("Generator already closed");
 			}
 		} else {
-			phpdbg_error("invalidarg", "", "Invalid object handle");
+			phpdbg_error("Invalid object handle");
 		}
 	} else {
 		for (i = 0; i < EG(objects_store).top; i++) {
@@ -1095,7 +1079,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 		case METHOD_PARAM:
 			return phpdbg_do_print_method(param);
 		default:
-			phpdbg_error("print", "type=\"invalidarg\"", "Invalid arguments to print, expected nothing, function name or method name");
+			phpdbg_error("Invalid arguments to print, expected nothing, function name or method name");
 			return SUCCESS;
 	}
 } /* }}} */
@@ -1103,50 +1087,47 @@ PHPDBG_COMMAND(print) /* {{{ */
 PHPDBG_COMMAND(info) /* {{{ */
 {
 	phpdbg_out("Execution Context Information\n\n");
-	phpdbg_xml("<printinfo %r>");
 #ifdef HAVE_PHPDBG_READLINE
 # ifdef HAVE_LIBREADLINE
-	 phpdbg_writeln("info", "readline=\"yes\"", "Readline   yes");
+	 phpdbg_writeln( "Readline   yes");
 # else
-	 phpdbg_writeln("info", "readline=\"no\"", "Readline   no");
+	 phpdbg_writeln("Readline   no");
 # endif
 # ifdef HAVE_LIBEDIT
-	 phpdbg_writeln("info", "libedit=\"yes\"", "Libedit    yes");
+	 phpdbg_writeln("Libedit    yes");
 # else
-	 phpdbg_writeln("info", "libedit=\"no\"", "Libedit    no");
+	 phpdbg_writeln("Libedit    no");
 # endif
 #else
-     phpdbg_writeln("info", "readline=\"unavailable\"", "Readline   unavailable");
+	phpdbg_writeln("Readline   unavailable");
 #endif
 
-	phpdbg_writeln("info", "context=\"%s\"", "Exec       %s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-	phpdbg_writeln("info", "compiled=\"%s\"", "Compiled   %s", PHPDBG_G(ops) ? "yes" : "no");
-	phpdbg_writeln("info", "stepping=\"%s\"", "Stepping   %s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-	phpdbg_writeln("info", "quiet=\"%s\"", "Quietness  %s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-	phpdbg_writeln("info", "oplog=\"%s\"", "Oplog      %s", PHPDBG_G(oplog) ? "on" : "off");
+	phpdbg_writeln("Exec       %s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+	phpdbg_writeln("Compiled   %s", PHPDBG_G(ops) ? "yes" : "no");
+	phpdbg_writeln("Stepping   %s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+	phpdbg_writeln("Quietness  %s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
-		phpdbg_writeln("info", "ops=\"%d\"", "Opcodes    %d", PHPDBG_G(ops)->last);
-		phpdbg_writeln("info", "vars=\"%d\"", "Variables  %d", PHPDBG_G(ops)->last_var ? PHPDBG_G(ops)->last_var - 1 : 0);
+		phpdbg_writeln("Opcodes    %d", PHPDBG_G(ops)->last);
+		phpdbg_writeln("Variables  %d", PHPDBG_G(ops)->last_var ? PHPDBG_G(ops)->last_var - 1 : 0);
 	}
 
-	phpdbg_writeln("info", "executing=\"%d\"", "Executing  %s", PHPDBG_G(in_execution) ? "yes" : "no");
+	phpdbg_writeln("Executing  %s", PHPDBG_G(in_execution) ? "yes" : "no");
 	if (PHPDBG_G(in_execution)) {
-		phpdbg_writeln("info", "vmret=\"%d\"", "VM Return  %d", PHPDBG_G(vmret));
+		phpdbg_writeln("VM Return  %d", PHPDBG_G(vmret));
 	}
 
-	phpdbg_writeln("info", "classes=\"%d\"", "Classes    %d", zend_hash_num_elements(EG(class_table)));
-	phpdbg_writeln("info", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
-	phpdbg_writeln("info", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
-	phpdbg_writeln("info", "includes=\"%d\"", "Included   %d", zend_hash_num_elements(&EG(included_files)));
-	phpdbg_xml("</printinfo>");
+	phpdbg_writeln("Classes    %d", zend_hash_num_elements(EG(class_table)));
+	phpdbg_writeln("Functions  %d", zend_hash_num_elements(EG(function_table)));
+	phpdbg_writeln("Constants  %d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Included   %d", zend_hash_num_elements(&EG(included_files)));
 
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_COMMAND(set) /* {{{ */
 {
-	phpdbg_error("set", "type=\"toofewargs\" expected=\"1\"", "No set command selected!");
+	phpdbg_error("No set command selected!");
 
 	return SUCCESS;
 } /* }}} */
@@ -1160,7 +1141,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 				strlen(zend_get_executed_filename()),
 				zend_get_executed_lineno());
 		} else {
-			phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
+			phpdbg_error("Execution context not set!");
 		}
 	} else switch (param->type) {
 		case ADDR_PARAM:
@@ -1170,7 +1151,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			if (PHPDBG_G(exec)) {
 				phpdbg_set_breakpoint_file(phpdbg_current_file(), strlen(phpdbg_current_file()), param->num);
 			} else {
-				phpdbg_error("inactive", "type=\"noexec\"", "Execution context not set!");
+				phpdbg_error("Execution context not set!");
 			}
 			break;
 		case METHOD_PARAM:
@@ -1211,20 +1192,20 @@ PHPDBG_COMMAND(sh) /* {{{ */
 		/* TODO: do something perhaps ?? do we want input ?? */
 		pclose(fd);
 	} else {
-		phpdbg_error("sh", "type=\"failure\" smd=\"%s\"", "Failed to execute %s", param->str);
+		phpdbg_error("Failed to execute %s", param->str);
 	}
 
 	return SUCCESS;
 } /* }}} */
 
 static int add_module_info(zend_module_entry *module) /* {{{ */ {
-	phpdbg_write("module", "name=\"%s\"", "%s\n", module->name);
+	phpdbg_write("%s\n", module->name);
 	return 0;
 }
 /* }}} */
 
 static void add_zendext_info(zend_extension *ext) /* {{{ */ {
-	phpdbg_write("extension", "name=\"%s\"", "%s\n", ext->name);
+	phpdbg_write("%s\n", ext->name);
 }
 /* }}} */
 
@@ -1248,7 +1229,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		efree(*path);
 		*path = libpath;
 	} else {
-		phpdbg_error("dl", "type=\"relpath\"", "Not a full path given or extension_dir ini setting is not set");
+		phpdbg_error("Not a full path given or extension_dir ini setting is not set");
 
 		return NULL;
 	}
@@ -1259,13 +1240,13 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 #ifdef PHP_WIN32
 		char *err = GET_DL_ERROR();
 		if (err && err[0]) {
-			phpdbg_error("dl", "type=\"unknown\"", "%s", err);
+			phpdbg_error("%s", err);
 			php_win32_error_msg_free(err);
 		} else {
-			phpdbg_error("dl", "type=\"unknown\"", "Unknown reason");
+			phpdbg_error("Unknown reason");
 		}
 #else
-		phpdbg_error("dl", "type=\"unknown\"", "%s", GET_DL_ERROR());
+		phpdbg_error("%s", GET_DL_ERROR());
 #endif
 		return NULL;
 	}
@@ -1287,11 +1268,11 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 			break;
 		}
 		if (extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
-			phpdbg_error("dl", "type=\"wrongapi\" extension=\"%s\" apineeded=\"%d\" apiinstalled=\"%d\"", "%s requires Zend Engine API version %d, which does not match the installed Zend Engine API version %d", new_extension->name, extension_version_info->zend_extension_api_no, ZEND_EXTENSION_API_NO);
+			phpdbg_error("%s requires Zend Engine API version %d, which does not match the installed Zend Engine API version %d", new_extension->name, extension_version_info->zend_extension_api_no, ZEND_EXTENSION_API_NO);
 
 			goto quit;
 		} else if (strcmp(ZEND_EXTENSION_BUILD_ID, extension_version_info->build_id) && (!new_extension->build_id_check || new_extension->build_id_check(ZEND_EXTENSION_BUILD_ID) != SUCCESS)) {
-			phpdbg_error("dl", "type=\"wrongbuild\" extension=\"%s\" buildneeded=\"%s\" buildinstalled=\"%s\"", "%s was built with configuration %s, whereas running engine is %s", new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
+			phpdbg_error("%s was built with configuration %s, whereas running engine is %s", new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
 
 			goto quit;
 		}
@@ -1302,7 +1283,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 
 		if (new_extension->startup) {
 			if (new_extension->startup(new_extension) != SUCCESS) {
-				phpdbg_error("dl", "type=\"startupfailure\" extension=\"%s\"", "Unable to startup Zend extension %s", new_extension->name);
+				phpdbg_error("Unable to startup Zend extension %s", new_extension->name);
 
 				goto quit;
 			}
@@ -1330,7 +1311,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		*name = module_entry->name;
 
 		if (strcmp(ZEND_EXTENSION_BUILD_ID, module_entry->build_id)) {
-			phpdbg_error("dl", "type=\"wrongbuild\" module=\"%s\" buildneeded=\"%s\" buildinstalled=\"%s\"",  "%s was built with configuration %s, whereas running engine is %s", module_entry->name, module_entry->build_id, ZEND_EXTENSION_BUILD_ID);
+			phpdbg_error("%s was built with configuration %s, whereas running engine is %s", module_entry->name, module_entry->build_id, ZEND_EXTENSION_BUILD_ID);
 
 			goto quit;
 		}
@@ -1340,20 +1321,20 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		module_entry->handle = handle;
 
 		if ((module_entry = zend_register_module_ex(module_entry)) == NULL) {
-			phpdbg_error("dl", "type=\"registerfailure\" module=\"%s\"", "Unable to register module %s", module_entry->name);
+			phpdbg_error("Unable to register module %s", module_entry->name);
 
 			goto quit;
 		}
 
 		if (zend_startup_module_ex(module_entry) == FAILURE) {
-			phpdbg_error("dl", "type=\"startupfailure\" module=\"%s\"", "Unable to startup module %s", module_entry->name);
+			phpdbg_error("Unable to startup module %s", module_entry->name);
 
 			goto quit;
 		}
 
 		if (module_entry->request_startup_func) {
 			if (module_entry->request_startup_func(MODULE_PERSISTENT, module_entry->module_number) == FAILURE) {
-				phpdbg_error("dl", "type=\"initfailure\" module=\"%s\"", "Unable to initialize module %s", module_entry->name);
+				phpdbg_error("Unable to initialize module %s", module_entry->name);
 
 				goto quit;
 			}
@@ -1362,7 +1343,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 		return "module";
 	} while (0);
 
-	phpdbg_error("dl", "type=\"nophpso\"", "This shared object is nor a Zend extension nor a module");
+	phpdbg_error("This shared object is nor a Zend extension nor a module");
 
 quit:
 	DL_UNLOAD(handle);
@@ -1377,10 +1358,10 @@ PHPDBG_COMMAND(dl) /* {{{ */
 	char *path;
 
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_notice("dl", "extensiontype=\"Zend extension\"", "Zend extensions");
+		phpdbg_notice("Zend extensions");
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) add_zendext_info);
 		phpdbg_out("\n");
-		phpdbg_notice("dl", "extensiontype=\"module\"", "Modules");
+		phpdbg_notice("Modules");
 		zend_hash_apply(&module_registry, (apply_func_t) add_module_info);
 	} else switch (param->type) {
 		case STR_PARAM:
@@ -1389,15 +1370,15 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 			phpdbg_activate_err_buf(1);
 			if ((type = phpdbg_load_module_or_extension(&path, &name)) == NULL) {
-				phpdbg_error("dl", "path=\"%s\" %b", "Could not load %s, not found or invalid zend extension / module: %b", path);
+				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %s", path, PHPDBG_G(err_buf).msg);
 			} else {
-				phpdbg_notice("dl", "extensiontype=\"%s\" name=\"%s\" path=\"%s\"", "Successfully loaded the %s %s at path %s", type, name, path);
+				phpdbg_notice("Successfully loaded the %s %s at path %s", type, name, path);
 			}
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
 			efree(path);
 #else
-			phpdbg_error("dl", "type=\"unsupported\" path=\"%.*s\"", "Cannot dynamically load %.*s - dynamic modules are not supported", (int) param->len, param->str);
+			phpdbg_error("Cannot dynamically load %.*s - dynamic modules are not supported", (int) param->len, param->str);
 #endif
 			break;
 
@@ -1414,7 +1395,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0);
 	} else {
-		phpdbg_error("source", "type=\"notfound\" file=\"%s\"", "Failed to stat %s, file does not exist", param->str);
+		phpdbg_error("Failed to stat %s, file does not exist", param->str);
 	}
 
 	return SUCCESS;
@@ -1428,7 +1409,7 @@ PHPDBG_COMMAND(export) /* {{{ */
 		phpdbg_export_breakpoints(handle);
 		fclose(handle);
 	} else {
-		phpdbg_error("export", "type=\"openfailure\" file=\"%s\"", "Failed to open or create %s, check path and permissions", param->str);
+		phpdbg_error("Failed to open or create %s, check path and permissions", param->str);
 	}
 
 	return SUCCESS;
@@ -1445,12 +1426,12 @@ PHPDBG_COMMAND(register) /* {{{ */
 			zend_hash_str_update_ptr(&PHPDBG_G(registered), lcname, lcname_len, function);
 			function_add_ref(function);
 
-			phpdbg_notice("register", "function=\"%s\"", "Registered %s", lcname);
+			phpdbg_notice("Registered %s", lcname);
 		} else {
-			phpdbg_error("register", "type=\"notfound\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
+			phpdbg_error("The requested function (%s) could not be found", param->str);
 		}
 	} else {
-		phpdbg_error("register", "type=\"inuse\" function=\"%s\"", "The requested name (%s) is already in use", lcname);
+		phpdbg_error("The requested name (%s) is already in use", lcname);
 	}
 
 	efree(lcname);
@@ -1474,16 +1455,13 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	}
 
 	phpdbg_out("Cleaning Execution Environment\n");
-	phpdbg_xml("<cleaninfo %r>");
 
-	phpdbg_writeln("clean", "classes=\"%d\"", "Classes    %d", zend_hash_num_elements(EG(class_table)));
-	phpdbg_writeln("clean", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
-	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
-	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
+	phpdbg_writeln("Classes    %d", zend_hash_num_elements(EG(class_table)));
+	phpdbg_writeln("Functions  %d", zend_hash_num_elements(EG(function_table)));
+	phpdbg_writeln("Constants  %d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Includes   %d", zend_hash_num_elements(&EG(included_files)));
 
 	phpdbg_clean(1, 0);
-
-	phpdbg_xml("</cleaninfo>");
 
 	return SUCCESS;
 } /* }}} */
@@ -1491,20 +1469,17 @@ PHPDBG_COMMAND(clean) /* {{{ */
 PHPDBG_COMMAND(clear) /* {{{ */
 {
 	phpdbg_out("Clearing Breakpoints\n");
-	phpdbg_xml("<clearinfo %r>");
 
-	phpdbg_writeln("clear", "files=\"%d\"", "File              %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
-	phpdbg_writeln("clear", "functions=\"%d\"", "Functions         %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
-	phpdbg_writeln("clear", "methods=\"%d\"", "Methods           %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
-	phpdbg_writeln("clear", "oplines=\"%d\"", "Oplines           %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
-	phpdbg_writeln("clear", "fileoplines=\"%d\"", "File oplines      %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]));
-	phpdbg_writeln("clear", "functionoplines=\"%d\"", "Function oplines  %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]));
-	phpdbg_writeln("clear", "methodoplines=\"%d\"", "Method oplines    %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]));
-	phpdbg_writeln("clear", "eval=\"%d\"", "Conditionals      %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
+	phpdbg_writeln("File              %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
+	phpdbg_writeln("Functions         %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
+	phpdbg_writeln("Methods           %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
+	phpdbg_writeln("Oplines           %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
+	phpdbg_writeln("File oplines      %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]));
+	phpdbg_writeln("Function oplines  %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]));
+	phpdbg_writeln("Method oplines    %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]));
+	phpdbg_writeln("Conditionals      %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
 
 	phpdbg_clear_breakpoints();
-
-	phpdbg_xml("</clearinfo>");
 
 	return SUCCESS;
 } /* }}} */
@@ -1570,12 +1545,6 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 		if (phpdbg_do_parse(&stack, input) <= 0) {
 			phpdbg_activate_err_buf(1);
 
-#ifdef PHP_WIN32
-#define PARA ((phpdbg_param_t *)stack.next)->type
-			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
-				sigio_watcher_start();
-			}
-#endif
 			zend_try {
 				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
 			} zend_catch {
@@ -1587,7 +1556,9 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						if (!allow_async_unsafe || phpdbg_call_register(&stack) == FAILURE) {
-							phpdbg_output_err_buf(NULL, "%b", "%b");
+							if (PHPDBG_G(err_buf).active) {
+							    phpdbg_output_err_buf("%s", PHPDBG_G(err_buf).msg);
+							}
 						}
 					}
 				break;
@@ -1599,7 +1570,7 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 					phpdbg_activate_err_buf(0);
 					phpdbg_free_err_buf();
 					if (!PHPDBG_G(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
-						phpdbg_error("command", "type=\"noexec\"", "Not running");
+						phpdbg_error("Not running");
 					}
 					break;
 				}
@@ -1607,12 +1578,6 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 
 			phpdbg_activate_err_buf(0);
 			phpdbg_free_err_buf();
-#ifdef PHP_WIN32
-			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
-				sigio_watcher_stop();
-			}
-#undef PARA
-#endif
 		}
 
 		phpdbg_stack_free(&stack);
@@ -1709,7 +1674,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_PREVENT_INTERACTIVE) {
-			phpdbg_print_opline_ex(execute_data, 0);
+			phpdbg_print_opline(execute_data, 0);
 			goto next;
 		}
 
@@ -1736,9 +1701,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 			zend_long line = zval_get_long(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("line"), 1, &rv));
 			zend_string *msg = zval_get_string(zend_read_property(zend_get_exception_base(exception), exception, ZEND_STRL("message"), 1, &rv));
 
-			phpdbg_error("exception",
-				"name=\"%s\" file=\"%s\" line=\"" ZEND_LONG_FMT "\"",
-				"Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
+			phpdbg_error("Uncaught %s in %s on line " ZEND_LONG_FMT ": %.*s",
 				ZSTR_VAL(exception->ce->name), ZSTR_VAL(file), line,
 				ZSTR_LEN(msg) < 80 ? (int) ZSTR_LEN(msg) : 80, ZSTR_VAL(msg));
 			zend_string_release(msg);
@@ -1755,7 +1718,7 @@ ex_is_caught:
 		}
 
 		/* not while in conditionals */
-		phpdbg_print_opline_ex(execute_data, 0);
+		phpdbg_print_opline(execute_data, 0);
 
 		/* perform seek operation */
 		if ((PHPDBG_G(flags) & PHPDBG_SEEK_MASK) && !(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
@@ -1797,7 +1760,7 @@ ex_is_caught:
 				if (INDEX_EXISTS_CHECK) {
 					PHPDBG_G(flags) &= ~PHPDBG_IN_LEAVE;
 					zend_hash_clean(&PHPDBG_G(seek));
-					phpdbg_notice("breakpoint", "id=\"leave\" file=\"%s\" line=\"%u\"", "Breaking for leave at %s:%u",
+					phpdbg_notice("Breaking for leave at %s:%u",
 						zend_get_executed_filename(),
 						zend_get_executed_lineno()
 					);
@@ -1838,7 +1801,7 @@ stepping:
 			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
 
 			phpdbg_out("\n");
-			phpdbg_notice("signal", "type=\"SIGINT\"", "Program received signal SIGINT");
+			phpdbg_notice("Program received signal SIGINT");
 			DO_INTERACTIVE(1);
 		}
 
@@ -1878,17 +1841,23 @@ void phpdbg_force_interruption(void) /* {{{ */ {
 	if (data) {
 		if (data->func) {
 			if (ZEND_USER_CODE(data->func->type)) {
-				phpdbg_notice("hardinterrupt", "opline=\"%p\" num=\"%lu\" file=\"%s\" line=\"%u\"", "Current opline: %p (op #%lu) in %s:%u", data->opline, (data->opline - data->func->op_array.opcodes) / sizeof(data->opline), data->func->op_array.filename->val, data->opline->lineno);
+				phpdbg_notice("Current opline: %p (op #%u) in %s:%u",
+				    data->opline,
+				    (uint32_t) (data->opline - data->func->op_array.opcodes),
+				    data->func->op_array.filename->val,
+				    data->opline->lineno);
 			} else if (data->func->internal_function.function_name) {
-				phpdbg_notice("hardinterrupt", "func=\"%s\"", "Current opline: in internal function %s", data->func->internal_function.function_name->val);
+				phpdbg_notice("Current opline: in internal function %s",
+				    data->func->internal_function.function_name->val);
 			} else {
-				phpdbg_notice("hardinterrupt", "", "Current opline: executing internal code");
+				phpdbg_notice("Current opline: executing internal code");
 			}
 		} else {
-			phpdbg_notice("hardinterrupt", "opline=\"%p\"", "Current opline: %p (op_array information unavailable)", data->opline);
+			phpdbg_notice("Current opline: %p (op_array information unavailable)",
+			    data->opline);
 		}
 	} else {
-		phpdbg_notice("hardinterrupt", "", "No information available about executing context");
+		phpdbg_notice("No information available about executing context");
 	}
 
 	DO_INTERACTIVE(0);
@@ -1901,20 +1870,3 @@ next:
 	}
 }
 /* }}} */
-
-PHPDBG_COMMAND(eol) /* {{{ */
-{
-	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_notice("eol", "argument required", "argument required");
-	} else switch (param->type) {
-		case STR_PARAM:
-			if (FAILURE == phpdbg_eol_global_update(param->str)) {
-				phpdbg_notice("eol", "unknown EOL name '%s', give crlf, lf, cr", "unknown EOL name '%s', give  crlf, lf, cr", param->str);
-			}
-			break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */

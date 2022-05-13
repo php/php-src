@@ -103,7 +103,7 @@ int mbfl_memory_device_output(int c, void *data)
 	}
 
 	device->buffer[device->pos++] = (unsigned char)c;
-	return c;
+	return 0;
 }
 
 int mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
@@ -180,5 +180,5 @@ int mbfl_wchar_device_output(int c, void *data)
 	}
 
 	device->buffer[device->pos++] = c;
-	return c;
+	return 0;
 }

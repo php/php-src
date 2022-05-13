@@ -26,13 +26,14 @@
 #include "fuzzer-sapi.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-	if (Size > 32 * 1024) {
-		/* Large inputs have a large impact on fuzzer performance,
+	if (Size > 6 * 1024) {
+		/* Large inputs have a large impact on fuzzer performance and may cause stack overflows,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
 	}
 
-	fuzzer_do_request_from_buffer("fuzzer.php", (const char *) Data, Size, /* execute */ 0);
+	fuzzer_do_request_from_buffer(
+		"fuzzer.php", (const char *) Data, Size, /* execute */ 0, /* before_shutdown */ NULL);
 
 	return 0;
 }
@@ -42,7 +43,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	 * Use tracked allocation mode to avoid leaks in that case. */
 	putenv("USE_TRACKED_ALLOC=1");
 
-	fuzzer_init_php();
+	fuzzer_init_php(NULL);
 
 	/* fuzzer_shutdown_php(); */
 	return 0;

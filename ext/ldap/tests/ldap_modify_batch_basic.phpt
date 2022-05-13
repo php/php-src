@@ -3,8 +3,9 @@ ldap_modify_batch() - Basic batch modify operation
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 Ondřej Hošek <ondra.hosek@gmail.com>
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php

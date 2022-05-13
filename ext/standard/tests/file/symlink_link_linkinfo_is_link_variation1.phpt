@@ -101,7 +101,7 @@ rmdir("$dirname/test/home");
 rmdir("$dirname/test");
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members in an object ***
 
 -- Working with soft links --

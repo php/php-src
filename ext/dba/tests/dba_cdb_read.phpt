@@ -1,5 +1,7 @@
 --TEST--
 DBA CDB handler test (read only)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'cdb_make';

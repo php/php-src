@@ -1,5 +1,7 @@
 --TEST--
 Bind miscellaneous column types using default types
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

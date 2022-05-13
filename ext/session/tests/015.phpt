@@ -1,5 +1,7 @@
 --TEST--
 use_trans_sid should not affect SID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -1,4 +1,4 @@
-.TH @program_prefix@phpdbg 1 "2021" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpdbg 1 "2022" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpdbg \- The interactive PHP debugger
 .SH SYNOPSIS
@@ -49,10 +49,6 @@ Override .phpgdbinit location (implies -I)
 .B \-I
 Ignore .phpdbginit (default init file)
 .TP
-.B \-O \fIfile\fR
-Set oplog output to
-.IR file
-.TP
 .B \-r
 Jump straight to run
 .TP
@@ -68,15 +64,6 @@ Read code to execute from stdin with an optional
 .TP
 .B \-S \fIsapi_name\fP
 Override SAPI name
-.TP
-.B \-l \fIport\fP
-Setup remote console port
-.TP
-.B \-a \fIaddress\fP
-Setup remote console bind address
-.TP
-.B \-x
-Enable XML output
 .TP
 .B \-p \fIopcode\fP
 Output opcodes and quit
@@ -118,7 +105,7 @@ You can view the list of known bugs or report any new bug you
 found at
 .PD 0
 .P
-.B http://bugs.php.net/
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.

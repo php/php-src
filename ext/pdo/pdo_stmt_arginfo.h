@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 670126c620221ba392f4cd41cdb31877cc29e1e3 */
+ * Stub hash: adcbda7b6763141981700bec5d8c5b739f8de767 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -145,6 +145,7 @@ static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_ent
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_queryString_default_value;
@@ -162,7 +163,7 @@ static zend_class_entry *register_class_PDORow(void)
 
 	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);

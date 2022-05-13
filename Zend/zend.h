@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.1.0-dev"
+#define ZEND_VERSION "4.2.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -69,7 +69,11 @@
 #define ZEND_TSRMLS_CACHE
 #endif
 
+#ifndef ZEND_COMPILE_DL_EXT
+TSRMLS_MAIN_CACHE_EXTERN()
+#else
 ZEND_TSRMLS_CACHE_EXTERN()
+#endif
 
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
@@ -119,7 +123,13 @@ typedef struct _zend_class_dependency {
 } zend_class_dependency;
 
 typedef struct _zend_inheritance_cache_entry zend_inheritance_cache_entry;
-typedef struct _zend_error_info zend_error_info;
+
+typedef struct _zend_error_info {
+	int type;
+	uint32_t lineno;
+	zend_string *filename;
+	zend_string *message;
+} zend_error_info;
 
 struct _zend_inheritance_cache_entry {
 	zend_inheritance_cache_entry *next;
@@ -173,6 +183,8 @@ struct _zend_class_entry {
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
+	/* allocated only if class implements ArrayAccess interface */
+	zend_class_arrayaccess_funcs *arrayaccess_funcs_ptr;
 
 	/* handlers */
 	union {
@@ -326,9 +338,6 @@ extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
-/* Callback for loading of not preloaded part of the script */
-extern ZEND_API zend_result (*zend_preload_autoload)(zend_string *filename);
-
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 /* For custom format specifiers like H */
@@ -381,13 +390,6 @@ typedef struct {
 	zend_error_handling_t  handling;
 	zend_class_entry       *exception;
 } zend_error_handling;
-
-typedef struct _zend_error_info {
-	int type;
-	uint32_t lineno;
-	zend_string *filename;
-	zend_string *message;
-} zend_error_info;
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_error_handling(zend_error_handling *current);

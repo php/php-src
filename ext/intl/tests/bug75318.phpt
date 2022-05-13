@@ -1,9 +1,7 @@
 --TEST--
 Bug #75318 (The parameter of UConverter::getAliases() is not optional)
---SKIPIF--
-<?php
-if (!extension_loaded('intl')) die('skip intl extension is not available');
-?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 $rm = new ReflectionMethod('UConverter', 'getAliases');

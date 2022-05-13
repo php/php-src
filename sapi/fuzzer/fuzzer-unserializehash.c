@@ -75,7 +75,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t FullSize) {
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
-	fuzzer_init_php();
+	fuzzer_init_php(NULL);
 
 	/* fuzzer_shutdown_php(); */
 	return 0;

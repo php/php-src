@@ -29,7 +29,6 @@
 #include "ext/standard/php_string.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
-#include "Zend/zend_interfaces.h"
 
 /*
  * zlib include files can define the following preprocessor defines which rename
@@ -282,7 +281,7 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 		return FAILURE;
 	}
 
-	if (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
+	if (!(output_context->op & PHP_OUTPUT_HANDLER_CLEAN) || ((output_context->op & PHP_OUTPUT_HANDLER_START) && !(output_context->op & PHP_OUTPUT_HANDLER_FINAL))) {
 		int flags;
 
 		if (SUCCESS == php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_GET_FLAGS, &flags)) {
@@ -346,7 +345,7 @@ static php_output_handler *php_zlib_output_handler_init(const char *handler_name
 		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 	}
 
-    ZLIBG(handler_registered) = 1;
+	ZLIBG(handler_registered) = 1;
 
 	if ((h = php_output_handler_create_internal(handler_name, handler_name_len, php_zlib_output_handler, chunk_size, flags))) {
 		php_output_handler_set_context(h, php_zlib_output_handler_context_init(), php_zlib_output_handler_context_dtor);
@@ -1341,8 +1340,6 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
-	inflate_context_ce->serialize = zend_class_serialize_deny;
-	inflate_context_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1353,8 +1350,6 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
-	deflate_context_ce->serialize = zend_class_serialize_deny;
-	deflate_context_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1417,10 +1412,10 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 static PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(compression_coding) = 0;
-    if (!ZLIBG(handler_registered)) {
-        ZLIBG(output_compression) = ZLIBG(output_compression_default);
-        php_zlib_output_compression_start();
-    }
+	if (!ZLIBG(handler_registered)) {
+		ZLIBG(output_compression) = ZLIBG(output_compression_default);
+		php_zlib_output_compression_start();
+	}
 
 	return SUCCESS;
 }
@@ -1430,9 +1425,9 @@ static PHP_RINIT_FUNCTION(zlib)
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
 	php_zlib_cleanup_ob_gzhandler_mess();
-    ZLIBG(handler_registered) = 0;
+	ZLIBG(handler_registered) = 0;
 
-    return SUCCESS;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -1458,7 +1453,7 @@ static PHP_GINIT_FUNCTION(zlib)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	zlib_globals->ob_gzhandler = NULL;
-    zlib_globals->handler_registered = 0;
+	zlib_globals->handler_registered = 0;
 }
 /* }}} */
 

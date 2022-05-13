@@ -54,6 +54,8 @@ function testAccess($c, $ao) {
 NULL
 string(12) "C::prop.orig"
   - Write:
+
+Deprecated: Creation of dynamic property ArrayObject::$prop is deprecated in %s on line %d
 string(8) "changed1"
 string(8) "changed2"
   - Isset:

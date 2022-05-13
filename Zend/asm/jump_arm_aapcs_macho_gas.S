@@ -52,7 +52,7 @@ _jump_fcontext:
     bic  v2, v2, #3
 
     @ load TLS[__PTK_LIBC_DYLD_Unwind_SjLj_Key]
-    ldr  v1, [v2, #8]
+    ldr  v1, [v2, #72]
     @ save SjLj handler
     push  {v1}
 
@@ -79,7 +79,7 @@ _jump_fcontext:
     @ r#estore SjLj handler
     pop  {v1}
     @ store SjLj handler in TLS
-    str  v1, [v2, #8]
+    str  v1, [v2, #72]
 
     @ restore hidden,V1-V8,LR
     pop {a4,v1-v8,lr}

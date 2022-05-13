@@ -1,9 +1,10 @@
 --TEST--
 ziparchive::addEmptyDir error
+--EXTENSIONS--
+zip
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php

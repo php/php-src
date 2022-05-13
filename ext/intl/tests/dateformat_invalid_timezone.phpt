@@ -2,9 +2,8 @@
 IntlDateFormat constructor failure
 --INI--
 date.timezone=Mars/Utopia_Planitia
---SKIPIF--
-<?php
-extension_loaded('intl') || print 'skip';
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

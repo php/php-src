@@ -40,7 +40,7 @@
 /* In some places we need to check if the number NUM is zero. */
 
 char
-bc_is_zero (bc_num num)
+bc_is_zero_for_scale (bc_num num, int scale)
 {
   int  count;
   char *nptr;
@@ -49,7 +49,7 @@ bc_is_zero (bc_num num)
   if (num == BCG(_zero_)) return TRUE;
 
   /* Initialize */
-  count = num->n_len + num->n_scale;
+  count = num->n_len + scale;
   nptr = num->n_value;
 
   /* The check */
@@ -59,4 +59,10 @@ bc_is_zero (bc_num num)
     return FALSE;
   else
     return TRUE;
+}
+
+char
+bc_is_zero (bc_num num)
+{
+  return bc_is_zero_for_scale(num, num->n_scale);
 }

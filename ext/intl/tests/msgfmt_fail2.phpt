@@ -1,7 +1,7 @@
 --TEST--
 msgfmt creation failures icu >= 4.8
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

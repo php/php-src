@@ -25,9 +25,9 @@ include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "測試多字節路徑"; // BIG5 string
 $prefix = create_data("dir_big5", $item . "5", 950);
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}5";
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}5";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

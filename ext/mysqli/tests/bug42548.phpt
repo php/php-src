@@ -1,11 +1,11 @@
 --TEST--
 Bug #42548 PROCEDURE xxx can't return a result set in the given context (works in 5.2.3!!)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) <= 50000) {
@@ -14,7 +14,7 @@ if (mysqli_get_server_version($link) <= 50000) {
 ?>
 --FILE--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 $mysqli = mysqli_init();
 $mysqli->real_connect($host, $user, $passwd, $db, $port, $socket);
@@ -52,7 +52,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

@@ -1,9 +1,7 @@
 --TEST--
 Bug #41287 (Namespace functions don't allow xmlns definition to be optional)
---SKIPIF--
-<?php
-if (!extension_loaded("xmlwriter")) die("skip");
-?>
+--EXTENSIONS--
+xmlwriter
 --FILE--
 <?php
 

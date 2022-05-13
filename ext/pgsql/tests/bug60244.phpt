@@ -1,5 +1,7 @@
 --TEST--
 Bug #60244 (pg_fetch_* functions do not validate that row param is >0)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");
@@ -10,7 +12,7 @@ include("skipif.inc");
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-$result = pg_query("select 'a' union select 'b'");
+$result = pg_query($db, "select 'a' union select 'b'");
 
 try {
     var_dump(pg_fetch_array($result, -1));

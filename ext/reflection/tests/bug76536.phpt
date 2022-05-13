@@ -1,5 +1,9 @@
 --TEST--
 Bug #76536 (PHP crashes with core dump when throwing exception in error handler)
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Error handler not available during preloading');
+?>
 --FILE--
 <?php
 class SomeConstants {const SOME_CONSTANT = "0foo" % 5; }

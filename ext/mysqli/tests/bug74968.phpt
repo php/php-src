@@ -1,8 +1,9 @@
 --TEST--
 Bug #74968 PHP crashes when calling mysqli_result::fetch_object with an abstract class
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

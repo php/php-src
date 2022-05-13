@@ -2,10 +2,8 @@
 IntlCalendar::roll() bool argument variation
 --INI--
 date.timezone=Atlantic/Azores
---SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-    die('skip intl extension not enabled');
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -21,10 +19,13 @@ var_dump($intlcal->get(IntlCalendar::FIELD_MONTH)); //1 (Feb)
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //28
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: IntlCalendar::roll(): Passing bool is deprecated, use 1 or -1 instead in %s on line %d
 bool(true)
 int(1)
 int(29)
+
+Deprecated: intlcal_roll(): Passing bool is deprecated, use 1 or -1 instead in %s on line %d
 bool(true)
 int(1)
-int(28)
+int(28)

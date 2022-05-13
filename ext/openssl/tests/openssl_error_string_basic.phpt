@@ -1,7 +1,11 @@
 --TEST--
-openssl_error_string() tests
+openssl_error_string() tests (OpenSSL < 3.0)
+--EXTENSIONS--
+openssl
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php
+if (OPENSSL_VERSION_NUMBER >= 0x30000000) die('skip For OpenSSL < 3.0');
+?>
 --FILE--
 <?php
 // helper function to check openssl errors
@@ -112,14 +116,14 @@ expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
 expect_openssl_errors('openssl_pkey_get_public', [$err_pem_no_start_line]);
 // private encrypt with unknown padding
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
-expect_openssl_errors('openssl_private_encrypt', ['04066076']);
+expect_openssl_errors('openssl_private_encrypt', ['0408F090']);
 // private decrypt with failed padding check
 @openssl_private_decrypt("data", $crypted, $private_key_file);
 expect_openssl_errors('openssl_private_decrypt', ['04065072']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
 @openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', [$err_pem_no_start_line, '04068076', '04067072']);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', [$err_pem_no_start_line, '0408F090', '04067072']);
 
 // X509
 echo "X509 errors\n";

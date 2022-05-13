@@ -34,7 +34,7 @@
 
 /* {{{ FETCH_DOUBLE_OPTION(var_name, option_name) */
 #define FETCH_DOUBLE_OPTION(var_name, option_name) \
-   	var_name = 0; \
+	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
@@ -46,7 +46,7 @@
 
 /* {{{ FETCH_LONG_OPTION(var_name, option_name) */
 #define FETCH_LONG_OPTION(var_name, option_name) \
-   	var_name = 0; \
+	var_name = 0; \
 	var_name##_set = 0; \
 	if (option_array) { \
 		if ((option_val = zend_hash_str_find(Z_ARRVAL_P(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
@@ -89,7 +89,7 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int _php_filter_validate_ipv6(char *str, size_t str_len);
+static int _php_filter_validate_ipv6(char *str, size_t str_len, int ip[8]);
 
 static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_long ctx_value;
@@ -444,10 +444,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
-			zval_ptr_dtor(value);
 			if ((min_range_set && (lval < min_range)) || (max_range_set && (lval > max_range))) {
 				goto error;
 			}
+			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
@@ -504,7 +504,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 }
 
-static int _php_filter_validate_domain(char * domain, int len, zend_long flags) /* {{{ */
+static int _php_filter_validate_domain(char * domain, size_t len, zend_long flags) /* {{{ */
 {
 	char *e, *s, *t;
 	size_t l;
@@ -517,7 +517,7 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 	t = e - 1;
 
 	/* Ignore trailing dot */
-	if (*t == '.') {
+	if (l > 0 && *t == '.') {
 		e = t;
 		l--;
 	}
@@ -613,7 +613,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
-		if (*s == '[' && *t == ']' && _php_filter_validate_ipv6((s + 1), l - 2)) {
+		if (*s == '[' && *t == ']' && _php_filter_validate_ipv6((s + 1), l - 2, NULL)) {
 			php_url_free(url);
 			return;
 		}
@@ -636,7 +636,9 @@ bad_url:
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->user != NULL && !is_userinfo_valid(url->user)) {
+	if ((url->user != NULL && !is_userinfo_valid(url->user))
+		|| (url->pass != NULL && !is_userinfo_valid(url->pass))
+	) {
 		php_url_free(url);
 		RETURN_VALIDATION_FAILED
 
@@ -751,11 +753,11 @@ static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ 
 }
 /* }}} */
 
-static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
+static int _php_filter_validate_ipv6(char *str, size_t str_len, int ip[8]) /* {{{ */
 {
-	int compressed = 0;
+	int compressed_pos = -1;
 	int blocks = 0;
-	int n;
+	int num, n, i;
 	char *ipv4;
 	char *end;
 	int ip4elm[4];
@@ -768,7 +770,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 	/* check for bundled IPv4 */
 	ipv4 = memchr(str, '.', str_len);
 	if (ipv4) {
- 		while (ipv4 > str && *(ipv4-1) != ':') {
+		while (ipv4 > str && *(ipv4-1) != ':') {
 			ipv4--;
 		}
 
@@ -798,27 +800,40 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 				return 0;
 			}
 			if (*str == ':') {
-				if (compressed) {
+				if (compressed_pos >= 0) {
 					return 0;
 				}
-				blocks++; /* :: means 1 or more 16-bit 0 blocks */
-				compressed = 1;
-
+				if (ip && blocks < 8) {
+					ip[blocks] = -1;
+				}
+				compressed_pos = blocks++; /* :: means 1 or more 16-bit 0 blocks */
 				if (++str == end) {
-					return (blocks <= 8);
+					if (blocks > 8) {
+						return 0;
+				}
+					goto fixup_ip;
 				}
 			} else if ((str - 1) == s) {
 				/* don't allow leading : without another : following */
 				return 0;
 			}
 		}
-		n = 0;
-		while ((str < end) &&
-		       ((*str >= '0' && *str <= '9') ||
-		        (*str >= 'a' && *str <= 'f') ||
-		        (*str >= 'A' && *str <= 'F'))) {
+		num = n = 0;
+		while (str < end) {
+			if (*str >= '0' && *str <= '9') {
+				num = 16 * num + (*str - '0');
+			} else if (*str >= 'a' && *str <= 'f') {
+				num = 16 * num + (*str - 'a') + 10;
+			} else if (*str >= 'A' && *str <= 'F') {
+				num = 16 * num + (*str - 'A') + 10;
+			} else {
+				break;
+			}
 			n++;
 			str++;
+		}
+		if (ip && blocks < 8) {
+			ip[blocks] = num;
 		}
 		if (n < 1 || n > 4) {
 			return 0;
@@ -826,7 +841,26 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 		if (++blocks > 8)
 			return 0;
 	}
-	return ((compressed && blocks <= 8) || blocks == 8);
+
+fixup_ip:
+	if (ip && ipv4) {
+		for (i = 0; i < 5; i++) {
+			ip[i] = 0;
+}
+		ip[i++] = 0xffff;
+		ip[i++] = 256 * ip4elm[0] + ip4elm[1];
+		ip[i++] = 256 * ip4elm[2] + ip4elm[3];
+	} else if (ip && compressed_pos >= 0 && blocks <= 8) {
+		int offset = 8 - blocks;
+		for (i = 7; i > compressed_pos + offset; i--) {
+			ip[i] = ip[i - offset];
+		}
+		for (i = compressed_pos + offset; i >= compressed_pos; i--) {
+			ip[i] = 0;
+		}
+	}
+
+	return (compressed_pos >= 0 && blocks <= 8) || blocks == 8;
 }
 /* }}} */
 
@@ -837,7 +871,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * allow_ipv4 and allow_ipv6 flags flag are used, then the first dot or
 	 * colon determine the format */
 
-	int            ip[4];
+	int            ip[8];
 	int            mode;
 
 	if (memchr(Z_STRVAL_P(value), ':', Z_STRLEN_P(value))) {
@@ -888,52 +922,28 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		case FORMAT_IPV6:
 			{
 				int res = 0;
-				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value));
+				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value), ip);
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
 				/* Check flags */
 				if (flags & FILTER_FLAG_NO_PRIV_RANGE) {
-					if (Z_STRLEN_P(value) >=2 && (!strncasecmp("FC", Z_STRVAL_P(value), 2) || !strncasecmp("FD", Z_STRVAL_P(value), 2))) {
+					if (ip[0] >= 0xfc00 && ip[0] <= 0xfdff) {
 						RETURN_VALIDATION_FAILED
 					}
 				}
 				if (flags & FILTER_FLAG_NO_RES_RANGE) {
-					switch (Z_STRLEN_P(value)) {
-						case 1: case 0:
-							break;
-						case 2:
-							if (zend_string_equals_literal(Z_STR_P(value), "::")) {
-								RETURN_VALIDATION_FAILED
-							}
-							break;
-						case 3:
-							if (zend_string_equals_literal(Z_STR_P(value), "::1") || zend_string_equals_literal(Z_STR_P(value), "5f:")) {
-								RETURN_VALIDATION_FAILED
-							}
-							break;
-						default:
-							if (Z_STRLEN_P(value) >= 5) {
-								if (
-									!strncasecmp("fe8", Z_STRVAL_P(value), 3) ||
-									!strncasecmp("fe9", Z_STRVAL_P(value), 3) ||
-									!strncasecmp("fea", Z_STRVAL_P(value), 3) ||
-									!strncasecmp("feb", Z_STRVAL_P(value), 3)
+					if ((ip[0] == 0 && ip[1] == 0 && ip[2] == 0 && ip[3] == 0
+						&& ip[4] == 0 && ip[5] == 0 && ip[6] == 0 && (ip[7] == 0 || ip[7] == 1))
+						|| (ip[0] == 0x5f)
+						|| (ip[0] >= 0xfe80 && ip[0] <= 0xfebf)
+						|| (ip[0] == 0x2001 && (ip[1] == 0x0db8 || (ip[1] >= 0x0010 && ip[1] <= 0x001f)))
+						|| (ip[0] == 0x3ff3)
 								) {
 									RETURN_VALIDATION_FAILED
 								}
 							}
-							if (
-								(Z_STRLEN_P(value) >= 9 &&  !strncasecmp("2001:0db8", Z_STRVAL_P(value), 9)) ||
-								(Z_STRLEN_P(value) >= 2 &&  !strncasecmp("5f", Z_STRVAL_P(value), 2)) ||
-								(Z_STRLEN_P(value) >= 4 &&  !strncasecmp("3ff3", Z_STRVAL_P(value), 4)) ||
-								(Z_STRLEN_P(value) >= 8 &&  !strncasecmp("2001:001", Z_STRVAL_P(value), 8))
-							) {
-								RETURN_VALIDATION_FAILED
 							}
-					}
-				}
-			}
 			break;
 	}
 }

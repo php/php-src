@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECT--
 In autoload: string(6) "UndefC"
-call_user_func(): Argument #1 ($function) must be a valid callback, class "UndefC" not found
+call_user_func(): Argument #1 ($callback) must be a valid callback, class "UndefC" not found

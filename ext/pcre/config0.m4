@@ -7,8 +7,8 @@ PHP_ARG_WITH([external-pcre],,
   [no])
 
 PHP_ARG_WITH([pcre-jit],,
-  [AS_HELP_STRING([--with-pcre-jit],
-    [Enable PCRE JIT functionality])],
+  [AS_HELP_STRING([--without-pcre-jit],
+    [Disable PCRE JIT functionality])],
   [yes],
   [no])
 

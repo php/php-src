@@ -15,7 +15,6 @@ $a->a = $a;
 var_dump($a);
 unset($a);
 var_dump(gc_collect_cycles());
-var_dump(gc_collect_cycles());
 echo "ok\n"
 ?>
 --EXPECTF--
@@ -24,6 +23,5 @@ object(Foo)#%d (1) {
   *RECURSION*
 }
 __destruct
-int(0)
 int(1)
 ok

@@ -57,7 +57,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 			ret = SUCCESS; \
 		} else if (Z_TYPE(retval) == IS_FALSE) { \
 			ret = FAILURE; \
-        }  else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == -1)) { \
+		}  else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == -1)) { \
 			if (!EG(exception)) { \
 				php_error_docref(NULL, E_DEPRECATED, "Session callback must have a return value of type bool, %s returned", zend_zval_type_name(&retval)); \
 			} \

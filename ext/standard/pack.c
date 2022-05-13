@@ -31,7 +31,7 @@
 #include "ext/standard/head.h"
 #include "php_string.h"
 #include "pack.h"
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
@@ -39,7 +39,7 @@
 #endif
 #endif
 #include "fsock.h"
-#if HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
@@ -62,6 +62,7 @@ typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
 typedef ZEND_SET_ALIGNED(1, uint64_t unaligned_uint64_t);
 typedef ZEND_SET_ALIGNED(1, unsigned int unaligned_uint);
+typedef ZEND_SET_ALIGNED(1, int unaligned_int);
 
 /* Mapping of byte from char (8bit) to long for machine endian */
 static int byte_map[1];
@@ -109,8 +110,8 @@ static inline uint16_t php_pack_reverse_int16(uint16_t arg)
 /* {{{ php_pack_reverse_int32 */
 static inline uint32_t php_pack_reverse_int32(uint32_t arg)
 {
-    uint32_t result;
-    result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);
+	uint32_t result;
+	result = ((arg & 0xFF) << 24) | ((arg & 0xFF00) << 8) | ((arg >> 8) & 0xFF00) | ((arg >> 24) & 0xFF);
 
 	return result;
 }
@@ -1043,8 +1044,14 @@ PHP_FUNCTION(unpack)
 
 					case 'i':   /* signed integer, machine size, machine endian */
 					case 'I': { /* unsigned integer, machine size, machine endian */
-						unsigned int x = *((unaligned_uint*) &input[inputpos]);
-						zend_long v = (type == 'i') ? (int) x : x;
+						zend_long v;
+						if (type == 'i') {
+							int x = *((unaligned_int*) &input[inputpos]);
+							v = x;
+						} else {
+							unsigned int x = *((unaligned_uint*) &input[inputpos]);
+							v = x;
+						}
 
 						ZVAL_LONG(&val, v);
 						zend_symtable_update(Z_ARRVAL_P(return_value), real_name, &val);

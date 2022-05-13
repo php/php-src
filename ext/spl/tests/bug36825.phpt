@@ -5,7 +5,7 @@ Bug #36825 (Exceptions thrown in ArrayObject::offsetGet cause segfault)
 
 class foo extends ArrayObject
 {
-    public function offsetGet($key)
+    public function offsetGet($key): mixed
     {
         echo __METHOD__ . "($key)\n";
         throw new Exception("hi");

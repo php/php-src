@@ -1,5 +1,7 @@
 --TEST--
 Bug #80800: imap_open() fails when the flags parameter includes CL_EXPUNGE
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');

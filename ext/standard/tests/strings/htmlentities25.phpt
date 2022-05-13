@@ -4,10 +4,8 @@ htmlentities() should not be influenced by mb_internal_encoding()
 default_charset=
 internal_encoding=
 mbstring.internal_encoding=ISO-8859-1
---SKIPIF--
-<?php
-    extension_loaded("mbstring") or die("skip mbstring not available\n");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

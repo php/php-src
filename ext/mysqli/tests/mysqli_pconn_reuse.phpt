@@ -1,10 +1,11 @@
 --TEST--
 mysqli_pconnect() - reusing/caching persistent connections - TODO
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
 die("skip TODO - we need to add a user level way to check if CHANGE_USER gets called by pconnect");
 
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

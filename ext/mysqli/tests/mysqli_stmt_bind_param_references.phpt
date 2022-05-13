@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_bind_param() - playing with references
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

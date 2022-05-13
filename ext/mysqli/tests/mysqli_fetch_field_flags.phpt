@@ -1,13 +1,12 @@
 --TEST--
 mysqli_fetch_field() - flags/field->flags
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('skipifconnectfailure.inc');
-
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-        die(printf("skip: [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50041)
     die("skip: Due to many MySQL Server differences, the test requires 5.0.41+");
@@ -16,7 +15,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
 /* TODO: mysqli.c needs to export a few more constants - see all the defined() calls! */
 
@@ -219,7 +218,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 done!

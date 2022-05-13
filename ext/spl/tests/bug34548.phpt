@@ -10,7 +10,7 @@ class Collection extends ArrayObject
         foreach($dataArray as $value) $this->append($value);
     }
 
-    public function offsetSet($index, $value)
+    public function offsetSet($index, $value): void
     {
         parent::offsetSet($index, $value);
     }

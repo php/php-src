@@ -1,0 +1,12 @@
+name: Verify generated files are up to date
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        [[ "$OSTYPE" == "darwin"* ]] && export PATH="/usr/local/opt/bison/bin:$PATH"
+        scripts/dev/genfiles
+        Zend/zend_vm_gen.php
+        build/gen_stub.php -f
+        git add . -Nu && git diff --exit-code

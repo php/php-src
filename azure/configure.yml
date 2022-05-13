@@ -50,12 +50,19 @@ steps:
         --enable-sysvmsg \
         --with-ffi \
         --enable-zend-test \
+        --enable-dl-test=shared \
         --with-ldap \
         --with-ldap-sasl \
         --with-password-argon2 \
         --with-mhash \
         --with-sodium \
         --enable-dba \
+        --with-cdb \
+        --enable-flatfile \
+        --enable-inifile \
+        --with-tcadb \
+        --with-lmdb \
+        --with-qdbm \
         --with-snmp \
         --with-unixODBC \
         --with-imap \

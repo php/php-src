@@ -29,7 +29,7 @@ void zend_dump_ht(HashTable *ht)
 	zend_ulong index;
 	zend_string *key;
 	zval *val;
-	int first = 1;
+	bool first = 1;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
 		if (first) {
@@ -169,7 +169,7 @@ static void zend_dump_range(const zend_ssa_range *r)
 
 static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_instanceof, uint32_t dump_flags)
 {
-	int first = 1;
+	bool first = 1;
 
 	fprintf(stderr, " [");
 	if (info & MAY_BE_GUARD) {
@@ -178,6 +178,10 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 	if (info & MAY_BE_UNDEF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
+	}
+	if (info & MAY_BE_INDIRECT) {
+		if (first) first = 0; else fprintf(stderr, ", ");
+		fprintf(stderr, "ind");
 	}
 	if (info & MAY_BE_REF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
@@ -235,11 +239,24 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		}
 		if (info & MAY_BE_ARRAY) {
 			if (first) first = 0; else fprintf(stderr, ", ");
+			if (!(info & MAY_BE_ARRAY_KEY_STRING) || (info & MAY_BE_PACKED_GUARD)) {
+				if (MAY_BE_PACKED_ONLY(info)) {
+					if (info & MAY_BE_PACKED_GUARD) {
+						fprintf(stderr, "!");
+					}
+					fprintf(stderr, "packed ");
+				} else if (MAY_BE_HASH_ONLY(info)) {
+					if (info & MAY_BE_PACKED_GUARD) {
+						fprintf(stderr, "!");
+					}
+					fprintf(stderr, "hash ");
+				}
+			}
 			fprintf(stderr, "array");
 			if ((info & MAY_BE_ARRAY_KEY_ANY) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
 			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
-				int afirst = 1;
+				bool afirst = 1;
 				fprintf(stderr, " [");
 				if (info & MAY_BE_ARRAY_KEY_LONG) {
 					if (afirst) afirst = 0; else fprintf(stderr, ", ");
@@ -252,7 +269,7 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 				fprintf(stderr, "]");
 			}
 			if (info & (MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF)) {
-				int afirst = 1;
+				bool afirst = 1;
 				fprintf(stderr, " of [");
 				if ((info & MAY_BE_ARRAY_OF_ANY) == MAY_BE_ARRAY_OF_ANY) {
 					if (afirst) afirst = 0; else fprintf(stderr, ", ");
@@ -716,11 +733,15 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 	}
 }
 
-static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+ZEND_API void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
 	const zend_ssa *ssa = NULL;
 	zend_ssa_op *ssa_op = NULL;
+
+	if (dump_flags & ZEND_DUMP_LINE_NUMBERS) {
+		fprintf(stderr, "L%04u ", opline->lineno);
+	}
 
 	len = fprintf(stderr, "%04u", (uint32_t)(opline - op_array->opcodes));
 	fprintf(stderr, "%*c", 5-len, ' ');
@@ -1173,7 +1194,7 @@ void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa,
 
 static void zend_dump_var_set(const zend_op_array *op_array, const char *name, zend_bitset set)
 {
-	int first = 1;
+	bool first = 1;
 	uint32_t i;
 
 	fprintf(stderr, "    ; %s = {", name);

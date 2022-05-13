@@ -1,10 +1,11 @@
 --TEST--
 Test function pcntl_rfork() with no wait flag.
+--EXTENSIONS--
+pcntl
+posix
 --SKIPIF--
 <?php
-	if (!extension_loaded('pcntl')) die('skip pcntl extension not available');
-	elseif (!extension_loaded('posix')) die('skip posix extension not available');
-  if (!function_exists('pcntl_rfork')) die('skip pcntl_rfork unavailable');
+	if (!function_exists('pcntl_rfork')) die('skip pcntl_rfork unavailable');
 ?>
 --FILE--
 <?php
@@ -15,7 +16,7 @@ if ($pid > 0) {
 	var_dump($pid);
 } else {
 	var_dump($pid);
-  sleep(1);
+  sleep(2); // as the child does not wait so we see its "pid"
 }
 ?>
 --EXPECTF--

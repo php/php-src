@@ -25,5 +25,9 @@ var_dump( gmstrftime($format, $timestamp) );
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with  Abbreviated month name format %h --
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(3) "Aug"

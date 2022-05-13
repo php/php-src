@@ -1,5 +1,7 @@
 --TEST--
 Test piecewise fetch of CLOBs equal to, and larger than PHP_OCI_LOB_BUFFER_SIZE
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs

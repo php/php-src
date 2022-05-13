@@ -4,12 +4,24 @@ Fiber status methods
 <?php
 
 $fiber = new Fiber(function (): void {
-    $fiber = Fiber::this();
+    $fiber = Fiber::getCurrent();
     echo "\nWithin Fiber:\n";
     var_dump($fiber->isStarted());
     var_dump($fiber->isRunning());
     var_dump($fiber->isSuspended());
     var_dump($fiber->isTerminated());
+
+    $nested = new Fiber(function () use ($fiber): void {
+        echo "\nWithin Nested Fiber:\n";
+        var_dump($fiber->isStarted());
+        var_dump($fiber->isRunning());
+        var_dump($fiber->isSuspended());
+        var_dump($fiber->isTerminated());
+        Fiber::suspend();
+    });
+
+    $nested->start();
+
     Fiber::suspend();
 });
 
@@ -44,6 +56,12 @@ bool(false)
 bool(false)
 
 Within Fiber:
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+Within Nested Fiber:
 bool(true)
 bool(true)
 bool(false)

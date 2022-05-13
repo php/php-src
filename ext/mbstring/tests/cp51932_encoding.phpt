@@ -1,7 +1,11 @@
 --TEST--
 Exhaustive test of CP51932 encoding verification and conversion
+--EXTENSIONS--
+mbstring
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+?>
 --FILE--
 <?php
 srand(2020); /* Make results consistent */
@@ -104,8 +108,16 @@ echo "CP51932 verification and conversion works on all invalid characters\n";
 findInvalidChars($fromUnicode, $invalidCodepoints, $unused, array_fill_keys(range(0, 0xFF), 2));
 convertAllInvalidChars($invalidCodepoints, $fromUnicode, 'UTF-16BE', 'CP51932', '%');
 echo "Unicode -> CP51932 conversion works on all invalid codepoints\n";
+
+// Test "long" illegal character markers
+mb_substitute_character("long");
+convertInvalidString("\x80", "%", "CP51932", "UTF-8");
+convertInvalidString("\xFE\xFF", "%", "CP51932", "UTF-8");
+
+echo "Done!\n";
 ?>
 --EXPECT--
 CP51932 verification and conversion works on all valid characters
 CP51932 verification and conversion works on all invalid characters
 Unicode -> CP51932 conversion works on all invalid codepoints
+Done!

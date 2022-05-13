@@ -4,7 +4,7 @@ ReflectionFiber basic tests
 <?php
 
 $callable = function (): void {
-    $reflection = new ReflectionFiber(Fiber::this());
+    $reflection = new ReflectionFiber(Fiber::getCurrent());
     echo "\nWithin Fiber:\n";
     var_dump($reflection->getExecutingFile());
     var_dump($reflection->getExecutingLine());

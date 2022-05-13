@@ -1,11 +1,7 @@
 --TEST--
 Test xml_set_notation_decl_handler function : basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-    print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 echo "Simple testcase for xml_parser_get_option() function\n";

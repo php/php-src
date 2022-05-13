@@ -94,6 +94,8 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function getStatusString(): string {}
 
+    public function clearError(): void {}
+
     /** @tentative-return-type */
     public function addEmptyDir(string $dirname, int $flags = 0): bool {}
 
@@ -104,7 +106,7 @@ class ZipArchive implements Countable
     public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE): bool {}
 
     /** @tentative-return-type */
-    public function replaceFile(string $filepath, string $index, int $start = 0, int $length = 0, int $flags = 0): bool {}
+    public function replaceFile(string $filepath, int $index, int $start = 0, int $length = 0, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function addGlob(string $pattern, int $flags = 0, array $options = []): array|false {}
@@ -184,6 +186,12 @@ class ZipArchive implements Countable
     public function getFromIndex(int $index, int $len = 0, int $flags = 0): string|false {}
 
     /** @return resource|false */
+    public function getStreamIndex(int $index, int $flags = 0) {}
+
+    /** @return resource|false */
+    public function getStreamName(string $name, int $flags = 0) {}
+
+	/** @return resource|false */
     public function getStream(string $name) {}
 
 #ifdef ZIP_OPSYS_DEFAULT

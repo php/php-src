@@ -135,6 +135,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 {
 	smart_str retval = {0};
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
+	bool unicode_warned = false;
 
 	do {
 		if (*prompt_spec == '\\') {
@@ -193,7 +194,16 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 				prompt_spec = prompt_end;
 			}
 		} else {
-			smart_str_appendc(&retval, *prompt_spec);
+			if (!(*prompt_spec & 0x80)) {
+				smart_str_appendc(&retval, *prompt_spec);
+			} else {
+				if (!unicode_warned) {
+					zend_error(E_WARNING,
+						"prompt contains unsupported unicode characters");
+					unicode_warned = true;
+				}
+				smart_str_appendc(&retval, '?');
+			}
 		}
 	} while (++prompt_spec && *prompt_spec);
 	smart_str_0(&retval);

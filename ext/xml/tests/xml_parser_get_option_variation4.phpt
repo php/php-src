@@ -1,11 +1,7 @@
 --TEST--
 xml_parser_get_option() - Test parameter not set
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) {
-    exit('Skip - XML extension not loaded');
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 

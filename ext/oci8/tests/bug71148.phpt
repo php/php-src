@@ -1,5 +1,7 @@
 --TEST--
 Bug #71448 (Binding reference overwritten on php7)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs

@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and doubles with thousend separators
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 $test = array(

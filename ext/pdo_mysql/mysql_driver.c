@@ -175,7 +175,7 @@ static bool mysql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", ZSTR_LEN(sql), ZSTR_VAL(sql));
+	PDO_DBG_INF_FMT("sql=%.*s", (int) ZSTR_LEN(sql), ZSTR_VAL(sql));
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -410,7 +410,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	bool bval;
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
@@ -464,7 +464,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			if (lval < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
- 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
 				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = lval;
@@ -486,7 +486,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 	PDO_DBG_ENTER("pdo_mysql_get_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("attr=%l", attr);
+	PDO_DBG_INF_FMT("attr=" ZEND_LONG_FMT, attr);
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, (char *)mysql_get_client_info());
@@ -544,7 +544,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->local_infile);
 			break;
 
-#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
 		case PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY:
 		{
 			const char* local_infile_directory = NULL;
@@ -765,7 +765,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		}
 
-#if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(PDO_USE_MYSQLND)
 		zend_string *local_infile_directory = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, NULL);
 		if (local_infile_directory && !php_check_open_basedir(ZSTR_VAL(local_infile_directory))) {
 			if (mysql_options(H->server, MYSQL_OPT_LOAD_DATA_LOCAL_DIR, (const char *)ZSTR_VAL(local_infile_directory))) {

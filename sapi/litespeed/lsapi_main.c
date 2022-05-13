@@ -97,7 +97,7 @@ static void init_sapi_from_env(sapi_module_struct *sapi_module)
 /* {{{ php_lsapi_startup */
 static int php_lsapi_startup(sapi_module_struct *sapi_module)
 {
-    if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+    if (php_module_startup(sapi_module, NULL)==FAILURE) {
         return FAILURE;
     }
     argv0 = sapi_module->executable_location;
@@ -1518,7 +1518,7 @@ int main( int argc, char * argv[] )
 
     lsapi_sapi_module.ini_defaults = sapi_lsapi_ini_defaults;
 
-    if (php_module_startup(&lsapi_sapi_module, &litespeed_module_entry, 1) == FAILURE) {
+    if (php_module_startup(&lsapi_sapi_module, &litespeed_module_entry) == FAILURE) {
 #ifdef ZTS
         tsrm_shutdown();
 #endif
@@ -1602,13 +1602,7 @@ int main( int argc, char * argv[] )
     return ret;
 }
 
-
 /*   LiteSpeed PHP module starts here */
-
-PHP_FUNCTION(litespeed_request_headers);
-PHP_FUNCTION(litespeed_response_headers);
-PHP_FUNCTION(apache_get_modules);
-PHP_FUNCTION(litespeed_finish_request);
 
 PHP_MINFO_FUNCTION(litespeed);
 

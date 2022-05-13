@@ -1,7 +1,7 @@
 --TEST--
 Cloning unconstructed numfmt
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

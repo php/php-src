@@ -1,9 +1,7 @@
 --TEST--
 openssl key from zval leaks
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $pub_key_id = false;

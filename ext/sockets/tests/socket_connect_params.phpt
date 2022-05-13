@@ -3,12 +3,8 @@ ext/sockets - socket_connect - test with empty parameters
 --CREDITS--
 Florian Anderiasch
 fa@php.net
---SKIPIF--
-<?php
-    if (!extension_loaded('sockets')) {
-        die('skip - sockets extension not available.');
-    }
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 

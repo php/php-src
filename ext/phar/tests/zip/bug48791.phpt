@@ -1,8 +1,8 @@
 --TEST--
 Phar: Bug #48791: open office documents always reported as corrupted by phar extension
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
+--EXTENSIONS--
+phar
+zlib
 --FILE--
 <?php
 echo file_get_contents('phar://' . __DIR__ . '/files/test.odt/content.xml'), "\n";

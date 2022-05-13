@@ -234,6 +234,9 @@ PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *hash, zva
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
 	zval tmp;
+	if (buf == NULL) {
+		return FAILURE;
+	}
 	array_init(zv);
 	while (*spec != '\0' && *spec != '.') {
 		char spec_ch = *spec;
@@ -860,7 +863,7 @@ PHP_FUNCTION(hash_algos)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
 		add_next_index_str(return_value, zend_string_copy(str));
 	} ZEND_HASH_FOREACH_END();
 }
@@ -877,7 +880,7 @@ PHP_FUNCTION(hash_hmac_algos)
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&php_hash_hashtable, str, ops) {
 		if (ops->is_crypto) {
 			add_next_index_str(return_value, zend_string_copy(str));
 		}
@@ -1391,6 +1394,11 @@ static void php_hashcontext_dtor(zend_object *obj) {
 }
 /* }}} */
 
+static void php_hashcontext_free(zend_object *obj) {
+	php_hashcontext_dtor(obj);
+	zend_object_std_dtor(obj);
+}
+
 /* {{{ php_hashcontext_clone */
 static zend_object *php_hashcontext_clone(zend_object *zobj) {
 	php_hashcontext_object *oldobj = php_hashcontext_from_object(zobj);
@@ -1631,7 +1639,7 @@ PHP_MINIT_FUNCTION(hash)
 	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
 	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
-	php_hashcontext_handlers.dtor_obj = php_hashcontext_dtor;
+	php_hashcontext_handlers.free_obj = php_hashcontext_free;
 	php_hashcontext_handlers.clone_obj = php_hashcontext_clone;
 
 #ifdef PHP_MHASH_BC
@@ -1658,7 +1666,7 @@ PHP_MINFO_FUNCTION(hash)
 	zend_string *str;
 	char *s = buffer, *e = s + sizeof(buffer);
 
-	ZEND_HASH_FOREACH_STR_KEY(&php_hash_hashtable, str) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&php_hash_hashtable, str) {
 		s += slprintf(s, e - s, "%s ", ZSTR_VAL(str));
 	} ZEND_HASH_FOREACH_END();
 	*s = 0;

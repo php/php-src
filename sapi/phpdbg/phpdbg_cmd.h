@@ -51,11 +51,11 @@ typedef enum {
 typedef struct _phpdbg_param phpdbg_param_t;
 struct _phpdbg_param {
 	phpdbg_param_type type;
-	long num;
+	zend_long num;
 	zend_ulong addr;
 	struct {
 		char *name;
-		long line;
+		zend_ulong line;
 	} file;
 	struct {
 		char *class;
@@ -175,7 +175,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 */
 #define phpdbg_default_switch_case() \
 	default: \
-		phpdbg_error("command", "type=\"wrongarg\" got=\"%s\"", "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param)); \
+		phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param)); \
 	break
 
 #endif /* PHPDBG_CMD_H */

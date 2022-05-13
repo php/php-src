@@ -1,3 +1,7 @@
+#ifdef __sun
+/* to enable 'new' ancillary data layout instead */
+# define _XPG4_2
+#endif
 #include "sockaddr_conv.h"
 #include "conversions.h"
 #include "sendrecvmsg.h" /* for ancillary registry */
@@ -226,9 +230,9 @@ static unsigned from_array_iterate(const zval *arr,
 			break;
 		}
 		i++;
-    } ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FOREACH_END();
 
-    return i -1;
+	return i -1;
 }
 
 /* Generic Aggregated conversions */
@@ -951,8 +955,8 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
 		zend_llist_remove_tail(&ctx->keys);
 	} ZEND_HASH_FOREACH_END();
 
-    msg->msg_control = control_buf;
-    msg->msg_controllen = cur_offset; /* not control_len, which may be larger */
+	msg->msg_control = control_buf;
+	msg->msg_controllen = cur_offset; /* not control_len, which may be larger */
 }
 static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context *ctx)
 {
@@ -1100,7 +1104,7 @@ static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_conte
 	msg->msg_iov = accounted_safe_ecalloc(num_elem, sizeof *msg->msg_iov, 0, ctx);
 	msg->msg_iovlen = (size_t)num_elem;
 
-    from_array_iterate(arr, from_zval_write_iov_array_aux, (void**)&msg, ctx);
+	from_array_iterate(arr, from_zval_write_iov_array_aux, (void**)&msg, ctx);
 }
 static void from_zval_write_controllen(const zval *elem, char *msghdr_c, ser_context *ctx)
 {
@@ -1297,13 +1301,20 @@ void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ctx)
 }
 #endif
 
-/* CONVERSIONS for struct ucred */
+/* CONVERSIONS for struct ucred/cmsgcred */
 #ifdef SO_PASSCRED
 static const field_descriptor descriptors_ucred[] = {
+#if defined(ANC_CREDS_UCRED)
 		{"pid", sizeof("pid"), 1, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
 		{"uid", sizeof("uid"), 1, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
 		/* assume the type gid_t is the same as uid_t: */
 		{"gid", sizeof("gid"), 1, offsetof(struct ucred, gid), from_zval_write_uid_t, to_zval_read_uid_t},
+#elif defined(ANC_CREDS_CMSGCRED)
+		{"pid", sizeof("pid"), 1, offsetof(struct cmsgcred, cmcred_pid), from_zval_write_pid_t, to_zval_read_pid_t},
+		{"uid", sizeof("uid"), 1, offsetof(struct cmsgcred, cmcred_uid), from_zval_write_uid_t, to_zval_read_uid_t},
+		/* assume the type gid_t is the same as uid_t: */
+		{"gid", sizeof("gid"), 1, offsetof(struct cmsgcred, cmcred_gid), from_zval_write_uid_t, to_zval_read_uid_t},
+#endif
 		{0}
 };
 void from_zval_write_ucred(const zval *container, char *ucred_c, ser_context *ctx)
@@ -1376,7 +1387,7 @@ void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
 		return;
 	}
 
-   from_array_iterate(arr, &from_zval_write_fd_array_aux, (void**)&int_arr, ctx);
+	from_array_iterate(arr, &from_zval_write_fd_array_aux, (void**)&int_arr, ctx);
 }
 void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 {

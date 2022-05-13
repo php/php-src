@@ -1,8 +1,9 @@
 --TEST--
 MySQL PDOStatement->execute()/fetch(), Non-SELECT
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -77,6 +78,8 @@ $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 __construct('%S', '%S', %s)
+
+Deprecated: Callables of the form ["MyPDO", "parent::__construct"] are deprecated in %s on line %d
 exec('DROP TABLE IF EXISTS test')
 exec('CREATE TABLE test(id INT)')
 exec('INSERT INTO test(id) VALUES (1), (2)')

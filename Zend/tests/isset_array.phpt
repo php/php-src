@@ -39,7 +39,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Deprecated: Implicit conversion from non-compatible float 0.6 to int in %s on line %d
+Deprecated: Implicit conversion from float 0.6 to int loses precision in %s on line %d
 bool(true)
 bool(false)
 bool(false)

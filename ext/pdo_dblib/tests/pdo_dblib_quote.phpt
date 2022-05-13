@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: Ensure quote function returns expected results
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 ?>
 --FILE--

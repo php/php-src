@@ -10,7 +10,7 @@ var_dump($fiber->getReturn());
 var_dump($fiber->isTerminated());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 NULL
 string(4) "test"

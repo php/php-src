@@ -3,12 +3,8 @@ unset() CV 5 (indirect unset() of global variable in session_start())
 --INI--
 session.auto_start=0
 session.save_handler=files
---SKIPIF--
-<?php
-
-include(__DIR__.'/../../ext/session/tests/skipif.inc');
-
-?>
+--EXTENSIONS--
+session
 --FILE--
 <?php
 $_SESSION = "ok\n";

@@ -1,34 +1,15 @@
 --TEST--
 mysqli_options()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
 require_once 'skipifconnectfailure.inc';
 
 ?>
 --FILE--
 <?php
 require_once "connect.inc";
-
-$valid_options = array(
-    MYSQLI_READ_DEFAULT_GROUP => "MYSQLI_READ_DEFAULT_GROUP",
-    MYSQLI_READ_DEFAULT_FILE => "MYSQLI_READ_DEFAULT_FILE",
-    MYSQLI_OPT_CONNECT_TIMEOUT => "MYSQLI_OPT_CONNECT_TIMEOUT",
-    MYSQLI_OPT_LOCAL_INFILE => "MYSQLI_OPT_LOCAL_INFILE",
-    MYSQLI_INIT_COMMAND => "MYSQLI_INIT_COMMAND",
-    MYSQLI_SET_CHARSET_NAME => "MYSQLI_SET_CHARSET_NAME",
-    MYSQLI_OPT_SSL_VERIFY_SERVER_CERT => "MYSQLI_OPT_SSL_VERIFY_SERVER_CERT",
-);
-
-if ($IS_MYSQLND && defined('MYSQLI_OPT_NET_CMD_BUFFER_SIZE')) {
-    $valid_options[] = constant('MYSQLI_OPT_NET_CMD_BUFFER_SIZE');
-}
-if ($IS_MYSQLND && defined('MYSQLI_OPT_NET_READ_BUFFER_SIZE')) {
-    $valid_options[] = constant('MYSQLI_OPT_NET_READ_BUFFER_SIZE');
-}
-if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
-    $valid_options[] = constant('MYSQLI_OPT_INT_AND_FLOAT_NATIVE');
-}
 
 $link = mysqli_init();
 
@@ -75,10 +56,10 @@ mysqli_free_result($res);
 mysqli_close($link2);
 
 foreach ($charsets as $charset) {
-    $k = $charset['Charset'];
     /* The server currently 17.07.2007 can't handle data sent in ucs2 */
     /* The server currently 16.08.2010 can't handle data sent in utf16 and utf32 */
-    if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32') {
+    /* As of MySQL 8.0.28, `SHOW CHARACTER SET` contains utf8mb3, but that is not yet supported by mysqlnd */
+    if ($charset['Charset'] == 'ucs2' || $charset['Charset'] == 'utf16' || $charset['Charset'] == 'utf32' || $charset['Charset'] == 'utf8mb3') {
         continue;
     }
     if (true !== mysqli_options($link, MYSQLI_SET_CHARSET_NAME, $charset['Charset'])) {
@@ -107,9 +88,12 @@ try {
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $link = mysqli_init();
 
-// test for error reporting
+// test for error reporting - only mysqlnd reports errors
 try {
     mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "foobar");
+    if (!$IS_MYSQLND) {
+        print "Unknown character set\n";
+    }
 } catch (mysqli_sql_exception $e) {
     echo $e->getMessage() . "\n";
 }

@@ -1,11 +1,7 @@
 --TEST--
 Test function feof() by calling it with its expected arguments
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 // note that gzeof is an alias to gzeof. parameter checking tests will be

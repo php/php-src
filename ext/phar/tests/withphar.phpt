@@ -1,7 +1,7 @@
 --TEST--
 Phar: phar run with ext/phar with default stub
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 include __DIR__ . '/files/nophar.phar';

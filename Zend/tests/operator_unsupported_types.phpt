@@ -453,7 +453,7 @@ Unsupported operand types: bool % array
 Unsupported operand types: array % int
 Unsupported operand types: int % array
 Unsupported operand types: array % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
@@ -469,7 +469,7 @@ Unsupported operand types: bool % stdClass
 Unsupported operand types: stdClass % int
 Unsupported operand types: int % stdClass
 Unsupported operand types: stdClass % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % stdClass
 Unsupported operand types: stdClass % string
 Unsupported operand types: string % stdClass
@@ -485,7 +485,7 @@ Unsupported operand types: bool % resource
 Unsupported operand types: resource % int
 Unsupported operand types: int % resource
 Unsupported operand types: resource % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
@@ -501,7 +501,7 @@ Unsupported operand types: bool % string
 Unsupported operand types: string % int
 Unsupported operand types: int % string
 Unsupported operand types: string % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % string
 Unsupported operand types: string % string
 Unsupported operand types: string % string
@@ -609,7 +609,7 @@ Unsupported operand types: bool << array
 Unsupported operand types: array << int
 Unsupported operand types: int << array
 Unsupported operand types: array << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
@@ -625,7 +625,7 @@ Unsupported operand types: bool << stdClass
 Unsupported operand types: stdClass << int
 Unsupported operand types: int << stdClass
 Unsupported operand types: stdClass << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << stdClass
 Unsupported operand types: stdClass << string
 Unsupported operand types: string << stdClass
@@ -641,7 +641,7 @@ Unsupported operand types: bool << resource
 Unsupported operand types: resource << int
 Unsupported operand types: int << resource
 Unsupported operand types: resource << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
@@ -657,7 +657,7 @@ Unsupported operand types: bool << string
 Unsupported operand types: string << int
 Unsupported operand types: int << string
 Unsupported operand types: string << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << string
 Unsupported operand types: string << string
 Unsupported operand types: string << string
@@ -689,7 +689,7 @@ Unsupported operand types: bool >> array
 Unsupported operand types: array >> int
 Unsupported operand types: int >> array
 Unsupported operand types: array >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
@@ -705,7 +705,7 @@ Unsupported operand types: bool >> stdClass
 Unsupported operand types: stdClass >> int
 Unsupported operand types: int >> stdClass
 Unsupported operand types: stdClass >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> stdClass
 Unsupported operand types: stdClass >> string
 Unsupported operand types: string >> stdClass
@@ -721,7 +721,7 @@ Unsupported operand types: bool >> resource
 Unsupported operand types: resource >> int
 Unsupported operand types: int >> resource
 Unsupported operand types: resource >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
@@ -737,7 +737,7 @@ Unsupported operand types: bool >> string
 Unsupported operand types: string >> int
 Unsupported operand types: int >> string
 Unsupported operand types: string >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> string
 Unsupported operand types: string >> string
 Unsupported operand types: string >> string
@@ -769,7 +769,7 @@ Unsupported operand types: bool & array
 Unsupported operand types: array & int
 Unsupported operand types: int & array
 Unsupported operand types: array & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
@@ -813,7 +813,7 @@ Unsupported operand types: bool & string
 Unsupported operand types: string & int
 Unsupported operand types: int & string
 Unsupported operand types: string & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & string
 No error for "foo" & "123"
 No error for "123" & "foo"
@@ -844,7 +844,7 @@ Unsupported operand types: bool | array
 Unsupported operand types: array | int
 Unsupported operand types: int | array
 Unsupported operand types: array | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
@@ -888,7 +888,7 @@ Unsupported operand types: bool | string
 Unsupported operand types: string | int
 Unsupported operand types: int | string
 Unsupported operand types: string | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | string
 No error for "foo" | "123"
 No error for "123" | "foo"
@@ -919,7 +919,7 @@ Unsupported operand types: bool ^ array
 Unsupported operand types: array ^ int
 Unsupported operand types: int ^ array
 Unsupported operand types: array ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
@@ -963,7 +963,7 @@ Unsupported operand types: bool ^ string
 Unsupported operand types: string ^ int
 Unsupported operand types: int ^ string
 Unsupported operand types: string ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ string
 No error for "foo" ^ "123"
 No error for "123" ^ "foo"
@@ -1467,7 +1467,7 @@ Unsupported operand types: bool % array
 Unsupported operand types: array % int
 Unsupported operand types: int % array
 Unsupported operand types: array % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % array
 Unsupported operand types: array % string
 Unsupported operand types: string % array
@@ -1483,7 +1483,7 @@ Unsupported operand types: bool % stdClass
 Unsupported operand types: stdClass % int
 Unsupported operand types: int % stdClass
 Unsupported operand types: stdClass % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % stdClass
 Unsupported operand types: stdClass % string
 Unsupported operand types: string % stdClass
@@ -1499,7 +1499,7 @@ Unsupported operand types: bool % resource
 Unsupported operand types: resource % int
 Unsupported operand types: int % resource
 Unsupported operand types: resource % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % resource
 Unsupported operand types: resource % string
 Unsupported operand types: string % resource
@@ -1515,7 +1515,7 @@ Unsupported operand types: bool % string
 Unsupported operand types: string % int
 Unsupported operand types: int % string
 Unsupported operand types: string % float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float % string
 Unsupported operand types: string % string
 Unsupported operand types: string % string
@@ -1623,7 +1623,7 @@ Unsupported operand types: bool << array
 Unsupported operand types: array << int
 Unsupported operand types: int << array
 Unsupported operand types: array << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << array
 Unsupported operand types: array << string
 Unsupported operand types: string << array
@@ -1639,7 +1639,7 @@ Unsupported operand types: bool << stdClass
 Unsupported operand types: stdClass << int
 Unsupported operand types: int << stdClass
 Unsupported operand types: stdClass << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << stdClass
 Unsupported operand types: stdClass << string
 Unsupported operand types: string << stdClass
@@ -1655,7 +1655,7 @@ Unsupported operand types: bool << resource
 Unsupported operand types: resource << int
 Unsupported operand types: int << resource
 Unsupported operand types: resource << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << resource
 Unsupported operand types: resource << string
 Unsupported operand types: string << resource
@@ -1671,7 +1671,7 @@ Unsupported operand types: bool << string
 Unsupported operand types: string << int
 Unsupported operand types: int << string
 Unsupported operand types: string << float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float << string
 Unsupported operand types: string << string
 Unsupported operand types: string << string
@@ -1703,7 +1703,7 @@ Unsupported operand types: bool >> array
 Unsupported operand types: array >> int
 Unsupported operand types: int >> array
 Unsupported operand types: array >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> array
 Unsupported operand types: array >> string
 Unsupported operand types: string >> array
@@ -1719,7 +1719,7 @@ Unsupported operand types: bool >> stdClass
 Unsupported operand types: stdClass >> int
 Unsupported operand types: int >> stdClass
 Unsupported operand types: stdClass >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> stdClass
 Unsupported operand types: stdClass >> string
 Unsupported operand types: string >> stdClass
@@ -1735,7 +1735,7 @@ Unsupported operand types: bool >> resource
 Unsupported operand types: resource >> int
 Unsupported operand types: int >> resource
 Unsupported operand types: resource >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> resource
 Unsupported operand types: resource >> string
 Unsupported operand types: string >> resource
@@ -1751,7 +1751,7 @@ Unsupported operand types: bool >> string
 Unsupported operand types: string >> int
 Unsupported operand types: int >> string
 Unsupported operand types: string >> float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float >> string
 Unsupported operand types: string >> string
 Unsupported operand types: string >> string
@@ -1783,7 +1783,7 @@ Unsupported operand types: bool & array
 Unsupported operand types: array & int
 Unsupported operand types: int & array
 Unsupported operand types: array & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & array
 Unsupported operand types: array & string
 Unsupported operand types: string & array
@@ -1799,7 +1799,7 @@ Unsupported operand types: bool & stdClass
 Unsupported operand types: stdClass & int
 Unsupported operand types: int & stdClass
 Unsupported operand types: stdClass & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & stdClass
 Unsupported operand types: stdClass & string
 Unsupported operand types: string & stdClass
@@ -1815,7 +1815,7 @@ Unsupported operand types: bool & resource
 Unsupported operand types: resource & int
 Unsupported operand types: int & resource
 Unsupported operand types: resource & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & resource
 Unsupported operand types: resource & string
 Unsupported operand types: string & resource
@@ -1831,7 +1831,7 @@ Unsupported operand types: bool & string
 Unsupported operand types: string & int
 Unsupported operand types: int & string
 Unsupported operand types: string & float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float & string
 No error for "foo" &= "123"
 No error for "123" &= "foo"
@@ -1862,7 +1862,7 @@ Unsupported operand types: bool | array
 Unsupported operand types: array | int
 Unsupported operand types: int | array
 Unsupported operand types: array | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | array
 Unsupported operand types: array | string
 Unsupported operand types: string | array
@@ -1878,7 +1878,7 @@ Unsupported operand types: bool | stdClass
 Unsupported operand types: stdClass | int
 Unsupported operand types: int | stdClass
 Unsupported operand types: stdClass | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | stdClass
 Unsupported operand types: stdClass | string
 Unsupported operand types: string | stdClass
@@ -1894,7 +1894,7 @@ Unsupported operand types: bool | resource
 Unsupported operand types: resource | int
 Unsupported operand types: int | resource
 Unsupported operand types: resource | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | resource
 Unsupported operand types: resource | string
 Unsupported operand types: string | resource
@@ -1910,7 +1910,7 @@ Unsupported operand types: bool | string
 Unsupported operand types: string | int
 Unsupported operand types: int | string
 Unsupported operand types: string | float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float | string
 No error for "foo" |= "123"
 No error for "123" |= "foo"
@@ -1941,7 +1941,7 @@ Unsupported operand types: bool ^ array
 Unsupported operand types: array ^ int
 Unsupported operand types: int ^ array
 Unsupported operand types: array ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ array
 Unsupported operand types: array ^ string
 Unsupported operand types: string ^ array
@@ -1957,7 +1957,7 @@ Unsupported operand types: bool ^ stdClass
 Unsupported operand types: stdClass ^ int
 Unsupported operand types: int ^ stdClass
 Unsupported operand types: stdClass ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ stdClass
 Unsupported operand types: stdClass ^ string
 Unsupported operand types: string ^ stdClass
@@ -1973,7 +1973,7 @@ Unsupported operand types: bool ^ resource
 Unsupported operand types: resource ^ int
 Unsupported operand types: int ^ resource
 Unsupported operand types: resource ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ resource
 Unsupported operand types: resource ^ string
 Unsupported operand types: string ^ resource
@@ -1989,7 +1989,7 @@ Unsupported operand types: bool ^ string
 Unsupported operand types: string ^ int
 Unsupported operand types: int ^ string
 Unsupported operand types: string ^ float
-Warning: Implicit conversion from non-compatible float 3.5 to int
+Warning: Implicit conversion from float 3.5 to int loses precision
 Unsupported operand types: float ^ string
 No error for "foo" ^= "123"
 No error for "123" ^= "foo"

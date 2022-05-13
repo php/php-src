@@ -65,7 +65,10 @@ class CertificateGenerator
             ),
             null,
             $this->caKey,
-            2
+            2,
+            [
+                'config' => self::CONFIG,
+            ]
         );
     }
 
@@ -101,6 +104,7 @@ class CertificateGenerator
 [ req ]
 distinguished_name = req_distinguished_name
 default_md = sha256
+default_bits = 1024
 
 [ req_distinguished_name ]
 
@@ -124,8 +128,9 @@ CONFIG;
             ];
 
             $this->lastKey = self::generateKey($keyLength);
+            $csr = openssl_csr_new($dn, $this->lastKey, $config);
             $this->lastCert = openssl_csr_sign(
-                openssl_csr_new($dn, $this->lastKey, $config),
+                $csr,
                 $this->ca,
                 $this->caKey,
                 /* days */ 2,
@@ -139,7 +144,7 @@ CONFIG;
             openssl_x509_export($this->lastCert, $certText);
 
             $keyText = '';
-            openssl_pkey_export($this->lastKey, $keyText);
+            openssl_pkey_export($this->lastKey, $keyText, null, $config);
 
             file_put_contents($file, $certText . PHP_EOL . $keyText);
         } finally {

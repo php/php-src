@@ -1,11 +1,7 @@
 --TEST--
 Bug #40854 (imap_mail_compose() creates an invalid terminator for multipart e-mails)
---SKIPIF--
-<?php
-        if (!extension_loaded("imap")) {
-                die("skip imap extension not available");
-        }
-?>
+--EXTENSIONS--
+imap
 --FILE--
 <?php
 $envelope["from"]= "joe@example.com";

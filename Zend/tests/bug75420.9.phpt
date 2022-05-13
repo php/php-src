@@ -3,10 +3,10 @@ Bug #75420.9 (Indirect modification of magic method argument)
 --FILE--
 <?php
 class Test implements ArrayAccess {
-    public function offsetExists($x) { $GLOBALS["name"] = 24; return true; }
-    public function offsetGet($x) { var_dump($x); return 42; }
-    public function offsetSet($x, $y) { }
-    public function offsetUnset($x) { }
+    public function offsetExists($x): bool { $GLOBALS["name"] = 24; return true; }
+    public function offsetGet($x): mixed { var_dump($x); return 42; }
+    public function offsetSet($x, $y): void { }
+    public function offsetUnset($x): void { }
 }
 
 $obj = new Test;

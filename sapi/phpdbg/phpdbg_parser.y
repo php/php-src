@@ -172,7 +172,7 @@ full_expression
 %%
 
 static int yyerror(const char *msg) {
-	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
+	phpdbg_error("Parse Error: %s", msg);
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);

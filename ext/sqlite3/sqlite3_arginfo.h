@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1d18ea0592ade188628e23fa6a65c06b36837c44 */
+ * Stub hash: c14e6403cfd75718156b409dc476f088aa0b5540 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -276,6 +276,7 @@ static zend_class_entry *register_class_SQLite3(void)
 
 	INIT_CLASS_ENTRY(ce, "SQLite3", class_SQLite3_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -286,6 +287,7 @@ static zend_class_entry *register_class_SQLite3Stmt(void)
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Stmt", class_SQLite3Stmt_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }
@@ -296,6 +298,7 @@ static zend_class_entry *register_class_SQLite3Result(void)
 
 	INIT_CLASS_ENTRY(ce, "SQLite3Result", class_SQLite3Result_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

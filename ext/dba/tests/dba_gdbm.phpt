@@ -1,5 +1,7 @@
 --TEST--
 DBA GDBM handler test
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     $handler = 'gdbm';

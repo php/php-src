@@ -8,6 +8,8 @@ session.gc_divisor=1000
 session.gc_maxlifetime=300
 session.save_path=
 session.name=PHPSESSID
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

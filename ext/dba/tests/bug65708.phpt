@@ -1,5 +1,7 @@
 --TEST--
 Bug #65708 (dba functions cast $key param to string in-place, bypassing copy on write)
+--EXTENSIONS--
+dba
 --SKIPIF--
 <?php
     require_once(__DIR__ .'/skipif.inc');

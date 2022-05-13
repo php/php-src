@@ -1,7 +1,7 @@
 --TEST--
 CURL file uploading
---SKIPIF--
-<?php include 'skipif.inc'; ?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

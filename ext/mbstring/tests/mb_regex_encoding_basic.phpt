@@ -1,8 +1,9 @@
 --TEST--
 Test mb_regex_encoding() function : basic functionality
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
 function_exists('mb_regex_encoding') or die("skip mb_regex_encoding() is not available in this build");
 ?>
 --FILE--

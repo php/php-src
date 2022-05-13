@@ -1,5 +1,7 @@
 --TEST--
 Bug #74892 Url Rewriting (trans_sid) not working on urls that start with #
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

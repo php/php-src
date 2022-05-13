@@ -44,7 +44,7 @@ if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	return FAILURE; \
 } else { \
 	CHECK_STATUS(statusval, quiet);\
-    p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
+	p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
 }
 
 #define MYSQLI_GET_RESULT(statusval) \
@@ -173,8 +173,8 @@ static int link_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
- 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
- 	ZEND_ASSERT(mysql);
+	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ZEND_ASSERT(mysql);
 
 	rc = mysql_affected_rows(mysql->mysql);
 
@@ -200,7 +200,7 @@ static int link_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
- 	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	if (mysql) {
 		array_init(retval);
@@ -260,7 +260,7 @@ static int result_type_read(mysqli_object *obj, zval *retval, bool quiet)
 	MYSQL_RES *p;
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
- 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	ZEND_ASSERT(p);
 	ZVAL_LONG(retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
@@ -312,7 +312,7 @@ static int stmt_id_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
- 	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	ZEND_ASSERT(p);
 	ZVAL_LONG(retval, mysqli_stmt_get_id(p->stmt));
@@ -329,7 +329,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
- 	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	ZEND_ASSERT(p);
 	rc = mysql_stmt_affected_rows(p->stmt);
@@ -356,7 +356,7 @@ static int stmt_error_list_read(mysqli_object *obj, zval *retval, bool quiet)
 
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 
- 	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	if (stmt && stmt->stmt) {
 		array_init(retval);
 #ifdef MYSQLI_USE_MYSQLND

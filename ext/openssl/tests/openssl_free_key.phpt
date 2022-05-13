@@ -2,10 +2,10 @@
 void openssl_free_key ( resource $key_identifier );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl"))
-    die("skip");
 if (!@openssl_pkey_new())
     die("skip cannot create private key");
 ?>

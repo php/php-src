@@ -1,11 +1,12 @@
 --TEST--
 mysqli_stmt_execute() - bind in execute
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
 require_once 'skipifconnectfailure.inc';
-if (!stristr(mysqli_get_client_info(), 'mysqlnd')) {
-    die("skip: only available in mysqlnd");
+if (!$IS_MYSQLND) {
+    die("skip only available in mysqlnd");
 }
 ?>
 --FILE--

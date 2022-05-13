@@ -1,9 +1,10 @@
 --TEST--
 http-stream test
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-if (!extension_loaded("dom")) die("skip dom extension is not present");
 require __DIR__.'/../http/server.inc';
 http_server_skipif();
 --INI--

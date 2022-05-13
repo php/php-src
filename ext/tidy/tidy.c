@@ -105,15 +105,15 @@
 	}
 
 #define ADD_PROPERTY_STRINGL(_table, _key, _string, _len) \
-   { \
-       zval tmp; \
-       if (_string) { \
-           ZVAL_STRINGL(&tmp, (char *)_string, _len); \
-       } else { \
-           ZVAL_EMPTY_STRING(&tmp); \
-       } \
-       zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-   }
+	{ \
+		zval tmp; \
+		if (_string) { \
+			ZVAL_STRINGL(&tmp, (char *)_string, _len); \
+		} else { \
+			ZVAL_EMPTY_STRING(&tmp); \
+		} \
+		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
+	}
 
 #define ADD_PROPERTY_LONG(_table, _key, _long) \
 	{ \
@@ -130,7 +130,7 @@
 	}
 
 #define ADD_PROPERTY_BOOL(_table, _key, _bool) \
-    { \
+	{ \
 		zval tmp; \
 		ZVAL_BOOL(&tmp, _bool); \
 		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
@@ -774,13 +774,14 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 	zval *opt_val;
 	zend_string *opt_name;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
-		if (opt_name == NULL) {
-			continue;
-		}
-		_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val);
-	} ZEND_HASH_FOREACH_END();
-
+	if (!HT_IS_PACKED(ht_options)) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
+			if (opt_name == NULL) {
+				continue;
+			}
+			_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val);
+		} ZEND_HASH_FOREACH_END();
+	}
 	return SUCCESS;
 }
 
@@ -1305,7 +1306,7 @@ PHP_FUNCTION(tidy_getopt)
 
 	if (!opt) {
 		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
-    	RETURN_THROWS();
+		RETURN_THROWS();
 	}
 
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt);
@@ -1363,7 +1364,7 @@ PHP_METHOD(tidy, __construct)
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 			zend_value_error("Input string is too long");
-    		RETURN_THROWS();
+			RETURN_THROWS();
 		}
 
 		TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
@@ -1401,7 +1402,7 @@ PHP_METHOD(tidy, parseFile)
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 		zend_value_error("Input string is too long");
-    	RETURN_THROWS();
+		RETURN_THROWS();
 	}
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);

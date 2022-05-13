@@ -60,7 +60,7 @@ void intl_convert_utf8_to_utf16(
 	*status = U_ZERO_ERROR;
 
 	if(src_len > INT32_MAX) {
-		/* we can not fit this string */
+		/* we cannot fit this string */
 		*status = U_BUFFER_OVERFLOW_ERROR;
 		return;
 	}

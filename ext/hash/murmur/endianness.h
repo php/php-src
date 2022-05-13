@@ -2,7 +2,7 @@ static const union {
   uint8_t u8[2];
   uint16_t u16;
 } EndianMix = {{ 1, 0 }};
-FORCE_INLINE int IsBigEndian()
+FORCE_INLINE int IsBigEndian(void)
 {
   // Constant-folded by the compiler.
   return EndianMix.u16 != 1;

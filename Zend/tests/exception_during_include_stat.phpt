@@ -4,6 +4,7 @@ Make sure exceptions during include/require stating are properly propagated
 <?php
 
 class StreamWrapper {
+    public $context;
     public function url_stat($path, $flags) {
         throw new Exception('stat failed');
     }

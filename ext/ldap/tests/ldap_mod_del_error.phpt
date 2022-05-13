@@ -3,8 +3,9 @@ ldap_mod_del() - ldap_mod_del() operations that should fail
 --CREDITS--
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
+--EXTENSIONS--
+ldap
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
@@ -27,7 +28,7 @@ require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
-ldap_delete($link, "dc=my-domain,$base");
+@ldap_delete($link, "dc=my-domain,$base");
 ?>
 --EXPECTF--
 Warning: ldap_mod_del(): Modify: No such object in %s on line %d

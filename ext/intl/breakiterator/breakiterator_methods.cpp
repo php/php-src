@@ -63,7 +63,6 @@ static void _breakiter_factory(const char *func_name,
 
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status);
-	// Todo check if this can happen?
 	if (U_FAILURE(status)) {
 		spprintf(&msg, 0, "%s: error creating BreakIterator",
 				func_name);
@@ -174,7 +173,6 @@ static void _breakiter_no_args_ret_int32(
 		int32_t (BreakIterator::*func)(),
 		INTERNAL_FUNCTION_PARAMETERS)
 {
-	char	*msg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
 

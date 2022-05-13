@@ -1,9 +1,9 @@
 --TEST--
 Verify that the Driver Name attribute is set
+--EXTENSIONS--
+oci8
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
-
-require(__DIR__."/connect.inc");
+<?php require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip as Output might vary with DRCP");
 
@@ -57,11 +57,11 @@ function get_attr($conn)
 ?>
 --EXPECT--
 **Test 1.1 - Default values for the attribute **************
-The value of DRIVER_NAME is PHP OCI8 : 3.0.1
+The value of DRIVER_NAME is PHP OCI8 : 3.2.1
 
 ***Test 1.2 - Get the values from different connections **************
 Testing with oci_pconnect()
-The value of DRIVER_NAME is PHP OCI8 : 3.0.1
+The value of DRIVER_NAME is PHP OCI8 : 3.2.1
 Testing with oci_new_connect()
-The value of DRIVER_NAME is PHP OCI8 : 3.0.1
+The value of DRIVER_NAME is PHP OCI8 : 3.2.1
 Done

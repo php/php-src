@@ -1,5 +1,7 @@
 --TEST--
 rewriter correctly handles attribute names which contain dashes
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

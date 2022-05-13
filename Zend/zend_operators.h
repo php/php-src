@@ -172,19 +172,17 @@ static zend_always_inline const char *
 zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
 	const char *p = haystack;
-	ptrdiff_t off_p;
 	size_t off_s;
 
-	if (needle_len == 0) {
-		return p;
-	}
+	ZEND_ASSERT(end >= p);
 
 	if (needle_len == 1) {
 		return (const char *)memchr(p, *needle, (end-p));
+	} else if (UNEXPECTED(needle_len == 0)) {
+		return p;
 	}
 
-	off_p = end - haystack;
-	off_s = (off_p > 0) ? (size_t)off_p : 0;
+	off_s = (size_t)(end - p);
 
 	if (needle_len > off_s) {
 		return NULL;
@@ -195,16 +193,13 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 		end -= needle_len;
 
 		while (p <= end) {
-			if ((p = (const char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-				if (!memcmp(needle+1, p+1, needle_len-2)) {
+			if ((p = (const char *)memchr(p, *needle, (end-p+1)))) {
+				if (ne == p[needle_len-1] && !memcmp(needle+1, p+1, needle_len-2)) {
 					return p;
 				}
-			}
-
-			if (p == NULL) {
+			} else {
 				return NULL;
 			}
-
 			p++;
 		}
 
@@ -216,17 +211,22 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
+#if defined(HAVE_MEMRCHR) && !defined(i386)
+	/* On x86 memrchr() doesn't use SSE/AVX, so inlined version is faster */
+	return (const void*)memrchr(s, c, n);
+#else
 	const unsigned char *e;
 	if (0 == n) {
 		return NULL;
 	}
 
 	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
-		if (*e == (const unsigned char)c) {
+		if (*e == (unsigned char)c) {
 			return (const void *)e;
 		}
 	}
 	return NULL;
+#endif
 }
 
 
@@ -433,18 +433,28 @@ ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2);
 
+ZEND_API extern const unsigned char zend_tolower_map[256];
+ZEND_API extern const unsigned char zend_toupper_map[256];
+
+#define zend_tolower_ascii(c) (zend_tolower_map[(unsigned char)(c)])
+#define zend_toupper_ascii(c) (zend_toupper_map[(unsigned char)(c)])
+
 ZEND_API void         ZEND_FASTCALL zend_str_tolower(char *str, size_t length);
+ZEND_API void         ZEND_FASTCALL zend_str_toupper(char *str, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_copy(char *dest, const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_copy(char *dest, const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup(const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_dup(const char *source, size_t length);
 ZEND_API char*        ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t length);
+ZEND_API char*        ZEND_FASTCALL zend_str_toupper_dup_ex(const char *source, size_t length);
 ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, bool persistent);
+ZEND_API zend_string* ZEND_FASTCALL zend_string_toupper_ex(zend_string *str, bool persistent);
 
 #define zend_string_tolower(str) zend_string_tolower_ex(str, 0)
+#define zend_string_toupper(str) zend_string_toupper_ex(str, 0)
 
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strcasecmp(zval *s1, zval *s2);
-ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int ZEND_FASTCALL zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncmp(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp(const char *s1, size_t len1, const char *s2, size_t len2);
@@ -471,6 +481,8 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 #define convert_scalar_to_number_ex(zv) convert_scalar_to_number(zv)
 
 ZEND_API void zend_update_current_locale(void);
+
+ZEND_API void zend_reset_lc_ctype_locale(void);
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
@@ -800,11 +812,6 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 #endif
 }
 
-static zend_always_inline zend_result fast_div_function(zval *result, zval *op1, zval *op2)
-{
-	return div_function(result, op1, op2);
-}
-
 static zend_always_inline bool zend_fast_equal_strings(zend_string *s1, zend_string *s2)
 {
 	if (s1 == s2) {
@@ -899,6 +906,7 @@ ZEND_API zend_string* ZEND_FASTCALL zend_long_to_str(zend_long num);
 ZEND_API zend_string* ZEND_FASTCALL zend_ulong_to_str(zend_ulong num);
 ZEND_API zend_string* ZEND_FASTCALL zend_u64_to_str(uint64_t num);
 ZEND_API zend_string* ZEND_FASTCALL zend_i64_to_str(int64_t num);
+ZEND_API zend_string* ZEND_FASTCALL zend_double_to_str(double num);
 
 static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 {
@@ -910,6 +918,67 @@ static zend_always_inline void zend_unwrap_reference(zval *op) /* {{{ */
 	}
 }
 /* }}} */
+
+static zend_always_inline bool zend_strnieq(const char *ptr1, const char *ptr2, size_t num)
+{
+	const char *end = ptr1 + num;
+	while (ptr1 < end) {
+		if (zend_tolower_ascii(*ptr1++) != zend_tolower_ascii(*ptr2++)) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+static zend_always_inline const char *
+zend_memnistr(const char *haystack, const char *needle, size_t needle_len, const char *end)
+{
+	ZEND_ASSERT(end >= haystack);
+
+	if (UNEXPECTED(needle_len == 0)) {
+		return haystack;
+	}
+
+	if (UNEXPECTED(needle_len > (size_t)(end - haystack))) {
+		return NULL;
+	}
+
+	const char first_lower = zend_tolower_ascii(*needle);
+	const char first_upper = zend_toupper_ascii(*needle);
+	const char *p_lower = (const char *)memchr(haystack, first_lower, end - haystack);
+	const char *p_upper = NULL;
+	if (first_lower != first_upper) {
+		// If the needle length is 1 we don't need to look beyond p_lower as it is a guaranteed match
+		size_t upper_search_length = end - (needle_len == 1 && p_lower != NULL ? p_lower : haystack);
+		p_upper = (const char *)memchr(haystack, first_upper, upper_search_length);
+	}
+	const char *p = !p_upper || (p_lower && p_lower < p_upper) ? p_lower : p_upper;
+
+	if (needle_len == 1) {
+		return p;
+	}
+
+	const char needle_end_lower = zend_tolower_ascii(needle[needle_len - 1]);
+	const char needle_end_upper = zend_toupper_ascii(needle[needle_len - 1]);
+	end -= needle_len;
+
+	while (p && p <= end) {
+		if (needle_end_lower == p[needle_len - 1] || needle_end_upper == p[needle_len - 1]) {
+			if (zend_strnieq(needle + 1, p + 1, needle_len - 2)) {
+				return p;
+			}
+		}
+		if (p_lower == p) {
+			p_lower = (const char *)memchr(p_lower + 1, first_lower, end - p_lower);
+		}
+		if (p_upper == p) {
+			p_upper = (const char *)memchr(p_upper + 1, first_upper, end - p_upper);
+		}
+		p = !p_upper || (p_lower && p_lower < p_upper) ? p_lower : p_upper;
+	}
+
+	return NULL;
+}
 
 
 END_EXTERN_C()

@@ -1,9 +1,7 @@
 --TEST--
 xml_parser_get_option() with XML_OPTION_SKIP_TAGSTART and XML_OPTION_SKIP_WHITE
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) die('skip xml extension not available');
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 $parser = xml_parser_create();

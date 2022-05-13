@@ -1,9 +1,7 @@
 --TEST--
 Fork of bug33853.phpt with exit replaced by throw
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) die('skip xsl not loaded');
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 

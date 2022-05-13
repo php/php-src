@@ -1,7 +1,7 @@
 --TEST--
 Bug #26639 (mb_convert_variables() clutters variables beyond the references)
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 $a = "‚ ‚¢‚¤‚¦‚¨";

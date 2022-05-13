@@ -1,7 +1,7 @@
 --TEST--
 Integer validation with spaces
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --INI--
 precision=14
 --FILE--

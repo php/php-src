@@ -164,7 +164,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 			/* Optional value is not supported with -<arg> <val> style */
 			} else if (opts[php_optidx].need_param == 1) {
 				*optarg = argv[(*optind)++];
- 			}
+			}
 		} else if (argv[*optind][arg_start] == '=') {
 			arg_start++;
 			*optarg = &argv[*optind][arg_start];

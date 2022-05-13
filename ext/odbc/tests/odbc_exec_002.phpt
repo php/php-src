@@ -1,5 +1,7 @@
 --TEST--
 odbc_exec(): Getting data from query
+--EXTENSIONS--
+odbc
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -21,11 +23,13 @@ $res = odbc_exec($conn, 'SELECT * FROM FOO');
 var_dump(odbc_fetch_row($res));
 var_dump(odbc_result($res, 'test'));
 var_dump(odbc_fetch_array($res));
-
+?>
+--CLEAN--
+<?php
+require 'config.inc';
+$conn = odbc_connect($dsn, $user, $pass);
 odbc_exec($conn, 'DROP TABLE FOO');
-
 odbc_exec($conn, 'DROP DATABASE odbcTEST');
-
 ?>
 --EXPECT--
 bool(true)

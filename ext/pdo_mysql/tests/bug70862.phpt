@@ -1,8 +1,9 @@
 --TEST--
 MySQL Prepared Statements and BLOBs
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
@@ -18,6 +19,7 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     class HelloWrapper {
+        public $context;
         public function stream_open() { return true; }
         public function stream_eof() { return true; }
         public function stream_read() { return NULL; }

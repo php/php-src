@@ -1,8 +1,9 @@
 --TEST--
 Bug #62890 (default_socket_timeout=-1 causes connection to timeout)
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded('openssl')) die('skip openssl extension not available');
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --INI--

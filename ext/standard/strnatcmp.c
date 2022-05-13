@@ -54,9 +54,9 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 			if (!bias)
 				bias = +1;
 		}
-     }
+	}
 
-     return 0;
+	return 0;
 }
 /* }}} */
 
@@ -64,8 +64,8 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 static int
 compare_left(char const **a, char const *aend, char const **b, char const *bend)
 {
-     /* Compare two left-aligned numbers: the first to have a
-        different value wins. */
+	/* Compare two left-aligned numbers: the first to have a
+	   different value wins. */
 	for(;; (*a)++, (*b)++) {
 		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
 			(*b == bend || !isdigit((int)(unsigned char)**b)))
@@ -78,14 +78,14 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 			 return -1;
 		 else if (**a > **b)
 			 return +1;
-     }
+	}
 
-     return 0;
+	return 0;
 }
 /* }}} */
 
 /* {{{ strnatcmp_ex */
-PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
+PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive)
 {
 	unsigned char ca, cb;
 	char const *ap, *bp;
@@ -146,7 +146,7 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			}
 		}
 
-		if (fold_case) {
+		if (is_case_insensitive) {
 			ca = toupper((int)(unsigned char)ca);
 			cb = toupper((int)(unsigned char)cb);
 		}

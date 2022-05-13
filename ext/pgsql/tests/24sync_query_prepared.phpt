@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL sync prepared queries
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php
 include("skipif.inc");

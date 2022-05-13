@@ -27,8 +27,6 @@
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
 
-#include "ext/standard/php_string.h"
-
 /* }}} */
 
 #define GRAPHEME_EXTRACT_TYPE_COUNT		0
@@ -179,9 +177,9 @@ PHP_FUNCTION(grapheme_stripos)
 		char *haystack_dup, *needle_dup;
 		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
-		php_strtolower(needle_dup, needle_len);
+		zend_str_tolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
-		php_strtolower(haystack_dup, haystack_len);
+		zend_str_tolower(haystack_dup, haystack_len);
 
 		found = php_memnstr(haystack_dup + noffset, needle_dup, needle_len, haystack_dup + haystack_len);
 
@@ -295,9 +293,9 @@ PHP_FUNCTION(grapheme_strripos)
 		char *needle_dup, *haystack_dup;
 
 		needle_dup = estrndup(needle, needle_len);
-		php_strtolower(needle_dup, needle_len);
+		zend_str_tolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
-		php_strtolower(haystack_dup, haystack_len);
+		zend_str_tolower(haystack_dup, haystack_len);
 
 		ret_pos = grapheme_strrpos_ascii(haystack_dup, haystack_len, needle_dup, needle_len, offset);
 
@@ -739,7 +737,7 @@ PHP_FUNCTION(grapheme_extract)
 			ZVAL_DEREF(next);
 			/* initialize next */
 			zval_ptr_dtor(next);
-            ZVAL_LONG(next, lstart);
+			ZVAL_LONG(next, lstart);
 		}
 	}
 
@@ -794,7 +792,7 @@ PHP_FUNCTION(grapheme_extract)
 	 */
 
 	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
-        size_t nsize = MIN(size, str_len);
+		size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}

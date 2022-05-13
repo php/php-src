@@ -25,4 +25,4 @@ unlink($file_c);
 unlink($file_p);
 ?>
 --EXPECTF--
-Fatal error: Cannot declare class c, because the name is already in use in %sbug67215.c.php on line %d
+Fatal error: Cannot declare class p, because the name is already in use in %sbug67215.p.php on line %d

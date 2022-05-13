@@ -1,6 +1,4 @@
 <?php
-extension_loaded('snmp') or die('skip snmp extension not available in this build');
-
 require_once (dirname(__FILE__).'/snmp_include.inc');
 
 //test server is available

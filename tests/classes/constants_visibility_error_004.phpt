@@ -12,4 +12,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Fatal error: Access level to B::protectedConst must be protected (as in class A) or weaker in %s on line 9
+Fatal error: Access level to B::protectedConst must be protected (as in class A) or weaker in %s on line 7

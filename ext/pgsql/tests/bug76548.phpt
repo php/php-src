@@ -1,5 +1,7 @@
 --TEST--
 Bug #76548 pg_fetch_result did not fetch the next row
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--

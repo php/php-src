@@ -1,5 +1,7 @@
 --TEST--
 session_set_save_handler test
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c333499e3ea100d976f0fa8bb8800ed21b04f1c6 */
+ * Stub hash: 69dcb08ae12b6acbba872f7de5018ca5c0aaf669 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -39,7 +39,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_define, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, case_insensitive, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -283,10 +283,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(func_get_arg, arginfo_func_get_arg)
 	ZEND_FE(func_get_args, arginfo_func_get_args)
 	ZEND_FE(strlen, arginfo_strlen)
-	ZEND_FE(strcmp, arginfo_strcmp)
-	ZEND_FE(strncmp, arginfo_strncmp)
-	ZEND_FE(strcasecmp, arginfo_strcasecmp)
-	ZEND_FE(strncasecmp, arginfo_strncasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcmp, arginfo_strcmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncmp, arginfo_strncmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcasecmp, arginfo_strcasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncasecmp, arginfo_strncasecmp)
 	ZEND_FE(error_reporting, arginfo_error_reporting)
 	ZEND_FE(define, arginfo_define)
 	ZEND_FE(defined, arginfo_defined)

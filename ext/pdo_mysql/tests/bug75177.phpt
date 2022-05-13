@@ -1,8 +1,9 @@
 --TEST--
 PDO MySQL Bug #75177 Type 'bit' is fetched as unexpected string
+--EXTENSIONS--
+pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');

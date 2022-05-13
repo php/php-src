@@ -13,6 +13,8 @@ class Test {
         var_dump(get_object_vars($this));
     }
 }
+
+#[AllowDynamicProperties]
 class Test2 extends Test {
 }
 

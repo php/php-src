@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: libxml2 XML Reader, next
---SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+--EXTENSIONS--
+xmlreader
 --FILE--
 <?php
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>

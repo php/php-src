@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: bigint columns are returned as strings
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
 if (in_array($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION), ['4.2', '4.6', '5.0', '6.0', '7.0'])) die('skip bigint type is unsupported by active TDS version');
 ?>

@@ -23,12 +23,9 @@ define('QUX', $y);
 $y[0] = 3;
 var_dump($x, $y, QUX);
 
-// ensure objects not allowed in arrays
-try {
-    define('ELEPHPANT', [new StdClass]);
-} catch (TypeError $exception) {
-    echo $exception->getMessage() . "\n";
-}
+// objects are allowed in arrays
+define('ELEPHPANT', [new StdClass]);
+var_dump(ELEPHPANT);
 
 // ensure recursion doesn't crash
 $recursive = [];
@@ -40,7 +37,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   int(7)
@@ -102,5 +99,9 @@ array(1) {
   [0]=>
   int(7)
 }
-define(): Argument #2 ($value) cannot be an object, stdClass given
+array(1) {
+  [0]=>
+  object(stdClass)#1 (0) {
+  }
+}
 define(): Argument #2 ($value) cannot be a recursive array

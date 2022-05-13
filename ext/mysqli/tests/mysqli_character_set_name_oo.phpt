@@ -1,8 +1,9 @@
 --TEST--
 mysqli_character_set_name(), mysql_client_encoding() [alias]
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

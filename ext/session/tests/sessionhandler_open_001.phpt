@@ -1,5 +1,7 @@
 --TEST--
 Testing repated SessionHandler::open() calls
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -35,7 +37,7 @@ try {
 print "Done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Session is not active
 Session is not active
 Session is not active

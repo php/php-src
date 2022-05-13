@@ -179,7 +179,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		}
 		zval_ptr_dtor( return_value );
 		RETURN_NULL();
-    }
+	}
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
 	INTL_METHOD_CHECK_STATUS_OR_NULL( to, "transliterator_create_from_rules: internal constructor call failed" );

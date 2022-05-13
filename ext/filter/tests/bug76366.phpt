@@ -1,9 +1,7 @@
 --TEST--
 Bug #76366 (references in sub-array for filtering breaks the filter)
---SKIPIF--
-<?php
-if (!extension_loaded('filter')) die('skip filter extension not available');
-?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 

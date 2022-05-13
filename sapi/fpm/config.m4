@@ -25,6 +25,30 @@ AC_DEFUN([AC_FPM_PRCTL],
   ])
 ])
 
+AC_DEFUN([AC_FPM_PROCCTL],
+[
+  AC_MSG_CHECKING([for procctl])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
+    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
+AC_DEFUN([AC_FPM_SETPFLAGS],
+[
+  AC_MSG_CHECKING([for setpflags])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
+    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -319,6 +343,19 @@ AC_DEFUN([AC_FPM_LQ],
     AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
   fi
 
+  AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_connection_info ti; int x = TCP_CONNECTION_INFO;]])], [
+    have_lq=tcp_connection_info
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+
+  if test "$have_lq" = "tcp_connection_info"; then
+    AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], 1, [do we have TCP_CONNECTION_INFO?])
+  fi
+
   if test "$have_lq" = "no" ; then
     AC_MSG_CHECKING([for SO_LISTENQLEN])
 
@@ -494,6 +531,8 @@ if test "$PHP_FPM" != "no"; then
 
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
+  AC_FPM_PROCCTL
+  AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
@@ -537,6 +576,12 @@ if test "$PHP_FPM" != "no"; then
     [no],
     [no])
 
+  PHP_ARG_WITH([fpm-selinux],,
+    [AS_HELP_STRING([--with-fpm-selinux],
+      [Support SELinux policy library])],
+    [no],
+    [no])
+
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
@@ -555,18 +600,57 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "$PHP_FPM_ACL" != "no" ; then
+    AC_MSG_CHECKING([for acl user/group permissions support])
     AC_CHECK_HEADERS([sys/acl.h])
-    dnl *BSD has acl_* built into libc.
-    AC_CHECK_FUNC(acl_free, [
-      AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
-    ],[
-      AC_CHECK_LIB(acl, acl_free, [
-        PHP_ADD_LIBRARY(acl)
-        AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
-      ],[
-        AC_MSG_ERROR(libacl required not found)
-      ])
-    ])
+
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
+      int main()
+      {
+        acl_t acl;
+        acl_entry_t user, group;
+        acl = acl_init(1);
+        acl_create_entry(&acl, &user);
+        acl_set_tag_type(user, ACL_USER);
+        acl_create_entry(&acl, &group);
+        acl_set_tag_type(user, ACL_GROUP);
+        acl_free(acl);
+        return 0;
+      }
+    ]])], [
+      AC_CHECK_LIB(acl, acl_free, 
+        [PHP_ADD_LIBRARY(acl)
+          have_fpm_acl=yes
+          AC_MSG_RESULT([yes])
+        ],[
+          AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
+            int main()
+            {
+              acl_t acl;
+              acl_entry_t user, group;
+              acl = acl_init(1);
+              acl_create_entry(&acl, &user);
+              acl_set_tag_type(user, ACL_USER);
+              acl_create_entry(&acl, &group);
+              acl_set_tag_type(user, ACL_GROUP);
+              acl_free(acl);
+              return 0;
+            }
+          ]])], [
+            have_fpm_acl=yes
+            AC_MSG_RESULT([yes])
+          ], [
+            have_fpm_acl=no
+            AC_MSG_RESULT([no])
+          ], [AC_MSG_RESULT([skipped])])
+        ])
+    ], [
+      have_fpm_acl=no
+      AC_MSG_RESULT([no])
+    ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+
+    if test "$have_fpm_acl" = "yes"; then
+      AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
+    fi
   fi
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
@@ -577,6 +661,14 @@ if test "$PHP_FPM" != "no"; then
     ],[
       AC_MSG_ERROR(libapparmor required but not found)
     ])
+  fi
+
+  if test "x$PHP_FPM_SELINUX" != "xno" ; then
+    AC_CHECK_HEADERS([selinux/selinux.h])
+    AC_CHECK_LIB(selinux, security_setenforce, [
+      PHP_ADD_LIBRARY(selinux)
+      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
+    ],[])
   fi
 
   PHP_SUBST_OLD(php_fpm_systemd)

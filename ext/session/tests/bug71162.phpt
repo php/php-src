@@ -1,5 +1,7 @@
 --TEST--
 updateTimestamp never called when session data is empty
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

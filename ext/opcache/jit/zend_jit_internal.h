@@ -319,7 +319,7 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *zend_vm_opcode_handler_t)(ZEND_O
 /* VM helpers */
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info EXECUTE_DATA_DC);
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info EXECUTE_DATA_DC);
-ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(uint32_t call_info EXECUTE_DATA_DC);
+ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_func_helper(EXECUTE_DATA_D);
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS);
 
@@ -412,6 +412,7 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_PACKED_GUARD  (1<<7)
 #define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
+#define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -438,6 +439,7 @@ typedef enum _zend_jit_trace_op {
 	ZEND_JIT_TRACE_VM,
 	ZEND_JIT_TRACE_OP1_TYPE,
 	ZEND_JIT_TRACE_OP2_TYPE,
+	ZEND_JIT_TRACE_VAL_INFO,
 	ZEND_JIT_TRACE_INIT_CALL,
 	ZEND_JIT_TRACE_DO_ICALL,
 	ZEND_JIT_TRACE_ENTER,
@@ -451,8 +453,10 @@ typedef enum _zend_jit_trace_op {
 #define IS_TRACE_REFERENCE (1<<5)
 #define IS_TRACE_INDIRECT  (1<<6)
 
+#define IS_TRACE_TYPE_MASK 0xf
+
 #define ZEND_JIT_TRACE_FAKE_INIT_CALL    0x00000100
-#define ZEND_JIT_TRACE_RETRUN_VALUE_USED 0x00000100
+#define ZEND_JIT_TRACE_RETURN_VALUE_USED 0x00000100
 
 #define ZEND_JIT_TRACE_MAX_SSA_VAR       0x7ffffe
 #define ZEND_JIT_TRACE_SSA_VAR_SHIFT     9
@@ -559,6 +563,9 @@ typedef union _zend_jit_trace_stack {
 		(_stack)[_slot].reg = _reg; \
 		(_stack)[_slot].flags = _flags; \
 	} while (0)
+#define RESET_STACK_MEM_TYPE(_stack, _slot) do { \
+		(_stack)[_slot].mem_type = IS_UNKNOWN; \
+	} while (0)
 
 /* trace info flags */
 #define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
@@ -578,6 +585,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  flags;         /* See ZEND_JIT_TRACE_... defines above */
 	uint32_t                  polymorphism;  /* Counter of polymorphic calls */
 	uint32_t                  jmp_table_size;/* number of jmp_table slots */
+	const zend_op_array      *op_array;      /* function */
 	const zend_op            *opline;        /* first opline */
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
@@ -590,6 +598,7 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
 	const zend_op              *call_opline;
+	zend_class_entry           *ce;          /* $this */
 	uint32_t                    call_level;
 	uint32_t                    _info;
 	int                         used_stack;
@@ -608,6 +617,9 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_THIS_CHECKED         0x00000020
 #define TRACE_FRAME_MASK_UNKNOWN_RETURN       0x00000040
 #define TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS 0x00000080
+#define TRACE_FRAME_MASK_THIS_CLASS_CHECKED   0x00000100
+#define TRACE_FRAME_MASK_CLOSURE_CALL         0x00000200
+#define TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS  0x00000400
 
 
 #define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \
@@ -639,8 +651,14 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_THIS_CHECKED)
 #define TRACE_FRAME_IS_UNKNOWN_RETURN(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_UNKNOWN_RETURN)
-#define TRACE_FRAME_NO_NEED_REKEASE_THIS(frame) \
+#define TRACE_FRAME_NO_NEED_RELEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS)
+#define TRACE_FRAME_IS_THIS_CLASS_CHECKED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_THIS_CLASS_CHECKED)
+#define TRACE_FRAME_IS_CLOSURE_CALL(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_CLOSURE_CALL)
+#define TRACE_FRAME_ALWAYS_RELEASE_THIS(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS)
 
 #define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
 		(frame)->_info |= (0xffffu << TRACE_FRAME_SHIFT_NUM_ARGS); \
@@ -673,6 +691,15 @@ struct _zend_jit_trace_stack_frame {
 	} while (0)
 #define TRACE_FRAME_SET_NO_NEED_RELEASE_THIS(frame) do { \
 		(frame)->_info |= TRACE_FRAME_MASK_NO_NEED_RELEASE_THIS; \
+	} while (0)
+#define TRACE_FRAME_SET_THIS_CLASS_CHECKED(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_THIS_CLASS_CHECKED; \
+	} while (0)
+#define TRACE_FRAME_SET_CLOSURE_CALL(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_CLOSURE_CALL; \
+	} while (0)
+#define TRACE_FRAME_SET_ALWAYS_RELEASE_THIS(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS; \
 	} while (0)
 
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_func_trace_helper(ZEND_OPCODE_HANDLER_ARGS);

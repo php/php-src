@@ -1,8 +1,9 @@
 --TEST--
 Bug #72694 (mb_ereg_search_setpos does not accept a string's last position)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-if (!extension_loaded('mbstring')) die('skip ext/mbstring required');
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

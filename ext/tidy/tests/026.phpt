@@ -2,6 +2,10 @@
 tidy.clean_output test
 --EXTENSIONS--
 tidy
+--SKIPIF--
+<?php
+if (getenv('SKIP_PRELOAD')) die('skip Output handler interferes');
+?>
 --INI--
 tidy.clean_output=1
 --FILE--

@@ -1,9 +1,7 @@
 --TEST--
 Bug #77153 (imap_open allows to run arbitrary shell commands via mailbox parameter)
---SKIPIF--
-<?php
-extension_loaded('imap') or die('skip imap extension not available in this build');
-?>
+--EXTENSIONS--
+imap
 --CONFLICTS--
 defaultmailbox
 --FILE--

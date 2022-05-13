@@ -21,13 +21,8 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
-
 ?>
 --EXPECTF--
 Serialization of 'ReflectionClass' is not allowed
 Unserialization of 'ReflectionClass' is not allowed
-
-Warning: Erroneous data format for unserializing 'ReflectionClass' in %s on line %d
-
-Notice: unserialize(): Error at offset 26 of 27 bytes in %s on line %d
-bool(false)
+Unserialization of 'ReflectionClass' is not allowed

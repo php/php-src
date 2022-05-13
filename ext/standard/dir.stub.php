@@ -4,6 +4,11 @@
 
 class Directory
 {
+    public readonly string $path;
+
+    /** @var resource */
+    public readonly mixed $handle;
+
     /**
      * @tentative-return-type
      * @implementation-alias closedir

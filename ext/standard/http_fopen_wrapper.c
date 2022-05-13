@@ -43,7 +43,7 @@
 #include "php_standard.h"
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -52,7 +52,7 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -313,10 +313,10 @@ finish:
 			php_stream_close(stream);
 			stream = NULL;
 		}
- 	 	smart_str_free(&header);
+		smart_str_free(&header);
 
- 	 	if (stream) {
- 	 		char header_line[HTTP_HEADER_BLOCK_SIZE];
+		if (stream) {
+			char header_line[HTTP_HEADER_BLOCK_SIZE];
 
 			/* get response header */
 			while (php_stream_gets(stream, header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL) {
@@ -455,7 +455,7 @@ finish:
 			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
-			php_strtolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+			zend_str_tolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 			t = ZSTR_VAL(tmp);
 
 			if (!header_init) {

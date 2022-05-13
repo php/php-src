@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5f63019ce24efa7b5426f172d68a0f9f705a3bd5 */
+ * Stub hash: e82bbc8e81fe98873a9a5697a4b38e63a24379da */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Fiber___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -29,7 +29,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Fiber_getReturn, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Fiber_this, 0, 0, Fiber, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Fiber_getCurrent, 0, 0, Fiber, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Fiber_suspend arginfo_class_Fiber_resume
@@ -47,7 +47,7 @@ ZEND_METHOD(Fiber, isSuspended);
 ZEND_METHOD(Fiber, isRunning);
 ZEND_METHOD(Fiber, isTerminated);
 ZEND_METHOD(Fiber, getReturn);
-ZEND_METHOD(Fiber, this);
+ZEND_METHOD(Fiber, getCurrent);
 ZEND_METHOD(Fiber, suspend);
 ZEND_METHOD(FiberError, __construct);
 
@@ -62,7 +62,7 @@ static const zend_function_entry class_Fiber_methods[] = {
 	ZEND_ME(Fiber, isRunning, arginfo_class_Fiber_isRunning, ZEND_ACC_PUBLIC)
 	ZEND_ME(Fiber, isTerminated, arginfo_class_Fiber_isTerminated, ZEND_ACC_PUBLIC)
 	ZEND_ME(Fiber, getReturn, arginfo_class_Fiber_getReturn, ZEND_ACC_PUBLIC)
-	ZEND_ME(Fiber, this, arginfo_class_Fiber_this, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Fiber, getCurrent, arginfo_class_Fiber_getCurrent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Fiber, suspend, arginfo_class_Fiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
@@ -79,7 +79,7 @@ static zend_class_entry *register_class_Fiber(void)
 
 	INIT_CLASS_ENTRY(ce, "Fiber", class_Fiber_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

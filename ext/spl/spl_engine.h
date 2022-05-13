@@ -21,8 +21,6 @@
 #include "php_spl.h"
 #include "zend_interfaces.h"
 
-PHPAPI zend_long spl_offset_convert_to_long(zval *offset);
-
 static inline void spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, zval *arg1)
 {
 	object_init_ex(retval, pce);

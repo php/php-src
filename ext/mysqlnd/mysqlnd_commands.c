@@ -107,11 +107,7 @@ MYSQLND_METHOD(mysqlnd_command, init_db)(MYSQLND_CONN_DATA * const conn, const M
 	*/
 	UPSERT_STATUS_SET_AFFECTED_ROWS_TO_ERROR(conn->upsert_status);
 	if (ret == PASS) {
-		if (conn->connect_or_select_db.s) {
-			mnd_pefree(conn->connect_or_select_db.s, conn->persistent);
-		}
-		conn->connect_or_select_db.s = mnd_pestrndup(db.s, db.l, conn->persistent);
-		conn->connect_or_select_db.l = db.l;
+		mysqlnd_set_persistent_string(&conn->connect_or_select_db, db.s, db.l, conn->persistent);
 	}
 
 	DBG_RETURN(ret);
@@ -524,7 +520,7 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 
 	DBG_ENTER("mysqlnd_command::enable_ssl");
 
-	DBG_INF_FMT("client_capability_flags=%lu", client_capabilities);
+	DBG_INF_FMT("client_capability_flags=%zu", client_capabilities);
 	DBG_INF_FMT("CLIENT_LONG_PASSWORD=	%d", client_capabilities & CLIENT_LONG_PASSWORD? 1:0);
 	DBG_INF_FMT("CLIENT_FOUND_ROWS=		%d", client_capabilities & CLIENT_FOUND_ROWS? 1:0);
 	DBG_INF_FMT("CLIENT_LONG_FLAG=		%d", client_capabilities & CLIENT_LONG_FLAG? 1:0);
@@ -619,7 +615,7 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	DBG_ENTER("mysqlnd_command::handshake");
 
 	DBG_INF_FMT("stream=%p", conn->vio->data->m.get_stream(conn->vio));
-	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
+	DBG_INF_FMT("[user=%s] [db=%s:%zu] [flags=%zu]", user, db, db_len, mysql_flags);
 
 	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 

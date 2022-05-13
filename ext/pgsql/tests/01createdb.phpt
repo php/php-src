@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL create db
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -20,7 +22,7 @@ else {
     echo pg_last_error()."\n";
 }
 
-$v = pg_version();
+$v = pg_version($db);
 if (version_compare($v['server'], '9.2', '>=') && (!($q = @pg_query($db, "SELECT * FROM ".$table_name_92)) || !@pg_num_rows($q)))
 {
     pg_query($db,$table_def_92); // Create table here

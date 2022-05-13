@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8bc76a5db3a225746daffe29c0b8404cf971452 */
+ * Stub hash: db6fd5b6c366dd8ee48ead99d235baa86e564401 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -235,8 +235,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface_getOffset, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTimeInterface_getTimestamp, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeInterface_getTimestamp arginfo_class_DateTimeInterface_getOffset
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeInterface_diff, 0, 1, DateInterval, 0)
 	ZEND_ARG_OBJ_INFO(0, targetObject, DateTimeInterface, 0)
@@ -246,10 +245,20 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface___wakeup, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_DateTimeInterface___serialize arginfo_timezone_abbreviations_list
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeInterface___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, datetime, IS_STRING, 0, "\"now\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_DateTime___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateTime___unserialize arginfo_class_DateTimeInterface___unserialize
 
 #define arginfo_class_DateTime___wakeup arginfo_class_DateTimeInterface___wakeup
 
@@ -322,6 +331,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTime_diff arginfo_class_DateTimeInterface_diff
 
 #define arginfo_class_DateTimeImmutable___construct arginfo_class_DateTime___construct
+
+#define arginfo_class_DateTimeImmutable___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateTimeImmutable___unserialize arginfo_class_DateTimeInterface___unserialize
 
 #define arginfo_class_DateTimeImmutable___wakeup arginfo_class_DateTimeInterface___wakeup
 
@@ -418,6 +431,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeZone_lis
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, countryCode, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_DateTimeZone___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateTimeZone___unserialize arginfo_class_DateTimeInterface___unserialize
+
 #define arginfo_class_DateTimeZone___wakeup arginfo_class_DateTimeInterface___wakeup
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeZone___set_state, 0, 1, DateTimeZone, 0)
@@ -433,6 +450,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateInterval
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateInterval_format arginfo_class_DateTimeInterface_format
+
+#define arginfo_class_DateInterval___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DateInterval___unserialize arginfo_class_DateTimeInterface___unserialize
 
 #define arginfo_class_DateInterval___wakeup arginfo_class_DateTimeInterface___wakeup
 
@@ -458,6 +479,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_getRecurrences, 0, 0, IS_LONG, 1)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_DatePeriod___serialize arginfo_timezone_abbreviations_list
+
+#define arginfo_class_DatePeriod___unserialize arginfo_class_DateTimeInterface___unserialize
 
 #define arginfo_class_DatePeriod___wakeup arginfo_class_DateTimeInterface___wakeup
 
@@ -518,11 +543,15 @@ ZEND_FUNCTION(date_sunrise);
 ZEND_FUNCTION(date_sunset);
 ZEND_FUNCTION(date_sun_info);
 ZEND_METHOD(DateTime, __construct);
+ZEND_METHOD(DateTime, __serialize);
+ZEND_METHOD(DateTime, __unserialize);
 ZEND_METHOD(DateTime, __wakeup);
 ZEND_METHOD(DateTime, __set_state);
 ZEND_METHOD(DateTime, createFromImmutable);
 ZEND_METHOD(DateTime, createFromInterface);
 ZEND_METHOD(DateTimeImmutable, __construct);
+ZEND_METHOD(DateTimeImmutable, __serialize);
+ZEND_METHOD(DateTimeImmutable, __unserialize);
 ZEND_METHOD(DateTimeImmutable, __wakeup);
 ZEND_METHOD(DateTimeImmutable, __set_state);
 ZEND_METHOD(DateTimeImmutable, modify);
@@ -536,9 +565,13 @@ ZEND_METHOD(DateTimeImmutable, setTimestamp);
 ZEND_METHOD(DateTimeImmutable, createFromMutable);
 ZEND_METHOD(DateTimeImmutable, createFromInterface);
 ZEND_METHOD(DateTimeZone, __construct);
+ZEND_METHOD(DateTimeZone, __serialize);
+ZEND_METHOD(DateTimeZone, __unserialize);
 ZEND_METHOD(DateTimeZone, __wakeup);
 ZEND_METHOD(DateTimeZone, __set_state);
 ZEND_METHOD(DateInterval, __construct);
+ZEND_METHOD(DateInterval, __serialize);
+ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
 ZEND_METHOD(DatePeriod, __construct);
@@ -546,6 +579,8 @@ ZEND_METHOD(DatePeriod, getStartDate);
 ZEND_METHOD(DatePeriod, getEndDate);
 ZEND_METHOD(DatePeriod, getDateInterval);
 ZEND_METHOD(DatePeriod, getRecurrences);
+ZEND_METHOD(DatePeriod, __serialize);
+ZEND_METHOD(DatePeriod, __unserialize);
 ZEND_METHOD(DatePeriod, __wakeup);
 ZEND_METHOD(DatePeriod, __set_state);
 ZEND_METHOD(DatePeriod, getIterator);
@@ -559,8 +594,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mktime, arginfo_mktime)
 	ZEND_FE(gmmktime, arginfo_gmmktime)
 	ZEND_FE(checkdate, arginfo_checkdate)
-	ZEND_FE(strftime, arginfo_strftime)
-	ZEND_FE(gmstrftime, arginfo_gmstrftime)
+	ZEND_DEP_FE(strftime, arginfo_strftime)
+	ZEND_DEP_FE(gmstrftime, arginfo_gmstrftime)
 	ZEND_FE(time, arginfo_time)
 	ZEND_FE(localtime, arginfo_localtime)
 	ZEND_FE(getdate, arginfo_getdate)
@@ -597,8 +632,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(date_interval_format, arginfo_date_interval_format)
 	ZEND_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
 	ZEND_FE(date_default_timezone_get, arginfo_date_default_timezone_get)
-	ZEND_FE(date_sunrise, arginfo_date_sunrise)
-	ZEND_FE(date_sunset, arginfo_date_sunset)
+	ZEND_DEP_FE(date_sunrise, arginfo_date_sunrise)
+	ZEND_DEP_FE(date_sunset, arginfo_date_sunset)
 	ZEND_FE(date_sun_info, arginfo_date_sun_info)
 	ZEND_FE_END
 };
@@ -611,12 +646,16 @@ static const zend_function_entry class_DateTimeInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, getTimestamp, arginfo_class_DateTimeInterface_getTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, diff, arginfo_class_DateTimeInterface_diff, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, __wakeup, arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, __serialize, arginfo_class_DateTimeInterface___serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, __unserialize, arginfo_class_DateTimeInterface___unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
 
 static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME(DateTime, __construct, arginfo_class_DateTime___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, __serialize, arginfo_class_DateTime___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, __unserialize, arginfo_class_DateTime___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTime, __wakeup, arginfo_class_DateTime___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTime, __set_state, arginfo_class_DateTime___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTime, createFromImmutable, arginfo_class_DateTime_createFromImmutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -642,6 +681,8 @@ static const zend_function_entry class_DateTime_methods[] = {
 
 static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, __construct, arginfo_class_DateTimeImmutable___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, __serialize, arginfo_class_DateTimeImmutable___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, __unserialize, arginfo_class_DateTimeImmutable___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __wakeup, arginfo_class_DateTimeImmutable___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __set_state, arginfo_class_DateTimeImmutable___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(createFromFormat, date_create_immutable_from_format, arginfo_class_DateTimeImmutable_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -673,6 +714,8 @@ static const zend_function_entry class_DateTimeZone_methods[] = {
 	ZEND_ME_MAPPING(getLocation, timezone_location_get, arginfo_class_DateTimeZone_getLocation, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(listAbbreviations, timezone_abbreviations_list, arginfo_class_DateTimeZone_listAbbreviations, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(listIdentifiers, timezone_identifiers_list, arginfo_class_DateTimeZone_listIdentifiers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateTimeZone, __serialize, arginfo_class_DateTimeZone___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeZone, __unserialize, arginfo_class_DateTimeZone___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeZone, __wakeup, arginfo_class_DateTimeZone___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeZone, __set_state, arginfo_class_DateTimeZone___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
@@ -683,6 +726,8 @@ static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __construct, arginfo_class_DateInterval___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(createFromDateString, date_interval_create_from_date_string, arginfo_class_DateInterval_createFromDateString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_interval_format, arginfo_class_DateInterval_format, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateInterval, __serialize, arginfo_class_DateInterval___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateInterval, __unserialize, arginfo_class_DateInterval___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __wakeup, arginfo_class_DateInterval___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __set_state, arginfo_class_DateInterval___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
@@ -695,6 +740,8 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_ME(DatePeriod, getEndDate, arginfo_class_DatePeriod_getEndDate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getDateInterval, arginfo_class_DatePeriod_getDateInterval, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getRecurrences, arginfo_class_DatePeriod_getRecurrences, ZEND_ACC_PUBLIC)
+	ZEND_ME(DatePeriod, __serialize, arginfo_class_DatePeriod___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(DatePeriod, __unserialize, arginfo_class_DatePeriod___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __wakeup, arginfo_class_DatePeriod___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __set_state, arginfo_class_DatePeriod___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, getIterator, arginfo_class_DatePeriod_getIterator, ZEND_ACC_PUBLIC)

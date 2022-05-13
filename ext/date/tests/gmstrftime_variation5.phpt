@@ -31,13 +31,25 @@ foreach($inputs as $key =>$value) {
 *** Testing gmstrftime() : usage variation ***
 
 --Year as decimal number without a century--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(2) "08"
 
 --Year as decimal number including the century--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%d) "%d"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(4) "2008"
 
 --Time zone offset--
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%s) "%s"
+
+Deprecated: Function gmstrftime() is deprecated in %s on line %d
 string(%s) "%s"

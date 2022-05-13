@@ -10,5 +10,5 @@ gc_collect_cycles();
 var_export($objstore);
 ?>
 --EXPECT--
-SplObjectStorage::__set_state(array(
+\SplObjectStorage::__set_state(array(
 ))

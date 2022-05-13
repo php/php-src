@@ -203,7 +203,7 @@ static int zend_extension_startup(zend_extension *extension)
 }
 
 
-void zend_startup_extensions_mechanism()
+void zend_startup_extensions_mechanism(void)
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
@@ -212,7 +212,7 @@ void zend_startup_extensions_mechanism()
 }
 
 
-void zend_startup_extensions()
+void zend_startup_extensions(void)
 {
 	zend_llist_apply_with_del(&zend_extensions, (int (*)(void *)) zend_extension_startup);
 }
@@ -267,8 +267,17 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
 
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
+	int handle = zend_op_array_extension_handles++;
 	zend_add_system_entropy(module_name, "zend_get_op_array_extension_handle", &zend_op_array_extension_handles, sizeof(int));
-	return zend_op_array_extension_handles++;
+	return handle;
+}
+
+ZEND_API int zend_get_op_array_extension_handles(const char *module_name, int handles)
+{
+	int handle = zend_op_array_extension_handles;
+	zend_op_array_extension_handles += handles;
+	zend_add_system_entropy(module_name, "zend_get_op_array_extension_handle", &zend_op_array_extension_handles, sizeof(int));
+	return handle;
 }
 
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)

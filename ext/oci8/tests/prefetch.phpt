@@ -1,7 +1,7 @@
 --TEST--
 oci_set_prefetch()
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

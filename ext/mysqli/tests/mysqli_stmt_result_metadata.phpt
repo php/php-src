@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_result_metadata()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

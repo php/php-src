@@ -1,7 +1,7 @@
 --TEST--
 get_object_vars() fast/slow-path discrepancies
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+--EXTENSIONS--
+json
 --FILE--
 <?php
 

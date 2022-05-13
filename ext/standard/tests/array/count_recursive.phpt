@@ -58,7 +58,7 @@ class count_class implements Countable {
   public $var_public;
   protected $var_protected;
 
-  public function count() {
+  public function count(): int {
     return 3;
   }
 }
@@ -88,7 +88,7 @@ var_dump(count($arr, COUNT_RECURSIVE));
 fclose( $resource1 );
 closedir( $resource2 );
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functionality of count() function ***
 -- Testing arrays --
 COUNT_NORMAL: should be 2, is 2

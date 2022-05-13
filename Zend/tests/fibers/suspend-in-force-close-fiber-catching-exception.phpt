@@ -22,6 +22,6 @@ try {
 echo "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Cannot suspend in a force-closed fiber
 done

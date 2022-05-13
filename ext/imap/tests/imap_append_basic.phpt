@@ -1,5 +1,7 @@
 --TEST--
 Test imap_append() function : basic functionality
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 require_once(__DIR__. '/setup/skipif.inc');
@@ -16,16 +18,16 @@ $imap_stream = setup_test_mailbox("imapappendbaisc", 0);
 $mb_details = imap_mailboxmsginfo($imap_stream);
 echo "Add a couple of msgs to the new mailbox\n";
 var_dump(imap_append($imap_stream, $mb_details->Mailbox
-                   , "From: webmaster@something.com\r\n"
-                   . "To: info@something.com\r\n"
+                   , "From: webmaster@example.com\r\n"
+                   . "To: info@example.com\r\n"
                    . "Subject: Test message\r\n"
                    . "\r\n"
                    . "this is a test message, please ignore\r\n"
                    ));
 
 var_dump(imap_append($imap_stream, $mb_details->Mailbox
-                   , "From: webmaster@something.com\r\n"
-                   . "To: info@something.com\r\n"
+                   , "From: webmaster@example.com\r\n"
+                   . "To: info@example.com\r\n"
                    . "Subject: Another test\r\n"
                    . "\r\n"
                    . "this is another test message, please ignore it too!!\r\n"
@@ -56,7 +58,7 @@ Msg Count after append : 2
 List the msg headers
 array(2) {
   [0]=>
-  string(%d) "%w%s       1)%s webmaster@something. Test message (%d chars)"
+  string(%d) "%w%s       1)%s webmaster@example.co Test message (%d chars)"
   [1]=>
-  string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
+  string(%d) "%w%s       2)%s webmaster@example.co Another test (%d chars)"
 }

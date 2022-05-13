@@ -1,7 +1,7 @@
 --TEST--
 Bug #79787 mb_strimwidth does not trim string
---SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 echo mb_strimwidth("一二三", 0, 4, '.', 'UTF-8')."\n";

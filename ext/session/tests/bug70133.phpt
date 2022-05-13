@@ -1,5 +1,7 @@
 --TEST--
 Bug #70133 (Extended SessionHandler::read is ignoring $session_id when calling parent)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

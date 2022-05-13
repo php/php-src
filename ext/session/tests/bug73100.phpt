@@ -1,9 +1,7 @@
 --TEST--
 Bug #73100 (session_destroy null dereference in ps_files_path_create)
---SKIPIF--
-<?php
-if (!extension_loaded('session')) die('skip session extension not available');
-?>
+--EXTENSIONS--
+session
 --INI--
 session.save_path=
 session.save_handler=files

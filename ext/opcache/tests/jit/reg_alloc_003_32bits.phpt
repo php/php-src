@@ -24,5 +24,5 @@ function test($char_code) {
 echo test(65), "\n";
 ?>
 --EXPECTF--
-Deprecated: Implicit conversion from non-compatible float 4294967168 to int in %s on line %d
+Deprecated: Implicit conversion from float 4294967168 to int loses precision in %s on line %d
 correct

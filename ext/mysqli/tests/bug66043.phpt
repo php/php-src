@@ -1,8 +1,9 @@
 --TEST--
 Bug #66043 (Segfault calling bind_param() on mysqli)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

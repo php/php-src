@@ -1,9 +1,7 @@
 --TEST--
 Extending Zip class and array property
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 class myZip extends ZipArchive {

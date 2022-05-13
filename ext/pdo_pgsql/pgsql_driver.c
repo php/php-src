@@ -87,7 +87,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (msg) {
-		einfo->errmsg = estrdup(msg);
+		einfo->errmsg = pestrdup(msg, dbh->is_persistent);
 	}
 	else if (errmsg) {
 		einfo->errmsg = _pdo_pgsql_trim_message(errmsg, dbh->is_persistent);
@@ -308,7 +308,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	}
 	H->pgoid = PQoidValue(res);
 	if (qs == PGRES_COMMAND_OK) {
-		ZEND_ATOL(ret, PQcmdTuples(res));
+		ret = ZEND_ATOL(PQcmdTuples(res));
 	} else {
 		ret = Z_L(0);
 	}
@@ -724,8 +724,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 		PQclear(pgsql_result);
 		while ((buf = php_stream_get_line(stream, NULL, 0, &line_len)) != NULL) {
 			if (PQputCopyData(H->server, buf, line_len) != 1) {
-	                        efree(buf);
-        	                pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+				efree(buf);
+				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
 				php_stream_close(stream);
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;

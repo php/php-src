@@ -663,8 +663,8 @@ void php_oci_lob_free (php_oci_descriptor *descriptor)
 		if (zend_hash_num_elements(descriptor->connection->descriptors) == 0) {
 			descriptor->connection->descriptor_count = 0;
 		} else {
-            /* delete descriptor from the hash */
-            zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
+			/* delete descriptor from the hash */
+			zend_hash_index_del(descriptor->connection->descriptors, descriptor->index);
 			if (descriptor->index + 1 == descriptor->connection->descriptor_count) {
 				/* If the descriptor being freed is the end-most one
 				 * allocated, then the descriptor_count is reduced so
@@ -752,7 +752,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename)
 
 	return 0;
 }
- 	/* }}} */
+/* }}} */
 
 /* {{{ php_oci_lob_append()
  Append data to the end of the LOB */

@@ -591,31 +591,35 @@ end_raw_value_chars:
 		return 0;
 	}
 
-	while (YYCURSOR < YYLIMIT) {
-		switch (*YYCURSOR++) {
+	unsigned char *s = SCNG(yy_text);
+
+	while (s < YYLIMIT) {
+		switch (*s++) {
 			case '"':
-				if (YYCURSOR < YYLIMIT && YYCURSOR[-2] == '\\' && *YYCURSOR != '\r' && *YYCURSOR != '\n') {
-					continue;
-				}
 				break;
 			case '$':
-				if (*YYCURSOR == '{') {
+				if (s < YYLIMIT && *s == '{') {
 					break;
 				}
 				continue;
 			case '\\':
-				if (YYCURSOR < YYLIMIT && *YYCURSOR != '"') {
-					YYCURSOR++;
+				if (s < YYLIMIT) {
+					unsigned char escaped = *s++;
+					/* A special case for Windows paths, e.g. key="C:\path\" */
+					if (escaped == '"' && (s >= YYLIMIT || *s == '\n' || *s == '\r')) {
+						break;
+					}
 				}
 				ZEND_FALLTHROUGH;
 			default:
 				continue;
 		}
 
-		YYCURSOR--;
+		s--;
 		break;
 	}
 
+	YYCURSOR = s;
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"');

@@ -5,34 +5,34 @@ SPL: ArrayIterator overloading
 
 class ArrayIteratorEx extends ArrayIterator
 {
-    function rewind()
+    function rewind(): void
     {
         echo __METHOD__ . "\n";
         ArrayIterator::rewind();
     }
 
-    function valid()
+    function valid(): bool
     {
         echo __METHOD__ . "\n";
         return ArrayIterator::valid();
     }
 
-    function key()
+    function key(): string|int|null
     {
         echo __METHOD__ . "\n";
         return ArrayIterator::key();
     }
 
-    function current()
+    function current(): mixed
     {
         echo __METHOD__ . "\n";
         return ArrayIterator::current();
     }
 
-    function next()
+    function next(): void
     {
         echo __METHOD__ . "\n";
-        return ArrayIterator::next();
+        ArrayIterator::next();
     }
 }
 

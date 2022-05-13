@@ -6,11 +6,11 @@ Sebastian Schürmann
 <?php
 class myIterator implements Iterator {
 
-    function current() {}
-    function next() {}
-    function key() {}
-    function valid() {}
-    function rewind() {}
+    function current(): mixed {}
+    function next(): void {}
+    function key(): mixed {}
+    function valid(): bool {}
+    function rewind(): void {}
 
 }
 try {

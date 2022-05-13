@@ -1,9 +1,7 @@
 --TEST--
 Bug #72714 (_xml_startElementHandler() segmentation fault)
---SKIPIF--
-<?php
-if (!extension_loaded('xml')) die('skip xml extension not available');
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 function startElement($parser, $name, $attribs) {

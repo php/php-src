@@ -1,7 +1,7 @@
 --TEST--
 GET/POST/REQUEST Test with input_filter
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --POST--
 d=379
 --GET--

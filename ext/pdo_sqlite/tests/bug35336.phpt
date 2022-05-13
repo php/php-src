@@ -1,9 +1,7 @@
 --TEST--
 Bug #35336 (crash on PDO::FETCH_CLASS + __set())
---SKIPIF--
-<?php
-if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
-?>
+--EXTENSIONS--
+pdo_sqlite
 --FILE--
 <?php
 class EEE {

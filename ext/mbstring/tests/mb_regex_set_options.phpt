@@ -1,8 +1,9 @@
 --TEST--
 mb_regex_set_options()
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die("skip mbstring not available\n");
 function_exists('mb_regex_set_options') or die("skip\n");
 ?>
 --FILE--

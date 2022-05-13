@@ -1,10 +1,7 @@
 --TEST--
 Test mb_strpos() function : mb_strpos bounds check is byte count rather than a character count
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

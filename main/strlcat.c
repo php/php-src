@@ -61,10 +61,7 @@ static const char *rcsid = "$OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtuck
  * Returns strlen(src) + MIN(siz, strlen(initial dst).
  * If retval >= siz, truncation occurred.
  */
-PHPAPI size_t php_strlcat(dst, src, siz)
-	char *dst;
-	const char *src;
-	size_t siz;
+PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz)
 {
 	const char *d = dst;
 	const char *s = src;

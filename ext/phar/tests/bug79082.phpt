@@ -1,8 +1,9 @@
 --TEST--
 Phar: Bug #79082: Files added to tar with Phar::buildFromIterator have all-access permissions
+--EXTENSIONS--
+phar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
 if (defined("PHP_WINDOWS_VERSION_MAJOR")) die("skip not for Windows")
 ?>
 --FILE--

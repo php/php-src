@@ -1,11 +1,15 @@
 --TEST--
 Check for default OpenSSL config path on Windows
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip windows only test');
 }
 ?>
+--ENV--
+OPENSSL_CONF=
 --FILE--
 <?php
 

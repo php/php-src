@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fa11774e0b29ff4f711f1677b395545334e1aee9 */
+ * Stub hash: cce88c2e27bd0b0fc7f68defdb0556b053e7dc81 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -62,8 +62,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_convertToDat
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_copy, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_count, 0, 0, IS_LONG, 0)
@@ -119,7 +119,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetExist
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_offsetGet, 0, 1, PharFileInfo, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_Phar_offsetGet, 0, 1, SplFileInfo, 0)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
@@ -128,7 +128,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetSet, 
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_offsetUnset arginfo_class_Phar_offsetExists
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, localName)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
@@ -297,7 +299,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_offsetSet arginfo_class_Phar_offsetSet
 
-#define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetExists
+#define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetUnset
 
 #define arginfo_class_PharData_setAlias arginfo_class_Phar_setAlias
 

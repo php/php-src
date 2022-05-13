@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_parse() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert = "file://" . __DIR__ . "/cert.crt";
@@ -153,10 +153,9 @@ array(16) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
-    string(202) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
+    string(%d) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
 DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2
-"
+serial:AE:C5:56:CC:72:37:50:A2%A"
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
   }
@@ -301,10 +300,9 @@ array(16) {
     ["subjectKeyIdentifier"]=>
     string(59) "DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D"
     ["authorityKeyIdentifier"]=>
-    string(202) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
+    string(%d) "keyid:DB:7E:40:72:BD:5C:35:85:EC:29:29:81:12:E8:62:68:6A:B7:3F:7D
 DirName:/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net
-serial:AE:C5:56:CC:72:37:50:A2
-"
+serial:AE:C5:56:CC:72:37:50:A2%A"
     ["basicConstraints"]=>
     string(7) "CA:TRUE"
   }

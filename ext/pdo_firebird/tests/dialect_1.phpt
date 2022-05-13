@@ -1,5 +1,7 @@
 --TEST--
 PDO_Firebird: support 1 sql dialect
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc');
 if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {

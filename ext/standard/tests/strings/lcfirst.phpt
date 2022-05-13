@@ -130,6 +130,7 @@ var_dump(lcfirst(lcfirst("hello")));
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 #### Basic and Various operations ####
 string(16) "tesTing lcfirst."
 string(17) "1.testing lcfirst"

@@ -1,11 +1,7 @@
 --TEST--
 Test xml_set_start_namespace_decl_handler function: basic
---SKIPIF--
-<?php
-if (!extension_loaded("xml")) {
-    print "skip - XML extension not loaded";
-}
-?>
+--EXTENSIONS--
+xml
 --FILE--
 <?php
 $xml = <<<HERE

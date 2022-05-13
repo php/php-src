@@ -1,8 +1,9 @@
 --TEST--
 Bug #51605 Mysqli - zombie links
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

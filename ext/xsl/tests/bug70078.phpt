@@ -1,9 +1,7 @@
 --TEST--
 Bug #70078 (XSL callbacks with nodes as parameter leak memory)
---SKIPIF--
-<?php
-if (!extension_loaded('xsl')) die('skip xsl extension not available');
-?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 // create big dummy document:

@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2201) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2232) "Class [ <internal:Core> class Exception implements Stringable, Throwable ] {
 
   - Constants [0] {
   }
@@ -54,7 +54,7 @@ string(2201) "Class [ <internal:Core> class Exception implements Throwable, Stri
     Property [ protected $code = 0 ]
     Property [ protected string $file = '' ]
     Property [ protected int $line = 0 ]
-    Property [ private array $trace = Array ]
+    Property [ private array $trace = [] ]
     Property [ private ?Throwable $previous = NULL ]
   }
 
@@ -79,6 +79,7 @@ string(2201) "Class [ <internal:Core> class Exception implements Throwable, Stri
 
       - Parameters [0] {
       }
+      - Tentative return [ void ]
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getMessage ] {

@@ -22,10 +22,16 @@ interface Throwable extends Stringable
 
 class Exception implements Throwable
 {
-    /** @var string Intentionally left untyped for BC reasons */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var string
+     */
     protected $message = "";
     private string $string = "";
-    /** @var int Intentionally left untyped for BC reasons */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var int
+     */
     protected $code = 0;
     protected string $file = "";
     protected int $line = 0;
@@ -36,8 +42,8 @@ class Exception implements Throwable
 
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
-    /** @return void */
-    public function __wakeup() {}
+    /** @tentative-return-type */
+    public function __wakeup(): void {}
 
     final public function getMessage(): string {}
 
@@ -75,10 +81,16 @@ class ErrorException extends Exception
 
 class Error implements Throwable
 {
-    /** @var string Intentionally left untyped for BC reasons */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var string
+     */
     protected $message = "";
     private string $string = "";
-    /** @var int Intentionally left untyped for BC reasons */
+    /**
+     * Intentionally left untyped for BC reasons
+     * @var int
+     */
     protected $code = 0;
     protected string $file = "";
     protected int $line;
@@ -92,10 +104,10 @@ class Error implements Throwable
     public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null) {}
 
     /**
-     * @return void
+     * @tentative-return-type
      * @implementation-alias Exception::__wakeup
      */
-    public function __wakeup() {}
+    public function __wakeup(): void {}
 
     /** @implementation-alias Exception::getMessage */
     final public function getMessage(): string {}

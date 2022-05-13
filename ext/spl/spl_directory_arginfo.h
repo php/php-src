@@ -1,83 +1,90 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00139cce188b3950e5a7606c70c5848c6280851d */
+ * Stub hash: 3ada856cfa2e50708b43125f819706176b1953f7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_getPath, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo_getPath, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileInfo_getFilename arginfo_class_SplFileInfo_getPath
 
 #define arginfo_class_SplFileInfo_getExtension arginfo_class_SplFileInfo_getPath
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_getBasename, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo_getBasename, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, suffix, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFileInfo_getPathname arginfo_class_SplFileInfo_getPath
 
-#define arginfo_class_SplFileInfo_getPerms arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileInfo_getPerms, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo_getInode arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getInode arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getSize arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getSize arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getOwner arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getOwner arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getGroup arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getGroup arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getATime arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getATime arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getMTime arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getMTime arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getCTime arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getCTime arginfo_class_SplFileInfo_getPerms
 
-#define arginfo_class_SplFileInfo_getType arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileInfo_getType, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo_isWritable arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo_isWritable, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo_isReadable arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_isReadable arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileInfo_isExecutable arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_isExecutable arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileInfo_isFile arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_isFile arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileInfo_isDir arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_isDir arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileInfo_isLink arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_isLink arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileInfo_getLinkTarget arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getLinkTarget arginfo_class_SplFileInfo_getType
 
-#define arginfo_class_SplFileInfo_getRealPath arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileInfo_getRealPath arginfo_class_SplFileInfo_getType
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_getFileInfo, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SplFileInfo_getFileInfo, 0, 0, SplFileInfo, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo_getPathInfo arginfo_class_SplFileInfo_getFileInfo
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SplFileInfo_getPathInfo, 0, 0, SplFileInfo, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_openFile, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SplFileInfo_openFile, 0, 0, SplFileObject, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"r\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, useIncludePath, _IS_BOOL, 0, "false")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_setFileClass, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo_setFileClass, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class, IS_STRING, 0, "SplFileObject::class")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo_setInfoClass, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo_setInfoClass, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class, IS_STRING, 0, "SplFileInfo::class")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo___debugInfo arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo___debugInfo, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileInfo__bad_state_ex arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo__bad_state_ex, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DirectoryIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
@@ -89,19 +96,20 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DirectoryIterator_getBasename arginfo_class_SplFileInfo_getBasename
 
-#define arginfo_class_DirectoryIterator_isDot arginfo_class_SplFileInfo_getPath
+#define arginfo_class_DirectoryIterator_isDot arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_DirectoryIterator_rewind arginfo_class_SplFileInfo_getPath
+#define arginfo_class_DirectoryIterator_rewind arginfo_class_SplFileInfo__bad_state_ex
 
-#define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_getPath
+#define arginfo_class_DirectoryIterator_valid arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_DirectoryIterator_key arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_key, 0, 0, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DirectoryIterator_current arginfo_class_SplFileInfo_getPath
+#define arginfo_class_DirectoryIterator_current arginfo_class_DirectoryIterator_key
 
-#define arginfo_class_DirectoryIterator_next arginfo_class_SplFileInfo_getPath
+#define arginfo_class_DirectoryIterator_next arginfo_class_SplFileInfo__bad_state_ex
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DirectoryIterator_seek, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DirectoryIterator_seek, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -112,15 +120,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FilesystemIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_FilesystemIterator_rewind arginfo_class_SplFileInfo_getPath
+#define arginfo_class_FilesystemIterator_rewind arginfo_class_SplFileInfo__bad_state_ex
 
 #define arginfo_class_FilesystemIterator_key arginfo_class_SplFileInfo_getPath
 
-#define arginfo_class_FilesystemIterator_current arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_FilesystemIterator_current, 0, 0, SplFileInfo|FilesystemIterator, MAY_BE_STRING)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_FilesystemIterator_getFlags arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_FilesystemIterator_getFlags, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FilesystemIterator_setFlags, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_FilesystemIterator_setFlags, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -129,11 +139,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveDirectoryIterator___construct, 0, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveDirectoryIterator_hasChildren, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_RecursiveDirectoryIterator_hasChildren, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, allowLinks, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_RecursiveDirectoryIterator_getChildren arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveDirectoryIterator_getChildren, 0, 0, RecursiveDirectoryIterator, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveDirectoryIterator_getSubPath arginfo_class_SplFileInfo_getPath
 
@@ -147,7 +158,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GLOB)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_GlobIterator_count, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_GlobIterator_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -158,25 +169,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject___construct, 0, 0, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_rewind arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_rewind arginfo_class_SplFileInfo__bad_state_ex
 
-#define arginfo_class_SplFileObject_eof arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_eof arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileObject_valid arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_valid arginfo_class_SplFileInfo_isWritable
 
 #define arginfo_class_SplFileObject_fgets arginfo_class_SplFileInfo_getPath
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fread, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fread, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fgetcsv, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fgetcsv, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escape, IS_STRING, 0, "\"\\\\\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fputcsv, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fputcsv, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, fields, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
@@ -184,65 +195,72 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fputcsv, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, eol, IS_STRING, 0, "\"\\n\"")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_setCsvControl arginfo_class_SplFileObject_fgetcsv
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_setCsvControl, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, separator, IS_STRING, 0, "\",\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enclosure, IS_STRING, 0, "\"\\\"\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, escape, IS_STRING, 0, "\"\\\\\"")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_getCsvControl arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_getCsvControl arginfo_class_SplFileInfo___debugInfo
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_flock, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_flock, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, operation, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, wouldBlock, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_fflush arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_fflush arginfo_class_SplFileInfo_isWritable
 
-#define arginfo_class_SplFileObject_ftell arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_ftell arginfo_class_SplFileInfo_getPerms
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fseek, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_fseek, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, whence, IS_LONG, 0, "SEEK_SET")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_fgetc arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_fgetc arginfo_class_SplFileInfo_getType
 
-#define arginfo_class_SplFileObject_fpassthru arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_fpassthru arginfo_class_FilesystemIterator_getFlags
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fscanf, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fscanf, 0, 1, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_fwrite, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_fwrite, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_fstat arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_fstat arginfo_class_SplFileInfo___debugInfo
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_ftruncate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_ftruncate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_current arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SplFileObject_current, 0, 0, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_key arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_key arginfo_class_FilesystemIterator_getFlags
 
-#define arginfo_class_SplFileObject_next arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_next arginfo_class_SplFileInfo__bad_state_ex
 
 #define arginfo_class_SplFileObject_setFlags arginfo_class_FilesystemIterator_setFlags
 
-#define arginfo_class_SplFileObject_getFlags arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_getFlags arginfo_class_FilesystemIterator_getFlags
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_setMaxLineLen, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_setMaxLineLen, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, maxLength, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_getMaxLineLen arginfo_class_SplFileInfo_getPath
+#define arginfo_class_SplFileObject_getMaxLineLen arginfo_class_FilesystemIterator_getFlags
 
-#define arginfo_class_SplFileObject_hasChildren arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_hasChildren, 0, 0, IS_FALSE, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_SplFileObject_getChildren arginfo_class_SplFileInfo_getPath
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_getChildren, 0, 0, IS_NULL, 1)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileObject_seek, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFileObject_seek, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, line, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -479,6 +497,7 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 
 	INIT_CLASS_ENTRY(ce, "SplFileInfo", class_SplFileInfo_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;

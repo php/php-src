@@ -1,7 +1,7 @@
 --TEST--
 Phar: truncated tar
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 try {
@@ -10,11 +10,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 
-?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 ?>
 --EXPECTF--
 phar error: "%strunc.tar" is a corrupted tar file (truncated)

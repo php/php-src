@@ -1,5 +1,7 @@
 --TEST--
 PostgreSQL pg_escape_bytea() functions (before connection)
+--EXTENSIONS--
+pgsql
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
@@ -26,5 +28,6 @@ else {
     echo "OK";
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OK

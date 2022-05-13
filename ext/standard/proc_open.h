@@ -41,6 +41,6 @@ typedef struct _php_process_handle {
 #endif
 	int npipes;
 	zend_resource **pipes;
-	char *command;
+	zend_string *command;
 	php_process_env env;
 } php_process_handle;

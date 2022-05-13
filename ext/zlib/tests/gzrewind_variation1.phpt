@@ -1,11 +1,7 @@
 --TEST--
 Test function gzrewind() by calling it with its expected arguments when writing
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $f = "gzrewind_variation1.txt.gz";

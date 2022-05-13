@@ -4,7 +4,7 @@ SPL: Error: iterator_to_array when the current operation throws an exception
 <?php
 
 class MyArrayIterator extends ArrayIterator {
-    public function current() {
+    public function current(): mixed {
         throw new Exception('Make the iterator break');
     }
 }

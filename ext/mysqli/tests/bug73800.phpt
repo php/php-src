@@ -1,8 +1,9 @@
 --TEST--
 Bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE)
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (PHP_INT_SIZE != 8) die('skip requires 64-bit');
 if (!defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) die('skip requires mysqlnd');

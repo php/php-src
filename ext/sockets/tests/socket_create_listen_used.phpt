@@ -3,12 +3,8 @@ ext/sockets - socket_create_listen - test for used socket
 --CREDITS--
 Florian Anderiasch
 fa@php.net
---SKIPIF--
-<?php
-if (!extension_loaded('sockets')) {
-    die('skip - sockets extension not available.');
-}
-?>
+--EXTENSIONS--
+sockets
 --FILE--
 <?php
 $s_c_l = socket_create_listen(0);

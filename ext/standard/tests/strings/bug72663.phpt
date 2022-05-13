@@ -19,7 +19,7 @@ var_dump(unserialize($exploit));
 ?>
 DONE
 --EXPECTF--
-Deprecated: The Serializable interface is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
+Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
 Notice: unserialize(): Unexpected end of serialized data in %sbug72663.php on line %d
 

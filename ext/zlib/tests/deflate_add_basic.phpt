@@ -1,11 +1,7 @@
 --TEST--
 Test incremental deflate_add() functionality
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 

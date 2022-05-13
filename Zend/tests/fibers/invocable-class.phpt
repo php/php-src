@@ -20,8 +20,8 @@ $fiber = new Fiber($test);
 $fiber->start();
 
 ?>
---EXPECT--
-object(Test)#1 (0) {
+--EXPECTF--
+object(Test)#%d (0) {
 }
-object(Test)#1 (0) {
+object(Test)#%d (0) {
 }

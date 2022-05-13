@@ -1,11 +1,7 @@
 --TEST--
 Test gzopen() function : basic functionality
---SKIPIF--
-<?php
-if (!extension_loaded("zlib")) {
-    print "skip - ZLIB extension not loaded";
-}
-?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 echo "*** Testing gzopen() : basic functionality ***\n";

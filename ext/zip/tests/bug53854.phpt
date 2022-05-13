@@ -1,9 +1,7 @@
 --TEST--
 Bug #53854 (Missing constants for compression type)
---SKIPIF--
-<?php
-if(!extension_loaded('zip')) die('skip');
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 

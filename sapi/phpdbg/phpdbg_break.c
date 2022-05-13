@@ -19,7 +19,6 @@
 #include "phpdbg.h"
 #include "phpdbg_print.h"
 #include "phpdbg_utils.h"
-#include "phpdbg_opcode.h"
 #include "phpdbg_break.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_prompt.h"

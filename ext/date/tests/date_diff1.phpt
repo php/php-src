@@ -28,7 +28,7 @@ object(DateTime)#2 (3) {
   ["timezone"]=>
   string(3) "EDT"
 }
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -36,29 +36,17 @@ object(DateInterval)#%d (16) {
   ["d"]=>
   int(2)
   ["h"]=>
-  int(16)
+  int(%d)
   ["i"]=>
   int(19)
   ["s"]=>
   int(40)
   ["f"]=>
   float(0)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
   ["invert"]=>
   int(0)
   ["days"]=>
   int(33)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }

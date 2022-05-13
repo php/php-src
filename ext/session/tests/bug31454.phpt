@@ -1,5 +1,7 @@
 --TEST--
 Bug #31454 (session_set_save_handler crashes PHP when supplied non-existent object ref)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

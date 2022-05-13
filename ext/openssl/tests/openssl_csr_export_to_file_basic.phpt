@@ -1,7 +1,7 @@
 --TEST--
 openssl_csr_export_to_file() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $csrfile = __DIR__ . "/openssl_csr_export_to_file_csr.tmp";

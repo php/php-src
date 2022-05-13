@@ -1,9 +1,9 @@
 --TEST--
 Phar::conversion to other formats
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip no zlib"); ?>
-<?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
+--EXTENSIONS--
+phar
+zlib
+bz2
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -155,11 +155,8 @@ echo $e->getMessage() . "\n";
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar.bz2');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.tbz');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');

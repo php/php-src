@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_get_result - data types
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-    require_once('skipif.inc');
     require_once('skipifconnectfailure.inc');
 
     if (!function_exists('mysqli_stmt_get_result'))
@@ -163,7 +164,7 @@ mysqli_stmt_get_result - data types
     func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT UNSIGNED", 18446744073709551615 + 1.1, 640);
     func_mysqli_stmt_get_result($link, $engine, "d", "FLOAT UNSIGNED ", NULL, 660);
 
-    // Yes, we need the temporary variable. The PHP casting will fouls us otherwise.
+    // Yes, we need the temporary variable. The PHP casting will foul us otherwise.
     $tmp = strval('-99999999.99');
     func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2)", $tmp, 680, "string");
     func_mysqli_stmt_get_result($link, $engine, "d", "DOUBLE(10,2)", NULL, 700);

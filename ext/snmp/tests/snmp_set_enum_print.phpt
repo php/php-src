@@ -2,6 +2,8 @@
 Function snmp_set_enum_print
 --CREDITS--
 Olivier Doucet
+--EXTENSIONS--
+snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');

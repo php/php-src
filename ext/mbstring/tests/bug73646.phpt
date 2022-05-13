@@ -1,8 +1,9 @@
 --TEST--
 Bug #73646 (mb_ereg_search_init null pointer dereference)
+--EXTENSIONS--
+mbstring
 --SKIPIF--
 <?php
-require 'skipif.inc';
 if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--

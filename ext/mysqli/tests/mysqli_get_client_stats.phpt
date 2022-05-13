@@ -1,8 +1,9 @@
 --TEST--
 mysqli_get_client_stats()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?PHP
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_client_stats')) {
     die("skip only available with mysqlnd");

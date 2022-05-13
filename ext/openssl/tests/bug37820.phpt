@@ -1,9 +1,7 @@
 --TEST--
 openssl_sign/verify: accept different algos
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $dir = __DIR__;

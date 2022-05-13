@@ -26,9 +26,12 @@ BEGIN_EXTERN_C()
 typedef void (*zend_string_copy_storage_func_t)(void);
 typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
 typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, bool permanent);
+typedef zend_string *(ZEND_FASTCALL *zend_string_init_existing_interned_func_t)(const char *str, size_t size, bool permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
+/* Init an interned string if it already exists, but do not create a new one if it does not. */
+ZEND_API extern zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
 
 ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
@@ -46,7 +49,10 @@ ZEND_API void zend_interned_strings_init(void);
 ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
-ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
+ZEND_API void zend_interned_strings_set_request_storage_handlers(
+	zend_new_interned_string_func_t handler,
+	zend_string_init_interned_func_t init_handler,
+	zend_string_init_existing_interned_func_t init_existing_handler);
 ZEND_API void zend_interned_strings_switch_storage(bool request);
 
 ZEND_API extern zend_string  *zend_empty_string;
@@ -82,6 +88,9 @@ END_EXTERN_C()
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
 #define _ZSTR_STRUCT_SIZE(len) (_ZSTR_HEADER_SIZE + len + 1)
+
+#define ZSTR_MAX_OVERHEAD (ZEND_MM_ALIGNED_SIZE(_ZSTR_HEADER_SIZE + 1))
+#define ZSTR_MAX_LEN (SIZE_MAX - ZSTR_MAX_OVERHEAD)
 
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
@@ -330,23 +339,28 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 	}
 }
 
+static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
+}
+
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
@@ -358,7 +372,20 @@ static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *
 	(ZSTR_LEN(str) == sizeof(c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
 
 #define zend_string_equals_literal(str, literal) \
-	(ZSTR_LEN(str) == sizeof(literal)-1 && !memcmp(ZSTR_VAL(str), literal, sizeof(literal) - 1))
+	zend_string_equals_cstr(str, literal, strlen(literal))
+
+static zend_always_inline bool zend_string_starts_with_cstr(const zend_string *str, const char *prefix, size_t prefix_length)
+{
+	return ZSTR_LEN(str) >= prefix_length && !memcmp(ZSTR_VAL(str), prefix, prefix_length);
+}
+
+static zend_always_inline bool zend_string_starts_with(const zend_string *str, const zend_string *prefix)
+{
+	return zend_string_starts_with_cstr(str, ZSTR_VAL(prefix), ZSTR_LEN(prefix));
+}
+
+#define zend_string_starts_with_literal(str, prefix) \
+	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
@@ -420,25 +447,25 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 			((chunk >> (8 * 7)) & 0xff);
 # else
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[4] * 33 * 33 * 33 +
-			str[5] * 33 * 33 +
-			str[6] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[4] * Z_L(33 * 33 * 33) +
+			str[5] * Z_L(33 * 33) +
+			str[6] * Z_L(33) +
 			str[7];
 # endif
 	}
 	if (len >= 4) {
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		len -= 4;
 		str += 4;
@@ -446,18 +473,18 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 	if (len >= 2) {
 		if (len > 2) {
 			hash =
-				hash   * 33 * 33 * 33 +
-				str[0] * 33 * 33 +
-				str[1] * 33 +
+				hash   * Z_L(33 * 33 * 33) +
+				str[0] * Z_L(33 * 33) +
+				str[1] * Z_L(33) +
 				str[2];
 		} else {
 			hash =
-				hash   * 33 * 33 +
-				str[0] * 33 +
+				hash   * Z_L(33 * 33) +
+				str[0] * Z_L(33) +
 				str[1];
 		}
 	} else if (len != 0) {
-		hash = hash * 33 + *str;
+		hash = hash * Z_L(33) + *str;
 	}
 #else
 	/* variant with the hash unrolled eight times */
@@ -562,6 +589,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
+	_(ZEND_STR_COUNT,                  "count") \
 
 
 typedef enum _zend_known_string_id {

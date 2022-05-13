@@ -36,14 +36,14 @@ using icu::UCharCharacterIterator;
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator)
 
 CodePointBreakIterator::CodePointBreakIterator()
-: BreakIterator(), fCharIter(NULL), lastCodePoint(U_SENTINEL)
+: BreakIterator(), lastCodePoint(U_SENTINEL), fCharIter(NULL)
 {
 	UErrorCode uec = UErrorCode();
 	this->fText = utext_openUChars(NULL, NULL, 0, &uec);
 }
 
 CodePointBreakIterator::CodePointBreakIterator(const PHP::CodePointBreakIterator &other)
-: BreakIterator(other), fText(NULL), fCharIter(NULL), lastCodePoint(U_SENTINEL)
+: BreakIterator(other), fText(NULL), lastCodePoint(U_SENTINEL), fCharIter(NULL)
 {
 	*this = other;
 }
@@ -73,7 +73,11 @@ CodePointBreakIterator::~CodePointBreakIterator()
 	clearCurrentCharIter();
 }
 
+#if U_ICU_VERSION_MAJOR_NUM >= 70
+bool CodePointBreakIterator::operator==(const BreakIterator& that) const
+#else
 UBool CodePointBreakIterator::operator==(const BreakIterator& that) const
+#endif
 {
 	if (typeid(*this) != typeid(that)) {
 		return false;

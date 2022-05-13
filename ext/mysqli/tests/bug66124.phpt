@@ -1,10 +1,10 @@
 --TEST--
 Bug #66124 (mysqli under mysqlnd loses precision when bind_param with 'i')
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

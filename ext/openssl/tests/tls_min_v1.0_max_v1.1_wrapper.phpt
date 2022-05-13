@@ -1,8 +1,9 @@
 --TEST--
 tls stream wrapper with min version 1.0 and max version 1.1
+--EXTENSIONS--
+openssl
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
 ?>
 --FILE--
@@ -15,7 +16,7 @@ $serverCode = <<<'CODE'
         'local_cert' => '%s',
         'min_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_0,
         'max_proto_version' => STREAM_CRYPTO_PROTO_TLSv1_1,
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     $server = stream_socket_server('tls://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
@@ -32,7 +33,7 @@ $clientCode = <<<'CODE'
     $ctx = stream_context_create(['ssl' => [
         'verify_peer' => false,
         'verify_peer_name' => false,
-        'security_level' => 1,
+        'security_level' => 0,
     ]]);
 
     phpt_wait();

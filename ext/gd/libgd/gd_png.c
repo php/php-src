@@ -71,6 +71,11 @@ static void gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
 
 	longjmp (jmpbuf_ptr->jmpbuf, 1);
 }
+
+static void gdPngWarningHandler (png_structp png_ptr, png_const_charp msg)
+{
+	gd_error_ex(GD_WARNING, "gd-png: libpng warning: %s", msg);
+}
 #endif
 
 static void gdPngReadData (png_structp png_ptr, png_bytep data, png_size_t length)
@@ -152,7 +157,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	}
 
 #ifdef PNG_SETJMP_SUPPORTED
-	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, NULL);
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, gdPngWarningHandler);
 #else
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
@@ -331,6 +336,11 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			break;
 	}
 
+	/* enable the interlace transform if supported */
+#ifdef PNG_READ_INTERLACING_SUPPORTED
+	(void)png_set_interlace_handling(png_ptr);
+#endif
+
 	png_read_update_info(png_ptr, info_ptr);
 
 	/* allocate space for the PNG image data */
@@ -494,7 +504,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 #ifdef PNG_SETJMP_SUPPORTED
 	jmpbuf_wrapper jbw;
 
-	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, NULL);
+	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, &jbw, gdPngErrorHandler, gdPngWarningHandler);
 #else
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 #endif
@@ -728,12 +738,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
 					 */
 					a = gdTrueColorGetAlpha(thisPixel);
 					/* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */
-					if (a == 127) {
-						*pOutputRow++ = 0;
-					} else {
-						*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
-					}
-
+					*pOutputRow++ = 255 - ((a << 1) + (a >> 6));
 				}
 			}
 		}

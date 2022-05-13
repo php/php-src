@@ -1,5 +1,7 @@
 --TEST--
 Bug #71972 (Cyclic references causing session_start(): Failed to decode session object)
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--

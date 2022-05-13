@@ -13,6 +13,8 @@ function getContinentList() {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
+
   function __construct($wsdl, $options=array()) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);

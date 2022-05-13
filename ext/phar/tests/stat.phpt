@@ -1,7 +1,7 @@
 --TEST--
 Phar: test stat function interceptions
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");?>
+--EXTENSIONS--
+phar
 --INI--
 phar.require_hash=1
 phar.readonly=0

@@ -8,12 +8,9 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class SOAPComplexTypeComplexType {
-    function __construct($s, $i, $f, $c) {
-        $this->varString = $s;
-        $this->varInt = $i;
-        $this->varFloat = $f;
-        $this->varComplexType = $c;
-    }
+    function __construct(
+        public $varString, public $varInt, public $varFloat, public $varComplexType
+    ) {}
 }
 $struct = new SOAPComplexTypeComplexType("arg",34,12.345,NULL);
 unset($struct->varComplexType);

@@ -1,8 +1,9 @@
 --TEST--
 mysqli_stmt_num_rows()
+--EXTENSIONS--
+mysqli
 --SKIPIF--
 <?php
-require_once('skipif.inc');
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
@@ -79,7 +80,7 @@ require_once('skipifconnectfailure.inc');
         What the test does is cover an implementation detail of the mysqlnd library.
         This implementation detail may, at any time, change without prior notice.
         On the contrary, the mysqlnd way is a reasonable one and, maybe, one fine
-        day, after Klingons visited earh, becomes the official one. Meanwhile do
+        day, after Klingons visited earth, becomes the official one. Meanwhile, do
         not rely on it.
         */
         if ($IS_MYSQLND && (7 !== ($tmp = mysqli_stmt_num_rows($stmt))))

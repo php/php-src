@@ -54,7 +54,7 @@ typedef struct _phpdbg_breakbase_t {
  */
 typedef struct _phpdbg_breakfile_t {
 	phpdbg_breakbase(filename);
-	long        line;
+	zend_ulong line;
 } phpdbg_breakfile_t;
 
 /**
@@ -123,7 +123,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file); /* }}} */
 
 /* {{{ Breakpoint Creation API */
-PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, size_t path_len, long lineno);
+PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, size_t path_len, zend_ulong lineno);
 PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* func_name, size_t func_name_len);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name);
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char* opname, size_t opname_len);

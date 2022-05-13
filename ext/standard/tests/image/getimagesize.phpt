@@ -23,7 +23,7 @@ GetImageSize()
     var_dump($result);
 ?>
 --EXPECT--
-array(16) {
+array(17) {
   ["test-1pix.bmp"]=>
   array(6) {
     [0]=>
@@ -68,6 +68,23 @@ array(16) {
     int(32)
     ["mime"]=>
     string(9) "image/bmp"
+  }
+  ["test1pix.avif"]=>
+  array(7) {
+    [0]=>
+    int(102)
+    [1]=>
+    int(121)
+    [2]=>
+    int(19)
+    [3]=>
+    string(24) "width="102" height="121""
+    ["bits"]=>
+    int(8)
+    ["channels"]=>
+    int(4)
+    ["mime"]=>
+    string(10) "image/avif"
   }
   ["test1pix.bmp"]=>
   array(6) {

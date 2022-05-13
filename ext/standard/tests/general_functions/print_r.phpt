@@ -136,6 +136,7 @@ $arrays = array (
 check_printr($arrays);
 
 echo "\n*** Testing print_r() on object variables ***\n";
+#[AllowDynamicProperties]
 class object_class
 {
   var       $value;
@@ -168,6 +169,7 @@ class no_member_class {
 }
 
 /* class with member as object of other class */
+#[AllowDynamicProperties]
 class contains_object_class
 {
    var       $p = 30;

@@ -63,3 +63,17 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, .
 
 	zend_throw_exception_object(&sql_ex);
 }
+
+PHP_METHOD(mysqli_sql_exception, getSqlState)
+{
+	zval *prop;
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	prop = zend_read_property(mysqli_exception_class_entry, Z_OBJ_P(ZEND_THIS), "sqlstate", sizeof("sqlstate")-1, 1, &rv);
+	ZVAL_DEREF(prop);
+	zend_string *str = zval_get_string(prop);
+	
+	RETURN_STR(str);
+}

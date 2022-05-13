@@ -57,7 +57,7 @@ PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);
 PHPAPI zval *php_stream_context_get_option(php_stream_context *context,
 		const char *wrappername, const char *optionname);
-PHPAPI int php_stream_context_set_option(php_stream_context *context,
+PHPAPI void php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue);
 
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);

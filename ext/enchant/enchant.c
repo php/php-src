@@ -22,7 +22,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "Zend/zend_interfaces.h"
 #include "Zend/zend_exceptions.h"
 #include "../spl/spl_exceptions.h"
 #include <enchant.h>
@@ -188,8 +187,6 @@ PHP_MINIT_FUNCTION(enchant)
 {
 	enchant_broker_ce = register_class_EnchantBroker();
 	enchant_broker_ce->create_object = enchant_broker_create_object;
-	enchant_broker_ce->serialize = zend_class_serialize_deny;
-	enchant_broker_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_broker_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_broker_handlers.offset = XtOffsetOf(enchant_broker, std);
@@ -199,8 +196,6 @@ PHP_MINIT_FUNCTION(enchant)
 
 	enchant_dict_ce = register_class_EnchantDictionary();
 	enchant_dict_ce->create_object = enchant_dict_create_object;
-	enchant_dict_ce->serialize = zend_class_serialize_deny;
-	enchant_dict_ce->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&enchant_dict_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	enchant_dict_handlers.offset = XtOffsetOf(enchant_dict, std);

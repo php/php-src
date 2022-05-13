@@ -12,7 +12,7 @@ function php_cli_server_start(
     ?string $router = 'index.php',
     array $cmd_args = []
 ): CliServerInfo {
-    $php_executable = getenv('TEST_PHP_EXECUTABLE');
+    $php_executable = getenv('TEST_PHP_EXECUTABLE') ?: PHP_BINARY;
     $error = null;
 
     // Create dedicated doc root to avoid index.php clashes between tests.

@@ -1,7 +1,7 @@
 --TEST--
 Bind tests with SQLT_AFC
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die ("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

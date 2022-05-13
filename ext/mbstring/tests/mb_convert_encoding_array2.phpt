@@ -1,10 +1,7 @@
 --TEST--
 Test mb_convert_encoding() function : Circular references
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-function_exists('mb_convert_encoding') or die("skip mb_convert_encoding() is not available in this build");
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 /*

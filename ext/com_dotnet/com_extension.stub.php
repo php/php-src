@@ -62,10 +62,11 @@ function com_event_sink(variant $variant, object $sink_object, array|string|null
 
 function com_print_typeinfo(variant|string $variant, ?string $dispatch_interface = null, bool $display_sink = false): bool {}
 
-function com_message_pump(int $timeout_milliseconds  = 0): bool {}
+function com_message_pump(int $timeout_milliseconds = 0): bool {}
 
 function com_load_typelib(string $typelib, bool $case_insensitive = true): bool {}
 
+/** @not-serializable */
 class variant
 {
     public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}

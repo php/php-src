@@ -1000,9 +1000,9 @@ Since:
 PHP_METHOD(DOMNode, replaceChild)
 {
 	zval *id, *newnode, *oldnode;
-	xmlNodePtr children, newchild, oldchild, nodep;
+	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
-	int foundoldchild = 0, stricterror;
+	int stricterror;
 
 	int ret;
 
@@ -1020,8 +1020,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
 	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
-	children = nodep->children;
-	if (!children) {
+	if (!nodep->children) {
 		RETURN_FALSE;
 	}
 
@@ -1043,42 +1042,32 @@ PHP_METHOD(DOMNode, replaceChild)
 		RETURN_FALSE;
 	}
 
-	/* check for the old child and whether the new child is already a child */
-	while (children) {
-		if (children == oldchild) {
-			foundoldchild = 1;
-			break;
-		}
-		children = children->next;
-	}
-
-	if (foundoldchild) {
-		if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
-			xmlNodePtr prevsib, nextsib;
-			prevsib = oldchild->prev;
-			nextsib = oldchild->next;
-
-			xmlUnlinkNode(oldchild);
-
-			newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
-			if (newchild) {
-				dom_reconcile_ns(nodep->doc, newchild);
-			}
-		} else if (oldchild != newchild) {
-			if (newchild->doc == NULL && nodep->doc != NULL) {
-				xmlSetTreeDoc(newchild, nodep->doc);
-				newchildobj->document = intern->document;
-				php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
-			}
-			xmlReplaceNode(oldchild, newchild);
-			dom_reconcile_ns(nodep->doc, newchild);
-		}
-		DOM_RET_OBJ(oldchild, &ret, intern);
-		return;
-	} else {
+	if (oldchild->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
+
+	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNodePtr prevsib, nextsib;
+		prevsib = oldchild->prev;
+		nextsib = oldchild->next;
+
+		xmlUnlinkNode(oldchild);
+
+		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
+		if (newchild) {
+			dom_reconcile_ns(nodep->doc, newchild);
+		}
+	} else if (oldchild != newchild) {
+		if (newchild->doc == NULL && nodep->doc != NULL) {
+			xmlSetTreeDoc(newchild, nodep->doc);
+			newchildobj->document = intern->document;
+			php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
+		}
+		xmlReplaceNode(oldchild, newchild);
+		dom_reconcile_ns(nodep->doc, newchild);
+	}
+	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
 
@@ -1088,7 +1077,7 @@ Since:
 PHP_METHOD(DOMNode, removeChild)
 {
 	zval *id, *node;
-	xmlNodePtr children, child, nodep;
+	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
 	int ret, stricterror;
 
@@ -1113,23 +1102,13 @@ PHP_METHOD(DOMNode, removeChild)
 		RETURN_FALSE;
 	}
 
-	children = nodep->children;
-	if (!children) {
+	if (!nodep->children || child->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
-	while (children) {
-		if (children == child) {
-			xmlUnlinkNode(child);
-			DOM_RET_OBJ(child, &ret, intern);
-			return;
-		}
-		children = children->next;
-	}
-
-	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-	RETURN_FALSE;
+	xmlUnlinkNode(child);
+	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
 
@@ -1613,11 +1592,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp->node = nodep;
 
 		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
-		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY) {
+		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
 			zval *tmpns;
 			zend_string *prefix;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
 						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));
@@ -1665,7 +1644,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		buf = xmlAllocOutputBuffer(NULL);
 	}
 
-    if (buf != NULL) {
+	if (buf != NULL) {
 		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
 			with_comments, buf);
 	}
@@ -1680,9 +1659,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		xmlXPathFreeContext(ctxp);
 	}
 
-    if (buf == NULL || ret < 0) {
-        RETVAL_FALSE;
-    } else {
+	if (buf == NULL || ret < 0) {
+		RETVAL_FALSE;
+	} else {
 		if (mode == 0) {
 #ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
@@ -1699,7 +1678,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				RETVAL_EMPTY_STRING();
 			}
 		}
-    }
+	}
 
 	if (buf) {
 		int bytes;

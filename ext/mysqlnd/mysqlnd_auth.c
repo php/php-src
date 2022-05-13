@@ -99,15 +99,12 @@ mysqlnd_run_authentication(
 			switch_to_auth_protocol = NULL;
 			switch_to_auth_protocol_len = 0;
 
-			if (conn->authentication_plugin_data.s) {
-				mnd_pefree(conn->authentication_plugin_data.s, conn->persistent);
-				conn->authentication_plugin_data.s = NULL;
-			}
+			mysqlnd_set_persistent_string(&conn->authentication_plugin_data, NULL, 0, conn->persistent);
 			conn->authentication_plugin_data.l = plugin_data_len;
 			conn->authentication_plugin_data.s = mnd_pemalloc(conn->authentication_plugin_data.l, conn->persistent);
 			memcpy(conn->authentication_plugin_data.s, plugin_data, plugin_data_len);
 
-			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
+			DBG_INF_FMT("salt(%zu)=[%.*s]", plugin_data_len, (int) plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
 			if (auth_plugin) {
 				scrambled_data = auth_plugin->methods.get_auth_data(
@@ -353,7 +350,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		goto end;
 	}
 
-	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet.message, auth_resp_packet.message_len);
+	mysqlnd_set_string(&conn->last_message, auth_resp_packet.message, auth_resp_packet.message_len);
 	ret = PASS;
 end:
 	PACKET_FREE(&auth_resp_packet);
@@ -424,9 +421,9 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		auth_packet.auth_data_len = auth_plugin_data_len;
 		auth_packet.auth_plugin_name = auth_protocol;
 
-        if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
+		if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
 			auth_packet.connect_attr = conn->options->connect_attr;
-        }
+		}
 
 		if (conn->m->get_server_version(conn) >= 50123) {
 			auth_packet.charset_no	= conn->charset->nr;
@@ -486,28 +483,15 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			conn->payload_decoder_factory->m.init_ok_packet(&redundant_error_packet);
 			PACKET_READ(conn, &redundant_error_packet);
 			PACKET_FREE(&redundant_error_packet);
-			DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn));
+			DBG_INF_FMT("Server is " ZEND_ULONG_FMT ", buggy, sends two ERR messages", conn->m->get_server_version(conn));
 		}
 	}
 	if (ret == PASS) {
-		char * tmp = NULL;
-		/* if we get conn->username as parameter and then we first free it, then estrndup it, we will crash */
-		tmp = mnd_pestrndup(user, user_len, conn->persistent);
-		if (conn->username.s) {
-			mnd_pefree(conn->username.s, conn->persistent);
-		}
-		conn->username.s = tmp;
+		ZEND_ASSERT(conn->username.s != user && conn->password.s != passwd);
+		mysqlnd_set_persistent_string(&conn->username, user, user_len, conn->persistent);
+		mysqlnd_set_persistent_string(&conn->password, passwd, passwd_len, conn->persistent);
 
-		tmp = mnd_pestrdup(passwd, conn->persistent);
-		if (conn->password.s) {
-			mnd_pefree(conn->password.s, conn->persistent);
-		}
-		conn->password.s = tmp;
-
-		if (conn->last_message.s) {
-			mnd_efree(conn->last_message.s);
-			conn->last_message.s = NULL;
-		}
+		mysqlnd_set_string(&conn->last_message, NULL, 0);
 		UPSERT_STATUS_RESET(conn->upsert_status);
 		/* set charset for old servers */
 		if (conn->m->get_server_version(conn) < 50123) {
@@ -589,7 +573,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
 		/* mysql_native_password only works with SCRAMBLE_LENGTH scramble */
 		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
-		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_ERR_FMT("The server sent wrong length for scramble %zu. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
 		DBG_RETURN(NULL);
 	}
 
@@ -700,14 +684,14 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
-typedef RSA * mysqlnd_rsa_t;
+typedef EVP_PKEY * mysqlnd_rsa_t;
 
 /* {{{ mysqlnd_sha256_get_rsa_from_pem */
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
-	BIO * bio = BIO_new_mem_buf(buf, len);
-	RSA * ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+	BIO *bio = BIO_new_mem_buf(buf, len);
+	EVP_PKEY *ret = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL);
 	BIO_free(bio);
 	return ret;
 }
@@ -718,7 +702,7 @@ static zend_uchar *
 mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
 {
 	zend_uchar * ret = NULL;
-	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
+	size_t server_public_key_len = (size_t) EVP_PKEY_size(server_public_key);
 
 	DBG_ENTER("mysqlnd_sha256_public_encrypt");
 	/*
@@ -728,7 +712,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	*/
 	if (server_public_key_len <= passwd_len + 41) {
 		/* password message is to long */
-		RSA_free(server_public_key);
+		EVP_PKEY_free(server_public_key);
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 		DBG_ERR("password is too long");
 		DBG_RETURN(NULL);
@@ -736,8 +720,16 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 
 	*auth_data_len = server_public_key_len;
 	ret = malloc(*auth_data_len);
-	RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
-	RSA_free(server_public_key);
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(server_public_key, NULL);
+	if (!ctx || EVP_PKEY_encrypt_init(ctx) <= 0 ||
+			EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
+			EVP_PKEY_encrypt(ctx, ret, &server_public_key_len, (zend_uchar *) xor_str, passwd_len + 1) <= 0) {
+		DBG_ERR("encrypt failed");
+		free(ret);
+		ret = NULL;
+	}
+	EVP_PKEY_CTX_free(ctx);
+	EVP_PKEY_free(server_public_key);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -866,7 +858,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
-			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
+			DBG_INF_FMT("Public key(%zu):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
 			/* now extract the public key */
 			ret = mysqlnd_sha256_get_rsa_from_pem((const char *) pk_resp_packet.public_key, pk_resp_packet.public_key_len);
 		} while (0);
@@ -889,7 +881,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
 				ret = mysqlnd_sha256_get_rsa_from_pem(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
 				DBG_INF("Successfully loaded");
-				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
+				DBG_INF_FMT("Public key:%*.s", (int) ZSTR_LEN(key_str), ZSTR_VAL(key_str));
 				zend_string_release_ex(key_str, 0);
 			}
 			php_stream_close(stream);
@@ -914,7 +906,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	mysqlnd_rsa_t server_public_key;
 	zend_uchar * ret = NULL;
 	DBG_ENTER("mysqlnd_sha256_auth_get_auth_data");
-	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
+	DBG_INF_FMT("salt(%zu)=[%.*s]", auth_plugin_data_len, (int) auth_plugin_data_len, auth_plugin_data);
 
 
 	if (conn->vio->data->ssl) {
@@ -1011,7 +1003,7 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
-	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
+	size_t server_public_key_len = (size_t) EVP_PKEY_size(server_public_key);
 
 	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
 	/*
@@ -1021,15 +1013,22 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	*/
 	if (server_public_key_len <= passwd_len + 41) {
 		/* password message is to long */
-		RSA_free(server_public_key);
+		EVP_PKEY_free(server_public_key);
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 		DBG_ERR("password is too long");
 		DBG_RETURN(0);
 	}
 
 	*crypted = emalloc(server_public_key_len);
-	RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
-	RSA_free(server_public_key);
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(server_public_key, NULL);
+	if (!ctx || EVP_PKEY_encrypt_init(ctx) <= 0 ||
+			EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
+			EVP_PKEY_encrypt(ctx, *crypted, &server_public_key_len, (zend_uchar *) xor_str, passwd_len + 1) <= 0) {
+		DBG_ERR("encrypt failed");
+		server_public_key_len = 0;
+	}
+	EVP_PKEY_CTX_free(ctx);
+	EVP_PKEY_free(server_public_key);
 	DBG_RETURN(server_public_key_len);
 }
 /* }}} */
@@ -1091,12 +1090,12 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 {
 	zend_uchar * ret = NULL;
 	DBG_ENTER("mysqlnd_caching_sha2_get_auth_data");
-	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
+	DBG_INF_FMT("salt(%zu)=[%.*s]", auth_plugin_data_len, (int) auth_plugin_data_len, auth_plugin_data);
 	*auth_data_len = 0;
 
 	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
 		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
-		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_ERR_FMT("The server sent wrong length for scramble %zu. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
 		DBG_RETURN(NULL);
 	}
 
@@ -1107,7 +1106,7 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 		*auth_data_len = SHA256_LENGTH;
 		php_mysqlnd_scramble_sha2((zend_uchar*)ret, auth_plugin_data, (zend_uchar*)passwd, passwd_len);
 		ret[SHA256_LENGTH] = '\0';
-		DBG_INF_FMT("hash(%d)=[%.*s]", *auth_data_len, *auth_data_len, ret);
+		DBG_INF_FMT("hash(%zu)=[%.*s]", *auth_data_len, (int) *auth_data_len, ret);
 	}
 
 	DBG_RETURN(ret);
@@ -1149,7 +1148,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
-			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
+			DBG_INF_FMT("Public key(%zu):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
 			/* now extract the public key */
 			ret = mysqlnd_sha256_get_rsa_from_pem((const char *) pk_resp_packet.public_key, pk_resp_packet.public_key_len);
 		} while (0);
@@ -1172,7 +1171,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
 				ret = mysqlnd_sha256_get_rsa_from_pem(ZSTR_VAL(key_str), ZSTR_LEN(key_str));
 				DBG_INF("Successfully loaded");
-				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
+				DBG_INF_FMT("Public key: %*.s", (int) ZSTR_LEN(key_str), ZSTR_VAL(key_str));
 				zend_string_release(key_str);
 			}
 			php_stream_close(stream);

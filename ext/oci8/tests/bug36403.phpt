@@ -1,9 +1,7 @@
 --TEST--
 Bug #36403 (oci_execute no longer supports OCI_DESCRIBE_ONLY)
---SKIPIF--
-<?php
-if (!extension_loaded('oci8')) die ("skip no oci8 extension");
-?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

@@ -61,7 +61,7 @@ typedef int32_t zend_off_t;
 # define ZEND_ULONG_FMT_SPEC PRIu64
 # ifdef ZEND_WIN32
 #  define ZEND_LTOA(i, s, len) _i64toa_s((i), (s), (len), 10)
-#  define ZEND_ATOL(i, s) i = _atoi64((s))
+#  define ZEND_ATOL(s) _atoi64((s))
 #  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
 #  define ZEND_STRTOUL(s0, s1, base) _strtoui64((s0), (s1), (base))
 #  define ZEND_STRTOL_PTR _strtoi64
@@ -73,7 +73,7 @@ typedef int32_t zend_off_t;
 		int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
 		(s)[st] = '\0'; \
  	} while (0)
-#  define ZEND_ATOL(i, s) (i) = atoll((s))
+#  define ZEND_ATOL(s) atoll((s))
 #  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
 #  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_STRTOL_PTR strtoll
@@ -90,14 +90,14 @@ typedef int32_t zend_off_t;
 # define ZEND_ULONG_FMT_SPEC PRIu32
 # ifdef ZEND_WIN32
 #  define ZEND_LTOA(i, s, len) _ltoa_s((i), (s), (len), 10)
-#  define ZEND_ATOL(i, s) i = atol((s))
+#  define ZEND_ATOL(s) atol((s))
 # else
 #  define ZEND_LTOA(i, s, len) \
 	do { \
 		int st = snprintf((s), (len), ZEND_LONG_FMT, (i)); \
 		(s)[st] = '\0'; \
  	} while (0)
-#  define ZEND_ATOL(i, s) (i) = atol((s))
+#  define ZEND_ATOL(s) atol((s))
 # endif
 # define ZEND_STRTOL_PTR strtol
 # define ZEND_STRTOUL_PTR strtoul

@@ -1,7 +1,7 @@
 --TEST--
 Bug #41917 (invalid scale and precision)
---SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); ?>
+--EXTENSIONS--
+oci8
 --FILE--
 <?php
 

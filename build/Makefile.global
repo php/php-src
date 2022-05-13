@@ -75,7 +75,10 @@ PHP_TEST_SETTINGS = -d 'open_basedir=' -d 'output_buffering=0' -d 'memory_limit=
 PHP_TEST_SHARED_EXTENSIONS =  ` \
 	if test "x$(PHP_MODULES)" != "x"; then \
 		for i in $(PHP_MODULES)""; do \
-			. $$i; $(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			. $$i; \
+			if test "x$$dlname" != "xdl_test.so"; then \
+				$(top_srcdir)/build/shtool echo -n -- " -d extension=$$dlname"; \
+			fi; \
 		done; \
 	fi; \
 	if test "x$(PHP_ZEND_EX)" != "x"; then \
@@ -118,6 +121,7 @@ clean:
 	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
 	rm -f ext/opcache/jit/zend_jit_x86.c
 	rm -f ext/opcache/jit/zend_jit_arm64.c
+	rm -f ext/opcache/minilua
 
 distclean: clean
 	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h
@@ -133,6 +137,7 @@ distclean: clean
 
 prof-gen:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-generate all
+	find . -name \*.gcda | xargs rm -f
 
 prof-clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
@@ -148,6 +153,9 @@ prof-use:
 		if test ! -z "$(PHP)"; then \
 			echo Parse $< to generate $@;\
 			$(PHP) $(top_srcdir)/build/gen_stub.php $<; \
+		elif test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+			echo Parse $< to generate $@;\
+			$(PHP_EXECUTABLE) $(top_srcdir)/build/gen_stub.php $<; \
 		fi; \
 	fi;
 

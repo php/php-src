@@ -1,7 +1,7 @@
 --TEST--
 Octal integer overflow
---SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 function octal_inc($s) {

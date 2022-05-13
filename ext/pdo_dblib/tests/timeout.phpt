@@ -1,8 +1,9 @@
 --TEST--
 PDO_DBLIB: Set query timeouts
+--EXTENSIONS--
+pdo_dblib
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require __DIR__ . '/config.inc';
 ?>

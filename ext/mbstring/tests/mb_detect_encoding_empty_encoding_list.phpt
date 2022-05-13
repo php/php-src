@@ -1,9 +1,7 @@
 --TEST--
 Test mb_detect_encoding() function : empty encoding list
---SKIPIF--
-<?php
-extension_loaded('mbstring') or die('skip');
-?>
+--EXTENSIONS--
+mbstring
 --FILE--
 <?php
 

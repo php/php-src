@@ -1,7 +1,7 @@
 --TEST--
 Bug #75299 Wrong reflection on inflate_init and inflate_add
---SKIPIF--
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+--EXTENSIONS--
+zlib
 --FILE--
 <?php
 $r = new ReflectionFunction('inflate_init');

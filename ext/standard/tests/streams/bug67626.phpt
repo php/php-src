@@ -4,6 +4,8 @@ Bug #67626: Exceptions not properly handled in user stream handlers
 <?php
 class MyStream
 {
+    public $context;
+
     public function stream_open() { return true; }
 
     public function stream_read()

@@ -55,8 +55,6 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-unlink($file_path."/rename_variation_link.tmp");
-unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
 --EXPECT--

@@ -14,7 +14,7 @@ echo "*** Testing ctype_punct() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
-    if (ctype_punct($c)) {
+    if (ctype_punct(chr($c))) {
         echo "character code $c is punctuation\n";
     }
 }

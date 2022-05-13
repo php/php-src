@@ -1,7 +1,7 @@
 --TEST--
 openssl_cms_sign() der tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $infile = __DIR__ . "/cert.crt";

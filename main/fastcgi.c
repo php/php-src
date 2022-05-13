@@ -154,12 +154,12 @@ typedef struct _fcgi_begin_request_rec {
 } fcgi_begin_request_rec;
 
 typedef struct _fcgi_end_request {
-    unsigned char appStatusB3;
-    unsigned char appStatusB2;
-    unsigned char appStatusB1;
-    unsigned char appStatusB0;
-    unsigned char protocolStatus;
-    unsigned char reserved[3];
+	unsigned char appStatusB3;
+	unsigned char appStatusB2;
+	unsigned char appStatusB1;
+	unsigned char appStatusB0;
+	unsigned char protocolStatus;
+	unsigned char reserved[3];
 } fcgi_end_request;
 
 typedef struct _fcgi_end_request_rec {
@@ -511,11 +511,8 @@ int fcgi_init(void)
 
 			str = getenv("_FCGI_SHUTDOWN_EVENT_");
 			if (str != NULL) {
-				zend_long ev;
-				HANDLE shutdown_event;
-
-				ZEND_ATOL(ev, str);
-				shutdown_event = (HANDLE) ev;
+				zend_long ev = ZEND_ATOL(str);
+				HANDLE shutdown_event = (HANDLE) ev;
 				if (!CreateThread(NULL, 0, fcgi_shutdown_thread,
 				                  shutdown_event, 0, NULL)) {
 					return -1;
@@ -523,9 +520,7 @@ int fcgi_init(void)
 			}
 			str = getenv("_FCGI_MUTEX_");
 			if (str != NULL) {
-				zend_long mt;
-				ZEND_ATOL(mt, str);
-				fcgi_accept_mutex = (HANDLE) mt;
+				fcgi_accept_mutex = (HANDLE) ZEND_ATOL(str);
 			}
 			return is_fastcgi = 1;
 		} else {
@@ -1595,10 +1590,10 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		memcpy(req->out_pos, str, len);
 		req->out_pos += len;
 	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
-		if (!req->out_hdr) {
-			open_packet(req, type);
-		}
 		if (limit > 0) {
+			if (!req->out_hdr) {
+				open_packet(req, type);
+			}
 			memcpy(req->out_pos, str, limit);
 			req->out_pos += limit;
 		}
@@ -1747,7 +1742,7 @@ void fcgi_free_mgmt_var_cb(zval *zv)
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+const char *fcgi_get_last_client_ip(void)
 {
 	static char str[INET6_ADDRSTRLEN];
 

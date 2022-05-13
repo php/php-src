@@ -1,5 +1,7 @@
 --TEST--
 Bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
+--EXTENSIONS--
+oci8
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -120,7 +122,7 @@ function fillxmltab($c)
         oci_bind_by_name($stmt, ":id", $id);
         $clob = oci_new_descriptor($c, OCI_D_LOB);
         oci_bind_by_name($stmt, ":xml", $clob, -1, OCI_B_CLOB);
-        $clob->writetemporary($data);
+        $clob->writeTemporary($data);
         oci_execute($stmt);
 
         $clob->close();

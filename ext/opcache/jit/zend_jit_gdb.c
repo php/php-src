@@ -23,6 +23,7 @@
 
 #define HAVE_GDB
 
+#include "zend_jit_gdb.h"
 #include "zend_elf.h"
 #include "zend_gdb.h"
 
@@ -284,7 +285,6 @@ static void zend_gdbjit_symtab(zend_gdbjit_ctx *ctx)
 
 typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, uint32_t unaligned_uint32_t);
-typedef ZEND_SET_ALIGNED(1, uint16_t unaligned_uint16_t);
 typedef ZEND_SET_ALIGNED(1, uintptr_t unaligned_uintptr_t);
 
 #define SECTALIGN(p, a) \
@@ -484,12 +484,12 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx, uint32_t sp_offset, uint3
 	ZEND_ASSERT(ctx->objsize < sizeof(zend_gdbjit_obj));
 }
 
-static int zend_jit_gdb_register(const char    *name,
-                                 const zend_op_array *op_array,
-                                 const void    *start,
-                                 size_t         size,
-                                 uint32_t       sp_offset,
-                                 uint32_t       sp_adjustment)
+int zend_jit_gdb_register(const char    *name,
+                          const zend_op_array *op_array,
+                          const void    *start,
+                          size_t         size,
+                          uint32_t       sp_offset,
+                          uint32_t       sp_adjustment)
 {
 	zend_gdbjit_ctx ctx;
 
@@ -504,13 +504,13 @@ static int zend_jit_gdb_register(const char    *name,
 	return zend_gdb_register_code(&ctx.obj, ctx.objsize);
 }
 
-static int zend_jit_gdb_unregister(void)
+int zend_jit_gdb_unregister(void)
 {
 	zend_gdb_unregister_all();
 	return 1;
 }
 
-static void zend_jit_gdb_init(void)
+void zend_jit_gdb_init(void)
 {
 #if 0
 	/* This might enable registration of all JIT-ed code, but unfortunately,

@@ -2,9 +2,8 @@
 Test normal operation of PDO::getAvailableDrivers / pdo_drivers
 --CREDITS--
 Amo Chohan <amo.chohan@gmail.com>
---SKIPIF--
-<?php
-if (!extension_loaded('pdo')) die('skip');
+--EXTENSIONS--
+pdo
 --FILE--
 <?php
 var_dump(is_array(PDO::getAvailableDrivers()));

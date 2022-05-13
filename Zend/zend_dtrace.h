@@ -37,7 +37,7 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data);
 ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *return_value);
 #include <zend_dtrace_gen.h>
 
-void dtrace_error_notify_cb(int type, const char *error_filename, uint32_t error_lineno, zend_string *message);
+void dtrace_error_notify_cb(int type, zend_string *error_filename, uint32_t error_lineno, zend_string *message);
 
 #endif /* HAVE_DTRACE */
 

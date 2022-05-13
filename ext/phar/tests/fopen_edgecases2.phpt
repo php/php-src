@@ -1,7 +1,7 @@
 --TEST--
 Phar: test edge cases of fopen() function interception #2
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --INI--
 phar.readonly=0
 --FILE--

@@ -41,6 +41,8 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	NULL,
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
+	NULL,
+	NULL,
 	NULL
 };
 
@@ -139,7 +141,7 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
@@ -219,7 +221,7 @@ int mbfl_filt_conv_qprintdec(int c, mbfl_convert_filter *filter)
 		break;
 	}
 
-	return c;
+	return 0;
 }
 
 int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)

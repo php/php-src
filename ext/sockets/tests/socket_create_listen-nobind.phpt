@@ -1,10 +1,10 @@
 --TEST--
 Test if socket_create_listen() returns false, when it cannot bind to the port.
+--EXTENSIONS--
+sockets
 --SKIPIF--
 <?php
-if (!extension_loaded('sockets')) {
-    die('SKIP The sockets extension is not loaded.');
-}
+
 $filename = __FILE__ . '.root_check.tmp';
 $fp = fopen($filename, 'w');
 fclose($fp);

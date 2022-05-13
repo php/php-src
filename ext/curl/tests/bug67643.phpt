@@ -1,9 +1,7 @@
 --TEST--
 Bug #67643 (curl_multi_getcontent returns '' when RETURNTRANSFER isn't set)
---SKIPIF--
-<?php
-if (!extension_loaded('curl')) print 'skip';
-?>
+--EXTENSIONS--
+curl
 --FILE--
 <?php
     $ch = curl_init();

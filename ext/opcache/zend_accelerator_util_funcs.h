@@ -25,11 +25,16 @@
 #include "zend.h"
 #include "ZendAccelerator.h"
 
+BEGIN_EXTERN_C()
+
 zend_persistent_script* create_persistent_script(void);
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements);
 
 void zend_accel_move_user_functions(HashTable *str, uint32_t count, zend_script *script);
 void zend_accel_move_user_classes(HashTable *str, uint32_t count, zend_script *script);
+void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script);
+void zend_accel_finalize_delayed_early_binding_list(zend_persistent_script *persistent_script);
+void zend_accel_free_delayed_early_binding_list(zend_persistent_script *persistent_script);
 
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory);
 
@@ -38,5 +43,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t len);
 
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script);
+
+END_EXTERN_C()
 
 #endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */

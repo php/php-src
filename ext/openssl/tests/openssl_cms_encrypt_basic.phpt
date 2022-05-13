@@ -1,7 +1,7 @@
 --TEST--
 openssl_cms_encrypt() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $infile = __DIR__ . "/plain.txt";
@@ -18,20 +18,21 @@ $headers = array("test@test", "testing openssl_cms_encrypt()");
 $empty_headers = array();
 $wrong = "wrong";
 $empty = "";
+$cipher = OPENSSL_CIPHER_AES_128_CBC;
 
-var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, openssl_x509_read($single_cert), $headers));
+var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, openssl_x509_read($single_cert), $headers, cipher_algo: $cipher));
 var_dump(openssl_cms_decrypt($outfile, $outfile2, $single_cert, $privkey));
 readfile($outfile2);
-var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $assoc_headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $empty_headers));
-var_dump(openssl_cms_encrypt($wrong, $outfile, $single_cert, $headers));
-var_dump(openssl_cms_encrypt($empty, $outfile, $single_cert, $headers));
-var_dump(openssl_cms_encrypt($infile, $empty, $single_cert, $headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, $wrong, $headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, $empty, $headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, $multi_certs, $headers));
-var_dump(openssl_cms_encrypt($infile, $outfile, array_map('openssl_x509_read', $multi_certs) , $headers));
+var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $assoc_headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, $single_cert, $empty_headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($wrong, $outfile, $single_cert, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($empty, $outfile, $single_cert, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $empty, $single_cert, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, $wrong, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, $empty, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, $multi_certs, $headers, cipher_algo: $cipher));
+var_dump(openssl_cms_encrypt($infile, $outfile, array_map('openssl_x509_read', $multi_certs), $headers, cipher_algo: $cipher));
 
 if (file_exists($outfile)) {
     echo "true\n";

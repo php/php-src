@@ -1,7 +1,7 @@
 --TEST--
 Bug #76991: Incorrect tokenization of multiple invalid flexible heredoc strings
---SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

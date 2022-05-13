@@ -1886,8 +1886,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		attr = attr->next;
 	}
 	if (newAttr->form == XSD_FORM_DEFAULT) {
- 		xmlNodePtr parent = attrType->parent;
- 		while (parent) {
+		xmlNodePtr parent = attrType->parent;
+		while (parent) {
 			if (node_is_equal_ex(parent, "schema", SCHEMA_NAMESPACE)) {
 				xmlAttrPtr def;
 				def = get_attribute(parent->properties, "attributeFormDefault");
@@ -1899,7 +1899,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				break;
 			}
 			parent = parent->parent;
-  	}
+		}
 		if (parent == NULL) {
 			newAttr->form = XSD_FORM_UNQUALIFIED;
 		}
@@ -2287,17 +2287,17 @@ void schema_pass2(sdlCtx *ctx)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ctx->attributeGroups) {
-		ZEND_HASH_FOREACH_PTR(ctx->attributeGroups, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(ctx->attributeGroups, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (sdl->elements) {
-		ZEND_HASH_FOREACH_PTR(sdl->elements, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->elements, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (sdl->groups) {
-		ZEND_HASH_FOREACH_PTR(sdl->groups, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->groups, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}

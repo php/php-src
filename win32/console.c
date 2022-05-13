@@ -25,9 +25,9 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
 	if (handle != INVALID_HANDLE_VALUE) {
-        DWORD mode;
-        if (GetConsoleMode(handle, &mode)) {
-            result = TRUE;
+		DWORD mode;
+		if (GetConsoleMode(handle, &mode)) {
+			result = TRUE;
 		}
 	}
 	return result;

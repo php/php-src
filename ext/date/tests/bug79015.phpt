@@ -6,7 +6,7 @@ $payload = 'O:12:"DateInterval":16:{s:1:"y";i:1;s:1:"m";i:0;s:1:"d";i:4;s:1:"h";
 var_dump(unserialize($payload));
 ?>
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (%d) {
   ["y"]=>
   int(1)
   ["m"]=>
@@ -20,23 +20,11 @@ object(DateInterval)#%d (16) {
   ["s"]=>
   int(0)
   ["f"]=>
-  float(-1)
-  ["weekday"]=>
-  int(0)
-  ["weekday_behavior"]=>
-  int(0)
-  ["first_last_day_of"]=>
-  int(0)
+  float(%f)
   ["invert"]=>
   int(0)
   ["days"]=>
   bool(false)
-  ["special_type"]=>
-  int(0)
-  ["special_amount"]=>
-  int(0)
-  ["have_weekday_relative"]=>
-  int(0)
-  ["have_special_relative"]=>
-  int(0)
+  ["from_string"]=>
+  bool(false)
 }

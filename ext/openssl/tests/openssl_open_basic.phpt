@@ -1,14 +1,14 @@
 --TEST--
 openssl_open() tests
---SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $data = "openssl_open() test";
 $pub_key = "file://" . __DIR__ . "/public.key";
 $priv_key = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrong = "wrong";
-$method = "RC4";
+$method = "AES-128-ECB";
 
 openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key, $pub_key), $method);
 openssl_open($sealed, $output, $ekeys[0], $priv_key, $method);

@@ -130,3 +130,14 @@ ini-with.hyphen = hyphen and dot
 [windows paths]
 winpath1="c:\some windows\path\test\new\r\quote \" here\single ' quote\some more"
 winpath2="special case\"
+
+[characters escaping]
+; Note: single-quoted strings don't support characters escaping, and the line below
+;       is single-quoted string, followed by unquoted text, followed by single-quoted '.'
+single_quoted = 'She said \'Exactly my point\'.'
+double_quoted = "She said \"Exactly my point\"."
+double_quoted_2 = "Use \\\" to escape double quote"
+double_quoted_multiline = "Lorem \"ipsum\"""
+ dolor"
+dollar_test = "\${test}"
+unescaped ="\n\r\t"

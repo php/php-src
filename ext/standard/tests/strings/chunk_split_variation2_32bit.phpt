@@ -16,4 +16,4 @@ var_dump(chunk_split($a,$b,$c));
 --EXPECTF--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 2 ***
 
-Fatal error: Possible integer overflow in memory allocation (65537 * 65537 + 65556) in %s on line %d
+Fatal error: Possible integer overflow in memory allocation (65537 * 65537 + %r65556|65560%r) in %s on line %d

@@ -3,8 +3,8 @@ datefmt_get_timezone_id_code()
 --INI--
 date.timezone=Atlantic/Azores
 intl.error_level=E_WARNING
---SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+--EXTENSIONS--
+intl
 --FILE--
 <?php
 

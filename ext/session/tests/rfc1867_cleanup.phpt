@@ -15,6 +15,8 @@ session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=1%
 session.upload_progress.min_freq=0.000000001
 session.save_handler=files
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --COOKIE--

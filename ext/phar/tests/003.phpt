@@ -1,7 +1,7 @@
 --TEST--
 Phar::canCompress
---SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+--EXTENSIONS--
+phar
 --FILE--
 <?php
 /* check this works and actually returns the boolean value */

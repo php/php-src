@@ -1,7 +1,7 @@
 --TEST--
 Test 7: Transform To Uri
---SKIPIF--
-<?php require_once __DIR__ .'/skipif.inc'; ?>
+--EXTENSIONS--
+xsl
 --FILE--
 <?php
 echo "Test 7: Transform To Uri";

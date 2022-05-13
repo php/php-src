@@ -1,5 +1,7 @@
 --TEST--
 Test session_regenerate_id() function : basic functionality
+--EXTENSIONS--
+session
 --SKIPIF--
 <?php
 
