@@ -502,7 +502,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 	do { free(pathw); } while(0);
 
 #else
-	zend_stat_t st;
+	zend_stat_t st = {0};
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;

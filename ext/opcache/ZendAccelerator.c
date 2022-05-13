@@ -994,7 +994,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size)
 {
-	zend_stat_t statbuf;
+	zend_stat_t statbuf = {0};
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
