@@ -3993,29 +3993,17 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		return -2;
 	}
 
-	{
-		mbfl_wchar_device dev;
-		mbfl_convert_filter *filter;
-		zend_long cp;
+	/* Some legacy text encodings have a minimum required wchar buffer size;
+	 * the ones which need the most are SJIS-Mac, UTF-7, and UTF7-IMAP */
+	uint32_t wchar_buf[MBSTRING_MIN_WCHAR_BUFSIZE];
+	unsigned int state = 0;
+	size_t out_len = enc->to_wchar((unsigned char**)&str, &str_len, wchar_buf, MBSTRING_MIN_WCHAR_BUFSIZE, &state);
+	ZEND_ASSERT(out_len <= MBSTRING_MIN_WCHAR_BUFSIZE);
 
-		mbfl_wchar_device_init(&dev);
-		filter = mbfl_convert_filter_new(enc, &mbfl_encoding_wchar, mbfl_wchar_device_output, 0, &dev);
-		/* If this assertion fails this means some memory allocation failure which is a bug */
-		ZEND_ASSERT(filter != NULL);
-
-		mbfl_convert_filter_feed_string(filter, (unsigned char*)str, str_len);
-		mbfl_convert_filter_flush(filter);
-
-		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] == MBFL_BAD_INPUT) {
-			cp = -1;
-		} else {
-			cp = dev.buffer[0];
-		}
-
-		mbfl_convert_filter_delete(filter);
-		mbfl_wchar_device_clear(&dev);
-		return cp;
+	if (!out_len || wchar_buf[0] == MBFL_BAD_INPUT) {
+		return -1;
 	}
+	return wchar_buf[0];
 }
 
 
