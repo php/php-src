@@ -90,7 +90,6 @@ typedef enum {
 ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int encode_max_depth;
-	size_t encoder_indent;
 	php_json_error_code error_code;
 ZEND_END_MODULE_GLOBALS(json)
 
