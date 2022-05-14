@@ -531,6 +531,7 @@ zend_object_handlers php_com_object_handlers = {
 	NULL,									/* do_operation */
 	com_objects_compare,					/* compare */
 	NULL,									/* get_properties_for */
+	zend_std_equals_objects,				/* equals */
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable)

@@ -1941,6 +1941,10 @@ ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose
 	return zend_std_get_properties_for(zobj, purpose);
 }
 
+ZEND_API zend_result zend_std_equals_objects(zend_uchar opcode, zval *result, zval *op1, zval *op2) {
+	return FAILURE;
+}
+
 ZEND_API const zend_object_handlers std_object_handlers = {
 	0,										/* offset */
 
@@ -1969,4 +1973,5 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	NULL,									/* do_operation */
 	zend_std_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
+	zend_std_equals_objects,						/* equals */
 };

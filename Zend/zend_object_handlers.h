@@ -156,6 +156,8 @@ typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, in
 
 typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
 
+typedef zend_result (*zend_object_equals_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
+
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
 	int										offset;
@@ -184,6 +186,7 @@ struct _zend_object_handlers {
 	zend_object_do_operation_t				do_operation;         /* optional */
 	zend_object_compare_t					compare;              /* required */
 	zend_object_get_properties_for_t		get_properties_for;   /* optional */
+	zend_object_equals_t					equals;				  /* optional */
 };
 
 BEGIN_EXTERN_C()

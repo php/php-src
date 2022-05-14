@@ -2142,8 +2142,8 @@ ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar e
 		Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
 		return 0;
 	} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-		if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-			result = Z_OBJ_HANDLER_P(op1, do_operation)(equals, &ret, op1, op2);
+		if (Z_OBJ_HANDLER_P(op1, equals)) {
+			result = Z_OBJ_HANDLER_P(op1, equals)(equals, &ret, op1, op2);
 			if (result == FAILURE) {
 				goto op2_equals_handler;
 			} else {
@@ -2159,8 +2159,8 @@ ZEND_API int ZEND_FASTCALL zend_equals_object(zval *op1, zval *op2, zend_uchar e
 		}
 	} else if (Z_TYPE_P(op2) == IS_OBJECT) {
 op2_equals_handler:
-		if (Z_OBJ_HANDLER_P(op2, do_operation)) {
-			result = Z_OBJ_HANDLER_P(op2, do_operation)(equals, &ret, op1, op2);
+		if (Z_OBJ_HANDLER_P(op2, equals)) {
+			result = Z_OBJ_HANDLER_P(op2, equals)(equals, &ret, op1, op2);
 			if (result == FAILURE) {
 				goto default_equals_handler;
 			} else {

@@ -413,6 +413,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	NULL,									/* do_operation */
 	saproxy_objects_compare,				/* compare */
 	NULL,									/* get_properties_for */
+	zend_std_equals_objects,				/* equals */
 };
 
 void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)
