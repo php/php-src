@@ -3161,7 +3161,7 @@ PHP_FUNCTION(mb_convert_variables)
 /* HTML numeric entities */
 
 /* Convert PHP array to data structure required by mbfl_html_numeric_entity */
-static int *make_conversion_map(HashTable *target_hash, int *convmap_size)
+static uint32_t *make_conversion_map(HashTable *target_hash, int *convmap_size)
 {
 	zval *hash_entry;
 
@@ -3171,8 +3171,8 @@ static int *make_conversion_map(HashTable *target_hash, int *convmap_size)
 		return NULL;
 	}
 
-	int *convmap = (int *)safe_emalloc(n_elems, sizeof(int), 0);
-	int *mapelm = convmap;
+	uint32_t *convmap = (uint32_t*)safe_emalloc(n_elems, sizeof(uint32_t), 0);
+	uint32_t *mapelm = convmap;
 
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 		*mapelm++ = zval_get_long(hash_entry);
@@ -3182,77 +3182,406 @@ static int *make_conversion_map(HashTable *target_hash, int *convmap_size)
 	return convmap;
 }
 
+static bool html_numeric_entity_convert(uint32_t w, uint32_t *convmap, int mapsize, uint32_t *retval)
+{
+	uint32_t *convmap_end = convmap + (mapsize * 4);
+
+	for (uint32_t *mapelm = convmap; mapelm < convmap_end; mapelm += 4) {
+		uint32_t lo_code = mapelm[0];
+		uint32_t hi_code = mapelm[1];
+		uint32_t offset  = mapelm[2];
+		uint32_t mask    = mapelm[3];
+
+		if (w >= lo_code && w <= hi_code) {
+			/* This wchar falls inside one of the ranges which should be
+			 * converted to HTML entities */
+			*retval = (w + offset) & mask;
+			return true;
+		}
+	}
+
+	/* None of the ranges matched */
+	return false;
+}
+
+static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, int mapsize, bool hex)
+{
+	/* Each wchar which we get from decoding the input string may become up to
+	 * 13 wchars when we convert it to an HTML entity */
+	uint32_t wchar_buf[32], converted_buf[32 * 13];
+	unsigned char entity[16]; /* For converting wchars to hex/decimal string */
+
+	unsigned int state = 0;
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, in_len, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	while (in_len) {
+		/* Convert input string to wchars, up to 32 at a time */
+		size_t out_len = encoding->to_wchar(&in, &in_len, wchar_buf, 32, &state);
+		ZEND_ASSERT(out_len <= 32);
+		uint32_t *converted = converted_buf;
+
+		/* Run through wchars and see if any of them fall into the ranges
+		 * which we want to convert to HTML entities */
+		for (int i = 0; i < out_len; i++) {
+			uint32_t w = wchar_buf[i];
+
+			if (html_numeric_entity_convert(w, convmap, mapsize, &w)) {
+				*converted++ = '&';
+				*converted++ = '#';
+				if (hex) {
+					*converted++ = 'x';
+				}
+
+				/* Convert wchar to decimal/hex string */
+				if (w == 0) {
+					*converted++ = '0';
+				} else {
+					unsigned char *p = entity + sizeof(entity);
+					if (hex) {
+						while (w > 0) {
+							*(--p) = "0123456789ABCDEF"[w & 0xF];
+							w >>= 4;
+						}
+					} else {
+						while (w > 0) {
+							*(--p) = "0123456789"[w % 10];
+							w /= 10;
+						}
+					}
+					while (p < entity + sizeof(entity)) {
+						*converted++ = *p++;
+					}
+				}
+
+				*converted++ = ';';
+			} else {
+				*converted++ = w;
+			}
+		}
+
+		ZEND_ASSERT(converted <= converted_buf + sizeof(converted_buf)/sizeof(*converted_buf));
+		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
 /* {{{ Converts specified characters to HTML numeric entities */
 PHP_FUNCTION(mb_encode_numericentity)
 {
-	char *str = NULL;
-	zend_string *encoding = NULL;
+	zend_string *encoding = NULL, *str;
 	int mapsize;
 	HashTable *target_hash;
-	bool is_hex = 0;
-	mbfl_string string, result, *ret;
+	bool is_hex = false;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_STR(str)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(encoding)
 		Z_PARAM_BOOL(is_hex)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char *)str;
-	string.encoding = php_mb_get_encoding(encoding, 3);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 3);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	int *convmap = make_conversion_map(target_hash, &mapsize);
+	uint32_t *convmap = make_conversion_map(target_hash, &mapsize);
 	if (convmap == NULL) {
 		RETURN_THROWS();
 	}
 
-	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, is_hex ? 2 : 0);
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len);
-	efree(ret->val);
+	RETVAL_STR(html_numeric_entity_encode(str, enc, convmap, mapsize, is_hex));
 	efree(convmap);
 }
 /* }}} */
 
+static bool html_numeric_entity_deconvert(uint32_t number, uint32_t *convmap, int mapsize, uint32_t *retval)
+{
+	uint32_t *convmap_end = convmap + (mapsize * 4);
+
+	for (uint32_t *mapelm = convmap; mapelm < convmap_end; mapelm += 4) {
+		uint32_t lo_code = mapelm[0];
+		uint32_t hi_code = mapelm[1];
+		uint32_t offset  = mapelm[2];
+		uint32_t codepoint = number - offset;
+		if (codepoint >= lo_code && codepoint <= hi_code) {
+			*retval = codepoint;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static zend_string* html_numeric_entity_decode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, int mapsize)
+{
+	uint32_t wchar_buf[128], converted_buf[128];
+
+	unsigned int state = 0;
+	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
+	size_t in_len = ZSTR_LEN(input);
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, in_len, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
+
+	/* Decode input string from bytes to wchars one 128-wchar buffer at a time, then deconvert HTML entities,
+	 * copying the deconverted wchars to a second buffer, then convert back to original encoding from the
+	 * 2nd 'converted' buffer.
+	 *
+	 * Tricky part: an HTML entity might be truncated at the end of the wchar buffer; the remaining
+	 * part could come in the next buffer of wchars. To deal with this problem, when we find what looks
+	 * like an HTML entity, we scan to see if it terminates before the end of the wchar buffer or not.
+	 * If not, we copy it to the beginning of the wchar buffer, and tell the input conversion routine
+	 * to store the next batch of wchars after it.
+	 *
+	 * Optimization: Scan for &, and if we don't find it anywhere, don't even bother copying the
+	 * wchars from the 1st buffer to the 2nd one.
+	 *
+	 * 'converted_buf' is big enough that the deconverted wchars will *always* fit in it, so we don't
+	 * have to do bounds checks when writing wchars into it.
+	 */
+
+	unsigned int wchar_buf_offset = 0;
+
+	while (in_len) {
+		/* Leave space for sentinel at the end of the buffer */
+		size_t out_len = encoding->to_wchar(&in, &in_len, wchar_buf + wchar_buf_offset, 127 - wchar_buf_offset, &state);
+		out_len += wchar_buf_offset;
+		ZEND_ASSERT(out_len <= 127);
+		wchar_buf[out_len] = '&'; /* Sentinel, to avoid bounds checks */
+
+		uint32_t *p, *converted;
+
+		/* Scan for & first; however, if `wchar_buf_offset` > 0, then definitely & will
+		 * be there (in `wchar_buf[0]`), so don't bother in that case */
+		if (wchar_buf_offset == 0) {
+			p = wchar_buf;
+			while (*p != '&')
+				p++;
+			if (p == wchar_buf + out_len) {
+				/* No HTML entities in this buffer */
+				encoding->from_wchar(wchar_buf, out_len, &buf, !in_len);
+				continue;
+			}
+
+			/* Copy over the prefix with no & which we already scanned */
+			memcpy(converted_buf, wchar_buf, (p - wchar_buf) * 4);
+			converted = converted_buf + (p - wchar_buf);
+		} else {
+			p = wchar_buf;
+			converted = converted_buf;
+		}
+
+found_ampersand:
+		ZEND_ASSERT(*p == '&');
+		uint32_t *p2 = p;
+
+		/* These tests can't overrun end of buffer, because we have a '&' sentinel there */
+		if (*++p2 == '#') {
+			if (*++p2 == 'x') {
+				/* Possible hex entity */
+				uint32_t w = *++p2;
+				while ((w >= '0' && w <= '9') || (w >= 'A' && w <= 'F') || (w >= 'a' && w <= 'f'))
+					w = *++p2;
+				if (p2 == wchar_buf + out_len) {
+					/* We hit the end of the buffer while still reading digits */
+					if ((p2 - p) <= 11 && in_len) {
+						/* The number of digits was legal (1-8 hex digits)
+						 * We need to process this identity again on the next iteration of the main loop */
+						memmove(wchar_buf, p, (p2 - p) * 4);
+						wchar_buf_offset = p2 - p;
+						goto process_converted_wchars;
+					} else {
+						/* Invalid entity */
+						memcpy(converted, p, (p2 - p) * 4);
+						converted += p2 - p;
+						goto process_converted_wchars_no_offset;
+					}
+				} else if ((p2 - p) == 3 || (p2 - p) > 11) {
+					/* Invalid entity */
+					memcpy(converted, p, (p2 - p) * 4);
+					converted += p2 - p;
+					if ((p2 - p) == 3) {
+						/* For compatibility with legacy behavior; if &#x is followed
+						 * by another entity, we don't convert the 2nd entity */
+						*converted++ = *p2++;
+					}
+				} else {
+					/* Valid hexadecimal entity */
+					uint32_t value = 0;
+					uint32_t *p3 = p + 3;
+					while (p3 < p2) {
+						w = *p3++;
+						if (w <= '9') {
+							value = (value * 16) + (w - '0');
+						} else if (w >= 'a') {
+							value = (value * 16) + 10 + (w - 'a');
+						} else {
+							value = (value * 16) + 10 + (w - 'A');
+						}
+					}
+					uint32_t original;
+					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
+						*converted++ = original;
+						if (*p2 != ';')
+							*converted++ = *p2;
+					} else {
+						memcpy(converted, p, (p2 - p + 1) * 4);
+						converted += p2 - p + 1;
+					}
+					/* For compatibility with legacy behavior:
+					 * We don't consider & as starting a new entity if it
+					 * terminates a preceding entity */
+					p2++;
+				}
+			} else if (p2 == wchar_buf + out_len && in_len) {
+				wchar_buf[0] = '&';
+				wchar_buf[1] = '#';
+				wchar_buf_offset = 2;
+				goto process_converted_wchars;
+			} else {
+				/* Possible decimal entity */
+				uint32_t w = *p2;
+				while (w >= '0' && w <= '9')
+					w = *++p2;
+				if (p2 == wchar_buf + out_len) {
+					if ((p2 - p) <= 12 && in_len) {
+						/* The number of digits was legal (1-10 decimal digits)
+						 * We need to process this identity again on next iteration of main loop */
+						memmove(wchar_buf, p, (p2 - p) * 4);
+						wchar_buf_offset = p2 - p;
+						goto process_converted_wchars;
+					} else {
+						/* Invalid entity */
+						memcpy(converted, p, (p2 - p) * 4);
+						converted += p2 - p;
+						wchar_buf_offset = 0;
+						goto process_converted_wchars_no_offset;
+					}
+				} else if ((p2 - p) == 2 || (p2 - p) > 12) {
+					/* Invalid entity */
+					memcpy(converted, p, (p2 - p) * 4);
+					converted += p2 - p;
+					if ((p2 - p) == 2) {
+						/* For compatibility with legacy behavior; if &# is followed
+						 * by another entity, we don't convert the 2nd entity */
+						*converted++ = *p2++;
+					}
+				} else {
+					/* Valid decimal entity */
+					uint32_t value = 0;
+					uint32_t *p3 = p + 2;
+					while (p3 < p2) {
+						/* If unsigned integer overflow would occur in the below
+						 * multiplication by 10, this entity is no good
+						 * 0x19999999 is 1/10th of 0xFFFFFFFF */
+						if (value > 0x19999999) {
+							memcpy(converted, p, (p2 - p) * 4);
+							converted += p2 - p;
+							goto decimal_entity_too_big;
+						}
+						value = (value * 10) + (*p3++ - '0');
+					}
+					uint32_t original;
+					if (html_numeric_entity_deconvert(value, convmap, mapsize, &original)) {
+						*converted++ = original;
+						if (*p2 != ';')
+							*converted++ = *p2;
+					} else {
+						memcpy(converted, p, (p2 - p + 1) * 4);
+						converted += p2 - p + 1;
+					}
+					/* For compatibility with legacy behavior:
+					 * We don't consider & as starting a new entity if it
+					 * terminates a preceding entity */
+					p2++;
+				}
+			}
+		} else if (p2 == wchar_buf + out_len) {
+			/* Corner case: & at end of buffer */
+			if (in_len) {
+				wchar_buf[0] = '&';
+				wchar_buf_offset = 1;
+				goto process_converted_wchars;
+			} else {
+				*converted++ = '&';
+				goto process_converted_wchars_no_offset;
+			}
+		} else {
+			*converted++ = '&';
+			if (*p2 == '&') {
+				/* Two successive ampersands convert to a single one,
+				 * and we do NOT allow the second one to start an entity
+				 * Duplicating the legacy behavior of mb_decode_numericentity here */
+				*converted++ = '&';
+				p2++;
+				if (p2 == wchar_buf + out_len) {
+					/* Corner case: two &'s at end of buffer */
+					goto process_converted_wchars_no_offset;
+				}
+			}
+		}
+decimal_entity_too_big:
+
+		/* Starting to scan a new section of the wchar buffer
+		 * 'p2' is pointing at the next wchar which needs to be processed */
+		p = p2;
+		while (*p2 != '&')
+			p2++;
+
+		if (p2 > p) {
+			memcpy(converted, p, (p2 - p) * 4);
+			converted += p2 - p;
+			p = p2;
+		}
+
+		if (p < wchar_buf + out_len)
+			goto found_ampersand;
+
+process_converted_wchars_no_offset:
+		/* We do not have any wchars remaining at the end of this buffer which
+		 * we need to reprocess on the next call */
+		wchar_buf_offset = 0;
+process_converted_wchars:
+		ZEND_ASSERT(converted <= converted_buf + 128);
+		encoding->from_wchar(converted_buf, converted - converted_buf, &buf, !in_len);
+	}
+
+	return mb_convert_buf_result(&buf);
+}
+
 /* {{{ Converts HTML numeric entities to character code */
 PHP_FUNCTION(mb_decode_numericentity)
 {
-	char *str = NULL;
-	zend_string *encoding = NULL;
+	zend_string *encoding = NULL, *str;
 	int mapsize;
 	HashTable *target_hash;
-	mbfl_string string, result, *ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(str, string.len)
+		Z_PARAM_STR(str)
 		Z_PARAM_ARRAY_HT(target_hash)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char *)str;
-	string.encoding = php_mb_get_encoding(encoding, 3);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 3);
+	if (!enc) {
 		RETURN_THROWS();
 	}
 
-	int *convmap = make_conversion_map(target_hash, &mapsize);
+	uint32_t *convmap = make_conversion_map(target_hash, &mapsize);
 	if (convmap == NULL) {
 		RETURN_THROWS();
 	}
 
-	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, 1);
-	ZEND_ASSERT(ret != NULL);
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len);
-	efree(ret->val);
-	efree((void *)convmap);
+	RETVAL_STR(html_numeric_entity_decode(str, enc, convmap, mapsize));
+	efree(convmap);
 }
 /* }}} */
 
