@@ -1370,7 +1370,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 
 static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
@@ -2710,7 +2710,7 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	}
 
 	if (document_root) {
-		zend_stat_t sb;
+		zend_stat_t sb = {0};
 
 		if (php_sys_stat(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
