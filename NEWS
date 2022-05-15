@@ -49,6 +49,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7787 (Improve session write failure message for user error
     handlers). (ilutov)
 
+- Sockets:
+  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
+
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 
