@@ -1635,6 +1635,19 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	client->current_header_value = NULL;
 }
 
+static void cli_concat_persistent_zstr_with_char(zend_string *str, const char *at, size_t length)
+{
+	/* Assert that there is only one reference to the string, as then zend_string_extends()
+	 * will reallocate it such that we do not need to release the old value. */
+	ZEND_ASSERT(GC_REFCOUNT(str) == 1);
+	/* Previous element was part of header value, append content to it */
+	size_t old_length = ZSTR_LEN(str);
+	str = zend_string_extend(str, old_length + length, /* persistent */ true);
+	memcpy(ZSTR_VAL(str) + old_length, at, length);
+	// Null terminate
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+}
+
 static int php_cli_server_client_read_request_on_header_field(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
@@ -1648,16 +1661,8 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 			client->current_header_name = zend_string_init(at, length, /* persistent */ true);
 			break;
 		case HEADER_FIELD: {
-			/* Append header to the previous value of it */
-			/* Assert that there is only one reference to the header name, as then zend_string_extends()
-			 * will reallocate it such that we do not need to release the old value. */
-			ZEND_ASSERT(GC_REFCOUNT(client->current_header_name) == 1);
-			/* Previous element was part of header value, append content to it */
-			size_t old_length = ZSTR_LEN(client->current_header_name);
-			client->current_header_name = zend_string_extend(client->current_header_name, old_length + length, /* persistent */ true);
-			memcpy(ZSTR_VAL(client->current_header_name) + old_length, at, length);
-			// Null terminate
-			ZSTR_VAL(client->current_header_name)[ZSTR_LEN(client->current_header_name)] = '\0';
+			/* Append header name to the previous value of it */
+			cli_concat_persistent_zstr_with_char(client->current_header_name, at, length);
 			break;
 		}
 	}
@@ -1675,15 +1680,8 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 			client->current_header_value = zend_string_init(at, length, /* persistent */ true);
 			break;
 		case HEADER_VALUE: {
-			/* Assert that there is only one reference to the header value, as then zend_string_extends()
-			 * will reallocate it such that we do not need to release the old value. */
-			ZEND_ASSERT(GC_REFCOUNT(client->current_header_value) == 1);
-			/* Previous element was part of header value, append content to it */
-			size_t old_length = ZSTR_LEN(client->current_header_value);
-			client->current_header_value = zend_string_extend(client->current_header_value, old_length + length, /* persistent */ true);
-			memcpy(ZSTR_VAL(client->current_header_value) + old_length, at, length);
-			// Null terminate
-			ZSTR_VAL(client->current_header_value)[ZSTR_LEN(client->current_header_value)] = '\0';
+			/* Append header value to the previous value of it */
+			cli_concat_persistent_zstr_with_char(client->current_header_value, at, length);
 			break;
 		}
 		case HEADER_NONE:
