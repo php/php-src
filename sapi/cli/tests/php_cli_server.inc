@@ -96,7 +96,8 @@ function php_cli_server_start(
         function($handle) use($router, $doc_root, $output_file) {
             proc_terminate($handle);
             $status = proc_get_status($handle);
-            if ($status['exitcode'] !== -1 && $status['exitcode'] !== 0) {
+            if ($status['exitcode'] !== -1 && $status['exitcode'] !== 0
+                    && !($status['exitcode'] === 255 && PHP_OS == 'Windows')) {
                 printf("Server exited with non-zero status: %d\n", $status['exitcode']);
                 printf("Server output:\n%s\n", file_get_contents($output_file));
             }
