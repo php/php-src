@@ -1908,11 +1908,10 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 	pefree(client->addr, 1);
 	zend_string_release_ex(client->addr_str, /* persistent */ true);
 
-	/* Headers must be sent */
-	assert(client->current_header_name == NULL);
-	assert(client->current_header_value == NULL);
-
 	if (client->content_sender_initialized) {
+		/* Headers must be set if we reached the content initialisation */
+		assert(client->current_header_name == NULL);
+		assert(client->current_header_value == NULL);
 		php_cli_server_content_sender_dtor(&client->content_sender);
 	}
 } /* }}} */
