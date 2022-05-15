@@ -1623,14 +1623,12 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	zval tmp;
 	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
-	zend_string *perm_header_name = zend_string_dup(client->current_header_name, /* persistent */ true);
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
 
 	/* Add the wrapped zend_string to the HashTable */
 	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
-	zend_hash_add(&client->request.headers_original_case, perm_header_name, &tmp);
+	zend_hash_add(&client->request.headers_original_case, client->current_header_name, &tmp);
 
-	zend_string_release_ex(client->current_header_name, /* persistent */ false);
 	zend_string_release_ex(lc_header_name, /* persistent */ true);
 
 	client->current_header_name = NULL;
@@ -1647,15 +1645,19 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 			ZEND_FALLTHROUGH;
 		case HEADER_NONE:
 			/* Create new header field */
-			client->current_header_name = zend_string_init(at, length, /* persistent */ false);
+			client->current_header_name = zend_string_init(at, length, /* persistent */ true);
 			break;
 		case HEADER_FIELD: {
-			/* Append header field */
-			zend_string *field = zend_string_concat2(
-				ZSTR_VAL(client->current_header_name), ZSTR_LEN(client->current_header_name), at, length);
-			// Free previous
-			zend_string_release_ex(client->current_header_name, /* persistent */ false);
-			client->current_header_name = field;
+			/* Append header to the previous value of it */
+			/* Assert that there is only one reference to the header name, as then zend_string_extends()
+			 * will reallocate it such that we do not need to release the old value. */
+			ZEND_ASSERT(GC_REFCOUNT(client->current_header_name) == 1);
+			/* Previous element was part of header value, append content to it */
+			size_t old_length = ZSTR_LEN(client->current_header_name);
+			client->current_header_name = zend_string_extend(client->current_header_name, old_length + length, /* persistent */ true);
+			memcpy(ZSTR_VAL(client->current_header_name) + old_length, at, length);
+			// Null terminate
+			ZSTR_VAL(client->current_header_name)[ZSTR_LEN(client->current_header_name)] = '\0';
 			break;
 		}
 	}
