@@ -13,11 +13,7 @@ $fd = stream_socket_client("tcp://" . PHP_CLI_SERVER_ADDRESS);
 fwrite($fd, "GET /index.php HTTP/1.0\r\nHost: hello");
 fclose($fd);
 
-/* This is needed to check that the Server didn't die */
-var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
-
 ?>
 ===DONE===
 --EXPECT--
-string(11) "Hello world"
 ===DONE===

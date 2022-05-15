@@ -1,5 +1,5 @@
 --TEST--
-Close request before server sends a response
+Server processing multiple request at the same time
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -20,9 +20,7 @@ stream_copy_to_stream($fd2, STDOUT);
 fwrite($fd, "\r\n\r\n");
 stream_copy_to_stream($fd, STDOUT);
 
-/* This is needed to check that the Server didn't die */
 echo PHP_EOL;
-var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
 
 ?>
 ===DONE===
@@ -41,5 +39,4 @@ X-Powered-By: %s
 Content-type: text/html; charset=UTF-8
 
 Hello world
-string(11) "Hello world"
 ===DONE===
