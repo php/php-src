@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8461 (tracing JIT crash after function/method change).
     (Arnaud, Dmitry)
 
+- OpenSSL:
+  . Fixed bug #79589 (error:14095126:SSL routines:ssl3_read_n:unexpected eof
+    while reading). (Jakub Zelenka)
+
 - SPL:
   . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
 
