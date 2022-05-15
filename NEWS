@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
 
 - Date:
   . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
