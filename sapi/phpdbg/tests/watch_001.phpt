@@ -2,6 +2,9 @@
 Test simple recursive watchpoint
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
+}
 if (getenv('SKIP_ASAN')) {
     die("skip intentionally causes segfaults");
 }
