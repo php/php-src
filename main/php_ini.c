@@ -566,7 +566,7 @@ int php_init_config(void)
 
 		/* Check if php_ini_file_name is a file and can be opened */
 		if (php_ini_file_name && php_ini_file_name[0]) {
-			zend_stat_t statbuf;
+			zend_stat_t statbuf = {0};
 
 			if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
 				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
@@ -642,7 +642,7 @@ int php_init_config(void)
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
 		struct dirent **namelist;
 		int ndir, i;
-		zend_stat_t sb;
+		zend_stat_t sb = {0};
 		char ini_file[MAXPATHLEN];
 		char *p;
 		zend_llist scanned_ini_list;

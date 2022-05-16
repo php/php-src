@@ -6,6 +6,7 @@ on:
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
+    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
@@ -74,6 +75,7 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
@@ -81,14 +83,18 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
   MACOS:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
@@ -126,6 +132,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
       - name: Test OpCache
@@ -133,12 +140,16 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files

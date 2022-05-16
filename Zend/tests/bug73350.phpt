@@ -12,7 +12,7 @@ $e = new Exception();
 var_export($e);
 ?>
 --EXPECTF--
-Exception::__set_state(array(
+\Exception::__set_state(array(
    'message' => '',
    'string' => 'Exception in %sbug73350.php:%d
 Stack trace:

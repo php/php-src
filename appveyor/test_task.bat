@@ -89,8 +89,18 @@ if not exist "%PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\en_US.aff" (
 mkdir %LOCALAPPDATA%\enchant\hunspell
 copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %LOCALAPPDATA%\enchant\hunspell
 
+rem prepare for snmp
+set MIBDIRS=%DEPS_DIR%\share\mibs
+start %DEPS_DIR%\bin\snmpd.exe -C -c %APPVEYOR_BUILD_FOLDER%\ext\snmp\tests\snmpd.conf -Ln
+
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
+
+rem prepare for mail
+curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
+hMailServer.exe /verysilent
+cd %APPVEYOR_BUILD_FOLDER%
+%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet appveyor\setup_hmailserver.php
 
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
@@ -101,7 +111,7 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
+for %%i in (ldap oci8_12c pdo_firebird pdo_oci) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
@@ -115,6 +125,8 @@ cd "%APPVEYOR_BUILD_FOLDER%"
 nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
+
+taskkill /f /im snmpd.exe
 
 appveyor PushArtifact %TEST_PHP_JUNIT%
 

@@ -190,8 +190,7 @@ function imagecolorresolve(GdImage $image, int $red, int $green, int $blue): int
 
 function imagecolorexact(GdImage $image, int $red, int $green, int $blue): int {}
 
-/** @return false|null */
-function imagecolorset(GdImage $image, int $color, int $red, int $green, int $blue, int $alpha = 0): ?bool {}
+function imagecolorset(GdImage $image, int $color, int $red, int $green, int $blue, int $alpha = 0): false|null {}
 
 /**
  * @return array<string, int>

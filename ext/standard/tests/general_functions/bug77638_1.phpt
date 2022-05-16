@@ -7,5 +7,5 @@ com_dotnet
 var_export(new COM("Scripting.Dictionary"));
 ?>
 --EXPECT--
-com::__set_state(array(
+\com::__set_state(array(
 ))

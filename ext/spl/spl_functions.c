@@ -19,8 +19,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_spl.h"
 
 /* {{{ spl_add_class_name */
@@ -41,11 +39,9 @@ void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_fla
 /* {{{ spl_add_interfaces */
 void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
-	uint32_t num_interfaces;
-
 	if (pce->num_interfaces) {
 		ZEND_ASSERT(pce->ce_flags & ZEND_ACC_LINKED);
-		for (num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
+		for (uint32_t num_interfaces = 0; num_interfaces < pce->num_interfaces; num_interfaces++) {
 			spl_add_class_name(list, pce->interfaces[num_interfaces], allow, ce_flags);
 		}
 	}
@@ -55,10 +51,9 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 /* {{{ spl_add_traits */
 void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 {
-	uint32_t num_traits;
 	zend_class_entry *trait;
 
-	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
+	for (uint32_t num_traits = 0; num_traits < pce->num_traits; num_traits++) {
 		trait = zend_fetch_class_by_name(pce->trait_names[num_traits].name,
 			pce->trait_names[num_traits].lc_name, ZEND_FETCH_CLASS_TRAIT);
 		ZEND_ASSERT(trait);
@@ -69,11 +64,9 @@ void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags)
 
 
 /* {{{ spl_add_classes */
-int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags)
+void spl_add_classes(zend_class_entry *pce, zval *list, bool sub, int allow, int ce_flags)
 {
-	if (!pce) {
-		return 0;
-	}
+	ZEND_ASSERT(pce);
 	spl_add_class_name(list, pce, allow, ce_flags);
 	if (sub) {
 		spl_add_interfaces(list, pce, allow, ce_flags);
@@ -82,11 +75,10 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 			spl_add_classes(pce, list, sub, allow, ce_flags);
 		}
 	}
-	return 0;
 }
 /* }}} */
 
-zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len) /* {{{ */
+zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, size_t prop_len) /* {{{ */
 {
 	return zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), prop_name, prop_len, 0);
 }

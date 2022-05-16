@@ -1,7 +1,7 @@
 --TEST--
 Bug #81430 (Attribute instantiation frame accessing invalid frame pointer)
 --EXTENSIONS--
-zend-test
+zend_test
 --INI--
 memory_limit=20M
 zend_test.observer.enabled=1

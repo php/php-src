@@ -1,5 +1,7 @@
 --TEST--
 Test mail() function : basic functionality
+--EXTENSIONS--
+imap
 --SKIPIF--
 <?php
 

@@ -197,7 +197,7 @@ You can view the list of known bugs or report any new bug you
 found at:
 .PD 0
 .P
-.B http://bugs.php.net
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 PHP-FPM SAPI was written by Andrei Nigmatulin. The mailing-lists are highload-php-en (English) and highload-php-ru (Russian).

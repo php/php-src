@@ -74,18 +74,39 @@ int fpm_scoreboard_init_main() /* {{{ */
 }
 /* }}} */
 
-void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+static struct fpm_scoreboard_s *fpm_scoreboard_get_for_update(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
 	if (!scoreboard) {
 		scoreboard = fpm_scoreboard;
 	}
 	if (!scoreboard) {
 		zlog(ZLOG_WARNING, "Unable to update scoreboard: the SHM has not been found");
+	}
+
+	return scoreboard;
+}
+/* }}} */
+
+void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	scoreboard = fpm_scoreboard_get_for_update(scoreboard);
+	if (!scoreboard) {
 		return;
 	}
 
-
 	fpm_spinlock(&scoreboard->lock, 0);
+}
+/* }}} */
+
+void fpm_scoreboard_update_commit(
+		int idle, int active, int lq, int lq_len, int requests, int max_children_reached,
+		int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	scoreboard = fpm_scoreboard_get_for_update(scoreboard);
+	if (!scoreboard) {
+		return;
+	}
+
 	if (action == FPM_SCOREBOARD_ACTION_SET) {
 		if (idle >= 0) {
 			scoreboard->idle = idle;
@@ -151,6 +172,17 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 	}
 
 	fpm_unlock(scoreboard->lock);
+}
+/* }}} */
+
+
+void fpm_scoreboard_update(
+		int idle, int active, int lq, int lq_len, int requests, int max_children_reached,
+		int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+{
+	fpm_scoreboard_update_begin(scoreboard);
+	fpm_scoreboard_update_commit(
+			idle, active, lq, lq_len, requests, max_children_reached, slow_rq, action, scoreboard);
 }
 /* }}} */
 

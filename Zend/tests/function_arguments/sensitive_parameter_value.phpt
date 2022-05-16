@@ -5,9 +5,10 @@ A SensitiveParameterValue keeps the inner value secret.
 
 $v = new SensitiveParameterValue('secret');
 
-echo "# var_dump() / debug_zval_dump()", PHP_EOL;
+echo "# var_dump() / debug_zval_dump() / print_r()", PHP_EOL;
 var_dump($v);
 debug_zval_dump($v);
+print_r($v);
 echo PHP_EOL;
 
 echo "# var_export()", PHP_EOL;
@@ -24,14 +25,15 @@ var_dump($v->getValue());
 
 ?>
 --EXPECTF--
-# var_dump() / debug_zval_dump()
+# var_dump() / debug_zval_dump() / print_r()
 object(SensitiveParameterValue)#%d (0) {
 }
 object(SensitiveParameterValue)#%d (%d) refcount(%d){
 }
+SensitiveParameterValue Object
 
 # var_export()
-SensitiveParameterValue::__set_state(array(
+\SensitiveParameterValue::__set_state(array(
 ))
 
 # (array) / json_encode()

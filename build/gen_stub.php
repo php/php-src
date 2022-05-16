@@ -286,6 +286,10 @@ class SimpleType {
                 return "IS_STATIC";
             case "never":
                 return "IS_NEVER";
+            case "null":
+                return "IS_NULL";
+            case "false":
+                return "IS_FALSE";
             default:
                 throw new Exception("Not implemented: $this->name");
         }
@@ -400,7 +404,6 @@ class SimpleType {
     }
 
     public function toVarEscapedName(): string {
-        $name = str_replace('_', '__', $this->name);
         return str_replace('\\', '_', $this->name);
     }
 
@@ -506,6 +509,10 @@ class Type {
 
     public function tryToSimpleType(): ?SimpleType {
         $withoutNull = $this->getWithoutNull();
+        /* type has only null */
+        if (count($withoutNull->types) === 0) {
+            return $this->types[0];
+        }
         if (count($withoutNull->types) === 1) {
             return $withoutNull->types[0];
         }
@@ -1477,7 +1484,7 @@ class PropertyInfo
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
                     $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
-                    $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"${escapedClassName}\")-1, 1);\n";
+                    $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
 
                     $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
                 }

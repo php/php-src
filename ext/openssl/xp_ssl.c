@@ -1634,6 +1634,11 @@ int php_openssl_setup_crypto(php_stream *stream,
 
 	ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
 
+#ifdef SSL_OP_IGNORE_UNEXPECTED_EOF
+	/* Only for OpenSSL 3+ to keep OpenSSL 1.1.1 behavior */
+	ssl_ctx_options |= SSL_OP_IGNORE_UNEXPECTED_EOF;
+#endif
+
 	if (!GET_VER_OPT("disable_compression") || zend_is_true(val)) {
 		ssl_ctx_options |= SSL_OP_NO_COMPRESSION;
 	}

@@ -3487,6 +3487,9 @@ static uint32_t zend_compile_args(
 					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 						opcode = ZEND_SEND_VAR_NO_REF;
 					} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
+						/* For IS_VAR operands, SEND_VAL will pass through the operand without
+						 * dereferencing, so it will use a by-ref pass if the call returned by-ref
+						 * and a by-value pass if it returned by-value. */
 						opcode = ZEND_SEND_VAL;
 					} else {
 						opcode = ZEND_SEND_VAR;
@@ -3589,16 +3592,17 @@ static uint32_t zend_compile_args(
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
 	if (fbc) {
+		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE));
 		if (fbc->type == ZEND_INTERNAL_FUNCTION && !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS)) {
 			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {
-				if (!(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED))) {
+				if (!(fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
 					return ZEND_DO_ICALL;
 				} else {
 					return ZEND_DO_FCALL_BY_NAME;
 				}
 			}
 		} else if (!(CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)){
-			if (zend_execute_ex == execute_ex && !(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			if (zend_execute_ex == execute_ex) {
 				return ZEND_DO_UCALL;
 			}
 		}
@@ -9500,7 +9504,16 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 	j = 0;
 	last_const_node.op_type = IS_UNUSED;
 	for (i = 0; i < list->children; i++) {
-		zend_compile_expr(&elem_node, list->child[i]);
+		zend_ast *encaps_var = list->child[i];
+		if (encaps_var->attr & (ZEND_ENCAPS_VAR_DOLLAR_CURLY|ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR)) {
+			if (encaps_var->attr & ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR) {
+				zend_error(E_DEPRECATED, "Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead");
+			} else {
+				zend_error(E_DEPRECATED, "Using ${var} in strings is deprecated, use {$var} instead");
+			}
+		}
+
+		zend_compile_expr(&elem_node, encaps_var);
 
 		if (elem_node.op_type == IS_CONST) {
 			convert_to_string(&elem_node.u.constant);

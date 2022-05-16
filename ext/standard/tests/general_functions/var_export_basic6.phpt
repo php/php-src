@@ -110,35 +110,35 @@ string(17) "(object) array(
 
 
 -- Iteration: new foo --
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 -- Iteration: new concreteClass --
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"
 
 
 -- Iteration: new Value --
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -146,140 +146,140 @@ string(57) "Value::__set_state(array(
 
 
 -- Iteration: new myClass --
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))
-string(266) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))"
 
 
 -- Iteration: myClass_object --
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))
-myClass::__set_state(array(
+\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))
-string(266) "myClass::__set_state(array(
+string(271) "\myClass::__set_state(array(
    'foo_object' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'public_var' => 10,
    'public_var1' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'private_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
    'protected_var' => 
-  foo::__set_state(array(
+  \foo::__set_state(array(
   )),
 ))"
 
 
 -- Iteration: myClass_object->foo_object --
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 -- Iteration: myClass_object->public_var1 --
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 -- Iteration: foo_object --
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-foo::__set_state(array(
+\foo::__set_state(array(
 ))
-string(26) "foo::__set_state(array(
+string(27) "\foo::__set_state(array(
 ))"
 
 
 -- Iteration: Value_object --
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-Value::__set_state(array(
+\Value::__set_state(array(
    'vars' => 
   array (
   ),
 ))
-string(57) "Value::__set_state(array(
+string(58) "\Value::__set_state(array(
    'vars' => 
   array (
   ),
@@ -287,9 +287,9 @@ string(57) "Value::__set_state(array(
 
 
 -- Iteration: concreteClass_object --
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-concreteClass::__set_state(array(
+\concreteClass::__set_state(array(
 ))
-string(36) "concreteClass::__set_state(array(
+string(37) "\concreteClass::__set_state(array(
 ))"

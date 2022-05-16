@@ -1215,7 +1215,7 @@ PHP_METHOD(SplDoublyLinkedList, add)
 PHP_METHOD(SplDoublyLinkedList, __debugInfo)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_ARR(spl_dllist_object_get_debug_info(Z_OBJ_P(ZEND_THIS)));

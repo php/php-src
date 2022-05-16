@@ -870,7 +870,7 @@ PHP_METHOD(RecursiveIteratorIterator, callGetChildren)
 
 	zobject = &object->iterators[object->level].zobject;
 	if (Z_TYPE_P(zobject) == IS_UNDEF) {
-		return;
+		RETURN_NULL();
 	} else {
 		zend_call_method_with_0_params(Z_OBJ_P(zobject), ce, &object->iterators[object->level].getchildren, "getchildren", return_value);
 		if (Z_TYPE_P(return_value) == IS_UNDEF) {
@@ -3181,6 +3181,9 @@ PHP_FUNCTION(iterator_to_array)
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser) /* {{{ */
 {
+	if (UNEXPECTED(*(zend_long*)puser == ZEND_LONG_MAX)) {
+		return ZEND_HASH_APPLY_STOP;
+	}
 	(*(zend_long*)puser)++;
 	return ZEND_HASH_APPLY_KEEP;
 }

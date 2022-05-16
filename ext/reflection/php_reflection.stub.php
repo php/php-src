@@ -117,6 +117,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     public function __toString(): string {}
 
+    public function isAnonymous(): bool {}
+
     /**
      * @tentative-return-type
      * @deprecated ReflectionFunction can no longer be constructed for disabled functions
@@ -203,6 +205,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     /** @tentative-return-type */
     public function getPrototype(): ReflectionMethod {}
+
+    public function hasPrototype(): bool {}
 
     /** @tentative-return-type */
     public function setAccessible(bool $accessible): void {}

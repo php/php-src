@@ -464,8 +464,7 @@ function forward_static_call(callable $callback, mixed ...$args): mixed {}
 
 function forward_static_call_array(callable $callback, array $args): mixed {}
 
-/** @return false|null */
-function register_shutdown_function(callable $callback, mixed ...$args): ?bool {}
+function register_shutdown_function(callable $callback, mixed ...$args): void {}
 
 /** @refcount 1 */
 function highlight_file(string $filename, bool $return = false): string|bool {}
@@ -1087,11 +1086,8 @@ function exec(string $command, &$output = null, &$result_code = null): string|fa
  */
 function system(string $command, &$result_code = null): string|false {}
 
-/**
- * @param int $result_code
- * @return false|null
- */
-function passthru(string $command, &$result_code = null): ?bool {}
+/** @param int $result_code */
+function passthru(string $command, &$result_code = null): false|null {}
 
 /** @refcount 1 */
 function escapeshellcmd(string $command): string {}

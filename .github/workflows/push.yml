@@ -53,7 +53,12 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
-          runTestsParameters: -d zend_extension=opcache.so -d opcache.jit_buffer_size=16M
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
     runs-on: macos-10.15
     steps:
@@ -78,5 +83,8 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files

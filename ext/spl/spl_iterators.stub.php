@@ -14,7 +14,7 @@ class EmptyIterator implements Iterator
     public function key(): never {}
 
     /** @tentative-return-type */
-    public function valid(): bool {}
+    public function valid(): false {}
 
     /** @tentative-return-type */
     public function rewind(): void {}

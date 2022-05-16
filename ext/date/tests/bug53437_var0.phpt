@@ -1,5 +1,5 @@
 --TEST--
-Bug #53437 (Crash when using unserialized DatePeriod instance), variation 1
+Bug #53437 (Crash when using unserialized DatePeriod instance), variation 0
 --FILE--
 <?php
 $dp = new DatePeriod(new DateTime('2010-01-01 UTC'), new DateInterval('P1D'), 2);
@@ -50,7 +50,7 @@ object(DatePeriod)#%d (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (16) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -65,24 +65,12 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["f"]=>
     float(0)
-    ["weekday"]=>
-    int(0)
-    ["weekday_behavior"]=>
-    int(0)
-    ["first_last_day_of"]=>
-    int(0)
     ["invert"]=>
     int(0)
     ["days"]=>
     bool(false)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(0)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
+    ["from_string"]=>
+    bool(false)
   }
   ["recurrences"]=>
   int(3)
@@ -111,7 +99,7 @@ object(DatePeriod)#%d (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (16) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -126,24 +114,12 @@ object(DatePeriod)#%d (6) {
     int(0)
     ["f"]=>
     float(0)
-    ["weekday"]=>
-    int(0)
-    ["weekday_behavior"]=>
-    int(0)
-    ["first_last_day_of"]=>
-    int(0)
     ["invert"]=>
     int(0)
     ["days"]=>
     bool(false)
-    ["special_type"]=>
-    int(0)
-    ["special_amount"]=>
-    int(0)
-    ["have_weekday_relative"]=>
-    int(0)
-    ["have_special_relative"]=>
-    int(0)
+    ["from_string"]=>
+    bool(false)
   }
   ["recurrences"]=>
   int(3)

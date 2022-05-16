@@ -343,6 +343,19 @@ AC_DEFUN([AC_FPM_LQ],
     AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
   fi
 
+  AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_connection_info ti; int x = TCP_CONNECTION_INFO;]])], [
+    have_lq=tcp_connection_info
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+
+  if test "$have_lq" = "tcp_connection_info"; then
+    AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], 1, [do we have TCP_CONNECTION_INFO?])
+  fi
+
   if test "$have_lq" = "no" ; then
     AC_MSG_CHECKING([for SO_LISTENQLEN])
 
@@ -587,18 +600,57 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "$PHP_FPM_ACL" != "no" ; then
+    AC_MSG_CHECKING([for acl user/group permissions support])
     AC_CHECK_HEADERS([sys/acl.h])
-    dnl *BSD has acl_* built into libc.
-    AC_CHECK_FUNC(acl_free, [
-      AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
-    ],[
-      AC_CHECK_LIB(acl, acl_free, [
-        PHP_ADD_LIBRARY(acl)
-        AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
-      ],[
-        AC_MSG_ERROR(libacl required not found)
-      ])
-    ])
+
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
+      int main()
+      {
+        acl_t acl;
+        acl_entry_t user, group;
+        acl = acl_init(1);
+        acl_create_entry(&acl, &user);
+        acl_set_tag_type(user, ACL_USER);
+        acl_create_entry(&acl, &group);
+        acl_set_tag_type(user, ACL_GROUP);
+        acl_free(acl);
+        return 0;
+      }
+    ]])], [
+      AC_CHECK_LIB(acl, acl_free, 
+        [PHP_ADD_LIBRARY(acl)
+          have_fpm_acl=yes
+          AC_MSG_RESULT([yes])
+        ],[
+          AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
+            int main()
+            {
+              acl_t acl;
+              acl_entry_t user, group;
+              acl = acl_init(1);
+              acl_create_entry(&acl, &user);
+              acl_set_tag_type(user, ACL_USER);
+              acl_create_entry(&acl, &group);
+              acl_set_tag_type(user, ACL_GROUP);
+              acl_free(acl);
+              return 0;
+            }
+          ]])], [
+            have_fpm_acl=yes
+            AC_MSG_RESULT([yes])
+          ], [
+            have_fpm_acl=no
+            AC_MSG_RESULT([no])
+          ], [AC_MSG_RESULT([skipped])])
+        ])
+    ], [
+      have_fpm_acl=no
+      AC_MSG_RESULT([no])
+    ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+
+    if test "$have_fpm_acl" = "yes"; then
+      AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
+    fi
   fi
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then

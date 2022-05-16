@@ -1036,7 +1036,10 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 
 	intern->ar_flags &= ~SPL_ARRAY_IS_SELF & ~SPL_ARRAY_USE_OTHER;
 	intern->ar_flags |= ar_flags;
-	intern->ht_iter = (uint32_t)-1;
+	if (intern->ht_iter != (uint32_t)-1) {
+		zend_hash_iterator_del(intern->ht_iter);
+		intern->ht_iter = (uint32_t)-1;
+	}
 }
 /* }}} */
 
@@ -1304,7 +1307,7 @@ PHP_METHOD(ArrayObject, count)
 	RETURN_LONG(spl_array_object_count_elements_helper(intern));
 } /* }}} */
 
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, size_t fname_len, int use_arg) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	HashTable **ht_ptr = spl_array_get_hash_table_ptr(intern);
@@ -1393,12 +1396,12 @@ PHP_METHOD(ArrayIterator, current)
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
-		return;
+		RETURN_NULL();
 	}
 	if (Z_TYPE_P(entry) == IS_INDIRECT) {
 		entry = Z_INDIRECT_P(entry);
 		if (Z_TYPE_P(entry) == IS_UNDEF) {
-			return;
+			RETURN_NULL();
 		}
 	}
 	RETURN_COPY_DEREF(entry);
@@ -1490,7 +1493,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
-		return;
+		RETURN_NULL();
 	}
 
 	if (Z_TYPE_P(entry) == IS_INDIRECT) {
@@ -1500,7 +1503,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_OBJECT) {
 		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
-			return;
+			RETURN_NULL();
 		}
 		if (instanceof_function(Z_OBJCE_P(entry), Z_OBJCE_P(ZEND_THIS))) {
 			RETURN_OBJ_COPY(Z_OBJ_P(entry));

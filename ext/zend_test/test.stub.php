@@ -109,6 +109,8 @@ namespace {
     function zend_get_unit_enum(): ZendTestUnitEnum {}
 
     function zend_test_parameter_with_attribute(string $parameter): int {}
+
+    function zend_get_current_func_name(): string {}
 }
 
 namespace ZendTestNS {

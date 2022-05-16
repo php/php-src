@@ -366,20 +366,20 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 
 /* Even if we don't build with valgrind support, include the symbol so that valgrind available
  * only at runtime will not result in false positives. */
-#ifndef HAVE_VALGRIND
+#ifndef I_REPLACE_SONAME_FNNAME_ZU
 # define I_REPLACE_SONAME_FNNAME_ZU(soname, fnname) _vgr00000ZU_ ## soname ## _ ## fnname
 #endif
 
-ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 
 #if defined(__GNUC__) && defined(__i386__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
-	char *ptr = ZSTR_VAL(s1);
-	size_t delta = (char*)s2 - (char*)s1;
+	const char *ptr = ZSTR_VAL(s1);
+	size_t delta = (const char*)s2 - (const char*)s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
@@ -414,10 +414,10 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *
 }
 
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
-	char *ptr = ZSTR_VAL(s1);
-	size_t delta = (char*)s2 - (char*)s1;
+	const char *ptr = ZSTR_VAL(s1);
+	size_t delta = (const char*)s2 - (const char*)s1;
 	size_t len = ZSTR_LEN(s1);
 	zend_ulong ret;
 
