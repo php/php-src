@@ -68,6 +68,9 @@ namespace {
 }
 
 namespace FFI {
+    /** @not-serializable */
+    final class CDef {
+    }
 
 	/** @not-serializable */
     final class CData {

@@ -190,10 +190,12 @@ typedef struct _zend_ffi_ctype {
 static zend_class_entry *zend_ffi_exception_ce;
 static zend_class_entry *zend_ffi_parser_exception_ce;
 static zend_class_entry *zend_ffi_ce;
+static zend_class_entry *zend_ffi_cdef_ce;
 static zend_class_entry *zend_ffi_cdata_ce;
 static zend_class_entry *zend_ffi_ctype_ce;
 
 static zend_object_handlers zend_ffi_handlers;
+static zend_object_handlers zend_ffi_cdef_handlers;
 static zend_object_handlers zend_ffi_cdata_handlers;
 static zend_object_handlers zend_ffi_cdata_value_handlers;
 static zend_object_handlers zend_ffi_cdata_free_handlers;
@@ -2199,6 +2201,23 @@ static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, int *is_temp) 
 }
 /* }}} */
 
+static zend_object *zend_ffi_cdef_new(zend_class_entry *class_type) /* {{{ */
+{
+	zend_ffi *ffi;
+
+	ffi = emalloc(sizeof(zend_ffi));
+
+	zend_ffi_object_init(&ffi->std, class_type);
+	ffi->std.handlers = &zend_ffi_cdef_handlers;
+
+	ffi->lib = NULL;
+	ffi->symbols = NULL;
+	ffi->tags = NULL;
+	ffi->persistent = 0;
+
+	return &ffi->std;
+}
+
 static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 {
 	zend_ffi *ffi;
@@ -2786,7 +2805,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	zend_ffi_symbol *sym = NULL;
 	zend_function   *func;
 	zend_ffi_type   *type;
-
+	/*
 	if (ZSTR_LEN(name) == sizeof("new") -1
 	 && (ZSTR_VAL(name)[0] == 'n' || ZSTR_VAL(name)[0] == 'N')
 	 && (ZSTR_VAL(name)[1] == 'e' || ZSTR_VAL(name)[1] == 'E')
@@ -2805,7 +2824,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	 && (ZSTR_VAL(name)[3] == 'e' || ZSTR_VAL(name)[3] == 'E')) {
 		return (zend_function*)&zend_ffi_type_fn;
 	}
-
+	*/
 	if (ffi->symbols) {
 		sym = zend_hash_find_ptr(ffi->symbols, name);
 		if (sym && sym->kind != ZEND_FFI_SYM_FUNC) {
@@ -2953,7 +2972,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 		}
 	}
 
-	ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+	ffi = (zend_ffi*)zend_ffi_cdef_new(zend_ffi_cdef_ce);
 	ffi->lib = handle;
 	ffi->symbols = FFI_G(symbols);
 	ffi->tags = FFI_G(tags);
@@ -3374,7 +3393,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		}
 
 		if (EG(objects_store).object_buckets) {
-			ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+			ffi = (zend_ffi*)zend_ffi_cdef_new(zend_ffi_cdef_ce);
 		} else {
 			ffi = ecalloc(1, sizeof(zend_ffi));
 		}
@@ -3382,7 +3401,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		ffi->tags = scope->tags;
 		ffi->persistent = 1;
 	} else {
-		ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+		ffi = (zend_ffi*)zend_ffi_cdef_new(zend_ffi_cdef_ce);
 		ffi->lib = handle;
 		ffi->symbols = FFI_G(symbols);
 		ffi->tags = FFI_G(tags);
@@ -3455,7 +3474,7 @@ ZEND_METHOD(FFI, scope) /* {{{ */
 		RETURN_THROWS();
 	}
 
-	ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+	ffi = (zend_ffi*)zend_ffi_cdef_new(zend_ffi_cdef_ce);
 
 	ffi->symbols = scope->symbols;
 	ffi->tags = scope->tags;
@@ -5253,13 +5272,14 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
-
+	/*
 	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
 	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&zend_ffi_cast_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "cast", sizeof("cast")-1), sizeof(zend_internal_function));
 	zend_ffi_cast_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", sizeof("type")-1), sizeof(zend_internal_function));
 	zend_ffi_type_fn.fn_flags &= ~ZEND_ACC_STATIC;
+	*/
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
@@ -5274,7 +5294,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.unset_property       = zend_fake_unset_property;
 	zend_ffi_handlers.has_dimension        = zend_fake_has_dimension;
 	zend_ffi_handlers.unset_dimension      = zend_fake_unset_dimension;
-	zend_ffi_handlers.get_method           = zend_ffi_get_func;
+	zend_ffi_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_handlers.compare              = NULL;
 	zend_ffi_handlers.cast_object          = zend_fake_cast_object;
 	zend_ffi_handlers.get_debug_info       = NULL;
@@ -5283,6 +5303,30 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_gc               = zend_fake_get_gc;
 
 	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
+
+	zend_ffi_cdef_ce = register_class_FFI_CDef();
+	zend_ffi_cdef_cdef_ce->create_object = zend_ffi_cdef_new;
+
+	memcpy(%zend_ffi_cdef_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	zend_ffi_def_handlers.get_constructor      = zend_fake_get_constructor;
+	zend_ffi_def_handlers.free_obj             = zend_ffi_cdef_free_obj;
+	zend_ffi_def_handlers.clone_obj            = NULL;
+	zend_ffi_def_handlers.read_property        = zend_ffi_cdef_read_var;
+	zend_ffi_def_handlers.write_property       = zend_ffi_cdef_write_var;
+	zend_ffi_def_handlers.read_dimension       = zend_fake_read_dimension;
+	zend_ffi_def_handlers.write_dimension      = zend_fake_write_dimension;
+	zend_ffi_def_handlers.get_property_ptr_ptr = zend_fake_get_property_ptr_ptr;
+	zend_ffi_def_handlers.has_property         = zend_fake_has_property;
+	zend_ffi_def_handlers.unset_property       = zend_fake_unset_property;
+	zend_ffi_def_handlers.has_dimension        = zend_fake_has_dimension;
+	zend_ffi_def_handlers.unset_dimension      = zend_fake_unset_dimension;
+	zend_ffi_def_handlers.get_method           = zend_ffi_get_func;
+	zend_ffi_def_handlers.compare              = NULL;
+	zend_ffi_def_handlers.cast_object          = zend_fake_cast_object;
+	zend_ffi_def_handlers.get_debug_info       = NULL;
+	zend_ffi_def_handlers.get_closure          = NULL;
+	zend_ffi_def_handlers.get_properties       = zend_fake_get_properties;
+	zend_ffi_def_handlers.get_gc               = zend_fake_get_gc;
 
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
