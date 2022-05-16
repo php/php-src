@@ -160,7 +160,8 @@ PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int optio
 
 PHP_JSON_API zend_result php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	zend_string *indent_str = zend_string_init("    ", strlen("    "), 0);
+	zend_string *indent_str = zend_string_alloc(PHP_JSON_ENCODER_DEFAULT_INDENT, 0);
+	memset(ZSTR_VAL(indent_str), ' ', PHP_JSON_ENCODER_DEFAULT_INDENT);
 
 	int result = php_json_encode_ex(buf, val, options, JSON_G(encode_max_depth), indent_str);
 
