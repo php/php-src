@@ -12,7 +12,7 @@ echo "*** Testing string imap_bodystruct : basic functionality ***\n";
 require_once(__DIR__.'/setup/imap_include.inc');
 
 echo "Create a new mailbox for test and add a multipart msgs\n";
-$imap_stream = setup_test_mailbox("imapbodystructbasic", 1, $mailbox, "multipart");
+$imap_stream = setup_test_mailbox("imapbodystructbasic", 1, $mailbox, true);
 
 echo "\nGet and validate structure of body part 1\n";
 

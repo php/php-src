@@ -842,7 +842,7 @@ ZEND_API void ZEND_COLD zend_incompatible_double_to_bool_error(double d)
 }
 ZEND_API void ZEND_COLD zend_incompatible_long_to_bool_error(const zend_long l)
 {
-	zend_error(E_DEPRECATED, "Implicit conversion from integer %ld to true, only 0 or 1 are allowed", l);
+	zend_error(E_DEPRECATED, "Implicit conversion from integer %d to true, only 0 or 1 are allowed", (int)l);
 }
 ZEND_API void ZEND_COLD zend_incompatible_string_to_bool_error(const zend_string *s)
 {

@@ -247,7 +247,7 @@ bool(true)
 bool(false)
 
 *** Trying int(%d)
-E_DEPRECATED: Implicit conversion from integer 9223372036854775807 to true, only 0 or 1 are allowed on line %d
+E_DEPRECATED: Implicit conversion from integer -1 to true, only 0 or 1 are allowed on line %d
 bool(true)
 
 *** Trying float(NAN)

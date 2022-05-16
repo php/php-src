@@ -37,7 +37,7 @@ $session->enum_print = "1";
 $session->quick_print = "1";
 $session->valueretrieval = "1";
 $session->oid_output_format = "3";
-$session->oid_increasing_check = "45";
+$session->oid_increasing_check = "1";
 
 var_dump($session);
 
