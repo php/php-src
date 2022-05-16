@@ -170,9 +170,7 @@ static zend_always_inline bool zend_scalar_is_valid_bool(zval *arg) {
 ZEND_API void zend_incompatible_double_to_long_error(double d);
 ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
 
-ZEND_API void zend_incompatible_double_to_bool_error(double d);
-ZEND_API void zend_incompatible_long_to_bool_error(const zend_long l);
-ZEND_API void zend_incompatible_string_to_bool_error(const zend_string *s);
+ZEND_API void zend_incompatible_scalar_to_bool_error(zval *arg);
 
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {

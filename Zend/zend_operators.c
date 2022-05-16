@@ -836,17 +836,15 @@ ZEND_API void ZEND_COLD zend_incompatible_string_to_long_error(const zend_string
 	zend_error(E_DEPRECATED, "Implicit conversion from float-string \"%s\" to int loses precision", ZSTR_VAL(s));
 }
 
-ZEND_API void ZEND_COLD zend_incompatible_double_to_bool_error(double d)
+ZEND_API void ZEND_COLD zend_incompatible_scalar_to_bool_error(zval *arg)
 {
-	zend_error_unchecked(E_DEPRECATED, "Implicit conversion from float %.*H to true, only 0 or 1 are allowed", -1, d);
-}
-ZEND_API void ZEND_COLD zend_incompatible_long_to_bool_error(const zend_long l)
-{
-	zend_error(E_DEPRECATED, "Implicit conversion from integer %d to true, only 0 or 1 are allowed", (int)l);
-}
-ZEND_API void ZEND_COLD zend_incompatible_string_to_bool_error(const zend_string *s)
-{
-	zend_error(E_DEPRECATED, "Implicit conversion from string \"%s\" to true, only \"\", \"0\" or \"1\" are allowed", ZSTR_VAL(s));
+	if (Z_TYPE_P(arg) == IS_DOUBLE) {
+		zend_error_unchecked(E_DEPRECATED, "Implicit conversion from float %.*H to true, only 0 or 1 are allowed", -1, Z_DVAL_P(arg));
+	} else if (Z_TYPE_P(arg) == IS_LONG) {
+		zend_error(E_DEPRECATED, "Implicit conversion from integer %ld to true, only 0 or 1 are allowed", (long)Z_LVAL_P(arg));
+	} else if (Z_TYPE_P(arg) == IS_STRING) {
+		zend_error(E_DEPRECATED, "Implicit conversion from string \"%s\" to true, only \"\", \"0\" or \"1\" are allowed", ZSTR_VAL(Z_STR_P(arg)));
+	}
 }
 
 ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op, bool is_strict) /* {{{ */
