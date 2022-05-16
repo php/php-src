@@ -194,7 +194,7 @@ bool(true)
 *** Trying string(0) ""
 bool(false)
 *** Trying int(2147483647)
-E_DEPRECATED: Implicit conversion from integer -1 to true, only 0 or 1 are allowed on line %d
+E_DEPRECATED: Implicit conversion from integer 2147483647 to true, only 0 or 1 are allowed on line %d
 bool(true)
 *** Trying float(NAN)
 E_DEPRECATED: Implicit conversion from float NAN to true, only 0 or 1 are allowed on line %d
