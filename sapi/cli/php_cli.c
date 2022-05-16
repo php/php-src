@@ -542,9 +542,11 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	 * extensions which write to stderr or company during mshutdown/gshutdown
 	 * won't have the expected functionality.
 	 */
-	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (no_close) {
+		if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	}
 
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
@@ -958,7 +960,7 @@ do_repeat:
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (script_file) {
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+				cli_register_file_handles(/* no_close */ true);
 			}
 
 			if (interactive) {
@@ -993,7 +995,7 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+			cli_register_file_handles(/* no_close */ true);
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -1008,7 +1010,7 @@ do_repeat:
 					file_handle.filename = NULL;
 				}
 
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+				cli_register_file_handles(/* no_close */ true);
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);

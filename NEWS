@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.7
 
+- CLI:
+  . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
+
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.
