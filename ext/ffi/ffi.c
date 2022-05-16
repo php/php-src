@@ -5328,6 +5328,10 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_gc               = zend_fake_get_gc;
 
 	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_TYPE", sizeof("SYM_TYPE")-1, ZEND_FFI_SYM_TYPE);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_CONST", sizeof("SYM_CONST")-1, ZEND_FFI_SYM_CONST);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_VAR", sizeof("SYM_VAR")-1, ZEND_FFI_SYM_VAR);
+	zend_declare_class_constant_long(zend_ffi_ce, "SYM_FUNC", sizeof("SYM_FUNC")-1, ZEND_FFI_SYM_FUNC);
 
 	zend_ffi_cdef_ce = register_class_FFI_CDef();
 	zend_ffi_cdef_cdef_ce->create_object = zend_ffi_cdef_new;

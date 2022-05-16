@@ -63,6 +63,10 @@ namespace {
 
         /** @prefer-ref $ptr */
         public static function isNull(FFI\CData $ptr): bool {}
+
+        public static function hasSymbol(FFI\CDef $cdef, $symbol, $type): bool {}
+
+        public static function getSymbols(FFI\CDef $cdef, $type): array {}
     }
 
 }
