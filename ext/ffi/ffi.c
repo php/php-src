@@ -2220,19 +2220,12 @@ static zend_object *zend_ffi_cdef_new(zend_class_entry *class_type) /* {{{ */
 
 static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 {
-	zend_ffi *ffi;
+	zend_object *ffi_obj;
 
-	ffi = emalloc(sizeof(zend_ffi));
+	zend_ffi_object_init(ffi_obj, class_type);
+	ffi_obj->handlers = &zend_ffi_handlers;
 
-	zend_ffi_object_init(&ffi->std, class_type);
-	ffi->std.handlers = &zend_ffi_handlers;
-
-	ffi->lib = NULL;
-	ffi->symbols = NULL;
-	ffi->tags = NULL;
-	ffi->persistent = 0;
-
-	return &ffi->std;
+	return &ffi_obj;
 }
 /* }}} */
 
