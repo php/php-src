@@ -596,6 +596,34 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 	}
 } /* }}} */
 
+static void sapi_cli_server_register_known_var_char(zval *track_vars_array,
+	const char *var_name, size_t var_name_len, const char *value, size_t value_len)
+{
+	zval new_entry;
+
+	if (!value) {
+		return;
+	}
+
+	ZVAL_STRINGL_FAST(&new_entry, value, value_len);
+
+	php_register_known_variable(var_name, var_name_len, &new_entry, track_vars_array);
+}
+
+static void sapi_cli_server_register_known_var_str(zval *track_vars_array,
+	const char *var_name, size_t var_name_len, /* const */ zend_string *value)
+{
+	zval new_entry;
+
+	if (!value) {
+		return;
+	}
+
+	ZVAL_STR_COPY(&new_entry, value);
+
+	php_register_known_variable(var_name, var_name_len, &new_entry, track_vars_array);
+}
+
 /* The entry zval will always contain a zend_string* */
 static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */ {
 	zval *track_vars_array = va_arg(args, zval *);
@@ -615,7 +643,7 @@ static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list 
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
 		if (strcmp(key, "CONTENT_TYPE") == 0 || strcmp(key, "CONTENT_LENGTH") == 0) {
-			// TODO make a version specialized for zend_string?
+			/* Is it possible to use sapi_cli_server_register_known_var_char() and not go through the SAPI filter? */
 			sapi_cli_server_register_variable(track_vars_array, key, Z_STRVAL_P(entry));
 		}
 		sapi_cli_server_register_variable(track_vars_array, real_key, Z_STRVAL_P(entry));
@@ -630,7 +658,9 @@ static int sapi_cli_server_register_entry_cb(zval *entry, int num_args, va_list 
 static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
-	sapi_cli_server_register_variable(track_vars_array, "DOCUMENT_ROOT", client->server->document_root);
+
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"DOCUMENT_ROOT", strlen("DOCUMENT_ROOT"), client->server->document_root, client->server->document_root_len);
 	{
 		char *tmp;
 		if ((tmp = strrchr(ZSTR_VAL(client->addr_str), ':'))) {
@@ -643,54 +673,67 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 			port[7] = '\0';
 			strncpy(addr, addr_start, addr_end - addr_start);
 			addr[addr_end - addr_start] = '\0';
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", addr);
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_PORT", port);
+			sapi_cli_server_register_known_var_char(track_vars_array,
+				"REMOTE_ADDR", strlen("REMOTE_ADDR"), addr, strlen(addr));
+			sapi_cli_server_register_known_var_char(track_vars_array,
+				"REMOTE_PORT", strlen("REMOTE_PORT"), port, strlen(port));
 		} else {
-			sapi_cli_server_register_variable(track_vars_array, "REMOTE_ADDR", ZSTR_VAL(client->addr_str));
+			sapi_cli_server_register_known_var_str(track_vars_array,
+				"REMOTE_ADDR", strlen("REMOTE_ADDR"), client->addr_str);
 		}
 	}
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "PHP %s Development Server", PHP_VERSION);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_SOFTWARE", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "HTTP/%d.%d", client->request.protocol_version / 100, client->request.protocol_version % 100);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_PROTOCOL", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "HTTP/%d.%d", client->request.protocol_version / 100, client->request.protocol_version % 100);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_PROTOCOL", strlen("SERVER_PROTOCOL"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
-	sapi_cli_server_register_variable(track_vars_array, "SERVER_NAME", client->server->host);
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"SERVER_NAME", strlen("SERVER_NAME"), client->server->host, strlen(client->server->host));
 	{
-		char *tmp;
-		spprintf(&tmp, 0, "%i",  client->server->port);
-		sapi_cli_server_register_variable(track_vars_array, "SERVER_PORT", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "%i",  client->server->port);
+		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_PORT", strlen("SERVER_PORT"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	}
 
-	sapi_cli_server_register_variable(track_vars_array, "REQUEST_URI", client->request.request_uri);
-	sapi_cli_server_register_variable(track_vars_array, "REQUEST_METHOD", SG(request_info).request_method);
-	sapi_cli_server_register_variable(track_vars_array, "SCRIPT_NAME", client->request.vpath);
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"REQUEST_URI", strlen("REQUEST_URI"), client->request.request_uri, client->request.request_uri_len);
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"REQUEST_METHOD", strlen("REQUEST_METHOD"),
+		SG(request_info).request_method, strlen(SG(request_info).request_method));
+	sapi_cli_server_register_known_var_char(track_vars_array,
+		"SCRIPT_NAME", strlen("SCRIPT_NAME"), client->request.vpath, client->request.vpath_len);
 	if (SG(request_info).path_translated) {
-		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", SG(request_info).path_translated);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"SCRIPT_FILENAME", strlen("SCRIPT_FILENAME"),
+			SG(request_info).path_translated, strlen(SG(request_info).path_translated));
 	} else if (client->server->router) {
-		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", client->server->router);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"SCRIPT_FILENAME", strlen("SCRIPT_FILENAME"), client->server->router, client->server->router_len);
 	}
 	if (client->request.path_info) {
-		sapi_cli_server_register_variable(track_vars_array, "PATH_INFO", client->request.path_info);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"PATH_INFO", strlen("PATH_INFO"), client->request.path_info, client->request.path_info_len);
 	}
 	if (client->request.path_info_len) {
-		char *tmp;
-		spprintf(&tmp, 0, "%s%s", client->request.vpath, client->request.path_info);
-		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", tmp);
-		efree(tmp);
+		zend_string *tmp = strpprintf(0, "%s%s", client->request.vpath, client->request.path_info);
+		sapi_cli_server_register_known_var_str(track_vars_array, "PHP_SELF", strlen("PHP_SELF"), tmp);
+		zend_string_release_ex(tmp, /* persistent */ false);
 	} else {
-		sapi_cli_server_register_variable(track_vars_array, "PHP_SELF", client->request.vpath);
+		sapi_cli_server_register_known_var_char(track_vars_array,
+			"PHP_SELF", strlen("PHP_SELF"), client->request.vpath, client->request.vpath_len);
 	}
 	if (client->request.query_string) {
+		/* Use sapi_cli_server_register_variable() to pass query string through SAPI input filter,
+		 * and check keys are proper PHP var names */
 		sapi_cli_server_register_variable(track_vars_array, "QUERY_STRING", client->request.query_string);
 	}
+	/* Use sapi_cli_server_register_variable() to pass header values through SAPI input filter,
+	 * and check keys are proper PHP var names */
 	zend_hash_apply_with_arguments(&client->request.headers, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
