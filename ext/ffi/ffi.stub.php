@@ -13,7 +13,7 @@ namespace {
 
         public static function scope(string $name): FFI {}
 
-        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false, ?FFI\CDef $cdef = null): ?FFI\CData {}
 
         /** @prefer-ref $ptr */
         public static function free(FFI\CData $ptr): void {}
@@ -22,9 +22,9 @@ namespace {
          * @param FFI\CData|int|float|bool|null $ptr
          * @prefer-ref $ptr
          */
-        public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}
+        public static function cast(FFI\CType|string $type, $ptr, ?FFI\CDef $cdef = null): ?FFI\CData {}
 
-        public static function type(string $type): ?FFI\CType {}
+        public static function type(string $type, ?FFI\CDef $cdef = null): ?FFI\CType {}
 
         /** @prefer-ref $ptr */
         public static function typeof(FFI\CData $ptr): FFI\CType {}

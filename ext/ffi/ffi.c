@@ -2355,6 +2355,30 @@ static void zend_ffi_scope_hash_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
+static void zend_ffi_cdef_free_obj(zend_object *object) /* {{{ */
+{
+	zend_ffi *ffi = (zend_ffi*)object;
+
+	if (ffi->persistent) {
+		return;
+	}
+
+	if (ffi->lib) {
+		DL_UNLOAD(ffi->lib);
+		ffi->lib = NULL;
+	}
+
+	if (ffi->symbols) {
+		zend_hash_destroy(ffi->symbols);
+		efree(ffi->symbols);
+	}
+
+	if (ffi->tags) {
+		zend_hash_destroy(ffi->tags);
+		efree(ffi->tags);
+	}
+}
+
 static void zend_ffi_free_obj(zend_object *object) /* {{{ */
 {
 	zend_ffi *ffi = (zend_ffi*)object;
@@ -2407,7 +2431,7 @@ static zend_object *zend_ffi_cdata_clone_obj(zend_object *obj) /* {{{ */
 }
 /* }}} */
 
-static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read_type, void **cache_slot, zval *rv) /* {{{ */
+static zval *zend_ffi_cdef_read_var(zend_object *obj, zend_string *var_name, int read_type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zend_ffi        *ffi = (zend_ffi*)obj;
 	zend_ffi_symbol *sym = NULL;
@@ -2451,7 +2475,7 @@ static zval *zend_ffi_read_var(zend_object *obj, zend_string *var_name, int read
 }
 /* }}} */
 
-static zval *zend_ffi_write_var(zend_object *obj, zend_string *var_name, zval *value, void **cache_slot) /* {{{ */
+static zval *zend_ffi_cdef_write_var(zend_object *obj, zend_string *var_name, zval *value, void **cache_slot) /* {{{ */
 {
 	zend_ffi        *ffi = (zend_ffi*)obj;
 	zend_ffi_symbol *sym = NULL;
@@ -3659,6 +3683,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	zend_object *type_obj = NULL;
 	zend_ffi_type *type, *type_ptr;
 	zend_ffi_cdata *cdata;
+	zend_ffi_cdef_handlers *cdef;
 	void *ptr;
 	bool owned = 1;
 	bool persistent = 0;
@@ -3666,11 +3691,12 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	zend_ffi_flags flags = ZEND_FFI_FLAG_OWNED;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(type_obj, zend_ffi_ctype_ce, type_def)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(owned)
 		Z_PARAM_BOOL(persistent)
+		Z_PARAM_OBJ_OR_NULL(cdef)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!owned) {
@@ -3684,8 +3710,8 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
-			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
+		if (Z_TYPE(EX(cdef)) == IS_OBJECT) {
+			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(cdef));
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
 		} else {
@@ -3697,7 +3723,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE(EX(This)) != IS_OBJECT) {
+			if (Z_TYPE(EX(cdef)) != IS_OBJECT) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3812,14 +3838,17 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	zend_object *ztype = NULL;
 	zend_ffi_type *old_type, *type, *type_ptr;
 	zend_ffi_cdata *old_cdata, *cdata;
+	zend_ffi_cdef_handlers *cdef;
 	bool is_const = 0;
 	zval *zv, *arg;
 	void *ptr;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(ztype, zend_ffi_ctype_ce, type_def)
 		Z_PARAM_ZVAL(zv)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(cdef)
 	ZEND_PARSE_PARAMETERS_END();
 
 	arg = zv;
@@ -3828,8 +3857,8 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
-			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
+		if (Z_TYPE(EX(cdef)) == IS_OBJECT) {
+			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(cdef));
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
 		} else {
@@ -3841,7 +3870,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE(EX(This)) != IS_OBJECT) {
+			if (Z_TYPE(EX(cdef)) != IS_OBJECT) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3988,14 +4017,17 @@ ZEND_METHOD(FFI, type) /* {{{ */
 	zend_ffi_ctype *ctype;
 	zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 	zend_string *type_def;
+	zend_ffi_cdef_handlers *cdef;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(type_def);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OR_NULL(cdef)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
-		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
+	if (Z_TYPE(EX(cdef)) == IS_OBJECT) {
+		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(cdef));
 		FFI_G(symbols) = ffi->symbols;
 		FFI_G(tags) = ffi->tags;
 	} else {
@@ -4007,7 +4039,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 
 	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
-		if (Z_TYPE(EX(This)) != IS_OBJECT) {
+		if (Z_TYPE(EX(cdef)) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
 				efree(FFI_G(tags));
@@ -4022,7 +4054,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		return;
 	}
 
-	if (Z_TYPE(EX(This)) != IS_OBJECT) {
+	if (Z_TYPE(EX(cdef)) != IS_OBJECT) {
 		if (FFI_G(tags)) {
 			zend_ffi_tags_cleanup(&dcl);
 		}
@@ -5285,8 +5317,8 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
 	zend_ffi_handlers.free_obj             = zend_ffi_free_obj;
 	zend_ffi_handlers.clone_obj            = NULL;
-	zend_ffi_handlers.read_property        = zend_ffi_read_var;
-	zend_ffi_handlers.write_property       = zend_ffi_write_var;
+	zend_ffi_handlers.read_property        = zend_fake_read_property;
+	zend_ffi_handlers.write_property       = zend_fake_write_var;
 	zend_ffi_handlers.read_dimension       = zend_fake_read_dimension;
 	zend_ffi_handlers.write_dimension      = zend_fake_write_dimension;
 	zend_ffi_handlers.get_property_ptr_ptr = zend_fake_get_property_ptr_ptr;
