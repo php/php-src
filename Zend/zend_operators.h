@@ -138,8 +138,41 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 	return (double)l == d;
 }
 
+static zend_always_inline bool zend_scalar_is_valid_bool(zval *arg) {
+	bool result = 0;
+
+	switch (Z_TYPE_P(arg)) {
+		case IS_TRUE:
+		case IS_FALSE:
+			result = 1;
+			break;
+		case IS_LONG:
+			if (Z_LVAL_P(arg) == 0 || Z_LVAL_P(arg) == 1) {
+				result = 1;
+			}
+			break;
+		case IS_DOUBLE:
+			if (Z_DVAL_P(arg) == 0.0 || Z_DVAL_P(arg) == 1.0) {
+				result = 1;
+			}
+			break;
+		case IS_STRING:
+			if (Z_STRLEN_P(arg) == 0 || (Z_STRLEN_P(arg) == 1 && (Z_STRVAL_P(arg)[0] == '0' || Z_STRVAL_P(arg)[0] == '1'))) {
+				result = 1;
+			}
+			break;
+		default:
+			break;
+	}
+	return result;
+}
+
 ZEND_API void zend_incompatible_double_to_long_error(double d);
 ZEND_API void zend_incompatible_string_to_long_error(const zend_string *s);
+
+ZEND_API void zend_incompatible_double_to_bool_error(double d);
+ZEND_API void zend_incompatible_long_to_bool_error(const zend_long l);
+ZEND_API void zend_incompatible_string_to_bool_error(const zend_string *s);
 
 static zend_always_inline zend_long zend_dval_to_lval_safe(double d)
 {

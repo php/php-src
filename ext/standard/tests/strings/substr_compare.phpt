@@ -20,7 +20,7 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
-var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);
+var_dump(substr_compare("abcde", "abc", -1, NULL) > 0);
 ?>
 --EXPECT--
 bool(true)

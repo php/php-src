@@ -88,5 +88,7 @@ array(34) {
   string(1) "0"
 }
 
+Deprecated: Implicit conversion from string "foobar" to true, only "", "0" or "1" are allowed in %s on line %d
+
 Warning: get_browser(): HTTP_USER_AGENT variable is not set, cannot determine user agent name in %s on line %d
 bool(false)

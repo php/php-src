@@ -473,6 +473,22 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_weak(zval *arg, bool *dest, uint
 		if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) && !zend_null_arg_deprecated("bool", arg_num)) {
 			return 0;
 		}
+		if (UNEXPECTED(!zend_scalar_is_valid_bool(arg))) {
+			/* Check arg_num is not (uint32_t)-1, as otherwise its called by
+			 * zend_verify_weak_scalar_type_hint_no_sideeffect() */
+			if (arg_num != (uint32_t)-1) {
+				if (Z_TYPE_P(arg) == IS_DOUBLE) {
+					zend_incompatible_double_to_bool_error(Z_DVAL_P(arg));
+				} else if (Z_TYPE_P(arg) == IS_LONG) {
+					zend_incompatible_long_to_bool_error(Z_LVAL_P(arg));
+				} else if (Z_TYPE_P(arg) == IS_STRING) {
+					zend_incompatible_string_to_bool_error(Z_STR_P(arg));
+				}
+			}
+			if (UNEXPECTED(EG(exception))) {
+				return 0;
+			}
+		}
 		*dest = zend_is_true(arg);
 	} else {
 		return 0;

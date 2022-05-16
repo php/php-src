@@ -98,8 +98,8 @@ Type int|float|bool:
 INF              => INF
 "42"             => 42
 "42.0"           => 42.0
-"42x"            => true
-"x"              => true
+"42x"            => true (Implicit conversion from string "42x" to true, only "", "0" or "1" are allowed)
+"x"              => true (Implicit conversion from string "x" to true, only "", "0" or "1" are allowed)
 ""               => false
 true             => true
 false            => false
@@ -111,11 +111,11 @@ new WithToString => Argument ... must be of type int|float|bool, WithToString gi
 Type int|bool:
 42               => 42
 42.0             => 42
-INF              => true
+INF              => true (Implicit conversion from float INF to true, only 0 or 1 are allowed)
 "42"             => 42
 "42.0"           => 42
-"42x"            => true
-"x"              => true
+"42x"            => true (Implicit conversion from string "42x" to true, only "", "0" or "1" are allowed)
+"x"              => true (Implicit conversion from string "x" to true, only "", "0" or "1" are allowed)
 ""               => false
 true             => true
 false            => false
@@ -189,13 +189,13 @@ new stdClass     => Argument ... must be of type array|string, stdClass given
 new WithToString => "__toString()"
 
 Type bool|array:
-42               => true
-42.0             => true
-INF              => true
-"42"             => true
-"42.0"           => true
-"42x"            => true
-"x"              => true
+42               => true (Implicit conversion from integer 42 to true, only 0 or 1 are allowed)
+42.0             => true (Implicit conversion from float 42 to true, only 0 or 1 are allowed)
+INF              => true (Implicit conversion from float INF to true, only 0 or 1 are allowed)
+"42"             => true (Implicit conversion from string "42" to true, only "", "0" or "1" are allowed)
+"42.0"           => true (Implicit conversion from string "42.0" to true, only "", "0" or "1" are allowed)
+"42x"            => true (Implicit conversion from string "42x" to true, only "", "0" or "1" are allowed)
+"x"              => true (Implicit conversion from string "x" to true, only "", "0" or "1" are allowed)
 ""               => false
 true             => true
 false            => false

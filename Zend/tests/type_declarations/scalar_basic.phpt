@@ -232,21 +232,26 @@ bool(true)
 bool(true)
 
 *** Trying float(1.5)
+E_DEPRECATED: Implicit conversion from float 1.5 to true, only 0 or 1 are allowed on line %d
 bool(true)
 
 *** Trying string(2) "1a"
+E_DEPRECATED: Implicit conversion from string "1a" to true, only "", "0" or "1" are allowed on line %d
 bool(true)
 
 *** Trying string(1) "a"
+E_DEPRECATED: Implicit conversion from string "a" to true, only "", "0" or "1" are allowed on line %d
 bool(true)
 
 *** Trying string(0) ""
 bool(false)
 
 *** Trying int(%d)
+E_DEPRECATED: Implicit conversion from integer 9223372036854775807 to true, only 0 or 1 are allowed on line %d
 bool(true)
 
 *** Trying float(NAN)
+E_DEPRECATED: Implicit conversion from float NAN to true, only 0 or 1 are allowed on line %d
 bool(true)
 
 *** Trying bool(true)
