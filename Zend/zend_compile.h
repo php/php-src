@@ -240,7 +240,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 16,21,30,31)                      |     |     |     */
+/* Class Flags (unused: 21,30,31)                         |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -272,6 +272,9 @@ typedef struct _zend_oparray_context {
 /* Objects of this class may have dynamic properties      |     |     |     */
 /* without triggering a deprecation warning               |     |     |     */
 #define ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES (1 << 15) /* X  |     |     |     */
+/*                                                        |     |     |     */
+/* Readonly class                                         |     |     |     */
+#define ZEND_ACC_READONLY_CLASS          (1 << 16) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Parent class is resolved (CE).                         |     |     |     */
 #define ZEND_ACC_RESOLVED_PARENT         (1 << 17) /*  X  |     |     |     */

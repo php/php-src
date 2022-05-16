@@ -1430,6 +1430,13 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		}
 	}
 
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_READONLY_CLASS) != (parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s class %s cannot extend %s class %s",
+			ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "Readonly" : "Non-readonly", ZSTR_VAL(ce->name),
+			parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "readonly" : "non-readonly", ZSTR_VAL(parent_ce->name)
+		);
+	}
+
 	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
 	}

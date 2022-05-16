@@ -797,6 +797,10 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
 		return 0;
 	}
+	if ((flags & ZEND_ACC_READONLY_CLASS) && (new_flag & ZEND_ACC_READONLY_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Multiple readonly modifiers are not allowed", 0);
+		return 0;
+	}
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error,
 			"Cannot use the final modifier on an abstract class", 0);
@@ -6673,6 +6677,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		if (property_flags) {
 			zend_op_array *op_array = CG(active_op_array);
 			zend_class_entry *scope = op_array->scope;
+
 			bool is_ctor =
 				scope && zend_is_constructor(op_array->function_name);
 			if (!is_ctor) {
@@ -6697,6 +6702,10 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Property %s::$%s cannot have type %s",
 					ZSTR_VAL(scope->name), ZSTR_VAL(name), ZSTR_VAL(str));
+			}
+
+			if (!(property_flags & ZEND_ACC_READONLY) && (scope->ce_flags & ZEND_ACC_READONLY_CLASS)) {
+				property_flags |= ZEND_ACC_READONLY;
 			}
 
 			/* Recompile the type, as it has different memory management requirements. */
@@ -7241,6 +7250,12 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
+	if ((ce->ce_flags & ZEND_ACC_READONLY_CLASS) && (flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Readonly class %s cannot declare static properties",
+			ZSTR_VAL(ce->name)
+		);
+	}
+
 	for (i = 0; i < children; ++i) {
 		zend_property_info *info;
 		zend_ast *prop_ast = list->child[i];
@@ -7304,6 +7319,10 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);
+		}
+
+		if ((ce->ce_flags & ZEND_ACC_READONLY_CLASS)) {
+			flags |= ZEND_ACC_READONLY;
 		}
 
 		if (flags & ZEND_ACC_READONLY) {
