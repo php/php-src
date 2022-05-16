@@ -1150,7 +1150,7 @@ function test_sort($a, $b): int
 // Send Email to QA Team
 //
 
-function mail_qa_team(string $data, bool $status = false): bool
+function mail_qa_team(string $data, string $status = 'failed'): bool
 {
     $url_bits = parse_url(QA_SUBMISSION_PAGE);
 
