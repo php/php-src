@@ -7321,7 +7321,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		if (!(flags & ZEND_ACC_READONLY) && (ce->ce_flags & ZEND_ACC_READONLY_CLASS)) {
+		if ((ce->ce_flags & ZEND_ACC_READONLY_CLASS)) {
 			flags |= ZEND_ACC_READONLY;
 		}
 
