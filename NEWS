@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.20
 
+- CLI:
+  . Fixed GH-8575 (CLI closes standard streams too early). (Levi Morrison)
+
 - Core:
   . Fixed Haiku ZTS builds. (David Carlier)
 
