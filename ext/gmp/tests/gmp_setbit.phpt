@@ -6,7 +6,7 @@ gmp
 <?php
 
 $n = gmp_init(-1);
-gmp_setbit($n, 10, -1);
+gmp_setbit($n, 10, 1);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);

@@ -15,9 +15,7 @@ try {
 
 $driver->reconnect = 0;
 var_dump($driver->reconnect);
-$str = '4';
-$str .= '2';
-$driver->reconnect = $str;
+$driver->reconnect = 1;
 var_dump($driver->reconnect);
 try {
     $driver->reconnect = [];
