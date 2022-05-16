@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(bool no_close) /* {{{ */
+static void cli_register_file_handles(void) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -540,11 +540,9 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	 * extensions which write to stderr or company during mshutdown/gshutdown
 	 * won't have the expected functionality.
 	 */
-	if (no_close) {
-		if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	}
+	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
 
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
@@ -958,7 +956,7 @@ do_repeat:
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (script_file) {
-				cli_register_file_handles(/* no_close */ true);
+				cli_register_file_handles();
 			}
 
 			if (interactive) {
@@ -993,7 +991,7 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles(/* no_close */ true);
+			cli_register_file_handles();
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -1008,7 +1006,7 @@ do_repeat:
 					file_handle.filename = NULL;
 				}
 
-				cli_register_file_handles(/* no_close */ true);
+				cli_register_file_handles();
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
