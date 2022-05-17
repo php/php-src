@@ -28,13 +28,13 @@ var_dump($instance->a);
 --EXPECTF--
 Function calls:
 
-Deprecated: Implicit conversion from integer 5 to true, only 0 or 1 are allowed in %s on line %d
+Deprecated: Implicit conversion from int 5 to true, only 0 or 1 are allowed in %s on line %d
 bool(true)
 Function returns:
 
-Deprecated: Implicit conversion from integer 3 to true, only 0 or 1 are allowed in %s on line %d
+Deprecated: Implicit conversion from int 3 to true, only 0 or 1 are allowed in %s on line %d
 bool(true)
 Typed property assignment:
 
-Deprecated: Implicit conversion from integer 13 to true, only 0 or 1 are allowed in %s on line %d
+Deprecated: Implicit conversion from int 13 to true, only 0 or 1 are allowed in %s on line %d
 bool(true)

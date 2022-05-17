@@ -189,7 +189,7 @@ new stdClass     => Argument ... must be of type array|string, stdClass given
 new WithToString => "__toString()"
 
 Type bool|array:
-42               => true (Implicit conversion from integer 42 to true, only 0 or 1 are allowed)
+42               => true (Implicit conversion from int 42 to true, only 0 or 1 are allowed)
 42.0             => true (Implicit conversion from float 42 to true, only 0 or 1 are allowed)
 INF              => true (Implicit conversion from float INF to true, only 0 or 1 are allowed)
 "42"             => true (Implicit conversion from string "42" to true, only "", "0" or "1" are allowed)
