@@ -5229,6 +5229,12 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 		if (cond_ast) {
 			znode cond_node;
 			uint32_t opnum_jmpz;
+
+			if (i > 0) {
+				CG(zend_lineno) = cond_ast->lineno;
+				zend_do_extended_stmt();
+			}
+
 			zend_compile_expr(&cond_node, cond_ast);
 			opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
 
