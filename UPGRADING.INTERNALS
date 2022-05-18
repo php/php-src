@@ -34,6 +34,9 @@ PHP 8.2 INTERNALS UPGRADE NOTES
       string_natural_case_compare_function(), and string_natural_compare_function()
       have been removed. They always returned SUCCESS and were a wrapper around
       strnatcmp_ex(). Use strnatcmp_ex() directly instead.
+  b. ext/pdo
+    - pdo_raise_impl_error()'s parameter sqlstate has been changed from
+      const char * to pdo_error_type (aka char [6]).
 
 ========================
 4. OpCode changes
