@@ -622,7 +622,7 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	if (ZT_G(print_stderr_mshutdown)) {
-		fprintf(stderr, "[zend-test] MSHUTDOWN\n");
+		fprintf(stderr, "[zend_test] MSHUTDOWN\n");
 	}
 
 	return SUCCESS;
