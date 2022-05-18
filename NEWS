@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
-  . Fixed GH-8575 (CLI closes standard streams too early). (Levi Morrison)
+  . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
 
 - Core:
   . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
