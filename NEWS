@@ -73,6 +73,7 @@ PHP                                                                        NEWS
 - Streams:
   . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
     (Cristian Rodríguez)
+  . Fixed bug GH-8548 (stream_wrapper_unregister() leaks memory). (ilutov)
 
 - Zip:
   . add ZipArchive::clearError() method
