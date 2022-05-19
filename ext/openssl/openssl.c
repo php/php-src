@@ -7433,7 +7433,7 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(data_len, data);
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(password_len, password);
 	PHP_OPENSSL_CHECK_SIZE_T_TO_INT_NULL_RETURN(aad_len, aad);
-	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(tag_len, tag);
+	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(tag_len, tag_len);
 
 
 	cipher_type = EVP_get_cipherbyname(method);

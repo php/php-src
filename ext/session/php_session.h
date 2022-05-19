@@ -205,7 +205,7 @@ typedef struct _php_ps_globals {
 	bool lazy_write; /* omit session write when it is possible */
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
-#if defined(HAVE_OPENSSL_EXT)
+#if defined(HAVE_OPENSSL_EXT) && !defined(ZTS)
 	bool ssl_encrypt; /* encrypt the session data */
 	zend_string *ssl_iv;
 	zend_string *ssl_pw_tok;
