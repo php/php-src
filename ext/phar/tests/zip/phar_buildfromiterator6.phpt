@@ -28,7 +28,7 @@ class myIterator implements Iterator
     }
     function valid(): bool {
         echo "valid\n";
-        return current($this->a) == true;
+        return current($this->a) !== false;
     }
     function rewind(): void {
         echo "rewind\n";

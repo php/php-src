@@ -6,27 +6,27 @@ gmp
 <?php
 
 $n = gmp_init(-1);
-gmp_setbit($n, 10, 1);
+gmp_setbit($n, 10, true);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
 try {
-    gmp_setbit($n, -20, 0);
+    gmp_setbit($n, -20, false);
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-gmp_setbit($n, 2, 0);
+gmp_setbit($n, 2, false);
 var_dump(gmp_strval($n));
 
 $n = gmp_init(5);
-gmp_setbit($n, 1, 1);
+gmp_setbit($n, 1, true);
 var_dump(gmp_strval($n));
 
 $n = gmp_init("100000000000");
-gmp_setbit($n, 23, 1);
+gmp_setbit($n, 23, true);
 var_dump(gmp_strval($n));
 
 gmp_setbit($n, 23, 0);

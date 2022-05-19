@@ -139,32 +139,28 @@ static zend_always_inline bool zend_is_long_compatible(double d, zend_long l) {
 }
 
 static zend_always_inline bool zend_scalar_is_valid_bool(zval *arg) {
-	bool result = 0;
-
 	switch (Z_TYPE_P(arg)) {
 		case IS_TRUE:
 		case IS_FALSE:
-			result = 1;
+			return true;
 			break;
 		case IS_LONG:
 			if (Z_LVAL_P(arg) == 0 || Z_LVAL_P(arg) == 1) {
-				result = 1;
+				return true;
 			}
 			break;
 		case IS_DOUBLE:
 			if (Z_DVAL_P(arg) == 0.0 || Z_DVAL_P(arg) == 1.0) {
-				result = 1;
+				return true;
 			}
 			break;
 		case IS_STRING:
 			if (Z_STRLEN_P(arg) == 0 || (Z_STRLEN_P(arg) == 1 && (Z_STRVAL_P(arg)[0] == '0' || Z_STRVAL_P(arg)[0] == '1'))) {
-				result = 1;
+				return true;
 			}
 			break;
-		default:
-			break;
 	}
-	return result;
+	return false;
 }
 
 ZEND_API void zend_incompatible_double_to_long_error(double d);
