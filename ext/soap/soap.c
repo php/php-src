@@ -577,7 +577,7 @@ PHP_METHOD(SoapHeader, __construct)
 		if (ZSTR_LEN(actor_str) > 2) {
 			ZVAL_STR_COPY(Z_HEADER_ACTOR_P(this_ptr), actor_str);
 		} else {
-			zend_argument_value_error(2, "must be longer than 2 characters");
+			zend_argument_value_error(5, "must be longer than 2 characters");
 			RETURN_THROWS();
 		}
 	} else if (!actor_is_null) {

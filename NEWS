@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #79589 (error:14095126:SSL routines:ssl3_read_n:unexpected eof
     while reading). (Jakub Zelenka)
 
+- Soap:
+  . Fixed bug GH-8578 (Error on wrong parameter on SoapHeader constructor).
+    (robertnisipeanu)
+
 - SPL:
   . Fixed bug GH-8235 (iterator_count() may run indefinitely). (cmb)
 
