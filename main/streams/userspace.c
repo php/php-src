@@ -35,9 +35,10 @@
 static int le_protocols;
 
 struct php_user_stream_wrapper {
+	php_stream_wrapper wrapper;
 	char * protoname;
 	zend_class_entry *ce;
-	php_stream_wrapper wrapper;
+	zend_resource *resource;
 };
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
@@ -481,10 +482,12 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
+	uwrap->resource = NULL;
 
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
 	if (php_register_url_stream_wrapper_volatile(protocol, &uwrap->wrapper) == SUCCESS) {
+		uwrap->resource = rsrc;
 		RETURN_TRUE;
 	}
 
@@ -510,10 +513,21 @@ PHP_FUNCTION(stream_wrapper_unregister)
 		RETURN_THROWS();
 	}
 
+	php_stream_wrapper *wrapper = zend_hash_find_ptr(php_stream_get_url_stream_wrappers_hash(), protocol);
 	if (php_unregister_url_stream_wrapper_volatile(protocol) == FAILURE) {
 		/* We failed */
 		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", ZSTR_VAL(protocol));
 		RETURN_FALSE;
+	}
+
+	ZEND_ASSERT(wrapper != NULL);
+	if (wrapper->wops == &user_stream_wops) {
+		struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper *)wrapper;
+		zend_resource *resource = uwrap->resource;
+		if (GC_DELREF(resource) == 0) {
+			// uwrap will be released by resource destructor
+			rc_dtor_func((zend_refcounted *)resource);
+		}
 	}
 
 	RETURN_TRUE;
