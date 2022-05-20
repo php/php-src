@@ -5,7 +5,7 @@ ffi
 --FILE--
 <?php
 $ffi = FFI::cdef(' struct test { int dummy; }; ');
-$test = $ffi->new('struct test');
+$test = FFI::new('struct test', cdef : $ffi);
 var_dump(is_callable($test));
 ?>
 --EXPECT--

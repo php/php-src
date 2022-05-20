@@ -34,7 +34,7 @@ var_dump(($zend->zend_printf)("Hello %s!\n", "World"));
 
 var_dump($zend->zend_hash_func("file", strlen("file")));
 
-$str = $zend->new("char[16]");
+$str = FFI::new("char[16]", cdef : $zend);
 FFI::memcpy($str, "Hello World!", strlen("Hello World!"));
 $zend->zend_str_tolower($str, strlen("Hello World!"));
 var_dump(FFI::string($str));

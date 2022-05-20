@@ -3851,7 +3851,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE_P(cdef) == IS_OBJECT) {
+		if (cdef && Z_TYPE_P(cdef) == IS_OBJECT) {
 			zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(cdef);
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
@@ -3864,7 +3864,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE_P(cdef) != IS_OBJECT) {
+			if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3884,7 +3884,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			is_const = 1;
 		}
 
-		if (Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
@@ -4020,7 +4020,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(cdef, zend_ffi_cdef_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(cdef) == IS_OBJECT) {
+	if (cdef && Z_TYPE_P(cdef) == IS_OBJECT) {
 		zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(cdef);
 		FFI_G(symbols) = ffi->symbols;
 		FFI_G(tags) = ffi->tags;
@@ -4033,7 +4033,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 
 	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
-		if (Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
 				efree(FFI_G(tags));
@@ -4048,7 +4048,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		return;
 	}
 
-	if (Z_TYPE_P(cdef) != IS_OBJECT) {
+	if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
 		if (FFI_G(tags)) {
 			zend_ffi_tags_cleanup(&dcl);
 		}
@@ -4527,20 +4527,71 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 ZEND_METHOD(FFI, hasSymbol) /* {{{ */
 {
 	zval *cdef;
+	zend_string *symbol;
+	zend_long symbol_kind;
+	bool kind_is_null = 1;
+	zend_ffi_symbol *sym = NULL;
+
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(cdef, zend_ffi_cdef_ce)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJECT_OF_CLASS(cdef, zend_ffi_cdef_ce)
+		Z_PARAM_STR(symbol)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(symbol_kind, kind_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!kind_is_null && (symbol_kind > ZEND_FFI_SYM_FUNC || symbol_kind < ZEND_FFI_SYM_TYPE)) {
+		zend_argument_value_error(2, "must be a valid symbol kind");
+		RETURN_THROWS();
+	}
+
+	zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(cdef);
+	sym = zend_hash_find_ptr(ffi->symbols, symbol);
+	if (!sym) {
+		RETURN_FALSE;
+	}
+	if (!kind_is_null && sym->kind != symbol_kind) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
 ZEND_METHOD(FFI, getSymbols) /* {{{ */
 {
 	zval *cdef;
+	zend_long symbol_kind;
+	bool kind_is_null = 1;
+	zval ctype_object;
+
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJ_OF_CLASS(cdef, zend_ffi_cdef_ce)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(cdef, zend_ffi_cdef_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(symbol_kind, kind_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!kind_is_null && (symbol_kind > ZEND_FFI_SYM_FUNC || symbol_kind < ZEND_FFI_SYM_TYPE)) {
+		zend_argument_value_error(2, "must be a valid symbol kind");
+		RETURN_THROWS();
+	}
+
+	zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(cdef);
+	zend_string *name;
+	zend_ffi_symbol *sym;
+
+	array_init(return_value);
+
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(ffi->symbols, name, sym) {
+		if(!kind_is_null && symbol_kind != sym->kind) {
+			continue;
+		}
+		zend_ffi_ctype *ctype = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
+		ctype->type = sym->type;
+
+		ZVAL_OBJ_COPY(&ctype_object, &ctype->std);
+		zend_hash_add_new(Z_ARRVAL_P(return_value), name, &ctype_object);
+		} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

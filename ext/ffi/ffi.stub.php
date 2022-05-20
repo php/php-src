@@ -7,11 +7,11 @@ namespace {
 	/** @not-serializable */
     final class FFI
     {
-        public static function cdef(string $code = "", ?string $lib = null): FFI {}
+        public static function cdef(string $code = "", ?string $lib = null): FFI\CDef {}
 
-        public static function load(string $filename): ?FFI {}
+        public static function load(string $filename): ?FFI\CDef {}
 
-        public static function scope(string $name): FFI {}
+        public static function scope(string $name): FFI\CDef {}
 
         public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false, ?FFI\CDef $cdef = null): ?FFI\CData {}
 
@@ -64,9 +64,9 @@ namespace {
         /** @prefer-ref $ptr */
         public static function isNull(FFI\CData $ptr): bool {}
 
-        public static function hasSymbol(FFI\CDef $cdef, $symbol, $type): bool {}
+        public static function hasSymbol(FFI\CDef $cdef, string $symbol, ?int $symbol_kind = null): bool {}
 
-        public static function getSymbols(FFI\CDef $cdef, $type): array {}
+        public static function getSymbols(FFI\CDef $cdef, ?int $symbol_kind = null): array {}
     }
 
 }

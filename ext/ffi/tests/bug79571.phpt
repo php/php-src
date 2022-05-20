@@ -17,7 +17,7 @@ $ffi = FFI::cdef(<<<EOF
     } my_union;
 EOF);
 
-$union = $ffi->new('my_union');
+$union = FFI::new('my_union', cdef : $ffi);
 $union->num = 42;
 var_dump($union);
 var_dump($union->num);

@@ -25,17 +25,17 @@ struct _f;
 typedef struct _f f;
 EOF
 );
-var_dump($ffi->new("struct _a"));
-var_dump($ffi->new("struct _b"));
-var_dump($ffi->new("c"));
-var_dump($ffi->new("d"));
+var_dump(FFI::new("struct _a", cdef : $ffi));
+var_dump(FFI::new("struct _b", cdef : $ffi));
+var_dump(FFI::new("c", cdef : $ffi));
+var_dump(FFI::new("d", cdef : $ffi));
 try {
-    var_dump($ffi->new("struct _e"));
+    var_dump(FFI::new("struct _e", cdef : $ffi));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump($ffi->new("f"));
+    var_dump(FFI::new("f", cdef : $ffi));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }

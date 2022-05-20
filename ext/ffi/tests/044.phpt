@@ -18,16 +18,16 @@ typedef unsigned int ud __attribute__ ((__mode__ (__DI__)));
 typedef float e __attribute__ ((__mode__ (__SF__)));
 typedef float f __attribute__ ((__mode__ (__DF__)));
 ");
-var_dump(FFI::sizeof($ffi->new("a")));
-var_dump(FFI::sizeof($ffi->new("ua")));
-var_dump(FFI::sizeof($ffi->new("b")));
-var_dump(FFI::sizeof($ffi->new("ub")));
-var_dump(FFI::sizeof($ffi->new("c")));
-var_dump(FFI::sizeof($ffi->new("uc")));
-var_dump(FFI::sizeof($ffi->new("d")));
-var_dump(FFI::sizeof($ffi->new("ud")));
-var_dump(FFI::sizeof($ffi->new("e")));
-var_dump(FFI::sizeof($ffi->new("f")));
+var_dump(FFI::sizeof(FFI::new("a", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("ua", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("b", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("ub", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("c", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("uc", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("d", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("ud", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("e", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("f", cdef : $ffi)));
 ?>
 --EXPECT--
 int(1)

@@ -32,20 +32,20 @@ enum _g {
 };
 EOF
 );
-var_dump($ffi->new("enum _a"));
-var_dump($ffi->new("enum _b"));
-var_dump($ffi->new("c"));
-var_dump($ffi->new("d"));
-var_dump($ffi->new("int[_c2]"));
-var_dump($ffi->new("int[_c3]"));
-var_dump($ffi->new("int[_c4]"));
+var_dump(FFI::new("enum _a", cdef : $ffi));
+var_dump(FFI::new("enum _b", cdef : $ffi));
+var_dump(FFI::new("c", cdef : $ffi));
+var_dump(FFI::new("d", cdef : $ffi));
+var_dump(FFI::new("int[_c2]", cdef : $ffi));
+var_dump(FFI::new("int[_c3]", cdef : $ffi));
+var_dump(FFI::new("int[_c4]", cdef : $ffi));
 try {
-    var_dump($ffi->new("enum _e"));
+    var_dump(FFI::new("enum _e", cdef : $ffi));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump($ffi->new("f"));
+    var_dump(FFI::new("f", cdef : $ffi));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
