@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #74671 (DST timezone abbreviation has incorrect offset). (Derick)
+  . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
+    (Derick)
 
 09 Jun 2022, PHP 8.0.20
 
