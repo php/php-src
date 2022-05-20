@@ -32,7 +32,7 @@ ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
 }
 
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
-	return zend_atomic_bool_store_ex(obj, desired);
+	zend_atomic_bool_store_ex(obj, desired);
 }
 
 #if ZEND_WIN32 || HAVE_SYNC_ATOMICS
