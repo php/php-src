@@ -11,8 +11,6 @@ opcache
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 ?>
---XFAIL--
-GH-8588
 --FILE--
 <?php
 Foo::test();
