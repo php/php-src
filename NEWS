@@ -5,6 +5,19 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
 
+- Date:
+  . Fixed bug #51934 (strtotime plurals / incorrect time). (Derick)
+  . Fixed bug #51987 (Datetime fails to parse an ISO 8601 ordinal date
+    (extended format)). (Derick)
+  . Fixed bug #66019 (DateTime object does not support short ISO 8601 time
+    format - YYYY-MM-DDTHH) (cmb, Derick)
+  . Fixed bug #68549 (Timezones and offsets are not properly used when working
+    with dates) (Derick, Roel Harbers)
+  . Fixed bug #81565 (date parsing fails when provided with timezones including
+    seconds). (Derick)
+  . Fixed bug GH-7758 (Problems with negative timestamps and fractions).
+    (Derick, Ilija)
+
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.

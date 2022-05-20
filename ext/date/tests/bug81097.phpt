@@ -1,12 +1,14 @@
 --TEST--
-Bug #81097: DateTimeZone silently falls back to UTC when providing an offset with seconds
+Bug #81097 (DateTimeZone silently falls back to UTC when providing an offset with seconds)
 --FILE--
 <?php
-try {
-	new DatetimeZone('+01:45:30');
-} catch (Exception $e) {
-	echo $e->getMessage();
-}
+$d = new DatetimeZone('+01:45:30');
+var_dump($d);
 ?>
---EXPECT--
-DateTimeZone::__construct(): Unknown or bad timezone (+01:45:30)
+--EXPECTF--
+object(DateTimeZone)#%d (%d) {
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+01:45"
+}

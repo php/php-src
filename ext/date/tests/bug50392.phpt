@@ -20,7 +20,7 @@ for ($i = 0; $i < 8; $i++) {
 --EXPECT--
 2009-03-01 18:00:00.
 - X
-- Data missing
+- Not enough data available to satisfy format
 
 2009-03-01 18:00:00.1
 - 0.1
