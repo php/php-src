@@ -1,5 +1,5 @@
 --TEST--
-FFI 046: FFI::getSymbols()
+FFI 048: FFI::getSymbols()
 --EXTENSIONS--
 ffi
 --INI--
