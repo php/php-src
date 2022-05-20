@@ -486,7 +486,7 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), DATE_TIMEZONEDB)) {
 			if (DATEG(default_timezone) && *DATEG(default_timezone)) {
-				php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+				php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s'", DATEG(default_timezone));
 			}
 		} else {
 			DATEG(timezone_valid) = 1;
@@ -519,7 +519,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 		}
 
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-			php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+			php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s'", DATEG(default_timezone));
 			return "UTC";
 		}
 
