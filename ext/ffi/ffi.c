@@ -4567,7 +4567,7 @@ ZEND_METHOD(FFI, getSymbols) /* {{{ */
 		zend_ffi_ctype *ctype = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
 		ctype->type = sym->type;
 
-		ZVAL_OBJ_COPY(&ctype_object, &ctype->std);
+		ZVAL_OBJ(&ctype_object, &ctype->std);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), name, &ctype_object);
 		} ZEND_HASH_FOREACH_END();
 }
