@@ -30,9 +30,9 @@ foreach ( $e as $d )
 ?>
 --EXPECTF--
 Original object:
-object(DatePeriod)#4 (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTimeImmutable)#5 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "1978-12-22 09:15:00.000000"
     ["timezone_type"]=>
@@ -43,7 +43,7 @@ object(DatePeriod)#4 (6) {
   ["current"]=>
   NULL
   ["end"]=>
-  object(DateTimeImmutable)#6 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2022-04-29 15:51:56.000000"
     ["timezone_type"]=>
@@ -52,7 +52,7 @@ object(DatePeriod)#4 (6) {
     string(13) "Europe/London"
   }
   ["interval"]=>
-  object(DateInterval)#7 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(2)
     ["m"]=>
@@ -78,17 +78,19 @@ object(DatePeriod)#4 (6) {
   int(1)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 
 
 Serialised object:
-string(565) "O:10:"DatePeriod":6:{s:5:"start";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"1978-12-22 09:15:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:16:"Europe/Amsterdam";}s:7:"current";N;s:3:"end";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2022-04-29 15:51:56.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:13:"Europe/London";}s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:2;s:1:"m";i:6;s:1:"d";i:0;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:1;s:18:"include_start_date";b:1;}"
+string(%d) "O:10:"DatePeriod":7:{s:5:"start";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"1978-12-22 09:15:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:16:"Europe/Amsterdam";}s:7:"current";N;s:3:"end";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2022-04-29 15:51:56.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:13:"Europe/London";}s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:2;s:1:"m";i:6;s:1:"d";i:0;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:1;s:18:"include_start_date";b:1;s:16:"include_end_date";b:0;}"
 
 
 Unserialised object:
-object(DatePeriod)#1 (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTimeImmutable)#2 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "1978-12-22 09:15:00.000000"
     ["timezone_type"]=>
@@ -99,7 +101,7 @@ object(DatePeriod)#1 (6) {
   ["current"]=>
   NULL
   ["end"]=>
-  object(DateTimeImmutable)#8 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2022-04-29 15:51:56.000000"
     ["timezone_type"]=>
@@ -108,7 +110,7 @@ object(DatePeriod)#1 (6) {
     string(13) "Europe/London"
   }
   ["interval"]=>
-  object(DateInterval)#9 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(2)
     ["m"]=>
@@ -134,13 +136,15 @@ object(DatePeriod)#1 (6) {
   int(1)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 
 
 Calling __serialize manually:
-array(6) {
+array(%d) {
   ["start"]=>
-  object(DateTimeImmutable)#10 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "1978-12-22 09:15:00.000000"
     ["timezone_type"]=>
@@ -151,7 +155,7 @@ array(6) {
   ["current"]=>
   NULL
   ["end"]=>
-  object(DateTimeImmutable)#11 (3) {
+  object(DateTimeImmutable)#%d (%d) {
     ["date"]=>
     string(26) "2022-04-29 15:51:56.000000"
     ["timezone_type"]=>
@@ -160,7 +164,7 @@ array(6) {
     string(13) "Europe/London"
   }
   ["interval"]=>
-  object(DateInterval)#12 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(2)
     ["m"]=>
@@ -186,6 +190,8 @@ array(6) {
   int(1)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 
 
