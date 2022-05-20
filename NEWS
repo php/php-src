@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
 
 - Date:
+  . Fixed bug #66019 (DateTime object does not support short ISO 8601 time
+    format - YYYY-MM-DDTHH) (cmb, Derick)
+  . Fixed bug #68549 (Timezones and offsets are not properly used when working
+    with dates) (Derick, Roel Harbers)
   . Fixed bug GH-7758 (Problems with negative timestamps and fractions).
     (Derick, Ilija)
 
