@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #51934 (strtotime plurals / incorrect time). (Derick)
+  . Fixed bug #51987 (Datetime fails to parse an ISO 8601 ordinal date
+    (extended format)). (Derick)
   . Fixed bug #66019 (DateTime object does not support short ISO 8601 time
     format - YYYY-MM-DDTHH) (cmb, Derick)
   . Fixed bug #68549 (Timezones and offsets are not properly used when working
