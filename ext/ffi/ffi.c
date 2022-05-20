@@ -201,11 +201,6 @@ static zend_object_handlers zend_ffi_cdata_value_handlers;
 static zend_object_handlers zend_ffi_cdata_free_handlers;
 static zend_object_handlers zend_ffi_ctype_handlers;
 
-/*
-static zend_internal_function zend_ffi_new_fn;
-static zend_internal_function zend_ffi_cast_fn;
-static zend_internal_function zend_ffi_type_fn;
-*/
 /* forward declarations */
 static void _zend_ffi_type_dtor(zend_ffi_type *type);
 static void zend_ffi_finalize_type(zend_ffi_dcl *dcl);
@@ -2223,6 +2218,8 @@ static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 {
 	zend_object *ffi_obj;
 
+	ffi_obj = emalloc(sizeof(zend_ffi));
+
 	zend_ffi_object_init(ffi_obj, class_type);
 	ffi_obj->handlers = &zend_ffi_handlers;
 
@@ -2823,26 +2820,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	zend_ffi_symbol *sym = NULL;
 	zend_function   *func;
 	zend_ffi_type   *type;
-	/*
-	if (ZSTR_LEN(name) == sizeof("new") -1
-	 && (ZSTR_VAL(name)[0] == 'n' || ZSTR_VAL(name)[0] == 'N')
-	 && (ZSTR_VAL(name)[1] == 'e' || ZSTR_VAL(name)[1] == 'E')
-	 && (ZSTR_VAL(name)[2] == 'w' || ZSTR_VAL(name)[2] == 'W')) {
-		return (zend_function*)&zend_ffi_new_fn;
-	} else if (ZSTR_LEN(name) == sizeof("cast") -1
-	 && (ZSTR_VAL(name)[0] == 'c' || ZSTR_VAL(name)[0] == 'C')
-	 && (ZSTR_VAL(name)[1] == 'a' || ZSTR_VAL(name)[1] == 'A')
-	 && (ZSTR_VAL(name)[2] == 's' || ZSTR_VAL(name)[2] == 'S')
-	 && (ZSTR_VAL(name)[3] == 't' || ZSTR_VAL(name)[3] == 'T')) {
-		return (zend_function*)&zend_ffi_cast_fn;
-	} else if (ZSTR_LEN(name) == sizeof("type") -1
-	 && (ZSTR_VAL(name)[0] == 't' || ZSTR_VAL(name)[0] == 'T')
-	 && (ZSTR_VAL(name)[1] == 'y' || ZSTR_VAL(name)[1] == 'Y')
-	 && (ZSTR_VAL(name)[2] == 'p' || ZSTR_VAL(name)[2] == 'P')
-	 && (ZSTR_VAL(name)[3] == 'e' || ZSTR_VAL(name)[3] == 'E')) {
-		return (zend_function*)&zend_ffi_type_fn;
-	}
-	*/
+
 	if (ffi->symbols) {
 		sym = zend_hash_find_ptr(ffi->symbols, name);
 		if (sym && sym->kind != ZEND_FFI_SYM_FUNC) {
@@ -5368,14 +5346,6 @@ ZEND_MINIT_FUNCTION(ffi)
 
 	zend_ffi_ce = register_class_FFI();
 	zend_ffi_ce->create_object = zend_ffi_new;
-	/*
-	memcpy(&zend_ffi_new_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "new", sizeof("new")-1), sizeof(zend_internal_function));
-	zend_ffi_new_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	memcpy(&zend_ffi_cast_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "cast", sizeof("cast")-1), sizeof(zend_internal_function));
-	zend_ffi_cast_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", sizeof("type")-1), sizeof(zend_internal_function));
-	zend_ffi_type_fn.fn_flags &= ~ZEND_ACC_STATIC;
-	*/
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
