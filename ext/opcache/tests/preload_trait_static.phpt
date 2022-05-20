@@ -10,6 +10,8 @@ opcache.preload={PWD}/preload_trait_static.inc
 require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
 ?>
+--XFAIL--
+GH-8588
 --FILE--
 <?php
 $bar = new Bar;
