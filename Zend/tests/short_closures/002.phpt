@@ -7,6 +7,10 @@ $a = 1;
 
 function printFunctionSignature($f) {
     $rf = new ReflectionFunction($f);
+    $attrs = $rf->getAttributes();
+    foreach ($attrs as $attr) {
+        printf('#[%s] ', $attr->getName());
+    }
     if ($rf->isStatic()) {
         print 'static ';
     }
@@ -68,6 +72,18 @@ $f = fn () use ($a): Foo {
 
 printFunctionSignature($f);
 
+$a = 1;
+$f = fn (): Foo {
+    return $a;
+};
+
+printFunctionSignature($f);
+
+$f = #[Attr] fn (): Foo {
+};
+
+printFunctionSignature($f);
+
 --EXPECTF--
 fn (...)
 fn & (...)
@@ -75,3 +91,5 @@ static fn (...)
 fn (...): Foo
 fn (...) use (a)
 fn (...) use (a): Foo
+fn (...) use (a): Foo
+#[Attr] fn (...): Foo

@@ -1,18 +1,18 @@
 --TEST--
-Short closures minimal capture: foreach
+Short closures minimal capture: foreach variation
 --FILE--
 <?php
 
 $a = 1;
-$k = 1;
-$v = 1;
+$k = 2;
+$v = 3;
 
 $f = fn () {
     $ret = [];
     foreach (range(0, $a) as $k => $v) {
         $ret[] = [$k, $v];
     }
-    return $ret;
+    return $k + $v;
 };
 
 echo "Captures:\n";
@@ -22,24 +22,13 @@ echo "f():\n";
 var_dump($f());
 --EXPECT--
 Captures:
-array(1) {
+array(3) {
   ["a"]=>
   int(1)
+  ["v"]=>
+  int(3)
+  ["k"]=>
+  int(2)
 }
 f():
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
-    int(0)
-    [1]=>
-    int(0)
-  }
-  [1]=>
-  array(2) {
-    [0]=>
-    int(1)
-    [1]=>
-    int(1)
-  }
-}
+int(2)

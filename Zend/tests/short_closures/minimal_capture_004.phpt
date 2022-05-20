@@ -16,7 +16,7 @@ echo "Captures or statics:\n";
 var_dump((new ReflectionFunction($f))->getStaticVariables());
 
 echo "f():\n";
-var_dump($f(3));
+var_dump($f());
 --EXPECT--
 Captures or statics:
 array(1) {
