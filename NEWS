@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
     non-relative items are present). (Derick)
+  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
+    (Daniel Egeberg, Derick)
   . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
     Year). (Pavel Djundik)
 
