@@ -9,9 +9,8 @@ opcache.preload={PWD}/preload_method_static_vars.inc
 <?php
 require_once('skipif.inc');
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+if (PHP_ZTS) die('xfail GH-8588');
 ?>
---XFAIL--
-GH-8588
 --FILE--
 <?php
 Foo::test();
