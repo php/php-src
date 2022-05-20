@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
 
+- Date:
+  . Fixed bug GH-7758 (Problems with negative timestamps and fractions).
+    (Derick, Ilija)
+
 - FPM:
   . Fixed ACL build check on MacOS. (David Carlier)
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.
