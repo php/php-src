@@ -3655,7 +3655,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	zend_object *type_obj = NULL;
 	zend_ffi_type *type, *type_ptr;
 	zend_ffi_cdata *cdata;
-	zval *cdef;
+	zval *cdef = NULL;
 	void *ptr;
 	bool owned = 1;
 	bool persistent = 0;
@@ -3695,7 +3695,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
+			if (!cdef) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3715,7 +3715,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 			is_const = 1;
 		}
 
-		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef) {
 			if (FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
@@ -3810,7 +3810,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	zend_object *ztype = NULL;
 	zend_ffi_type *old_type, *type, *type_ptr;
 	zend_ffi_cdata *old_cdata, *cdata;
-	zval *cdef;
+	zval *cdef = NULL;
 	bool is_const = 0;
 	zval *zv, *arg;
 	void *ptr;
@@ -3842,7 +3842,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
+			if (!cdef) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3862,7 +3862,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			is_const = 1;
 		}
 
-		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef) {
 			if (FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
@@ -3989,7 +3989,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 	zend_ffi_ctype *ctype;
 	zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 	zend_string *type_def;
-	zval *cdef;
+	zval *cdef = NULL;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -4011,7 +4011,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 
 	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
-		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef) {
 			if (FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
 				efree(FFI_G(tags));
@@ -4026,7 +4026,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		return;
 	}
 
-	if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
+	if (!cdef) {
 		if (FFI_G(tags)) {
 			zend_ffi_tags_cleanup(&dcl);
 		}
