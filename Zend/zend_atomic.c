@@ -27,14 +27,21 @@ ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired) {
 	ZEND_ATOMIC_BOOL_INIT(obj, desired);
 }
 
-extern inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj,
-                                                      bool desired);
-extern inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj,
-                                                   bool desired);
+ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+	return zend_atomic_bool_exchange_ex(obj, desired);
+}
+
+ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+	return zend_atomic_bool_store_ex(obj, desired);
+}
 
 #if ZEND_WIN32 || HAVE_SYNC_ATOMICS
 /* On these platforms it is non-const due to underlying APIs. */
-extern inline ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
+ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj) {
+	return zend_atomic_bool_load_ex(obj);
+}
 #else
-extern inline ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj);
+ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj) {
+	return zend_atomic_bool_load_ex(obj);
+}
 #endif

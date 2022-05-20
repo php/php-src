@@ -1383,7 +1383,7 @@ static void pcntl_signal_handler(int signo)
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
 	if (PCNTL_G(async_signals)) {
-		zend_atomic_bool_store(&EG(vm_interrupt), true);
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
 }
 

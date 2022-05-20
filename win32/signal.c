@@ -77,7 +77,7 @@ static BOOL WINAPI php_win32_signal_system_ctrl_handler(DWORD evt)
 		return FALSE;
 	}
 
-	zend_atomic_bool_store(vm_interrupt_flag, true);
+	zend_atomic_bool_store_ex(vm_interrupt_flag, true);
 
 	ctrl_evt = evt;
 

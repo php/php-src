@@ -63,17 +63,17 @@ BEGIN_EXTERN_C()
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
-inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	return InterlockedExchange8(&obj->value, desired);
 }
 
 /* On this platform it is non-const due to Iterlocked API*/
-inline ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
 	/* Or'ing with false won't change the value. */
 	return InterlockedOr8(&obj->value, false);
 }
 
-inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	(void)InterlockedExchange8(&obj->value, desired);
 }
 
@@ -81,15 +81,15 @@ inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) __c11_atomic_init(&(obj)->value, (desired))
 
-inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	return __c11_atomic_exchange(&obj->value, desired, __ATOMIC_SEQ_CST);
 }
 
-inline ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	return __c11_atomic_load(&obj->value, __ATOMIC_SEQ_CST);
 }
 
-inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	__c11_atomic_store(&obj->value, desired, __ATOMIC_SEQ_CST);
 }
 
@@ -97,19 +97,19 @@ inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
-inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	bool prev = false;
 	__atomic_exchange(&obj->value, &desired, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
 
-inline ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	bool prev = false;
 	__atomic_load(&obj->value, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
 
-inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	__atomic_store(&obj->value, &desired, __ATOMIC_SEQ_CST);
 }
 
@@ -117,7 +117,7 @@ inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
-inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	bool prev = __sync_lock_test_and_set(&obj->value, desired);
 
 	/* __sync_lock_test_and_set only does an acquire barrier, so sync
@@ -127,12 +127,12 @@ inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desir
 	return prev;
 }
 
-inline ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
 	/* Or'ing false won't change the value */
 	return __sync_fetch_and_or(&obj->value, false);
 }
 
-inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	__sync_synchronize();
 	obj->value = desired;
 	__sync_synchronize();
@@ -147,23 +147,37 @@ inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired)
  * improvement. As more platforms support C11 atomics, or as we add support
  * for more platforms through intrinsics/asm, this should be used less and
  * less until it can be removed.
- * At the time of this writing, all platforms in CI avoided this fallback.
+ * At the time of this writing, all platforms in CI avoided this fallback,
+ * so we emit an error. If there ends up being some platform that needs it,
+ * we can remove the error or add support for whatever platform that is.
  */
+#error No atomics support detected. Please open an issue with platform deatils.
 
-inline ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	obj->value = desired;
 }
 
-inline ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	return obj->value;
 }
 
-inline ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired) {
+static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
 	bool prev = obj->value;
 	obj->value = true;
 	return prev;
 }
 
+#endif
+
+ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired);
+ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired);
+ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
+
+#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
+/* On these platforms it is non-const due to underlying APIs. */
+ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
+#else
+ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj);
 #endif
 
 END_EXTERN_C()
