@@ -3682,7 +3682,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE_P(cdef) == IS_OBJECT) {
+		if (cdef && Z_TYPE_P(cdef) == IS_OBJECT) {
 			zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(cdef);
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
@@ -3695,7 +3695,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE_P(cdef) != IS_OBJECT) {
+			if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3715,7 +3715,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 			is_const = 1;
 		}
 
-		if (Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
@@ -3842,7 +3842,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
+			if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
 				if (FFI_G(tags)) {
 					zend_hash_destroy(FFI_G(tags));
 					efree(FFI_G(tags));
@@ -3862,7 +3862,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			is_const = 1;
 		}
 
-		if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
@@ -4011,7 +4011,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 
 	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
-		if (!cdef && Z_TYPE_P(cdef) != IS_OBJECT) {
+		if (!cdef || Z_TYPE_P(cdef) != IS_OBJECT) {
 			if (FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
 				efree(FFI_G(tags));
