@@ -1549,8 +1549,8 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(properties, key, prop) {
 			property_info = zend_get_property_info(object->ce, key, 1);
 			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
-			    property_info &&
-			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
+				property_info &&
+				(property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
 				if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
@@ -2275,7 +2275,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 	module_request_startup_handlers = (zend_module_entry**)malloc(
-	    sizeof(zend_module_entry*) *
+		sizeof(zend_module_entry*) *
 		(startup_count + 1 +
 		 shutdown_count + 1 +
 		 post_deactivate_count + 1));
@@ -2301,8 +2301,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	/* Collect internal classes with static members */
 	ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
 		if (ce->type == ZEND_INTERNAL_CLASS &&
-		    ce->default_static_members_count > 0) {
-		    class_count++;
+			ce->default_static_members_count > 0) {
+			class_count++;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2314,8 +2314,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	if (class_count) {
 		ZEND_HASH_MAP_FOREACH_PTR(CG(class_table), ce) {
 			if (ce->type == ZEND_INTERNAL_CLASS &&
-			    ce->default_static_members_count > 0) {
-			    class_cleanup_handlers[--class_count] = ce;
+				ce->default_static_members_count > 0) {
+				class_cleanup_handlers[--class_count] = ce;
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -2795,7 +2795,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					if (ZEND_TYPE_IS_ITERABLE_FALLBACK(arg_info->type)) {
 						rebuild_arginfo = true;
 					}
-				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+					reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
 #if ZEND_DEBUG
 				for (uint32_t j = 0; j < i; j++) {
@@ -2810,7 +2810,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		}
 
 		if (reg_function->common.arg_info &&
-		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+			(reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* Treat return type as an extra argument */
 			num_args++;
 			rebuild_arginfo = true;
@@ -3449,8 +3449,8 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			zend_object *object = zend_get_this_object(frame);
 
 			if (object &&
-			    instanceof_function(object->ce, scope) &&
-			    instanceof_function(scope, ce)) {
+				instanceof_function(object->ce, scope) &&
+				instanceof_function(scope, ce)) {
 				fcc->object = object;
 				fcc->called_scope = object->ce;
 			} else {
@@ -3555,8 +3555,8 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 				zend_object *object = zend_get_this_object(frame);
 
 				if (object &&
-				    instanceof_function(object->ce, scope) &&
-				    instanceof_function(scope, fcc->calling_scope)) {
+					instanceof_function(object->ce, scope) &&
+					instanceof_function(scope, fcc->calling_scope)) {
 					fcc->object = object;
 					fcc->called_scope = object->ce;
 				} else {
@@ -3599,7 +3599,7 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 
 	lmname = zend_string_tolower(mname);
 	if (strict_class &&
-	    fcc->calling_scope &&
+		fcc->calling_scope &&
 		zend_string_equals_literal(lmname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		fcc->function_handler = fcc->calling_scope->constructor;
 		if (fcc->function_handler) {
@@ -3609,10 +3609,10 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 		fcc->function_handler = Z_PTR_P(zv);
 		retval = 1;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
-		    !strict_class) {
+			!strict_class) {
 			scope = get_scope(frame);
 			if (scope &&
-			    instanceof_function(fcc->function_handler->common.scope, scope)) {
+				instanceof_function(fcc->function_handler->common.scope, scope)) {
 
 				zv = zend_hash_find(&scope->function_table, lmname);
 				if (zv != NULL) {
@@ -3626,9 +3626,9 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 			}
 		}
 		if (!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC) &&
-		    (fcc->calling_scope &&
-		     ((fcc->object && fcc->calling_scope->__call) ||
-		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
+			(fcc->calling_scope &&
+			 ((fcc->object && fcc->calling_scope->__call) ||
+			  (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			scope = get_scope(frame);
 			if (fcc->function_handler->common.scope != scope) {
 				if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
@@ -3650,8 +3650,8 @@ get_function_via_handler:
 				fcc->function_handler = fcc->object->handlers->get_method(&fcc->object, mname, NULL);
 				if (fcc->function_handler) {
 					if (strict_class &&
-					    (!fcc->function_handler->common.scope ||
-					     !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
+						(!fcc->function_handler->common.scope ||
+						 !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
 						zend_release_fcall_info_cache(fcc);
 					} else {
 						retval = 1;
@@ -3671,7 +3671,7 @@ get_function_via_handler:
 				if (call_via_handler && !fcc->object) {
 					zend_object *object = zend_get_this_object(frame);
 					if (object &&
-					    instanceof_function(object->ce, fcc->calling_scope)) {
+						instanceof_function(object->ce, fcc->calling_scope)) {
 						fcc->object = object;
 					}
 				}
@@ -4140,7 +4140,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	}
 	if (access_type & ZEND_ACC_STATIC) {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
+			(property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
 			zend_hash_del(&ce->properties_info, name);
@@ -4158,7 +4158,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	} else {
 		zval *property_default_ptr;
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
+			(property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 			zend_hash_del(&ce->properties_info, name);

@@ -3137,7 +3137,7 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);
 	}
-	if ((type_mask & MAY_BE_ARRAY)) {
+	if (type_mask & MAY_BE_ARRAY) {
 		append_type_mask(return_value, MAY_BE_ARRAY);
 	}
 	if (type_mask & MAY_BE_STRING) {
