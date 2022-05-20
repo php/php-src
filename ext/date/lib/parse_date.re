@@ -211,18 +211,25 @@ static timelib_relunit const timelib_relunit_lookup[] = {
 	{ "year",        TIMELIB_YEAR,    1 },
 	{ "years",       TIMELIB_YEAR,    1 },
 
+	{ "mondays",     TIMELIB_WEEKDAY, 1 },
 	{ "monday",      TIMELIB_WEEKDAY, 1 },
 	{ "mon",         TIMELIB_WEEKDAY, 1 },
+	{ "tuesdays",    TIMELIB_WEEKDAY, 2 },
 	{ "tuesday",     TIMELIB_WEEKDAY, 2 },
 	{ "tue",         TIMELIB_WEEKDAY, 2 },
+	{ "wednesdays",  TIMELIB_WEEKDAY, 3 },
 	{ "wednesday",   TIMELIB_WEEKDAY, 3 },
 	{ "wed",         TIMELIB_WEEKDAY, 3 },
+	{ "thursdays",   TIMELIB_WEEKDAY, 4 },
 	{ "thursday",    TIMELIB_WEEKDAY, 4 },
 	{ "thu",         TIMELIB_WEEKDAY, 4 },
+	{ "fridays",     TIMELIB_WEEKDAY, 5 },
 	{ "friday",      TIMELIB_WEEKDAY, 5 },
 	{ "fri",         TIMELIB_WEEKDAY, 5 },
+	{ "saturdays",   TIMELIB_WEEKDAY, 6 },
 	{ "saturday",    TIMELIB_WEEKDAY, 6 },
 	{ "sat",         TIMELIB_WEEKDAY, 6 },
+	{ "sundays",     TIMELIB_WEEKDAY, 0 },
 	{ "sunday",      TIMELIB_WEEKDAY, 0 },
 	{ "sun",         TIMELIB_WEEKDAY, 0 },
 
@@ -813,6 +820,22 @@ static timelib_long timelib_parse_tz_cor(const char **ptr, int *tz_not_found)
 			*tz_not_found = 0;
 			tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10));
 			return tmp;
+
+		case 6: /* HHMMSS */
+			*tz_not_found = 0;
+			tmp = strtol(begin, NULL, 10);
+			tmp = sHOUR(tmp / 10000) + sMIN((tmp / 100) % 100) + (tmp % 100);
+			return tmp;
+
+		case 8: /* HH:MM:SS */
+			if (begin[2] != ':' || begin[5] != ':') {
+				break;
+			}
+
+			*tz_not_found = 0;
+			tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10)) + strtol(begin + 6, NULL, 10);
+			return tmp;
+
 	}
 	return 0;
 }
@@ -945,7 +968,7 @@ second = minute | "60";
 secondlz = minutelz | "60";
 meridian = ([AaPp] "."? [Mm] "."?) [\000\t ];
 tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/-][A-Za-z]+)+;
-tzcorrection = "GMT"? [+-] hour24 ":"? minute?;
+tzcorrection = "GMT"? [+-] ((hour24 (":"? minute)?) | (hour24lz minutelz secondlz) | (hour24lz ":" minutelz ":" secondlz));
 
 daysuf = "st" | "nd" | "rd" | "th";
 
@@ -963,10 +986,11 @@ weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
 monthlz = "0" [0-9] | "1" [0-2];
 daylz   = "0" [0-9] | [1-2][0-9] | "3" [01];
 
+dayfulls = 'sundays' | 'mondays' | 'tuesdays' | 'wednesdays' | 'thursdays' | 'fridays' | 'saturdays';
 dayfull = 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
 dayabbr = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 dayspecial = 'weekday' | 'weekdays';
-daytext = dayfull | dayabbr | dayspecial;
+daytext = dayfulls | dayfull | dayabbr | dayspecial;
 
 monthfull = 'january' | 'february' | 'march' | 'april' | 'may' | 'june' | 'july' | 'august' | 'september' | 'october' | 'november' | 'december';
 monthabbr = 'jan' | 'feb' | 'mar' | 'apr' | 'may' | 'jun' | 'jul' | 'aug' | 'sep' | 'sept' | 'oct' | 'nov' | 'dec';
@@ -978,6 +1002,7 @@ timetiny12 = hour12 space? meridian;
 timeshort12 = hour12[:.]minutelz space? meridian;
 timelong12 = hour12[:.]minute[:.]secondlz space? meridian;
 
+timetiny24 = 't' hour24;
 timeshort24 = 't'? hour24[:.]minute;
 timelong24 =  't'? hour24[:.]minute[:.]second;
 iso8601long =  't'? hour24 [:.] minute [:.] second frac;
@@ -1016,7 +1041,7 @@ soap             = year4 "-" monthlz "-" daylz "T" hour24lz ":" minutelz ":" sec
 xmlrpc           = year4 monthlz daylz "T" hour24 ":" minutelz ":" secondlz;
 xmlrpcnocolon    = year4 monthlz daylz 't' hour24 minutelz secondlz;
 wddx             = year4 "-" month "-" day "T" hour24 ":" minute ":" second;
-pgydotd          = year4 "."? dayofyear;
+pgydotd          = year4 [.-]? dayofyear;
 pgtextshort      = monthabbr "-" daylz "-" year;
 pgtextreverse    = year "-" monthabbr "-" daylz;
 mssqltime        = hour12 ":" minutelz ":" secondlz [:.] [0-9]+ meridian;
@@ -1054,7 +1079,7 @@ relative = relnumber space? (reltextunit | 'week' );
 relativetext = (reltextnumber|reltexttext) space reltextunit;
 relativetextweek = reltexttext space 'week';
 
-weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of';
+weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) space 'of';
 
 */
 
@@ -1143,8 +1168,10 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 
 	timestampms
 	{
-		timelib_ull i, us;
+		timelib_sll i;
+		timelib_ull us;
 		const char *ptr_before;
+		bool is_negative;
 
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
@@ -1152,11 +1179,16 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_UNHAVE_TIME();
 		TIMELIB_HAVE_TZ();
 
+		is_negative = *(ptr + 1) == '-';
+
 		i = timelib_get_signed_nr(s, &ptr, 24);
 
 		ptr_before = ptr;
 		us = timelib_get_signed_nr(s, &ptr, 6);
 		us = us * pow(10, 7 - (ptr - ptr_before));
+		if (is_negative) {
+			us *= -1;
+		}
 
 		s->time->y = 1970;
 		s->time->m = 1;
@@ -1179,6 +1211,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		DEBUG_OUTPUT("firstdayof | lastdayof");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_RELATIVE();
+		TIMELIB_UNHAVE_TIME();
 
 		/* skip "last day of" or "first day of" */
 		if (*ptr == 'l' || *ptr == 'L') {
@@ -1273,19 +1306,21 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		return TIMELIB_TIME24_WITH_ZONE;
 	}
 
-	timeshort24 | timelong24 /* | iso8601short | iso8601norm */ | iso8601long /*| iso8601shorttz | iso8601normtz | iso8601longtz*/
+	timetiny24 | timeshort24 | timelong24 /* | iso8601short | iso8601norm */ | iso8601long /*| iso8601shorttz | iso8601normtz | iso8601longtz*/
 	{
 		int tz_not_found;
-		DEBUG_OUTPUT("timeshort24 | timelong24 | iso8601long");
+		DEBUG_OUTPUT("timetiny24 | timeshort24 | timelong24 | iso8601long");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TIME();
 		s->time->h = timelib_get_nr(&ptr, 2);
-		s->time->i = timelib_get_nr(&ptr, 2);
 		if (*ptr == ':' || *ptr == '.') {
-			s->time->s = timelib_get_nr(&ptr, 2);
+			s->time->i = timelib_get_nr(&ptr, 2);
+			if (*ptr == ':' || *ptr == '.') {
+				s->time->s = timelib_get_nr(&ptr, 2);
 
-			if (*ptr == '.') {
-				s->time->us = timelib_get_frac_nr(&ptr);
+				if (*ptr == '.') {
+					s->time->us = timelib_get_frac_nr(&ptr);
+				}
 			}
 		}
 
@@ -2242,7 +2277,7 @@ timelib_time *timelib_parse_from_format_with_map(const char *format, const char 
 					break;
 				}
 				if (s->time->h > 12) {
-					add_pbf_error(s, TIMELIB_ERR_HOUR_LARGER_THAN_12, "Hour can not be higher than 12", string, begin);
+					add_pbf_error(s, TIMELIB_ERR_HOUR_LARGER_THAN_12, "Hour cannot be higher than 12", string, begin);
 					break;
 				}
 
@@ -2488,7 +2523,7 @@ timelib_time *timelib_parse_from_format_with_map(const char *format, const char 
 					break;
 
 				default:
-					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Data missing", string, ptr);
+					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Not enough data available to satisfy format", string, ptr);
 					done = 1;
 			}
 			fptr++;

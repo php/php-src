@@ -308,6 +308,7 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 		memcpy(&t->relative, interval, sizeof(timelib_rel_time));
 
 		timelib_update_ts(t, NULL);
+		timelib_update_from_sse(t);
 	} else {
 		if (interval->invert) {
 			bias = -1;
@@ -331,7 +332,6 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 		timelib_do_normalize(t);
 	}
 
-	timelib_update_from_sse(t);
 	if (t->zone_type == TIMELIB_ZONETYPE_ID) {
 		timelib_set_timezone(t, t->tz_info);
 	}
