@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     format - YYYY-MM-DDTHH) (cmb, Derick)
   . Fixed bug #68549 (Timezones and offsets are not properly used when working
     with dates) (Derick, Roel Harbers)
+  . Fixed bug #81565 (date parsing fails when provided with timezones including
+    seconds). (Derick)
   . Fixed bug GH-7758 (Problems with negative timestamps and fractions).
     (Derick, Ilija)
 
