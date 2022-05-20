@@ -133,7 +133,7 @@ array(4) {
   ["errors"]=>
   array(1) {
     [10]=>
-    string(12) "Data missing"
+    string(%d) "Not enough data available to satisfy format"
   }
 }
 
