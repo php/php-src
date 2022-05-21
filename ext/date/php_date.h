@@ -93,6 +93,7 @@ struct _php_period_obj {
 	int               recurrences;
 	bool              initialized;
 	bool              include_start_date;
+	bool              include_end_date;
 	zend_object       std;
 };
 
