@@ -10,6 +10,12 @@ PHP                                                                        NEWS
 - MBString:
   . Fixed bug GH-8685 (pcre not ready at mbstring startup). (Remi)
 
+- OpenSSL:
+  . Fixed bug #50293 (Several openssl functions ignore the VCWD).
+    (Jakub Zelenka, cmb)
+  . Fixed bug #81713 (NULL byte injection in several OpenSSL functions working
+    with certificates). (Jakub Zelenka)
+
 - PDO ODBC:
   . Fixed errorInfo() result on successful PDOStatement->execute(). (Yurunsoft)
 
