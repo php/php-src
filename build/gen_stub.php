@@ -1411,7 +1411,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     foreach ($funcInfo->args as $argInfo) {
         $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
         $argDefaultKind = $argInfo->hasProperDefaultValue() ? "_WITH_DEFAULT_VALUE" : "";
-        $argType = $argInfo->type;
+        $argType = $argInfo->type ?? $argInfo->phpDocType;
         if ($argType !== null) {
             if (null !== $simpleArgType = $argType->tryToSimpleType()) {
                 if ($simpleArgType->isBuiltin) {
