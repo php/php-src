@@ -100,6 +100,13 @@ static uint32_t add_static_slot(HashTable     *hash,
 	return ret;
 }
 
+static inline void bias_key(zend_string *key, uint32_t bias)
+{
+	/* Add a bias to the hash so we can distinguish string keys
+	 * that would otherwise be the same. */
+	ZSTR_H(key) = zend_string_hash_val(key) + bias;
+}
+
 static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
 {
 	ZEND_ASSERT(Z_TYPE_P(literal) == IS_STRING);
@@ -124,9 +131,7 @@ static zend_string *create_str_cache_key(zval *literal, uint8_t num_related)
 		ZEND_ASSERT(0 && "Currently not needed");
 	}
 
-	/* Add a bias to the hash so we can distinguish keys
-	 * that would otherwise be the same after concatenation. */
-	ZSTR_H(key) = zend_string_hash_val(key) + num_related - 1;
+	bias_key(key, num_related - 1);
 	return key;
 }
 
@@ -141,7 +146,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 	int l_false = -1;
 	int l_true = -1;
 	int l_empty_arr = -1;
-	HashTable hash, double_hash;
+	HashTable hash;
 	zend_string *key = NULL;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
 	int *const_slot, *class_slot, *func_slot, *bind_var_slot, *property_slot, *method_slot;
@@ -285,8 +290,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		/* Merge equal constants */
 		j = 0;
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
-		/* Use separate hashtable for doubles stored as string keys, to avoid collisions. */
-		zend_hash_init(&double_hash, 0, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
@@ -349,10 +352,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					} else {
 						ZEND_ASSERT(info[i].num_related == 2);
 						key = zend_string_init(Z_STRVAL(op_array->literals[i+1]), Z_STRLEN(op_array->literals[i+1]), 0);
-						ZSTR_H(key) = ZSTR_HASH(Z_STR(op_array->literals[i+1])) + 100 +
-							info[i].num_related - 1;
-						if ((pos = zend_hash_find(&hash, key)) != NULL
-						 && info[Z_LVAL_P(pos)].num_related == 2) {
+						bias_key(key, 100 + info[i].num_related - 1);
+						if ((pos = zend_hash_find(&hash, key)) != NULL) {
+							ZEND_ASSERT(info[Z_LVAL_P(pos)].num_related == 2);
 							map[i] = Z_LVAL_P(pos);
 							zval_ptr_dtor_nogc(&op_array->literals[i+1]);
 						} else {
@@ -373,18 +375,21 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case IS_DOUBLE:
 					ZEND_ASSERT(info[i].num_related == 1);
-					if ((pos = zend_hash_str_find(&double_hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != NULL) {
+					key = zend_string_init((char*)&Z_DVAL(op_array->literals[i]), sizeof(double), 0);
+					bias_key(key, 200);
+					if ((pos = zend_hash_find(&hash, key))) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
-						zend_hash_str_add_new(&double_hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double), &zv);
+						zend_hash_add_new(&hash, key, &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
 						j++;
 					}
+					zend_string_release_ex(key, 0);
 					break;
 				case IS_STRING: {
 					key = create_str_cache_key(&op_array->literals[i], info[i].num_related);
@@ -452,7 +457,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 
 		/* Only clean "hash", as it will be reused in the loop below. */
 		zend_hash_clean(&hash);
-		zend_hash_destroy(&double_hash);
 		op_array->last_literal = j;
 
 		const_slot = zend_arena_alloc(&ctx->arena, j * 6 * sizeof(int));
