@@ -204,6 +204,7 @@ PHP 8.2 UPGRADE NOTES
 - Sockets:
   . SO_INCOMING_CPU
   . TCP_NOTSENT_LOWAT
+  . SO_MEMINFO
 
 ========================================
 11. Changes to INI File Handling
