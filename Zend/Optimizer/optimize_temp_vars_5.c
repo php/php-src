@@ -150,31 +150,27 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 
 		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 			currT = VAR_NUM(opline->result.var) - offset;
-			if (zend_bitset_in(valid_T, currT)) {
-				if (start_of_T[currT] == opline) {
-					/* ZEND_FAST_CALL can not share temporary var with others
-					 * since the fast_var could also be set by ZEND_HANDLE_EXCEPTION
-					 * which could be ahead of it */
-					if (opline->opcode != ZEND_FAST_CALL) {
-						zend_bitset_excl(taken_T, map_T[currT]);
-					}
-				}
-				opline->result.var = NUM_VAR(map_T[currT] + offset);
-				if (opline->opcode == ZEND_ROPE_INIT) {
-					if (start_of_T[currT] == opline) {
-						uint32_t num = ((opline->extended_value * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
-						while (num > 1) {
-							num--;
-							zend_bitset_excl(taken_T, map_T[currT]+num);
-						}
-					}
-				}
-			} else {
-				/* Code which gets here is using a wrongly built opcode such as RECV() */
+			if (!zend_bitset_in(valid_T, currT)) {
+				/* As a result of DCE, an opcode may have an unused result. */
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				zend_bitset_incl(valid_T, currT);
-				opline->result.var = NUM_VAR(i + offset);
+			}
+			opline->result.var = NUM_VAR(map_T[currT] + offset);
+			if (start_of_T[currT] == opline) {
+				/* ZEND_FAST_CALL can not share temporary var with others
+				 * since the fast_var could also be set by ZEND_HANDLE_EXCEPTION
+				 * which could be ahead of it */
+				if (opline->opcode != ZEND_FAST_CALL) {
+					zend_bitset_excl(taken_T, map_T[currT]);
+				}
+				if (opline->opcode == ZEND_ROPE_INIT) {
+					uint32_t num = ((opline->extended_value * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+					while (num > 1) {
+						num--;
+						zend_bitset_excl(taken_T, map_T[currT]+num);
+					}
+				}
 			}
 		}
 
