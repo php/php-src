@@ -297,6 +297,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
 				case IS_NULL:
+					ZEND_ASSERT(info[i].num_related == 1);
 					if (l_null < 0) {
 						l_null = j;
 						if (i != j) {
@@ -308,6 +309,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					map[i] = l_null;
 					break;
 				case IS_FALSE:
+					ZEND_ASSERT(info[i].num_related == 1);
 					if (l_false < 0) {
 						l_false = j;
 						if (i != j) {
@@ -319,6 +321,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					map[i] = l_false;
 					break;
 				case IS_TRUE:
+					ZEND_ASSERT(info[i].num_related == 1);
 					if (l_true < 0) {
 						l_true = j;
 						if (i != j) {
@@ -369,6 +372,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case IS_DOUBLE:
+					ZEND_ASSERT(info[i].num_related == 1);
 					if ((pos = zend_hash_str_find(&double_hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != NULL) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
@@ -399,10 +403,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					} else {
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
-						if (key) {
-							zend_hash_add_new(&hash, key, &zv);
-							zend_string_release_ex(key, 0);
-						}
+						zend_hash_add_new(&hash, key, &zv);
+						zend_string_release_ex(key, 0);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -419,6 +421,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				}
 				case IS_ARRAY:
+					ZEND_ASSERT(info[i].num_related == 1);
 					if (zend_hash_num_elements(Z_ARRVAL(op_array->literals[i])) == 0) {
 						if (l_empty_arr < 0) {
 							l_empty_arr = j;
@@ -436,6 +439,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					ZEND_FALLTHROUGH;
 				default:
 					/* don't merge other types */
+					ZEND_ASSERT(info[i].num_related == 1);
 					map[i] = j;
 					if (i != j) {
 						op_array->literals[j] = op_array->literals[i];
