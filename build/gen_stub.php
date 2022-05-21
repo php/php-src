@@ -1797,6 +1797,10 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_ABSTRACT";
         }
 
+        if ($this->flags & Class_::MODIFIER_READONLY) {
+            $flags[] = "ZEND_ACC_READONLY_CLASS";
+        }
+
         if ($this->isDeprecated) {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }

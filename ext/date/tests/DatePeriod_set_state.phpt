@@ -19,9 +19,9 @@ var_dump($datePeriodObjectNew);
 
 ?>
 --EXPECTF--
-object(DatePeriod)#%d (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#%d (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2017-10-06 23:30:00.000000"
     ["timezone_type"]=>
@@ -60,4 +60,6 @@ object(DatePeriod)#%d (6) {
   int(25)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }

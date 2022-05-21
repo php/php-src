@@ -13,10 +13,13 @@ PHP                                                                        NEWS
 
 - Curl:
   . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
 
 - Date:
   . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
     non-relative items are present). (Derick)
+  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
+    (Daniel Egeberg, Derick)
   . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
     Year). (Pavel Djundik)
 
@@ -44,15 +47,19 @@ PHP                                                                        NEWS
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
   . Added ReflectionMethod::hasPrototype(). (Ollie Read)
 
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
+
+- Sockets:
+  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
+  . Added SO_MEMINFO socket option. (David Carlier)
+
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 
 - SQLite3:
   . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
-
-- Streams:
-  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
-    (Cristian Rodríguez)
 
 - Standard:
   . net_get_interfaces() also reports wireless network interfaces on Windows.
@@ -61,14 +68,17 @@ PHP                                                                        NEWS
   . Fixed bug GH-7847 (stripos with large haystack has bad performance).
     (ilutov)
   . New function memory_reset_peak_usage(). (Patrick Allaert)
+  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
+
+- Streams:
+  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
+    (Cristian Rodríguez)
 
 - Zip:
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method
   . add ZipArchive::getStreamIndex() method
-
-- Session:
-  . Fixed bug GH-7787 (Improve session write failure message for user error
-    handlers). (ilutov)
+  . On Windows, the Zip extension is now built as shared library (DLL) by
+    default. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

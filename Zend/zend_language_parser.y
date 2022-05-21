@@ -595,6 +595,7 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY 		{ $$ = ZEND_ACC_READONLY_CLASS|ZEND_ACC_NO_DYNAMIC_PROPERTIES; }
 ;
 
 trait_declaration_statement:

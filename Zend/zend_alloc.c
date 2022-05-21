@@ -364,7 +364,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_panic(const char *message)
 #if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
 	kill(getpid(), SIGSEGV);
 #endif
-	exit(1);
+	abort();
 }
 
 static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,

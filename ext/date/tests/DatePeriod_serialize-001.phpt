@@ -22,9 +22,9 @@ var_dump($d->__serialize());
 ?>
 --EXPECTF--
 Original object:
-object(DatePeriod)#1 (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#2 (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2012-07-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -37,7 +37,7 @@ object(DatePeriod)#1 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#3 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -63,17 +63,19 @@ object(DatePeriod)#1 (6) {
   int(5)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 
 
 Serialised object:
-string(411) "O:10:"DatePeriod":6:{s:5:"start";O:8:"DateTime":3:{s:4:"date";s:26:"2012-07-01 00:00:00.000000";s:13:"timezone_type";i:1;s:8:"timezone";s:6:"+00:00";}s:7:"current";N;s:3:"end";N;s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:7;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:5;s:18:"include_start_date";b:1;}"
+string(%d) "O:10:"DatePeriod":7:{s:5:"start";O:8:"DateTime":3:{s:4:"date";s:26:"2012-07-01 00:00:00.000000";s:13:"timezone_type";i:1;s:8:"timezone";s:6:"+00:00";}s:7:"current";N;s:3:"end";N;s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:7;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:5;s:18:"include_start_date";b:1;s:16:"include_end_date";b:0;}"
 
 
 Unserialised object:
-object(DatePeriod)#5 (6) {
+object(DatePeriod)#%d (%d) {
   ["start"]=>
-  object(DateTime)#6 (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2012-07-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -86,7 +88,7 @@ object(DatePeriod)#5 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#4 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -112,13 +114,15 @@ object(DatePeriod)#5 (6) {
   int(5)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
 
 
 Calling __serialize manually:
-array(6) {
+array(%d) {
   ["start"]=>
-  object(DateTime)#7 (3) {
+  object(DateTime)#%d (%d) {
     ["date"]=>
     string(26) "2012-07-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -131,7 +135,7 @@ array(6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#8 (10) {
+  object(DateInterval)#%d (%d) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -157,4 +161,6 @@ array(6) {
   int(5)
   ["include_start_date"]=>
   bool(true)
+  ["include_end_date"]=>
+  bool(false)
 }
