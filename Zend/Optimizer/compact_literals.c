@@ -119,10 +119,6 @@ static zend_string *create_str_cache_key(zval *literal, uint32_t flags)
 	if (num_related == 1) {
 		return zend_string_copy(Z_STR_P(literal));
 	}
-	if ((flags & LITERAL_KIND_MASK) == LITERAL_VALUE) {
-		/* Don't merge LITERAL_VALUE that has related literals */
-		return NULL;
-	}
 
 	/* Concatenate all the related literals for the cache key. */
 	zend_string *key;
@@ -435,12 +431,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case IS_STRING: {
 					key = create_str_cache_key(&op_array->literals[i], info[i].flags);
-					if (key && (pos = zend_hash_find(&hash, key)) != NULL &&
-					    Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) == IS_STRING &&
-					    LITERAL_NUM_RELATED(info[i].flags) == LITERAL_NUM_RELATED(info[Z_LVAL_P(pos)].flags) &&
-					    (LITERAL_NUM_RELATED(info[i].flags) != 2 ||
-					     ((info[i].flags & LITERAL_KIND_MASK) != LITERAL_VALUE &&
-					      (info[Z_LVAL_P(pos)].flags & LITERAL_KIND_MASK) != LITERAL_VALUE))) {
+					if ((pos = zend_hash_find(&hash, key)) != NULL) {
+						ZEND_ASSERT(Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) == IS_STRING &&
+							LITERAL_NUM_RELATED(info[i].flags) == LITERAL_NUM_RELATED(info[Z_LVAL_P(pos)].flags));
 						zend_string_release_ex(key, 0);
 						map[i] = Z_LVAL_P(pos);
 						zval_ptr_dtor_nogc(&op_array->literals[i]);
