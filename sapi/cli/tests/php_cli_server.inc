@@ -28,40 +28,37 @@ function php_cli_server_start(
         $cmd[] = $router;
     }
 
-    $output_file = tempnam(sys_get_temp_dir(), 'cli_server_output');
-    $output_file_fd = fopen($output_file, 'ab');
-    if ($output_file_fd === false) {
-        die(sprintf("Failed opening output file %s\n", $output_file));
-    }
-
     $descriptorspec = array(
         0 => STDIN,
-        1 => $output_file_fd,
-        2 => $output_file_fd,
+        1 => STDOUT,
+        2 => ['pipe', 'w'],
     );
     $handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root, null, array("suppress_errors" => true));
 
     // First, wait for the dev server to declare itself ready.
     $bound = null;
+    stream_set_blocking($pipes[2], false);
     for ($i = 0; $i < 60; $i++) {
         usleep(50000); // 50ms per try
         $status = proc_get_status($handle);
         if (empty($status['running'])) {
-            echo "Server failed to start\n";
-            printf("Server output:\n%s\n", file_get_contents($output_file));
+            echo "Server is not running\n";
             proc_terminate($handle);
             exit(1);
         }
 
-        $output = file_get_contents($output_file);
-        if (preg_match('@PHP \S* Development Server \(https?://(.*?:\d+)\) started@', $output, $matches)) {
-            $bound = $matches[1];
-            break;
+        while (($line = fgets($pipes[2])) !== false) {
+            if (preg_match('@PHP \S* Development Server \(https?://(.*?:\d+)\) started@', $line, $matches)) {
+                $bound = $matches[1];
+                // Now that we've identified the listen address, close STDERR.
+                // Otherwise the pipe may clog up with unread log messages.
+                fclose($pipes[2]);
+                break 2;
+            }
         }
     }
     if ($bound === null) {
         echo "Server did not output startup message";
-        printf("Server output:\n%s\n", file_get_contents($output_file));
         proc_terminate($handle);
         exit(1);
     }
@@ -76,7 +73,7 @@ function php_cli_server_start(
         $fp = @fsockopen("tcp://$bound");
         // Failure, the server is no longer running
         if (!($status && $status['running'])) {
-            $error = sprintf("Server stopped\nServer output:\n%s\n", file_get_contents($output_file));
+            $error = "Server is not running\n";
             break;
         }
         // Success, Connected to servers
@@ -93,14 +90,8 @@ function php_cli_server_start(
     }
 
     register_shutdown_function(
-        function($handle) use($router, $doc_root, $output_file) {
+        function($handle) use($router, $doc_root) {
             proc_terminate($handle);
-            $status = proc_get_status($handle);
-            if ($status['exitcode'] !== -1 && $status['exitcode'] !== 0
-                    && !($status['exitcode'] === 255 && PHP_OS_FAMILY == 'Windows')) {
-                printf("Server exited with non-zero status: %d\n", $status['exitcode']);
-                printf("Server output:\n%s\n", file_get_contents($output_file));
-            }
             @unlink(__DIR__ . "/{$router}");
             @rmdir($doc_root);
         },
