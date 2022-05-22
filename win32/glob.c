@@ -157,11 +157,7 @@ static int	 match(Char *, Char *, Char *);
 static void	 qprintf(const char *, Char *);
 #endif
 
-PHPAPI int
-glob(pattern, flags, errfunc, pglob)
-	const char *pattern;
-	int flags, (*errfunc)(const char *, int);
-	glob_t *pglob;
+PHPAPI int glob(const char *pattern, int flags, (*errfunc)(const char *, int), glob_t *pglob)
 {
 	const u_char *patnext;
 	int c;
@@ -215,10 +211,7 @@ glob(pattern, flags, errfunc, pglob)
  * invoke the standard globbing routine to glob the rest of the magic
  * characters
  */
-static int
-globexp1(pattern, pglob)
-	const Char *pattern;
-	glob_t *pglob;
+static int globexp1(const Char *pattern,glob_t *pglob)
 {
 	const Char* ptr = pattern;
 	int rv;
@@ -240,11 +233,7 @@ globexp1(pattern, pglob)
  * If it succeeds then it invokes globexp1 with the new pattern.
  * If it fails then it tries to glob the rest of the pattern and returns.
  */
-static int
-globexp2(ptr, pattern, pglob, rv)
-	const Char *ptr, *pattern;
-	glob_t *pglob;
-	int *rv;
+static int globexp2(const Char *ptr, const Char *pattern, glob_t *pglob, int *rv)
 {
 	int     i;
 	Char   *lm, *ls;
@@ -350,12 +339,7 @@ globexp2(ptr, pattern, pglob, rv)
 /*
  * expand tilde from the passwd file.
  */
-static const Char *
-globtilde(pattern, patbuf, patbuf_len, pglob)
-	const Char *pattern;
-	Char *patbuf;
-	size_t patbuf_len;
-	glob_t *pglob;
+static const Char *globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 {
 #ifndef PHP_WIN32
 	struct passwd *pwd;
@@ -429,10 +413,7 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
  * if things went well, nonzero if errors occurred.  It is not an error
  * to find no matches.
  */
-static int
-glob0(pattern, pglob)
-	const Char *pattern;
-	glob_t *pglob;
+static int glob0( const Char *pattern, glob_t *pglob)
 {
 	const Char *qpatnext;
 	int c, err, oldpathc;
@@ -518,8 +499,7 @@ glob0(pattern, pglob)
 	return(0);
 }
 
-static int
-compare(const void *p, const void *q)
+static int compare(const void *p, const void *q)
 {
 	return(strcmp(*(char **)p, *(char **)q));
 }
@@ -545,13 +525,8 @@ glob1(pattern, pattern_last, pglob, limitp)
  * of recursion for each segment in the pattern that contains one or more
  * meta characters.
  */
-static int
-glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
-		pattern_last, pglob, limitp)
-	Char *pathbuf, *pathbuf_last, *pathend, *pathend_last;
-	Char *pattern, *pattern_last;
-	glob_t *pglob;
-	size_t *limitp;
+static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, pattern,
+		Char *pattern_last, glob_t *pglob, size_t *limitp)
 {
 	zend_stat_t sb = {0};
 	Char *p, *q;
@@ -609,13 +584,8 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 	/* NOTREACHED */
 }
 
-static int
-glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
-	restpattern, restpattern_last, pglob, limitp)
-	Char *pathbuf, *pathbuf_last, *pathend, *pathend_last;
-	Char *pattern, *pattern_last, *restpattern, *restpattern_last;
-	glob_t *pglob;
-	size_t *limitp;
+static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern, Char *pattern_last,
+	Char *restpattern, Char *restpattern_last, glob_t *pglob, size_t *limitp)
 {
 	register struct dirent *dp;
 	DIR *dirp;
@@ -703,11 +673,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
  *	Either gl_pathc is zero and gl_pathv is NULL; or gl_pathc > 0 and
  *	gl_pathv points to (gl_offs + gl_pathc + 1) items.
  */
-static int
-globextend(path, pglob, limitp)
-	const Char *path;
-	glob_t *pglob;
-	size_t *limitp;
+static int globextend(const Char *path, glob_t *pglob, size_t *limitp)
 {
 	register char **pathv;
 	u_int newsize, len;
@@ -761,9 +727,7 @@ globextend(path, pglob, limitp)
  * pattern matching function for filenames.  Each occurrence of the *
  * pattern causes a recursion level.
  */
-static int
-match(name, pat, patend)
-	register Char *name, *pat, *patend;
+static int match(Char *name, Char *pat, Char *patend)
 {
 	int ok, negate_range;
 	Char c, k;
@@ -810,9 +774,7 @@ match(name, pat, patend)
 }
 
 /* Free allocated data belonging to a glob_t structure. */
-PHPAPI void
-globfree(pglob)
-	glob_t *pglob;
+PHPAPI void globfree(glob_t *pglob)
 {
 	register int i;
 	register char **pp;
@@ -827,10 +789,7 @@ globfree(pglob)
 	}
 }
 
-static DIR *
-g_opendir(str, pglob)
-	register Char *str;
-	glob_t *pglob;
+static DIR * g_opendir(Char *str, glob_t *pglob)
 {
 	char buf[MAXPATHLEN];
 
@@ -847,11 +806,7 @@ g_opendir(str, pglob)
 	return(opendir(buf));
 }
 
-static int
-g_lstat(fn, sb, pglob)
-	register Char *fn;
-	zend_stat_t *sb = NULL;
-	glob_t *pglob;
+static int g_lstat(Char *fn, zend_stat_t *sb, glob_t *pglob)
 {
 	char buf[MAXPATHLEN];
 
@@ -862,11 +817,7 @@ g_lstat(fn, sb, pglob)
 	return(php_sys_lstat(buf, sb));
 }
 
-static int
-g_stat(fn, sb, pglob)
-	register Char *fn;
-	zend_stat_t *sb = NULL;
-	glob_t *pglob;
+static int g_stat(Char *fn, zend_stat_t *sb, glob_t *pglob)
 {
 	char buf[MAXPATHLEN];
 
@@ -877,10 +828,7 @@ g_stat(fn, sb, pglob)
 	return(php_sys_stat(buf, sb));
 }
 
-static Char *
-g_strchr(str, ch)
-	Char *str;
-	int ch;
+static Char *g_strchr(Char *str, int ch)
 {
 	do {
 		if (*str == ch)
@@ -889,11 +837,7 @@ g_strchr(str, ch)
 	return (NULL);
 }
 
-static int
-g_Ctoc(str, buf, len)
-	register const Char *str;
-	char *buf;
-	u_int len;
+static int g_Ctoc(const Char *str, char *buf, u_int len)
 {
 
 	while (len--) {
@@ -905,9 +849,7 @@ g_Ctoc(str, buf, len)
 
 #ifdef DEBUG
 static void
-qprintf(str, s)
-	const char *str;
-	register Char *s;
+qprintf(char *str, Char *s)
 {
 	register Char *p;
 
