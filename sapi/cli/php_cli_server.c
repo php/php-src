@@ -381,7 +381,6 @@ static const char *get_mime_type(const php_cli_server *server, const char *ext, 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	php_cli_server_client *client;
-	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -389,9 +388,8 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 	client = SG(server_context);
 
-	/* Need to copy the HashTable */
-	ZVAL_ARR(&tmp,&client->request.headers_original_case);
-	RETURN_COPY(&tmp);
+	/* Need to duplicate the header HashTable */
+	RETURN_ARR(zend_array_dup(&client->request.headers_original_case));
 }
 /* }}} */
 
@@ -1624,6 +1622,7 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 	ZVAL_STR(&tmp, client->current_header_value);
 	/* strip off the colon */
 	zend_string *lc_header_name = zend_string_tolower_ex(client->current_header_name, /* persistent */ true);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
 
 	/* Add the wrapped zend_string to the HashTable */
 	zend_hash_add(&client->request.headers, lc_header_name, &tmp);
@@ -1660,6 +1659,7 @@ static int php_cli_server_client_read_request_on_header_field(php_http_parser *p
 		case HEADER_NONE:
 			/* Create new header field */
 			client->current_header_name = zend_string_init(at, length, /* persistent */ true);
+			GC_MAKE_PERSISTENT_LOCAL(client->current_header_name);
 			break;
 		case HEADER_FIELD: {
 			/* Append header name to the previous value of it */
@@ -1679,6 +1679,7 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		case HEADER_FIELD:
 			/* Previous element was the header field, create the header value */
 			client->current_header_value = zend_string_init(at, length, /* persistent */ true);
+			GC_MAKE_PERSISTENT_LOCAL(client->current_header_value);
 			break;
 		case HEADER_VALUE: {
 			/* Append header value to the previous value of it */
@@ -1882,6 +1883,7 @@ static void php_cli_server_client_ctor(php_cli_server_client *client, php_cli_se
 	zend_string *tmp_addr = NULL;
 	php_network_populate_name_from_sockaddr(addr, addr_len, &tmp_addr, NULL, 0);
 	client->addr_str = zend_string_dup(tmp_addr, /* persistent */ true);
+	GC_MAKE_PERSISTENT_LOCAL(client->addr_str);
 	zend_string_release_ex(tmp_addr, /* persistent */ false);
 
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
