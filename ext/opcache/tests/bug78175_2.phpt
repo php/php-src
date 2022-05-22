@@ -10,6 +10,7 @@ opcache
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+if (PHP_ZTS) die('xfail GH-8588');
 ?>
 --FILE--
 <?php
