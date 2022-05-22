@@ -60,6 +60,9 @@ PHPAPI PHP_FUNCTION(dl)
 
 #if ZEND_RC_DEBUG
 	bool orig_rc_debug = zend_rc_debug;
+	/* FIXME: Loading extensions during the request breaks some invariants. In
+	 * particular, it will create persistent interned strings, which is not
+	 * allowed at this stage. */
 	zend_rc_debug = false;
 #endif
 

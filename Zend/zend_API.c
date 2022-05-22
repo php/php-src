@@ -2948,8 +2948,17 @@ static void clean_module_classes(int module_number) /* {{{ */
 
 void module_destructor(zend_module_entry *module) /* {{{ */
 {
+#if ZEND_RC_DEBUG
+	bool orig_rc_debug = zend_rc_debug;
+#endif
 
 	if (module->type == MODULE_TEMPORARY) {
+#if ZEND_RC_DEBUG
+		/* FIXME: Loading extensions during the request breaks some invariants.
+		 * In particular, it will create persistent interned strings, which is
+		 * not allowed at this stage. */
+		zend_rc_debug = false;
+#endif
 		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
 		clean_module_classes(module->module_number);
@@ -2990,6 +2999,10 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(module->handle);
 	}
+#endif
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
