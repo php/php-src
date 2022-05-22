@@ -50,7 +50,7 @@
 /* {{{ php_statpage */
 PHPAPI void php_statpage(void)
 {
-	zend_stat_t *pstat = {0};
+	zend_stat_t *pstat = NULL;
 
 	pstat = sapi_get_stat();
 

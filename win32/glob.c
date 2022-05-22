@@ -850,7 +850,7 @@ g_opendir(str, pglob)
 static int
 g_lstat(fn, sb, pglob)
 	register Char *fn;
-	zend_stat_t *sb = {0};
+	zend_stat_t *sb = NULL;
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];
@@ -865,7 +865,7 @@ g_lstat(fn, sb, pglob)
 static int
 g_stat(fn, sb, pglob)
 	register Char *fn;
-	zend_stat_t *sb = {0};
+	zend_stat_t *sb = NULL;
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];
