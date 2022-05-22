@@ -60,7 +60,8 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 
 	}
 
-	if (scope++) {
+	if (scope) {
+		scope++;
 		zend_long lval = 0;
 		double dval = 0;
 		unsigned scope_id = 0;
