@@ -3503,7 +3503,8 @@ diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
  
  #include "file.h"
  
-+#include "php_stdint.h"
++#include <inttypes.h>
++#include <stdint.h>
 +
  #include <assert.h>
  #include <ctype.h>

@@ -20,7 +20,7 @@
 # include "main/php_config.h"
 #endif
 
-#include "main/php_stdint.h"
+#include <stdint.h>
 #include <stdbool.h>
 
 #ifdef TSRM_WIN32

@@ -31,7 +31,8 @@
 #	include <stdint.h>
 #	include <stddef.h>
 #else
-#	include "main/php_stdint.h"
+#	include <stdint.h>
+#	include <inttypes.h>
 #endif
 #include "php.h"
 #include "php_globals.h"

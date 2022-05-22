@@ -210,8 +210,8 @@ typedef unsigned int socklen_t;
 #endif
 
 #include <stdarg.h>
-
-#include "php_stdint.h"
+#include <inttypes.h>
+#include <stdint.h>
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
