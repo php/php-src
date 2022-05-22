@@ -157,7 +157,7 @@ static int	 match(Char *, Char *, Char *);
 static void	 qprintf(const char *, Char *);
 #endif
 
-PHPAPI int glob(const char *pattern, int flags, (*errfunc)(const char *, int), glob_t *pglob)
+PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
 {
 	const u_char *patnext;
 	int c;
@@ -525,7 +525,7 @@ glob1(pattern, pattern_last, pglob, limitp)
  * of recursion for each segment in the pattern that contains one or more
  * meta characters.
  */
-static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, pattern,
+static int glob2(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last, Char *pattern,
 		Char *pattern_last, glob_t *pglob, size_t *limitp)
 {
 	zend_stat_t sb = {0};
