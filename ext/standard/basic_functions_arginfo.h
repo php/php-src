@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b1c51fabe59bba6706500365f3eb7d9676d625f6 */
+ * Stub hash: 29f2ff95da2c07a61f23729da63ada536d2980d1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3514,6 +3514,12 @@ static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
 static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_basic_functions_consts(int module_number)
+{
+    REGISTER_DOUBLE_CONSTANT("M_E", M_E, CONST_CS | CONST_PERSISTENT);
+    ZEND_ASSERT(M_E == 2.7182818284590451);
+}
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 {

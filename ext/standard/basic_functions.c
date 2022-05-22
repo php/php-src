@@ -292,6 +292,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
+	register_basic_functions_consts(module_number);
+
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
 
@@ -322,7 +324,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
 
 #define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
-	REGISTER_MATH_CONSTANT(M_E);
 	REGISTER_MATH_CONSTANT(M_LOG2E);
 	REGISTER_MATH_CONSTANT(M_LOG10E);
 	REGISTER_MATH_CONSTANT(M_LN2);

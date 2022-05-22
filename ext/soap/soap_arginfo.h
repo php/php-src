@@ -442,7 +442,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string_release(property_location_name);
 
 	zval property_trace_default_value;
-	ZVAL_BOOL(&property_trace_default_value, 0);
+	ZVAL_BOOL(&property_trace_default_value, false);
 	zend_string *property_trace_name = zend_string_init("trace", sizeof("trace") - 1, 1);
 	zend_declare_typed_property(class_entry, property_trace_name, &property_trace_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_trace_name);
@@ -490,7 +490,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string_release(property__password_name);
 
 	zval property__use_digest_default_value;
-	ZVAL_BOOL(&property__use_digest_default_value, 0);
+	ZVAL_BOOL(&property__use_digest_default_value, false);
 	zend_string *property__use_digest_name = zend_string_init("_use_digest", sizeof("_use_digest") - 1, 1);
 	zend_declare_typed_property(class_entry, property__use_digest_name, &property__use_digest_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property__use_digest_name);
@@ -526,7 +526,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string_release(property__proxy_password_name);
 
 	zval property__exceptions_default_value;
-	ZVAL_BOOL(&property__exceptions_default_value, 1);
+	ZVAL_BOOL(&property__exceptions_default_value, true);
 	zend_string *property__exceptions_name = zend_string_init("_exceptions", sizeof("_exceptions") - 1, 1);
 	zend_declare_typed_property(class_entry, property__exceptions_name, &property__exceptions_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property__exceptions_name);
@@ -568,7 +568,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_string_release(property__user_agent_name);
 
 	zval property__keep_alive_default_value;
-	ZVAL_BOOL(&property__keep_alive_default_value, 1);
+	ZVAL_BOOL(&property__keep_alive_default_value, true);
 	zend_string *property__keep_alive_name = zend_string_init("_keep_alive", sizeof("_keep_alive") - 1, 1);
 	zend_declare_typed_property(class_entry, property__keep_alive_name, &property__keep_alive_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property__keep_alive_name);
