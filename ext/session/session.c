@@ -1153,7 +1153,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 static inline void last_modified(void) /* {{{ */
 {
 	const char *path;
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	char buf[MAX_STR + 1];
 
 	path = SG(request_info).path_translated;

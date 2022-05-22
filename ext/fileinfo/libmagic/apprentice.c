@@ -1187,7 +1187,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 					continue;
 				}
 				if ((*bang[i].fun)(ms, &me,
-				    line + bang[i].len + 2, 
+				    line + bang[i].len + 2,
 				    len - bang[i].len - 2) != 0) {
 					(*errs)++;
 					continue;
@@ -1324,7 +1324,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 	uint32_t i, j;
 	size_t files = 0, maxfiles = 0;
 	char **filearr = NULL;
-	zend_stat_t st;
+	zend_stat_t st = {0};
 	struct magic_map *map;
 	struct magic_entry_set mset[MAGIC_SETS];
 	php_stream *dir;
@@ -1419,7 +1419,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 		/* coalesce per file arrays into a single one, if needed */
 		if (mset[j].count == 0)
 			continue;
-		      
+
 		if (coalesce_entries(ms, mset[j].me, mset[j].count,
 		    &map->magic[j], &map->nmagic[j]) == -1) {
 			errs++;

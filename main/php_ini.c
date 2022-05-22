@@ -768,7 +768,7 @@ void php_ini_register_extensions(void)
 /* {{{ php_parse_user_ini_file */
 PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash)
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	char ini_file[MAXPATHLEN];
 
 	snprintf(ini_file, MAXPATHLEN, "%s%c%s", dirname, DEFAULT_SLASH, ini_filename);

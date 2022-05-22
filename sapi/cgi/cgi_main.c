@@ -1210,7 +1210,7 @@ static void init_request_info(fcgi_request *request)
 #endif
 
 		if (CGIG(fix_pathinfo)) {
-			zend_stat_t st;
+			zend_stat_t st = {0};
 			char *real_path = NULL;
 			char *env_redirect_url = CGI_GETENV("REDIRECT_URL");
 			char *env_document_root = CGI_GETENV("DOCUMENT_ROOT");

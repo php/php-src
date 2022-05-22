@@ -120,7 +120,7 @@ static cwd_state main_cwd_state; /* True global */
 
 static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
 		return (0);
@@ -131,7 +131,7 @@ static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 
 static int php_is_file_ok(const cwd_state *state)  /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);

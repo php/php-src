@@ -283,7 +283,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
 	struct dirent *entry;
-	zend_stat_t sbuf;
+	zend_stat_t sbuf = {0};
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -340,7 +340,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 static int ps_files_key_exists(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
-	zend_stat_t sbuf;
+	zend_stat_t sbuf = {0};
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
@@ -473,7 +473,7 @@ PS_CLOSE_FUNC(files)
 PS_READ_FUNC(files)
 {
 	zend_long n = 0;
-	zend_stat_t sbuf;
+	zend_stat_t sbuf = {0};
 	PS_FILES_DATA;
 
 	ps_files_open(data, ZSTR_VAL(key));

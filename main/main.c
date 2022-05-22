@@ -363,7 +363,7 @@ static void php_binary_init(void)
 			if ((envpath = getenv("PATH")) != NULL) {
 				char *search_dir, search_path[MAXPATHLEN];
 				char *last = NULL;
-				zend_stat_t s;
+				zend_stat_t s = {0};
 
 				path = estrdup(envpath);
 				search_dir = php_strtok_r(path, ":", &last);
@@ -1397,7 +1397,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 /* {{{ php_get_current_user */
 PHPAPI char *php_get_current_user(void)
 {
-	zend_stat_t *pstat;
+	zend_stat_t *pstat = {0};
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;

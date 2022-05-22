@@ -553,7 +553,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 	glob_t *pglob;
 	size_t *limitp;
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	Char *p, *q;
 	int anymeta;
 
@@ -850,7 +850,7 @@ g_opendir(str, pglob)
 static int
 g_lstat(fn, sb, pglob)
 	register Char *fn;
-	zend_stat_t *sb;
+	zend_stat_t *sb = {0};
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];
@@ -865,7 +865,7 @@ g_lstat(fn, sb, pglob)
 static int
 g_stat(fn, sb, pglob)
 	register Char *fn;
-	zend_stat_t *sb;
+	zend_stat_t *sb = {0};
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];
