@@ -60,10 +60,12 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 
 	}
 
-	if (scope++) {
+	if (scope) {
 		zend_long lval = 0;
 		double dval = 0;
 		unsigned scope_id = 0;
+
+		scope++;
 
 		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
 			if (lval > 0 && (zend_ulong)lval <= UINT_MAX) {

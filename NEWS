@@ -110,6 +110,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed Solaris builds. (David Carlier)
+  . Fix undefined behavior in php_set_inet6_addr. (ilutov)
 
 - SPL:
   . Fixed bug GH-8121 (SplFileObject - seek and key with csv file inconsistent).
