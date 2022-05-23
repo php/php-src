@@ -56,6 +56,9 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
   . It is now possible to use null and false as standalone types.
     RFC: https://wiki.php.net/rfc/null-false-standalone-types
+  . Added support for readonly classes.
+    RFC: https://wiki.php.net/rfc/readonly_classes
+
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
