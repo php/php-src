@@ -21,9 +21,9 @@ PHP 8.2 UPGRADE NOTES
 
 - Date:
   . DateTime::createFromImmutable() now has a tentative return type of static,
-    previously it was DateTime
+    previously it was DateTime.
   . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
-    previously it was DateTimeImmutable
+    previously it was DateTimeImmutable.
 
 - Standard:
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
