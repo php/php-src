@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-8466 (ini_get() is optimized out when the option does not
     exist). (Arnaud)
 
+- Pcntl:
+  . Fixed Haiku build. (David Carlier)
+
 - Soap:
   . Fixed bug GH-8578 (Error on wrong parameter on SoapHeader constructor).
     (robertnisipeanu)
