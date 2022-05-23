@@ -913,7 +913,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 		session->securityNameLen = ZSTR_LEN(community);
 	} else {
 		session->authenticator = NULL;
-		session->community = (u_char *)estrdup(ZSTR_VAL(community));
+		session->community = (uint8_t *)estrdup(ZSTR_VAL(community));
 		session->community_len = ZSTR_LEN(community);
 	}
 
@@ -1035,7 +1035,7 @@ static bool netsnmp_session_gen_auth_key(struct snmp_session *s, zend_string *pa
 	int snmp_errno;
 	s->securityAuthKeyLen = USM_AUTH_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
-			(u_char *) ZSTR_VAL(pass), ZSTR_LEN(pass),
+			(uint8_t *) ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityAuthKey, &(s->securityAuthKeyLen)))) {
 		php_error_docref(NULL, E_WARNING, "Error generating a key for authentication pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
 		return false;
@@ -1051,7 +1051,7 @@ static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pas
 
 	s->securityPrivKeyLen = USM_PRIV_KU_LEN;
 	if ((snmp_errno = generate_Ku(s->securityAuthProto, s->securityAuthProtoLen,
-			(u_char *)ZSTR_VAL(pass), ZSTR_LEN(pass),
+			(uint8_t *)ZSTR_VAL(pass), ZSTR_LEN(pass),
 			s->securityPrivKey, &(s->securityPrivKeyLen)))) {
 		php_error_docref(NULL, E_WARNING, "Error generating a key for privacy pass phrase '%s': %s", ZSTR_VAL(pass), snmp_api_errstring(snmp_errno));
 		return false;
@@ -1064,7 +1064,7 @@ static bool netsnmp_session_gen_sec_key(struct snmp_session *s, zend_string *pas
 static bool netsnmp_session_set_contextEngineID(struct snmp_session *s, zend_string * contextEngineID)
 {
 	size_t	ebuf_len = 32, eout_len = 0;
-	u_char	*ebuf = (u_char *) emalloc(ebuf_len);
+	uint8_t	*ebuf = (uint8_t *) emalloc(ebuf_len);
 
 	if (!snmp_hex_to_binary(&ebuf, &ebuf_len, &eout_len, 1, ZSTR_VAL(contextEngineID))) {
 		// TODO Promote to Error?
