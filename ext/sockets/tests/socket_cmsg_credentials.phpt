@@ -17,7 +17,7 @@ die('skip SO_PASSCRED is not defined');
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";
-$path = __DIR__ . "/socket_cmsg_credentials.sock";
+$path = sys_get_temp_dir() . "/socket_cmsg_credentials.sock";
 
 @unlink($path);
 
@@ -55,7 +55,7 @@ var_dump($data['control'][0]['data']['pid'] === $pid);
 ?>
 --CLEAN--
 <?php
-$path = __DIR__ . "/socket_cmsg_credentials.sock";
+$path = sys_get_temp_dir() . "/socket_cmsg_credentials.sock";
 @unlink($path);
 --EXPECTF--
 creating send socket
