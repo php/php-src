@@ -159,7 +159,7 @@ static void	 qprintf(const char *, Char *);
 
 PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
 {
-	const u_char *patnext;
+	const uint8_t *patnext;
 	int c;
 	Char *bufnext, *bufend, patbuf[MAXPATHLEN];
 
@@ -170,7 +170,7 @@ PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int
 	flags |= GLOB_NOESCAPE;
 #endif
 
-	patnext = (u_char *) pattern;
+	patnext = (uint8_t *) pattern;
 	if (!(flags & GLOB_APPEND)) {
 		pglob->gl_pathc = 0;
 		pglob->gl_pathv = NULL;
@@ -625,14 +625,14 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	else
 		readdirfunc = readdir;
 	while ((dp = (*readdirfunc)(dirp))) {
-		register u_char *sc;
+		register uint8_t *sc;
 		register Char *dc;
 
 		/* Initial DOT must be matched literally. */
 		if (dp->d_name[0] == DOT && *pattern != DOT)
 			continue;
 		dc = pathend;
-		sc = (u_char *) dp->d_name;
+		sc = (uint8_t *) dp->d_name;
 		while (dc < pathend_last && (*dc++ = *sc++) != EOS)
 			;
 		if (dc >= pathend_last) {
