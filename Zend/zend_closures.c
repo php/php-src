@@ -648,7 +648,7 @@ void zend_register_closure_ce(void) /* {{{ */
 	zend_ce_closure = register_class_Closure();
 	zend_ce_closure->create_object = zend_closure_new;
 
-	memcpy(&closure_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&closure_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;
@@ -685,7 +685,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 	}
 
 	if (func->type == ZEND_USER_FUNCTION) {
-		memcpy(&closure->func, func, sizeof(zend_op_array));
+		ZEND_MEMCPY_INLINE(&closure->func, func, sizeof(zend_op_array));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
@@ -739,7 +739,7 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 			(*closure->func.op_array.refcount)++;
 		}
 	} else {
-		memcpy(&closure->func, func, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(&closure->func, func, sizeof(zend_internal_function));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {

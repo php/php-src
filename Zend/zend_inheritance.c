@@ -81,10 +81,10 @@ static zend_function *zend_duplicate_internal_function(zend_function *func, zend
 
 	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 		new_function = pemalloc(sizeof(zend_internal_function), 1);
-		memcpy(new_function, func, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(new_function, func, sizeof(zend_internal_function));
 	} else {
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-		memcpy(new_function, func, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(new_function, func, sizeof(zend_internal_function));
 		new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	}
 	if (EXPECTED(new_function->common.function_name)) {
@@ -1111,7 +1111,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 				} else {
 					/* op_array wasn't duplicated yet */
 					zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-					memcpy(new_function, child, sizeof(zend_op_array));
+					ZEND_MEMCPY_INLINE(new_function, child, sizeof(zend_op_array));
 					Z_PTR_P(child_zv) = child = new_function;
 				}
 			}
@@ -1352,13 +1352,13 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 			ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
 			if (ce->parent->ce_flags & ZEND_ACC_IMMUTABLE) {
 				c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
-				memcpy(c, parent_const, sizeof(zend_class_constant));
+				ZEND_MEMCPY_INLINE(c, parent_const, sizeof(zend_class_constant));
 				parent_const = c;
 			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
 			c = pemalloc(sizeof(zend_class_constant), 1);
-			memcpy(c, parent_const, sizeof(zend_class_constant));
+			ZEND_MEMCPY_INLINE(c, parent_const, sizeof(zend_class_constant));
 			parent_const = c;
 		}
 		_zend_hash_append_ptr(&ce->constants_table, name, parent_const);
@@ -1638,14 +1638,14 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 			ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
 			if (iface->ce_flags & ZEND_ACC_IMMUTABLE) {
 				ct = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
-				memcpy(ct, c, sizeof(zend_class_constant));
+				ZEND_MEMCPY_INLINE(ct, c, sizeof(zend_class_constant));
 				c = ct;
 				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
 			ct = pemalloc(sizeof(zend_class_constant), 1);
-			memcpy(ct, c, sizeof(zend_class_constant));
+			ZEND_MEMCPY_INLINE(ct, c, sizeof(zend_class_constant));
 			c = ct;
 		}
 		zend_hash_update_ptr(&ce->constants_table, name, c);
@@ -1837,11 +1837,11 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 
 	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
-		memcpy(new_fn, fn, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(new_fn, fn, sizeof(zend_internal_function));
 		new_fn->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-		memcpy(new_fn, fn, sizeof(zend_op_array));
+		ZEND_MEMCPY_INLINE(new_fn, fn, sizeof(zend_op_array));
 		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
@@ -2425,14 +2425,14 @@ static void add_compatibility_obligation(
 	obligation->type = OBLIGATION_COMPATIBILITY;
 	/* Copy functions, because they may be stack-allocated in the case of traits. */
 	if (child_fn->common.type == ZEND_INTERNAL_FUNCTION) {
-		memcpy(&obligation->child_fn, child_fn, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(&obligation->child_fn, child_fn, sizeof(zend_internal_function));
 	} else {
-		memcpy(&obligation->child_fn, child_fn, sizeof(zend_op_array));
+		ZEND_MEMCPY_INLINE(&obligation->child_fn, child_fn, sizeof(zend_op_array));
 	}
 	if (parent_fn->common.type == ZEND_INTERNAL_FUNCTION) {
-		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(&obligation->parent_fn, parent_fn, sizeof(zend_internal_function));
 	} else {
-		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_op_array));
+		ZEND_MEMCPY_INLINE(&obligation->parent_fn, parent_fn, sizeof(zend_op_array));
 	}
 	obligation->child_scope = child_scope;
 	obligation->parent_scope = parent_scope;
@@ -2553,7 +2553,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 	Bucket *p, *end;
 
 	ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
-	memcpy(ce, pce, sizeof(zend_class_entry));
+	ZEND_MEMCPY_INLINE(ce, pce, sizeof(zend_class_entry));
 	ce->ce_flags &= ~ZEND_ACC_IMMUTABLE;
 	ce->refcount = 1;
 	ce->inheritance_cache = NULL;
@@ -2592,7 +2592,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZEND_ASSERT(op_array->prototype == NULL);
 			new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 			Z_PTR(p->val) = new_op_array;
-			memcpy(new_op_array, op_array, sizeof(zend_op_array));
+			ZEND_MEMCPY_INLINE(new_op_array, op_array, sizeof(zend_op_array));
 			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
 			new_op_array->scope = ce;
 			ZEND_MAP_PTR_INIT(new_op_array->run_time_cache, NULL);
@@ -2641,7 +2641,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZEND_ASSERT(prop_info->ce == pce);
 			new_prop_info= zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 			Z_PTR(p->val) = new_prop_info;
-			memcpy(new_prop_info, prop_info, sizeof(zend_property_info));
+			ZEND_MEMCPY_INLINE(new_prop_info, prop_info, sizeof(zend_property_info));
 			new_prop_info->ce = ce;
 			if (ZEND_TYPE_HAS_LIST(new_prop_info->type)) {
 				zend_type_list *new_list;
@@ -2669,7 +2669,7 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			ZEND_ASSERT(c->ce == pce);
 			new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 			Z_PTR(p->val) = new_c;
-			memcpy(new_c, c, sizeof(zend_class_constant));
+			ZEND_MEMCPY_INLINE(new_c, c, sizeof(zend_class_constant));
 			new_c->ce = ce;
 		}
 	}

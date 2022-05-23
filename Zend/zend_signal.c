@@ -319,7 +319,7 @@ void zend_signal_activate(void)
 {
 	size_t x;
 
-	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
+	ZEND_MEMCPY_INLINE(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
 	if (SIGG(reset)) {
 		for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {

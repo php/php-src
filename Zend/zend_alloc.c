@@ -3008,7 +3008,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 	zend_mm_chunk *chunk;
 	zend_mm_heap *heap;
 
-	memcpy((zend_mm_handlers*)&tmp_storage.handlers, handlers, sizeof(zend_mm_handlers));
+	ZEND_MEMCPY_INLINE((zend_mm_handlers*)&tmp_storage.handlers, handlers, sizeof(zend_mm_handlers));
 	tmp_storage.data = data;
 	chunk = (zend_mm_chunk*)handlers->chunk_alloc(&tmp_storage, ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(chunk == NULL)) {
@@ -3068,7 +3068,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 #endif
 		return NULL;
 	}
-	memcpy(storage, &tmp_storage, sizeof(zend_mm_storage));
+	ZEND_MEMCPY_INLINE(storage, &tmp_storage, sizeof(zend_mm_storage));
 	if (data) {
 		storage->data = (void*)(((char*)storage + sizeof(zend_mm_storage)));
 		memcpy(storage->data, data, data_size);

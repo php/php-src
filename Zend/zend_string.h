@@ -432,7 +432,7 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		   time and extract each byte with a bit field extract instr. */
 		uint64_t chunk;
 
-		memcpy(&chunk, str, sizeof(chunk));
+		ZEND_MEMCPY_INLINE(&chunk, str, sizeof(chunk));
 		hash =
 			hash                        * 33 * 33 * 33 * 33 +
 			((chunk >> (8 * 0)) & 0xff) * 33 * 33 * 33 +

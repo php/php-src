@@ -64,7 +64,7 @@ static void copy_zend_constant(zval *zv)
 
 	ZEND_ASSERT(ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
-	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
+	ZEND_MEMCPY_INLINE(Z_PTR_P(zv), c, sizeof(zend_constant));
 
 	c = Z_PTR_P(zv);
 	c->name = zend_string_copy(c->name);
@@ -538,7 +538,7 @@ static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_consta
 	void *ret;
 	zend_constant *copy = pemalloc(sizeof(zend_constant), ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);
 
-	memcpy(copy, c, sizeof(zend_constant));
+	ZEND_MEMCPY_INLINE(copy, c, sizeof(zend_constant));
 	ret = zend_hash_add_ptr(ht, key, copy);
 	if (!ret) {
 		pefree(copy, ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT);

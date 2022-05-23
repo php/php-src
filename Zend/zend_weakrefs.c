@@ -648,7 +648,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 
 	zend_ce_weakref->create_object = zend_weakref_new;
 
-	memcpy(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&zend_weakref_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
 
 	zend_weakref_handlers.free_obj = zend_weakref_free;
@@ -659,7 +659,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
 
-	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	ZEND_MEMCPY_INLINE(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);
 	zend_weakmap_handlers.free_obj = zend_weakmap_free_obj;
 	zend_weakmap_handlers.read_dimension = zend_weakmap_read_dimension;

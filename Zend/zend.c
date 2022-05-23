@@ -632,7 +632,7 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 	}
 	func = pemalloc(sizeof(zend_internal_function), 1);
 	Z_FUNC_P(zv) = func;
-	memcpy(func, old_func, sizeof(zend_internal_function));
+	ZEND_MEMCPY_INLINE(func, old_func, sizeof(zend_internal_function));
 	function_add_ref(func);
 	if ((old_func->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))
 	 && old_func->common.arg_info) {
@@ -1298,7 +1298,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 
 #define SAVE_STACK(stack) do { \
 		if (CG(stack).top) { \
-			memcpy(&stack, &CG(stack), sizeof(zend_stack)); \
+			ZEND_MEMCPY_INLINE(&stack, &CG(stack), sizeof(zend_stack)); \
 			CG(stack).top = CG(stack).max = 0; \
 			CG(stack).elements = NULL; \
 		} else { \
@@ -1309,7 +1309,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 #define RESTORE_STACK(stack) do { \
 		if (stack.top) { \
 			zend_stack_destroy(&CG(stack)); \
-			memcpy(&CG(stack), &stack, sizeof(zend_stack)); \
+			ZEND_MEMCPY_INLINE(&CG(stack), &stack, sizeof(zend_stack)); \
 		} \
 	} while (0)
 

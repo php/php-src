@@ -1328,7 +1328,7 @@ ZEND_API HashTable *zend_separate_class_constants_table(zend_class_entry *class_
 		if (c->ce == class_type) {
 			if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 				new_c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
-				memcpy(new_c, c, sizeof(zend_class_constant));
+				ZEND_MEMCPY_INLINE(new_c, c, sizeof(zend_class_constant));
 				c = new_c;
 			}
 			Z_TRY_ADDREF(c->value);
@@ -2770,7 +2770,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		lowercase_name = zend_string_tolower_ex(internal_function->function_name, type == MODULE_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		reg_function = malloc(sizeof(zend_internal_function));
-		memcpy(reg_function, &function, sizeof(zend_internal_function));
+		ZEND_MEMCPY_INLINE(reg_function, &function, sizeof(zend_internal_function));
 		if (zend_hash_add_ptr(target_function_table, lowercase_name, reg_function) == NULL) {
 			unload=1;
 			free(reg_function);
