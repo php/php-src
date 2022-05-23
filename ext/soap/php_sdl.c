@@ -883,7 +883,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 					soap_error0(E_ERROR, "Parsing WSDL: Missing 'type' attribute for <binding>");
 				}
 
-				ctype = strrchr((char*)type->children->content,':');
+				ctype = strchr((char*)type->children->content,':');
 				if (ctype == NULL) {
 					ctype = (char*)type->children->content;
 				} else {

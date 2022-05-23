@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://wssmcommupper/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="WSSmCommUpperImplService" targetNamespace="http://wssmcommupper/">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified" targetNamespace="http://wssmcommupper/" version="1.0">
+      <xs:element name="queryConfig" type="tns:queryConfig" />
+      <xs:element name="queryConfigResponse" type="tns:queryConfigResponse" />
+      <xs:element name="queryPolicy" type="tns:queryPolicy" />
+      <xs:element name="queryPolicyResponse" type="tns:queryPolicyResponse" />
+      <xs:element name="queryView" type="tns:queryView" />
+      <xs:element name="queryViewResponse" type="tns:queryViewResponse" />
+      <xs:element name="reportConfig" type="tns:reportConfig" />
+      <xs:element name="reportConfigResponse" type="tns:reportConfigResponse" />
+      <xs:element name="reportEvent" type="tns:reportEvent" />
+      <xs:element name="reportEventResponse" type="tns:reportEventResponse" />
+      <xs:element name="reportHealthView" type="tns:reportHealthView" />
+      <xs:element name="reportHealthViewResponse" type="tns:reportHealthViewResponse" />
+      <xs:element name="reportLog" type="tns:reportLog" />
+      <xs:element name="reportLogResponse" type="tns:reportLogResponse" />
+      <xs:element name="reportPolicy" type="tns:reportPolicy" />
+      <xs:element name="reportPolicyResponse" type="tns:reportPolicyResponse" />
+      <xs:element name="reportView" type="tns:reportView" />
+      <xs:element name="reportViewResponse" type="tns:reportViewResponse" />
+      <xs:complexType name="reportHealthView">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportHealthViewResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportPolicy">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportPolicyResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryPolicy">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryPolicyResponse">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="return" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportConfig">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportConfigResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportEvent">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportEventResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportView">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportViewResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryConfig">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryConfigResponse">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="return" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryView">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="queryViewResponse">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="return" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportLog">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="arg0" type="xs:string" />
+          <xs:element minOccurs="0" name="arg1" type="xs:string" />
+          <xs:element minOccurs="0" name="arg2" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="reportLogResponse">
+        <xs:sequence>
+          <xs:element name="return" type="xs:int" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="reportPolicy">
+    <wsdl:part element="tns:reportPolicy" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportEvent">
+    <wsdl:part element="tns:reportEvent" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportView">
+    <wsdl:part element="tns:reportView" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryPolicyResponse">
+    <wsdl:part element="tns:queryPolicyResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportEventResponse">
+    <wsdl:part element="tns:reportEventResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryView">
+    <wsdl:part element="tns:queryView" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportLog">
+    <wsdl:part element="tns:reportLog" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportViewResponse">
+    <wsdl:part element="tns:reportViewResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportHealthView">
+    <wsdl:part element="tns:reportHealthView" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportConfigResponse">
+    <wsdl:part element="tns:reportConfigResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportHealthViewResponse">
+    <wsdl:part element="tns:reportHealthViewResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportLogResponse">
+    <wsdl:part element="tns:reportLogResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryPolicy">
+    <wsdl:part element="tns:queryPolicy" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportConfig">
+    <wsdl:part element="tns:reportConfig" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryConfig">
+    <wsdl:part element="tns:queryConfig" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="reportPolicyResponse">
+    <wsdl:part element="tns:reportPolicyResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryViewResponse">
+    <wsdl:part element="tns:queryViewResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:message name="queryConfigResponse">
+    <wsdl:part element="tns:queryConfigResponse" name="parameters" />
+  </wsdl:message>
+  <wsdl:portType name="http:wssmcommupper">
+    <wsdl:operation name="reportHealthView">
+      <wsdl:input message="tns:reportHealthView" name="reportHealthView" />
+      <wsdl:output message="tns:reportHealthViewResponse" name="reportHealthViewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="reportPolicy">
+      <wsdl:input message="tns:reportPolicy" name="reportPolicy" />
+      <wsdl:output message="tns:reportPolicyResponse" name="reportPolicyResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryPolicy">
+      <wsdl:input message="tns:queryPolicy" name="queryPolicy" />
+      <wsdl:output message="tns:queryPolicyResponse" name="queryPolicyResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="reportConfig">
+      <wsdl:input message="tns:reportConfig" name="reportConfig" />
+      <wsdl:output message="tns:reportConfigResponse" name="reportConfigResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="reportEvent">
+      <wsdl:input message="tns:reportEvent" name="reportEvent" />
+      <wsdl:output message="tns:reportEventResponse" name="reportEventResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="reportView">
+      <wsdl:input message="tns:reportView" name="reportView" />
+      <wsdl:output message="tns:reportViewResponse" name="reportViewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryConfig">
+      <wsdl:input message="tns:queryConfig" name="queryConfig" />
+      <wsdl:output message="tns:queryConfigResponse" name="queryConfigResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryView">
+      <wsdl:input message="tns:queryView" name="queryView" />
+      <wsdl:output message="tns:queryViewResponse" name="queryViewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="reportLog">
+      <wsdl:input message="tns:reportLog" name="reportLog" />
+      <wsdl:output message="tns:reportLogResponse" name="reportLogResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSSmCommUpperImplServiceSoapBinding" type="tns:http:wssmcommupper">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="reportHealthView">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportHealthView">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportHealthViewResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="reportPolicy">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportPolicy">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportPolicyResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryPolicy">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="queryPolicy">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="queryPolicyResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="reportConfig">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportConfig">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportConfigResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="reportEvent">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportEvent">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportEventResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="reportView">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportView">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportViewResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryConfig">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="queryConfig">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="queryConfigResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryView">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="queryView">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="queryViewResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="reportLog">
+      <soap:operation soapAction="" style="document" />
+      <wsdl:input name="reportLog">
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="reportLogResponse">
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSSmCommUpperImplService">
+    <wsdl:port binding="tns:WSSmCommUpperImplServiceSoapBinding" name="WSSmCommUpperImplPort">
+      <soap:address location="http://172.20.22.9:10081/WSSmCommUpper/WSSmCommUpper" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
