@@ -1750,6 +1750,9 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		}
 
 		if (ret == FAILURE) {
+			/* If a failure occurred in one of the earlier files,
+			 * only destroy the following file handles. */
+			zend_destroy_file_handle(file_handle);
 			continue;
 		}
 

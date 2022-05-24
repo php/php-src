@@ -2535,14 +2535,6 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
 
-	if (prepend_file_p) {
-		zend_destroy_file_handle(prepend_file_p);
-	}
-
-	if (append_file_p) {
-		zend_destroy_file_handle(append_file_p);
-	}
-
 	if (EG(exception)) {
 		zend_try {
 			zend_exception_error(EG(exception), E_ERROR);

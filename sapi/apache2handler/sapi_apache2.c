@@ -706,7 +706,6 @@ zend_first_try {
 		} else {
 			zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &zfd);
 		}
-		zend_destroy_file_handle(&zfd);
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
 			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1)));
