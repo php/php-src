@@ -78,6 +78,8 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/dnf_types
   . Added error_log_mode ini setting that allows setting of permissions for
     error log file.
+  . Added support for fetching properties of enums in constant expressions.
+    RFC: https://wiki.php.net/rfc/fetch_property_in_const_expressions
 
 
 - Curl:

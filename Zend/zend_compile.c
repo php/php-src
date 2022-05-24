@@ -9751,7 +9751,8 @@ static bool zend_is_allowed_in_const_expr(zend_ast_kind kind) /* {{{ */
 		|| kind == ZEND_AST_MAGIC_CONST || kind == ZEND_AST_COALESCE
 		|| kind == ZEND_AST_CONST_ENUM_INIT
 		|| kind == ZEND_AST_NEW || kind == ZEND_AST_ARG_LIST
-		|| kind == ZEND_AST_NAMED_ARG;
+		|| kind == ZEND_AST_NAMED_ARG
+		|| kind == ZEND_AST_PROP || kind == ZEND_AST_NULLSAFE_PROP;
 }
 /* }}} */
 

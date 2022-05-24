@@ -391,6 +391,7 @@ ZEND_API void zend_disable_functions(const char *function_list);
 ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length);
 
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
+ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
 #define IS_CALLABLE_SUPPRESS_DEPRECATIONS (1<<1)
