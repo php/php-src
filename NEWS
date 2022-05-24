@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.7
+26 May 2022, PHP 8.1.7RC1
 
 - CLI:
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
