@@ -841,9 +841,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
-
 	module_destructor(module);
-	free(module);
 }
 /* }}} */
 
