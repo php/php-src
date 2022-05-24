@@ -18,8 +18,11 @@
 #include "php_odbc_utils.h"
 
 /*
- * This contains functionality shared between odbc and PDO_ODBC, so it makes
- * sense for this to be in standard.
+ * Utility functions for dealing with ODBC connection strings and other common
+ * functionality.
+ *
+ * While useful for PDO_ODBC too, this lives in ext/odbc because there isn't a
+ * better place for it.
  */
 
 PHP_FUNCTION(odbc_connection_string_is_quoted)
