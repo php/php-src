@@ -966,11 +966,12 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_LINT:
-			EG(exit_status) = php_lint_script(&file_handle);
-			if (EG(exit_status) == SUCCESS) {
+			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
+				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
+				EG(exit_status) = 255;
 			}
 			break;
 		case PHP_MODE_STRIP:
