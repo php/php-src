@@ -1450,6 +1450,7 @@ static void initialize_date_period_properties(php_period_obj *period_obj)
 
 	zend_update_property_long(date_ce_period, &period_obj->std, "recurrences", sizeof("recurrences") - 1, (zend_long) period_obj->recurrences);
 	zend_update_property_bool(date_ce_period, &period_obj->std, "include_start_date", sizeof("include_start_date") - 1, period_obj->include_start_date);
+	zend_update_property_bool(date_ce_period, &period_obj->std, "include_end_date", sizeof("include_end_date") - 1, period_obj->include_end_date);
 }
 
 /* define an overloaded iterator structure */

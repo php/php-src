@@ -683,14 +683,6 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
-    public readonly ?DateTimeInterface $start;
-    /** @readonly */
-    public ?DateTimeInterface $current;
-    public readonly ?DateTimeInterface $end;
-    public readonly ?DateInterval $interval;
-    public readonly int $recurrences;
-    public readonly bool $include_start_date;
-
     /**
      * @var int
      * @cname PHP_DATE_PERIOD_EXCLUDE_START_DATE
@@ -701,6 +693,15 @@ class DatePeriod implements IteratorAggregate
      * @cname PHP_DATE_PERIOD_INCLUDE_END_DATE
      */
     public const INCLUDE_END_DATE = UNKNOWN;
+
+    public readonly ?DateTimeInterface $start;
+    /** @readonly */
+    public ?DateTimeInterface $current;
+    public readonly ?DateTimeInterface $end;
+    public readonly ?DateInterval $interval;
+    public readonly int $recurrences;
+    public readonly bool $include_start_date;
+    public readonly bool $include_end_date;
 
     /**
      * @param DateTimeInterface|string $start
