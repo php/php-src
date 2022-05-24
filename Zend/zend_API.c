@@ -96,6 +96,14 @@ ZEND_API ZEND_COLD void zend_wrong_param_count(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_type_name(object));
+	zend_tmp_string_release(tmp_property_name);
+}
+
 /* Argument parsing API -- andrei */
 ZEND_API const char *zend_get_type_by_const(int type) /* {{{ */
 {
