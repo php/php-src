@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #79589 (error:14095126:SSL routines:ssl3_read_n:unexpected eof
     while reading). (Jakub Zelenka)
 
+- Pcntl:
+  . Fixed Haiku build. (David Carlier)
+
 - Soap:
   . Fixed bug GH-8578 (Error on wrong parameter on SoapHeader constructor).
     (robertnisipeanu)
