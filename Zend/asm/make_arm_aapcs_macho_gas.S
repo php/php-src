@@ -39,16 +39,16 @@
  *******************************************************/
 
 .text
-.globl _make_fcontext
+.globl _zend_make_fcontext
 .align 2
-_make_fcontext:
+_zend_make_fcontext:
     @ shift address in A1 to lower 16 byte boundary
     bic  a1, a1, #15
 
     @ reserve space for context-data on context-stack
     sub  a1, a1, #124
 
-    @ third arg of make_fcontext() == address of context-function
+    @ third arg of zend_make_fcontext() == address of context-function
     str  a3, [a1, #108]
 
     @ compute address of returned transfer_t

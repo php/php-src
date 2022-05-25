@@ -40,18 +40,18 @@
 
 .file "make_arm_aapcs_elf_gas.S"
 .text
-.globl make_fcontext
+.globl zend_make_fcontext
 .align 2
-.type make_fcontext,%function
+.type zend_make_fcontext,%function
 .syntax unified
-make_fcontext:
+zend_make_fcontext:
     @ shift address in A1 to lower 16 byte boundary
     bic  a1, a1, #15
 
     @ reserve space for context-data on context-stack
     sub  a1, a1, #124
 
-    @ third arg of make_fcontext() == address of context-function
+    @ third arg of zend_make_fcontext() == address of context-function
     str  a3, [a1, #104]
 
     @ compute address of returned transfer_t
@@ -75,7 +75,7 @@ finish:
     mov  a1, #0
     @ exit application
     bl  _exit@PLT
-.size make_fcontext,.-make_fcontext
+.size zend_make_fcontext,.-zend_make_fcontext
 
 @ Mark that we don't need executable stack.
 .section .note.GNU-stack,"",%progbits

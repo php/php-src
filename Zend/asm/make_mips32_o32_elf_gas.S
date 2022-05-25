@@ -40,11 +40,11 @@
 
 .file "make_mips32_o32_elf_gas.S"
 .text
-.globl make_fcontext
+.globl zend_make_fcontext
 .align 2
-.type make_fcontext,@function
-.ent make_fcontext
-make_fcontext:
+.type zend_make_fcontext,@function
+.ent zend_make_fcontext
+zend_make_fcontext:
 #ifdef __PIC__
 .set    noreorder
 .cpload $t9
@@ -63,7 +63,7 @@ make_fcontext:
     #  - 4 bytes for alignment
     addiu $v0, $v0, -128
 
-    # third arg of make_fcontext() == address of context-function
+    # third arg of zend_make_fcontext() == address of context-function
     sw  $a2, 92($v0)
     # save global pointer in context-data
     sw  $gp, 112($v0)
@@ -90,8 +90,8 @@ finish:
     la $t9, _exit
     move $a0, $zero
     jr $t9
-.end make_fcontext
-.size make_fcontext, .-make_fcontext
+.end zend_make_fcontext
+.size zend_make_fcontext, .-zend_make_fcontext
 
 /* Mark that we don't need executable stack.  */
 .section .note.GNU-stack,"",%progbits

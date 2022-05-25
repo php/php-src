@@ -70,17 +70,17 @@
     .toc
     .csect .text[PR], 5
     .align 2
-    .globl  make_fcontext[DS]
-    .globl .make_fcontext
-    .csect  make_fcontext[DS], 3
-make_fcontext:
-    .llong .make_fcontext[PR], TOC[tc0], 0
+    .globl  zend_make_fcontext[DS]
+    .globl .zend_make_fcontext
+    .csect  zend_make_fcontext[DS], 3
+zend_make_fcontext:
+    .llong .zend_make_fcontext[PR], TOC[tc0], 0
     .csect .text[PR], 5
-.make_fcontext:
+.zend_make_fcontext:
     # save return address into R6
     mflr  6
 
-    # first arg of make_fcontext() == top address of context-function
+    # first arg of zend_make_fcontext() == top address of context-function
     # shift address in R3 to lower 16 byte boundary
     clrrdi  3, 3, 4
 
@@ -88,7 +88,7 @@ make_fcontext:
     # including 64 byte of linkage + parameter area (R1 % 16 == 0)
     subi  3, 3, 248
 
-    # third arg of make_fcontext() == address of context-function descriptor
+    # third arg of zend_make_fcontext() == address of context-function descriptor
     ld   4, 0(5)
     std  4, 176(3)
     # save TOC of context-function

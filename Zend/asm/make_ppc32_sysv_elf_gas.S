@@ -52,14 +52,14 @@
 
 .file "make_ppc32_sysv_elf_gas.S"
 .text
-.globl make_fcontext
+.globl zend_make_fcontext
 .align 2
-.type make_fcontext,@function
-make_fcontext:
+.type zend_make_fcontext,@function
+zend_make_fcontext:
     # save return address into R6
     mflr  %r6
 
-    # first arg of make_fcontext() == top address of context-function
+    # first arg of zend_make_fcontext() == top address of context-function
     # shift address in R3 to lower 16 byte boundary
     clrrwi  %r3, %r3, 4
 
@@ -67,7 +67,7 @@ make_fcontext:
     # and parameter area + 240 bytes of context-data (R1 % 16 == 0)
     subi  %r3, %r3, 16 + 240
 
-    # third arg of make_fcontext() == address of context-function
+    # third arg of zend_make_fcontext() == address of context-function
 #ifdef __linux__
     # save context-function as PC
     stw  %r5, 16(%r3)
@@ -111,7 +111,7 @@ make_fcontext:
 
 #ifndef __linux__
 trampoline:
-    # On systems other than Linux, jump_fcontext is returning the
+    # On systems other than Linux, zend_jump_fcontext is returning the
     # transfer_t in R3:R4, but we need to pass transfer_t * R3 to
     # our context-function.
     lwz   %r0, 8(%r1)   # address of context-function
@@ -136,7 +136,7 @@ finish:
     # call _exit(0) with special addend 0x8000 for large model
     li  %r3, 0
     bl  _exit + 0x8000@plt
-.size make_fcontext, .-make_fcontext
+.size zend_make_fcontext, .-zend_make_fcontext
 
 /* Provide the GOT pointer for secure PLT, large model. */
 .section .got2,"aw"

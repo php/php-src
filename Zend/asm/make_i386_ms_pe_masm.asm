@@ -26,8 +26,8 @@
 _exit PROTO, value:SDWORD
 .code
 
-make_fcontext PROC BOOST_CONTEXT_EXPORT
-    ; first arg of make_fcontext() == top of context-stack
+zend_make_fcontext PROC BOOST_CONTEXT_EXPORT
+    ; first arg of zend_make_fcontext() == top of context-stack
     mov  eax, [esp+04h]
 
     ; reserve space for first argument of context-function
@@ -47,11 +47,11 @@ make_fcontext PROC BOOST_CONTEXT_EXPORT
     ; save x87 control-word
     fnstcw  [eax+04h]
 
-    ; first arg of make_fcontext() == top of context-stack
+    ; first arg of zend_make_fcontext() == top of context-stack
     mov  ecx, [esp+04h]
     ; save top address of context stack as 'base'
     mov  [eax+014h], ecx
-    ; second arg of make_fcontext() == size of context-stack
+    ; second arg of zend_make_fcontext() == size of context-stack
     mov  edx, [esp+08h]
     ; negate stack size for LEA instruction (== substraction)
     neg  edx
@@ -65,7 +65,7 @@ make_fcontext PROC BOOST_CONTEXT_EXPORT
 	xor  ecx, ecx
     mov  [eax+08h], ecx
 
-    ; third arg of make_fcontext() == address of context-function
+    ; third arg of zend_make_fcontext() == address of context-function
     ; stored in EBX
     mov  ecx, [esp+0ch]
     mov  [eax+024h], ecx
@@ -73,7 +73,7 @@ make_fcontext PROC BOOST_CONTEXT_EXPORT
     ; compute abs address of label trampoline
     mov  ecx, trampoline
     ; save address of trampoline as return-address for context-function
-    ; will be entered after calling jump_fcontext() first time
+    ; will be entered after calling zend_jump_fcontext() first time
     mov  [eax+02ch], ecx
 
     ; compute abs address of label finish
@@ -136,5 +136,5 @@ finish:
     ; exit application
     call  _exit
     hlt
-make_fcontext ENDP
+zend_make_fcontext ENDP
 END

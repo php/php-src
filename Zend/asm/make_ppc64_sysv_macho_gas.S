@@ -66,12 +66,12 @@
  *                                                     *
 
 .text
-.globl _make_fcontext
-_make_fcontext:
+.globl _zend_make_fcontext
+_zend_make_fcontext:
     ; save return address into R6
     mflr  r6
 
-    ; first arg of make_fcontext() == top address of context-function
+    ; first arg of zend_make_fcontext() == top address of context-function
     ; shift address in R3 to lower 16 byte boundary
     clrrwi  r3, r3, 4
 
@@ -79,7 +79,7 @@ _make_fcontext:
     ; including 64 byte of linkage + parameter area (R1  16 == 0)
     subi  r3, r3, 248
 
-    ; third arg of make_fcontext() == address of context-function
+    ; third arg of zend_make_fcontext() == address of context-function
     stw  r5, 176(r3)
 
     ; set back-chain to zero

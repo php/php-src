@@ -45,8 +45,8 @@
 
 .text
 .align	8
-.global	jump_fcontext
-.type	jump_fcontext, @function
+.global	zend_jump_fcontext
+.type	zend_jump_fcontext, @function
 
 #define ARG_OFFSET         0
 #define GR_OFFSET	   16
@@ -66,7 +66,7 @@ struct transfer_t {
    void    *   data;
 };
 
-transfer_t jump_fcontext( fcontext_t const to,
+transfer_t zend_jump_fcontext( fcontext_t const to,
 			  void * data);
 
 Incoming args
@@ -76,7 +76,7 @@ r4 - Data pointer
 
 */
 
-jump_fcontext:
+zend_jump_fcontext:
 	.machine "z10"
 	/* Reserve stack space to store the current context.  */
 	aghi	%r15,-CONTEXT_SIZE
@@ -131,7 +131,7 @@ jump_fcontext:
 	ltg	%r2,GR_OFFSET(%r15)
 	jnz	use_return_slot
 
-	/* We restore a make_fcontext context.  Use the function
+	/* We restore a zend_make_fcontext context.  Use the function
 	   argument slot in the context we just saved and allocate the
 	   register save area for the target function.  */
 	la	%r2,ARG_OFFSET(%r1)
@@ -139,9 +139,9 @@ jump_fcontext:
 
 use_return_slot:
 	/* Save the two fields in transfer_t.  When calling a
-	   make_fcontext function this becomes the function argument of
+	   zend_make_fcontext function this becomes the function argument of
 	   the target function, otherwise it will be the return value of
-	   jump_fcontext.  */
+	   zend_jump_fcontext.  */
 	stg	%r1,0(%r2)
 	stg	%r4,8(%r2)
 
@@ -152,5 +152,5 @@ use_return_slot:
 	br	%r5
 
 
-.size   jump_fcontext,.-jump_fcontext
+.size   zend_jump_fcontext,.-zend_jump_fcontext
 .section .note.GNU-stack,"",%progbits

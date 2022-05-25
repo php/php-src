@@ -58,13 +58,13 @@
     .file "jump_ppc32_sysv_xcoff_gas.S"
     .toc
     .csect .text[PR], 5
-    .globl  jump_fcontext[DS]
-    .globl .jump_fcontext
-    .csect  jump_fcontext[DS]
-jump_fcontext:
-    .long .jump_fcontext[PR], TOC[tc0], 0
+    .globl  zend_jump_fcontext[DS]
+    .globl .zend_jump_fcontext
+    .csect  zend_jump_fcontext[DS]
+zend_jump_fcontext:
+    .long .zend_jump_fcontext[PR], TOC[tc0], 0
     .csect .text[PR], 5
-.jump_fcontext:
+.zend_jump_fcontext:
     # reserve space on stack
     subi  1, 1, 256
 

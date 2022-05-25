@@ -71,13 +71,13 @@
     .toc
     .csect .text[PR], 5
     .align 2
-    .globl  jump_fcontext[DS]
-    .globl .jump_fcontext
-    .csect  jump_fcontext[DS], 3
-jump_fcontext:
-    .llong .jump_fcontext[PR], TOC[tc0], 0
+    .globl  zend_jump_fcontext[DS]
+    .globl .zend_jump_fcontext
+    .csect  zend_jump_fcontext[DS], 3
+zend_jump_fcontext:
+    .llong .zend_jump_fcontext[PR], TOC[tc0], 0
     .csect .text[PR], 5
-.jump_fcontext:
+.zend_jump_fcontext:
     # reserve space on stack
     subi  1, 1, 184
 
