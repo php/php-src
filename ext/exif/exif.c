@@ -4376,7 +4376,7 @@ static bool exif_discard_imageinfo(image_info_type *ImageInfo)
 static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	bool ret;
-	zend_stat_t st;
+	zend_stat_t st = {0};
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));

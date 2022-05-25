@@ -1118,7 +1118,7 @@ static zend_class_entry *register_class_mysqli_driver(void)
 	zend_string_release(property_driver_version_name);
 
 	zval property_reconnect_default_value;
-	ZVAL_BOOL(&property_reconnect_default_value, 0);
+	ZVAL_BOOL(&property_reconnect_default_value, false);
 	zend_string *property_reconnect_name = zend_string_init("reconnect", sizeof("reconnect") - 1, 1);
 	zend_declare_typed_property(class_entry, property_reconnect_name, &property_reconnect_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_reconnect_name);

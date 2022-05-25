@@ -306,7 +306,7 @@ void phpdbg_string_init(char *buffer) {
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -398,7 +398,7 @@ void phpdbg_clean(bool full, bool resubmit) /* {{{ */
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -1390,7 +1390,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0);

@@ -664,6 +664,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_SSL);
 	REGISTER_CURL_CONSTANT(CURLOPT_NETRC_FILE);
 
+	/* Available since 7.11.1 */
+	REGISTER_CURL_CONSTANT(CURLOPT_MAXFILESIZE_LARGE);
+
 	/* Available since 7.11.2 */
 	REGISTER_CURL_CONSTANT(CURLOPT_TCP_NODELAY);
 
@@ -2981,6 +2984,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		/* Curl off_t options */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
+		case CURLOPT_MAXFILESIZE_LARGE:
 #if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
 		case CURLOPT_TIMEVALUE_LARGE:
 #endif

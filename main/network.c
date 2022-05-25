@@ -1177,7 +1177,7 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
 	php_error_docref(NULL, E_WARNING,
 		"PHP needs to be recompiled with a larger value of FD_SETSIZE.\n"
 		"If this binary is from an official www.php.net package, file a bug report\n"
-		"at http://bugs.php.net, including the following information:\n"
+		"at https://github.com/php/php-src/issues, including the following information:\n"
 		"FD_SETSIZE=%d, but you are using %d.\n"
 		" --enable-fd-setsize=%d is recommended, but you may want to set it\n"
 		"to match to maximum number of sockets each script will work with at\n"

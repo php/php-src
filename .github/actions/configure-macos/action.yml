@@ -61,6 +61,7 @@ runs:
           --enable-sysvmsg \
           --with-ffi \
           --enable-zend-test \
+          --enable-dl-test=shared \
           --enable-intl \
           --with-mhash \
           --with-sodium \

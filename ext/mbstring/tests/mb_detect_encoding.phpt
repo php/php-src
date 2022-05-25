@@ -15,6 +15,7 @@ $euc_jp = "\xC6\xFC\xCB\xDC\xB8\xEC\xA5\xC6\xA5\xAD\xA5\xB9\xA5\xC8\xA4\xC7\xA4\
 // UTF-8
 $polish1 = "Zażółć gęślą jaźń.";
 $polish2 = "Wół poszedł spać bardzo wcześnie. A to zdanie bez ogonka.";
+$hungarian = "Árvíztűrő tükörfúrógép";
 
 echo "== BASIC TEST ==\n";
 
@@ -57,6 +58,12 @@ REV:20080716T203548Z
 END:VCARD
 ';
 echo mb_detect_encoding($test, ['UTF-8', 'UTF-16']), "\n";
+
+$test = 'Dušan';
+echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-8
+
+$test = 'Živko';
+echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-8
 
 // We once had a problem where all kind of strings would be detected as 'UUENCODE'
 echo mb_detect_encoding('abc', ['UUENCODE', 'UTF-8']), "\n";
@@ -227,6 +234,84 @@ test($deStrings, $deEncodings);
 
 test([$polish1, $polish2], ['UTF-32BE', 'UTF-32LE', 'UTF-16BE', 'UTF-16LE', 'UTF-8', 'ISO-8859-2']);
 
+$czechStrings = [
+    // Gotta love these Czech proverbs
+    // "Some like girls, others like muffins." Truer words were never spoken.
+    'Bezdomovec je doma všude.',
+    'Bez práce nejsou koláče.',
+    'Bez peněz do hospody nelez.',
+    'Bližší košile nežli kabát.',
+    'Boží mlýny melou pomalu, ale jistě.',
+    'Co je dovoleno pánovi, není dovoleno kmánovi.',
+    'Co je šeptem, to je s čertem.',
+    'Co je v domě, není pro mě.',
+    'Co je v domě, to se počítá.',
+    'Co jsi z úst vypustil, ani párem koní nedostaneš zpět.',
+    'Co můžeš udělat dnes, neodkládej na zítřek.',
+    'Co nejde po dobrým, to půjde po zlým.',
+    'Co oči nevidí, to srdce nebolí (a ruce neukradnou).',
+    'Co se škádlívá, to se rádo mívá.',
+    'Co se v mládí naučíš, ke stáru jako když najdeš.',
+    'Co sis uvařil, to si sněz.',
+    'Co tě nezabije, to tě posílí.',
+    'Cvik dělá mistra.',
+    'Co tě nepálí, nehas.',
+    'Co na srdci, to na jazyku.',
+    'Co nejde silou, jde rozumem.',
+    'Čas všechny rány zahojí.',
+    'Častá krůpěj kámen proráží.',
+    'Čím výše vystoupíš, tím hlouběji padáš.',
+    'Čím výše vystoupíš, tím větší rozhled.',
+    'Čiň čertu dobře, peklem se ti odmění.',
+    'Čistota – půl zdraví.',
+    'Dal ses na vojnu, tak bojuj.',
+    'Darovanému koni na zuby nehleď.',
+    'Devatero řemesel – desátá bída.',
+    'Dějiny píší vítězové.',
+    'Dobré slovo i železná vrata otvírá.',
+    'Dočkej času jako husa klasu.',
+    'Drzé čelo lepší než poplužní dvůr.',
+    'Dvakrát měř, jednou řež.',
+    'Důvěřuj, ale prověřuj',
+    'Hlad je nejlepší kuchař.',
+    'Hlad má velké oči.',
+    'Hloupý, kdo dává, hloupější, kdo nebere.',
+    'Hněv je špatný rádce.',
+    'Někdo rád holky, jinej zas vdolky.',
+    'Volům kroky a jelenům skoky.',
+    'Vrána k vráně sedá, rovný rovného si hledá.',
+    'Všeho nechám, už tam spěchám.',
+    'Všechna sláva, polní tráva.',
+    'Všeho s mírou.',
+    'Všechno zlé je pro něco dobré.',
+    'Všude dobře, doma nejlépe.',
+    'Vrána vráně oči nevyklove.',
+    'Výjimka potvrzuje pravidlo.',
+    'Vzduch – boží duch.',
+    'Za dobrotu na žebrotu.',
+    'Zadarmo ani kuře nehrabe.',
+    'Zahálky jsa služebníkem, neběduj, žes hadrníkem.',
+    'Z cizího krev neteče.',
+    'Zítra je taky den.',
+    'Zakázané ovoce chutná nejlépe.',
+    'Zlaté slovo, které zůstane v ústech.',
+    'Zvyk je železná košile.',
+    'Žába močál vždy najde.',
+    'Žádná píseň není tak dlouhá, aby jí nebyl konec.',
+    'Žádný strom neroste do nebe.',
+    'Žádný učený z nebe nespadl.',
+    'Žízeň je věčná.'
+];
+$czechEncodings = [
+    'UTF-8',
+    'UTF-16',
+    // 'Windows-1250', // Windows-1250 is not supported by mbstring
+    // 'ISO-8859-2' // We are not able to accurately distinguish UTF-8 and ISO-8859-2
+];
+test($czechStrings, $czechEncodings);
+
+test([$hungarian], ['UTF-8', 'UTF-16', 'Windows-1252']);
+
 echo "Done!\n";
 
 ?>
@@ -243,6 +328,8 @@ JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
 ISO-8859-1
+UTF-8
+UTF-8
 UTF-8
 UTF-8
 UTF-8

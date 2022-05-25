@@ -55,13 +55,13 @@ if ($is_child) {
 
     $status = proc_get_status($proc);
     if ($status["running"]) {
-        echo "Child $child_pid didn't exit after ${max}us\n";
+        echo "Child $child_pid didn't exit after {$max}us\n";
 		foreach ($pipes as $pipe) {
 			fclose($pipe);
 		}
 		proc_terminate($proc);
     } else {
-        echo "Child $child_pid exit with status ", $status["exitcode"], " after ${total}us\n";
+        echo "Child $child_pid exit with status ", $status["exitcode"], " after {$total}us\n";
     }
 }
 

@@ -23,6 +23,7 @@
 #include "zend_alloc.h"
 #include "zend_operators.h"
 #include "zend_strtod.h"
+#include "zend_modules.h"
 
 static HashTable *registered_zend_ini_directives;
 
@@ -194,7 +195,7 @@ ZEND_API void zend_ini_sort_entries(void) /* {{{ */
 /*
  * Registration / unregistration
  */
-ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number) /* {{{ */
+ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_entry, int module_number, int module_type) /* {{{ */
 {
 	zend_ini_entry *p;
 	zval *default_value;
@@ -210,7 +211,10 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 	 * lead to death.
 	 */
 	if (directives != EG(ini_directives)) {
+		ZEND_ASSERT(module_type == MODULE_TEMPORARY);
 		directives = EG(ini_directives);
+	} else {
+		ZEND_ASSERT(module_type == MODULE_PERSISTENT);
 	}
 #endif
 
@@ -234,7 +238,7 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 			if (p->name) {
 				zend_string_release_ex(p->name, 1);
 			}
-			zend_unregister_ini_entries(module_number);
+			zend_unregister_ini_entries_ex(module_number, module_type);
 			return FAILURE;
 		}
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
@@ -255,9 +259,46 @@ ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_ent
 }
 /* }}} */
 
+ZEND_API zend_result zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int module_number) /* {{{ */
+{
+	zend_module_entry *module;
+
+	/* Module is likely to be the last one in the list */
+	ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+		if (module->module_number == module_number) {
+			return zend_register_ini_entries_ex(ini_entry, module_number, module->type);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return FAILURE;
+}
+/* }}} */
+
+ZEND_API void zend_unregister_ini_entries_ex(int module_number, int module_type) /* {{{ */
+{
+	static HashTable *ini_directives;
+
+	if (module_type == MODULE_TEMPORARY) {
+		ini_directives = EG(ini_directives);
+	} else {
+		ini_directives = registered_zend_ini_directives;
+	}
+
+	zend_hash_apply_with_argument(ini_directives, zend_remove_ini_entries, (void *) &module_number);
+}
+/* }}} */
+
 ZEND_API void zend_unregister_ini_entries(int module_number) /* {{{ */
 {
-	zend_hash_apply_with_argument(registered_zend_ini_directives, zend_remove_ini_entries, (void *) &module_number);
+	zend_module_entry *module;
+
+	/* Module is likely to be the last one in the list */
+	ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+		if (module->module_number == module_number) {
+			zend_unregister_ini_entries_ex(module_number, module->type);
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

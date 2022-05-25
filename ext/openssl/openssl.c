@@ -2364,7 +2364,7 @@ static X509_STORE *php_openssl_setup_verify(zval *calist)
 	X509_LOOKUP * dir_lookup, * file_lookup;
 	int ndirs = 0, nfiles = 0;
 	zval * item;
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	store = X509_STORE_new();
 

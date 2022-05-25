@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_enum.h"
 #include "zend_attributes.h"
+#include "zend_constants.h"
 
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
@@ -1429,6 +1430,13 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		}
 	}
 
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_READONLY_CLASS) != (parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s class %s cannot extend %s class %s",
+			ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "Readonly" : "Non-readonly", ZSTR_VAL(ce->name),
+			parent_ce->ce_flags & ZEND_ACC_READONLY_CLASS ? "readonly" : "non-readonly", ZSTR_VAL(parent_ce->name)
+		);
+	}
+
 	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
 	}
@@ -1632,6 +1640,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 				ct = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 				memcpy(ct, c, sizeof(zend_class_constant));
 				c = ct;
+				Z_CONSTANT_FLAGS(c->value) |= CONST_OWNED;
 			}
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {

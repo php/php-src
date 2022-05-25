@@ -4,7 +4,7 @@ A release managers role includes making packaged source code from the canonical 
 available according to their release schedule.
 
 The release schedule for their branch is available on a Wiki page, for example
-  [PHP 8.0 release schedule](https://wiki.php.net/todo/php80)
+[PHP 8.0 release schedule](https://wiki.php.net/todo/php80)
 
 There are two types of release:
 
@@ -15,8 +15,8 @@ The process of making packaged source available and announcing availability is e
 in detail below. The process differs slightly for non-stable and stable releases.
 
 Before a release manager can begin their work, there are several things that must happen,
-explained at the end of this document in 
-	[New Release Manager Checklist](#new-release-manager-checklist).
+explained at the end of this document in
+[New Release Manager Checklist](#new-release-manager-checklist).
 
 ## General notes and tips
 
@@ -422,8 +422,9 @@ branch:
     next minor or major release, issue a call for volunteers on
     internals@lists.php.net (cf. http://news.php.net/php.internals/98652).
 
- 2. Make sure that there are two or more volunteers, and hold a vote if
-    necessary (see
+ 2. Make sure that there are two or more volunteers. Typically, one should be a
+    veteran release manager (having previously served as a php-src release manager),
+    while the other one (or two) should be rookies. Hold a vote if necessary (see
     https://wiki.php.net/rfc/releaseprocess#release_managers_selection).
 
  3. Help the new release managers with their first steps.

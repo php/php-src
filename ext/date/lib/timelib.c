@@ -37,7 +37,7 @@
 
 const char *timelib_error_messages[10] = {
 	"No error",
-	"Can not allocate buffer for parsing",
+	"Cannot allocate buffer for parsing",
 	"Corrupt tzfile: The transitions in the file don't always increase",
 	"Corrupt tzfile: The expected 64-bit preamble is missing",
 	"Corrupt tzfile: No abbreviation could be found for a transition",

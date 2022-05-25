@@ -13,6 +13,15 @@ PHP                                                                        NEWS
 
 - Curl:
   . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
+  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
+
+- Date:
+  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
+    non-relative items are present). (Derick)
+  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
+    (Daniel Egeberg, Derick)
+  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
+    Year). (Pavel Djundik)
 
 - FPM:
   . Emit error for invalid port setting. (David Carlier)
@@ -20,6 +29,9 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added support for listening queue on macOS. (David Carlier)
   . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
+
+- FTP:
+  . Fix datetime format string to follow POSIX spec in ftp_mdtm(). (Jihwan Kim)
 
 - Intl:
   . Update all grandfathered language tags with preferred values
@@ -34,6 +46,18 @@ PHP                                                                        NEWS
   . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
     Buckley)
 
+- Reflection:
+  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
+  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
+
+- Session:
+  . Fixed bug GH-7787 (Improve session write failure message for user error
+    handlers). (ilutov)
+
+- Sockets:
+  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
+  . Added SO_MEMINFO socket option. (David Carlier)
+
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
 
@@ -47,14 +71,18 @@ PHP                                                                        NEWS
   . Fixed bug GH-7847 (stripos with large haystack has bad performance).
     (ilutov)
   . New function memory_reset_peak_usage(). (Patrick Allaert)
+  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
+
+- Streams:
+  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
+    (Cristian Rodríguez)
+  . Fixed bug GH-8548 (stream_wrapper_unregister() leaks memory). (ilutov)
 
 - Zip:
   . add ZipArchive::clearError() method
   . add ZipArchive::getStreamName() method
   . add ZipArchive::getStreamIndex() method
-
-- Session:
-  . Fixed bug GH-7787 (Improve session write failure message for user error
-    handlers). (ilutov)
+  . On Windows, the Zip extension is now built as shared library (DLL) by
+    default. (cmb)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

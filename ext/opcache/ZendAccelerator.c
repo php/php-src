@@ -994,7 +994,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size)
 {
-	zend_stat_t statbuf;
+	zend_stat_t statbuf = {0};
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
@@ -3409,7 +3409,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
-static void accel_deactivate_now()
+static void accel_deactivate_now(void)
 {
 	/* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
 #ifdef ZEND_WIN32

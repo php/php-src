@@ -268,7 +268,7 @@ PHP_FUNCTION(phpdbg_exec)
 	}
 
 	{
-		zend_stat_t sb;
+		zend_stat_t sb = {0};
 		bool result = 1;
 
 		if (VCWD_STAT(ZSTR_VAL(exec), &sb) != FAILURE) {

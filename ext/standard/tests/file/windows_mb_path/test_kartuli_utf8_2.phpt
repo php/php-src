@@ -21,8 +21,8 @@ dir_kartuli
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "ქართველები";
-$prefix = create_data("dir_kartuli", "${item}42}");
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_kartuli", "{$item}42}");
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

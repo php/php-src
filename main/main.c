@@ -358,12 +358,12 @@ static void php_binary_init(void)
 		binary_location = (char *)malloc(MAXPATHLEN);
 		if (binary_location && !strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
-			int found = 0;
+			bool found = false;
 
 			if ((envpath = getenv("PATH")) != NULL) {
 				char *search_dir, search_path[MAXPATHLEN];
 				char *last = NULL;
-				zend_stat_t s;
+				zend_stat_t s = {0};
 
 				path = estrdup(envpath);
 				search_dir = php_strtok_r(path, ":", &last);
@@ -371,7 +371,7 @@ static void php_binary_init(void)
 				while (search_dir) {
 					snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
 					if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK) && VCWD_STAT(binary_location, &s) == 0 && S_ISREG(s.st_mode)) {
-						found = 1;
+						found = true;
 						break;
 					}
 					search_dir = php_strtok_r(NULL, ":", &last);
@@ -768,26 +768,26 @@ PHP_INI_END()
 
 /* True globals (no need for thread safety */
 /* But don't make them a single int bitfield */
-static int module_initialized = 0;
-static int module_startup = 1;
-static int module_shutdown = 0;
+static bool module_initialized = false;
+static bool module_startup = true;
+static bool module_shutdown = false;
 
 /* {{{ php_during_module_startup */
-PHPAPI int php_during_module_startup(void)
+PHPAPI bool php_during_module_startup(void)
 {
 	return module_startup;
 }
 /* }}} */
 
 /* {{{ php_during_module_shutdown */
-PHPAPI int php_during_module_shutdown(void)
+PHPAPI bool php_during_module_shutdown(void)
 {
 	return module_shutdown;
 }
 /* }}} */
 
 /* {{{ php_get_module_initialized */
-PHPAPI int php_get_module_initialized(void)
+PHPAPI bool php_get_module_initialized(void)
 {
 	return module_initialized;
 }
@@ -1397,7 +1397,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 /* {{{ php_get_current_user */
 PHPAPI char *php_get_current_user(void)
 {
-	zend_stat_t *pstat;
+	zend_stat_t *pstat = NULL;
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;
@@ -1467,14 +1467,14 @@ PHP_FUNCTION(set_time_limit)
 {
 	zend_long new_timeout;
 	char *new_timeout_str;
-	int new_timeout_strlen;
+	size_t new_timeout_strlen;
 	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_timeout) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
+	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
 	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
 	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == SUCCESS) {
@@ -1694,9 +1694,9 @@ static void sigchld_handler(int apar)
 #endif
 
 /* {{{ php_request_startup */
-int php_request_startup(void)
+zend_result php_request_startup(void)
 {
-	int retval = SUCCESS;
+	zend_result retval = SUCCESS;
 
 	zend_interned_strings_activate();
 
@@ -1945,7 +1945,7 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 /* }}} */
 
 /* {{{ php_register_extensions */
-int php_register_extensions(zend_module_entry * const * ptr, int count)
+zend_result php_register_extensions(zend_module_entry * const * ptr, int count)
 {
 	zend_module_entry * const * end = ptr + count;
 
@@ -1999,7 +1999,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
 	zend_result retval = SUCCESS;
-	int module_number = 0;	/* for REGISTER_INI_ENTRIES() */
+	int module_number = 0;
 	char *php_os;
 	zend_module_entry *module;
 
@@ -2032,8 +2032,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	}
 #endif
 
-	module_shutdown = 0;
-	module_startup = 1;
+	module_shutdown = false;
+	module_startup = true;
 	sapi_initialize_empty_request();
 	sapi_activate();
 
@@ -2177,7 +2177,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_stream_shutdown();
 
 	/* Register PHP core ini entries */
-	REGISTER_INI_ENTRIES();
+	zend_register_ini_entries_ex(ini_entries, module_number, MODULE_PERSISTENT);
 
 	/* Register Zend ini entries */
 	zend_register_standard_ini_entries();
@@ -2270,7 +2270,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();
 
-	module_initialized = 1;
+	module_initialized = true;
 
 	if (zend_post_startup() != SUCCESS) {
 		return FAILURE;
@@ -2343,7 +2343,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	virtual_cwd_deactivate();
 
 	sapi_deactivate();
-	module_startup = 0;
+	module_startup = false;
 
 	/* Don't leak errors from startup into the per-request phase. */
 	clear_last_error();
@@ -2374,9 +2374,9 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 /* {{{ php_module_shutdown */
 void php_module_shutdown(void)
 {
-	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
+	int module_number=0;
 
-	module_shutdown = 1;
+	module_shutdown = true;
 
 	if (!module_initialized) {
 		return;
@@ -2405,7 +2405,7 @@ void php_module_shutdown(void)
 	/* Destroys filter & transport registries too */
 	php_shutdown_stream_wrappers(module_number);
 
-	UNREGISTER_INI_ENTRIES();
+	zend_unregister_ini_entries_ex(module_number, MODULE_PERSISTENT);
 
 	/* close down the ini config */
 	php_shutdown_config();
@@ -2431,7 +2431,7 @@ void php_module_shutdown(void)
 		cb();
 	}
 
-	module_initialized = 0;
+	module_initialized = false;
 
 #ifndef ZTS
 	core_globals_dtor(&core_globals);
@@ -2451,7 +2451,7 @@ void php_module_shutdown(void)
 /* }}} */
 
 /* {{{ php_execute_script */
-PHPAPI int php_execute_script(zend_file_handle *primary_file)
+PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p = NULL, *append_file_p = NULL;
 	zend_file_handle prepend_file, append_file;
@@ -2461,7 +2461,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 	char *old_cwd;
 	ALLOCA_FLAG(use_heap)
 #endif
-	int retval = 0;
+	bool retval = false;
 
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
@@ -2644,10 +2644,10 @@ PHPAPI int php_handle_auth_data(const char *auth)
 /* }}} */
 
 /* {{{ php_lint_script */
-PHPAPI int php_lint_script(zend_file_handle *file)
+PHPAPI zend_result php_lint_script(zend_file_handle *file)
 {
 	zend_op_array *op_array;
-	int retval = FAILURE;
+	zend_result retval = FAILURE;
 
 	zend_try {
 		op_array = zend_compile_file(file, ZEND_INCLUDE);
@@ -2688,9 +2688,9 @@ PHPAPI void php_reserve_tsrm_memory(void)
 /* }}} */
 
 /* {{{ php_tsrm_startup */
-PHPAPI int php_tsrm_startup(void)
+PHPAPI bool php_tsrm_startup(void)
 {
-	int ret = tsrm_startup(1, 1, 0, NULL);
+	bool ret = tsrm_startup(1, 1, 0, NULL);
 	php_reserve_tsrm_memory();
 	(void)ts_resource(0);
 	return ret;

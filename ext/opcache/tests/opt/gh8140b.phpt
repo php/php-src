@@ -5,7 +5,7 @@ GH-8140 (Wrong first class callable by name optimization)
 $mycallable = greeter(...);
 
 function greeter(string $name) {
-    echo "Hello, ${name}!";
+    echo "Hello, {$name}!";
 }
   
 $mycallable("world");

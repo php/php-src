@@ -2901,7 +2901,7 @@ static int zend_jit_setup(void)
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
 	/* Probably, it might be better solution */
 	do {
-		void ***tls_mem = ((void**)__readgsqword(0x58))[_tls_index];
+		void ***tls_mem = ((void****)__readgsqword(0x58))[_tls_index];
 		void *val = _tsrm_ls_cache;
 		size_t offset = 0;
 		size_t size = (char*)&_tls_end - (char*)&_tls_start;
@@ -2925,7 +2925,7 @@ static int zend_jit_setup(void)
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
 	/* Probably, it might be better solution */
 	do {
-		void ***tls_mem = ((void***)__readfsdword(0x2c))[_tls_index];
+		void ***tls_mem = ((void****)__readfsdword(0x2c))[_tls_index];
 		void *val = _tsrm_ls_cache;
 		size_t offset = 0;
 		size_t size = (char*)&_tls_end - (char*)&_tls_start;
@@ -9319,13 +9319,13 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 				ZEND_UNREACHABLE();
 			}
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline,
+					func && (func->common.fn_flags & ZEND_ACC_IMMUTABLE) ? ZEND_JIT_EXIT_INVALIDATE : 0);
 				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
 				if (!exit_addr) {
 					return 0;
 				}
-
 				if (!func || opline->opcode == ZEND_INIT_FCALL) {
 					|	test r0, r0
 					|	jnz >3

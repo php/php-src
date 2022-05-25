@@ -2378,7 +2378,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
 
 	lcname = zend_new_interned_string(lcname);
-	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
+	if ((module_ptr = zend_hash_add_ptr(&module_registry, lcname, module)) == NULL) {
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module->name);
 		zend_string_release(lcname);
 		return NULL;
@@ -2953,8 +2953,17 @@ static void clean_module_classes(int module_number) /* {{{ */
 
 void module_destructor(zend_module_entry *module) /* {{{ */
 {
+#if ZEND_RC_DEBUG
+	bool orig_rc_debug = zend_rc_debug;
+#endif
 
 	if (module->type == MODULE_TEMPORARY) {
+#if ZEND_RC_DEBUG
+		/* FIXME: Loading extensions during the request breaks some invariants.
+		 * In particular, it will create persistent interned strings, which is
+		 * not allowed at this stage. */
+		zend_rc_debug = false;
+#endif
 		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
 		clean_module_classes(module->module_number);
@@ -2970,7 +2979,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	if (module->module_started
 	 && !module->module_shutdown_func
 	 && module->type == MODULE_TEMPORARY) {
-		zend_unregister_ini_entries(module->module_number);
+		zend_unregister_ini_entries_ex(module->module_number, module->type);
 	}
 
 	/* Deinitialize module globals */
@@ -2995,6 +3004,10 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(module->handle);
 	}
+#endif
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
@@ -3061,7 +3074,6 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 				break;
 			}
 			module_destructor(module);
-			free(module);
 			zend_string_release_ex(key, 0);
 		} ZEND_HASH_MAP_FOREACH_END_DEL();
 	} else {

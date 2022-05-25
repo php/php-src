@@ -1,13 +1,7 @@
 #ifndef _CRYPT_FREESEC_H
 #define _CRYPT_FREESEC_H
 
-#ifdef PHP_WIN32
-# ifndef inline
-# define inline __inline
-# endif
-#endif
-
-#include "php_stdint.h"
+#include <stdint.h>
 
 #define MD5_HASH_MAX_LEN 120
 

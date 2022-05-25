@@ -12,7 +12,7 @@ if (substr(PHP_OS, 0, 3) != "WIN") { print "skip windows only"; }
 <?php
 
 $v1=100;
-$v2=0xffffffff / 4 + 0x1337;
+$v2=0x3fffffff + 0x1337;
 shm_attach($v1,$v2);
 
 ?>

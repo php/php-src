@@ -134,7 +134,7 @@ static ZEND_INI_MH(OnUpdateFileCache)
 		if (!ZSTR_LEN(new_value)) {
 			new_value = NULL;
 		} else {
-			zend_stat_t buf;
+			zend_stat_t buf = {0};
 
 		    if (!IS_ABSOLUTE_PATH(ZSTR_VAL(new_value), ZSTR_LEN(new_value)) ||
 			    zend_stat(ZSTR_VAL(new_value), &buf) != 0 ||

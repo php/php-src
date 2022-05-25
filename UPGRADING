@@ -19,6 +19,12 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Date:
+  . DateTime::createFromImmutable() now has a tentative return type of static,
+    previously it was DateTime.
+  . DateTimeImmutable::createFromMutable() now has a tentative return type of static,
+    previously it was DateTimeImmutable.
+
 - Standard:
   . strtolower() and strtoupper() are no longer locale-sensitive. They now
     perform ASCII case conversion, as if the locale were "C". Use
@@ -50,6 +56,9 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/redact_parameters_in_back_traces
   . It is now possible to use null and false as standalone types.
     RFC: https://wiki.php.net/rfc/null-false-standalone-types
+  . Added support for readonly classes.
+    RFC: https://wiki.php.net/rfc/readonly_classes
+
 
 - Curl:
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
@@ -106,6 +115,10 @@ PHP 8.2 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
 
+  . The "${var}" and "${expr}" style string interpolations are deprecated and
+    will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
+    RFC: https://wiki.php.net/rfc/deprecate_dollar_brace_string_interpolation
+
 - Mbstring:
   . Use of QPrint, Base64, Uuencode, and HTML-ENTITIES 'text encodings' is
     deprecated for all Mbstring functions. Unlike all the other text
@@ -133,6 +146,10 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- Reflection:
+  . ReflectionFunction::isAnonymous()
+  . ReflectionMethod::hasPrototype()
 
 - Sodium:
   . sodium_crypto_stream_xchacha20_xor_ic()
@@ -185,9 +202,12 @@ PHP 8.2 UPGRADE NOTES
 
 - Curl:
   . CURLOPT_XFERINFOFUNCTION
+  . CURLOPT_MAXFILESIZE_LARGE
 
 - Sockets:
   . SO_INCOMING_CPU
+  . TCP_NOTSENT_LOWAT
+  . SO_MEMINFO
 
 ========================================
 11. Changes to INI File Handling
@@ -205,6 +225,9 @@ PHP 8.2 UPGRADE NOTES
   . Since building against Oracle Client 10g is no longer supported anyway,
     the configuration option --with-oci8 has been dropped. --with-oci8-11g,
     --with-oci8-12c and --with-oci8-19 are still supported.
+
+- Zip:
+  . The Zip extension is now built as shared library (DLL) by default.
 
 ========================================
 13. Other Changes

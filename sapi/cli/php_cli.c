@@ -234,7 +234,7 @@ static void print_extensions(void) /* {{{ */
 #define STDERR_FILENO 2
 #endif
 
-static inline int sapi_cli_select(php_socket_t fd)
+static inline bool sapi_cli_select(php_socket_t fd)
 {
 	fd_set wfd;
 	struct timeval tv;
@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(bool no_close) /* {{{ */
+static void cli_register_file_handles(void) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -536,17 +536,19 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
 
+	/* Release stream resources, but don't free the underlying handles. Othewrise,
+	 * extensions which write to stderr or company during mshutdown/gshutdown
+	 * won't have the expected functionality.
+	 */
+	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
 		if (s_out) php_stream_close(s_out);
 		if (s_err) php_stream_close(s_err);
 		return;
-	}
-
-	if (no_close) {
-		s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
 	}
 
 	s_in_process = s_in;
@@ -572,7 +574,7 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
 /* {{{ cli_seek_file_begin */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
+static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *script_file)
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
@@ -609,9 +611,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
-	int interactive=0;
+	bool interactive = false;
 	const char *param_error=NULL;
-	int hide_argv = 0;
+	bool hide_argv = false;
 	int num_repeats = 1;
 	pid_t pid = getpid();
 
@@ -698,7 +700,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 						break;
 					}
 
-					interactive=1;
+					interactive = true;
 				}
 				break;
 
@@ -818,7 +820,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				zend_load_extension(php_optarg);
 				break;
 			case 'H':
-				hide_argv = 1;
+				hide_argv = true;
 				break;
 			case 10:
 				behavior=PHP_MODE_REFLECTION_FUNCTION;
@@ -894,7 +896,7 @@ do_repeat:
 		}
 		if (script_file) {
 			virtual_cwd_activate();
-			if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+			if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 				goto err;
 			} else {
 				char real_path[MAXPATHLEN];
@@ -954,7 +956,7 @@ do_repeat:
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
 			if (script_file) {
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+				cli_register_file_handles();
 			}
 
 			if (interactive) {
@@ -964,11 +966,12 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_LINT:
-			EG(exit_status) = php_lint_script(&file_handle);
-			if (EG(exit_status) == SUCCESS) {
+			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
+				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
+				EG(exit_status) = 255;
 			}
 			break;
 		case PHP_MODE_STRIP:
@@ -989,7 +992,7 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+			cli_register_file_handles();
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -1004,7 +1007,7 @@ do_repeat:
 					file_handle.filename = NULL;
 				}
 
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+				cli_register_file_handles();
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
@@ -1022,7 +1025,7 @@ do_repeat:
 						zend_eval_string_ex(exec_run, NULL, "Command line run code", 1);
 					} else {
 						if (script_file) {
-							if (cli_seek_file_begin(&file_handle, script_file) != SUCCESS) {
+							if (cli_seek_file_begin(&file_handle, script_file) == FAILURE) {
 								EG(exit_status) = 1;
 							} else {
 								CG(skip_shebang) = 1;

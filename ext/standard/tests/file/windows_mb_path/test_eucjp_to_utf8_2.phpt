@@ -21,8 +21,8 @@ dir_eucjp
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('eucjp', 'utf-8', "テストマルチバイト・パス"); // EUCJP string
-$prefix = create_data("dir_eucjp", "${item}42}");
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_eucjp", "{$item}42}");
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

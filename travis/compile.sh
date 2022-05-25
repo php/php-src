@@ -68,6 +68,7 @@ $S390X_CONFIG \
 --with-ffi \
 --with-sodium \
 --enable-zend-test=shared \
+--enable-dl-test=shared \
 --enable-werror \
 --with-pear
 

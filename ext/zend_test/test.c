@@ -291,6 +291,15 @@ static ZEND_FUNCTION(zend_weakmap_dump)
 	RETURN_ARR(zend_array_dup(&ZT_G(global_weakmap)));
 }
 
+static ZEND_FUNCTION(zend_get_current_func_name)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    zend_string *function_name = get_function_or_method_name(EG(current_execute_data)->prev_execute_data->func);
+
+    RETURN_STR(function_name);
+}
+
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
 static ZEND_FUNCTION(zend_iterable)
 {
@@ -486,6 +495,7 @@ static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);
@@ -610,6 +620,10 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 	}
 
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
+	if (ZT_G(print_stderr_mshutdown)) {
+		fprintf(stderr, "[zend-test] MSHUTDOWN\n");
+	}
 
 	return SUCCESS;
 }

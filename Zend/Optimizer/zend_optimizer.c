@@ -184,6 +184,9 @@ zend_result zend_optimizer_eval_special_func_call(
 	if (zend_string_equals_literal(name, "ini_get")) {
 		zend_ini_entry *ini_entry = zend_hash_find_ptr(EG(ini_directives), arg);
 		if (!ini_entry) {
+			if (PG(enable_dl)) {
+				return FAILURE;
+			}
 			ZVAL_FALSE(result);
 		} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
 			return FAILURE;
