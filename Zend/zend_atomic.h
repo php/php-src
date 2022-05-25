@@ -19,10 +19,6 @@
 
 #include <stdbool.h>
 
-#ifndef __has_feature
-#define __has_feature(x) 0
-#endif
-
 #define ZEND_GCC_PREREQ(x, y) \
 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
 
@@ -140,18 +136,13 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 
 #elif HAVE_NO_ATOMICS
 
-#define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
+#error No atomics support detected. Please open an issue with platform details.
 
-/* Yes, these are not guaranteed to be atomic. Understand that previously
- * atomics were never used, so the fact they are sometimes used is an
- * improvement. As more platforms support C11 atomics, or as we add support
- * for more platforms through intrinsics/asm, this should be used less and
- * less until it can be removed.
- * At the time of this writing, all platforms in CI avoided this fallback,
- * so we emit an error. If there ends up being some platform that needs it,
- * we can remove the error or add support for whatever platform that is.
+/* If there is a platform without atomics support, either:
+ *  1. Add support for it.
+ *  2. Remove the #error above and use the below non-atomic versions.
  */
-#error No atomics support detected. Please open an issue with platform deatils.
+#define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
 	obj->value = desired;
