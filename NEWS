@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-8338 (Intel CET is disabled unintentionally). (Chen, Hu)
+  . Fixed leak in Enum::from/tryFrom for internal enums when using JIT (ilutov)
 
 - Date:
   . Fixed bug #72963 (Null-byte injection in CreateFromFormat and related
