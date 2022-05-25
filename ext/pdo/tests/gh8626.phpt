@@ -2,10 +2,10 @@
 GH-8626: PDOStatement->execute() failed, then execute successfully, errorInfo() information is incorrect
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!strncasecmp(getenv('PDOTEST_DSN'), 'mysql', strlen('mysql'))) die('skip not relevant for mysql driver');
+if (!str_starts_with(getenv('PDOTEST_DSN'), 'mysql')) die('skip non-mysql drivers');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
