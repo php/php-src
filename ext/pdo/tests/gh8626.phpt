@@ -17,8 +17,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-@$db->exec("DROP TABLE test");
-$db->exec("CREATE TABLE test (x int)");
+$db->exec("SET SESSION sql_mode=CONCAT((select @@sql_mode),',STRICT_TRANS_TABLES')");
+@$db->exec('DROP TABLE test');
+$db->exec('CREATE TABLE test (x int)');
 
 $stmt = $db->prepare('INSERT INTO test VALUES(?)');
 
