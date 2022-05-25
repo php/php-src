@@ -1525,7 +1525,9 @@ function gen_specs($f, $prolog, $specs) {
         $last = $num;
         out($f, "$prolog$def,\n");
     }
-    out($f, "$prolog$lastdef\n");
+    while ($last++ < 255) {
+        out($f, "$prolog$lastdef,\n");
+    }
 }
 
 // Generates handler for undefined opcodes (CALL threading model)
