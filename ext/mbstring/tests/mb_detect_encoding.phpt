@@ -15,6 +15,7 @@ $euc_jp = "\xC6\xFC\xCB\xDC\xB8\xEC\xA5\xC6\xA5\xAD\xA5\xB9\xA5\xC8\xA4\xC7\xA4\
 // UTF-8
 $polish1 = "Zażółć gęślą jaźń.";
 $polish2 = "Wół poszedł spać bardzo wcześnie. A to zdanie bez ogonka.";
+$hungarian = "Árvíztűrő tükörfúrógép";
 
 echo "== BASIC TEST ==\n";
 
@@ -308,6 +309,8 @@ $czechEncodings = [
     // 'ISO-8859-2' // We are not able to accurately distinguish UTF-8 and ISO-8859-2
 ];
 test($czechStrings, $czechEncodings);
+
+test([$hungarian], ['UTF-8', 'UTF-16', 'Windows-1252']);
 
 echo "Done!\n";
 
