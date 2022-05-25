@@ -5,6 +5,7 @@ GH-8626: PDOStatement->execute() failed, then execute successfully, errorInfo() 
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'mysql', strlen('mysql'))) die('skip not relevant for mysql driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
