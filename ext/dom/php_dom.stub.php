@@ -568,7 +568,7 @@ final class DOMException extends Exception
      * Intentionally left untyped for BC reasons
      * @var int
      */
-    public $code = 0;
+    public $code = 0; // TODO add proper type (i.e. int|string)
 }
 
 class DOMText extends DOMCharacterData
