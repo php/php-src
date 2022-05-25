@@ -130,7 +130,7 @@ branch.
 ## FAQ
 
 Q. How do I report a security issue?\
-A. Please report it on <http://bugs.php.net>, choosing type "Security".
+A. Please report it on <https://bugs.php.net>, choosing type "Security".
 This will automatically make it private. If for some reason you can not
 do that, or need to talk to somebody about a PHP security issue that is
 not exactly a bug report, please write to security@php.net.
