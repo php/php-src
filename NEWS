@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
     (Derick)
 
+- PDO ODBC:
+  . Fixed errorInfo() result on successful PDOStatement->execute(). (Yurunsoft)
+
 09 Jun 2022, PHP 8.0.20
 
 - CLI:
