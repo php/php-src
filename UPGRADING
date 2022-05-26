@@ -189,6 +189,10 @@ PHP 8.2 UPGRADE NOTES
     of AVIF images. Previously, the dimensions have been reported as 0x0, and
     bits and channels have not been reported at all.
 
+- Tidy:
+  . tidy properties are now properly declared.
+  . tidyNode properties are now properly declared as readonly.
+
 - Zip:
   . extension updated to 1.20.0 with new methods:
     ZipArchive::clearError, getStreamName and getStreamIndex
