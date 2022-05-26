@@ -2382,7 +2382,7 @@ PHP_FUNCTION(date_create_from_format)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(format_str, format_str_len)
-		Z_PARAM_STRING(time_str, time_str_len)
+		Z_PARAM_PATH(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2404,7 +2404,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(format_str, format_str_len)
-		Z_PARAM_STRING(time_str, time_str_len)
+		Z_PARAM_PATH(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(timezone_object, date_ce_timezone)
 	ZEND_PARSE_PARAMETERS_END();
@@ -2804,7 +2804,7 @@ PHP_FUNCTION(date_parse_from_format)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(format)
-		Z_PARAM_STR(date)
+		Z_PARAM_PATH_STR(date)
 	ZEND_PARSE_PARAMETERS_END();
 
 	parsed_time = timelib_parse_from_format(ZSTR_VAL(format), ZSTR_VAL(date), ZSTR_LEN(date), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);

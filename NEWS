@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed Haiku ZTS builds. (David Carlier)
 
 - Date:
+  . Fixed bug #72963 (Null-byte injection in CreateFromFormat and related
+    functions). (Derick)
   . Fixed bug GH-8471 (Segmentation fault when converting immutable and mutable
     DateTime instances created using reflection). (Derick)
 
