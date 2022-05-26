@@ -34,25 +34,25 @@ $stmt->closeCursor();
 var_dump($stmt->execute([1]), $stmt->errorCode(), $stmt->errorInfo());
 ?>
 ===DONE===
---EXPECTREGEX--
-bool\(false\)
-string\(\d+\) "[^"]+"
-array\(3\) {
-  \[0\]=>
-  string\(\d+\) "[^"]+"
-  \[1\]=>
-  int\(\d+\)
-  \[2\]=>
-  string\(\d+\) "[^"]+((.+".+)*[^"]+)?"
+--EXPECTF--
+bool(false)
+string(%d) "%s"
+array(3) {
+  [0]=>
+  string(%d) "%s"
+  [1]=>
+  int(%d)
+  [2]=>
+  string(%d) "%s%w%S"
 }
-bool\(true\)
-string\(5\) "00000"
-array\(3\) {
-  \[0\]=>
-  string\(5\) "00000"
-  \[1\]=>
+bool(true)
+string(5) "00000"
+array(3) {
+  [0]=>
+  string(5) "00000"
+  [1]=>
   NULL
-  \[2\]=>
+  [2]=>
   NULL
 }
 ===DONE===
