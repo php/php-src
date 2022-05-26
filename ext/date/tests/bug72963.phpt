@@ -12,13 +12,13 @@ foreach ($strings as $string) {
 	echo "\nCovering string: ", addslashes($string), "\n\n";
 
 	try {
-		$d1 = DateTime::createFromFormat('m/d/Y', $string);
+		$d1 = DateTime::createFromFormat('!m/d/Y', $string);
 	} catch (ValueError $v) {
 		echo $v->getMessage(), "\n";
 	}
 
 	try {
-		$d2 = DateTimeImmutable::createFromFormat('m/d/Y', $string);
+		$d2 = DateTimeImmutable::createFromFormat('!m/d/Y', $string);
 	} catch (ValueError $v) {
 		echo $v->getMessage(), "\n";
 	}
@@ -37,7 +37,7 @@ Covering string: 8/8/2016
 
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(26) "2016-08-08 13:52:31.000000"
+  string(26) "2016-08-08 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -45,7 +45,7 @@ object(DateTime)#1 (3) {
 }
 object(DateTimeImmutable)#2 (3) {
   ["date"]=>
-  string(26) "2016-08-08 13:52:31.000000"
+  string(26) "2016-08-08 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
