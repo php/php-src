@@ -27,7 +27,7 @@ var_dump(tidy_get_root($tidy)->child[0]->hasChildren());
 var_dump(tidy_get_root($tidy)->child[0]->child[0]->hasChildren());
 
 ?>
---EXPECT--
+--EXPECTF--
 object(tidy)#1 (2) {
   ["errorBuffer"]=>
   NULL
@@ -35,14 +35,14 @@ object(tidy)#1 (2) {
   NULL
 }
 -------
-string(82) "<html>
+string(%d) "<html>
 <?php echo "xpto;" ?>
 <head>
 <title></title>
 </head>
 <body>
 </body>
-</html>"
+%s"
 -------
 bool(true)
 bool(true)
