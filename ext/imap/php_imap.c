@@ -62,6 +62,7 @@ MAILSTREAM DEFAULTPROTO;
 #define CRLF	"\015\012"
 #define CRLF_LEN sizeof("\015\012") - 1
 #define PHP_EXPUNGE 32768
+#define PHP_XOAUTH2 65536
 #define PHP_IMAP_ADDRESS_SIZE_BUF 10
 #ifndef SENDBUFLEN
 #define SENDBUFLEN 16385
@@ -471,6 +472,9 @@ PHP_MINIT_FUNCTION(imap)
 #if defined(HAVE_IMAP_KRB) && defined(HAVE_IMAP_AUTH_GSS)
 	auth_link(&auth_gss);		/* link in the gss authenticator */
 #endif
+#ifdef HAVE_IMAP_XOAUTH2
+	auth_link(&auth_oa2);		/* link in the oauth2 authenticator */
+#endif
 	auth_link(&auth_pla);		/* link in the plain authenticator */
 #endif
 
@@ -536,6 +540,13 @@ PHP_MINIT_FUNCTION(imap)
 	*/
 	REGISTER_LONG_CONSTANT("CL_EXPUNGE", PHP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
 	/* expunge silently */
+
+	/*
+	This flag is not recognized by c-client, it's only used by PHP to control whether the xoauth2
+	authenticator should be active or not
+	 */
+	REGISTER_LONG_CONSTANT("OP_XOAUTH2", PHP_XOAUTH2, CONST_PERSISTENT | CONST_CS);
+	/* enable xoauth2 authentication */
 
 	/* Fetch options */
 
@@ -790,10 +801,20 @@ PHP_FUNCTION(imap_open)
 	 * the CL_EXPUNGE flag which will expunge when the mailbox is closed (be that manually, or via the
 	 * IMAP\Connection object being destroyed naturally at the end of the PHP script */
 	if (flags && ((flags & ~(OP_READONLY | OP_ANONYMOUS | OP_HALFOPEN | PHP_EXPUNGE | OP_DEBUG | OP_SHORTCACHE
-	 		| OP_SILENT | OP_PROTOTYPE | OP_SECURE)) != 0)) {
+			| OP_SILENT | OP_PROTOTYPE | OP_SECURE | PHP_XOAUTH2)) != 0)) {
 		zend_argument_value_error(4, "must be a bitmask of the OP_* constants, and CL_EXPUNGE");
 		RETURN_THROWS();
 	}
+
+#ifdef HAVE_IMAP_XOAUTH2
+	/* We only enable the XOAUTH2 authenticator if explicitly requested */
+	mail_parameters(NIL, (flags & PHP_XOAUTH2) ? ENABLE_AUTHENTICATOR : DISABLE_AUTHENTICATOR, (void *)"XOAUTH2");
+#else
+	if (flags & PHP_XOAUTH2) {
+		php_error_docref(NULL, E_WARNING, "Not compiled with XOAUTH2 support");
+		RETURN_FALSE;
+	}
+#endif
 
 	if (retries < 0) {
 		zend_argument_value_error(5, "must be greater than or equal to 0");
