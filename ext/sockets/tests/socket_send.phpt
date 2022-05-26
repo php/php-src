@@ -23,8 +23,10 @@ if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_OOB)===$stringSo
   print("okey\n");
 }
 
-if(!defined('MSG_EOR') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR)===$stringSocketLength){
-  print("okey\n");
+if (PHP_OS !== "Darwin") { // MSG_EOR seems unsupported on MacOS
+    if(!defined('MSG_EOR') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR)===$stringSocketLength){
+      print("okey\n");
+    }
 }
 
 if(!defined('MSG_EOF') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOF)===$stringSocketLength){
