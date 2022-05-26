@@ -13,6 +13,9 @@ echo "-------\n";
 
 $tidy = new tidy();
 $tidy->parseString('<html><?php echo "xpto;" ?></html>');
+var_dump($tidy->value);
+
+echo "-------\n";
 
 var_dump(tidy_get_root($tidy)->child[0]->isHtml());
 var_dump(tidy_get_root($tidy)->child[0]->child[0]->isPHP());
@@ -31,6 +34,15 @@ object(tidy)#1 (2) {
   ["value"]=>
   NULL
 }
+-------
+string(82) "<html>
+<?php echo "xpto;" ?>
+<head>
+<title></title>
+</head>
+<body>
+</body>
+</html>"
 -------
 bool(true)
 bool(true)
