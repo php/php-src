@@ -13,7 +13,7 @@ echo "-------\n";
 
 $tidy = new tidy();
 $tidy->parseString('<html><?php echo "xpto;" ?></html>');
-var_dump($tidy->value);
+var_dump(rtrim($tidy->value));
 
 echo "-------\n";
 
@@ -42,7 +42,7 @@ string(%d) "<html>
 </head>
 <body>
 </body>
-%s"
+</html>"
 -------
 bool(true)
 bool(true)
