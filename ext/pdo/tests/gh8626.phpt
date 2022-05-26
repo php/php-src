@@ -2,10 +2,13 @@
 GH-8626: PDOStatement->execute() failed, then execute successfully, errorInfo() information is incorrect
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip');
+if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
-if (!str_starts_with(getenv('PDOTEST_DSN'), 'mysql')) die('skip non-mysql drivers');
+$driver = substr(getenv('PDOTEST_DSN'), 0, strpos(getenv('PDOTEST_DSN'), ':'));
+if (!in_array($driver, array('mysql', 'pgsql', 'sqlite'))) {
+    die('skip not supported');
+}
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
@@ -17,38 +20,39 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-$db->exec("SET SESSION sql_mode=CONCAT((select @@sql_mode),',STRICT_TRANS_TABLES')");
-@$db->exec('DROP TABLE test');
-$db->exec('CREATE TABLE test (x int)');
+$db->exec('DROP TABLE test');
+$db->exec('CREATE TABLE test (x int NOT NULL)');
 
 $stmt = $db->prepare('INSERT INTO test VALUES(?)');
 
 // fail
-var_dump($stmt->execute([PHP_INT_MIN]), $stmt->errorCode(), $stmt->errorInfo());
+var_dump($stmt->execute([null]), $stmt->errorCode(), $stmt->errorInfo());
+
+$stmt->closeCursor();
 
 // success
 var_dump($stmt->execute([1]), $stmt->errorCode(), $stmt->errorInfo());
 ?>
 ===DONE===
---EXPECTF--
-bool(false)
-string(%d) "%s"
-array(3) {
-  [0]=>
-  string(%d) "%s"
-  [1]=>
-  int(%d)
-  [2]=>
-  string(%d) "%s"
+--EXPECTREGEX--
+bool\(false\)
+string\(\d+\) "[^"]+"
+array\(3\) {
+  \[0\]=>
+  string\(\d+\) "[^"]+"
+  \[1\]=>
+  int\(\d+\)
+  \[2\]=>
+  string\(\d+\) "[^"]+((.+".+)*[^"]+)?"
 }
-bool(true)
-string(5) "00000"
-array(3) {
-  [0]=>
-  string(5) "00000"
-  [1]=>
+bool\(true\)
+string\(5\) "00000"
+array\(3\) {
+  \[0\]=>
+  string\(5\) "00000"
+  \[1\]=>
   NULL
-  [2]=>
+  \[2\]=>
   NULL
 }
 ===DONE===
