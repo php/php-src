@@ -104,20 +104,18 @@ const ps_module ps_mod_files = {
 };
 
 
-static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
+static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, const zend_string *key)
 {
-	size_t key_len;
 	const char *p;
 	int i;
 	size_t n;
 
-	key_len = strlen(key);
-	if (!data || key_len <= data->dirdepth ||
-		buflen < (strlen(data->basedir) + 2 * data->dirdepth + key_len + 5 + sizeof(FILE_PREFIX))) {
+	if (!data || ZSTR_LEN(key) <= data->dirdepth ||
+		buflen < (strlen(data->basedir) + 2 * data->dirdepth + ZSTR_LEN(key) + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
 
-	p = key;
+	p = ZSTR_VAL(key);
 	memcpy(buf, data->basedir, data->basedir_len);
 	n = data->basedir_len;
 	buf[n++] = PHP_DIR_SEPARATOR;
@@ -127,8 +125,8 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	}
 	memcpy(buf + n, FILE_PREFIX, sizeof(FILE_PREFIX) - 1);
 	n += sizeof(FILE_PREFIX) - 1;
-	memcpy(buf + n, key, key_len);
-	n += key_len;
+	memcpy(buf + n, ZSTR_VAL(key), ZSTR_LEN(key));
+	n += ZSTR_LEN(key);
 	buf[n] = '\0';
 
 	return buf;
@@ -151,7 +149,7 @@ static void ps_files_close(ps_files *data)
 	}
 }
 
-static void ps_files_open(ps_files *data, const char *key)
+static void ps_files_open(ps_files *data, const zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
@@ -159,7 +157,7 @@ static void ps_files_open(ps_files *data, const char *key)
 #endif
 	int ret;
 
-	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
+	if (data->fd < 0 || !data->lastkey || strcmp(ZSTR_VAL(key), data->lastkey)) {
 		if (data->lastkey) {
 			efree(data->lastkey);
 			data->lastkey = NULL;
@@ -167,7 +165,7 @@ static void ps_files_open(ps_files *data, const char *key)
 
 		ps_files_close(data);
 
-		if (php_session_valid_key(key) == FAILURE) {
+		if (php_session_valid_key(ZSTR_VAL(key)) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return;
 		}
@@ -177,7 +175,7 @@ static void ps_files_open(ps_files *data, const char *key)
 			return;
 		}
 
-		data->lastkey = estrdup(key);
+		data->lastkey = estrdup(ZSTR_VAL(key));
 
 		/* O_NOFOLLOW to prevent us from following evil symlinks */
 #ifdef O_NOFOLLOW
@@ -233,7 +231,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
        data->lastkey and reopen when it is needed. */
-	ps_files_open(data, ZSTR_VAL(key));
+	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -337,7 +335,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	return (nrdels);
 }
 
-static zend_result ps_files_key_exists(ps_files *data, const char *key)
+static zend_result ps_files_key_exists(ps_files *data, const zend_string *key)
 {
 	char buf[MAXPATHLEN];
 	zend_stat_t sbuf = {0};
@@ -476,7 +474,7 @@ PS_READ_FUNC(files)
 	zend_stat_t sbuf = {0};
 	PS_FILES_DATA;
 
-	ps_files_open(data, ZSTR_VAL(key));
+	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -571,7 +569,7 @@ PS_UPDATE_TIMESTAMP_FUNC(files)
 	int ret;
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
 	}
 
@@ -601,7 +599,7 @@ PS_DESTROY_FUNC(files)
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	if (!ps_files_path_create(buf, sizeof(buf), data, ZSTR_VAL(key))) {
+	if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
 	}
 
@@ -680,7 +678,7 @@ PS_CREATE_SID_FUNC(files)
 		}
 		/* Check collision */
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
-		if (data && ps_files_key_exists(data, ZSTR_VAL(sid)) == SUCCESS) {
+		if (data && ps_files_key_exists(data, sid) == SUCCESS) {
 			if (sid) {
 				zend_string_release_ex(sid, 0);
 				sid = NULL;
@@ -708,5 +706,5 @@ PS_VALIDATE_SID_FUNC(files)
 {
 	PS_FILES_DATA;
 
-	return ps_files_key_exists(data, ZSTR_VAL(key));
+	return ps_files_key_exists(data, key);
 }
