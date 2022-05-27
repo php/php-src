@@ -2784,7 +2784,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			num_args++;
 		}
 
-		bool rebuild_arginfo = false;
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && num_args) {
 			uint32_t i;
@@ -2792,9 +2791,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				zend_internal_arg_info *arg_info = &reg_function->internal_function.arg_info[i];
 				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
 				if (ZEND_TYPE_IS_SET(arg_info->type)) {
-					if (ZEND_TYPE_IS_ITERABLE_FALLBACK(arg_info->type)) {
-						rebuild_arginfo = true;
-					}
 					reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 				}
 #if ZEND_DEBUG
@@ -2809,14 +2805,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			}
 		}
 
+		/* Rebuild arginfos if parameter/property types and/or a return type are used */
 		if (reg_function->common.arg_info &&
 			(reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* Treat return type as an extra argument */
 			num_args++;
-			rebuild_arginfo = true;
-		}
-
-		if (rebuild_arginfo) {
 			/* convert "const char*" class type names into "zend_string*" */
 			uint32_t i;
 			zend_arg_info *arg_info = reg_function->common.arg_info - 1;
@@ -2865,7 +2858,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					}
 				}
 				if (ZEND_TYPE_IS_ITERABLE_FALLBACK(new_arg_info[i].type)) {
-					/* Do not warn?
+					/* Warning generated an extension load warning which is emitted for every test
 					zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
 						" regenerate the argument info via the php-src gen_stub build script");
 					*/
