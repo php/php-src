@@ -1979,6 +1979,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		spl_filesystem_file_free_line(intern);
 		intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
 		intern->u.file.current_line_len = Z_STRLEN(retval);
+		intern->u.file.lines_to_catch_up = 0;
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	} else {
