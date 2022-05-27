@@ -15,6 +15,6 @@ var_dump($fo->getFilename());
 var_dump($fo->getRealPath());
 ?>
 --EXPECTF--
-string(%d) "%sspl%stests"
+string(%d) "%sspl%etests%eSplFileObject"
 string(19) "fileobject_004.phpt"
-string(%d) "%sspl%stests%sfileobject_004.phpt"
+string(%d) "%sspl%etests%eSplFileObject%efileobject_004.phpt"

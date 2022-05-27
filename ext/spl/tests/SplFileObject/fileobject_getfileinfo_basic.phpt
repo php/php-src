@@ -21,24 +21,24 @@ var_dump($fi = $d->getFileInfo(), (string)$fi);
 --EXPECTF--
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
-  string(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
+  string(%d) "%sext%espl%etests%eSplFileObject%efileobject_getfileinfo_basic.php"
   ["fileName":"SplFileInfo":private]=>
   string(%d) "fileobject_getfileinfo_basic.php"
 }
-string(%d) "%sext%espl%etests%efileobject_getfileinfo_basic.php"
+string(%d) "%sext%espl%etests%eSplFileObject%efileobject_getfileinfo_basic.php"
 
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
-  string(%d) "%sext%espl%etests"
+  string(%d) "%sext%e%spl%etests%eSplFileObject"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "tests"
+  string(%d) "SplFileObject"
 }
-string(%d) "%sext%espl%etests"
+string(%d) "%sext%espl%etests%eSplFileObject"
 
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
-  string(%d) "%sext%espl%etests"
+  string(%d) "%sext%espl%etests%eSplFileObject"
   ["fileName":"SplFileInfo":private]=>
-  string(%d) "tests"
+  string(%d) "SplFileObject"
 }
-string(%d) "%sext%espl%etests"
+string(%d) "%sext%espl%etests%eSplFileObject"
