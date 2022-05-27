@@ -70,7 +70,7 @@ string(1) "4"
 int(5)
 string(1) "5"
 int(6)
-string(0) ""
+bool(false)
 ===B===
 int(0)
 string(1) "0"

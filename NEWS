@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed errorInfo() result on successful PDOStatement->execute(). (Yurunsoft)
   . Fixed handling of single-key connection strings. (Calvin Buckley)
 
+- SPL:
+  . Fixed bug GH-8563 (Different results for seek() on SplFileObject and SplTempFileObject). (Girgias)
+
 - Zip:
   . Fixed bug GH-8781 (ZipArchive::close deletes zip file without updating stat
     cache). (Remi)
