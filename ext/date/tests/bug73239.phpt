@@ -11,4 +11,4 @@ try {
 ?>
 --EXPECTF--
 Warning: ini_set(): Invalid date.timezone value 'dummy' in %sbug73239.php on line %d
-DateTime::__construct(): Invalid date.timezone value 'dummy', we selected the timezone 'UTC' for now.
+DateTime::__construct(): UTC was used as timezone, because the date.timezone value 'dummy' is invalid

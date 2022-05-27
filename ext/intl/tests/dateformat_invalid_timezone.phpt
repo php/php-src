@@ -15,4 +15,4 @@ try {
 }
 ?>
 --EXPECT--
-IntlDateFormatter::__construct(): Invalid date.timezone value 'Mars/Utopia_Planitia', we selected the timezone 'UTC' for now.
+IntlDateFormatter::__construct(): UTC was used as timezone, because the date.timezone value 'Mars/Utopia_Planitia' is invalid

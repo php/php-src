@@ -519,7 +519,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 		}
 
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-			php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s'", DATEG(default_timezone));
+			php_error_docref(NULL, E_WARNING, "UTC was used as timezone, because the date.timezone value '%s' is invalid", DATEG(default_timezone));
 			return "UTC";
 		}
 
