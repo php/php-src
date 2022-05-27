@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #72963 (Null-byte injection in CreateFromFormat and related
     functions). (Derick)
+  . Fixed bug #74671 (DST timezone abbreviation has incorrect offset). (Derick)
 
 - MBString:
   . mb_detect_encoding recognizes all letters in Czech alphabet (alexdowad)
