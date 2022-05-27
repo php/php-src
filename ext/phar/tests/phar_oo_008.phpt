@@ -107,8 +107,8 @@ __halt_compiler();
 2=>3|c|'e'
 ===5===
 0=>1|2|3
-1=>2|a|b
-2=>3|c|'e'
+2=>2|a|b
+4=>3|c|'e'
 ===6===
 MyCSVFile2::getCurrentLine
 1=>1|2|3
