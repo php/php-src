@@ -365,26 +365,6 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 	return 0;
 }
 
-static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_array *called_from)
-{
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-#ifdef _WIN32
-		/* ASLR */
-		return 1;
-#else
-		return 0;
-#endif
-	} else if (func->type == ZEND_USER_FUNCTION) {
-		if (func->common.fn_flags & ZEND_ACC_PRELOADED) {
-			return 0;
-		}
-		if (func->op_array.filename == called_from->filename && !func->op_array.scope) {
-			return 0;
-		}
-	}
-	return 1;
-}
-
 static zend_always_inline uint32_t zend_jit_trace_type_to_info_ex(zend_uchar type, uint32_t info)
 {
 	if (type == IS_UNKNOWN) {
