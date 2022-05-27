@@ -43,12 +43,14 @@ PHP                                                                        NEWS
     dropped. Oracle Client libraries 11.2 or newer are now required.
 
 - ODBC:
-  . Automatically quote username and password when needed. (Calvin Buckley)
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
 
 - PDO_ODBC:
   . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
     Buckley)
-  . Automatically quote username and password when needed. (Calvin Buckley)
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
 
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
