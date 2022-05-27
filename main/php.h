@@ -210,8 +210,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include <stdarg.h>
-#include <inttypes.h>
-#include <stdint.h>
 
 #include "zend_hash.h"
 #include "zend_alloc.h"

@@ -38,7 +38,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
   #define atoll atol
 #endif
 
-#include <inttypes.h>
 #include <stdint.h>
 
 #if SIZEOF_LONG_LONG > 4 && !defined(_LONG_LONG)

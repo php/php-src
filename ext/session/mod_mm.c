@@ -24,7 +24,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <inttypes.h>
 #include <stdint.h>
 
 #include "php_session.h"
