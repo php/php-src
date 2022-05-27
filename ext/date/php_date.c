@@ -3490,7 +3490,7 @@ static bool timezone_initialize(php_timezone_obj *tzobj, const char *tz, size_t 
 		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
 		timelib_free(dummy_t->tz_abbr);
 		efree(dummy_t);
-		return FAILURE;
+		return false;
 	}
 	if (not_found) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
