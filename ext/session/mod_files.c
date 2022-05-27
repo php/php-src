@@ -89,7 +89,7 @@
 #endif
 
 typedef struct {
-	char *lastkey;
+	zend_string *last_key;
 	char *basedir;
 	size_t basedir_len;
 	size_t dirdepth;
@@ -149,7 +149,7 @@ static void ps_files_close(ps_files *data)
 	}
 }
 
-static void ps_files_open(ps_files *data, const zend_string *key)
+static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
@@ -157,10 +157,10 @@ static void ps_files_open(ps_files *data, const zend_string *key)
 #endif
 	int ret;
 
-	if (data->fd < 0 || !data->lastkey || strcmp(ZSTR_VAL(key), data->lastkey)) {
-		if (data->lastkey) {
-			efree(data->lastkey);
-			data->lastkey = NULL;
+	if (data->fd < 0 || !data->last_key || !zend_string_equals(key, data->last_key)) {
+		if (data->last_key) {
+			zend_string_release_ex(data->last_key, /* persistent */ false);
+			data->last_key = NULL;
 		}
 
 		ps_files_close(data);
@@ -175,7 +175,7 @@ static void ps_files_open(ps_files *data, const zend_string *key)
 			return;
 		}
 
-		data->lastkey = estrdup(ZSTR_VAL(key));
+		data->last_key = zend_string_copy(key);
 
 		/* O_NOFOLLOW to prevent us from following evil symlinks */
 #ifdef O_NOFOLLOW
@@ -230,7 +230,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks
-       data->lastkey and reopen when it is needed. */
+       data->last_key and reopen when it is needed. */
 	ps_files_open(data, key);
 	if (data->fd < 0) {
 		return FAILURE;
@@ -445,9 +445,9 @@ PS_CLOSE_FUNC(files)
 
 	ps_files_close(data);
 
-	if (data->lastkey) {
-		efree(data->lastkey);
-		data->lastkey = NULL;
+	if (data->last_key) {
+		zend_string_release_ex(data->last_key, /* persistent */ false);
+		data->last_key = NULL;
 	}
 
 	efree(data->basedir);
