@@ -1,5 +1,7 @@
 --TEST--
 Bug #72963 (Null-byte injection in CreateFromFormat and related functions)
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 $strings = [
