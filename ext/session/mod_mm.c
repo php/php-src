@@ -64,7 +64,7 @@ static ps_mm *ps_mm_instance = NULL;
 # define ps_mm_debug(a)
 #endif
 
-static inline uint32_t ps_sd_hash(const char *data, int len)
+static inline uint32_t ps_sd_hash(const char *data, size_t len)
 {
 	uint32_t h;
 	const char *e = data + len;
@@ -110,7 +110,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 {
 	uint32_t hv, slot;
 	ps_sd *sd;
-	int keylen;
+	size_t keylen;
 
 	keylen = strlen(key);
 
@@ -172,7 +172,7 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 	mm_free(data->mm, sd);
 }
 
-static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
+static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, bool rw)
 {
 	uint32_t hv, slot;
 	ps_sd *ret, *prev;
@@ -201,7 +201,7 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 	return ret;
 }
 
-static int ps_mm_key_exists(ps_mm *data, const char *key)
+static zend_result ps_mm_key_exists(ps_mm *data, const char *key)
 {
 	ps_sd *sd;
 
@@ -221,7 +221,7 @@ const ps_module ps_mod_mm = {
 
 #define PS_MM_DATA ps_mm *data = PS_GET_MOD_DATA()
 
-static int ps_mm_initialize(ps_mm *data, const char *path)
+static zend_result ps_mm_initialize(ps_mm *data, const char *path)
 {
 	data->owner = getpid();
 	data->mm = mm_create(0, path);
@@ -242,7 +242,6 @@ static int ps_mm_initialize(ps_mm *data, const char *path)
 
 static void ps_mm_destroy(ps_mm *data)
 {
-	int h;
 	ps_sd *sd, *next;
 
 	/* This function is called during each module shutdown,
@@ -252,7 +251,7 @@ static void ps_mm_destroy(ps_mm *data)
 		return;
 	}
 
-	for (h = 0; h < data->hash_max + 1; h++) {
+	for (int h = 0; h < data->hash_max + 1; h++) {
 		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_sd_destroy(data, sd);
@@ -266,11 +265,11 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	int save_path_len = strlen(PS(save_path));
-	int mod_name_len = strlen(sapi_module.name);
-	int euid_len;
+	size_t save_path_len = strlen(PS(save_path));
+	size_t mod_name_len = strlen(sapi_module.name);
+	size_t euid_len;
 	char *ps_mm_path, euid[30];
-	int ret;
+	zend_result ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
 	if (!ps_mm_instance) {
@@ -302,7 +301,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 
 	efree(ps_mm_path);
 
-	if (ret != SUCCESS) {
+	if (ret == FAILURE) {
 		free(ps_mm_instance);
 		ps_mm_instance = NULL;
 		return FAILURE;
@@ -344,7 +343,7 @@ PS_READ_FUNC(mm)
 {
 	PS_MM_DATA;
 	ps_sd *sd;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 
 	mm_lock(data->mm, MM_LOCK_RD);
 
