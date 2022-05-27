@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.21
 
+- Date:
+  . Fixed bug #74671 (DST timezone abbreviation has incorrect offset). (Derick)
 
 09 Jun 2022, PHP 8.0.20
 
