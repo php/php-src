@@ -57,6 +57,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
   . Added SO_MEMINFO socket option. (David Carlier)
+  . Added SO_RTABLE socket option (OpenBSD), equivalent of SO_MARK (Linux).
+    (David Carlier)
+  . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
+    options. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)

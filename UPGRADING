@@ -210,8 +210,13 @@ PHP 8.2 UPGRADE NOTES
 
 - Sockets:
   . SO_INCOMING_CPU
-  . TCP_NOTSENT_LOWAT
   . SO_MEMINFO
+  . SO_RTABLE (OpenBSD)
+  . TCP_KEEPALIVE (MacOS)
+  . TCP_KEEPCNT (Linux, others)
+  . TCP_KEEPIDLE (Linux, others)
+  . TCP_KEEPINTVL (Linux, others)
+  . TCP_NOTSENT_LOWAT
 
 ========================================
 11. Changes to INI File Handling
