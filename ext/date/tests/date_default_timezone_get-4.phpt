@@ -7,5 +7,5 @@ date.timezone=Incorrect/Zone
     echo date_default_timezone_get(), "\n";
 ?>
 --EXPECTF--
-Warning: date_default_timezone_get(): UTC was used as timezone, because the date.timezone value 'Incorrect/Zone' is invalid in %sdate_default_timezone_get-4.php on line %d
+Warning: PHP Startup: Invalid date.timezone value 'Incorrect/Zone', using 'UTC' instead in %s on line %d
 UTC
