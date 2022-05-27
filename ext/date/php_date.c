@@ -3438,6 +3438,12 @@ static int timezone_initialize(php_timezone_obj *tzobj, const char *tz, size_t t
 
 	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	dummy_t->dst = dst;
+	if (!not_found && (*tz != '\0')) {
+		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
+		timelib_free(dummy_t->tz_abbr);
+		efree(dummy_t);
+		return FAILURE;
+	}
 	if (not_found) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
 		efree(dummy_t);
