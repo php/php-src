@@ -85,7 +85,8 @@ struct _spl_filesystem_object {
 			char               *current_line;
 			size_t             current_line_len;
 			size_t             max_line_len;
-			zend_long               current_line_num;
+			zend_long          current_line_num;
+			zend_long          lines_to_catch_up;
 			zval               zresource;
 			zend_function      *func_getCurr;
 			char               delimiter;

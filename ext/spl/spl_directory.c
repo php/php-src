@@ -2047,10 +2047,12 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	}
 	if (-1 == php_stream_rewind(intern->u.file.stream)) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot rewind file %s", ZSTR_VAL(intern->file_name));
-	} else {
-		spl_filesystem_file_free_line(intern);
-		intern->u.file.current_line_num = 0;
+		return;
 	}
+
+	spl_filesystem_file_free_line(intern);
+	intern->u.file.current_line_num = 0;
+	intern->u.file.lines_to_catch_up = 0;
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
 		spl_filesystem_file_read_line(this_ptr, intern, /* silent */ true);
 	}
@@ -2191,6 +2193,8 @@ PHP_METHOD(SplFileObject, fgets)
 	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1) == FAILURE) {
 		RETURN_THROWS();
 	}
+	/* Inform current() that it needs to catch up a line */
+	intern->u.file.lines_to_catch_up++;
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
 } /* }}} */
 
@@ -2205,8 +2209,18 @@ PHP_METHOD(SplFileObject, current)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
+	/* No lines have been read yet (rewind or just opened file) */
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
 		spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true);
+	}
+	/* next() of fgets() has been called and we need to read the line which is now pointed at */
+	if (intern->u.file.lines_to_catch_up > 0) {
+		ZEND_ASSERT(intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval));
+		for (; 0 < intern->u.file.lines_to_catch_up; intern->u.file.lines_to_catch_up--) {
+			/* Free fetched line */
+			spl_filesystem_file_free_line(intern);
+			spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true);
+		}
 	}
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
@@ -2242,9 +2256,11 @@ PHP_METHOD(SplFileObject, next)
 		RETURN_THROWS();
 	}
 
-	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
+		spl_filesystem_file_free_line(intern);
 		spl_filesystem_file_read_line(ZEND_THIS, intern, /* silent */ true);
+	} else {
+		intern->u.file.lines_to_catch_up++;
 	}
 	intern->u.file.current_line_num++;
 } /* }}} */
