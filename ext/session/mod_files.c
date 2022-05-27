@@ -155,7 +155,7 @@ static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
-    struct stat sbuf;
+    struct stat sbuf = {0};
 #endif
 	int ret;
 
@@ -226,7 +226,7 @@ static void ps_files_open(ps_files *data, const char *key)
 	}
 }
 
-static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
+static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
 	size_t n = 0;
 
@@ -337,7 +337,7 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	return (nrdels);
 }
 
-static int ps_files_key_exists(ps_files *data, const char *key)
+static zend_result ps_files_key_exists(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 	zend_stat_t sbuf = {0};
