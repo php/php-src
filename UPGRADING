@@ -190,6 +190,9 @@ PHP 8.2 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Date:
+  . DatePeriod properties are now properly declared.
+
 - Intl:
   . IntlBreakIterator, IntlRuleBasedBreakIterator, IntlCodePointBreakIterator,
     IntlPartsIterator, IntlCalendar, IntlCalendar, Collator, IntlIterator,
