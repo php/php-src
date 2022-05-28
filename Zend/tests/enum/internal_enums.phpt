@@ -21,6 +21,9 @@ var_dump(ZendTestStringEnum::Foo->value);
 var_dump($bar = ZendTestStringEnum::from("Test2"));
 var_dump($bar === ZendTestStringEnum::Bar);
 var_dump(ZendTestStringEnum::tryFrom("Test3"));
+var_dump(ZendTestStringEnum::tryFrom(42));
+var_dump(ZendTestStringEnum::tryFrom(43));
+var_dump(ZendTestStringEnum::tryFrom(0));
 var_dump(ZendTestStringEnum::cases());
 
 var_dump($s = serialize($foo));
@@ -47,13 +50,18 @@ string(5) "Test1"
 enum(ZendTestStringEnum::Bar)
 bool(true)
 NULL
-array(3) {
+enum(ZendTestStringEnum::FortyTwo)
+NULL
+NULL
+array(4) {
   [0]=>
   enum(ZendTestStringEnum::Foo)
   [1]=>
   enum(ZendTestStringEnum::Bar)
   [2]=>
   enum(ZendTestStringEnum::Baz)
+  [3]=>
+  enum(ZendTestStringEnum::FortyTwo)
 }
 string(30) "E:22:"ZendTestStringEnum:Foo";"
 enum(ZendTestStringEnum::Foo)

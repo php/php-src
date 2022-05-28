@@ -210,6 +210,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 {
 	zend_class_entry *ce = execute_data->func->common.scope;
+	bool release_string = false;
 	zend_string *string_key;
 	zend_long long_key;
 
@@ -221,17 +222,33 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 
 		case_name_zv = zend_hash_index_find(ce->backed_enum_table, long_key);
 	} else {
-		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_STR(string_key)
-		ZEND_PARSE_PARAMETERS_END();
-
 		ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+
+		if (ZEND_ARG_USES_STRICT_TYPES()) {
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR(string_key)
+			ZEND_PARSE_PARAMETERS_END();
+		} else {
+			// We allow long keys so that coercion to string doesn't happen implicitly. The JIT
+			// skips deallocation of params that don't require it. In the case of from/tryFrom
+			// passing int to from(int|string) looks like no coercion will happen, so the JIT
+			// won't emit a dtor call. Thus we allocate/free the string manually.
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR_OR_LONG(string_key, long_key)
+			ZEND_PARSE_PARAMETERS_END();
+
+			if (string_key == NULL) {
+				release_string = true;
+				string_key = zend_long_to_str(long_key);
+			}
+		}
+
 		case_name_zv = zend_hash_find(ce->backed_enum_table, string_key);
 	}
 
 	if (case_name_zv == NULL) {
 		if (try) {
-			RETURN_NULL();
+			goto return_null;
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
@@ -240,7 +257,7 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
 			zend_value_error("\"%s\" is not a valid backing value for enum \"%s\"", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
 		}
-		RETURN_THROWS();
+		goto throw;
 	}
 
 	// TODO: We might want to store pointers to constants in backed_enum_table instead of names,
@@ -251,11 +268,26 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 	zval *case_zv = &c->value;
 	if (Z_TYPE_P(case_zv) == IS_CONSTANT_AST) {
 		if (zval_update_constant_ex(case_zv, c->ce) == FAILURE) {
-			RETURN_THROWS();
+			goto throw;
 		}
 	}
 
-	ZVAL_COPY(return_value, case_zv);
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_COPY(case_zv);
+
+throw:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_THROWS();
+
+return_null:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_NULL();
 }
 
 static ZEND_NAMED_FUNCTION(zend_enum_from_func)
