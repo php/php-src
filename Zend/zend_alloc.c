@@ -2915,6 +2915,33 @@ ZEND_API void start_memory_manager(void)
 	REAL_PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
 #  endif
 #else
+	HANDLE token;
+	DWORD err;
+	BOOL r;
+	TOKEN_PRIVILEGES priv = {0};
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token)) {
+		stderr_last_error("Can't access process token");
+		return;
+	}
+	
+	if (!LookupPrivilegeValueA(NULL, "SeLockMemoryPrivilege", &priv.Privileges[0].Luid)) {
+		CloseHandle(token);
+		stderr_last_error("Can't access privilege lookup");
+		return;
+	}
+	
+	priv.PrivilegeCount = 1;
+	priv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	
+	r = AdjustTokenPrivileges(token, FALSE, &priv, sizeof(priv), NULL, 0);
+	err = GetLastError();
+	
+	if (!r || err != ERROR_SUCCESS) {
+		CloseHandle(token);
+		return;
+	}
+	
+	CloseHandle(token);
 	minlgsz = (zend_long)GetLargePageMinimum();
 #endif
 }
