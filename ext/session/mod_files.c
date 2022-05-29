@@ -90,8 +90,7 @@
 
 typedef struct {
 	zend_string *last_key;
-	char *basedir;
-	size_t basedir_len;
+	zend_string *basedir;
 	size_t dirdepth;
 	size_t st_size;
 	int filemode;
@@ -111,13 +110,13 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 	size_t n;
 
 	if (!data || ZSTR_LEN(key) <= data->dirdepth ||
-		buflen < (strlen(data->basedir) + 2 * data->dirdepth + ZSTR_LEN(key) + 5 + sizeof(FILE_PREFIX))) {
+		buflen < (ZSTR_LEN(data->basedir) + 2 * data->dirdepth + ZSTR_LEN(key) + 5 + sizeof(FILE_PREFIX))) {
 		return NULL;
 	}
 
 	p = ZSTR_VAL(key);
-	memcpy(buf, data->basedir, data->basedir_len);
-	n = data->basedir_len;
+	memcpy(buf, ZSTR_VAL(data->basedir), ZSTR_LEN(data->basedir));
+	n = ZSTR_LEN(data->basedir);
 	buf[n++] = PHP_DIR_SEPARATOR;
 	for (i = 0; i < (int)data->dirdepth; i++) {
 		buf[n++] = *p++;
@@ -277,7 +276,7 @@ static zend_result ps_files_write(ps_files *data, zend_string *key, zend_string 
 	return SUCCESS;
 }
 
-static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
+static int ps_files_cleanup_dir(const zend_string *dirname, zend_long maxlifetime)
 {
 	DIR *dir;
 	struct dirent *entry;
@@ -285,27 +284,24 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
-	size_t dirname_len;
 
-	dir = opendir(dirname);
+	dir = opendir(ZSTR_VAL(dirname));
 	if (!dir) {
-		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)", dirname, strerror(errno), errno);
+		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)", ZSTR_VAL(dirname), strerror(errno), errno);
 		return (0);
 	}
 
 	time(&now);
 
-	dirname_len = strlen(dirname);
-
-	if (dirname_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", dirname);
+	if (ZSTR_LEN(dirname) >= MAXPATHLEN) {
+		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: dirname(%s) is too long", ZSTR_VAL(dirname));
 		closedir(dir);
 		return (0);
 	}
 
 	/* Prepare buffer (dirname never changes) */
-	memcpy(buf, dirname, dirname_len);
-	buf[dirname_len] = PHP_DIR_SEPARATOR;
+	memcpy(buf, ZSTR_VAL(dirname), ZSTR_LEN(dirname));
+	buf[ZSTR_LEN(dirname)] = PHP_DIR_SEPARATOR;
 
 	while ((entry = readdir(dir))) {
 		/* does the file start with our prefix? */
@@ -313,12 +309,12 @@ static int ps_files_cleanup_dir(const char *dirname, zend_long maxlifetime)
 			size_t entry_len = strlen(entry->d_name);
 
 			/* does it fit into our buffer? */
-			if (entry_len + dirname_len + 2 < MAXPATHLEN) {
+			if (entry_len + ZSTR_LEN(dirname) + 2 < MAXPATHLEN) {
 				/* create the full path.. */
-				memcpy(buf + dirname_len + 1, entry->d_name, entry_len);
+				memcpy(buf + ZSTR_LEN(dirname) + 1, entry->d_name, entry_len);
 
 				/* NUL terminate it and */
-				buf[dirname_len + entry_len + 1] = '\0';
+				buf[ZSTR_LEN(dirname) + entry_len + 1] = '\0';
 
 				/* check whether its last access was more than maxlifetime ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 &&
@@ -417,8 +413,7 @@ PS_OPEN_FUNC(files)
 	data->fd = -1;
 	data->dirdepth = dirdepth;
 	data->filemode = filemode;
-	data->basedir_len = strlen(save_path);
-	data->basedir = estrndup(save_path, data->basedir_len);
+	data->basedir = zend_string_init(save_path, strlen(save_path), /* persistent */ false);
 
 	if (PS_GET_MOD_DATA()) {
 		ps_close_files(mod_data);
@@ -450,7 +445,7 @@ PS_CLOSE_FUNC(files)
 		data->last_key = NULL;
 	}
 
-	efree(data->basedir);
+	zend_string_release_ex(data->basedir, /* persistent */ false);
 	efree(data);
 	PS_SET_MOD_DATA(NULL);
 
