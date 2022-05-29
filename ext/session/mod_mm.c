@@ -24,8 +24,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <stdint.h>
 
-#include "php_stdint.h"
 #include "php_session.h"
 #include "mod_mm.h"
 #include "SAPI.h"
