@@ -342,7 +342,6 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
-	date_globals->timezone_valid = 0;
 }
 /* }}} */
 
@@ -478,8 +477,6 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const t
 /* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
-	DATEG(timezone_valid) = 0;
-
 	if (new_value && ZSTR_VAL(new_value) && !timelib_timezone_id_is_valid(ZSTR_VAL(new_value), DATE_TIMEZONEDB)) {
 		php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', using 'UTC' instead", ZSTR_VAL(new_value));
 		return FAILURE;
@@ -488,8 +485,6 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
 		return FAILURE;
 	}
-
-	DATEG(timezone_valid) = 1;
 
 	return SUCCESS;
 }
@@ -512,16 +507,6 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 			return Z_STRVAL_P(ztz);
 		}
 	} else if (*DATEG(default_timezone)) {
-		if (DATEG(timezone_valid) == 1) {
-			return DATEG(default_timezone);
-		}
-
-		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-			php_error_docref(NULL, E_WARNING, "UTC was used as timezone, because the date.timezone value '%s' is invalid", DATEG(default_timezone));
-			return "UTC";
-		}
-
-		DATEG(timezone_valid) = 1;
 		return DATEG(default_timezone);
 	}
 	/* Fallback to UTC */
