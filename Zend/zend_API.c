@@ -2864,7 +2864,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					*/
 					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
 						(new_arg_info[i].type.type_mask|_ZEND_TYPE_UNION_BIT|MAY_BE_ARRAY));
-					memcpy(&new_arg_info[i].type, &legacy_iterable, sizeof(zend_type));
+					new_arg_info[i].type = legacy_iterable;
 				}
 			}
 		}
