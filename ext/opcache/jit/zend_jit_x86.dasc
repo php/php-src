@@ -6183,7 +6183,7 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
 		|	je >8  // END OF zend_jit_assign_to_variable()
-		|	jmp ->exception_handler_undef
+		|	jmp ->exception_handler
 	} else {
 		|	jmp >8
 	}
