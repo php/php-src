@@ -3432,8 +3432,8 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			if (!fcc->object) {
 				fcc->object = zend_get_this_object(frame);
 			}
-		    *strict_class = 1;
-		    ret = 1;
+			*strict_class = 1;
+			ret = 1;
 		}
 	} else if ((ce = zend_lookup_class(name)) != NULL) {
 		zend_class_entry *scope = get_scope(frame);
@@ -3442,8 +3442,8 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 			zend_object *object = zend_get_this_object(frame);
 
 			if (object &&
-				instanceof_function(object->ce, scope) &&
-				instanceof_function(scope, ce)) {
+			    instanceof_function(object->ce, scope) &&
+			    instanceof_function(scope, ce)) {
 				fcc->object = object;
 				fcc->called_scope = object->ce;
 			} else {
