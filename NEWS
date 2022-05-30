@@ -42,9 +42,15 @@ PHP                                                                        NEWS
   . Support for building against Oracle Client libraries 10.1 and 10.2 has been
     dropped. Oracle Client libraries 11.2 or newer are now required.
 
+- ODBC:
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
+
 - PDO_ODBC:
   . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
     Buckley)
+  . Fixed bug GH-8300 (User input not escaped when building connection string).
+    (Calvin Buckley)
 
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
@@ -57,6 +63,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
   . Added SO_MEMINFO socket option. (David Carlier)
+  . Added SO_RTABLE socket option (OpenBSD), equivalent of SO_MARK (Linux).
+    (David Carlier)
+  . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
+    options. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)

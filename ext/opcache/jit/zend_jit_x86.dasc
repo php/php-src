@@ -6251,7 +6251,7 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	MEM_CMP_ZTS aword, executor_globals, exception, 0, r0
 		|	je >8  // END OF zend_jit_assign_to_variable()
-		|	jmp ->exception_handler_undef
+		|	jmp ->exception_handler
 	} else {
 		|	jmp >8
 	}
@@ -9527,7 +9527,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		|2:
 	}
 
-	if (!func
+	if ((!func || zend_jit_may_be_modified(func, op_array))
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
 	 && trace->func
@@ -9538,7 +9538,7 @@ static int zend_jit_init_method_call(dasm_State          **Dst,
 		int32_t exit_point;
 		const void *exit_addr;
 
-		exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_METHOD_CALL);
+		exit_point = zend_jit_trace_get_exit_point(opline, func ? ZEND_JIT_EXIT_INVALIDATE : ZEND_JIT_EXIT_METHOD_CALL);
 		exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		if (!exit_addr) {
 			return 0;

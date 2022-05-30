@@ -69,6 +69,13 @@ namespace {
         case Foo = "Test1";
         case Bar = "Test2";
         case Baz = "Test2\\a";
+        case FortyTwo = "42";
+    }
+
+    enum ZendTestIntEnum: int {
+        case Foo = 1;
+        case Bar = 3;
+        case Baz = -1;
     }
 
     function zend_test_array_return(): array {}

@@ -26,6 +26,10 @@ function testInvalid($from, $to) {
 testValid("", "");
 echo "Identification passes on empty string... good start!\n";
 
+/* RFC says that 0x00 should be Base64-encoded */
+testValidString("\x00", "&AAA-", 'UTF-8', 'UTF7-IMAP');
+echo "Null byte converted correctly\n";
+
 /* Identification and conversion of ASCII characters (minus &) */
 for ($i = 0x20; $i <= 0x7E; $i++) {
 	if ($i == 0x26) // '&'
@@ -221,6 +225,7 @@ echo "Done!\n";
 ?>
 --EXPECT--
 Identification passes on empty string... good start!
+Null byte converted correctly
 Testing all valid single-character ASCII strings... check!
 Non-ASCII characters convert to illegal char marker... yes!
 & can be Base64-encoded... yes!

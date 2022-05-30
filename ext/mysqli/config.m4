@@ -27,9 +27,8 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH([mysqli],
   [for MySQLi support],
-  [AS_HELP_STRING([[--with-mysqli[=FILE]]],
-    [Include MySQLi support. FILE is the path to mysql_config. If no value or
-    mysqlnd is passed as FILE, the MySQL native driver will be used])])
+  [AS_HELP_STRING([[--with-mysqli]],
+    [Include MySQLi support. The MySQL native driver will be used])])
 
 dnl ext/pdo_mysql/config.m4 also depends on this configure option.
 PHP_ARG_WITH([mysql-sock],
@@ -45,20 +44,7 @@ if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
   PHP_MYSQLND_ENABLED=yes
 
 elif test "$PHP_MYSQLI" != "no"; then
-
-  MYSQL_CONFIG=$PHP_MYSQLI
-
-  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG --libs > /dev/null 2>&1; then
-    MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
-    MYSQLI_LIBLINE=`$MYSQL_CONFIG --libs | $SED -e "s/'//g"`
-  else
-    AC_MSG_RESULT([mysql_config not found])
-    AC_MSG_ERROR([Please reinstall the mysql distribution])
-  fi
-
-  PHP_EVAL_INCLINE($MYSQLI_INCLINE)
-  PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
-  AC_DEFINE(HAVE_MYSQLILIB, 1, [ ])
+  AC_MSG_ERROR([Linking mysqli against external library is no longer supported])
 fi
 
 dnl Build extension
@@ -83,9 +69,6 @@ if test "$PHP_MYSQLI" != "no"; then
 
   if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
-    AC_DEFINE([MYSQLI_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
     PHP_INSTALL_HEADERS([ext/mysqli/mysqli_mysqlnd.h])
-  else
-    PHP_INSTALL_HEADERS([ext/mysqli/mysqli_libmysql.h])
   fi
 fi

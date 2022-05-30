@@ -207,31 +207,21 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 	} ZEND_HASH_FOREACH_END();
 }
 
-static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
+ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try)
 {
-	zend_class_entry *ce = execute_data->func->common.scope;
-	zend_string *string_key;
-	zend_long long_key;
-
 	zval *case_name_zv;
 	if (ce->enum_backing_type == IS_LONG) {
-		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_LONG(long_key)
-		ZEND_PARSE_PARAMETERS_END();
-
 		case_name_zv = zend_hash_index_find(ce->backed_enum_table, long_key);
 	} else {
-		ZEND_PARSE_PARAMETERS_START(1, 1)
-			Z_PARAM_STR(string_key)
-		ZEND_PARSE_PARAMETERS_END();
-
 		ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+		ZEND_ASSERT(string_key != NULL);
 		case_name_zv = zend_hash_find(ce->backed_enum_table, string_key);
 	}
 
 	if (case_name_zv == NULL) {
 		if (try) {
-			RETURN_NULL();
+			*result = NULL;
+			return SUCCESS;
 		}
 
 		if (ce->enum_backing_type == IS_LONG) {
@@ -240,7 +230,7 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
 			zend_value_error("\"%s\" is not a valid backing value for enum \"%s\"", ZSTR_VAL(string_key), ZSTR_VAL(ce->name));
 		}
-		RETURN_THROWS();
+		return FAILURE;
 	}
 
 	// TODO: We might want to store pointers to constants in backed_enum_table instead of names,
@@ -251,11 +241,74 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 	zval *case_zv = &c->value;
 	if (Z_TYPE_P(case_zv) == IS_CONSTANT_AST) {
 		if (zval_update_constant_ex(case_zv, c->ce) == FAILURE) {
-			RETURN_THROWS();
+			return FAILURE;
 		}
 	}
 
-	ZVAL_COPY(return_value, case_zv);
+	*result = Z_OBJ_P(case_zv);
+	return SUCCESS;
+}
+
+static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
+{
+	zend_class_entry *ce = execute_data->func->common.scope;
+	bool release_string = false;
+	zend_string *string_key = NULL;
+	zend_long long_key = 0;
+
+	if (ce->enum_backing_type == IS_LONG) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_LONG(long_key)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
+
+		if (ZEND_ARG_USES_STRICT_TYPES()) {
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR(string_key)
+			ZEND_PARSE_PARAMETERS_END();
+		} else {
+			// We allow long keys so that coercion to string doesn't happen implicitly. The JIT
+			// skips deallocation of params that don't require it. In the case of from/tryFrom
+			// passing int to from(int|string) looks like no coercion will happen, so the JIT
+			// won't emit a dtor call. Thus we allocate/free the string manually.
+			ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_STR_OR_LONG(string_key, long_key)
+			ZEND_PARSE_PARAMETERS_END();
+
+			if (string_key == NULL) {
+				release_string = true;
+				string_key = zend_long_to_str(long_key);
+			}
+		}
+	}
+
+	zend_object *case_obj;
+	if (zend_enum_get_case_by_value(&case_obj, ce, long_key, string_key, try) == FAILURE) {
+		goto throw;
+	}
+
+	if (case_obj == NULL) {
+		ZEND_ASSERT(try);
+		goto return_null;
+	}
+
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_OBJ_COPY(case_obj);
+
+throw:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_THROWS();
+
+return_null:
+	if (release_string) {
+		zend_string_release(string_key);
+	}
+	RETURN_NULL();
 }
 
 static ZEND_NAMED_FUNCTION(zend_enum_from_func)

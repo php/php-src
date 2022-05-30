@@ -2351,53 +2351,17 @@ static inline bool php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 	return (no_enc >= mbfl_no_encoding_utf8 && no_enc <= mbfl_no_encoding_utf8_sb);
 }
 
-MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len)
+MBSTRING_API zend_string* php_mb_convert_encoding_ex(const char *input, size_t length, const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding)
 {
-	mbfl_string string, result, *ret;
-	mbfl_buffer_converter *convd;
-	char *output = NULL;
-
-	if (output_len) {
-		*output_len = 0;
-	}
-
-	/* initialize string */
-	string.encoding = from_encoding;
-	string.val = (unsigned char *)input;
-	string.len = length;
-
-	/* initialize converter */
-	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
-	/* If this assertion fails this means some memory allocation failure which is a bug */
-	ZEND_ASSERT(convd != NULL);
-
-	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-
-	/* do it */
-	mbfl_string_init(&result);
-	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
-	if (ret) {
-		if (output_len) {
-			*output_len = ret->len;
-		}
-		output = (char *)ret->val;
-	}
-
-	MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-	mbfl_buffer_converter_delete(convd);
-	return output;
+	unsigned int num_errors = 0;
+	zend_string *result = mb_fast_convert((unsigned char*)input, length, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
+	MBSTRG(illegalchars) += num_errors;
+	return result;
 }
-/* }}} */
 
-/* {{{ MBSTRING_API char *php_mb_convert_encoding() */
-MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, const mbfl_encoding *to_encoding, const mbfl_encoding **from_encodings, size_t num_from_encodings, size_t *output_len)
+MBSTRING_API zend_string* php_mb_convert_encoding(const char *input, size_t length, const mbfl_encoding *to_encoding, const mbfl_encoding **from_encodings, size_t num_from_encodings)
 {
 	const mbfl_encoding *from_encoding;
-
-	if (output_len) {
-		*output_len = 0;
-	}
 
 	/* pre-conversion encoding */
 	ZEND_ASSERT(num_from_encodings >= 1);
@@ -2417,9 +2381,8 @@ MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, con
 		}
 	}
 
-	return php_mb_convert_encoding_ex(input, length, to_encoding, from_encoding, output_len);
+	return php_mb_convert_encoding_ex(input, length, to_encoding, from_encoding);
 }
-/* }}} */
 
 MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const mbfl_encoding *to_encoding, const mbfl_encoding **from_encodings, size_t num_from_encodings)
 {
@@ -2427,8 +2390,6 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	zend_long idx;
 	zend_string *key;
 	zval *entry, entry_tmp;
-	size_t ckey_len, cval_len;
-	char *ckey, *cval;
 
 	if (!input) {
 		return NULL;
@@ -2444,22 +2405,14 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
-			ckey = php_mb_convert_encoding(
-				ZSTR_VAL(key), ZSTR_LEN(key),
-				to_encoding, from_encodings, num_from_encodings, &ckey_len);
-			key = zend_string_init(ckey, ckey_len, 0);
-			efree(ckey);
+			key = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), to_encoding, from_encodings, num_from_encodings);
 		}
 		/* convert value */
 		ZEND_ASSERT(entry);
 try_again:
 		switch(Z_TYPE_P(entry)) {
 			case IS_STRING:
-				cval = php_mb_convert_encoding(
-					Z_STRVAL_P(entry), Z_STRLEN_P(entry),
-					to_encoding, from_encodings, num_from_encodings, &cval_len);
-				ZVAL_STRINGL(&entry_tmp, cval, cval_len);
-				efree(cval);
+				ZVAL_STR(&entry_tmp, php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), to_encoding, from_encodings, num_from_encodings));
 				break;
 			case IS_NULL:
 			case IS_TRUE:
@@ -2569,23 +2522,9 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (input_str) {
-		if (num_from_encodings == 1) {
-			const mbfl_encoding *from_encoding = from_encodings[0];
-			if (from_encoding->to_wchar && to_encoding->from_wchar) {
-				unsigned int num_errors = 0;
-				RETVAL_STR(mb_fast_convert(input_str, from_encoding, to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors));
-				MBSTRG(illegalchars) += num_errors;
-				goto out;
-			}
-		}
-
-		size_t size;
-		char *ret = php_mb_convert_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str),
-			to_encoding, from_encodings, num_from_encodings, &size);
+		zend_string *ret = php_mb_convert_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), to_encoding, from_encodings, num_from_encodings);
 		if (ret != NULL) {
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL(ret, size);		/* the string is already strdup()'ed */
-			efree(ret);
+			RETVAL_STR(ret);
 		} else {
 			RETVAL_FALSE;
 		}
@@ -2596,7 +2535,6 @@ PHP_FUNCTION(mb_convert_encoding)
 		RETVAL_ARR(tmp);
 	}
 
-out:
 	if (free_from_encodings) {
 		efree(ZEND_VOIDP(from_encodings));
 	}
@@ -4159,20 +4097,16 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 	buf[2] = (cp >>  8) & 0xff;
 	buf[3] = cp & 0xff;
 
-	size_t ret_len;
 	long orig_illegalchars = MBSTRG(illegalchars);
 	MBSTRG(illegalchars) = 0;
-	char *ret_str = php_mb_convert_encoding_ex(buf, 4, enc, &mbfl_encoding_ucs4be, &ret_len);
+	ret = php_mb_convert_encoding_ex(buf, 4, enc, &mbfl_encoding_ucs4be);
+
 	if (MBSTRG(illegalchars) != 0) {
-		efree(ret_str);
-		MBSTRG(illegalchars) = orig_illegalchars;
-		return NULL;
+		zend_string_release(ret);
+		ret = NULL;
 	}
 
-	ret = zend_string_init(ret_str, ret_len, 0);
-	efree(ret_str);
 	MBSTRG(illegalchars) = orig_illegalchars;
-
 	return ret;
 }
 
@@ -4216,11 +4150,7 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_THROWS();
 	}
 
-	size_t ret_len;
-	char *ret = php_mb_convert_encoding_ex(str, str_len, enc, enc, &ret_len);
-
-	RETVAL_STRINGL(ret, ret_len);
-	efree(ret);
+	RETURN_STR(php_mb_convert_encoding_ex(str, str_len, enc, enc));
 }
 /* }}} */
 

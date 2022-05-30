@@ -1076,7 +1076,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		}
 
 		if (ZEND_OPTIMIZER_PASS_14 & ctx->optimization_level) {
-			if (dce_optimize_op_array(op_array, ssa, 0)) {
+			if (dce_optimize_op_array(op_array, ctx, ssa, 0)) {
 				remove_nops = 1;
 			}
 			if (zend_dfa_optimize_jmps(op_array, ssa)) {
