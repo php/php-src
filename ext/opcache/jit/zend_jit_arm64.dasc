@@ -5737,7 +5737,7 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
 		|	MEM_LOAD_64_ZTS ldr, REG0, executor_globals, exception, TMP1
 		|	cbz REG0, >8  // END OF zend_jit_assign_to_variable()
-		|	b ->exception_handler_undef
+		|	b ->exception_handler
 	} else {
 		|	b >8
 	}
