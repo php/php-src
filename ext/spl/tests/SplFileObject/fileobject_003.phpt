@@ -68,11 +68,11 @@ string(%d) "%sfileobject_001a.txt"
 bool(true)
 string(19) "fileobject_001a.txt"
 bool(true)
-string(%d) "%stests"
+string(%d) "%stests%eSplFileObject"
 bool(true)
 string(%d) "%sfileobject_001a.txt"
 string(19) "fileobject_001a.txt"
-string(%d) "%stests"
+string(%d) "%stests%eSplFileObject"
 ===1===
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>

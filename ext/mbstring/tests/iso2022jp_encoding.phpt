@@ -192,6 +192,9 @@ for ($i = 0; $i <= 0xFF; $i++) {
 		identifyInvalidString($escapeSequence, 'ISO-2022-JP');
 	}
 }
+/* Also try a bare ESC */
+identifyInvalidString("\x1B", 'JIS');
+identifyInvalidString("\x1B", 'ISO-2022-JP');
 
 echo "All escape sequences work as expected\n";
 

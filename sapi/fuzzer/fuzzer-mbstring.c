@@ -51,8 +51,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	char *Result = php_mb_convert_encoding_ex((char *) Data, Size, ToEncoding, FromEncoding, NULL);
-	efree(Result);
+	zend_string *Result = php_mb_convert_encoding_ex((char *) Data, Size, ToEncoding, FromEncoding);
+	zend_string_release(Result);
 	efree(ToEncodingName);
 	efree(FromEncodingName);
 

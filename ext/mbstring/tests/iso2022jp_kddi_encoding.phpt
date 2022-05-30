@@ -209,6 +209,16 @@ testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "ISO-2022
 // Switch from JISX 0208 Kanji to JISX 0201 Kana
 testValidString("\x30\x00\xFF\x67", "\x1B\$B\x21\x21\x1B(I'\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);
 
+/* Convert Unicode flag emoji to ISO-2022-JP-KDDI proprietary flag emoji
+ * I am not able to confirm that the kuten codes we are using for these proprietary emoji are the right ones
+ * (There doesn't seem to be any publically available reference, and I don't have a legacy KDDI device)
+ *
+ * However, the conversion does not work in the opposite direction; this is because of the test
+ * `if (s >= (84 * 94) && s < (91 * 94))`, which the kuten code which we are using for flag emoji doesn't match
+ * That test is inherited from the old implementation (from libmbfl), and I have no way to confirm that
+ * changing it won't break anything */
+testValidString("\x00\x01\xF1\xF0\x00\x01\xF1\xF7", "\x1B\$B\x70\x55\x1B(B", "UTF-32BE", "ISO-2022-JP-KDDI", false);
+
 echo "JIS X 0208 (with MS extensions) and KDDI emoji support OK\n";
 
 testValidString("\x00\xA5", "\x1B\$B!o\x1B(B", "UTF-16BE", "ISO-2022-JP-KDDI", false);

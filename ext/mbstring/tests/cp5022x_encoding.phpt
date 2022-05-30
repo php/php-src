@@ -366,9 +366,14 @@ foreach (['CP50220', 'CP50221', 'CP50222'] as $encoding) {
 
 echo "Invalid escape sequences OK\n";
 
-// Regression test
+// Regression tests
 if (mb_convert_encoding("\x1BC\xF5", 'UTF-16BE', 'CP50221') !== "\x00%\x00C\x00%")
-  die("Bad")
+  die("Bad");
+
+// Previously, the CP50220 implementation would eat trailing null bytes
+$converted = mb_convert_encoding("ab\x00", 'UTF-16BE', 'CP50220');
+if ($converted !== "\x00a\x00b\x00\x00")
+  die("Bad handling of trailing null byte (got " . bin2hex($converted) . ")");
 
 ?>
 --EXPECT--

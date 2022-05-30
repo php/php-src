@@ -19,25 +19,9 @@ if (PHP_MYSQLI != "no") {
 		"mysqli_report.c " +
 		"mysqli_warning.c";
 
-	if (PHP_MYSQLI == "yes" || PHP_MYSQLI == "mysqlnd") {
+	if (PHP_MYSQLI != "no") {
 		EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE('MYSQLI_USE_MYSQLND', 1, 'Using MySQL native driver');
-		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
 		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
-		MESSAGE("\tmysqlnd build");
 		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
-	} else {
-		if (CHECK_LIB("libmysql.lib", "mysqli", PHP_MYSQLI) &&
-			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_MYSQLI +
-										"\\include;" + PHP_PHP_BUILD +
-										"\\include\\mysql;" + PHP_MYSQLI)) {
-			EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-			AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
-			MESSAGE("\tlibmysql build");
-			PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
-		} else {
-			WARNING("mysqli not enabled; libraries and headers not found");
-			PHP_MYSQLI = "no"
-		}
 	}
 }

@@ -119,11 +119,7 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	if (mysqli_result_is_unbuffered(result)) {
-#ifdef MYSQLI_USE_MYSQLND
 		if (result->unbuf->eof_reached) {
-#else
-		if (result->eof) {
-#endif
 			php_error_docref(NULL, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
 			return;
 		}

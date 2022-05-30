@@ -991,7 +991,7 @@ static void mb_wchar_to_cp50222(uint32_t *in, size_t len, mb_convert_buf *buf, b
 			out = mb_convert_buf_add(out, s - 0x80);
 		} else if (s <= 0x927E) {
 			/* JISX 0208 Kanji */
-			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 5);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 6);
 			if (buf->state == JISX_0201_KANA) {
 				out = mb_convert_buf_add(out, 0xF);
 			}
@@ -1002,7 +1002,7 @@ static void mb_wchar_to_cp50222(uint32_t *in, size_t len, mb_convert_buf *buf, b
 			out = mb_convert_buf_add2(out, (s >> 8) & 0xFF, s & 0xFF);
 		} else if (s >= 0x10000) {
 			/* JISX 0201 Latin; we 'tag' these by adding 0x10000 */
-			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 4);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 5);
 			if (buf->state == JISX_0201_KANA) {
 				out = mb_convert_buf_add(out, 0xF);
 			}

@@ -55,12 +55,12 @@ PHP_MINFO_FUNCTION(mbstring);
 
 MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc);
 
-MBSTRING_API char *php_mb_convert_encoding_ex(
+MBSTRING_API zend_string* php_mb_convert_encoding_ex(
 		const char *input, size_t length,
-		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
-MBSTRING_API char * php_mb_convert_encoding(
+		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding);
+MBSTRING_API zend_string* php_mb_convert_encoding(
 		const char *input, size_t length, const mbfl_encoding *to_encoding,
-		const mbfl_encoding **from_encodings, size_t num_from_encodings, size_t *output_len);
+		const mbfl_encoding **from_encodings, size_t num_from_encodings);
 
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc);
 

@@ -109,47 +109,6 @@ int php_le_pmysqli(void)
 	return le_pmysqli;
 }
 
-#ifndef MYSQLI_USE_MYSQLND
-/* {{{ php_free_stmt_bind_buffer */
-void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
-{
-	unsigned int i;
-
-	if (!bbuf.var_cnt) {
-		return;
-	}
-
-	for (i=0; i < bbuf.var_cnt; i++) {
-
-		/* free temporary bind buffer */
-		if (type == FETCH_RESULT && bbuf.buf[i].val) {
-			efree(bbuf.buf[i].val);
-		}
-
-		zval_ptr_dtor(&bbuf.vars[i]);
-	}
-
-	if (bbuf.vars) {
-		efree(bbuf.vars);
-	}
-
-	/*
-	  Don't free bbuf.is_null for FETCH_RESULT since we have allocated
-	  is_null and buf in one block so we free only buf, which is the beginning
-	  of the block. When FETCH_SIMPLE then buf wasn't allocated together with
-	  buf and we have to free it.
-	*/
-	if (type == FETCH_RESULT) {
-		efree(bbuf.buf);
-	} else if (type == FETCH_SIMPLE){
-		efree(bbuf.is_null);
-	}
-
-	bbuf.var_cnt = 0;
-}
-/* }}} */
-#endif
-
 /* {{{ php_clear_stmt_bind */
 void php_clear_stmt_bind(MY_STMT *stmt)
 {
@@ -164,16 +123,6 @@ void php_clear_stmt_bind(MY_STMT *stmt)
 	  mysqlnd keeps track of the binding and has freed its
 	  structures in stmt_close() above
 	*/
-#ifndef MYSQLI_USE_MYSQLND
-	/* Clean param bind */
-	php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
-	/* Clean output bind */
-	php_free_stmt_bind_buffer(stmt->result, FETCH_RESULT);
-
-	if (!Z_ISUNDEF(stmt->link_handle)) {
-		zval_ptr_dtor(&stmt->link_handle);
-	}
-#endif
 	if (stmt->query) {
 		efree(stmt->query);
 	}
@@ -452,7 +401,6 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 }
 /* }}} */
 
-#ifdef MYSQLI_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
 static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 {
@@ -475,7 +423,6 @@ static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };
-#endif
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
@@ -492,7 +439,6 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("mysqli.default_socket",			NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysqli_globals,		mysqli_globals)
 #endif
-	STD_PHP_INI_BOOLEAN("mysqli.reconnect",				"0",	PHP_INI_SYSTEM,		OnUpdateLong,		reconnect,			zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_local_infile",	"0",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_local_infile,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.local_infile_directory",	NULL,	PHP_INI_SYSTEM,		OnUpdateString,		local_infile_directory,	zend_mysqli_globals,	mysqli_globals)
 PHP_INI_END()
@@ -515,7 +461,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 	mysqli_globals->default_user = NULL;
 	mysqli_globals->default_pw = NULL;
 	mysqli_globals->default_socket = NULL;
-	mysqli_globals->reconnect = 0;
 	mysqli_globals->report_mode = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;;
 	mysqli_globals->allow_local_infile = 0;
 	mysqli_globals->local_infile_directory = NULL;
@@ -527,11 +472,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 PHP_MINIT_FUNCTION(mysqli)
 {
 	REGISTER_INI_ENTRIES();
-#ifndef MYSQLI_USE_MYSQLND
-	if (mysql_server_init(0, NULL, NULL)) {
-		return FAILURE;
-	}
-#endif
 
 	memcpy(&mysqli_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	mysqli_object_handlers.offset = XtOffsetOf(mysqli_object, zo);
@@ -596,25 +536,15 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_READ_DEFAULT_FILE", MYSQL_READ_DEFAULT_FILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
-#if (MYSQL_VERSION_ID >= 80021 && !defined(MARIADB_BASE_VERSION)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOAD_DATA_LOCAL_DIR", MYSQL_OPT_LOAD_DATA_LOCAL_DIR, CONST_CS | CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
-#endif
-#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_INT_AND_FLOAT_NATIVE", MYSQLND_OPT_INT_AND_FLOAT_NATIVE, CONST_CS | CONST_PERSISTENT);
-#endif
-#if MYSQL_VERSION_ID < 80000 || MYSQL_VERSION_ID >= 100000 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
-#endif
 
-#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PUBLIC_KEY", MYSQL_SERVER_PUBLIC_KEY, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	/* mysqli_real_connect flags */
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);
@@ -625,22 +555,16 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_FOUND_ROWS", CLIENT_FOUND_ROWS, CONST_CS | CONST_PERSISTENT);
 #ifdef CLIENT_SSL_VERIFY_SERVER_CERT
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT", CLIENT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
-#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT", CLIENT_SSL_DONT_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
 #endif
-#endif
-#if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS", CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS", MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	/* for mysqli_query */
 	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT", MYSQLI_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_USE_RESULT", MYSQLI_USE_RESULT, CONST_CS | CONST_PERSISTENT);
-#if defined (MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_ASYNC", MYSQLI_ASYNC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_STORE_RESULT_COPY_DATA", MYSQLI_STORE_RESULT_COPY_DATA, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	/* for mysqli_fetch_assoc */
 	REGISTER_LONG_CONSTANT("MYSQLI_ASSOC", MYSQLI_ASSOC, CONST_CS | CONST_PERSISTENT);
@@ -676,9 +600,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_BINARY_FLAG", BINARY_FLAG, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DEFAULT_VALUE_FLAG", NO_DEFAULT_VALUE_FLAG, CONST_CS | CONST_PERSISTENT);
 
-#if MYSQL_VERSION_ID < 60000 || MYSQL_VERSION_ID > 60003 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_ON_UPDATE_NOW_FLAG", ON_UPDATE_NOW_FLAG, CONST_CS | CONST_PERSISTENT);
-#endif
 
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_DECIMAL", FIELD_TYPE_DECIMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_TINY", FIELD_TYPE_TINY, CONST_CS | CONST_PERSISTENT);
@@ -729,15 +651,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REPORT_OFF", 0, CONST_CS | CONST_PERSISTENT);
 
 	/* We use non-nested macros with expansion, as VC has problems */
-#ifdef MYSQLI_USE_MYSQLND
 	REGISTER_LONG_CONSTANT("MYSQLI_DEBUG_TRACE_ENABLED", MYSQLND_DBG_ENABLED, CONST_CS | CONST_PERSISTENT);
-#else
-#ifdef DBUG_ON
-	REGISTER_LONG_CONSTANT("MYSQLI_DEBUG_TRACE_ENABLED", 1, CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_LONG_CONSTANT("MYSQLI_DEBUG_TRACE_ENABLED", 0, CONST_CS | CONST_PERSISTENT);
-#endif
-#endif
 
 	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED", SERVER_QUERY_NO_GOOD_INDEX_USED, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_QUERY_NO_INDEX_USED", SERVER_QUERY_NO_INDEX_USED, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
@@ -778,10 +692,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", 0, CONST_CS | CONST_PERSISTENT);
 #endif
 
-
-#ifdef MYSQLI_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
-#endif
 
 	return SUCCESS;
 }
@@ -790,21 +701,6 @@ PHP_MINIT_FUNCTION(mysqli)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
-#ifndef MYSQLI_USE_MYSQLND
-#ifdef PHP_WIN32
-	zend_ulong client_ver = mysql_get_client_version();
-	/*
-	  Can't call mysql_server_end() multiple times prior to 5.0.46 on Windows.
-	  PHP bug#41350 MySQL bug#25621
-	*/
-	if ((client_ver >= 50046 && client_ver < 50100) || client_ver > 50122) {
-		mysql_server_end();
-	}
-#else
-	mysql_server_end();
-#endif
-#endif
-
 	zend_hash_destroy(&mysqli_driver_properties);
 	zend_hash_destroy(&mysqli_result_properties);
 	zend_hash_destroy(&mysqli_stmt_properties);
@@ -820,11 +716,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
-	if (mysql_thread_init()) {
-		return FAILURE;
-	}
-#endif
 	MyG(error_msg) = NULL;
 	MyG(error_no) = 0;
 	MyG(report_mode) = MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT;
@@ -839,9 +730,6 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
-	mysql_thread_end();
-#endif
 	if (MyG(error_msg)) {
 		efree(MyG(error_msg));
 	}
@@ -865,10 +753,6 @@ PHP_MINFO_FUNCTION(mysqli)
 	php_info_print_table_row(2, "Inactive Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, MyG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
-#ifndef MYSQLI_USE_MYSQLND
-	php_info_print_table_row(2, "Client API header version", MYSQL_SERVER_VERSION);
-	php_info_print_table_row(2, "MYSQLI_SOCKET", MYSQL_UNIX_ADDR);
-#endif
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -879,9 +763,7 @@ PHP_MINFO_FUNCTION(mysqli)
 /* Dependencies */
 static const  zend_module_dep mysqli_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
-#ifdef MYSQLI_USE_MYSQLND
 	ZEND_MOD_REQUIRED("mysqlnd")
-#endif
 	ZEND_MOD_END
 };
 
@@ -933,10 +815,6 @@ PHP_METHOD(mysqli_stmt, __construct)
 		efree(stmt);
 		RETURN_FALSE;
 	}
-
-#ifndef MYSQLI_USE_MYSQLND
-	ZVAL_COPY(&stmt->link_handle, mysql_link);
-#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
@@ -1006,71 +884,6 @@ PHP_METHOD(mysqli_result, getIterator)
 /* {{{ php_mysqli_fetch_into_hash_aux */
 void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype)
 {
-#ifndef MYSQLI_USE_MYSQLND
-	MYSQL_ROW row;
-	unsigned int	i, num_fields;
-	MYSQL_FIELD		*fields;
-	unsigned long	*field_len;
-
-	if (!(row = mysql_fetch_row(result))) {
-		RETURN_NULL();
-	}
-
-	if (fetchtype & MYSQLI_ASSOC) {
-		fields = mysql_fetch_fields(result);
-	}
-
-	array_init(return_value);
-	field_len = mysql_fetch_lengths(result);
-	num_fields = mysql_num_fields(result);
-
-	for (i = 0; i < num_fields; i++) {
-		if (row[i]) {
-			zval res;
-
-			if (mysql_fetch_field_direct(result, i)->type == MYSQL_TYPE_BIT) {
-				my_ulonglong llval;
-				char tmp[22];
-				switch (field_len[i]) {
-					case 8:llval = (my_ulonglong)  bit_uint8korr(row[i]);break;
-					case 7:llval = (my_ulonglong)  bit_uint7korr(row[i]);break;
-					case 6:llval = (my_ulonglong)  bit_uint6korr(row[i]);break;
-					case 5:llval = (my_ulonglong)  bit_uint5korr(row[i]);break;
-					case 4:llval = (my_ulonglong)  bit_uint4korr(row[i]);break;
-					case 3:llval = (my_ulonglong)  bit_uint3korr(row[i]);break;
-					case 2:llval = (my_ulonglong)  bit_uint2korr(row[i]);break;
-					case 1:llval = (my_ulonglong)  uint1korr(row[i]);break;
-					EMPTY_SWITCH_DEFAULT_CASE()
-				}
-				/* even though lval is declared as unsigned, the value
-				 * may be negative. Therefore we cannot use MYSQLI_LLU_SPEC and must
-				 * use MYSQLI_LL_SPEC.
-				 */
-				snprintf(tmp, sizeof(tmp), (mysql_fetch_field_direct(result, i)->flags & UNSIGNED_FLAG)? MYSQLI_LLU_SPEC : MYSQLI_LL_SPEC, llval);
-				ZVAL_STRING(&res, tmp);
-			} else {
-				ZVAL_STRINGL(&res, row[i], field_len[i]);
-			}
-
-			if (fetchtype & MYSQLI_NUM) {
-				add_index_zval(return_value, i, &res);
-			}
-			if (fetchtype & MYSQLI_ASSOC) {
-				if (fetchtype & MYSQLI_NUM && Z_REFCOUNTED(res)) {
-					Z_ADDREF(res);
-				}
-				add_assoc_zval(return_value, fields[i].name, &res);
-			}
-		} else {
-			if (fetchtype & MYSQLI_NUM) {
-				add_index_null(return_value, i);
-			}
-			if (fetchtype & MYSQLI_ASSOC) {
-				add_assoc_null(return_value, fields[i].name);
-			}
-		}
-	}
-#else
 	mysqlnd_fetch_into(result, ((fetchtype & MYSQLI_NUM)? MYSQLND_FETCH_NUM:0) | ((fetchtype & MYSQLI_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value);
 	/* TODO: We don't have access to the connection object at this point, so we use low-level
 	 * mysqlnd APIs to access the error information. We should try to pass through the connection
@@ -1083,7 +896,6 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 				conn->m->get_sqlstate(conn), error_no, conn->m->get_error_str(conn));
 		}
 	}
-#endif
 }
 /* }}} */
 
