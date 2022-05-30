@@ -478,7 +478,12 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const t
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
 	if (new_value && ZSTR_VAL(new_value) && !timelib_timezone_id_is_valid(ZSTR_VAL(new_value), DATE_TIMEZONEDB)) {
-		php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', using 'UTC' instead", ZSTR_VAL(new_value));
+		php_error_docref(
+			NULL, E_WARNING,
+			"Invalid date.timezone value '%s', using '%s' instead",
+			ZSTR_VAL(new_value),
+			DATEG(default_timezone) ? DATEG(default_timezone) : "UTC"
+		);
 		return FAILURE;
 	}
 
@@ -493,7 +498,7 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb)
 {
-	/* Checking configure timezone */
+	/* Checking whether timezone has been set with date_default_timezone_set() */
 	if (DATEG(timezone) && (strlen(DATEG(timezone))) > 0) {
 		return DATEG(timezone);
 	}
