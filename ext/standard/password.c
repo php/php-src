@@ -160,6 +160,13 @@ static bool php_password_bcrypt_verify(const zend_string *password, const zend_s
 		return 0;
 	}
 
+	if (ZSTR_LEN(password) != strlen(ZSTR_VAL(password))) {
+		php_error_docref(NULL, E_WARNING,
+			"bcrypt based password hashing is not binary safe, but the provided password contains a null byte.  "
+			"The portion of the password provided up to the null byte did validate, but this hash should be "
+			"regenerated using a password without null bytes, or using a binary safe algorithm such as argon2i/argon2id");
+	}
+
 	if (ZSTR_LEN(ret) != ZSTR_LEN(hash) || ZSTR_LEN(hash) < 13) {
 		zend_string_free(ret);
 		return 0;
@@ -183,6 +190,11 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zend_string *result, *hash, *salt;
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
+
+	if (ZSTR_LEN(password) != strlen(ZSTR_VAL(password))) {
+		zend_value_error("bcrypt based password hashing is not binary safe, but the provided password contains a null byte");
+		return NULL;
+	}
 
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
