@@ -6148,7 +6148,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			if (type_code == IS_ITERABLE) {
 				/* Set iterable bit for BC compat during Reflection and string representation of type */
 				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
-                	(_ZEND_TYPE_UNION_BIT|MAY_BE_ARRAY|_ZEND_TYPE_ITERABLE_BIT));
+                	(MAY_BE_ARRAY|_ZEND_TYPE_ITERABLE_BIT));
 				return iterable;
 			}
 
@@ -6286,7 +6286,7 @@ static zend_type zend_compile_typename(
 
 			/* An intersection of union types cannot exist so invalidate it
 			 * Currently only can happen with iterable getting canonicalized to Traversable|array */
-			if (ZEND_TYPE_IS_UNION(single_type)) {
+			if (ZEND_TYPE_IS_ITERABLE_FALLBACK(single_type)) {
 				zend_string *standard_type_str = zend_type_to_string(single_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type %s cannot be part of an intersection type", ZSTR_VAL(standard_type_str));
