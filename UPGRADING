@@ -201,6 +201,12 @@ PHP 8.2 UPGRADE NOTES
     no longer serializable. Previously, they could be serialized, but
     unserialization yielded unusable objects or failed.
 
+- mysqli:
+  . The support for libmysql has been removed. It's no longer possible to compile
+    mysqli with libmysql and all relevant functionality has been removed.
+  . The reconnect property of mysqli_driver has been removed. It was supported only by libmysql.
+  . The INI directive mysqli.reconnect has been removed.
+
 - OCI8:
   . The minimum Oracle Client library version required is now 11.2.
 

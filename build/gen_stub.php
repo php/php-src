@@ -15,7 +15,7 @@ use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
-ini_set("precision", 17);
+ini_set("precision", "17");
 
 /**
  * @return FileInfo[]
