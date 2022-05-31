@@ -1,0 +1,12 @@
+# The following volunteers have self-identified as subject matter experts
+# or interested parties over a particular area of the php-src source code.
+# While requesting a review from someone does not obligate that person to
+# review a pull request, these reviewers might have valuable knowledge of
+# the problem area and could aid in deciding whether a pull request is ready
+# for merging.
+#
+# For more information, see the GitHub CODEOWNERS documentation:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+/ext/opcache @iluuu1994
+/Zend @iluuu1994
