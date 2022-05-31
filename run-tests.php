@@ -728,7 +728,7 @@ function main(): void
         echo get_summary(false);
 
         if ($output_file != '' && $just_save_results) {
-            save_results($output_file, prompt_to_save_results: false);
+            save_results($output_file, /* prompt_to_save_results: */ false);
         }
     } else {
         // Compile a list of all test files (*.phpt).
@@ -790,7 +790,7 @@ function main(): void
         show_end($end_time);
         show_summary();
 
-        save_results($output_file, prompt_to_save_results: true);
+        save_results($output_file, /* prompt_to_save_results: */ true);
     }
 
     $junit->saveXML();
@@ -1020,7 +1020,7 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
     $failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 
     file_put_contents($output_file, $failed_tests_data);
-    echo "Report saved to:", $output_file, "\n";
+    echo "Report saved to: ", $output_file, "\n";
 }
 
 function get_binary(string $php, string $sapi, string $sapi_path): ?string
