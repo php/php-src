@@ -831,10 +831,6 @@ class ArgInfo {
 
     private function setTypes(?Type $type, ?Type $phpDocType): void
     {
-        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
-            throw new Exception('PHPDoc param type "' . $phpDocType->__toString() . '" is unnecessary');
-        }
-
         $this->type = $type;
         $this->phpDocType = $phpDocType;
     }
@@ -954,7 +950,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getDeclarationName(): string {
-        return $this->name->getLast();
+        return strtr($this->name->toString(), "\\", "_");
     }
 
     public function getDeclaration(): string {
@@ -1071,10 +1067,6 @@ class ReturnInfo {
 
     private function setTypes(?Type $type, ?Type $phpDocType, bool $tentativeReturnType): void
     {
-        if ($phpDocType !== null && Type::equals($type, $phpDocType)) {
-            throw new Exception('PHPDoc return type "' . $phpDocType->__toString() . '" is unnecessary');
-        }
-
         $this->type = $type;
         $this->phpDocType = $phpDocType;
         $this->tentativeReturnType = $tentativeReturnType;
@@ -1317,8 +1309,8 @@ class FuncInfo {
             if ($namespace) {
                 // Render A\B as "A\\B" in C strings for namespaces
                 return sprintf(
-                    "\tZEND_NS_FE(\"%s\", %s, %s)\n",
-                    addslashes($namespace), $declarationName, $this->getArgInfoName());
+                    "\tZEND_NS_RAW_FENTRY(\"%s\", \"%s\", ZEND_FN(%s), %s, 0)\n",
+                    addslashes($namespace), substr((string)$this->name, strlen($namespace)+1), $declarationName, $this->getArgInfoName());
             } else {
                 if ($this->supportsCompileTimeEval) {
                     return sprintf(
@@ -2203,7 +2195,7 @@ class EnumCaseInfo {
     public function getDeclaration(iterable $allConstInfos): string {
         $escapedName = addslashes($this->name);
         if ($this->value === null) {
-            $code = "\n\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
+            $code = "\tzend_enum_add_case_cstr(class_entry, \"$escapedName\", NULL);\n";
         } else {
             $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
 
@@ -3121,7 +3113,7 @@ function parseConstLike(
 function parseProperty(
     Name $class,
     int $flags,
-    Stmt\PropertyProperty $property,
+    Stmt\PropertyProperty|Node\Param $property,
     ?Node $type,
     ?DocComment $comment,
     PrettyPrinterAbstract $prettyPrinter
@@ -3159,13 +3151,23 @@ function parseProperty(
         }
     }
 
+    $default = $property->default;
+    if ($property instanceof Node\Param) {
+        $name = $property->var->name;
+        if ($property->flags & Stmt\Class_::MODIFIER_READONLY) {
+            $default = null;
+        }
+    } else {
+        $name = $property->name;
+    }
+
     return new PropertyInfo(
-        new PropertyName($class, $property->name->__toString()),
+        new PropertyName($class, (string) $name),
         $flags,
         $propertyType,
         $phpDocType ? Type::fromString($phpDocType) : null,
-        $property->default,
-        $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
+        $default,
+        $default ? $prettyPrinter->prettyPrintExpr($default) : null,
         $isDocReadonly,
         $link
     );
@@ -3384,6 +3386,20 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                         $classStmt,
                         $cond
                     );
+                    if ($classStmt->name->toString() === "__construct") {
+                        foreach ($classStmt->params as $param) {
+                            if ($param->flags) {
+                                $propertyInfos[] = parseProperty(
+                                    $className,
+                                    $param->flags,
+                                    $param,
+                                    $param->type,
+                                    $param->getDocComment(),
+                                    $prettyPrinter
+                                );
+                            }
+                        }
+                    }
                 } else if ($classStmt instanceof Stmt\EnumCase) {
                     $enumCaseInfos[] = new EnumCaseInfo(
                         $classStmt->name->toString(), $classStmt->expr);
@@ -3622,7 +3638,9 @@ function generateArgInfoCode(
                 }
 
                 $generatedFunctionDeclarations[$key] = true;
-                return $fileInfo->declarationPrefix . $funcInfo->getDeclaration();
+                if ($decl = $funcInfo->getDeclaration()) {
+                    return $fileInfo->declarationPrefix . $decl;
+                }
             }
         );
 
