@@ -13,14 +13,12 @@ die('skip not for AIX');
 }
 --CLEAN--
 <?php
-chdir(__DIR__);
-$path = "./socket_cmsg_rights.sock";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 @unlink($path);
 --FILE--
 <?php
-chdir(__DIR__);
-include "./mcast_helpers.php.inc";
-$path = "./socket_cmsg_rights.sock";
+include __DIR__."/mcast_helpers.php.inc";
+$path = __DIR__ . "/socket_cmsg_rights.sock";
 
 @unlink($path);
 
