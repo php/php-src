@@ -22,8 +22,6 @@ foreach ($key_sizes as $key_size) {
 
 /* array of available hashings to test */
 $algo = array(
-    OPENSSL_ALGO_MD5,
-    OPENSSL_ALGO_SHA1,
     OPENSSL_ALGO_SHA224,
     OPENSSL_ALGO_SHA256,
     OPENSSL_ALGO_SHA384,
@@ -52,18 +50,6 @@ function _uuid() {
 
 ?>
 --EXPECTREGEX--
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
-string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
-bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
 bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
