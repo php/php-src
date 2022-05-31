@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6d9ff0e2263a39420dd157206331a9e897d9e775 */
+ * Stub hash: 1be3dba6b0638764bcf00cd695cb88a3e8a0a530 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -72,6 +72,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_call_method, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_MASK(0, clsOrObject, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg1, IS_MIXED, 0, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_MIXED, 0, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -128,6 +135,7 @@ static ZEND_FUNCTION(zend_weakmap_dump);
 static ZEND_FUNCTION(zend_get_unit_enum);
 static ZEND_FUNCTION(zend_test_parameter_with_attribute);
 static ZEND_FUNCTION(zend_get_current_func_name);
+static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -164,6 +172,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
 	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
+	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };

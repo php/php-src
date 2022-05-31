@@ -26,6 +26,7 @@
 #include "fiber.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
+#include "zend_interfaces.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
@@ -275,6 +276,40 @@ static ZEND_FUNCTION(zend_iterable)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ITERABLE_OR_NULL(arg2)
 	ZEND_PARSE_PARAMETERS_END();
+}
+
+/* Call a method on a class or object using zend_call_method() */
+static ZEND_FUNCTION(zend_call_method)
+{
+	zval *class_or_object;
+	zend_string *method_name;
+	zval *arg1 = NULL, *arg2 = NULL;
+	zend_object *obj = NULL;
+	zend_class_entry *ce = NULL;
+	int argc = ZEND_NUM_ARGS();
+
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_ZVAL(class_or_object)
+		Z_PARAM_STR(method_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(arg1)
+		Z_PARAM_ZVAL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(class_or_object) == IS_OBJECT) {
+		obj = Z_OBJ_P(class_or_object);
+		ce = obj->ce;
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(class_or_object) == IS_STRING);
+		ce = zend_lookup_class(Z_STR_P(class_or_object));
+		if (!ce) {
+			zend_error(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
+			return;
+		}
+	}
+
+	ZEND_ASSERT((argc >= 2) && (argc <= 4));
+	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)

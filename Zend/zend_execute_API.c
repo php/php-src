@@ -921,11 +921,6 @@ cleanup_args:
 		} else {
 			zend_execute_internal(call, fci->retval);
 		}
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_args(call);
-		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
-			zend_array_release(call->extra_named_params);
-		}
 
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
@@ -938,6 +933,11 @@ cleanup_args:
 				? Z_ISREF_P(fci->retval) : !Z_ISREF_P(fci->retval));
 		}
 #endif
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_args(call);
+		if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+			zend_array_release(call->extra_named_params);
+		}
 
 		if (EG(exception)) {
 			zval_ptr_dtor(fci->retval);
