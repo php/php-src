@@ -136,12 +136,8 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 
 #elif HAVE_NO_ATOMICS
 
-#error No atomics support detected. Please open an issue with platform details.
+#warning No atomics support detected. Please open an issue with platform details.
 
-/* If there is a platform without atomics support, either:
- *  1. Add support for it.
- *  2. Remove the #error above and use the below non-atomic versions.
- */
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
