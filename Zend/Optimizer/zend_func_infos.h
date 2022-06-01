@@ -283,12 +283,8 @@ static const func_info_t func_infos[] = {
     F1("mysqli_fetch_assoc", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_NULL|MAY_BE_FALSE),
     F1("mysqli_fetch_object", MAY_BE_OBJECT|MAY_BE_NULL|MAY_BE_FALSE),
     F1("mysqli_fetch_row", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY|MAY_BE_NULL|MAY_BE_FALSE),
-#if defined(MYSQLI_USE_MYSQLND)
     F1("mysqli_get_connection_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
-#endif
-#if defined(MYSQLI_USE_MYSQLND)
     F1("mysqli_get_client_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
-#endif
     F1("mysqli_get_charset", MAY_BE_OBJECT|MAY_BE_NULL),
     F1("mysqli_get_client_info", MAY_BE_STRING),
     F1("mysqli_get_links_stats", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
@@ -302,16 +298,12 @@ static const func_info_t func_infos[] = {
     F1("mysqli_prepare", MAY_BE_OBJECT|MAY_BE_FALSE),
     F1("mysqli_query", MAY_BE_OBJECT|MAY_BE_BOOL),
     F1("mysqli_real_escape_string", MAY_BE_STRING),
-#if defined(MYSQLI_USE_MYSQLND)
     F1("mysqli_reap_async_query", MAY_BE_OBJECT|MAY_BE_BOOL),
-#endif
     F1("mysqli_stmt_affected_rows", MAY_BE_LONG|MAY_BE_STRING),
     F0("mysqli_stmt_close", MAY_BE_TRUE),
     F1("mysqli_stmt_error", MAY_BE_STRING),
     F1("mysqli_stmt_error_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
-#if defined(MYSQLI_USE_MYSQLND)
     F1("mysqli_stmt_get_result", MAY_BE_OBJECT|MAY_BE_FALSE),
-#endif
     F1("mysqli_stmt_get_warnings", MAY_BE_OBJECT|MAY_BE_FALSE),
     F1("mysqli_stmt_init", MAY_BE_OBJECT|MAY_BE_FALSE),
     F1("mysqli_stmt_insert_id", MAY_BE_LONG|MAY_BE_STRING),
