@@ -9892,9 +9892,9 @@ ZEND_VM_DEFINE_OP(137, ZEND_OP_DATA);
 
 ZEND_VM_HELPER(zend_interrupt_helper, ANY, ANY)
 {
-	EG(vm_interrupt) = 0;
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
 	SAVE_OPLINE();
-	if (EG(timed_out)) {
+	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
 	} else if (zend_interrupt_function) {
 		zend_interrupt_function(execute_data);
