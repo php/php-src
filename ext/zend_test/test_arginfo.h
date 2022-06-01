@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ffc411537fe4a095516b552d43910cc97ebe332e */
+ * Stub hash: 8b170fa6a9b1cb0e48278373172235498de3c4dc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -79,10 +79,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_call_method, 0, 2, IS_MIXED, 0)
-	ZEND_ARG_TYPE_MASK(0, clsOrObject, MAY_BE_OBJECT|MAY_BE_STRING, NULL)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg1, IS_MIXED, 0, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_MIXED, 0, "null")
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, arg2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
