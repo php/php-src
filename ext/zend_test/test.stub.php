@@ -114,7 +114,7 @@ namespace {
 
     function zend_get_current_func_name(): string {}
 
-    function zend_call_method(object|string $clsOrObject, string $method, mixed $arg1 = null, mixed $arg2 = null): mixed {}
+    function zend_call_method(string $class, string $method, mixed $arg1 = UNKNOWN, mixed $arg2 = UNKNOWN): mixed {}
 }
 
 namespace ZendTestNS {
