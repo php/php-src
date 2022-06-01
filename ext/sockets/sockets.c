@@ -55,8 +55,10 @@
 # if HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
 # endif
-# ifdef SO_MEMINFO
+# if defined(HAVE_LINUX_SOCK_DIAG_H)
 #  include <linux/sock_diag.h>
+# else
+#  undef SO_MEMINFO
 # endif
 #endif
 
