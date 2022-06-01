@@ -118,6 +118,8 @@ namespace {
     function zend_test_parameter_with_attribute(string $parameter): int {}
 
     function zend_get_current_func_name(): string {}
+
+    function zend_call_method(object|string $clsOrObject, string $method, mixed $arg1 = null, mixed $arg2 = null): mixed {}
 }
 
 namespace ZendTestNS {
