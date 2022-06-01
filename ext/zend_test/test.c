@@ -334,13 +334,15 @@ static ZEND_FUNCTION(zend_call_method)
 	if (Z_TYPE_P(class_or_object) == IS_OBJECT) {
 		obj = Z_OBJ_P(class_or_object);
 		ce = obj->ce;
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(class_or_object) == IS_STRING);
+	} else if (Z_TYPE_P(class_or_object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(class_or_object));
 		if (!ce) {
 			zend_error(E_ERROR, "Unknown class '%s'", Z_STRVAL_P(class_or_object));
 			return;
 		}
+	} else {
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(class_or_object));
+		return;
 	}
 
 	ZEND_ASSERT((argc >= 2) && (argc <= 4));
