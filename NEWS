@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
   . Added ReflectionMethod::hasPrototype(). (Ollie Read)
+  . Narrow ReflectionEnum::getBackingType() return type to ReflectionNamedType.
+    (SamMousa)
 
 - Session:
   . Fixed bug GH-7787 (Improve session write failure message for user error
