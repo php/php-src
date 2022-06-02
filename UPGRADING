@@ -246,6 +246,8 @@ PHP 8.2 UPGRADE NOTES
   . TCP_KEEPIDLE (Linux, others)
   . TCP_KEEPINTVL (Linux, others)
   . TCP_NOTSENT_LOWAT
+  . LOCAL_CREDS_PERSISTENT (FreeBSD)
+  . SCM_CREDS2 (FreeBSD)
 
 ========================================
 11. Changes to INI File Handling

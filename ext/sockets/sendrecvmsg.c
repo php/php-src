@@ -134,6 +134,11 @@ static void init_ancillary_registry(void)
 #endif
 #endif
 
+#ifdef LOCAL_CREDS_PERSISTENT
+	PUT_ENTRY(SOCKCRED2SIZE(1), 1, 0, from_zval_write_ucred,
+			to_zval_read_ucred, SOL_SOCKET, SCM_CREDS2);
+#endif
+
 #ifdef SCM_RIGHTS
 	PUT_ENTRY(0, sizeof(int), calculate_scm_rights_space, from_zval_write_fd_array,
 			to_zval_read_fd_array, SOL_SOCKET, SCM_RIGHTS);
@@ -451,6 +456,10 @@ void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SCM_CREDS",		SCM_CREDS,	CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef LOCAL_CREDS_PERSISTENT
+	REGISTER_LONG_CONSTANT("SCM_CREDS2",			SCM_CREDS2,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LOCAL_CREDS_PERSISTENT",	LOCAL_CREDS_PERSISTENT,	CONST_CS | CONST_PERSISTENT);
 #endif
 
 #ifdef ZTS
