@@ -27,6 +27,19 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
+
+#if SIZEOF_ZEND_LONG == 8
+#define PHP_DISP_E_DIVBYZERO (zend_long) (ULONG) DISP_E_DIVBYZERO
+#define PHP_DISP_E_OVERFLOW (zend_long) (ULONG) DISP_E_OVERFLOW
+#define PHP_DISP_E_BADINDEX (zend_long) (ULONG) DISP_E_BADINDEX
+#define PHP_MK_E_UNAVAILABLE (zend_long) (ULONG) MK_E_UNAVAILABLE
+#else
+#define PHP_DISP_E_DIVBYZERO DISP_E_DIVBYZERO
+#define PHP_DISP_E_OVERFLOW DISP_E_OVERFLOW
+#define PHP_DISP_E_BADINDEX DISP_E_BADINDEX
+#define PHP_MK_E_UNAVAILABLE MK_E_UNAVAILABLE
+#endif
+
 #include "com_extension_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)

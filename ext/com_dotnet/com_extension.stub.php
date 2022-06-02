@@ -251,22 +251,22 @@ const NORM_IGNOREKASHIDA = UNKNOWN;
 
 /**
  * @var int
- * @cname DISP_E_DIVBYZERO
+ * @cname PHP_DISP_E_DIVBYZERO
  */
 const DISP_E_DIVBYZERO = UNKNOWN;
 /**
  * @var int
- * @cname DISP_E_OVERFLOW
+ * @cname PHP_DISP_E_OVERFLOW
  */
 const DISP_E_OVERFLOW = UNKNOWN;
 /**
  * @var int
- * @cname DISP_E_BADINDEX
+ * @cname PHP_DISP_E_BADINDEX
  */
 const DISP_E_BADINDEX = UNKNOWN;
 /**
  * @var int
- * @cname MK_E_UNAVAILABLE
+ * @cname PHP_MK_E_UNAVAILABLE
  */
 const MK_E_UNAVAILABLE = UNKNOWN;
 
