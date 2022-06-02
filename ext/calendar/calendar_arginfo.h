@@ -117,7 +117,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static void register_calendar_consts(int module_number)
+static void register_calendar_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("CAL_GREGORIAN", CAL_GREGORIAN, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("CAL_JULIAN", CAL_JULIAN, CONST_CS | CONST_PERSISTENT);

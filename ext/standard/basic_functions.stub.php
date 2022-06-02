@@ -1629,11 +1629,15 @@ function unpack(string $format, string $string, int $offset = 0): array|false {}
  */
 function password_get_info(string $hash): array {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @sensitive-param $password
+ */
 function password_hash(string $password, string|int|null $algo, array $options = []): string {}
 
 function password_needs_rehash(string $hash, string|int|null $algo, array $options = []): bool {}
 
+/** @sensitive-param $password */
 function password_verify(string $password, string $hash): bool {}
 
 function password_algos(): array {}

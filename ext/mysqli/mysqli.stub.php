@@ -126,6 +126,7 @@ class mysqli
      */
     public int $warning_count;
 
+    /** @sensitive-param $password */
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,

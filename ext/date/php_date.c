@@ -401,8 +401,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(date)
 PHP_MINIT_FUNCTION(date)
 {
 	REGISTER_INI_ENTRIES();
-	register_php_date_consts(module_number);
 	date_register_classes();
+	register_php_date_symbols(module_number);
 
 	php_date_global_timezone_db = NULL;
 	php_date_global_timezone_db_enabled = 0;

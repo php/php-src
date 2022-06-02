@@ -895,7 +895,7 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_php_dom_consts(int module_number)
+static void register_php_dom_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE", XML_ELEMENT_NODE, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NODE", XML_ATTRIBUTE_NODE, CONST_CS | CONST_PERSISTENT);

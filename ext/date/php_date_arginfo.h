@@ -748,7 +748,7 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_php_date_consts(int module_number)
+static void register_php_date_symbols(int module_number)
 {
     REGISTER_STRING_CONSTANT("DATE_ATOM", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
     ZEND_ASSERT(strcmp(DATE_FORMAT_RFC3339, "Y-m-d\\TH:i:sP") == 0);

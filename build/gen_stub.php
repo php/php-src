@@ -759,13 +759,24 @@ class ArgInfo {
     public $phpDocType;
     /** @var string|null */
     public $defaultValue;
+    /** @var bool */
+    public $isSensitive;
 
-    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type, ?Type $phpDocType, ?string $defaultValue) {
+    public function __construct(
+        string $name,
+        int $sendBy,
+        bool $isVariadic,
+        ?Type $type,
+        ?Type $phpDocType,
+        ?string $defaultValue,
+        bool $isSensitive
+    ) {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->setTypes($type, $phpDocType);
         $this->defaultValue = $defaultValue;
+        $this->isSensitive = $isSensitive;
     }
 
     public function equals(ArgInfo $other): bool {
@@ -773,7 +784,8 @@ class ArgInfo {
             && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
             && Type::equals($this->type, $other->type)
-            && $this->defaultValue === $other->defaultValue;
+            && $this->defaultValue === $other->defaultValue
+            && $this->isSensitive === $other->isSensitive;
     }
 
     public function getSendByString(): string {
@@ -925,6 +937,7 @@ interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
     public function getMethodSynopsisFilename(): string;
+    public function getAttributeName(): string;
     public function __toString(): string;
     public function isMethod(): bool;
     public function isConstructor(): bool;
@@ -970,6 +983,10 @@ class FunctionName implements FunctionOrMethodName {
         return implode('_', $this->name->parts);
     }
 
+    public function getAttributeName(): string {
+        return strtolower($this->name->toString());
+    }
+
     public function __toString(): string {
         return $this->name->toString();
     }
@@ -989,7 +1006,7 @@ class FunctionName implements FunctionOrMethodName {
 
 class MethodName implements FunctionOrMethodName {
     /** @var Name */
-    private $className;
+    public $className;
     /** @var string */
     public $methodName;
 
@@ -1012,6 +1029,10 @@ class MethodName implements FunctionOrMethodName {
 
     public function getMethodSynopsisFilename(): string {
         return $this->getDeclarationClassName() . "_{$this->methodName}";
+    }
+
+    public function getAttributeName(): string {
+        return strtolower($this->methodName);
     }
 
     public function __toString(): string {
@@ -2896,7 +2917,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             preg_match('/^\s*[\w\|\\\\\[\]]+\s*\$(\w+).*$/', $value, $matches);
-        } elseif ($this->name === "prefer-ref") {
+        } elseif ($this->name === "prefer-ref" || $this->name === "sensitive-param") {
             preg_match('/^\s*\$(\w+).*$/', $value, $matches);
         }
 
@@ -2946,34 +2967,54 @@ function parseFunctionLike(
         if ($comment) {
             $tags = parseDocComment($comment);
             foreach ($tags as $tag) {
-                if ($tag->name === 'prefer-ref') {
-                    $varName = $tag->getVariableName();
-                    if (!isset($paramMeta[$varName])) {
-                        $paramMeta[$varName] = [];
-                    }
-                    $paramMeta[$varName]['preferRef'] = true;
-                } else if ($tag->name === 'alias' || $tag->name === 'implementation-alias') {
-                    $aliasType = $tag->name;
-                    $aliasParts = explode("::", $tag->getValue());
-                    if (count($aliasParts) === 1) {
-                        $alias = new FunctionName(new Name($aliasParts[0]));
-                    } else {
-                        $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
-                    }
-                } else if ($tag->name === 'deprecated') {
-                    $isDeprecated = true;
-                } else if ($tag->name === 'no-verify') {
-                    $verify = false;
-                } else if ($tag->name === 'tentative-return-type') {
-                    $tentativeReturnType = true;
-                } else if ($tag->name === 'return') {
-                    $docReturnType = $tag->getType();
-                } else if ($tag->name === 'param') {
-                    $docParamTypes[$tag->getVariableName()] = $tag->getType();
-                } else if ($tag->name === 'refcount') {
-                    $refcount = $tag->getValue();
-                } else if ($tag->name === 'compile-time-eval') {
-                    $supportsCompileTimeEval = true;
+                switch ($tag->name) {
+                    case 'alias':
+                    case 'implementation-alias':
+                        $aliasType = $tag->name;
+                        $aliasParts = explode("::", $tag->getValue());
+                        if (count($aliasParts) === 1) {
+                            $alias = new FunctionName(new Name($aliasParts[0]));
+                        } else {
+                            $alias = new MethodName(new Name($aliasParts[0]), $aliasParts[1]);
+                        }
+                        break;
+
+                    case 'deprecated':
+                        $isDeprecated = true;
+                        break;
+
+                    case 'no-verify':
+                        $verify = false;
+                        break;
+
+                    case 'tentative-return-type':
+                        $tentativeReturnType = true;
+                        break;
+
+                    case 'return':
+                        $docReturnType = $tag->getType();
+                        break;
+
+                    case 'param':
+                        $docParamTypes[$tag->getVariableName()] = $tag->getType();
+                        break;
+
+                    case 'refcount':
+                        $refcount = $tag->getValue();
+                        break;
+
+                    case 'compile-time-eval':
+                        $supportsCompileTimeEval = true;
+                        break;
+
+                    case 'prefer-ref':
+                    case 'sensitive-param':
+                        $varName = $tag->getVariableName();
+                        if (!isset($paramMeta[$varName])) {
+                            $paramMeta[$varName] = [];
+                        }
+                        $paramMeta[$varName][$tag->name] = true;
+                        break;
                 }
             }
         }
@@ -2984,7 +3025,8 @@ function parseFunctionLike(
         $foundVariadic = false;
         foreach ($func->getParams() as $i => $param) {
             $varName = $param->var->name;
-            $preferRef = !empty($paramMeta[$varName]['preferRef']);
+            $preferRef = !empty($paramMeta[$varName]['prefer-ref']);
+            $isSensitive = !empty($paramMeta[$varName]['sensitive-param']);
             unset($paramMeta[$varName]);
 
             if (isset($varNameSet[$varName])) {
@@ -3031,7 +3073,8 @@ function parseFunctionLike(
                 $param->variadic,
                 $type,
                 isset($docParamTypes[$varName]) ? Type::fromString($docParamTypes[$varName]) : null,
-                $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null
+                $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null,
+                $isSensitive
             );
             if (!$param->default && !$param->variadic) {
                 $numRequiredArgs = $i + 1;
@@ -3555,7 +3598,11 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
     return null;
 }
 
-/** @param iterable $infos */
+/**
+ * @template T
+ * @param iterable<T> $infos
+ * @param Closure(T): string|null $codeGenerator
+ */
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator): string {
     $code = "";
@@ -3593,7 +3640,7 @@ function generateArgInfoCode(
     $generatedFuncInfos = [];
     $code .= generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
-        function (FuncInfo $funcInfo) use(&$generatedFuncInfos) {
+        static function (FuncInfo $funcInfo) use (&$generatedFuncInfos) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
             if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
                 $code = sprintf(
@@ -3615,7 +3662,7 @@ function generateArgInfoCode(
         $generatedFunctionDeclarations = [];
         $code .= generateCodeWithConditions(
             $fileInfo->getAllFuncInfos(), "",
-            function (FuncInfo $funcInfo) use($fileInfo, &$generatedFunctionDeclarations) {
+            static function (FuncInfo $funcInfo) use ($fileInfo, &$generatedFunctionDeclarations) {
                 $key = $funcInfo->getDeclarationKey();
                 if (isset($generatedFunctionDeclarations[$key])) {
                     return null;
@@ -3636,14 +3683,27 @@ function generateArgInfoCode(
     }
 
     if ($fileInfo->generateClassEntries) {
-        if (!empty($fileInfo->constInfos)) {
-            $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_consts(int module_number)\n";
+        $classEntriesWithSensitiveParams = [];
+        $attributeInitializationCode = generateAttributeInitialization($fileInfo, $classEntriesWithSensitiveParams);
+
+        if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
+            $classEntriesWithSensitiveParams = array_unique($classEntriesWithSensitiveParams);
+            $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number";
+            foreach ($classEntriesWithSensitiveParams as $ce) {
+                $code .= ", zend_class_entry *$ce";
+            }
+            $code .= ")\n";
             $code .= "{\n";
 
             foreach ($fileInfo->constInfos as $constInfo) {
                 $code .= $constInfo->getDeclaration($allConstInfos);
             }
 
+            if (!empty($attributeInitializationCode !== "" && $fileInfo->constInfos)) {
+                $code .= "\n";
+            }
+
+            $code .= $attributeInitializationCode;
             $code .= "}\n";
         }
 
@@ -3677,13 +3737,41 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
     }
 
     $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
-    $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
+    $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getFunctionEntry();
     });
     $code .= "\tZEND_FE_END\n";
     $code .= "};\n";
 
     return $code;
+}
+
+function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntriesWithSensitiveParams): string {
+    return generateCodeWithConditions(
+        $fileInfo->getAllFuncInfos(),
+        "",
+        static function (FuncInfo $funcInfo) use (&$classEntriesWithSensitiveParams) {
+            $code = null;
+
+            foreach ($funcInfo->args as $index => $arg) {
+                if (!$arg->isSensitive) {
+                    continue;
+                }
+
+                if ($funcInfo->name instanceof MethodName) {
+                    $classEntry = "class_entry_" . str_replace("\\", "_", $funcInfo->name->className->toString());
+                    $functionTable = "&{$classEntry}->function_table";
+                    $classEntriesWithSensitiveParams[] = $classEntry;
+                } else {
+                    $functionTable = "CG(function_table)";
+                }
+
+                $code .= "    zend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getAttributeName() . "\", $index);\n";
+            }
+
+            return $code;
+        }
+    );
 }
 
 /** @param FuncInfo<string, FuncInfo> $funcInfos */
@@ -3693,7 +3781,7 @@ function generateOptimizerInfo(array $funcInfos): string {
 
     $code .= "static const func_info_t func_infos[] = {\n";
 
-    $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
+    $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getOptimizerInfo();
     });
 
@@ -4090,7 +4178,7 @@ function initPhpParser() {
         installPhpParser($version, $phpParserDir);
     }
 
-    spl_autoload_register(function(string $class) use($phpParserDir) {
+    spl_autoload_register(function(string $class) use ($phpParserDir) {
         if (strpos($class, "PhpParser\\") === 0) {
             $fileName = $phpParserDir . "/lib/" . str_replace("\\", "/", $class) . ".php";
             require $fileName;

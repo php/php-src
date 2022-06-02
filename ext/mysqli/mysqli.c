@@ -32,6 +32,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_attributes.h"
 #include "mysqli_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(mysqli)
@@ -691,6 +692,8 @@ PHP_MINIT_FUNCTION(mysqli)
 #else
 	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", 0, CONST_CS | CONST_PERSISTENT);
 #endif
+
+	register_mysqli_symbols(module_number, mysqli_link_class_entry);
 
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
 

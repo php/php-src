@@ -166,7 +166,7 @@ PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
 
-	register_exif_consts(module_number);
+	register_exif_symbols(module_number);
 
 	return SUCCESS;
 }

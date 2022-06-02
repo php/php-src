@@ -59,7 +59,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static void register_filter_consts(int module_number)
+static void register_filter_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("INPUT_POST", PARSE_POST, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("INPUT_GET", PARSE_GET, CONST_CS | CONST_PERSISTENT);

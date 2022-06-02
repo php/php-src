@@ -162,7 +162,7 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_INI_ENTRIES();
 
-	register_filter_consts(module_number);
+	register_filter_symbols(module_number);
 
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
 
