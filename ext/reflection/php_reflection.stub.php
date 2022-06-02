@@ -729,7 +729,7 @@ class ReflectionEnum extends ReflectionClass
 
     public function isBacked(): bool {}
 
-    public function getBackingType(): ?ReflectionType {}
+    public function getBackingType(): ?ReflectionNamedType {}
 }
 
 class ReflectionEnumUnitCase extends ReflectionClassConstant
