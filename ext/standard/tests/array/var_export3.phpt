@@ -17,7 +17,8 @@ $kake = new kake;
 
 var_export($kake);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Passing object of class (kake) with no __set_state method is deprecated in %s on line %d
 \kake::__set_state(array(
    'mann' => 42,
    'kvinne' => 43,

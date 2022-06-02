@@ -61,6 +61,7 @@ class cr {
         if ($a->priv_member === $b->priv_member) return 0;
         return ($a->priv_member > $b->priv_member)? 1:-1;
     }
+    public static function __set_state(array $values) {}
 }
 
 function comp_func($a, $b) {

@@ -583,6 +583,9 @@ again:
 					smart_str_appendl(buf, "::", 2);
 					smart_str_append(buf, Z_STR_P(case_name_zval));
 				} else {
+					if (!zend_hash_str_find_ptr(&ce->function_table, "__set_state", strlen("__set_state"))) {
+						zend_error(E_DEPRECATED, "Passing object of class (%s) with no __set_state method is deprecated", ZSTR_VAL(ce->name));
+					}
 					smart_str_appendl(buf, "::__set_state(array(\n", 21);
 				}
 			}

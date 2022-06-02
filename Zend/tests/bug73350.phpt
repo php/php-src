@@ -12,6 +12,7 @@ $e = new Exception();
 var_export($e);
 ?>
 --EXPECTF--
+Deprecated: Passing object of class (Exception) with no __set_state method is deprecated in %s on line %d
 \Exception::__set_state(array(
    'message' => '',
    'string' => 'Exception in %sbug73350.php:%d

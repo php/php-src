@@ -9,6 +9,7 @@ gc_collect_cycles();
 
 var_export($objstore);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Passing object of class (SplObjectStorage) with no __set_state method is deprecated in %s on line %d
 \SplObjectStorage::__set_state(array(
 ))

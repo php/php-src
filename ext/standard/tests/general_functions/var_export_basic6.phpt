@@ -7,7 +7,7 @@ echo "*** Testing var_export() with valid objects ***\n";
 // class with no members
 class foo
 {
-// no members
+  public static function __set_state(array $values) {}
 }
 
 // abstract class
@@ -17,6 +17,8 @@ abstract class abstractClass
   public function printClassName () {
     echo $this->getClassName() . "\n";
   }
+
+  public static function __set_state(array $values) {}
 }
 // implement abstract class
 class concreteClass extends abstractClass
@@ -44,6 +46,8 @@ class Value implements iValue
   public function dumpVal () {
     var_export ( $vars );
   }
+
+  public static function __set_state(array $values) {}
 }
 
 // a gereral class
@@ -62,6 +66,8 @@ class myClass
     $this->private_var = new foo();
     $this->protected_var = new foo();
   }
+
+  public static function __set_state(array $values) {}
 }
 
 // create a object of each class defined above

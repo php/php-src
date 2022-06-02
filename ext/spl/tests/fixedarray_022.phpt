@@ -10,6 +10,8 @@ call_user_func(function () {
 });
 ?>
 --EXPECTF--
+Deprecated: Passing object of class (SplFixedArray) with no __set_state method is deprecated in %s on line %d
+
 Warning: var_export does not handle circular references in %s on line 5
 \SplFixedArray::__set_state(array(
    0 => NULL,

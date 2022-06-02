@@ -33,6 +33,8 @@ object(SensitiveParameterValue)#%d (%d) refcount(%d){
 SensitiveParameterValue Object
 
 # var_export()
+
+Deprecated: Passing object of class (SensitiveParameterValue) with no __set_state method is deprecated in %s on line %d
 \SensitiveParameterValue::__set_state(array(
 ))
 
