@@ -1,5 +1,7 @@
 --TEST--
 Bug ##76452 (Crash while parsing blob data in firebird_fetch_blob)
+--EXTENSIONS--
+pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --FILE--
