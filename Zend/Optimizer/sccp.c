@@ -1563,7 +1563,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT(result, op1);
 			break;
 		case ZEND_JMP_NULL:
-			switch (opline->extended_value) {
+			switch (opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK) {
 				case ZEND_SHORT_CIRCUITING_CHAIN_EXPR:
 					ZVAL_NULL(&zv);
 					break;

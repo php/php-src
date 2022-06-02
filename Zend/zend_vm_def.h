@@ -7574,19 +7574,23 @@ ZEND_VM_HOT_NOCONST_HANDLER(198, ZEND_JMP_NULL, CONST|TMP|VAR|CV, JMP_ADDR)
 	}
 
 	result = EX_VAR(opline->result.var);
-	if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+		if (OP1_TYPE == IS_CV 
+			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
+			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
+		) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-	} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+	} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 		ZVAL_FALSE(result);
 	} else {
-		ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+		ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 		ZVAL_TRUE(result);
 	}
 

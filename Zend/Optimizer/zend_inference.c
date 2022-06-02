@@ -2457,16 +2457,19 @@ static zend_always_inline zend_result _zend_update_type_info(
 			COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->result_def);
 			break;
 		case ZEND_JMP_NULL:
-			if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR) {
+		{
+			uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+			if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR) {
 				tmp = MAY_BE_NULL;
-			} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+			} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 				tmp = MAY_BE_FALSE;
 			} else {
-				ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+				ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 				tmp = MAY_BE_TRUE;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
+		}
 		case ZEND_ASSIGN_OP:
 		case ZEND_ASSIGN_DIM_OP:
 		case ZEND_ASSIGN_OBJ_OP:

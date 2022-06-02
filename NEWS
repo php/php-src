@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
+  . Fixed bug GH-8661 (Nullsafe in coalesce triggers undefined variable
+    warning). (ilutov)
 
 - MBString:
   . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,

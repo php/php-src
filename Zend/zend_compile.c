@@ -2261,7 +2261,7 @@ static void zend_short_circuiting_commit(uint32_t checkpoint, znode *result, zen
 		zend_op *opline = &CG(active_op_array)->opcodes[opnum];
 		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
-		opline->extended_value =
+		opline->extended_value |=
 			ast->kind == ZEND_AST_ISSET ? ZEND_SHORT_CIRCUITING_CHAIN_ISSET :
 			ast->kind == ZEND_AST_EMPTY ? ZEND_SHORT_CIRCUITING_CHAIN_EMPTY :
 			                              ZEND_SHORT_CIRCUITING_CHAIN_EXPR;
@@ -2269,12 +2269,15 @@ static void zend_short_circuiting_commit(uint32_t checkpoint, znode *result, zen
 	}
 }
 
-static void zend_emit_jmp_null(znode *obj_node)
+static void zend_emit_jmp_null(znode *obj_node, uint32_t bp_type)
 {
 	uint32_t jmp_null_opnum = get_next_op_number();
 	zend_op *opline = zend_emit_op(NULL, ZEND_JMP_NULL, obj_node, NULL);
 	if (opline->op1_type == IS_CONST) {
 		Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+	}
+	if (bp_type == BP_VAR_IS) {
+		opline->extended_value |= ZEND_JMP_NULL_BP_VAR_IS;
 	}
 	zend_stack_push(&CG(short_circuiting_opnums), &jmp_null_opnum);
 }
@@ -2850,7 +2853,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 					}
 				}
 			}
-			zend_emit_jmp_null(&obj_node);
+			zend_emit_jmp_null(&obj_node, type);
 		}
 	}
 
@@ -4461,7 +4464,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 		zend_short_circuiting_mark_inner(obj_ast);
 		zend_compile_expr(&obj_node, obj_ast);
 		if (nullsafe) {
-			zend_emit_jmp_null(&obj_node);
+			zend_emit_jmp_null(&obj_node, type);
 		}
 	}
 

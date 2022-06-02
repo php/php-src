@@ -5244,19 +5244,23 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_CON
 	}
 
 	result = EX_VAR(opline->result.var);
-	if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+		if (IS_CONST == IS_CV
+			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
+			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
+		) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-	} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+	} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 		ZVAL_FALSE(result);
 	} else {
-		ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+		ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 		ZVAL_TRUE(result);
 	}
 
@@ -19344,19 +19348,23 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_TMP_
 	}
 
 	result = EX_VAR(opline->result.var);
-	if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+		if (IS_TMP_VAR == IS_CV
+			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
+			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
+		) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-	} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+	} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 		ZVAL_FALSE(result);
 	} else {
-		ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+		ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 		ZVAL_TRUE(result);
 	}
 
@@ -22267,19 +22275,23 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_VAR_
 	}
 
 	result = EX_VAR(opline->result.var);
-	if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+		if (IS_VAR == IS_CV
+			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
+			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
+		) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-	} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+	} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 		ZVAL_FALSE(result);
 	} else {
-		ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+		ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 		ZVAL_TRUE(result);
 	}
 
@@ -39116,19 +39128,23 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_NULL_SPEC_CV_H
 	}
 
 	result = EX_VAR(opline->result.var);
-	if (EXPECTED(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
+	uint32_t short_circuiting_type = opline->extended_value & ZEND_SHORT_CIRCUITING_CHAIN_MASK;
+	if (EXPECTED(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EXPR)) {
 		ZVAL_NULL(result);
-		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)) {
+		if (IS_CV == IS_CV
+			&& UNEXPECTED(Z_TYPE_P(val) == IS_UNDEF)
+			&& (opline->extended_value & ZEND_JMP_NULL_BP_VAR_IS) == 0
+		) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-	} else if (opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
+	} else if (short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_ISSET) {
 		ZVAL_FALSE(result);
 	} else {
-		ZEND_ASSERT(opline->extended_value == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
+		ZEND_ASSERT(short_circuiting_type == ZEND_SHORT_CIRCUITING_CHAIN_EMPTY);
 		ZVAL_TRUE(result);
 	}
 
