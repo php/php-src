@@ -118,7 +118,7 @@ PHP_MINIT_FUNCTION(ftp)
 	ftp_object_handlers.free_obj = ftp_object_destroy;
 	ftp_object_handlers.clone_obj = NULL;
 
-	register_ftp_consts(module_number);
+	register_ftp_symbols(module_number);
 
 	return SUCCESS;
 }

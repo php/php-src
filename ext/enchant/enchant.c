@@ -207,7 +207,7 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_handlers.clone_obj = NULL;
 	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
-	register_enchant_consts(module_number);
+	register_enchant_symbols(module_number);
 
 	return SUCCESS;
 }

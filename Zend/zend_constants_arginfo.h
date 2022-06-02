@@ -3,7 +3,7 @@
 
 
 
-static void register_zend_constants_consts(int module_number)
+static void register_zend_constants_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("E_ERROR", E_ERROR, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("E_WARNING", E_WARNING, CONST_CS | CONST_PERSISTENT);

@@ -210,7 +210,7 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_hash_consts(int module_number)
+static void register_hash_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("HASH_HMAC", PHP_HASH_HMAC, CONST_CS | CONST_PERSISTENT);
 }

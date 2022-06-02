@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a2f2992afd959a13215bfdfd00096f368b3bc392 */
+ * Stub hash: 794efd97f6eac5e755bed2eb6219173a1ee45321 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -1024,6 +1024,11 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 	ZEND_ME(mysqli_sql_exception, getSqlState, arginfo_class_mysqli_sql_exception_getSqlState, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_mysqli_symbols(int module_number, zend_class_entry *class_entry_mysqli)
+{
+    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "__construct", 2);
+}
 
 static zend_class_entry *register_class_mysqli_driver(void)
 {

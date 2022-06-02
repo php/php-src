@@ -115,7 +115,7 @@ PHP_MINIT_FUNCTION(finfo)
 	finfo_object_handlers.free_obj = finfo_objects_free;
 	finfo_object_handlers.clone_obj = NULL;
 
-	register_fileinfo_consts(module_number);
+	register_fileinfo_symbols(module_number);
 
 	return SUCCESS;
 }

@@ -789,7 +789,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, dom_xpath_class_entry->name, &dom_xpath_prop_handlers);
 #endif
 
-	register_php_dom_consts(module_number);
+	register_php_dom_symbols(module_number);
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 

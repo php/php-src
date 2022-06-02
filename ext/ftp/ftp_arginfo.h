@@ -280,7 +280,7 @@ static const zend_function_entry class_FTP_Connection_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_ftp_consts(int module_number)
+static void register_ftp_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("FTP_TEXT", FTPTYPE_ASCII, CONST_CS | CONST_PERSISTENT);

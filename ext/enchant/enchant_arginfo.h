@@ -158,7 +158,7 @@ static const zend_function_entry class_EnchantDictionary_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_enchant_consts(int module_number)
+static void register_enchant_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
     REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);

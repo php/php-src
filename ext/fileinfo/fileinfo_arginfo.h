@@ -82,7 +82,7 @@ static const zend_function_entry class_finfo_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_fileinfo_consts(int module_number)
+static void register_fileinfo_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("FILEINFO_NONE", MAGIC_NONE, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("FILEINFO_SYMLINK", MAGIC_SYMLINK, CONST_CS | CONST_PERSISTENT);

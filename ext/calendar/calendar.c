@@ -110,7 +110,7 @@ ZEND_GET_MODULE(calendar)
 
 PHP_MINIT_FUNCTION(calendar)
 {
-	register_calendar_consts(module_number);
+	register_calendar_symbols(module_number);
 
 	return SUCCESS;
 }

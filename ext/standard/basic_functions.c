@@ -29,6 +29,7 @@
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -292,7 +293,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
-	register_basic_functions_consts(module_number);
+	register_basic_functions_symbols(module_number);
 
 	php_ce_incomplete_class = register_class___PHP_Incomplete_Class();
 	php_register_incomplete_class_handlers();
