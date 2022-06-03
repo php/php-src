@@ -1,3 +1,16 @@
+"Category: Tests":
+- ext/**/tests/*
+
+"Category: Engine":
+- Zend/*
+
+"Category: Optimizer":
+- Zend/Optimizer/**/*
+
+"Category: Build System":
+- build/*
+- scripts/**/*
+
 "Extension: bcmath":
 - ext/bcmath/**/*
 
@@ -208,8 +221,26 @@
 "Extension: zlib":
 - ext/zlib/**/*
 
+"SAPI: apache2handler":
+- ext/sapi/apache2handler/**/*
+
+"SAPI: cgi":
+- ext/sapi/cgi/**/*
+
+"SAPI: cli":
+- ext/sapi/cli/**/*
+
+"SAPI: fpm":
+- ext/sapi/fpm/**/*
+
+"SAPI: fuzzer":
+- ext/sapi/fuzzer/**/*
+
+"SAPI: litespeed":
+- ext/sapi/litespeed/**/*
+
+"SAPI: phpdbg":
+- ext/sapi/phpdbg/**/*
+
 "Stubs":
 - ext/**/*.stub.php
-
-"Category: Tests":
-- ext/**/tests/*
