@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - MBString:
   . mb_detect_encoding recognizes all letters in Czech alphabet (alexdowad)
   . mb_detect_encoding recognizes all letters in Hungarian alphabet (alexdowad)
+  . Fixed bug GH-8685 (pcre not ready at mbstring startup). (Remi)
 
 - OPcache:
   . Fixed bug GH-8591 (tracing JIT crash after private instance method change).
