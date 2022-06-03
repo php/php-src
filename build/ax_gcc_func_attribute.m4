@@ -227,7 +227,7 @@ AC_DEFUN([AX_GCC_FUNC_ATTRIBUTE], [
             dnl GCC doesn't exit with an error if an unknown attribute is
             dnl provided but only outputs a warning, so accept the attribute
             dnl only if no warning were issued.
-            [AS_IF([grep -- -Wattributes conftest.err],
+            [AS_IF([test -s conftest.err],
                 [AS_VAR_SET([ac_var], [no])],
                 [AS_VAR_SET([ac_var], [yes])])],
             [AS_VAR_SET([ac_var], [no])])
