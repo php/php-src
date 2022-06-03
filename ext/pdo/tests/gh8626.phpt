@@ -24,20 +24,14 @@ $stmt = $db->prepare('INSERT INTO test VALUES(?)');
 // fail
 var_dump($stmt->execute([null]), $stmt->errorCode());
 $errorInfo = $stmt->errorInfo();
-if (isset($errorInfo[3])) {
-    unset($errorInfo[3]); // odbc
-}
-var_dump($errorInfo);
+var_dump(array_slice($errorInfo, 0, 3)); // odbc, dblib
 
 $stmt->closeCursor(); // sqlite
 
 // success
 var_dump($stmt->execute([1]), $stmt->errorCode());
 $errorInfo = $stmt->errorInfo();
-if (isset($errorInfo[3])) {
-    unset($errorInfo[3]); // odbc
-}
-var_dump($errorInfo);
+var_dump(array_slice($errorInfo, 0, 3)); // odbc, dblib
 ?>
 ===DONE===
 --EXPECTF--
