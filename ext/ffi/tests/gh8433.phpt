@@ -8,9 +8,9 @@ ffi.enable=1
 <?php
 
 $ffi = FFI::cdef("typedef struct { int a; } bar;");
-$x = $ffi->new("bar(*)(void)");
+$x = FFI::new("bar(*)(void)", cdef : $ffi);
 FFI::addr($x)[0] = function() use ($ffi) {
-    $bar = $ffi->new("bar");
+    $bar = FFI::new("bar", cdef : $ffi);
     $bar->a = 2;
     return $bar;
 };

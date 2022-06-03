@@ -52,7 +52,7 @@ try {
 }
 try {
     $f = FFI::cdef("typedef int * const t[1];");
-    $p = $f->new("t");
+    $p = FFI::new("t", cdef : $f);
     $p[0] = null;
     echo "ok\n";
 } catch (Throwable $e) {

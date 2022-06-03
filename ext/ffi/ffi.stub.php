@@ -7,13 +7,13 @@ namespace {
 	/** @not-serializable */
     final class FFI
     {
-        public static function cdef(string $code = "", ?string $lib = null): FFI {}
+        public static function cdef(string $code = "", ?string $lib = null): FFI\CDef {}
 
-        public static function load(string $filename): ?FFI {}
+        public static function load(string $filename): ?FFI\CDef {}
 
-        public static function scope(string $name): FFI {}
+        public static function scope(string $name): FFI\CDef {}
 
-        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+        public static function new(FFI\CType|string $type, bool $owned = true, bool $persistent = false, ?FFI\CDef $cdef = null): ?FFI\CData {}
 
         /** @prefer-ref $ptr */
         public static function free(FFI\CData $ptr): void {}
@@ -22,9 +22,9 @@ namespace {
          * @param FFI\CData|int|float|bool|null $ptr
          * @prefer-ref $ptr
          */
-        public static function cast(FFI\CType|string $type, $ptr): ?FFI\CData {}
+        public static function cast(FFI\CType|string $type, $ptr, ?FFI\CDef $cdef = null): ?FFI\CData {}
 
-        public static function type(string $type): ?FFI\CType {}
+        public static function type(string $type, ?FFI\CDef $cdef = null): ?FFI\CType {}
 
         /** @prefer-ref $ptr */
         public static function typeof(FFI\CData $ptr): FFI\CType {}
@@ -63,11 +63,18 @@ namespace {
 
         /** @prefer-ref $ptr */
         public static function isNull(FFI\CData $ptr): bool {}
+
+        public static function hasSymbol(FFI\CDef $cdef, string $symbol, ?int $symbol_kind = null): bool {}
+
+        public static function getSymbols(FFI\CDef $cdef, ?int $symbol_kind = null): array {}
     }
 
 }
 
 namespace FFI {
+    /** @not-serializable */
+    final class CDef {
+    }
 
 	/** @not-serializable */
     final class CData {

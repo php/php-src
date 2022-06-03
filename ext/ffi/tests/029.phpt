@@ -10,8 +10,8 @@ $ffi = FFI::cdef("
     typedef char t1;
     typedef char _Alignas(int) t2;
 ");
-var_dump(FFI::sizeof($ffi->new("struct {char a; t1 b;}")));
-var_dump(FFI::sizeof($ffi->new("struct {char a; t2 b;}")));
+var_dump(FFI::sizeof(FFI::new("struct {char a; t1 b;}", cdef : $ffi)));
+var_dump(FFI::sizeof(FFI::new("struct {char a; t2 b;}", cdef : $ffi)));
 ?>
 --EXPECT--
 int(2)

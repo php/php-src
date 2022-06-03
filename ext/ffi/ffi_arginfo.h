@@ -1,16 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d9dd3b93c0d1623fe61ea0bd8ee9d4c3a359bf78 */
+ * Stub hash: 754463b45c9c4a1313e2bd690c84656d5d6ec853 */
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI\\CDef, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lib, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_load, 0, 1, FFI, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_load, 0, 1, FFI\\CDef, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_scope, 0, 1, FFI, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_scope, 0, 1, FFI\\CDef, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -18,6 +18,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_new, 0, 1, FFI\\CData, 
 	ZEND_ARG_OBJ_TYPE_MASK(0, type, FFI\\CType, MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, owned, _IS_BOOL, 0, "true")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, persistent, _IS_BOOL, 0, "false")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, cdef, FFI\\CDef, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_free, 0, 1, IS_VOID, 0)
@@ -27,10 +28,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cast, 0, 2, FFI\\CData, 1)
 	ZEND_ARG_OBJ_TYPE_MASK(0, type, FFI\\CType, MAY_BE_STRING, NULL)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, ptr)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, cdef, FFI\\CDef, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_type, 0, 1, FFI\\CType, 1)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, cdef, FFI\\CDef, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_typeof, 0, 1, FFI\\CType, 0)
@@ -77,6 +80,17 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_isNull, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(ZEND_SEND_PREFER_REF, ptr, FFI\\CData, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_hasSymbol, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, cdef, FFI\\CDef, 0)
+	ZEND_ARG_TYPE_INFO(0, symbol, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, symbol_kind, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_getSymbols, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, cdef, FFI\\CDef, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, symbol_kind, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FFI_CType_getName, 0, 0, IS_STRING, 0)
@@ -139,6 +153,8 @@ ZEND_METHOD(FFI, memcmp);
 ZEND_METHOD(FFI, memset);
 ZEND_METHOD(FFI, string);
 ZEND_METHOD(FFI, isNull);
+ZEND_METHOD(FFI, hasSymbol);
+ZEND_METHOD(FFI, getSymbols);
 ZEND_METHOD(FFI_CType, getName);
 ZEND_METHOD(FFI_CType, getKind);
 ZEND_METHOD(FFI_CType, getSize);
@@ -175,6 +191,13 @@ static const zend_function_entry class_FFI_methods[] = {
 	ZEND_ME(FFI, memset, arginfo_class_FFI_memset, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, string, arginfo_class_FFI_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, isNull, arginfo_class_FFI_isNull, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(FFI, hasSymbol, arginfo_class_FFI_hasSymbol, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(FFI, getSymbols, arginfo_class_FFI_getSymbols, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_FFI_CDef_methods[] = {
 	ZEND_FE_END
 };
 
@@ -219,6 +242,17 @@ static zend_class_entry *register_class_FFI(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_FFI_CDef(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "FFI", "CDef", class_FFI_CDef_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 

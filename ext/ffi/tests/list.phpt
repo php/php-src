@@ -22,7 +22,7 @@ class DList {
                     };
                 ");
         }
-        $node = FFI::addr(self::$ffi->new("dlist", false));
+        $node = FFI::addr(FFI::new("dlist", false, cdef : self::$ffi));
         $node->data = 0;
         $node->next = $node;
         $node->prev = $node;
@@ -41,7 +41,7 @@ class DList {
     }
 
     function add(int $data) {
-        $node = FFI::addr(self::$ffi->new("dlist", false));
+        $node = FFI::addr(FFI::new("dlist", false, cdef : self::$ffi));
         $node->data = $data;
         $node->next = $this->root;
         $node->prev = $this->root->prev;

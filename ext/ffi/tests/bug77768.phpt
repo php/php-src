@@ -32,7 +32,7 @@ int printf(const char *format, ...);
 int printf(const char *format, ...);
 ");
 
-var_dump(FFI::sizeof($x->new("uint8_t")));
+var_dump(FFI::sizeof(FFI::new("uint8_t", cdef : $x)));
 var_dump(FFI::sizeof(FFI::new("uint8_t")));
 ?>
 --EXPECT--

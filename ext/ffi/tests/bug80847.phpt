@@ -32,7 +32,7 @@ if (PHP_OS_FAMILY !== 'Windows') {
         $ffi = FFI::cdef($header, ffi_get_php_dll_name());
     }
 }
-$x = $ffi->new('bug80847_02');
+$x = FFI::new('bug80847_02', cdef : $ffi);
 $x->a->b = 42;
 $x->a->c = 42.5;
 var_dump($x);
