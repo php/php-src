@@ -67,6 +67,7 @@ typedef struct {
 	unsigned int 	multi_query;
 	bool		persistent;
 	int				async_result_fetch_type;
+	bool		disable_cleanup;
 } MY_MYSQL;
 
 typedef struct {
