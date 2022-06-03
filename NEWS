@@ -70,6 +70,7 @@ PHP                                                                        NEWS
   . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
     options. (David Carlier)
   . Added ancillary data support for FreeBSD. (David Carlier)
+  . Added ancillary data support for NetBSD. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
