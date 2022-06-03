@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
     (Derick)
 
+- MBString:
+  . Fixed bug GH-8685 (pcre not ready at mbstring startup). (Remi)
+
 - PDO ODBC:
   . Fixed errorInfo() result on successful PDOStatement->execute(). (Yurunsoft)
 
