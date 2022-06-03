@@ -161,9 +161,18 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 /* }}} */
 
+/* {{{ mbstring_deps[] */
+static const zend_module_dep mbstring_deps[] = {
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_END
+};
+/* }}} */
+
 /* {{{ zend_module_entry mbstring_module_entry */
 zend_module_entry mbstring_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	NULL,
+	mbstring_deps,
 	"mbstring",
 	ext_functions,
 	PHP_MINIT(mbstring),
