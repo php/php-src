@@ -33,6 +33,8 @@
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
+zend_class_entry *pdosqlite_ce;
+
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
 
