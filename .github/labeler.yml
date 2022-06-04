@@ -238,6 +238,3 @@
 
 "SAPI: phpdbg":
 - ext/sapi/phpdbg/**/*
-
-"Stubs":
-- ext/**/*.stub.php
