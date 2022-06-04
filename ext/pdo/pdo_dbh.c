@@ -236,7 +236,7 @@ void create_specific_pdo_object(zval *new_object, const char *driver_name)
 //'odbc'
 
 	// No specific DB implementation found
-	object_init_ex(new_object, pdo_ce);
+	object_init_ex(new_object, pdo_dbh_ce);
 }
 
 static
