@@ -29,6 +29,7 @@ CREATE TABLE gh10908(
   MYBOOL BOOLEAN
 );
 EOT;
+$dbh = getDbConnection();
 $dbh->exec($sql);
 $dbh->exec("INSERT INTO gh10908 VALUES(1, 'ABC', 12.34, 1.0, 2.0, '2023-03-24 17:39', '2023-03-24', '17:39', 'abcdefg', 32767, 200000, 'azertyuiop', false);");
 
@@ -57,6 +58,7 @@ echo "Did not crash\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE gh10908");
 unset($dbh);
 ?>

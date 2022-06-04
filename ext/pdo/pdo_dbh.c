@@ -221,10 +221,82 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ */
-PHP_METHOD(PDO, __construct)
+#define MAX_PDO_SUB_CLASSES 64
+static unsigned int number_of_pdo_driver_class_entries = 0;
+static pdo_driver_class_entry *pdo_driver_class_entries[MAX_PDO_SUB_CLASSES];
+
+// It would be possible remove this and roll it into the standard driver class entries
+// I chose not to do it at this time, as that would break existing PDO extensions
+zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry)
 {
-	zval *object = ZEND_THIS;
+	if (number_of_pdo_driver_class_entries >= MAX_PDO_SUB_CLASSES) {
+		return FAILURE;
+	}
+
+	pdo_driver_class_entries[number_of_pdo_driver_class_entries] = driver_class_entry;
+	number_of_pdo_driver_class_entries += 1;
+
+	return SUCCESS;
+}
+
+static bool create_driver_specific_pdo_object(const char *driver_name, zend_class_entry *called_scope, zval *new_object)
+{
+	zend_class_entry *ce_based_on_driver_name = NULL, *ce_based_on_called_object = NULL;
+
+	for (int i = 0; i < number_of_pdo_driver_class_entries && (ce_based_on_driver_name == NULL || ce_based_on_called_object == NULL); i++) {
+		pdo_driver_class_entry *driver_class_entry = pdo_driver_class_entries[i];
+
+		if (strcmp(driver_class_entry->driver_name, driver_name) == 0) {
+			ce_based_on_driver_name = driver_class_entry->driver_ce;
+		}
+
+		if (called_scope != pdo_dbh_ce && instanceof_function(called_scope, driver_class_entry->driver_ce)) {
+			ce_based_on_called_object = called_scope;
+		}
+	}
+
+	if (ce_based_on_called_object) {
+		if (ce_based_on_driver_name) {
+			if (instanceof_function(ce_based_on_called_object, ce_based_on_driver_name) == false) {
+				zend_throw_exception_ex(php_pdo_get_exception(), 0,
+					"%s::connect() cannot be called when connecting to the \"%s\" driver, "
+					"you must call either %s::connect() or PDO::connect() instead",
+					ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+				return false;
+			}
+
+			object_init_ex(new_object, ce_based_on_called_object);
+			return true;
+		} else {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0,
+				"%s::connect() cannot be called when connecting to an unknown driver, "
+				"you must call PDO::connect() instead",
+				ZSTR_VAL(called_scope->name));
+			return false;
+		}
+	}
+
+	if (ce_based_on_driver_name) {
+		if (called_scope != pdo_dbh_ce) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0,
+				"%s::connect() cannot be called when connecting to the \"%s\" driver, "
+				"you must call either %s::connect() or PDO::connect() instead",
+				ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+			return false;
+		}
+
+		// A specific driver implementation was called on PDO
+		object_init_ex(new_object, ce_based_on_driver_name);
+	} else {
+		// No specific DB implementation found
+		object_init_ex(new_object, called_scope);
+	}
+
+	return true;
+}
+
+static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object, zend_class_entry *current_scope, zval *new_zval_object)
+{
 	pdo_dbh_t *dbh = NULL;
 	bool is_persistent = 0;
 	char *data_source;
@@ -291,7 +363,17 @@ PHP_METHOD(PDO, __construct)
 		RETURN_THROWS();
 	}
 
-	dbh = Z_PDO_DBH_P(object);
+	if (new_zval_object != NULL) {
+		ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
+		bool result = create_driver_specific_pdo_object(driver->driver_name, current_scope, new_zval_object);
+		if (!result) {
+			RETURN_THROWS();
+		}
+
+		dbh = Z_PDO_DBH_P(new_zval_object);
+	} else {
+		dbh = php_pdo_dbh_fetch_inner(object);
+	}
 
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
@@ -352,7 +434,7 @@ PHP_METHOD(PDO, __construct)
 		if (pdbh) {
 			efree(dbh);
 			/* switch over to the persistent one */
-			Z_PDO_OBJECT_P(object)->inner = pdbh;
+			php_pdo_dbh_fetch_object(object)->inner = pdbh;
 			pdbh->refcount++;
 			dbh = pdbh;
 		}
@@ -431,6 +513,19 @@ options:
 	if (!EG(exception)) {
 		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
 	}
+}
+
+/* {{{ */
+PHP_METHOD(PDO, __construct)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, NULL);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(PDO, connect)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, return_value);
 }
 /* }}} */
 
@@ -1334,6 +1429,8 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 }
 
 static zend_object_handlers pdo_dbh_object_handlers;
+static zend_object_handlers pdosqlite_dbh_object_handlers;
+
 static void pdo_dbh_free_storage(zend_object *std);
 
 void pdo_dbh_init(int module_number)
@@ -1349,6 +1446,13 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
+
+	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
+	pdosqlite_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
+	pdosqlite_dbh_object_handlers.get_method = dbh_method_get;
+	pdosqlite_dbh_object_handlers.compare = zend_objects_not_comparable;
+	pdosqlite_dbh_object_handlers.get_gc = dbh_get_gc;
 }
 
 static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)

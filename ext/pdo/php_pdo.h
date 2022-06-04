@@ -19,8 +19,11 @@
 
 #include "zend.h"
 
-extern zend_module_entry pdo_module_entry;
+PHPAPI extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry
+
+PHPAPI extern zend_class_entry *pdo_dbh_ce;
+PHPAPI extern zend_object *pdo_dbh_new(zend_class_entry *ce);
 
 #include "php_version.h"
 #define PHP_PDO_VERSION PHP_VERSION
@@ -49,9 +52,6 @@ PHP_MINFO_FUNCTION(pdo);
 
 #define REGISTER_PDO_CLASS_CONST_LONG(const_name, value) \
 	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
-
-#define REGISTER_PDO_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1);
 
 #define LONG_CONST(c) (zend_long) c
 

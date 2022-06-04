@@ -22,9 +22,14 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
+#include "pdo/php_pdo_int.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#include "pdo_pgsql_arginfo.h"
+
+zend_class_entry *PdoPgsql_ce;
+static pdo_driver_class_entry PdoPgsql_pdo_driver_class_entry;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
@@ -53,6 +58,90 @@ zend_module_entry pdo_pgsql_module_entry = {
 ZEND_GET_MODULE(pdo_pgsql)
 #endif
 
+/* Escape an identifier for insertion into a text field	*/
+PHP_METHOD(PdoPgsql, escapeIdentifier)
+{
+	zend_string *from = NULL;
+	char *tmp;
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &from) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+	PDO_DBH_CLEAR_ERR();
+
+	/* Obtain db Handle */
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
+	if (!tmp) {
+		// TODO - exception
+		php_error_docref(NULL, E_WARNING,"Failed to escape identifier");
+		RETURN_FALSE;
+	}
+
+	RETVAL_STRING(tmp);
+	PQfreemem(tmp);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(PdoPgsql, copyFromArray)
+{
+	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(PdoPgsql, copyFromFile)
+{
+	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(PdoPgsql, copyToFile)
+{
+	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Returns true if the copy worked fine or false if error */
+PHP_METHOD(PdoPgsql, copyToArray)
+{
+	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+PHP_METHOD(PdoPgsql, lobCreate)
+{
+	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Opens an existing large object stream.  Must be called inside a transaction. */
+PHP_METHOD(PdoPgsql, lobOpen)
+{
+	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Deletes the large object identified by oid.  Must be called inside a transaction. */
+PHP_METHOD(PdoPgsql, lobUnlink)
+{
+	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Get asynchronous notification */
+PHP_METHOD(PdoPgsql, getNotify)
+{
+	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Get backend(server) pid */
+PHP_METHOD(PdoPgsql, getPid)
+{
+	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* true global environment */
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -64,6 +153,15 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (zend_long)PGSQL_TRANSACTION_INTRANS);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
+
+	PdoPgsql_ce = register_class_PdoPgsql(pdo_dbh_ce);
+	PdoPgsql_ce->create_object = pdo_dbh_new;
+
+	PdoPgsql_pdo_driver_class_entry.driver_name = "pgsql";
+	PdoPgsql_pdo_driver_class_entry.driver_ce = PdoPgsql_ce;
+	if (pdo_register_driver_specific_class(&PdoPgsql_pdo_driver_class_entry) == FAILURE) {
+		return FAILURE;
+	}
 
 	return php_pdo_register_driver(&pdo_pgsql_driver);
 }

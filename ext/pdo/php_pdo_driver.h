@@ -215,6 +215,16 @@ typedef struct {
 
 } pdo_driver_t;
 
+// NOTE - This separate struct, could be rolled it into pdo_driver_t
+// I chose not to, as that would cause BC break and require a lot of
+// downstream work.
+typedef struct {
+	char *driver_name;
+	zend_class_entry *driver_ce;
+} pdo_driver_class_entry;
+
+PHPAPI zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry);
+
 /* {{{ methods for a database handle */
 
 /* close or otherwise disconnect the database */

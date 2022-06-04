@@ -10,6 +10,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require("testdb.inc");
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, true);
 
 echo "========== not in manually transaction ==========\n";

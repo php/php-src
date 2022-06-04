@@ -12,6 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec("CREATE TABLE test62024 (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
 
@@ -41,6 +42,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test62024");
 unset($dbh);
 ?>

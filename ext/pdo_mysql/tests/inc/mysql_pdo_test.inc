@@ -8,7 +8,7 @@ foreach ($env as $k => $v) {
 
 class MySQLPDOTest extends PDOTest {
 
-    static function factory($classname = 'PDO', $mydsn = null, $myAttr = null) {
+    static function factory($classname = PDO::class, $mydsn = null, $myAttr = null) {
         $dsn 	= self::getDSN($mydsn);
         $user	= PDO_MYSQL_TEST_USER;
         $pass	= PDO_MYSQL_TEST_PASS;
@@ -33,6 +33,33 @@ class MySQLPDOTest extends PDOTest {
 
     static function factoryWithAttr($attr) {
         return self::factory('PDO', null, $attr);
+    }
+
+    static function connect($drop_test_tables = false, $myattr = null, $mydsn = null) {
+        $dsn 	= self::getDSN($mydsn);
+        $user	= PDO_MYSQL_TEST_USER;
+        $pass	= PDO_MYSQL_TEST_PASS;
+        $attr	= getenv('PDOTEST_ATTR');
+
+        if (is_string($attr) && strlen($attr)) {
+            $attr = unserialize($attr);
+        } else {
+            $attr = null;
+        }
+        if ($user === false)
+            $user = NULL;
+        if ($pass === false)
+            $pass = NULL;
+
+        $db = PDO::connect($dsn, $user, $pass, $attr);
+        if (!$db) {
+            die("Could not create PDO object (DSN=$dsn, user=$user)\n");
+        }
+
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
+
+        return $db;
     }
 
     static function createTestTable($table, $db, $engine = null) {

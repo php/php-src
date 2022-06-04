@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 
 require("testdb.inc");
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $table = 'error_handle';
@@ -30,12 +31,13 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE error_handle');
 unset($dbh);
 ?>
 --EXPECTF--
 dbh error
-Warning: PDO::query(): SQLSTATE[22018]: Invalid character value for cast specification: -413 conversion error from string "str" in %s on line 10
+Warning: PDO::query(): SQLSTATE[22018]: Invalid character value for cast specification: -413 conversion error from string "str" in %s on line %d
 
 stmt error
-Warning: PDOStatement::execute(): SQLSTATE[22018]: Invalid character value for cast specification: -413 conversion error from string "str" in %s on line 16
+Warning: PDOStatement::execute(): SQLSTATE[22018]: Invalid character value for cast specification: -413 conversion error from string "str" in %s on line %d

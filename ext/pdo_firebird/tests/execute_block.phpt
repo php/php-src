@@ -10,9 +10,10 @@ A bug in firebird causes a memory leak when calling `isc_attach_database()`.
 See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
-	require("testdb.inc");
+require("testdb.inc");
 
-	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+$dbh = getDbConnection();
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 	$sql = '
 execute block (a int = :e, b int = :d)
@@ -29,16 +30,16 @@ begin
   suspend;
 end	
 ';
-	$query = $dbh->prepare($sql);
-	$query->execute(['d' => 1, 'e' => 2]);
-	$row = $query->fetch(\PDO::FETCH_OBJ);
-	var_dump($row->N);
-	var_dump($row->M);
 
-	unset($query);
-	unset($dbh);
-	echo "done\n";
+$query = $dbh->prepare($sql);
+$query->execute(['d' => 1, 'e' => 2]);
+$row = $query->fetch(\PDO::FETCH_OBJ);
+var_dump($row->N);
+var_dump($row->M);
 
+unset($query);
+unset($dbh);
+echo "done\n";
 ?>
 --EXPECT--
 int(13)

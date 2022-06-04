@@ -5,13 +5,14 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-
+$db = getDbConnection();
 if (!driver_supports_batch_statements_without_select($db)) die('xfail test will fail with this version of FreeTDS');
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
+$db = getDbConnection();
 // creating a proc need to be a statement in it's own batch, so we need to do a little setup first
 $db->query("create table #test_batch_stmt_ins_exec(id int); ");
 $db->query(

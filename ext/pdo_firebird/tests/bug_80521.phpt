@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require 'testdb.inc';
 
+$dbh = getDbConnection();
 $dbh->exec("CREATE TABLE bug80521 (foo INTEGER)");
 var_dump($dbh->prepare("SELECT foo FROM bug80521 WHERE foo = :foo_bar"));
 ?>
@@ -22,6 +23,7 @@ object(PDOStatement)#%d (1) {
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE bug80521");
 unset($dbh);
 ?>

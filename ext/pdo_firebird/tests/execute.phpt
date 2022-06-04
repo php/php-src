@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require("testdb.inc");
 
+$dbh = getDbConnection();
 var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -47,6 +48,7 @@ echo "done\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE test_execute');
 unset($dbh);
 --EXPECT--
