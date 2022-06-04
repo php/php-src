@@ -5280,8 +5280,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_handlers.get_gc               = zend_fake_get_gc;
 
-	zend_declare_class_constant_long(zend_ffi_ce, "__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__")-1, __BIGGEST_ALIGNMENT__);
-
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;

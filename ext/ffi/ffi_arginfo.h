@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ec471e9638aa6b7b46b6e2cf8dd7232daa6d1525 */
+ * Stub hash: 61da0287284302ae020c50af7d6252f58cd5a9d3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_cdef, 0, 0, FFI, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_STRING, 0, "\"\"")
@@ -221,6 +221,12 @@ static zend_class_entry *register_class_FFI(void)
 	INIT_CLASS_ENTRY(ce, "FFI", class_FFI_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+
+	zval const___BIGGEST_ALIGNMENT___value;
+	ZVAL_LONG(&const___BIGGEST_ALIGNMENT___value, __BIGGEST_ALIGNMENT__);
+	zend_string *const___BIGGEST_ALIGNMENT___name = zend_string_init_interned("__BIGGEST_ALIGNMENT__", sizeof("__BIGGEST_ALIGNMENT__") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const___BIGGEST_ALIGNMENT___name, &const___BIGGEST_ALIGNMENT___value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const___BIGGEST_ALIGNMENT___name);
 
 	return class_entry;
 }

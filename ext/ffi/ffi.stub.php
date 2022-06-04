@@ -7,6 +7,12 @@ namespace {
 	/** @not-serializable */
     final class FFI
     {
+        /**
+         * @var int
+         * @cname __BIGGEST_ALIGNMENT__
+         */
+        public const __BIGGEST_ALIGNMENT__ = UNKNOWN;
+
         public static function cdef(string $code = "", ?string $lib = null): FFI {}
 
         public static function load(string $filename): ?FFI {}
