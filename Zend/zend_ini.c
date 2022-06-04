@@ -24,6 +24,7 @@
 #include "zend_operators.h"
 #include "zend_strtod.h"
 #include "zend_modules.h"
+#include "zend_smart_str.h"
 
 static HashTable *registered_zend_ini_directives;
 
@@ -545,6 +546,9 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	char *digits_end = NULL;
 	char *str = ZSTR_VAL(value);
 	size_t str_len = ZSTR_LEN(value);
+	smart_str invalid = {0};
+	smart_str interpreted = {0};
+	smart_str chr = {0};
 
 	/* Ignore trailing whitespace */
 	while (str_len && zend_is_whitespace(str[str_len-1])) --str_len;
@@ -562,16 +566,21 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	zend_ulong retval = (zend_ulong) ZEND_STRTOL(str, &digits_end, 0);
 
 	if (digits_end == str) {
-		*errstr = zend_strpprintf(0, "Invalid quantity '%.*s': no valid leading digits, interpreting as '0' for backwards compatibility",
-						(int)str_len, str);
+		smart_str_append_escaped(&invalid, str, str_len);
+		smart_str_0(&invalid);
+
+		*errstr = zend_strpprintf(0, "Invalid quantity '%s': no valid leading digits, interpreting as '0' for backwards compatibility",
+						ZSTR_VAL(invalid.s));
+
+		smart_str_free(&invalid);
 		return 0;
 	}
 
 	/* Allow for whitespace between integer portion and any suffix character */
-	while (zend_is_whitespace(*digits_end)) ++digits_end;
+	while (digits_end < &str[str_len] && zend_is_whitespace(*digits_end)) ++digits_end;
 
 	/* No exponent suffix. */
-	if (!*digits_end) {
+	if (digits_end == &str[str_len]) {
 		*errstr = NULL;
 		return retval;
 	}
@@ -590,18 +599,42 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 			case 'K':
 				retval *= 1024;
 				break;
-		default:
-			/* Unknown suffix */
-			*errstr = zend_strpprintf(0, "Invalid quantity '%.*s': unknown multipler '%c', interpreting as '%.*s' for backwards compatibility",
-						(int)str_len, str, str[str_len-1], (int)(digits_end - str), str);
-			return retval;
+			default:
+				/* Unknown suffix */
+				smart_str_append_escaped(&invalid, str, str_len);
+				smart_str_0(&invalid);
+				smart_str_append_escaped(&interpreted, str, digits_end - str);
+				smart_str_0(&interpreted);
+				smart_str_append_escaped(&chr, &str[str_len-1], 1);
+				smart_str_0(&chr);
+
+				*errstr = zend_strpprintf(0, "Invalid quantity '%s': unknown multipler '%s', interpreting as '%s' for backwards compatibility",
+							ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
+
+				smart_str_free(&invalid);
+				smart_str_free(&interpreted);
+				smart_str_free(&chr);
+
+				return retval;
 		}
 	}
 
 	if (digits_end < &str[str_len-1]) {
 		/* More than one character in suffix */
-		*errstr = zend_strpprintf(0, "Invalid quantity '%.*s', interpreting as '%.*s%c' for backwards compatibility",
-						(int)str_len, str, (int)(digits_end - str), str, str[str_len-1]);
+		smart_str_append_escaped(&invalid, str, str_len);
+		smart_str_0(&invalid);
+		smart_str_append_escaped(&interpreted, str, digits_end - str);
+		smart_str_0(&interpreted);
+		smart_str_append_escaped(&chr, &str[str_len-1], 1);
+		smart_str_0(&chr);
+
+		*errstr = zend_strpprintf(0, "Invalid quantity '%s', interpreting as '%s%s' for backwards compatibility",
+						ZSTR_VAL(invalid.s), ZSTR_VAL(interpreted.s), ZSTR_VAL(chr.s));
+
+		smart_str_free(&invalid);
+		smart_str_free(&interpreted);
+		smart_str_free(&chr);
+
 		return (zend_long) retval;
 	}
 
