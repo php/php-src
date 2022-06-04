@@ -1631,7 +1631,7 @@ PHP_MINIT_FUNCTION(hash)
 	PHP_HASH_HAVAL_REGISTER(5,224);
 	PHP_HASH_HAVAL_REGISTER(5,256);
 
-	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
+	register_hash_consts(module_number);
 
 	php_hashcontext_ce = register_class_HashContext();
 	php_hashcontext_ce->create_object = php_hashcontext_create;

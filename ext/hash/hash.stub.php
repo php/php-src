@@ -2,6 +2,12 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cname PHP_HASH_HMAC
+ */
+const HASH_HMAC = UNKNOWN;
+
 /** @refcount 1 */
 function hash(string $algo, string $data, bool $binary = false, array $options = []): string {}
 
