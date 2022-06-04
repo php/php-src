@@ -219,10 +219,29 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ */
-PHP_METHOD(PDO, __construct)
+static
+void create_specific_pdo_object(zval *new_object, const char *driver_name)
 {
-	zval *object = ZEND_THIS;
+	if (strcmp("sqlite", driver_name) == 0) {
+
+		object_init_ex(new_object, pdosqlite_ce);
+//		intern = Z_XMLREADER_P(return_value);
+//		intern->ptr = reader;
+//		printf("created pdosqlite object?\n");
+		return;
+	}
+//'pgsql'
+//'oci'
+//'firebird'
+//'odbc'
+
+	// No specific DB implementation found
+	object_init_ex(new_object, pdo_ce);
+}
+
+static
+void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zval *object, zval *new_zval_object)
+{
 	pdo_dbh_t *dbh = NULL;
 	bool is_persistent = 0;
 	char *data_source;
@@ -289,7 +308,26 @@ PHP_METHOD(PDO, __construct)
 		RETURN_THROWS();
 	}
 
-	dbh = Z_PDO_DBH_P(object);
+	// TODO - turn into a function?
+	if (object == NULL) {
+		// could this every happen?
+		if (driver->driver_name == NULL) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "Driver name is NULL");
+			RETURN_THROWS();
+		}
+
+		create_specific_pdo_object(new_zval_object, driver->driver_name);
+
+		if (new_zval_object == NULL) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0, "Failed to create specific PDO class");
+			RETURN_THROWS();
+		}
+
+		dbh = Z_PDO_DBH_P(new_zval_object);
+	}
+	else {
+		dbh = Z_PDO_DBH_P(object);
+	}
 
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
@@ -430,7 +468,31 @@ options:
 		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
 	}
 }
+
+/* {{{ */
+PHP_METHOD(PDO, __construct)
+{
+	zval *object = ZEND_THIS;
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, object, NULL);
+}
 /* }}} */
+
+
+/* {{{ */
+PHP_METHOD(PDO, connect)
+{
+//	zval *new_object = NULL;
+//	return_value = NULL;
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, return_value);
+
+	if (return_value == NULL) {
+		// Fix stuff up here?
+		printf("Retval is still null.\n");
+		exit(-1);
+	}
+}
+/* }}} */
+
 
 static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
 {
@@ -1324,6 +1386,8 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 }
 
 static zend_object_handlers pdo_dbh_object_handlers;
+static zend_object_handlers pdosqlite_dbh_object_handlers;
+
 static void pdo_dbh_free_storage(zend_object *std);
 
 void pdo_dbh_init(void)
@@ -1428,13 +1492,13 @@ void pdo_dbh_init(void)
 	pdosqlite_ce = register_class_PDOSqlite(pdo_dbh_ce);
 	pdosqlite_ce->create_object = pdo_dbh_new;
 
-	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
-	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
-	pdo_dbh_object_handlers.clone_obj = NULL;
-	pdo_dbh_object_handlers.get_method = dbh_method_get;
-	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
-	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
+	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
+	pdosqlite_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
+	pdosqlite_dbh_object_handlers.clone_obj = NULL;
+	pdosqlite_dbh_object_handlers.get_method = dbh_method_get;
+	pdosqlite_dbh_object_handlers.compare = zend_objects_not_comparable;
+	pdosqlite_dbh_object_handlers.get_gc = dbh_get_gc;
 }
 
 static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)

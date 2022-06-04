@@ -1,7 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d10dbdfd55eb4a4dc779cbf4fa000cdf4fb3539 */
+ * Stub hash: 9ad9db0f01bb0f36d1ff11c15428799d38a1a22f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_PDO_connect, 0, 1, PDO|PDOSqlite, 0)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
@@ -60,6 +67,7 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(PDO, __construct);
+ZEND_METHOD(PDO, connect);
 ZEND_METHOD(PDO, beginTransaction);
 ZEND_METHOD(PDO, commit);
 ZEND_METHOD(PDO, errorCode);
@@ -78,6 +86,7 @@ ZEND_METHOD(PDO, setAttribute);
 
 static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, connect, arginfo_class_PDO_connect, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)
