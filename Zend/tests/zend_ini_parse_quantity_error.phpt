@@ -17,7 +17,6 @@ $tests = [
 foreach ($tests as $setting) {
   var_dump(zend_test_zend_ini_parse_quantity($setting));
 }
-
 --EXPECTF--
 Warning: Invalid quantity 'K': no valid leading digits, interpreting as '0' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(0)
