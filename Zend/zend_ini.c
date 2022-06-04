@@ -559,7 +559,7 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	zend_ulong retval = (zend_ulong) ZEND_STRTOL(str, &digits_end, 0);
 
 	if (digits_end == str) {
-		*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s': no valid leading digits, interpreting as '0' for backwards compatibility",
+		*errstr = zend_strpprintf(0, "Invalid quantity '%.*s': no valid leading digits, interpreting as '0' for backwards compatibility",
 						(int)str_len, str);
 		return 0;
 	}
@@ -589,7 +589,7 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 				break;
 		default:
 			/* Unknown suffix */
-			*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s': unknown multipler '%c', interpreting as '%.*s' for backwards compatibility",
+			*errstr = zend_strpprintf(0, "Invalid quantity '%.*s': unknown multipler '%c', interpreting as '%.*s' for backwards compatibility",
 						(int)str_len, str, str[str_len-1], (int)(digits_end - str), str);
 			return retval;
 		}
@@ -597,7 +597,7 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 
 	if (digits_end < &str[str_len-1]) {
 		/* More than one character in suffix */
-		*errstr = zend_strpprintf(0, "Invalid numeric string '%.*s', interpreting as '%.*s%c' for backwards compatibility",
+		*errstr = zend_strpprintf(0, "Invalid quantity '%.*s', interpreting as '%.*s%c' for backwards compatibility",
 						(int)str_len, str, (int)(digits_end - str), str, str[str_len-1]);
 		return (zend_long) retval;
 	}

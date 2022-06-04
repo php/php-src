@@ -19,14 +19,14 @@ foreach ($tests as $setting) {
 }
 
 --EXPECTF--
-Warning: Invalid numeric string 'K': no valid leading digits, interpreting as '0' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+Warning: Invalid quantity 'K': no valid leading digits, interpreting as '0' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(0)
 
-Warning: Invalid numeric string '1KM', interpreting as '1M' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+Warning: Invalid quantity '1KM', interpreting as '1M' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(1048576)
 
-Warning: Invalid numeric string '1X': unknown multipler 'X', interpreting as '1' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+Warning: Invalid quantity '1X': unknown multipler 'X', interpreting as '1' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(1)
 
-Warning: Invalid numeric string '1.0K', interpreting as '1K' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
+Warning: Invalid quantity '1.0K', interpreting as '1K' for backwards compatibility in %s%ezend_ini_parse_quantity_error.php on line %d
 int(1024)
