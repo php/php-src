@@ -30,7 +30,9 @@ static HashTable *registered_zend_ini_directives;
 #define NO_VALUE_PLAINTEXT		"no value"
 #define NO_VALUE_HTML			"<i>no value</i>"
 
-#define ZEND_IS_WHITESPACE(c) (((c) == ' ') || ((c) == '\t') || ((c) == '\n') || ((c) == '\r') || ((c) == '\v') || ((c) == '\f'))
+static inline bool zend_is_whitespace(char c) {
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
+}
 
 /*
  * hash_apply functions
@@ -545,7 +547,8 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	size_t str_len = ZSTR_LEN(value);
 
 	/* Ignore trailing whitespace */
-	while (str_len && ZEND_IS_WHITESPACE(str[str_len-1])) --str_len;
+	while (str_len && zend_is_whitespace(str[str_len-1])) --str_len;
+
 	if (!str_len) {
 		*errstr = NULL;
 		return 0;
@@ -565,7 +568,7 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	}
 
 	/* Allow for whitespace between integer portion and any suffix character */
-	while (ZEND_IS_WHITESPACE(*digits_end)) ++digits_end;
+	while (zend_is_whitespace(*digits_end)) ++digits_end;
 
 	/* No exponent suffix. */
 	if (!*digits_end) {
