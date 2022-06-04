@@ -3,6 +3,61 @@
 /** @generate-class-entries */
 
 namespace FTP {
+    /**
+     * @var int
+     * @cname FTPTYPE_ASCII
+     */
+    const FTP_ASCII = UNKNOWN;
+    /**
+     * @var int
+     * @cname FTPTYPE_ASCII
+     */
+    const FTP_TEXT = UNKNOWN;
+    /**
+     * @var int
+     * @cname FTPTYPE_IMAGE
+     */
+    const FTP_BINARY = UNKNOWN;
+    /**
+     * @var int
+     * @cname FTPTYPE_IMAGE
+     */
+    const FTP_IMAGE = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_AUTORESUME
+     */
+    const FTP_AUTORESUME = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_OPT_TIMEOUT_SEC
+     */
+    const FTP_TIMEOUT_SEC = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_OPT_AUTOSEEK
+     */
+    const FTP_AUTOSEEK = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_OPT_USEPASVADDRESS
+     */
+    const FTP_USEPASVADDRESS = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_FAILED
+     */
+    const FTP_FAILED = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_FINISHED
+     */
+    const FTP_FINISHED = UNKNOWN;
+    /**
+     * @var int
+     * @cname PHP_FTP_MOREDATA
+     */
+    const FTP_MOREDATA = UNKNOWN;
 
     /**
      * @strict-properties
@@ -11,11 +66,9 @@ namespace FTP {
     final class Connection
     {
     }
-
 }
 
 namespace {
-
     function ftp_connect(string $hostname, int $port = 21, int $timeout = 90): FTP\Connection|false {}
 
     #ifdef HAVE_FTP_SSL
@@ -91,5 +144,4 @@ namespace {
     /** @param int|bool $value */
     function ftp_set_option(FTP\Connection $ftp, int $option, $value): bool {}
     function ftp_get_option(FTP\Connection $ftp, int $option): int|bool {}
-
 }
