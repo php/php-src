@@ -32,6 +32,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 #include "pdo_dbh_arginfo.h"
+#include "pdo_sqlite_arginfo.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
@@ -1423,6 +1424,17 @@ void pdo_dbh_init(void)
 
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (zend_long)PDO_CURSOR_FWDONLY);
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
+
+	pdosqlite_ce = register_class_PDOSqlite(pdo_dbh_ce);
+	pdosqlite_ce->create_object = pdo_dbh_new;
+
+	memcpy(&pdo_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	pdo_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
+	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
+	pdo_dbh_object_handlers.clone_obj = NULL;
+	pdo_dbh_object_handlers.get_method = dbh_method_get;
+	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
+	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 }
 
 static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)

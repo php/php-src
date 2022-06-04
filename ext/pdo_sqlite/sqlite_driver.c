@@ -453,7 +453,8 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	return ret;
 }
 
-static void php_sqlite3_func_callback(sqlite3_context *context, int argc,
+// TODO - make static again static
+void php_sqlite3_func_callback(sqlite3_context *context, int argc,
 	sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
