@@ -166,11 +166,13 @@ static void mysqli_link_free_storage(zend_object *object)
 
 	if (my_res && my_res->ptr) {
 		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
-		if (mysql->mysql) {
-			php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, my_res->status);
+		if(!mysql->disable_cleanup) {
+			if (mysql->mysql) {
+				php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, my_res->status);
+			}
+			php_clear_mysql(mysql);
+			efree(mysql);
 		}
-		php_clear_mysql(mysql);
-		efree(mysql);
 		my_res->status = MYSQLI_STATUS_UNKNOWN;
 	}
 	mysqli_objects_free_storage(object);

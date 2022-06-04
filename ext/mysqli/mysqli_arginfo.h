@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a2f2992afd959a13215bfdfd00096f368b3bc392 */
+ * Stub hash: 9894c3e237ecd523f8e755248eca926830ce115b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -51,6 +51,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_data_seek, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, result, mysqli_result, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mysqli_disable_cleanup, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_mysqli_dump_debug_info arginfo_mysqli_close
@@ -451,6 +455,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_mysqli_disable_cleanup arginfo_class_mysqli_autocommit
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_get_charset, 0, 0, IS_OBJECT, 1)
 ZEND_END_ARG_INFO()
 
@@ -703,6 +709,7 @@ ZEND_FUNCTION(mysqli_connect);
 ZEND_FUNCTION(mysqli_connect_errno);
 ZEND_FUNCTION(mysqli_connect_error);
 ZEND_FUNCTION(mysqli_data_seek);
+ZEND_FUNCTION(mysqli_disable_cleanup);
 ZEND_FUNCTION(mysqli_dump_debug_info);
 ZEND_FUNCTION(mysqli_debug);
 ZEND_FUNCTION(mysqli_errno);
@@ -816,6 +823,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_connect_errno, arginfo_mysqli_connect_errno)
 	ZEND_FE(mysqli_connect_error, arginfo_mysqli_connect_error)
 	ZEND_FE(mysqli_data_seek, arginfo_mysqli_data_seek)
+	ZEND_FE(mysqli_disable_cleanup, arginfo_mysqli_disable_cleanup)
 	ZEND_FE(mysqli_dump_debug_info, arginfo_mysqli_dump_debug_info)
 	ZEND_FE(mysqli_debug, arginfo_mysqli_debug)
 	ZEND_FE(mysqli_errno, arginfo_mysqli_errno)
@@ -930,6 +938,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(connect, mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(disable_cleanup, mysqli_disable_cleanup, arginfo_class_mysqli_disable_cleanup, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(get_client_info, mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME_MAPPING(get_connection_stats, mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC)

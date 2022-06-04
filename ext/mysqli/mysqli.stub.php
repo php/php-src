@@ -201,6 +201,12 @@ class mysqli
 
     /**
      * @tentative-return-type
+     * @alias mysqli_disable_cleanup
+     */
+    public function disable_cleanup(bool $enable): bool {}
+
+    /**
+     * @tentative-return-type
      * @alias mysqli_get_charset
      */
     public function get_charset(): ?object {}
@@ -765,6 +771,8 @@ function mysqli_connect_errno(): int {}
 function mysqli_connect_error(): ?string {}
 
 function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
+
+function mysqli_disable_cleanup(bool $enable): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
