@@ -84,6 +84,26 @@ explained at the end of this document in
  5. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
 
+    For example:
+
+    ```sh
+    # With ZTS
+    make distclean || \
+    ./buildconf --force \
+        && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+        && make -j$(nproc) \
+        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && ./sapi/cli/php -v
+
+    # Without ZTS
+    make distclean || \
+    ./buildconf --force \
+        && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+        && make -j$(nproc) \
+        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && ./sapi/cli/php -v
+    ```
+
  6. Check `./sapi/cli/php -v` output for version matching.
 
  7. If all is right, commit the changes to the release branch:
@@ -206,6 +226,26 @@ explained at the end of this document in
 
  5. Compile and run `make test`, with and without ZTS, using the right Bison and
     re2c version (for PHP 7.4, minimum Bison 3.0.0 and re2c 0.13.4 are used).
+
+    For example:
+
+    ```sh
+    # With ZTS
+    make distclean || \
+    ./buildconf --force \
+        && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+        && make -j$(nproc) \
+        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && ./sapi/cli/php -v
+
+    # Without ZTS
+    make distclean || \
+    ./buildconf --force \
+        && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
+        && make -j$(nproc) \
+        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && ./sapi/cli/php -v
+    ```
 
  6. Check `./sapi/cli/php -v` output for version matching.
 
