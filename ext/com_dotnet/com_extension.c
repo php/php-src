@@ -200,7 +200,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	REGISTER_INI_ENTRIES();
 
-	register_com_extension_consts(module_number);
+	register_com_extension_symbols(module_number);
 
 	PHP_MINIT(com_typeinfo)(INIT_FUNC_ARGS_PASSTHRU);
 

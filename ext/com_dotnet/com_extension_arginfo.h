@@ -237,7 +237,7 @@ static const zend_function_entry class_com_exception_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_com_extension_consts(int module_number)
+static void register_com_extension_symbols(int module_number)
 {
     REGISTER_LONG_CONSTANT("CLSCTX_INPROC_SERVER", CLSCTX_INPROC_SERVER, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("CLSCTX_INPROC_HANDLER", CLSCTX_INPROC_HANDLER, CONST_CS | CONST_PERSISTENT);
