@@ -1623,16 +1623,6 @@ static size_t tsrm_tls_offset;
 ||	}
 |.endmacro
 
-|.macro ENDBR
-||#if defined (__CET__) && (__CET__ & 1) != 0
-|	.if X64
-|		endbr64
-|	.else
-|		endbr32
-|	.endif
-||#endif
-|.endmacro
-
 static bool reuse_ip = 0;
 static bool delayed_call_chain = 0;
 static uint32_t  delayed_call_level = 0;
@@ -2302,7 +2292,6 @@ static int zend_jit_hybrid_hot_code_stub(dasm_State **Dst)
  */
 static int zend_jit_hybrid_hot_counter_stub(dasm_State **Dst, uint32_t cost)
 {
-	|	ENDBR
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	mov r2, aword [r1 + offsetof(zend_jit_op_array_hot_extension, counter)]
@@ -2373,7 +2362,6 @@ static int zend_jit_hybrid_hot_trace_stub(dasm_State **Dst)
 
 static int zend_jit_hybrid_trace_counter_stub(dasm_State **Dst, uint32_t cost)
 {
-	|	ENDBR
 	|	mov r0, EX->func
 	|	mov r1, aword [r0 + offsetof(zend_op_array, reserved[zend_func_info_rid])]
 	|	mov r1, aword [r1 + offsetof(zend_jit_op_array_trace_extension, offset)]
@@ -3061,7 +3049,6 @@ static int zend_jit_align_func(dasm_State **Dst)
 
 static int zend_jit_prologue(dasm_State **Dst)
 {
-	|	ENDBR
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		|	SUB_HYBRID_SPAD
 	} else if (GCC_GLOBAL_REGS) {
