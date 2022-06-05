@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
     enums). (ilutov)
 
+- Curl:
+  . Added new constants from cURL 7.62 to 7.80. (Pierrick)
+
 - MBString:
   . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
     after they had been changed in 8.1.0. (Alex Dowad)
