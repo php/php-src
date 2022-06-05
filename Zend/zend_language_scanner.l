@@ -2441,7 +2441,7 @@ inline_char_handler:
 	RETURN_OR_SKIP_TOKEN(T_COMMENT);
 }
 
-<ST_IN_SCRIPTING>"?>"{NEWLINE}? {
+<ST_IN_SCRIPTING>"=?>"|("?>"{NEWLINE}?) {
 	BEGIN(INITIAL);
 	if (yytext[yyleng-1] != '>') {
 		CG(increment_lineno) = 1;
