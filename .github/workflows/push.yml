@@ -23,11 +23,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - debug: true
-            zts: false
-          - debug: false
+#          - debug: true
+#            zts: false
+#          - debug: false
+#            zts: true
+          - configuration_parameters: "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'"
+            debug: true
+            name: '_ASAN_UBSAN'
+            run_tests_parameters: '--asan'
             zts: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: "LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
@@ -40,6 +45,7 @@ jobs:
         uses: ./.github/actions/configure-x64
         with:
           configurationParameters: >-
+            ${{ matrix.configuration_parameters }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
       - name: make
@@ -50,16 +56,21 @@ jobs:
         uses: ./.github/actions/setup-x64
       - name: Test
         uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: false
     runs-on: macos-10.15
     steps:
       - name: git checkout
