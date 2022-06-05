@@ -703,7 +703,7 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 }
 /* }}} */
 
-zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
+ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
 {
 	return (zend_ulong) zend_ini_parse_quantity_internal(value, false, errstr);
 }
