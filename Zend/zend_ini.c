@@ -541,35 +541,59 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str)
 	}
 }
 
-ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
+static zend_long zend_ini_parse_quantity_internal(zend_string *value, bool signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
 	char *str = ZSTR_VAL(value);
-	size_t str_len = ZSTR_LEN(value);
+	char *str_end = &str[ZSTR_LEN(value)];
+	char *digits = str;
+	bool overflow = false;
+	zend_ulong factor;
 	smart_str invalid = {0};
 	smart_str interpreted = {0};
 	smart_str chr = {0};
 
-	/* Ignore trailing whitespace */
-	while (str_len && zend_is_whitespace(str[str_len-1])) --str_len;
+	/* Ignore leading whitespace. ZEND_STRTOL() also skips leading whitespaces,
+	 * but we need the position of the first non-whitespace later. */
+	while (digits < str_end && zend_is_whitespace(*digits)) ++digits;
 
-	if (!str_len) {
+	/* Ignore trailing whitespace */
+	while (digits < str_end && zend_is_whitespace(*(str_end-1))) --str_end;
+
+	if (digits == str_end) {
 		*errstr = NULL;
 		return 0;
 	}
 
-	/* Perform following multiplications on unsigned to avoid overflow UB.
-	 * For now overflow is silently ignored -- not clear what else can be
-	 * done here, especially as the final result of this function may be
-	 * used in an unsigned context (e.g. "memory_limit=3G", which overflows
-	 * zend_long on 32-bit, but not size_t). */
-	zend_ulong retval = (zend_ulong) ZEND_STRTOL(str, &digits_end, 0);
+	zend_ulong retval;
+	errno = 0;
 
-	if (digits_end == str) {
-		smart_str_append_escaped(&invalid, str, str_len);
+	if (signed_result) {
+		retval = (zend_ulong) ZEND_STRTOL(digits, &digits_end, 0);
+	} else {
+		retval = ZEND_STRTOUL(digits, &digits_end, 0);
+	}
+
+	if (errno == ERANGE) {
+		overflow = true;
+	} else if (!signed_result) {
+		/* ZEND_STRTOUL() does not report a range error when the subject starts
+		 * with a minus sign, so we check this here. Ignore "-1" as it is
+		 * commonly used as max value, for instance in memory_limit=-1. */
+		if (digits[0] == '-' && !(digits_end - digits == 2 && digits_end == str_end && digits[1] == '1')) {
+			overflow = true;
+		}
+	}
+
+	if (UNEXPECTED(digits_end == digits)) {
+		/* No leading digits */
+
+		/* Escape the string to avoid null bytes and to make non-printable chars
+		 * visible */
+		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 
-		*errstr = zend_strpprintf(0, "Invalid quantity '%s': no valid leading digits, interpreting as '0' for backwards compatibility",
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
 						ZSTR_VAL(invalid.s));
 
 		smart_str_free(&invalid);
@@ -577,59 +601,89 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 	}
 
 	/* Allow for whitespace between integer portion and any suffix character */
-	while (digits_end < &str[str_len] && zend_is_whitespace(*digits_end)) ++digits_end;
+	while (digits_end < str_end && zend_is_whitespace(*digits_end)) ++digits_end;
 
 	/* No exponent suffix. */
-	if (digits_end == &str[str_len]) {
-		*errstr = NULL;
-		return retval;
+	if (digits_end == str_end) {
+		goto end;
 	}
 
-	if (str_len>0) {
-		switch (str[str_len-1]) {
-			case 'g':
-			case 'G':
-				retval *= 1024;
-				ZEND_FALLTHROUGH;
-			case 'm':
-			case 'M':
-				retval *= 1024;
-				ZEND_FALLTHROUGH;
-			case 'k':
-			case 'K':
-				retval *= 1024;
-				break;
-			default:
-				/* Unknown suffix */
-				smart_str_append_escaped(&invalid, str, str_len);
-				smart_str_0(&invalid);
-				smart_str_append_escaped(&interpreted, str, digits_end - str);
-				smart_str_0(&interpreted);
-				smart_str_append_escaped(&chr, &str[str_len-1], 1);
-				smart_str_0(&chr);
+	switch (*(str_end-1)) {
+		case 'g':
+		case 'G':
+			factor = 1<<30;
+			break;
+		case 'm':
+		case 'M':
+			factor = 1<<20;
+			break;
+		case 'k':
+		case 'K':
+			factor = 1<<10;
+			break;
+		default:
+			/* Unknown suffix */
+			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+			smart_str_0(&invalid);
+			smart_str_append_escaped(&interpreted, str, digits_end - str);
+			smart_str_0(&interpreted);
+			smart_str_append_escaped(&chr, str_end-1, 1);
+			smart_str_0(&chr);
 
-				*errstr = zend_strpprintf(0, "Invalid quantity '%s': unknown multipler '%s', interpreting as '%s' for backwards compatibility",
-							ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": unknown multipler \"%s\", interpreting as \"%s\" for backwards compatibility",
+						ZSTR_VAL(invalid.s), ZSTR_VAL(chr.s), ZSTR_VAL(interpreted.s));
 
-				smart_str_free(&invalid);
-				smart_str_free(&interpreted);
-				smart_str_free(&chr);
+			smart_str_free(&invalid);
+			smart_str_free(&interpreted);
+			smart_str_free(&chr);
 
-				return retval;
+			return retval;
+	}
+
+	if (!overflow) {
+		if (signed_result) {
+			zend_long sretval = (zend_long)retval;
+			if (sretval > 0) {
+				overflow = (zend_long)retval > ZEND_LONG_MAX / (zend_long)factor;
+			} else {
+				overflow = (zend_long)retval < ZEND_LONG_MIN / (zend_long)factor;
+			}
+		} else {
+			overflow = retval > ZEND_ULONG_MAX / factor;
 		}
 	}
 
-	if (digits_end < &str[str_len-1]) {
+	retval *= factor;
+
+	if (UNEXPECTED(digits_end != str_end-1)) {
 		/* More than one character in suffix */
-		smart_str_append_escaped(&invalid, str, str_len);
+		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
 		smart_str_0(&invalid);
 		smart_str_append_escaped(&interpreted, str, digits_end - str);
 		smart_str_0(&interpreted);
-		smart_str_append_escaped(&chr, &str[str_len-1], 1);
+		smart_str_append_escaped(&chr, str_end-1, 1);
 		smart_str_0(&chr);
 
-		*errstr = zend_strpprintf(0, "Invalid quantity '%s', interpreting as '%s%s' for backwards compatibility",
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\", interpreting as \"%s%s\" for backwards compatibility",
 						ZSTR_VAL(invalid.s), ZSTR_VAL(interpreted.s), ZSTR_VAL(chr.s));
+
+		smart_str_free(&invalid);
+		smart_str_free(&interpreted);
+		smart_str_free(&chr);
+
+		return (zend_long) retval;
+	}
+
+end:
+	if (UNEXPECTED(overflow)) {
+		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+		smart_str_0(&invalid);
+
+		/* Not specifying the resulting value here because the caller may make
+		 * additional conversions. Not specifying the allowed range
+		 * because the caller may do narrower range checks. */
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": value is out of range, using overflow result for backwards compatibility",
+						ZSTR_VAL(invalid.s));
 
 		smart_str_free(&invalid);
 		smart_str_free(&interpreted);
@@ -640,6 +694,18 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
 
 	*errstr = NULL;
 	return (zend_long) retval;
+}
+/* }}} */
+
+ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
+{
+	return zend_ini_parse_quantity_internal(value, true, errstr);
+}
+/* }}} */
+
+zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
+{
+	return (zend_ulong) zend_ini_parse_quantity_internal(value, false, errstr);
 }
 /* }}} */
 

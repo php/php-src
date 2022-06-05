@@ -397,6 +397,23 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
+{
+	zend_string *str;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG((zend_long)zend_ini_parse_uquantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+
 static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
