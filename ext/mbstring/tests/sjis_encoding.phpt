@@ -20,13 +20,37 @@ for ($i = 0; $i < 0x20; $i++) {
   $fromUnicode["\x00" . chr($i)] = chr($i);
 }
 
-/* U+007E is TILDE; convert to Shift-JIS 0x8160 (WAVE DASH) */
-$fromUnicode["\x00\x7E"] = "\x81\x60";
+/* According to the relevant Japan Industrial Standards Committee standards,
+ * SJIS 0x5C is a Yen sign, and 0x7E is an overline.
+ *
+ * However, this conflicts with the implementation of SJIS in various legacy
+ * software (notably Microsoft products), where SJIS 0x5C and 0x7E are taken
+ * as equivalent to the same ASCII bytes.
+ *
+ * Prior to PHP 8.1, mbstring's implementation of SJIS handled these bytes
+ * compatibly with Microsoft products. This was changed in PHP 8.1.0, in an
+ * attempt to comply with the JISC specifications. However, after discussion
+ * with various concerned Japanese developers, it seems that the historical
+ * behavior was more useful in the majority of applications which process
+ * SJIS-encoded text. */
+$validChars["\x5C"] = "\x00\x5C";
+$validChars["\x7E"] = "\x00\x7E";
+$fromUnicode["\x00\x5C"] = "\x5C";
+$fromUnicode["\x00\x7E"] = "\x7E";
+
+/* That means it does not make sense to convert U+203E (OVERLINE)
+ * to 0x7E; convert it to JIS X 0208 FULLWIDTH MACRON instead */
+$fromUnicode["\x20\x3E"] = "\x81\x50";
+/* U+00AF is MACRON; convert that to FULLWIDTH MACRON as well */
+$fromUnicode["\x00\xAF"] = "\x81\x50";
+/* Since we are treating 0x5C as equivalent to U+005C, it does not
+ * make sense to convert U+00A5 (YEN SIGN) to 0x5C
+ * Convert it to JIS X 0208 FULLWIDTH YEN SIGN instead */
+$fromUnicode["\x00\xA5"] = "\x81\x8F";
+
 /* DEL character */
 $validChars["\x7F"] = "\x00\x7F";
 $fromUnicode["\x00\x7F"] = "\x7F";
-/* U+00AF is MACRON; Shift-JIS 0x7E is overline */
-$fromUnicode["\x00\xAF"] = "\x7E";
 /* Use fullwidth reverse solidus, not (halfwidth) backslash (0x5C) */
 $validChars["\x81\x5F"] = "\xFF\x3C";
 $fromUnicode["\xFF\x3C"] = "\x81\x5F";
