@@ -4187,17 +4187,19 @@ ZEND_METHOD(ReflectionClass, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter)
+static zend_bool _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter)
 {
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
-		return;
+		return 0;
 	}
 
 	if (mptr->common.fn_flags & filter) {
 		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
 		add_next_index_zval(retval, &method);
+		return 1;
 	}
+	return 0;
 }
 /* }}} */
 
@@ -4237,7 +4239,9 @@ ZEND_METHOD(ReflectionClass, getMethods)
 		}
 		zend_function *closure = zend_get_closure_invoke_method(obj);
 		if (closure) {
-			_addmethod(closure, ce, return_value, filter);
+			if (!_addmethod(closure, ce, return_value, filter)) {
+				_free_function(closure);
+			}
 		}
 		if (!has_obj) {
 			zval_ptr_dtor(&obj_tmp);
