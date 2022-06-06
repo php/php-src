@@ -1122,7 +1122,7 @@ PHP_FUNCTION(pg_query_params)
 			} else {
 				zend_string *param_str = zval_try_get_string(tmp);
 				if (!param_str) {
-					_php_pgsql_free_params(params, num_params);
+					_php_pgsql_free_params(params, i);
 					RETURN_THROWS();
 				}
 				params[i] = estrndup(ZSTR_VAL(param_str), ZSTR_LEN(param_str));
@@ -3920,8 +3920,8 @@ PHP_FUNCTION(pg_send_execute)
 				params[i] = NULL;
 			} else {
 				zend_string *tmp_str = zval_try_get_string(tmp);
-				if (UNEXPECTED(!tmp)) {
-					_php_pgsql_free_params(params, num_params);
+				if (UNEXPECTED(!tmp_str)) {
+					_php_pgsql_free_params(params, i);
 					return;
 				}
 				params[i] = estrndup(ZSTR_VAL(tmp_str), ZSTR_LEN(tmp_str));
