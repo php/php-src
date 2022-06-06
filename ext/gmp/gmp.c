@@ -38,9 +38,9 @@
 #define GMP_ROUND_MINUSINF  2
 
 #ifdef mpir_version
-#define GMP_MPIR_VERSION_STRING  (char *) mpir_version
+#define GMP_MPIR_VERSION_STRING  ((char *) mpir_version)
 #endif
-#define GMP_VERSION_STRING  (char *) gmp_version
+#define GMP_VERSION_STRING  ((char *) gmp_version)
 
 #define GMP_MSW_FIRST     (1 << 0)
 #define GMP_LSW_FIRST     (1 << 1)
