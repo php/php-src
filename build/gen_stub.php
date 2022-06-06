@@ -937,7 +937,7 @@ interface FunctionOrMethodName {
     public function getDeclaration(): string;
     public function getArgInfoName(): string;
     public function getMethodSynopsisFilename(): string;
-    public function getAttributeName(): string;
+    public function getNameForAttributes(): string;
     public function __toString(): string;
     public function isMethod(): bool;
     public function isConstructor(): bool;
@@ -983,7 +983,7 @@ class FunctionName implements FunctionOrMethodName {
         return implode('_', $this->name->parts);
     }
 
-    public function getAttributeName(): string {
+    public function getNameForAttributes(): string {
         return strtolower($this->name->toString());
     }
 
@@ -1031,7 +1031,7 @@ class MethodName implements FunctionOrMethodName {
         return $this->getDeclarationClassName() . "_{$this->methodName}";
     }
 
-    public function getAttributeName(): string {
+    public function getNameForAttributes(): string {
         return strtolower($this->methodName);
     }
 
@@ -3766,7 +3766,7 @@ function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntrie
                     $functionTable = "CG(function_table)";
                 }
 
-                $code .= "    zend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getAttributeName() . "\", $index);\n";
+                $code .= "    zend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", $index);\n";
             }
 
             return $code;
@@ -4178,7 +4178,7 @@ function initPhpParser() {
         installPhpParser($version, $phpParserDir);
     }
 
-    spl_autoload_register(function(string $class) use ($phpParserDir) {
+    spl_autoload_register(static function(string $class) use ($phpParserDir) {
         if (strpos($class, "PhpParser\\") === 0) {
             $fileName = $phpParserDir . "/lib/" . str_replace("\\", "/", $class) . ".php";
             require $fileName;
