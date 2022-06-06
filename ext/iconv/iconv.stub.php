@@ -9,7 +9,7 @@
 const ICONV_IMPL = UNKNOWN;
 /**
  * @var string
- * @cname PHP_ICONV_VERSION_VALUE
+ * @cname get_iconv_version()
  */
 const ICONV_VERSION = UNKNOWN;
 /**

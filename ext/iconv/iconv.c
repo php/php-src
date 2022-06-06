@@ -70,8 +70,6 @@ char *get_iconv_version(void) {
 	return version;
 }
 
-#define PHP_ICONV_VERSION_VALUE get_iconv_version()
-
 #define PHP_ICONV_MIME_DECODE_STRICT            (1<<0)
 #define PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR (1<<1)
 
