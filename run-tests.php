@@ -152,8 +152,8 @@ function main(): void
            $cfgfiles, $cfgtypes, $conf_passed, $end_time, $environment,
            $exts_skipped, $exts_tested, $exts_to_test, $failed_tests_file,
            $ignored_by_ext, $ini_overwrites, $is_switch, $colorize,
-           $just_save_results, $log_format, $matches, $no_clean, $no_file_cache,
-           $optionals, $output_file, $pass_option_n, $pass_options,
+           $log_format, $matches, $no_clean, $no_file_cache,
+           $optionals, $pass_option_n, $pass_options,
            $pattern_match, $php, $php_cgi, $phpdbg, $preload, $redir_tests,
            $repeat, $result_tests_file, $slow_min_ms, $start_time, $switch,
            $temp_source, $temp_target, $test_cnt, $test_dirs,
@@ -313,9 +313,6 @@ function main(): void
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
-    define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
-    define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
-    define('QA_REPORTS_PAGE', 'http://qa.php.net/reports');
     define('TRAVIS_CI', (bool) getenv('TRAVIS'));
 
     // Determine the tests to be run.
@@ -731,7 +728,7 @@ function main(): void
         echo get_summary(false);
 
         if ($output_file != '' && $just_save_results) {
-            save_or_mail_results();
+            save_results($output_file, /* prompt_to_save_results: */ false);
         }
     } else {
         // Compile a list of all test files (*.phpt).
@@ -793,7 +790,7 @@ function main(): void
         show_end($end_time);
         show_summary();
 
-        save_or_mail_results();
+        save_results($output_file, /* prompt_to_save_results: */ true);
     }
 
     $junit->saveXML();
@@ -929,134 +926,101 @@ VALGRIND    : " . ($valgrind ? $valgrind->getHeader() : 'Not used') . "
 ";
 }
 
-function save_or_mail_results(): void
+function save_results(string $output_file, bool $prompt_to_save_results): void
 {
-    global $sum_results, $just_save_results, $failed_test_summary,
-           $PHP_FAILED_TESTS, $php, $output_file;
+    global $sum_results, $failed_test_summary,
+           $PHP_FAILED_TESTS, $php;
 
-    /* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
-    if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
+    if (getenv('NO_INTERACTION') || TRAVIS_CI) {
+        return;
+    }
+
+    if ($prompt_to_save_results) {
+        /* We got failed Tests, offer the user to save a QA report */
         $fp = fopen("php://stdin", "r+");
         if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED']) {
             echo "\nYou may have found a problem in PHP.";
         }
-        echo "\nThis report can be automatically sent to the PHP QA team at\n";
-        echo QA_REPORTS_PAGE . " and http://news.php.net/php.qa.reports\n";
+        echo "\nThis report can be saved and used to open an issue on the bug tracker at\n";
+        echo "https://github.com/php/php-src/issues\n";
         echo "This gives us a better understanding of PHP's behavior.\n";
-        echo "If you don't want to send the report immediately you can choose\n";
-        echo "option \"s\" to save it.	You can then email it to " . PHP_QA_EMAIL . " later.\n";
-        echo "Do you want to send this report now? [Yns]: ";
+        echo "Do you want to save this report in a file? [Yn]: ";
         flush();
 
         $user_input = fgets($fp, 10);
-        $just_save_results = (!empty($user_input) && strtolower($user_input[0]) === 's');
-    }
-
-    if ($just_save_results || !getenv('NO_INTERACTION') || TRAVIS_CI) {
-        if ($just_save_results || TRAVIS_CI || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
-            /*
-             * Collect information about the host system for our report
-             * Fetch phpinfo() output so that we can see the PHP environment
-             * Make an archive of all the failed tests
-             * Send an email
-             */
-            if ($just_save_results) {
-                $user_input = 's';
-            }
-
-            /* Ask the user to provide an email address, so that QA team can contact the user */
-            if (TRAVIS_CI) {
-                $user_email = 'travis at php dot net';
-            } elseif (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
-                echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
-                flush();
-                $user_email = trim(fgets($fp, 1024));
-                $user_email = str_replace("@", " at ", str_replace(".", " dot ", $user_email));
-            }
-
-            $failed_tests_data = '';
-            $sep = "\n" . str_repeat('=', 80) . "\n";
-            $failed_tests_data .= $failed_test_summary . "\n";
-            $failed_tests_data .= get_summary(true) . "\n";
-
-            if ($sum_results['FAILED']) {
-                foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
-                    $failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
-                    $failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
-                    $failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
-                    $failed_tests_data .= $sep . "\n\n";
-                }
-                $status = "failed";
-            } else {
-                $status = "success";
-            }
-
-            $failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
-            $failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
-            $ldd = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
-
-            if (!IS_WINDOWS) {
-                /* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
-                if (getenv('PHP_AUTOCONF')) {
-                    $autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
-                } else {
-                    $autoconf = shell_exec('autoconf --version');
-                }
-
-                /* Always use the generated libtool - Mac OSX uses 'glibtool' */
-                $libtool = shell_exec(INIT_DIR . '/libtool --version');
-
-                /* Use shtool to find out if there is glibtool present (MacOSX) */
-                $sys_libtool_path = shell_exec(__DIR__ . '/build/shtool path glibtool libtool');
-
-                if ($sys_libtool_path) {
-                    $sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
-                }
-
-                /* Try the most common flags for 'version' */
-                $flags = ['-v', '-V', '--version'];
-                $cc_status = 0;
-
-                foreach ($flags as $flag) {
-                    system(getenv('CC') . " $flag >/dev/null 2>&1", $cc_status);
-                    if ($cc_status == 0) {
-                        $compiler = shell_exec(getenv('CC') . " $flag 2>&1");
-                        break;
-                    }
-                }
-
-                $ldd = shell_exec("ldd $php 2>/dev/null");
-            }
-
-            $failed_tests_data .= "Autoconf:\n$autoconf\n";
-            $failed_tests_data .= "Bundled Libtool:\n$libtool\n";
-            $failed_tests_data .= "System Libtool:\n$sys_libtool\n";
-            $failed_tests_data .= "Compiler:\n$compiler\n";
-            $failed_tests_data .= "Bison:\n" . shell_exec('bison --version 2>/dev/null') . "\n";
-            $failed_tests_data .= "Libraries:\n$ldd\n";
-            $failed_tests_data .= "\n";
-
-            if (isset($user_email)) {
-                $failed_tests_data .= "User's E-mail: " . $user_email . "\n\n";
-            }
-
-            $failed_tests_data .= $sep . "PHPINFO" . $sep;
-            $failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
-
-            if (($just_save_results || !mail_qa_team($failed_tests_data, $status)) && !TRAVIS_CI) {
-                file_put_contents($output_file, $failed_tests_data);
-
-                if (!$just_save_results) {
-                    echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
-                }
-
-                echo "Please send " . $output_file . " to " . PHP_QA_EMAIL . " manually, thank you.\n";
-            } elseif (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
-                fwrite($fp, "\nThank you for helping to make PHP better.\n");
-                fclose($fp);
-            }
+        fclose($fp);
+        if (!(strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y')) {
+            return;
         }
     }
+    /**
+     * Collect information about the host system for our report
+     * Fetch phpinfo() output so that we can see the PHP environment
+     * Make an archive of all the failed tests
+     */
+    $failed_tests_data = '';
+    $sep = "\n" . str_repeat('=', 80) . "\n";
+    $failed_tests_data .= $failed_test_summary . "\n";
+    $failed_tests_data .= get_summary(true) . "\n";
+
+    if ($sum_results['FAILED']) {
+        foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
+            $failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
+            $failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
+            $failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+            $failed_tests_data .= $sep . "\n\n";
+        }
+    }
+
+    $failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
+    $failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
+    $ldd = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
+
+    if (!IS_WINDOWS) {
+        /* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
+        if (getenv('PHP_AUTOCONF')) {
+            $autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
+        } else {
+            $autoconf = shell_exec('autoconf --version');
+        }
+
+        /* Always use the generated libtool - Mac OSX uses 'glibtool' */
+        $libtool = shell_exec(INIT_DIR . '/libtool --version');
+
+        /* Use shtool to find out if there is glibtool present (MacOSX) */
+        $sys_libtool_path = shell_exec(__DIR__ . '/build/shtool path glibtool libtool');
+
+        if ($sys_libtool_path) {
+            $sys_libtool = shell_exec(str_replace("\n", "", $sys_libtool_path) . ' --version');
+        }
+
+        /* Try the most common flags for 'version' */
+        $flags = ['-v', '-V', '--version'];
+        $cc_status = 0;
+
+        foreach ($flags as $flag) {
+            system(getenv('CC') . " $flag >/dev/null 2>&1", $cc_status);
+            if ($cc_status == 0) {
+                $compiler = shell_exec(getenv('CC') . " $flag 2>&1");
+                break;
+            }
+        }
+
+        $ldd = shell_exec("ldd $php 2>/dev/null");
+    }
+
+    $failed_tests_data .= "Autoconf:\n$autoconf\n";
+    $failed_tests_data .= "Bundled Libtool:\n$libtool\n";
+    $failed_tests_data .= "System Libtool:\n$sys_libtool\n";
+    $failed_tests_data .= "Compiler:\n$compiler\n";
+    $failed_tests_data .= "Bison:\n" . shell_exec('bison --version 2>/dev/null') . "\n";
+    $failed_tests_data .= "Libraries:\n$ldd\n";
+    $failed_tests_data .= "\n";
+    $failed_tests_data .= $sep . "PHPINFO" . $sep;
+    $failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
+
+    file_put_contents($output_file, $failed_tests_data);
+    echo "Report saved to: ", $output_file, "\n";
 }
 
 function get_binary(string $php, string $sapi, string $sapi_path): ?string
@@ -1144,52 +1108,6 @@ function test_sort($a, $b): int
     } else {
         return $tb - $ta;
     }
-}
-
-//
-// Send Email to QA Team
-//
-
-function mail_qa_team(string $data, bool $status = false): bool
-{
-    $url_bits = parse_url(QA_SUBMISSION_PAGE);
-
-    if ($proxy = getenv('http_proxy')) {
-        $proxy = parse_url($proxy);
-        $path = $url_bits['host'] . $url_bits['path'];
-        $host = $proxy['host'];
-        if (empty($proxy['port'])) {
-            $proxy['port'] = 80;
-        }
-        $port = $proxy['port'];
-    } else {
-        $path = $url_bits['path'];
-        $host = $url_bits['host'];
-        $port = empty($url_bits['port']) ? 80 : $port = $url_bits['port'];
-    }
-
-    $data = "php_test_data=" . urlencode(base64_encode(str_replace("\00", '[0x0]', $data)));
-    $data_length = strlen($data);
-
-    $fs = fsockopen($host, $port, $errno, $errstr, 10);
-
-    if (!$fs) {
-        return false;
-    }
-
-    $php_version = urlencode(TESTED_PHP_VERSION);
-
-    echo "\nPosting to " . QA_SUBMISSION_PAGE . "\n";
-    fwrite($fs, "POST " . $path . "?status=$status&version=$php_version HTTP/1.1\r\n");
-    fwrite($fs, "Host: " . $host . "\r\n");
-    fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
-    fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
-    fwrite($fs, "Content-Length: " . $data_length . "\r\n\r\n");
-    fwrite($fs, $data);
-    fwrite($fs, "\r\n\r\n");
-    fclose($fs);
-
-    return true;
 }
 
 //
@@ -1530,9 +1448,6 @@ function run_all_tests_parallel(array $test_files, array $env, $redir_tested): v
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
-                "PHP_QA_EMAIL" => PHP_QA_EMAIL,
-                "QA_SUBMISSION_PAGE" => QA_SUBMISSION_PAGE,
-                "QA_REPORTS_PAGE" => QA_REPORTS_PAGE,
                 "TRAVIS_CI" => TRAVIS_CI
             ]
         ])) . "\n";
