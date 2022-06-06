@@ -667,6 +667,9 @@ mbfl_filt_conv_wchar_sjis_mac_flush(mbfl_convert_filter *filter)
 
 static size_t mb_sjismac_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
+	/* A single SJIS-Mac kuten code can convert to up to 5 Unicode codepoints, oh my! */
+	ZEND_ASSERT(bufsize >= 5);
+
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 

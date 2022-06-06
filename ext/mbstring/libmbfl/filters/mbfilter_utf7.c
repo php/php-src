@@ -480,6 +480,13 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 {
 	ZEND_ASSERT(bufsize >= 5); /* This function will infinite-loop if called with a tiny output buffer */
 
+	/* Why does this require a minimum output buffer size of 5?
+	 * There is one case where one iteration of the main 'while' loop below will emit 5 wchars:
+	 * that is if the first half of a surrogate pair is followed by an otherwise valid codepoint which
+	 * is not the 2nd half of a surrogate pair, then another valid codepoint, then the Base64-encoded
+	 * section ends with a byte which is not a valid Base64 character, AND which also is not in a
+	 * position where we would expect the Base64-encoded section to end */
+
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
