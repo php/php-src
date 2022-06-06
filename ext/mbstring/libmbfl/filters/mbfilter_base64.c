@@ -234,10 +234,10 @@ static int decode_base64(char c)
 
 static size_t mb_base64_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
+	ZEND_ASSERT(bufsize >= 3);
+
 	unsigned char *p = *in, *e = p + *in_len;
-	/* Reserve two slots at the end of the output buffer so that we always have
-	 * space to emit any trailing bytes when we hit the end of the input string */
-	uint32_t *out = buf, *limit = buf + bufsize - 2;
+	uint32_t *out = buf, *limit = buf + bufsize;
 
 	unsigned int bits = *state & 0xFF, cache = *state >> 8;
 
@@ -266,6 +266,7 @@ static size_t mb_base64_to_wchar(unsigned char **in, size_t *in_len, uint32_t *b
 
 	if (p == e) {
 		if (bits) {
+			/* If we reach here, there will be at least 3 spaces remaining in output buffer */
 			if (bits == 18) {
 				*out++ = (cache >> 10) & 0xFF;
 				*out++ = (cache >> 2) & 0xFF;
