@@ -2,6 +2,27 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var string
+ * @cname PHP_ICONV_IMPL_VALUE
+ */
+const ICONV_IMPL = UNKNOWN;
+/**
+ * @var string
+ * @cname PHP_ICONV_VERSION_VALUE
+ */
+const ICONV_VERSION = UNKNOWN;
+/**
+ * @var int
+ * @cname PHP_ICONV_MIME_DECODE_STRICT
+ */
+const ICONV_MIME_DECODE_STRICT = UNKNOWN;
+/**
+ * @var int
+ * @cname PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR
+ */
+const ICONV_MIME_DECODE_CONTINUE_ON_ERROR = UNKNOWN;
+
 function iconv_strlen(string $string, ?string $encoding = null): int|false {}
 
 /** @refcount 1 */
