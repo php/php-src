@@ -463,6 +463,8 @@ mbfl_filt_conv_any_jis_flush(mbfl_convert_filter *filter)
 
 static size_t mb_iso2022jp_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
+	ZEND_ASSERT(bufsize >= 3);
+
 	unsigned char *p = *in, *e = p + *in_len;
 	uint32_t *out = buf, *limit = buf + bufsize;
 
