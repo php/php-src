@@ -540,6 +540,10 @@ static zend_string *get_class_from_type(zend_class_entry *scope, zend_type singl
 static void register_unresolved_classes(zend_class_entry *scope, zend_type type) {
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			register_unresolved_classes(scope, *single_type);
+			continue;
+		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *class_name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
 			lookup_class_ex(scope, class_name, /* register_unresolved */ true);
