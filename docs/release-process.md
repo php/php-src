@@ -271,6 +271,7 @@ explained at the end of this document in
     `web-php`:
 
     ```sh
+    git pull
     git submodule init
     git submodule update
     cd distributions
