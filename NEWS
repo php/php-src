@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0alpha1
+?? ??? ????, PHP 8.2.0alpha2
+
+
+09 Jun 2022, PHP 8.2.0alpha1
 
 - CLI:
   . Fixed bug #81496 (Server logs incorrect request method). (lauri)
