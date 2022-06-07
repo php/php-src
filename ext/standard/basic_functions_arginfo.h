@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0be859a950e082bb02f747630068ea658c6673dd */
+ * Stub hash: f35440fd9902dd0201fbaa9005bc51c5aecadf2c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3164,8 +3164,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_split, arginfo_str_split)
 	ZEND_FE(strpbrk, arginfo_strpbrk)
 	ZEND_FE(substr_compare, arginfo_substr_compare)
-	ZEND_FE(utf8_encode, arginfo_utf8_encode)
-	ZEND_FE(utf8_decode, arginfo_utf8_decode)
+	ZEND_DEP_FE(utf8_encode, arginfo_utf8_encode)
+	ZEND_DEP_FE(utf8_decode, arginfo_utf8_decode)
 	ZEND_FE(opendir, arginfo_opendir)
 	ZEND_FE(dir, arginfo_dir)
 	ZEND_FE(closedir, arginfo_closedir)

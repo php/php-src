@@ -1021,10 +1021,16 @@ function strpbrk(string $string, string $characters): string|false {}
 
 function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @deprecated
+ */
 function utf8_encode(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @deprecated
+ */
 function utf8_decode(string $string): string {}
 
 /* dir.c */
