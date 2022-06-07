@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-26 May 2022, PHP 8.1.7RC1
+09 Jun 2022, PHP 8.1.7
 
 - CLI:
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.
     (Jakub Zelenka, loveharmful)
 
+- mysqlnd:
+  . Fixed bug #81719: mysqlnd/pdo password buffer overflow. (CVE-2022-31626)
+    (c dot fol at ambionics dot io)
+
 - OPcache:
   . Fixed bug GH-8461 (tracing JIT crash after function/method change).
     (Arnaud, Dmitry)
@@ -33,6 +37,10 @@ PHP                                                                        NEWS
 
 - Pcntl:
   . Fixed Haiku build. (David Carlier)
+
+- pgsql
+  . Fixed bug #81720: Uninitialized array in pg_query_params().
+    (CVE-2022-31625) (cmb)
 
 - Soap:
   . Fixed bug GH-8578 (Error on wrong parameter on SoapHeader constructor).
