@@ -92,7 +92,7 @@ explained at the end of this document in
     ./buildconf --force \
         && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
         && make -j$(nproc) \
-        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
         && ./sapi/cli/php -v
 
     # Without ZTS
@@ -100,7 +100,7 @@ explained at the end of this document in
     ./buildconf --force \
         && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
         && make -j$(nproc) \
-        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
         && ./sapi/cli/php -v
     ```
 
@@ -115,7 +115,7 @@ explained at the end of this document in
  8. Tag the repository release branch with the version, e.g.:
 
     ```sh
-    git tag -u YOURKEYID php-7.4.2RC2
+    git tag -u YOURKEYID php-7.4.2RC2 -m "Tag for php-7.4.2RC2"
     ```
 
  9. Bump the version numbers in `main/php_version.h`, `Zend/zend.h`,
@@ -131,26 +131,33 @@ explained at the end of this document in
       (a local temporary branch should be used).
 
     ```sh
-    git push --tags origin HEAD
+    git push origin {tag name}
     git push origin {main branch}
     git push origin {release branch}
     ```
 
+    Do not push with `--tags`, as this will push all local tags, including tags
+    you might not wish to push.
+
 11. Run: `./scripts/dev/makedist php-7.4.0RC2`, this will export the tree,
     create `configure` and build three tarballs (gz, bz2 and xz).
 
-12. Run `./scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
-    tarballs and output verification information to be included in announcement
-    email.
+12. Run `./scripts/dev/gen_verify_stub <version> [GPG identity] > <version>.manifest`,
+    this will sign the tarballs and save the signatures to `<version>.manifest`,
+    so you can include them in the announcement email.
 
-13. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there
+13. If you have the [GitHub command line tool](https://cli.github.com) installed,
+    run `gh gist create --public <version>.manifest` to create a public Gist for
+    the manifest file, or go to https://gist.github.com to create one manually.
+
+14. Copy those tarballs (scp, rsync) to downloads.php.net, in your homedir there
     should be a directory `public_html/`. Copy them into there. If you do not
     have this directory, create it.
 
-14. Now the RC can be found on https://downloads.php.net/~yourname,
+15. Now the RC can be found on https://downloads.php.net/~yourname,
     e.g. https://downloads.php.net/~derick/.
 
-15. Once the release has been tagged, contact the release-managers@ distribution
+16. Once the release has been tagged, contact the release-managers@ distribution
     list so that Windows binaries can be created. Once those are made, they can
     be found at https://windows.php.net/download.
 
@@ -235,7 +242,7 @@ explained at the end of this document in
     ./buildconf --force \
         && ./configure --enable-zts --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
         && make -j$(nproc) \
-        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
         && ./sapi/cli/php -v
 
     # Without ZTS
@@ -243,13 +250,13 @@ explained at the end of this document in
     ./buildconf --force \
         && ./configure --disable-all --enable-debug --enable-opcache --enable-opcache-jit \
         && make -j$(nproc) \
-        && make test TEST_PHP_ARGS=-j$(nproc) \
+        && make test TEST_PHP_ARGS="-q -j$(nproc)" \
         && ./sapi/cli/php -v
     ```
 
  6. Check `./sapi/cli/php -v` output for version matching.
 
- 7. Tag the repository with the version e.g. `git tag -u YOURKEYID php-7.4.1`
+ 7. Tag the repository with the version e.g. `git tag -u YOURKEYID php-7.4.1 -m "Tag for php 7.4.1"`
 
  8. Push the tag e.g. `git push origin php-7.4.1`.
 
@@ -262,11 +269,15 @@ explained at the end of this document in
     be influenced by defining the environment variable
     `TAR_OPTIONS='--format=gnu'`.
 
-10. Run `scripts/dev/gen_verify_stub <version> [identity]`, this will sign the
-    tarballs and output verification information to be included in announcement
-    email.
+10. Run `./scripts/dev/gen_verify_stub <version> [GPG identity] > <version>.manifest`,
+    this will sign the tarballs and save the signatures to `<version>.manifest`,
+    so you can include them in the announcement email.
 
-11. Commit and push all the tarballs and signature files to
+11. If you have the [GitHub command line tool](https://cli.github.com) installed,
+    run `gh gist create --public <version>.manifest` to create a public Gist for
+    the manifest file, or go to https://gist.github.com to create one manually.
+
+12. Commit and push all the tarballs and signature files to
     `web-php-distributions`, then update the git submodule reference in
     `web-php`:
 
@@ -285,7 +296,7 @@ explained at the end of this document in
     This is to fetch the last commit id from `web-php-distributions` and commit
     this last commit id to `web-php`, then, website will now sync.
 
-12. Once the release has been tagged, contact release managers, Windows
+13. Once the release has been tagged, contact release managers, Windows
     builders, and package maintainers so that they can build releases. Do not
     send this announcement to any public lists.
 
