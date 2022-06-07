@@ -166,7 +166,7 @@ static void mysqli_link_free_storage(zend_object *object)
 
 	if (my_res && my_res->ptr) {
 		MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
-		if(!mysql->disable_cleanup) {
+		if (!mysql->disable_cleanup) {
 			if (mysql->mysql) {
 				php_mysqli_close(mysql, MYSQLI_CLOSE_EXPLICIT, my_res->status);
 			}
