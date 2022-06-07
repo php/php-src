@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-8591 (tracing JIT crash after private instance method change).
     (Arnaud, Dmitry, Oleg Stepanischev)
 
-26 May 2022, PHP 8.1.7
+09 Jun 2022, PHP 8.1.7
 
 - CLI:
   . Fixed bug GH-8575 (CLI closes standard streams too early). (Levi Morrison)
