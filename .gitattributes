@@ -18,3 +18,6 @@
 *.phpt diff=php
 *.php diff=php
 *.[ch] diff=cpp
+
+# Collapse the generated arginfo.h files within a pull request.
+**/*_arginfo.h linguist-generated
