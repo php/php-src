@@ -151,6 +151,10 @@ PHP 8.2 UPGRADE NOTES
 
 - SPL:
   . The SplFileInfo::_bad_state_ex() internal method has been deprecated.
+
+- Standard:
+  . utf8_encode() and utf8_decode() have been deprecated.
+
 ========================================
 5. Changed Functions
 ========================================

@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
     after they had been changed in 8.1.0. (Alex Dowad)
 
+- Standard:
+  . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
+
 09 Jun 2022, PHP 8.2.0alpha1
 
 - CLI:
