@@ -1802,13 +1802,8 @@ function run_test(string $php, $file, array $env): string
     $org_file = $file;
     $orig_php = $php;
 
-    if (isset($env['TEST_PHP_CGI_EXECUTABLE'])) {
-        $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'];
-    }
-
-    if (isset($env['TEST_PHPDBG_EXECUTABLE'])) {
-        $phpdbg = $env['TEST_PHPDBG_EXECUTABLE'];
-    }
+    $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'] ?? null;
+    $phpdbg = $env['TEST_PHPDBG_EXECUTABLE'] ?? null;
 
     if (is_array($file)) {
         $file = $file[0];
@@ -2489,6 +2484,8 @@ COMMAND $cmd
         }
     }
 
+    $wanted_headers = null;
+    $output_headers = null;
     $failed_headers = false;
 
     if ($test->hasSection('EXPECTHEADERS')) {
@@ -2646,6 +2643,8 @@ COMMAND $cmd
             $wanted_re = preg_quote($wanted_headers . "\n--HEADERS--\n", '/') . $wanted_re;
         }
     }
+
+    $restype = [];
 
     if ($leaked) {
         $restype[] = $test->hasSection('XLEAK') ?
