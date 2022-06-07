@@ -1330,6 +1330,7 @@ typedef enum {
 } reflection_type_kind;
 
 /* For backwards compatibility reasons, we need to return T|null style unions
+ * and transformation from iterable to Traversable|array
  * as a ReflectionNamedType. Here we determine what counts as a union type and
  * what doesn't. */
 static reflection_type_kind get_type_kind(zend_type type) {
@@ -1344,6 +1345,10 @@ static reflection_type_kind get_type_kind(zend_type type) {
 	}
 
 	if (ZEND_TYPE_IS_COMPLEX(type)) {
+		/* BC support for 'iterable' type */
+		if (UNEXPECTED(ZEND_TYPE_IS_ITERABLE_FALLBACK(type))) {
+			return NAMED_TYPE;
+		}
 		if (type_mask_without_null != 0) {
 			return UNION_TYPE;
 		}
@@ -2726,6 +2731,11 @@ ZEND_METHOD(ReflectionParameter, isArray)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
+	/* BC For iterable */
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(param->arg_info->type)) {
+		RETURN_FALSE;
+	}
+
 	type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(param->arg_info->type);
 	RETVAL_BOOL(type_mask == MAY_BE_ARRAY);
 }
@@ -3006,9 +3016,21 @@ ZEND_METHOD(ReflectionType, allowsNull)
 }
 /* }}} */
 
+/* For BC with iterable for named types */
+static zend_string *zend_named_reflection_type_to_string(zend_type type) {
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
+		zend_string *iterable = ZSTR_KNOWN(ZEND_STR_ITERABLE);
+		if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_NULL) {
+			return zend_string_concat2("?", strlen("?"), ZSTR_VAL(iterable), ZSTR_LEN(iterable));
+		}
+		return iterable;
+	}
+	return zend_type_to_string(type);
+}
+
 static zend_string *zend_type_to_string_without_null(zend_type type) {
 	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-	return zend_type_to_string(type);
+	return zend_named_reflection_type_to_string(type);
 }
 
 /* {{{ Return the text of the type hint */
@@ -3022,7 +3044,7 @@ ZEND_METHOD(ReflectionType, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string(param->type));
+	RETURN_STR(zend_named_reflection_type_to_string(param->type));
 }
 /* }}} */
 
@@ -3040,7 +3062,7 @@ ZEND_METHOD(ReflectionNamedType, getName)
 	if (param->legacy_behavior) {
 		RETURN_STR(zend_type_to_string_without_null(param->type));
 	}
-	RETURN_STR(zend_type_to_string(param->type));
+	RETURN_STR(zend_named_reflection_type_to_string(param->type));
 }
 /* }}} */
 
@@ -3055,6 +3077,10 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(param->type)) {
+		RETURN_TRUE;
+	}
+
 	/* Treat "static" as a class type for the purposes of reflection. */
 	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type)
 		&& !(ZEND_TYPE_FULL_MASK(param->type) & MAY_BE_STATIC));
@@ -3063,6 +3089,11 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 
 static void append_type(zval *return_value, zend_type type) {
 	zval reflection_type;
+	/* Drop iterable BC bit for type list */
+	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
+		ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_ITERABLE_BIT;
+	}
+
 	reflection_type_factory(type, &reflection_type, 0);
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &reflection_type);
 }
@@ -3102,9 +3133,6 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		append_type_mask(return_value, MAY_BE_CALLABLE);
-	}
-	if (type_mask & MAY_BE_ITERABLE) {
-		append_type_mask(return_value, MAY_BE_ITERABLE);
 	}
 	if (type_mask & MAY_BE_OBJECT) {
 		append_type_mask(return_value, MAY_BE_OBJECT);

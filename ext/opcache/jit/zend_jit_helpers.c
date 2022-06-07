@@ -1949,7 +1949,7 @@ static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
-	return (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) != 0;
+	return (ZEND_TYPE_FULL_MASK(type) & MAY_BE_ARRAY) != 0;
 }
 
 static zend_property_info *zend_object_fetch_property_type_info(
@@ -2094,7 +2094,7 @@ static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_propert
 	if ((Z_TYPE_P(val) <= IS_FALSE
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE))
 		&& ZEND_TYPE_IS_SET(prop->type)
-		&& (ZEND_TYPE_FULL_MASK(prop->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+		&& (ZEND_TYPE_FULL_MASK(prop->type) & MAY_BE_ARRAY) == 0) {
 		zend_string *type_str = zend_type_to_string(prop->type);
 		zend_type_error(
 			"Cannot auto-initialize an array inside property %s::$%s of type %s",

@@ -80,7 +80,6 @@ class PropTypeTest {
     public int $int;
     public string $string;
     public array $arr;
-    public iterable $iterable;
     public stdClass $std;
     public OtherThing $other;
     public $mixed;
@@ -216,7 +215,6 @@ string(4) "Test"
 public int $int;
 public string $string;
 public array $arr;
-public iterable $iterable;
 public stdClass $std;
 public OtherThing $other;
 public $mixed;

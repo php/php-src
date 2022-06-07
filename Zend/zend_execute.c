@@ -909,9 +909,6 @@ static zend_always_inline bool i_zend_check_property_type(zend_property_info *in
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(property)) {
-		return 1;
-	}
 	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
@@ -1046,9 +1043,6 @@ static zend_always_inline bool zend_check_type_slow(
 
 	type_mask = ZEND_TYPE_FULL_MASK(*type);
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
-		return 1;
-	}
-	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
@@ -2929,7 +2923,7 @@ static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
-	return (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) != 0;
+	return (ZEND_TYPE_FULL_MASK(type) & MAY_BE_ARRAY) != 0;
 }
 
 /* Checks whether an array can be assigned to the reference. Throws error if not assignable. */
@@ -3378,9 +3372,6 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 	type_mask = ZEND_TYPE_FULL_MASK(type);
 	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
-	if (type_mask & MAY_BE_ITERABLE) {
-		return zend_is_iterable(zv);
-	}
 
 	/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 	if (strict) {

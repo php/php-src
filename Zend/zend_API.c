@@ -2805,6 +2805,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			}
 		}
 
+		/* Rebuild arginfos if parameter/property types and/or a return type are used */
 		if (reg_function->common.arg_info &&
 		    (reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			/* convert "const char*" class type names into "zend_string*" */
@@ -2855,6 +2856,15 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 							j++;
 						}
 					}
+				}
+				if (ZEND_TYPE_IS_ITERABLE_FALLBACK(new_arg_info[i].type)) {
+					/* Warning generated an extension load warning which is emitted for every test
+					zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
+						" regenerate the argument info via the php-src gen_stub build script");
+					*/
+					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+						(new_arg_info[i].type.type_mask|MAY_BE_ARRAY));
+					new_arg_info[i].type = legacy_iterable;
 				}
 			}
 		}

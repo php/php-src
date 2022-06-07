@@ -314,6 +314,29 @@ static ZEND_FUNCTION(zend_iterable)
 	ZEND_PARSE_PARAMETERS_END();
 }
 
+static ZEND_FUNCTION(zend_iterable_legacy)
+{
+	zval *arg1, *arg2;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(arg1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ITERABLE_OR_NULL(arg2)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_COPY(arg1);
+}
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, arg1, IS_ITERABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry ext_function_legacy[] = {
+	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE_END
+};
+
 /* Call a method on a class or object using zend_call_method() */
 static ZEND_FUNCTION(zend_call_method)
 {
@@ -627,6 +650,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
 	// Loading via dl() not supported with the observer API
 	if (type != MODULE_TEMPORARY) {

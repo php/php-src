@@ -75,13 +75,16 @@ Allows null: true
   Name: null
   String: null
   Allows Null: true
-Type X|iterable|bool:
+Type X|Traversable|array|bool:
 Allows null: false
   Name: X
   String: X
   Allows Null: false
-  Name: iterable
-  String: iterable
+  Name: Traversable
+  String: Traversable
+  Allows Null: false
+  Name: array
+  String: array
   Allows Null: false
   Name: bool
   String: bool

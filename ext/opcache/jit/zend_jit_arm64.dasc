@@ -12232,7 +12232,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 			uint32_t flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
-				if ((ZEND_TYPE_FULL_MASK(prop_info->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+				if ((ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_ARRAY) == 0) {
 					if (!type_loaded) {
 						type_loaded = 1;
 						|	MEM_ACCESS_32_WITH_UOFFSET ldr, REG2w, FCARG1x, (prop_info->offset + offsetof(zval,u1.type_info)), TMP1
