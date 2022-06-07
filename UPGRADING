@@ -274,6 +274,13 @@ PHP 8.2 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- Core:
+  . The iterable type is now a built-in compile time alias for array|Traversable.
+    Error messages relating to iterable will therefore now use array|Traversable.
+    Type Reflection is preserved for single iterable (and ?iterable) to produce
+    a ReflectionNamedType with name iterable, however usage of iterable in
+    union types will be converted to array|Traversable
+
 ========================================
 14. Performance Improvements
 ========================================
