@@ -1008,6 +1008,7 @@ static void ZEND_COLD emit_incompatible_method_error(
 	zend_string *parent_prototype = zend_get_function_declaration(parent, parent_scope);
 	zend_string *child_prototype = zend_get_function_declaration(child, child_scope);
 	if (status == INHERITANCE_UNRESOLVED) {
+		// TODO Improve error message if first unresolved class is present in child and parent?
 		/* Fetch the first unresolved class from registered autoloads */
 		zend_string *unresolved_class = NULL;
 		ZEND_HASH_MAP_FOREACH_STR_KEY(CG(delayed_autoloads), unresolved_class) {
