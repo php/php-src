@@ -134,11 +134,10 @@ PHP 8.2 UPGRADE NOTES
         [new Foo, "Bar::method"]
 
     This does not affect normal method callables like "A::method" or
-    ["A", "method"]. A deprecation notice is only emitted on call. Both
-    is_callable() and the callable type will silently accept these callables
-    until support for them is removed entirely.
+    ["A", "method"].
 
     RFC: https://wiki.php.net/rfc/deprecate_partially_supported_callables
+    RFC: https://wiki.php.net/rfc/partially-supported-callables-expand-deprecation-notices
 
   . The "${var}" and "${expr}" style string interpolations are deprecated and
     will be removed in PHP 9. Use "$var"/"{$var}" or "{${expr}}", respectively.
