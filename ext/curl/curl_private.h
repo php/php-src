@@ -110,6 +110,9 @@ typedef struct {
 	zval private_data;
 	/* CurlShareHandle object set using CURLOPT_SHARE. */
 	struct _php_curlsh *share;
+#if LIBCURL_VERSION_NUM >= 0x073f00 /* 7.63.0 */
+	struct _php_curlurl *url;
+#endif
 	zend_object                   std;
 } php_curl;
 
@@ -137,6 +140,16 @@ typedef struct _php_curlsh {
 	zend_object std;
 } php_curlsh;
 
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+typedef struct _php_curlurl {
+	CURLU *url;
+	struct {
+		int no;
+	} err;
+	zend_object std;
+} php_curlurl;
+#endif
+
 php_curl *init_curl_handle_into_zval(zval *curl);
 void init_curl_handle(php_curl *ch);
 void _php_curl_cleanup_handle(php_curl *);
@@ -156,8 +169,19 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+static inline php_curlurl *curl_url_from_obj(zend_object *obj) {
+    return (php_curlurl *)((char *)(obj) - XtOffsetOf(php_curlurl, std));
+}
+
+#define Z_CURL_URL_P(zv) curl_url_from_obj(Z_OBJ_P(zv))
+#endif
+
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+void curl_url_register_handlers(void);
+#endif
 void curlfile_register_class(void);
 int curl_cast_object(zend_object *obj, zval *result, int type);
 
