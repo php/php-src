@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f445ea17c00f60894eec13b99660c2056e1a6456 */
+ * Stub hash: 2615114ae250af0329b861d82f4100c2757457da */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -3484,7 +3484,7 @@ static const zend_function_entry class_AssertionError_methods[] = {
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_DOUBLE_CONSTANT("M_E", M_E, CONST_CS | CONST_PERSISTENT);
-	ZEND_ASSERT(M_E == 2.7182818284590451);
+	ZEND_ASSERT(M_E == 2.718281828459045);
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);

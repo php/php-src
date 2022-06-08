@@ -6,7 +6,7 @@
  * @var float
  * @cvalue M_E
  */
-const M_E = 2.7182818284590452354;
+const M_E = 2.718281828459045;
 
 final class __PHP_Incomplete_Class
 {
