@@ -8,6 +8,8 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 
 4. OpCode changes
 
+5. SAPI changes
+
 ========================
 1. Internal API changes
 ========================
@@ -24,6 +26,9 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * The main/php_stdint.h header has been removed.
   Include the standard <inttypes.h> and/or <stdint.h> headers instead.
   Replace usage of u_char by the standard C99 uint8_t type.
+* A new ZEND_THREEWAY_COMPARE() macro has been introduced which does a
+  three-way comparison of two integers and returns -1, 0 or 1 if the LHS is
+  smaller, equal or larger than the RHS
 
 ========================
 2. Build system changes
@@ -53,3 +58,12 @@ PHP 8.2 INTERNALS UPGRADE NOTES
   will produce ZEND_INIT_FCALL_BY_NAME opcodes instead which check for the
   existence of the function at runtime.
 
+========================
+5. SAPI changes
+========================
+
+ * The signature of php_module_startup() has changed from
+   int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
+   to
+   zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
+   as only one additional module was ever provided.
