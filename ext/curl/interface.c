@@ -3989,3 +3989,25 @@ PHP_FUNCTION(curl_pause)
 	RETURN_LONG(curl_easy_pause(ch->cp, bitmask));
 }
 /* }}} */
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+/* {{{ perform connection upkeep checks */
+PHP_FUNCTION(curl_upkeep)
+{
+	CURLcode	error;
+	zval		*zid;
+	php_curl	*ch;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ch = Z_CURL_P(zid);
+
+	error = curl_easy_upkeep(ch->cp);
+	SAVE_CURL_ERROR(ch, error);
+
+	RETURN_BOOL(error == CURLE_OK);
+}
+/*}}} */
+#endif

@@ -77,6 +77,7 @@ PHP 8.2 UPGRADE NOTES
   . Added CURLINFO_EFFECTIVE_METHOD option and returning the effective
     HTTP method in curl_getinfo() return value.
   . Exposed multiple new constants from libcurl 7.62 to 7.80.
+  . Added new function curl_upkeep() to perform any connection upkeep checks.
 
 - OCI8:
   . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
@@ -173,6 +174,9 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- Curl:
+  . curl_upkeep() (libcurl >= 7.62.0)
 
 - Reflection:
   . ReflectionFunction::isAnonymous()
