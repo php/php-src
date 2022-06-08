@@ -2,7 +2,6 @@
 PDO Common: Bug #43663 (__call on classes derived from PDO)
 --EXTENSIONS--
 pdo
-pdo_sqlite
 --SKIPIF--
 <?php
 $dir = getenv('REDIR_TEST_DIR');
