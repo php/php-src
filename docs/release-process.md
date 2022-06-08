@@ -255,7 +255,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    ```shell
    git add -p
-   git commit --gpg-sign=YOURKEYID -m "Bump for PHP X.Y.Z-dev"
+   git commit --gpg-sign=YOURKEYID -m "PHP-X.Y is now for PHP X.Y.Z-dev"
    ```
 
    > 💡 **Tip** \
@@ -871,7 +871,8 @@ version.
    See [Prepare for PHP 8.2][] and [Prepare for PHP 8.2 (bis)][] for an example
    of what this commit should include.
 
-4. Push the new version branch and the changes to the `master` branch.
+4. Push the new version branch and the changes to the `master` branch, with an
+   appropriate commit message (e.g., "master is now for PHP 8.3.0-dev").
 
 5. Immediately notify internals@ of the new branch and advise on the new merging
    order. For example: https://news-web.php.net/php.internals/99903
