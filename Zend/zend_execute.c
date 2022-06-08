@@ -229,6 +229,15 @@ ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute
 	return EX_VAR(var);
 }
 
+ZEND_API bool zend_gcc_global_regs(void)
+{
+  #if defined(HAVE_GCC_GLOBAL_REGS)
+        return 1;
+  #else
+        return 0;
+  #endif
+}
+
 static zend_always_inline zval *_get_zval_ptr_tmp(uint32_t var EXECUTE_DATA_DC)
 {
 	zval *ret = EX_VAR(var);
