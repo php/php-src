@@ -181,6 +181,10 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 					return NULL;
 				}
 
+				if (nodesc > 1) {
+					newNode = xmlCopyNode(newNode, 1);
+				}
+
 				if (!xmlAddChild(fragment, newNode)) {
 					xmlFree(fragment);
 
