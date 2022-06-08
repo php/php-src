@@ -15,7 +15,7 @@ use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
-ini_set("precision", "17");
+ini_set("precision", "-1");
 
 const PHP_70_VERSION_ID = 70000;
 const PHP_80_VERSION_ID = 80000;
