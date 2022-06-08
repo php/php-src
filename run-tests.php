@@ -2005,11 +2005,19 @@ TEST $file
     $ini_settings = $workerID ? ['opcache.cache_id' => "worker$workerID"] : [];
 
     // Additional required extensions
+    $extensions = [];
     if ($test->hasSection('EXTENSIONS')) {
+        $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
+    }
+    if (is_array($IN_REDIRECT) && $IN_REDIRECT['EXTENSIONS'] != []) {
+        $extensions = array_merge($extensions, $IN_REDIRECT['EXTENSIONS']);
+    }
+
+    /* Load required extensions */
+    if ($extensions != []) {
         $ext_params = [];
         settings2array($ini_overwrites, $ext_params);
         $ext_params = settings2params($ext_params);
-        $extensions = preg_split("/[\n\r]+/", trim($test->getSection('EXTENSIONS')));
         [$ext_dir, $loaded] = $skipCache->getExtensions("$orig_php $pass_options $extra_options $ext_params $no_file_cache");
         $ext_prefix = IS_WINDOWS ? "php_" : "";
         $missing = [];
@@ -2161,6 +2169,7 @@ TEST $file
         $IN_REDIRECT['via'] = "via [$shortname]\n\t";
         $IN_REDIRECT['dir'] = realpath(dirname($file));
         $IN_REDIRECT['prefix'] = $tested;
+        $IN_REDIRECT['EXTENSIONS'] = $extensions;
 
         if (!empty($IN_REDIRECT['TESTS'])) {
             if (is_array($org_file)) {
@@ -3322,6 +3331,9 @@ class JUnit
         'execution_time' => 0,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct(array $env, int $workerID)
     {
         // Check whether a junit log is wanted.
@@ -3539,6 +3551,9 @@ class JUnit
         $this->suites[$suite_name] = self::EMPTY_SUITE + ['name' => $suite_name];
     }
 
+    /**
+     * @throws Exception
+     */
     public function stopTimer(string $file_name): void
     {
         if (!$this->enabled) {
@@ -3738,6 +3753,9 @@ class TestFile
         'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
     ];
 
+    /**
+     * @throws BorkageException
+     */
     public function __construct(string $fileName, bool $inRedirect)
     {
         $this->fileName = $fileName;
@@ -3778,6 +3796,9 @@ class TestFile
         return !empty($this->sections[$name]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getSection(string $name): string
     {
         if (!isset($this->sections[$name])) {
@@ -3814,6 +3835,7 @@ class TestFile
 
     /**
      * Load the sections of the test file
+     * @throws BorkageException
      */
     private function readFile(): void
     {
@@ -3876,6 +3898,9 @@ class TestFile
         fclose($fp);
     }
 
+    /**
+     * @throws BorkageException
+     */
     private function validateAndProcess(bool $inRedirect): void
     {
         // the redirect section allows a set of tests to be reused outside of
