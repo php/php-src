@@ -95,11 +95,6 @@ static const zend_function_entry class_PDO_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_pdo_dbh_symbols(int module_number, zend_class_entry *class_entry_PDO)
-{
-	zend_mark_function_parameter_as_sensitive(&class_entry_PDO->function_table, "__construct", 2);
-}
-
 static zend_class_entry *register_class_PDO(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -107,6 +102,8 @@ static zend_class_entry *register_class_PDO(void)
 	INIT_CLASS_ENTRY(ce, "PDO", class_PDO_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "__construct", 2);
 
 	return class_entry;
 }

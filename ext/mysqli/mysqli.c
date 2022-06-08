@@ -694,7 +694,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_BOOL_CONSTANT("MYSQLI_IS_MARIADB", 0, CONST_CS | CONST_PERSISTENT);
 #endif
 
-	register_mysqli_symbols(module_number, mysqli_link_class_entry);
+	register_mysqli_symbols(module_number);
 
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api);
 

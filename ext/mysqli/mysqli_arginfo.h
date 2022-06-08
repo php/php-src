@@ -1025,15 +1025,11 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_mysqli_symbols(int module_number, zend_class_entry *class_entry_mysqli)
+static void register_mysqli_symbols(int module_number)
 {
 	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_change_user", 2);
 	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_connect", 2);
 	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_real_connect", 3);
-	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "__construct", 2);
-	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "change_user", 1);
-	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "connect", 2);
-	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "real_connect", 2);
 }
 
 static zend_class_entry *register_class_mysqli_driver(void)
@@ -1185,6 +1181,11 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_string *property_warning_count_name = zend_string_init("warning_count", sizeof("warning_count") - 1, 1);
 	zend_declare_typed_property(class_entry, property_warning_count_name, &property_warning_count_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_warning_count_name);
+
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "__construct", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "change_user", 1);
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "connect", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "real_connect", 2);
 
 	return class_entry;
 }

@@ -2277,6 +2277,8 @@ class ClassInfo {
     public $funcInfos;
     /** @var EnumCaseInfo[] */
     public $enumCaseInfos;
+    /** @var string|null */
+    public $cond;
 
     /**
      * @param Name[] $extends
@@ -2300,7 +2302,8 @@ class ClassInfo {
         array $constInfos,
         array $propertyInfos,
         array $funcInfos,
-        array $enumCaseInfos
+        array $enumCaseInfos,
+        ?string $cond
     ) {
         $this->name = $name;
         $this->flags = $flags;
@@ -2316,6 +2319,7 @@ class ClassInfo {
         $this->propertyInfos = $propertyInfos;
         $this->funcInfos = $funcInfos;
         $this->enumCaseInfos = $enumCaseInfos;
+        $this->cond = $cond;
     }
 
     /**
@@ -2333,7 +2337,13 @@ class ClassInfo {
 
         $escapedName = implode("_", $this->name->parts);
 
-        $code = "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
+        $code = '';
+
+        if ($this->cond) {
+            $code .= "#if {$this->cond}\n";
+        }
+
+        $code .= "static zend_class_entry *register_class_$escapedName(" . (empty($params) ? "void" : implode(", ", $params)) . ")\n";
 
         $code .= "{\n";
         if ($this->type == "enum") {
@@ -2390,9 +2400,17 @@ class ClassInfo {
             $code .= $property->getDeclaration($allConstInfos);
         }
 
+        if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
+            $code .= "\n" . $attributeInitializationCode;
+        }
+
         $code .= "\n\treturn class_entry;\n";
 
         $code .= "}\n";
+
+        if ($this->cond) {
+            $code .= "#endif\n";
+        }
 
         return $code;
     }
@@ -3237,7 +3255,8 @@ function parseClass(
     array $consts,
     array $properties,
     array $methods,
-    array $enumCases
+    array $enumCases,
+    ?string $cond
 ): ClassInfo {
     $flags = $class instanceof Class_ ? $class->flags : 0;
     $comment = $class->getDocComment();
@@ -3297,7 +3316,8 @@ function parseClass(
         $consts,
         $properties,
         $methods,
-        $enumCases
+        $enumCases,
+        $cond
     );
 }
 
@@ -3447,7 +3467,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
             }
 
             $fileInfo->classInfos[] = parseClass(
-                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos
+                $className, $stmt, $constInfos, $propertyInfos, $methodInfos, $enumCaseInfos, $cond
             );
             continue;
         }
@@ -3613,9 +3633,10 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
  * @template T
  * @param iterable<T> $infos
  * @param Closure(T): string|null $codeGenerator
+ * @param ?string $parentCond
  */
 function generateCodeWithConditions(
-    iterable $infos, string $separator, Closure $codeGenerator): string {
+    iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
     foreach ($infos as $info) {
         $infoCode = $codeGenerator($info);
@@ -3624,7 +3645,7 @@ function generateCodeWithConditions(
         }
 
         $code .= $separator;
-        if ($info->cond) {
+        if ($info->cond && $info->cond !== $parentCond) {
             $code .= "#if {$info->cond}\n";
             $code .= $infoCode;
             $code .= "#endif\n";
@@ -3689,21 +3710,15 @@ function generateArgInfoCode(
         }
 
         foreach ($fileInfo->classInfos as $classInfo) {
-            $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos);
+            $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
         }
     }
 
     if ($fileInfo->generateClassEntries) {
-        $classEntriesWithSensitiveParams = [];
-        $attributeInitializationCode = generateAttributeInitialization($fileInfo, $classEntriesWithSensitiveParams);
+        $attributeInitializationCode = generateAttributeInitialization($fileInfo->funcInfos);
 
         if ($attributeInitializationCode !== "" || !empty($fileInfo->constInfos)) {
-            $classEntriesWithSensitiveParams = array_unique($classEntriesWithSensitiveParams);
-            $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number";
-            foreach ($classEntriesWithSensitiveParams as $ce) {
-                $code .= ", zend_class_entry *$ce";
-            }
-            $code .= ")\n";
+            $code .= "\nstatic void register_{$stubFilenameWithoutExtension}_symbols(int module_number)\n";
             $code .= "{\n";
 
             foreach ($fileInfo->constInfos as $constInfo) {
@@ -3738,8 +3753,12 @@ function generateClassEntryCode(FileInfo $fileInfo, iterable $allConstInfos): st
 }
 
 /** @param FuncInfo[] $funcInfos */
-function generateFunctionEntries(?Name $className, array $funcInfos): string {
-    $code = "";
+function generateFunctionEntries(?Name $className, array $funcInfos, ?string $cond = null): string {
+    $code = "\n\n";
+
+    if ($cond) {
+        $code .= "#if {$cond}\n";
+    }
 
     $functionEntryName = "ext_functions";
     if ($className) {
@@ -3747,21 +3766,27 @@ function generateFunctionEntries(?Name $className, array $funcInfos): string {
         $functionEntryName = "class_{$underscoreName}_methods";
     }
 
-    $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
+    $code .= "static const zend_function_entry {$functionEntryName}[] = {\n";
     $code .= generateCodeWithConditions($funcInfos, "", static function (FuncInfo $funcInfo) {
         return $funcInfo->getFunctionEntry();
-    });
+    }, $cond);
     $code .= "\tZEND_FE_END\n";
     $code .= "};\n";
 
+    if ($cond) {
+        $code .= "#endif\n";
+    }
+
     return $code;
 }
-
-function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntriesWithSensitiveParams): string {
+/**
+ * @param iterable<FuncInfo> $funcInfos
+ */
+function generateAttributeInitialization(iterable $funcInfos, ?string $parentCond = null): string {
     return generateCodeWithConditions(
-        $fileInfo->getAllFuncInfos(),
+        $funcInfos,
         "",
-        static function (FuncInfo $funcInfo) use (&$classEntriesWithSensitiveParams) {
+        static function (FuncInfo $funcInfo) {
             $code = null;
 
             foreach ($funcInfo->args as $index => $arg) {
@@ -3770,9 +3795,7 @@ function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntrie
                 }
 
                 if ($funcInfo->name instanceof MethodName) {
-                    $classEntry = "class_entry_" . str_replace("\\", "_", $funcInfo->name->className->toString());
-                    $functionTable = "&{$classEntry}->function_table";
-                    $classEntriesWithSensitiveParams[] = $classEntry;
+                    $functionTable = "&class_entry->function_table";
                 } else {
                     $functionTable = "CG(function_table)";
                 }
@@ -3781,7 +3804,8 @@ function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntrie
             }
 
             return $code;
-        }
+        },
+        $parentCond
     );
 }
 

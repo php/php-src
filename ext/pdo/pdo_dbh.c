@@ -1424,8 +1424,6 @@ void pdo_dbh_init(int module_number)
 
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (zend_long)PDO_CURSOR_FWDONLY);
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
-
-	register_pdo_dbh_symbols(module_number, pdo_dbh_ce);
 }
 
 static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)

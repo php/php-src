@@ -220,12 +220,12 @@ static const zend_function_entry class_com_methods[] = {
 };
 
 
-static const zend_function_entry class_dotnet_methods[] = {
 #if HAVE_MSCOREE_H
+static const zend_function_entry class_dotnet_methods[] = {
 	ZEND_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_FE_END
 };
+#endif
 
 
 static const zend_function_entry class_com_safearray_proxy_methods[] = {
@@ -322,6 +322,7 @@ static zend_class_entry *register_class_com(zend_class_entry *class_entry_varian
 	return class_entry;
 }
 
+#if HAVE_MSCOREE_H
 static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_variant)
 {
 	zend_class_entry ce, *class_entry;
@@ -331,6 +332,7 @@ static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_var
 
 	return class_entry;
 }
+#endif
 
 static zend_class_entry *register_class_com_safearray_proxy(void)
 {

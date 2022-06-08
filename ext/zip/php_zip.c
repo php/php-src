@@ -3256,8 +3256,6 @@ static PHP_MINIT_FUNCTION(zip)
 	le_zip_dir   = zend_register_list_destructors_ex(php_zip_free_dir,   NULL, le_zip_dir_name,   module_number);
 	le_zip_entry = zend_register_list_destructors_ex(php_zip_free_entry, NULL, le_zip_entry_name, module_number);
 
-	register_php_zip_symbols(module_number, zip_class_entry);
-
 	return SUCCESS;
 }
 /* }}} */

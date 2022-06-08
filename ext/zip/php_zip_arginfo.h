@@ -486,17 +486,6 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_FE_END
 };
 
-static void register_php_zip_symbols(int module_number, zend_class_entry *class_entry_ZipArchive)
-{
-	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setpassword", 0);
-#if defined(HAVE_ENCRYPTION)
-	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionname", 2);
-#endif
-#if defined(HAVE_ENCRYPTION)
-	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionindex", 2);
-#endif
-}
-
 static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
@@ -540,6 +529,14 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *property_comment_name = zend_string_init("comment", sizeof("comment") - 1, 1);
 	zend_declare_typed_property(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_comment_name);
+
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setpassword", 0);
+#if defined(HAVE_ENCRYPTION)
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionname", 2);
+#endif
+#if defined(HAVE_ENCRYPTION)
+	zend_mark_function_parameter_as_sensitive(&class_entry->function_table, "setencryptionindex", 2);
+#endif
 
 	return class_entry;
 }

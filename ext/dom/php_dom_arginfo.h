@@ -876,24 +876,16 @@ static const zend_function_entry class_DOMProcessingInstruction_methods[] = {
 };
 
 
+#if defined(LIBXML_XPATH_ENABLED)
 static const zend_function_entry class_DOMXPath_methods[] = {
-#if defined(LIBXML_XPATH_ENABLED)
 	ZEND_ME(DOMXPath, __construct, arginfo_class_DOMXPath___construct, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 	ZEND_ME(DOMXPath, evaluate, arginfo_class_DOMXPath_evaluate, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 	ZEND_ME(DOMXPath, query, arginfo_class_DOMXPath_query, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 	ZEND_ME(DOMXPath, registerNamespace, arginfo_class_DOMXPath_registerNamespace, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 	ZEND_ME(DOMXPath, registerPhpFunctions, arginfo_class_DOMXPath_registerPhpFunctions, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_FE_END
 };
+#endif
 
 static void register_php_dom_symbols(int module_number)
 {
@@ -1702,6 +1694,7 @@ static zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entr
 	return class_entry;
 }
 
+#if defined(LIBXML_XPATH_ENABLED)
 static zend_class_entry *register_class_DOMXPath(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -1725,3 +1718,4 @@ static zend_class_entry *register_class_DOMXPath(void)
 
 	return class_entry;
 }
+#endif

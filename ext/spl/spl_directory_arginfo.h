@@ -438,15 +438,13 @@ static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 };
 
 
+#if defined(HAVE_GLOB)
 static const zend_function_entry class_GlobIterator_methods[] = {
-#if defined(HAVE_GLOB)
 	ZEND_ME(GlobIterator, __construct, arginfo_class_GlobIterator___construct, ZEND_ACC_PUBLIC)
-#endif
-#if defined(HAVE_GLOB)
 	ZEND_ME(GlobIterator, count, arginfo_class_GlobIterator_count, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_FE_END
 };
+#endif
 
 
 static const zend_function_entry class_SplFileObject_methods[] = {
@@ -535,6 +533,7 @@ static zend_class_entry *register_class_RecursiveDirectoryIterator(zend_class_en
 	return class_entry;
 }
 
+#if defined(HAVE_GLOB)
 static zend_class_entry *register_class_GlobIterator(zend_class_entry *class_entry_FilesystemIterator, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
@@ -545,6 +544,7 @@ static zend_class_entry *register_class_GlobIterator(zend_class_entry *class_ent
 
 	return class_entry;
 }
+#endif
 
 static zend_class_entry *register_class_SplFileObject(zend_class_entry *class_entry_SplFileInfo, zend_class_entry *class_entry_RecursiveIterator, zend_class_entry *class_entry_SeekableIterator)
 {
