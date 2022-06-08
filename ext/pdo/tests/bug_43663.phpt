@@ -23,7 +23,7 @@ class test extends PDO{
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-$a = new test('sqlite::memory:');
+$a = PDOTest::factory(test::class);
 $a->foo();
 $a->bar();
 ?>
