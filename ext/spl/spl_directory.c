@@ -693,11 +693,8 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 	spl_filesystem_object *fsobj = spl_filesystem_from_obj(*object);
 
 	if (fsobj->u.dir.dirp == NULL && fsobj->orig_path == NULL) {
-		zend_function *func;
-		zend_string *tmp = zend_string_init("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
-		func = zend_std_get_method(object, tmp, NULL);
-		zend_string_release_ex(tmp, 0);
-		return func;
+		zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
+		return NULL;
 	}
 
 	return zend_std_get_method(object, method, key);
@@ -1403,6 +1400,7 @@ PHP_METHOD(SplFileInfo, _bad_state_ex)
 		RETURN_THROWS();
 	}
 	zend_throw_error(NULL, "The parent constructor was not called: the object is in an invalid state");
+	RETURN_THROWS();
 }
 /* }}} */
 

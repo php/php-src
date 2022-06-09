@@ -149,6 +149,8 @@ PHP 8.2 UPGRADE NOTES
     separate, built-in implementations of all of them; for example, UUencoded
     data can be handled using convert_uuencode/convert_uudecode.
 
+- SPL:
+  . The SplFileInfo::_bad_state_ex() internal method has been deprecated.
 ========================================
 5. Changed Functions
 ========================================
