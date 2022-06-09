@@ -1002,6 +1002,13 @@ volunteers to begin the selection process for the next release managers.
    > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
    > ```
 
+5. Make sure you have the following repositories cloned locally:
+
+   * https://github.com/php/php-src
+   * https://github.com/php/web-php
+   * https://github.com/php/web-qa
+   * https://github.com/php/web-php-distributions
+
 
 [general availability]: https://en.wikipedia.org/wiki/Software_release_life_cycle#General_availability_(GA)
 [muscle memory]: https://en.wikipedia.org/wiki/Muscle_memory
