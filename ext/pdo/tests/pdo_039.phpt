@@ -30,9 +30,6 @@ if ($pass === false) $pass = NULL;
 $conn = new PDO($dsn, $user, $pass, $attr);
 
 $query = 'SELECT 1';
-if ($conn->getAttribute(PDO::ATTR_DRIVER_NAME) === "firebird") {
-    $query .= ' from RDB$DATABASE';
-}
 
 var_dump($conn->errorCode());
 $stmt = $conn->prepare($query);
