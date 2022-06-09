@@ -12,18 +12,21 @@ foreach (array(
     '1g',
     '1gb',
     '14.2mb',
+    '14.2bm',
     'boat'
 ) as $input) {
     echo ini_parse_quantity( $input ) . PHP_EOL;
 }
 ?>
 --EXPECT--
-0
+-1
 0
 1
 1
 1024
 1048576
 1073741824
+1
 14
+14680064
 0
