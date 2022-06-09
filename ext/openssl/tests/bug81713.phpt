@@ -58,7 +58,7 @@ $tests = [
     ["openssl_public_encrypt", "test", &$out, $priv_key_file_null],
     ["openssl_public_decrypt", "test", &$out, $priv_key_file_null],
     ["openssl_sign", "test", &$out, $priv_key_file_null],
-    ["openssl_verify", "test", &$out, $priv_key_file_null],
+    ["openssl_verify", "test", "sig", $priv_key_file_null],
     ["openssl_seal", "test", &$sealed, &$ekeys, [$priv_key_file_null], "AES-128-CBC", &$iv],
     ["openssl_open", "test", &$open, "aaa", $priv_key_file_null, "AES-128-CBC", &$iv],
     ["openssl_csr_new", $dn, &$priv_key_file_null, $csr_args],
