@@ -1,5 +1,5 @@
 --TEST--
-GH-8548: stream_wrapper_unregister() leaks memory
+GH-8548: Test stream_wrapper_unregister() for directories
 --FILE--
 <?php
 
@@ -7,7 +7,7 @@ class Wrapper
 {
     public $context;
 
-    public function stream_open(string $path, string $mode, int $options): bool
+    public function dir_opendir(string $path, int $options): bool
     {
         return true;
     }
@@ -23,19 +23,19 @@ function test() {
         throw new \Exception('Could not register stream wrapper');
     }
 
-    $file = fopen('foo://bar', 'r');
+    $dir = opendir('foo://bar');
 
     if (!stream_wrapper_unregister('foo')) {
         throw new \Exception('Could not unregister stream wrapper');
     }
 
-    $wrapper = stream_get_meta_data($file)['wrapper_data'];
+    $wrapper = stream_get_meta_data($dir)['wrapper_data'];
     if (!$wrapper instanceof Wrapper) {
         throw new \Exception('Wrapper is not of expected type');
     }
 
-    fclose($file);
-    unset($file);
+    closedir($dir);
+    unset($dir);
 }
 
 // The first iterations will allocate space for things like the resource list
