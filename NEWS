@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed leak in Enum::from/tryFrom for internal enums when using JIT (ilutov)
   . Fixed calling internal methods with a static return type from
     extension code. (Sara)
+  . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
+    references). (Nicolas Grekas)
 
 - Date:
   . Fixed bug #72963 (Null-byte injection in CreateFromFormat and related

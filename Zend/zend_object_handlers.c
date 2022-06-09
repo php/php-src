@@ -111,6 +111,10 @@ ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj) /*
 				continue;
 			}
 
+			if (Z_ISREF_P(prop) && Z_REFCOUNT_P(prop) == 1) {
+				prop = Z_REFVAL_P(prop);
+			}
+
 			Z_TRY_ADDREF_P(prop);
 			_zend_hash_append(ht, prop_info->name, prop);
 		}
