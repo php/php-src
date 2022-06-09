@@ -78,6 +78,7 @@ PHP                                                                        NEWS
   . Added ancillary data support for FreeBSD. (David Carlier)
   . Added ancillary data support for NetBSD. (David Carlier)
   . Added SO_BPF_EXTENSIONS socket option. (David Carlier)
+  . Added SO_SETFIB socket option. (David Carlier)
 
 - Sodium:
   . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)

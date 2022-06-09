@@ -252,6 +252,7 @@ PHP 8.2 UPGRADE NOTES
   . SCM_CREDS2 (FreeBSD)
   . LOCAL_CREDS (NetBSD)
   . SO_BPF_EXTENSIONS
+  . SO_SETFIB
 
 ========================================
 11. Changes to INI File Handling
