@@ -6,14 +6,10 @@ if (!extension_loaded("openssl")) die("skip openssl not loaded");
 ?>
 --FILE--
 <?php
-$ssl_configargs = [
-    "digest_alg" => "sha1",
-    "encrypt_key" => false,
-    "basicConstraints" => "CA:true",
-    "keyUsage" => "cRLSign, keyCertSign",
-    "nsCertType" => "sslCA, emailCA",
-    "config" => __DIR__ . "/openssl.cnf",
-];
+$cert = "file://" . __DIR__ . "/cert.crt";
+$priv = "file://" . __DIR__ . "/private_rsa_1024.key";
+$config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
+
 $dn = [
     "countryName" => "GB",
     "stateOrProvinceName" => "Berkshire",
@@ -21,19 +17,25 @@ $dn = [
     "organizationName" => "My Company Ltd",
     "commonName" => "Demo Cert",
 ];
-$numberofdays = '365';
+
+$args = array(
+    "digest_alg" => "sha256",
+    "private_key_bits" => 2048,
+    "private_key_type" => OPENSSL_KEYTYPE_RSA,
+    "encrypt_key" => true,
+    "config" => $config
+);
 
 mkdir(__DIR__ . "/bug50293");
 chdir(__DIR__ . "/bug50293");
 
-$privkey = openssl_pkey_new($ssl_configargs);
-$csr = openssl_csr_new($dn, $privkey, $ssl_configargs);
-$sscert = openssl_csr_sign($csr, null, $privkey, $numberofdays);
-openssl_csr_export($csr, $csrout);
+$privkey = openssl_pkey_get_private('file://' . __DIR__ . '/private_ec.key');
+$csr = openssl_csr_new($dn, $privkey, $args);
+$sscert = openssl_csr_sign($csr, null, $privkey, 365, $args);
+openssl_csr_export($csr, $csrout);;
 openssl_x509_export($sscert, $certout);
 openssl_x509_export_to_file($sscert , "bug50293.crt", false);
-openssl_pkey_export($privkey, $pkeyout);
-openssl_pkey_export_to_file($privkey, "bug50293.pem");
+openssl_pkey_export_to_file($privkey, "bug50293.pem", null, $args);
 
 var_dump(
     file_exists("bug50293.crt"),
