@@ -46,17 +46,6 @@ set ODBC_TEST_PASS=Password12!
 set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=(local)\SQL2017;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
 set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
-rem setup Firebird related exts
-curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
-7z x -oC:\Firebird Firebird.zip
-echo create database 'C:\test.fdb' user 'SYSDBA' password 'phpfi';> C:\Firebird\setup.sql
-C:\Firebird\instsvc.exe install -n TestInstance
-C:\Firebird\isql -q -i C:\Firebird\setup.sql
-C:\Firebird\instsvc.exe start -n TestInstance
-if %errorlevel% neq 0 exit /b 3
-path C:\Firebird;%PATH%
-set PDO_FIREBIRD_TEST_DSN=firebird:dbname=C:\test.fdb
-
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
@@ -122,7 +111,7 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-for %%i in (ldap oci8_12c pdo_oci) do (
+for %%i in (ldap oci8_12c pdo_firebird pdo_oci) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
