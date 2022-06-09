@@ -56,6 +56,8 @@ C:\Firebird\instsvc.exe start -n TestInstance
 if %errorlevel% neq 0 exit /b 3
 path C:\Firebird;%PATH%
 set PDO_FIREBIRD_TEST_DSN=firebird:dbname=C:\test.fdb
+set PDO_FIREBIRD_TEST_USER=SYSDBA
+set PDO_FIREBIRD_TEST_PASS=phpfi
 
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
