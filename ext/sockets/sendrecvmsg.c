@@ -72,7 +72,7 @@ inline ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
 
 #define LONG_CHECK_VALID_INT(l, arg_pos) \
 	do { \
-		if ((l) < INT_MIN && (l) > INT_MAX) { \
+		if ((l) < INT_MIN || (l) > INT_MAX) { \
 			zend_argument_value_error((arg_pos), "must be between %d and %d", INT_MIN, INT_MAX); \
 			RETURN_THROWS(); \
 		} \
