@@ -37,11 +37,11 @@ environment:
         matrix:
                 - THREAD_SAFE: 0
                   OPCACHE: 0
-                  PARALLEL:
-                # - THREAD_SAFE: 1
-                #   OPCACHE: 1
-                #   PARALLEL: -j2
-                #   INTRINSICS: AVX
+                  PARALLEL: -j2
+                - THREAD_SAFE: 1
+                  OPCACHE: 1
+                  PARALLEL: -j2
+                  INTRINSICS: AVX
 
 services:
         # the setup scripts have to be touched, once some other db version is used
