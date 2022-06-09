@@ -354,10 +354,9 @@ static void track_class_dependency(zend_class_entry *ce, zend_string *class_name
 {
 	HashTable *ht;
 
+	ZEND_ASSERT(class_name);
 	if (!CG(current_linking_class) || ce == CG(current_linking_class)) {
 		return;
-	} else if (!class_name) {
-		class_name = ce->name;
 	} else if (zend_string_equals_literal_ci(class_name, "self")
 	        || zend_string_equals_literal_ci(class_name, "parent")) {
 		return;
