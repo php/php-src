@@ -709,6 +709,34 @@ ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **e
 }
 /* }}} */
 
+ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting) /* {{{ */
+{
+	zend_string *errstr;
+	zend_long retval = zend_ini_parse_quantity(value, &errstr);
+
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
+	return retval;
+}
+/* }}} */
+
+ZEND_API zend_long zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting) /* {{{ */
+{
+	zend_string *errstr;
+	zend_long retval = zend_ini_parse_uquantity(value, &errstr);
+
+	if (errstr) {
+		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+
+	return retval;
+}
+/* }}} */
+
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
 	int value;
@@ -797,24 +825,14 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
-	zend_string *errstr;
-	*p = zend_ini_parse_quantity(new_value, &errstr);
-	if (errstr) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
-		zend_string_release(errstr);
-	}
+	*p = zend_ini_parse_quantity_warn(new_value, entry->name);
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
-	zend_string *errstr;
-	zend_long tmp = zend_ini_parse_quantity(new_value, &errstr);
-	if (errstr) {
-		zend_error(E_WARNING, "Invalid \"%s\" setting: %s", ZSTR_VAL(entry->name), ZSTR_VAL(errstr));
-		zend_string_release(errstr);
-	}
+	zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 	if (tmp < 0) {
 		return FAILURE;
 	}

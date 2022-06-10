@@ -132,6 +132,10 @@ ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **err
  */
 ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr);
 
+ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string *setting);
+
+ZEND_API zend_long zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting);
+
 ZEND_API zend_result zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
