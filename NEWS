@@ -38,9 +38,17 @@ PHP                                                                        NEWS
   . Fixed bug #72185: php-fpm writes empty fcgi record causing nginx 502.
     (Jakub Zelenka, loveharmful)
 
+- Mysqlnd:
+  . Fixed bug #81719: mysqlnd/pdo password buffer overflow. (CVE-2022-31626)
+    (c dot fol at ambionics dot io)
+
 - OPcache:
   . Fixed bug GH-8466 (ini_get() is optimized out when the option does not
     exist). (Arnaud)
+
+- Pgsql:
+  . Fixed bug #81720: Uninitialized array in pg_query_params().
+    (CVE-2022-31625) (cmb)
 
 - Pcntl:
   . Fixed Haiku build. (David Carlier)
@@ -185,6 +193,10 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug GH-7867 (FFI::cast() from pointer to array is broken). (cmb,
     dmitry)
+
+- Filter:
+  . Fix #81708: UAF due to php_filter_float() failing for ints.
+    (CVE-2021-21708) (stas)
 
 - FPM:
   . Fixed memory leak on invalid port. (David Carlier)
