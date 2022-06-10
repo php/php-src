@@ -12,4 +12,4 @@ function test(): (A&B&C)|(A&B) {}
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Type A&B is less restrictive than type A&B&C in %s on line %d
+Fatal error: Type A&B&C is redundant as it is more restrictive than type A&B in %s on line %d

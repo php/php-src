@@ -11,4 +11,4 @@ function test(): (A&B)|A {}
 ?>
 ===DONE===
 --EXPECTF--
-Fatal error: Type A is less restrictive than type A&B in %s on line %d
+Fatal error: Type A&B is redundant as it is more restrictive than type A in %s on line %d

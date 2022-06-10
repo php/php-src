@@ -6250,7 +6250,7 @@ static void zend_are_intersection_types_redundant(zend_type left_type, zend_type
 		larger_type_list = r_type_list;
 	}
 
-	int sum = 0;
+	unsigned int sum = 0;
 	zend_type *outer_type;
 	ZEND_TYPE_LIST_FOREACH(smaller_type_list, outer_type)
 		zend_type *inner_type;
@@ -6263,24 +6263,21 @@ static void zend_are_intersection_types_redundant(zend_type left_type, zend_type
 	ZEND_TYPE_LIST_FOREACH_END();
 
 	if (sum == smaller_type_list->num_types) {
-		zend_string *l_type_str = zend_type_to_string(left_type);
-		zend_string *r_type_str = zend_type_to_string(right_type);
-		if (smaller_type_list->num_types == larger_type_list->num_types) {
-			if (flipped) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant with type %s",
-					ZSTR_VAL(r_type_str), ZSTR_VAL(l_type_str));
-			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant with type %s",
-					ZSTR_VAL(l_type_str), ZSTR_VAL(r_type_str));
-			}
+		zend_string *smaller_type_str;
+		zend_string *larger_type_str;
+		if (flipped) {
+			smaller_type_str = zend_type_to_string(right_type);
+			larger_type_str = zend_type_to_string(left_type);
 		} else {
-			if (flipped) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Type %s is less restrictive than type %s",
-					ZSTR_VAL(r_type_str), ZSTR_VAL(l_type_str));
-			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "Type %s is less restrictive than type %s",
-					ZSTR_VAL(l_type_str), ZSTR_VAL(r_type_str));
-			}
+			smaller_type_str = zend_type_to_string(left_type);
+			larger_type_str = zend_type_to_string(right_type);
+		}
+		if (smaller_type_list->num_types == larger_type_list->num_types) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant with type %s",
+				ZSTR_VAL(smaller_type_str), ZSTR_VAL(larger_type_str));
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+				ZSTR_VAL(larger_type_str), ZSTR_VAL(smaller_type_str));
 		}
 	}
 }
@@ -6295,8 +6292,8 @@ static void zend_is_intersection_type_redundant_by_single_type(zend_type interse
 		if (zend_string_equals_ci(ZEND_TYPE_NAME(*single_intersection_type), ZEND_TYPE_NAME(single_type))) {
 			zend_string *single_type_str = zend_type_to_string(single_type);
 			zend_string *complete_type = zend_type_to_string(intersection_type);
-			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is less restrictive than type %s",
-					ZSTR_VAL(single_type_str), ZSTR_VAL(complete_type));
+			zend_error_noreturn(E_COMPILE_ERROR, "Type %s is redundant as it is more restrictive than type %s",
+					ZSTR_VAL(complete_type), ZSTR_VAL(single_type_str));
 		}
 	ZEND_TYPE_FOREACH_END();
 }
