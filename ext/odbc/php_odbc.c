@@ -2170,7 +2170,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    *ldb = 0;
 		int		ldb_len = 0;
 
-		if (strstr((char*)db, ";")) {
+		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
+		if (strstr((char*)db, "=")) {
 			direct = 1;
 			/* Force UID and PWD to be set in the DSN */
 			bool is_uid_set = uid && *uid
