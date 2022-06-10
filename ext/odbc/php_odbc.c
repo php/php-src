@@ -2156,7 +2156,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    *ldb = 0;
 		int		ldb_len = 0;
 
-		if (strstr((char*)db, ";")) {
+		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
+		if (strstr((char*)db, "=")) {
 			direct = 1;
 			if (uid && !strstr ((char*)db, "uid") && !strstr((char*)db, "UID")) {
 				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid, pwd);
