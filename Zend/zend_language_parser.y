@@ -278,14 +278,16 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
+%type <ast> closure_type closure_type_param_list non_empty_closure_type_param_list closure_type_param
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> optional_property_modifiers property_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
+%type <num> closure_type_param_is_reference
 
 %type <ptr> backup_lex_pos
-%type <str> backup_doc_comment
+%type <str> backup_doc_comment closure_type_param_list_cast 
 
 %type <ident> reserved_non_modifiers semi_reserved
 
@@ -806,6 +808,7 @@ type_expr:
 	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type			{ $$ = $1; }
 	|	intersection_type	{ $$ = $1; }
+	|	closure_type		{ $$ = $1; }
 ;
 
 type:
@@ -831,12 +834,57 @@ type_expr_without_static:
 	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 	|	union_type_without_static	{ $$ = $1; }
 	|	intersection_type_without_static	{ $$ = $1; }
+	|	closure_type				{ $$ = $1; }
 ;
 
 type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
 	|	name		{ $$ = $1; }
+;
+
+closure_type:
+		name closure_type_param_list
+					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $1, $2, NULL); }
+	|	name closure_type_param_list ':' type_expr_without_static
+					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $1, $2, $4); }
+;
+
+closure_type_param_list:
+		'(' ')'			{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
+	|	'(' non_empty_closure_type_param_list possible_comma ')'
+			{ $$ = $2; }
+	|	closure_type_param_list_cast { 
+			zend_ast *type_name = zend_ast_create_zval_from_str($1);
+			type_name->attr = ZEND_NAME_NOT_FQ;
+			$$ = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, zend_ast_create_ex(ZEND_AST_PARAM, 0, type_name, NULL, NULL, NULL, NULL));
+		}
+;
+
+closure_type_param_list_cast:
+		T_INT_CAST		{ $$ = zend_string_init("int", strlen("int"), 0); }
+	|	T_DOUBLE_CAST	{ $$ = zend_string_init("float", strlen("float"), 0); }
+	|	T_STRING_CAST	{ $$ = zend_string_init("string", strlen("string"), 0); }
+	|	T_ARRAY_CAST	{ $$ = zend_string_init("array", strlen("array"), 0); }
+	|	T_OBJECT_CAST	{ $$ = zend_string_init("object", strlen("object"), 0); }
+	|	T_BOOL_CAST		{ $$ = zend_string_init("bool", strlen("bool"), 0); }
+;
+
+non_empty_closure_type_param_list:
+		closure_type_param { $$ = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, $1); }
+	|	non_empty_closure_type_param_list ',' closure_type_param
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+closure_type_param_is_reference:
+		%empty	{ $$ = 0; }
+	|	T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG	{ $$ = ZEND_PARAM_REF; }
+	|	T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG	{ $$ = ZEND_PARAM_REF; }
+;
+
+closure_type_param:
+		type_without_static closure_type_param_is_reference is_variadic
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, NULL, NULL, NULL, NULL); }
 ;
 
 union_type_without_static:

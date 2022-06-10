@@ -33,6 +33,7 @@
 #include "zend_inheritance.h"
 #include "zend_vm.h"
 #include "zend_enum.h"
+#include "zend_smart_str.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -1193,6 +1194,44 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
+
+	if (ZEND_TYPE_IS_CLOSURE(type)) {
+		zend_closure_type *closure_type = ZEND_TYPE_CLOSURE(type);
+
+		smart_str ss = {0};
+		smart_str_appends(&ss, "\\Closure(");
+
+		for (uint32_t i = 0; i < closure_type->num_params; i++) {
+			zend_closure_param_type param_type = closure_type->param_types[i];
+			zend_string *param_string = zend_type_to_string_resolved(param_type.type, scope);
+			smart_str_append(&ss, param_string);
+			zend_string_release(param_string);
+
+			if (param_type.by_ref) {
+				smart_str_appends(&ss, "&");
+			}
+
+			if (i < (closure_type->num_params - 1)) {
+				smart_str_appends(&ss, ", ");
+			} else if (closure_type->variadic) {
+				smart_str_appends(&ss, "...");
+			}
+		}
+
+		smart_str_appendc(&ss, ')');
+
+		zend_string *return_type_string = zend_type_to_string_resolved(closure_type->return_type, scope);
+		if (return_type_string != NULL) {
+			smart_str_appends(&ss, ": ");
+			smart_str_append(&ss, return_type_string);
+			zend_string_release(return_type_string);
+		}
+
+		smart_str_0(&ss);
+		str = zend_string_copy(ss.s);
+		smart_str_free(&ss);
+		return str;
+	}
 
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
@@ -6326,6 +6365,38 @@ static zend_type zend_compile_typename(
 		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 		/* Inform that the type list is an intersection type */
 		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
+	} else if (ast->kind == ZEND_AST_TYPE_CALLABLE) {
+		// FIXME: Assert \Closure
+		// zend_ast *class_name_ast = ast->child[0];
+		zend_ast_list *param_list = zend_ast_get_list(ast->child[1]);
+		zend_closure_type *closure_type = zend_arena_alloc(&CG(arena), ZEND_TYPE_CLOSURE_SIZE(param_list->children));
+
+		bool variadic = false;
+		closure_type->num_params = param_list->children;
+		for (uint32_t i = 0; i < param_list->children; i++) {
+			zend_ast *param_ast = param_list->child[i];
+			zend_ast *param_type_ast = param_ast->child[0];
+			bool by_ref = param_ast->attr & ZEND_PARAM_REF;
+			variadic = param_ast->attr & ZEND_PARAM_VARIADIC;
+
+			if (variadic && i != (param_list->children - 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
+			}
+
+			closure_type->param_types[i] = (zend_closure_param_type) {
+				.by_ref = by_ref,
+				.type = zend_compile_typename(param_type_ast, /* force_allow_null */ false),
+			};
+		}
+		closure_type->variadic = variadic;
+
+		zend_ast *return_type_ast = ast->child[2];
+		closure_type->return_type = return_type_ast != NULL
+			? zend_compile_typename(return_type_ast, /* force_allow_null */ false)
+			: (zend_type) ZEND_TYPE_INIT_NONE(0);
+
+		type = (zend_type) ZEND_TYPE_INIT_CLOSURE(closure_type, 0);
+		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
 	} else {
 		type = zend_compile_single_typename(ast);
 	}

@@ -138,12 +138,25 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
+typedef struct {
+	bool by_ref;
+	zend_type type;
+} zend_closure_param_type;
+
+typedef struct {
+	zend_type return_type;
+	bool variadic;
+	uint32_t num_params;
+	zend_closure_param_type param_types[1];
+} zend_closure_type;
+
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
 #define _ZEND_TYPE_MASK ((1u << 25) - 1)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_CLOSURE_BIT (1u << 23)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
-#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT)
+#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_CLOSURE_BIT)
 /* For BC behaviour with iterable type */
 #define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
 /* Whether the type list is arena allocated */
@@ -179,6 +192,12 @@ typedef struct {
 
 #define ZEND_TYPE_IS_UNION(t) \
 	((((t).type_mask) & _ZEND_TYPE_UNION_BIT) != 0)
+
+#define ZEND_TYPE_IS_CLOSURE(t) \
+	((((t).type_mask) & _ZEND_TYPE_CLOSURE_BIT) != 0)
+
+#define ZEND_TYPE_CLOSURE(t) \
+	((zend_closure_type *) (t).ptr)
 
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
@@ -288,6 +307,12 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
 	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
+
+#define ZEND_TYPE_INIT_CLOSURE(ptr, extra_flags) \
+	{ (void *) (ptr), _ZEND_TYPE_CLOSURE_BIT | (extra_flags) }
+
+#define ZEND_TYPE_CLOSURE_SIZE(num_params) \
+	(sizeof(zend_closure_type) + (num_params) * sizeof(zend_closure_param_type) - sizeof(zend_closure_param_type))
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */

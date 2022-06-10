@@ -120,6 +120,15 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 		}
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_release(ZEND_TYPE_NAME(type));
+	} else if (ZEND_TYPE_IS_CLOSURE(type)) {
+		zend_closure_type *closure_type = ZEND_TYPE_CLOSURE(type);
+		zend_type_release(closure_type->return_type, persistent);
+		for (uint32_t i = 0; i < closure_type->num_params; i++) {
+			zend_type_release(closure_type->param_types[i].type, persistent);
+		}
+		if (!ZEND_TYPE_USES_ARENA(type)) {
+			pefree(closure_type, persistent);
+		}
 	}
 }
 
