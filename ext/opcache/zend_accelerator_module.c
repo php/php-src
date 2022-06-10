@@ -177,7 +177,6 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 static ZEND_INI_MH(OnUpdateCounter)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
-
 	if (val >= 0 && val < 256) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -190,7 +189,6 @@ static ZEND_INI_MH(OnUpdateCounter)
 static ZEND_INI_MH(OnUpdateUnrollC)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
-
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_CALL_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -204,7 +202,6 @@ static ZEND_INI_MH(OnUpdateUnrollC)
 static ZEND_INI_MH(OnUpdateUnrollR)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
-
 	if (val >= 0 && val < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
@@ -218,7 +215,6 @@ static ZEND_INI_MH(OnUpdateUnrollR)
 static ZEND_INI_MH(OnUpdateUnrollL)
 {
 	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
-
 	if (val > 0 && val < ZEND_JIT_TRACE_MAX_LOOPS_UNROLL) {
 		zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 		*p = val;
