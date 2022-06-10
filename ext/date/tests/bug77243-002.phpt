@@ -1,5 +1,7 @@
 --TEST--
 Bug #77243 (Weekdays are calculated incorrectly for negative years)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
 date_default_timezone_set('UTC');
