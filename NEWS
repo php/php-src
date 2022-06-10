@@ -250,6 +250,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-7867 (FFI::cast() from pointer to array is broken). (cmb,
     dmitry)
 
+- Filter:
+  . Fix #81708: UAF due to php_filter_float() failing for ints.
+    (CVE-2021-21708) (cmb)
+
 - FPM:
   . Fixed memory leak on invalid port. (David Carlier)
   . Fixed bug GH-7842 (Invalid OpenMetrics response format returned by FPM
