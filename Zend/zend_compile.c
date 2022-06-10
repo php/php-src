@@ -1200,11 +1200,15 @@ static zend_string *add_intersection_type(zend_string *str,
 	zend_string *intersection_str = NULL;
 
 	ZEND_TYPE_LIST_FOREACH(intersection_type_list, single_type) {
+		ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
+		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*single_type));
 		zend_string *name = ZEND_TYPE_NAME(*single_type);
 		zend_string *resolved = resolve_class_name(name, scope);
 		intersection_str = add_type_string(intersection_str, resolved, /* is_intersection */ true);
 		zend_string_release(resolved);
 	} ZEND_TYPE_LIST_FOREACH_END();
+
+	ZEND_ASSERT(intersection_str);
 
 	if (is_bracketed) {
 		zend_string *result = zend_string_concat3("(", 1, ZSTR_VAL(intersection_str), ZSTR_LEN(intersection_str), ")", 1);
