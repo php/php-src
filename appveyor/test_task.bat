@@ -49,15 +49,16 @@ set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 rem setup Firebird related exts
 curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
 7z x -oC:\Firebird Firebird.zip
-echo create database 'C:\test.fdb' user 'SYSDBA' password 'phpfi';> C:\Firebird\setup.sql
+set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
+set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
+set PDO_FIREBIRD_TEST_USER=SYSDBA
+set PDO_FIREBIRD_TEST_PASS=phpfi
+echo create database '%PDO_FIREBIRD_TEST_DATABASE%' user '%PDO_FIREBIRD_TEST_USER%' password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\setup.sql
 C:\Firebird\instsvc.exe install -n TestInstance
 C:\Firebird\isql -q -i C:\Firebird\setup.sql
 C:\Firebird\instsvc.exe start -n TestInstance
 if %errorlevel% neq 0 exit /b 3
 path C:\Firebird;%PATH%
-set PDO_FIREBIRD_TEST_DSN=firebird:dbname=C:\test.fdb
-set PDO_FIREBIRD_TEST_USER=SYSDBA
-set PDO_FIREBIRD_TEST_PASS=phpfi
 
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
