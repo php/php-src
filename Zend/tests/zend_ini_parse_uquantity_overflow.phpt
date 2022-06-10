@@ -8,13 +8,13 @@ zend_test
 $tests = [
     'No overflow 001' => '0',
     'No overflow 002' => '1',
-    'No overflow 002' => '100',
-    'No overflow 003' => strval(PHP_INT_MAX),
-    'No overflow 004' => '2K',
-    'No overflow 005' => '-1',
-    'No overflow 006' => ' -1',
-    'No overflow 007' => '-1 ',
-    'No overflow 008' => ' -1 ',
+    'No overflow 003' => '100',
+    'No overflow 004' => strval(PHP_INT_MAX),
+    'No overflow 005' => '2K',
+    'No overflow 006' => '-1',
+    'No overflow 007' => ' -1',
+    'No overflow 008' => '-1 ',
+    'No overflow 009' => ' -1 ',
     'Subject overflow 001' => base_convert(str_repeat('1', PHP_INT_SIZE*8+1), 2, 10),
     'Subject overflow 002' => '-'.base_convert(str_repeat('1', PHP_INT_SIZE*8+1), 2, 10),
     'Subject overflow 003' => strval(PHP_INT_MIN),
@@ -27,8 +27,8 @@ $tests = [
 foreach ($tests as $name => $value) {
     printf("# %s: \"%s\"\n", $name, $value);
     printf("%u\n", zend_test_zend_ini_parse_uquantity($value));
-    echo "\n";
-    echo "----------\n";
+    print "\n";
+    print "----------\n";
 }
 
 printf("# zend_test_zend_ini_parse_uquantity(\"-1\") === -1\n");
@@ -39,31 +39,35 @@ var_dump(zend_test_zend_ini_parse_uquantity("-1") === -1);
 0
 
 ----------
-# No overflow 002: "100"
+# No overflow 002: "1"
+1
+
+----------
+# No overflow 003: "100"
 100
 
 ----------
-# No overflow 003: "%d"
+# No overflow 004: "%d"
 %d
 
 ----------
-# No overflow 004: "2K"
+# No overflow 005: "2K"
 2048
 
 ----------
-# No overflow 005: "-1"
+# No overflow 006: "-1"
 %d
 
 ----------
-# No overflow 006: " -1"
+# No overflow 007: " -1"
 %d
 
 ----------
-# No overflow 007: "-1 "
+# No overflow 008: "-1 "
 %d
 
 ----------
-# No overflow 008: " -1 "
+# No overflow 009: " -1 "
 %d
 
 ----------
