@@ -1,5 +1,7 @@
 --TEST--
 Bug #73239 (Odd warning/exception message with invalid timezones)
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 ini_set('date.timezone', 'dummy');

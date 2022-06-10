@@ -1,5 +1,7 @@
 --TEST--
 Test invalid time zone passed to ini_set
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 
