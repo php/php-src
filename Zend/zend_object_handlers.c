@@ -1841,7 +1841,7 @@ ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+ZEND_API zend_result zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	switch (type) {
 		case IS_STRING: {
@@ -1871,7 +1871,7 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 }
 /* }}} */
 
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
+ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only) /* {{{ */
 {
 	zend_class_entry *ce = obj->ce;
 	zval *func = zend_hash_find_known_hash(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE));

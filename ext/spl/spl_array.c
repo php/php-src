@@ -1276,7 +1276,7 @@ static zend_long spl_array_object_count_elements_helper(spl_array_object *intern
 	}
 } /* }}} */
 
-int spl_array_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result spl_array_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 

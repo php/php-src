@@ -159,6 +159,6 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 void curl_multi_register_handlers(void);
 void curl_share_register_handlers(void);
 void curlfile_register_class(void);
-int curl_cast_object(zend_object *obj, zval *result, int type);
+zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 
 #endif  /* _PHP_CURL_PRIVATE_H */

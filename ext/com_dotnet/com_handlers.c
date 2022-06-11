@@ -429,7 +429,7 @@ static int com_objects_compare(zval *object1, zval *object2)
 	return ret;
 }
 
-static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result com_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -490,7 +490,7 @@ static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 	return zend_std_cast_object_tostring(readobj, writeobj, type);
 }
 
-static int com_object_count(zend_object *object, zend_long *count)
+static zend_result com_object_count(zend_object *object, zend_long *count)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;
