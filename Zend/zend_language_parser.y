@@ -883,8 +883,8 @@ closure_type_param_is_reference:
 ;
 
 closure_type_param:
-		type_without_static closure_type_param_is_reference is_variadic
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, NULL, NULL, NULL, NULL); }
+		type_expr_without_static is_variadic
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2, $1, NULL, NULL, NULL, NULL); }
 ;
 
 union_type_without_static:

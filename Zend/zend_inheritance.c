@@ -33,16 +33,6 @@
 ZEND_API zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces) = NULL;
 ZEND_API zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies) = NULL;
 
-/* Unresolved means that class declarations that are currently not available are needed to
- * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
- * as an ERROR. */
-typedef enum {
-	INHERITANCE_UNRESOLVED = -1,
-	INHERITANCE_ERROR = 0,
-	INHERITANCE_WARNING = 1,
-	INHERITANCE_SUCCESS = 2,
-} inheritance_status;
-
 static void add_dependency_obligation(zend_class_entry *ce, zend_class_entry *dependency_ce);
 static void add_compatibility_obligation(
 		zend_class_entry *ce, const zend_function *child_fn, zend_class_entry *child_scope,
@@ -193,7 +183,9 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 /* }}} */
 
 static zend_string *resolve_class_name(zend_class_entry *scope, zend_string *name) {
-	ZEND_ASSERT(scope);
+	if (!scope) {
+		return name;
+	}
 	if (zend_string_equals_literal_ci(name, "parent") && scope->parent) {
 		if (scope->ce_flags & ZEND_ACC_RESOLVED_PARENT) {
 			return scope->parent->name;
@@ -525,7 +517,7 @@ static void register_unresolved_classes(zend_class_entry *scope, zend_type type)
 	} ZEND_TYPE_FOREACH_END();
 }
 
-static inheritance_status zend_perform_covariant_type_check(
+ZEND_API inheritance_status zend_perform_covariant_type_check(
 		zend_class_entry *fe_scope, zend_type fe_type,
 		zend_class_entry *proto_scope, zend_type proto_type)
 {
@@ -564,7 +556,86 @@ static inheritance_status zend_perform_covariant_type_check(
 	inheritance_status early_exit_status;
 	bool have_unresolved = false;
 
-	if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+	if (ZEND_TYPE_IS_CLOSURE(fe_type)) {
+		if (proto_type_mask & (MAY_BE_OBJECT|MAY_BE_CALLABLE)) {
+			return INHERITANCE_SUCCESS;
+		}
+		if (ZEND_TYPE_IS_CLOSURE(proto_type)) {
+			zend_closure_type *fe_closure = ZEND_TYPE_CLOSURE(fe_type);
+			zend_closure_type *proto_closure = ZEND_TYPE_CLOSURE(proto_type);
+
+			inheritance_status status = INHERITANCE_SUCCESS;
+
+			/* The variadic argument is not included in the stored argument count. */
+			bool proto_is_variadic = proto_closure->variadic;
+			uint32_t proto_num_args = proto_closure->num_params + (proto_is_variadic ? 1 : 0);
+			bool fe_is_variadic = fe_closure->variadic;
+			uint32_t fe_num_args = fe_closure->num_params + (fe_is_variadic ? 1 : 0);
+			uint32_t num_args = MAX(proto_num_args, fe_num_args);
+			for (uint32_t i = 0; i < num_args; i++) {
+				zend_closure_param_type *proto_arg_info =
+					i < proto_num_args ? &proto_closure->param_types[i] :
+					proto_is_variadic ? &proto_closure->param_types[proto_num_args - 1] : NULL;
+				zend_closure_param_type *fe_arg_info =
+					i < fe_num_args ? &fe_closure->param_types[i] :
+					fe_is_variadic ? &fe_closure->param_types[fe_num_args - 1] : NULL;
+				if (!proto_arg_info) {
+					/* A new (optional) argument has been added, which is fine. */
+					continue;
+				}
+				if (!fe_arg_info) {
+					/* An argument has been removed. This is considered illegal, because arity checks
+					* work based on a model where passing more than the declared number of parameters
+					* to a function is an error. */
+					return INHERITANCE_ERROR;
+				}
+
+				if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
+					/* Child with no type or mixed type is always compatible */
+					continue;
+				}
+
+				if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
+					/* Child defines a type, but parent doesn't, violates LSP */
+					return INHERITANCE_ERROR;
+				}
+
+				/* Contravariant type check is performed as a covariant type check with swapped
+				* argument order. */
+				inheritance_status local_status = zend_perform_covariant_type_check(
+					proto_scope, proto_arg_info->type, fe_scope, fe_arg_info->type);
+				if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
+					if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
+						return INHERITANCE_ERROR;
+					}
+					ZEND_ASSERT(local_status == INHERITANCE_UNRESOLVED);
+					status = INHERITANCE_UNRESOLVED;
+				}
+
+				/* by-ref constraints on arguments are invariant */
+				if (ZEND_ARG_SEND_MODE(fe_arg_info) != ZEND_ARG_SEND_MODE(proto_arg_info)) {
+					return INHERITANCE_ERROR;
+				}
+			}
+
+			if (ZEND_TYPE_IS_SET(proto_closure->return_type)) {
+				if (!ZEND_TYPE_IS_SET(fe_closure->return_type)) {
+					return INHERITANCE_ERROR;
+				}
+
+
+				inheritance_status return_type_status = zend_perform_covariant_type_check(
+					fe_scope, fe_closure->return_type, proto_scope, proto_closure->return_type);
+				// FIXME: We need to continue on warning
+				if (return_type_status != INHERITANCE_SUCCESS) {
+					return return_type_status;
+				}
+			}
+
+			return status;
+		}
+		return INHERITANCE_ERROR;
+	} if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
 		/* Currently, for object type any class name would be allowed here.
 		 * We still perform a class lookup for forward-compatibility reasons,
 		 * as we may have named types in the future that are not classes

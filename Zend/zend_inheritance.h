@@ -24,6 +24,16 @@
 
 BEGIN_EXTERN_C()
 
+/* Unresolved means that class declarations that are currently not available are needed to
+ * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
+ * as an ERROR. */
+typedef enum {
+	INHERITANCE_UNRESOLVED = -1,
+	INHERITANCE_ERROR = 0,
+	INHERITANCE_WARNING = 1,
+	INHERITANCE_SUCCESS = 2,
+} inheritance_status;
+
 ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *parent_ce, bool checked);
 
@@ -35,6 +45,10 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 void zend_verify_abstract_class(zend_class_entry *ce);
 void zend_build_properties_info_table(zend_class_entry *ce);
 ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce, zend_string *lcname, zval *delayed_early_binding);
+
+ZEND_API inheritance_status zend_perform_covariant_type_check(
+	zend_class_entry *fe_scope, zend_type fe_type,
+	zend_class_entry *proto_scope, zend_type proto_type);
 
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_get)(zend_class_entry *ce, zend_class_entry *parent, zend_class_entry **traits_and_interfaces);
 ZEND_API extern zend_class_entry* (*zend_inheritance_cache_add)(zend_class_entry *ce, zend_class_entry *proto, zend_class_entry *parent, zend_class_entry **traits_and_interfaces, HashTable *dependencies);

@@ -23,6 +23,7 @@ test('\\Closure(): void');
 test('\\Closure(): string');
 test('\\Closure(): int|bool');
 test('\\Closure(): \\Closure(): void');
+test('\\Closure(\Closure())');
 test('\\Closure(): ?float');
 test('\\Closure(): Foo&Bar');
 test('\\Closure(): Foo|Bar');
@@ -57,6 +58,8 @@ test('\\Closure(');
 \Closure(): int|bool
 \Closure(): \Closure(): void
 \Closure(): \Closure(): void
+\Closure(\Closure())
+\Closure(\Closure())
 \Closure(): ?float
 \Closure(): ?float
 \Closure(): Foo&Bar
@@ -83,14 +86,14 @@ test('\\Closure(');
 \Closure(Foo, Bar)
 \Closure()
 \Closure()
-\Closure(Foo&)
-\Closure(Foo&)
-\Closure(Foo, Bar&)
-\Closure(Foo, Bar&)
+syntax error, unexpected token ")"
+syntax error, unexpected token ")"
+syntax error, unexpected token ")"
+syntax error, unexpected token ")"
 \Closure(Foo...)
 \Closure(Foo...)
-\Closure(Foo&...)
-\Closure(Foo&...)
+syntax error, unexpected token "&", expecting ")"
+syntax error, unexpected token "&", expecting ")"
 syntax error, unexpected token ","
 syntax error, unexpected token ","
 syntax error, unexpected token ":", expecting variable

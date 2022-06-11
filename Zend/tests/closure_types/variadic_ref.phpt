@@ -6,4 +6,5 @@ Closure type param can be variadic and by-ref
 function test(\Closure(string&...): void $closure) {}
 
 ?>
---EXPECT--
+--EXPECTF--
+Parse error: syntax error, unexpected token "&", expecting ")" in %s on line %d

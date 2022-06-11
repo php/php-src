@@ -1040,6 +1040,78 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 				} ZEND_TYPE_LIST_FOREACH_END();
 			}
+		} if (UNEXPECTED(ZEND_TYPE_IS_CLOSURE(*type))) {
+			if (Z_OBJCE_P(arg) != zend_ce_closure) {
+				return false;
+			}
+
+			zend_closure_type *closure_type = ZEND_TYPE_CLOSURE(*type);
+			zend_function *closure = zend_get_closure_method_def(Z_OBJ_P(arg));
+			zend_class_entry *scope = closure->common.scope;
+
+			/* The variadic argument is not included in the stored argument count. */
+			bool proto_is_variadic = closure_type->variadic;
+			uint32_t proto_num_args = closure_type->num_params + (proto_is_variadic ? 1 : 0);
+			bool fe_is_variadic = closure->common.fn_flags & ZEND_ACC_VARIADIC;
+			uint32_t fe_num_args = closure->common.num_args + (fe_is_variadic ? 1 : 0);
+			uint32_t num_args = MAX(proto_num_args, fe_num_args);
+			for (uint32_t i = 0; i < num_args; i++) {
+				zend_closure_param_type *proto_arg_info =
+						i < proto_num_args ? &closure_type->param_types[i] :
+						proto_is_variadic ? &closure_type->param_types[proto_num_args - 1] : NULL;
+				// zend_closure_param_type *fe_arg_info =
+				// 		i < fe_num_args ? &closure->param_types[i] :
+				// 		fe_is_variadic ? &fe_closure->param_types[fe_num_args - 1] : NULL;
+				zend_arg_info *fe_arg_info =
+						i < fe_num_args ? &closure->common.arg_info[i] :
+						fe_is_variadic ? &closure->common.arg_info[fe_num_args - 1] : NULL;
+				if (!proto_arg_info) {
+					/* A new (optional) argument has been added, which is fine. */
+					continue;
+				}
+				if (!fe_arg_info) {
+					/* An argument has been removed. This is considered illegal, because arity checks
+					* work based on a model where passing more than the declared number of parameters
+					* to a function is an error. */
+					return false;
+				}
+
+				if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
+					/* Child with no type or mixed type is always compatible */
+					continue;
+				}
+
+				if (!ZEND_TYPE_IS_SET(proto_arg_info->type)) {
+					/* Child defines a type, but parent doesn't, violates LSP */
+					return false;
+				}
+
+				/* Contravariant type check is performed as a covariant type check with swapped
+				* argument order. */
+				inheritance_status local_status = zend_perform_covariant_type_check(
+						scope, proto_arg_info->type, scope, fe_arg_info->type);
+				if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
+					return false;
+				}
+
+				/* by-ref constraints on arguments are invariant */
+				if (ZEND_ARG_SEND_MODE(fe_arg_info) != ZEND_ARG_SEND_MODE(proto_arg_info)) {
+					return false;
+				}
+			}
+
+			if (ZEND_TYPE_IS_SET(closure_type->return_type)) {
+				if (!(closure->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+					return false;
+				}
+
+				zend_type closure_return_type = closure->common.arg_info[-1].type;
+				if (zend_perform_covariant_type_check(scope, closure_return_type, scope, closure_type->return_type) != INHERITANCE_SUCCESS) {
+					return false;
+				}
+			}
+			
+			return true;
 		} else {
 			ce = zend_fetch_ce_from_cache_slot(cache_slot, type);
 			/* If we have a CE we check if it satisfies the type constraint,
