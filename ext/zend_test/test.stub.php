@@ -21,6 +21,7 @@ namespace {
         public int $intProp = 123;
         public ?stdClass $classProp = null;
         public stdClass|Iterator|null $classUnionProp = null;
+        public Traversable&Countable $classIntersectionProp;
         public readonly int $readonlyProp;
 
         public static function is_object(): int {}

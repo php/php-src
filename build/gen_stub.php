@@ -558,6 +558,14 @@ class Type {
             }
             return new Type($types);
         }
+        if ($node instanceof Node\IntersectionType) {
+            $nestedTypeObjects = array_map(['Type', 'fromNode'], $node->types);
+            $types = [];
+            foreach ($nestedTypeObjects as $typeObject) {
+                array_push($types, ...$typeObject->types);
+            }
+            return new Type($types, true);
+        }
 
         if ($node instanceof Node\NullableType) {
             return new Type(
@@ -619,7 +627,7 @@ class Type {
     /**
      * @param SimpleType[] $types
      */
-    private function __construct(array $types) {
+    private function __construct(array $types, public readonly bool $isIntersection = false) {
         $this->types = $types;
     }
 
@@ -2237,7 +2245,11 @@ class PropertyInfo extends VariableLike
 
                     $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
 
-                    $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    if ($this->type->isIntersection) {
+                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_INTERSECTION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    } else {
+                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
+                    }
                     $typeCode = "property_{$propertyName}_type";
                 } else {
                     $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
