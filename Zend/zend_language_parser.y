@@ -284,7 +284,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
 %type <num> optional_property_modifiers property_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
-%type <num> closure_type_param_is_reference
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment closure_type_param_list_cast 
@@ -876,15 +875,9 @@ non_empty_closure_type_param_list:
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
-closure_type_param_is_reference:
-		%empty	{ $$ = 0; }
-	|	T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG	{ $$ = ZEND_PARAM_REF; }
-	|	T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG	{ $$ = ZEND_PARAM_REF; }
-;
-
 closure_type_param:
-		type_expr_without_static is_variadic
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2, $1, NULL, NULL, NULL, NULL); }
+		type_expr_without_static is_reference is_variadic
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2|$3, $1, NULL, NULL, NULL, NULL); }
 ;
 
 union_type_without_static:

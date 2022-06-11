@@ -38,7 +38,7 @@ test('fn(Foo, Bar)');
 test('fn(Foo, Bar,)');
 test('fn ()');
 test('fn(Foo&)');
-test('fn(Foo, Bar&)');
+test('fn(Foo&, Bar)');
 test('fn(Foo...)');
 test('fn(Foo&...)');
 test('fn(,)');
@@ -86,14 +86,14 @@ fn(Foo, Bar)
 fn(Foo, Bar)
 fn()
 fn()
-syntax error, unexpected token ")"
-syntax error, unexpected token ")"
-syntax error, unexpected token ")"
-syntax error, unexpected token ")"
+fn(Foo&)
+fn(Foo&)
+fn(Foo&, Bar)
+fn(Foo&, Bar)
 fn(Foo...)
 fn(Foo...)
-syntax error, unexpected token "&", expecting ")"
-syntax error, unexpected token "&", expecting ")"
+fn(Foo&...)
+fn(Foo&...)
 syntax error, unexpected token ","
 syntax error, unexpected token ","
 syntax error, unexpected token ":"

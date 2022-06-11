@@ -1875,7 +1875,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
-<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"...") {
+/*
+ * We also allow the & to be followed by ","|")" for closure type params which aren't actually followed by a variable,
+ * e.g. fn(string &, int &).
+ */
+<ST_IN_SCRIPTING>"&"[ \t\r\n]*("$"|"..."|","|")") {
 	yyless(1);
 	RETURN_TOKEN(T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG);
 }
