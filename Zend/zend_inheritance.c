@@ -635,7 +635,7 @@ ZEND_API inheritance_status zend_perform_covariant_type_check(
 			return status;
 		}
 		return INHERITANCE_ERROR;
-	} if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
+	} else if (ZEND_TYPE_IS_INTERSECTION(fe_type)) {
 		/* Currently, for object type any class name would be allowed here.
 		 * We still perform a class lookup for forward-compatibility reasons,
 		 * as we may have named types in the future that are not classes

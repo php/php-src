@@ -1,5 +1,5 @@
 --TEST--
-Closure type return type covariance
+Closure type return type check
 --FILE--
 <?php
 

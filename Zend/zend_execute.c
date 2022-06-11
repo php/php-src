@@ -1067,7 +1067,7 @@ static zend_always_inline bool zend_check_type_slow(
 					}
 				} ZEND_TYPE_LIST_FOREACH_END();
 			}
-		} if (UNEXPECTED(ZEND_TYPE_IS_CLOSURE(*type))) {
+		} else if (UNEXPECTED(ZEND_TYPE_IS_CLOSURE(*type))) {
 			if (Z_OBJCE_P(arg) != zend_ce_closure) {
 				return false;
 			}
