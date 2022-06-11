@@ -1073,7 +1073,7 @@ static zend_always_inline bool zend_check_type_slow(
 			}
 
 			zend_closure_type *closure_type = ZEND_TYPE_CLOSURE(*type);
-			zend_function *closure = zend_get_closure_method_def(Z_OBJ_P(arg));
+			const zend_function *closure = zend_get_closure_method_def(Z_OBJ_P(arg));
 			zend_class_entry *scope = closure->common.scope;
 
 			/* The variadic argument is not included in the stored argument count. */
