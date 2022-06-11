@@ -1,7 +1,5 @@
 --TEST--
 Covariant replacement of iterable type with intersection type in DNF type
---XFAIL--
-Issue with delayed variance
 --FILE--
 <?php
 
