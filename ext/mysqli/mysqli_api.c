@@ -528,13 +528,11 @@ PHP_FUNCTION(mysqli_execute_query)
 		RETURN_FALSE;
 	}
 
-	/* The bit below, which is copied from mysqli_stmt_prepare, is needed for bad index exceptions */ 
+	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */ 
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {
-		stmt->query = (char *)emalloc(query_len + 1);
-		memcpy(stmt->query, query, query_len);
-		stmt->query[query_len] = '\0';
+		stmt->query = estrdup(query);
 	}
 
 	// bind-in-execute
@@ -1330,9 +1328,7 @@ PHP_FUNCTION(mysqli_prepare)
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (stmt->stmt && query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {
-		stmt->query = (char *)emalloc(query_len + 1);
-		memcpy(stmt->query, query, query_len);
-		stmt->query[query_len] = '\0';
+		stmt->query = estrdup(query);
 	}
 
 	/* don't join to the previous if because it won't work if mysql_stmt_prepare_fails */
