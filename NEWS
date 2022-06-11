@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
 
+- MBString:
+  . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
+    after they had been changed in 8.1.0. (Alex Dowad)
+
 09 Jun 2022, PHP 8.2.0alpha1
 
 - CLI:
