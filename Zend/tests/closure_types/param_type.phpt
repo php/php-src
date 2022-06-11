@@ -44,21 +44,21 @@ foreach ($values as $type) {
 
 ?>
 --EXPECT--
-none > none: true
-none > string: true
-none > int: true
-none > bool: true
-none > string|int: true
-none > string|int|bool: true
-none > ?string: true
-none > object: true
-none > Foo: true
-none > Bar: true
-none > Foo&Bar: true
-none > fn(): void: true
-none > fn(): string: true
-none > fn(): string|int: true
-none > callable: true
+none > none: false
+none > string: false
+none > int: false
+none > bool: false
+none > string|int: false
+none > string|int|bool: false
+none > ?string: false
+none > object: false
+none > Foo: false
+none > Bar: false
+none > Foo&Bar: false
+none > fn(): void: false
+none > fn(): string: false
+none > fn(): string|int: false
+none > callable: false
 string > none: true
 string > string: true
 string > int: false

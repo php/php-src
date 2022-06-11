@@ -1006,6 +1006,33 @@ static zend_always_inline zend_class_entry *zend_fetch_ce_from_cache_slot(
 	return ce;
 }
 
+/* These functions are copied from ext-reflection, is there a simpler way to check if the parameter has a default value? */
+static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
+{
+	zend_op *op = op_array->opcodes;
+	zend_op *end = op + op_array->last;
+
+	++offset;
+	while (op < end) {
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT
+		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == offset)
+		{
+			return op;
+		}
+		++op;
+	}
+	ZEND_ASSERT(0 && "Failed to find op");
+	return NULL;
+}
+static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
+	zend_op *recv = get_recv_op(op_array, offset);
+	if (!recv || recv->opcode != ZEND_RECV_INIT) {
+		return NULL;
+	}
+
+	return RT_CONSTANT(recv, recv->op2);
+}
+
 static zend_always_inline bool zend_check_type_slow(
 		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
 		bool is_return_type, bool is_internal)
@@ -1059,21 +1086,28 @@ static zend_always_inline bool zend_check_type_slow(
 				zend_closure_param_type *proto_arg_info =
 						i < proto_num_args ? &closure_type->param_types[i] :
 						proto_is_variadic ? &closure_type->param_types[proto_num_args - 1] : NULL;
-				// zend_closure_param_type *fe_arg_info =
-				// 		i < fe_num_args ? &closure->param_types[i] :
-				// 		fe_is_variadic ? &fe_closure->param_types[fe_num_args - 1] : NULL;
 				zend_arg_info *fe_arg_info =
 						i < fe_num_args ? &closure->common.arg_info[i] :
 						fe_is_variadic ? &closure->common.arg_info[fe_num_args - 1] : NULL;
 				if (!proto_arg_info) {
-					/* A new (optional) argument has been added, which is fine. */
-					continue;
+					bool has_default_value;
+					if (closure->type == ZEND_INTERNAL_FUNCTION) {
+						has_default_value = (!(closure->common.fn_flags & ZEND_ACC_USER_ARG_INFO)
+							&& ((zend_internal_arg_info*) (fe_arg_info))->default_value);
+					} else {
+						has_default_value = get_default_from_recv((zend_op_array *)closure, i);
+					}
+
+					if (has_default_value) {
+						/* A new (optional) argument has been added, which is fine. */
+						continue;
+					} else {
+						return false;
+					}
 				}
 				if (!fe_arg_info) {
-					/* An argument has been removed. This is considered illegal, because arity checks
-					* work based on a model where passing more than the declared number of parameters
-					* to a function is an error. */
-					return false;
+					/* Not declaring all parameters is ok when they are not used in the closure. */
+					return true;
 				}
 
 				if (!ZEND_TYPE_IS_SET(fe_arg_info->type) || ZEND_TYPE_PURE_MASK(fe_arg_info->type) == MAY_BE_ANY) {
