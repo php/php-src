@@ -39,6 +39,7 @@ test('fn(Foo, Bar,)');
 test('fn ()');
 test('fn(Foo&)');
 test('fn(Foo&, Bar)');
+test('fn(Foo&Bar&)');
 test('fn(Foo...)');
 test('fn(Foo&...)');
 test('fn(,)');
@@ -90,6 +91,8 @@ fn(Foo&)
 fn(Foo&)
 fn(Foo&, Bar)
 fn(Foo&, Bar)
+fn(Foo&Bar&)
+fn(Foo&Bar&)
 fn(Foo...)
 fn(Foo...)
 fn(Foo&...)
