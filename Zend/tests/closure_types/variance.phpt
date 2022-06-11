@@ -1,5 +1,5 @@
 --TEST--
-Closure type covariance
+Closure type variance
 --FILE--
 <?php
 
