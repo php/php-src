@@ -4,19 +4,19 @@ Closure type covariance
 <?php
 
 class Foo {
-    function a(): \Closure(): mixed {}
-    function b(): \Closure(int) {}
-    function c(\Closure(): int $x) {}
-    function d(\Closure(mixed) $x) {}
-    function e(\Closure(): \Closure(\Closure(int)): string $x) {}
+    function a(): fn(): mixed {}
+    function b(): fn(int) {}
+    function c(fn(): int $x) {}
+    function d(fn(mixed) $x) {}
+    function e(fn(): fn(fn(int)): string $x) {}
 }
 
 class Bar extends Foo {
-    function a(): \Closure(): int {}
-    function b(): \Closure(mixed) {}
-    function c(\Closure(): mixed $x) {}
-    function d(\Closure(int) $x) {}
-    function e(\Closure(): \Closure(\Closure(mixed)): string $x) {}
+    function a(): fn(): int {}
+    function b(): fn(mixed) {}
+    function c(fn(): mixed $x) {}
+    function d(fn(int) $x) {}
+    function e(fn(): fn(fn(mixed)): string $x) {}
 }
 
 ?>

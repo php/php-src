@@ -3,7 +3,7 @@ Closure type param can be variadic and by-ref
 --FILE--
 <?php
 
-function test(\Closure(string&...): void $closure) {}
+function test(fn(string&...): void $closure) {}
 
 ?>
 --EXPECTF--

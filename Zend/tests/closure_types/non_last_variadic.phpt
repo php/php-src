@@ -3,7 +3,7 @@ Only last closure type parameter can be variadic
 --FILE--
 <?php
 
-function test(\Closure(string..., int): void $closure) {}
+function test(fn(string..., int): void $c) {}
 
 ?>
 --EXPECTF--

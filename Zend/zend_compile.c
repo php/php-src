@@ -1199,7 +1199,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 		zend_closure_type *closure_type = ZEND_TYPE_CLOSURE(type);
 
 		smart_str ss = {0};
-		smart_str_appends(&ss, "\\Closure(");
+		smart_str_appends(&ss, "fn(");
 
 		for (uint32_t i = 0; i < closure_type->num_params; i++) {
 			zend_closure_param_type param_type = closure_type->param_types[i];
@@ -6366,9 +6366,7 @@ static zend_type zend_compile_typename(
 		/* Inform that the type list is an intersection type */
 		ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_INTERSECTION_BIT;
 	} else if (ast->kind == ZEND_AST_TYPE_CALLABLE) {
-		// FIXME: Assert \Closure
-		// zend_ast *class_name_ast = ast->child[0];
-		zend_ast_list *param_list = zend_ast_get_list(ast->child[1]);
+		zend_ast_list *param_list = zend_ast_get_list(ast->child[0]);
 		zend_closure_type *closure_type = zend_arena_alloc(&CG(arena), ZEND_TYPE_CLOSURE_SIZE(param_list->children));
 
 		bool variadic = false;
@@ -6390,7 +6388,7 @@ static zend_type zend_compile_typename(
 		}
 		closure_type->variadic = variadic;
 
-		zend_ast *return_type_ast = ast->child[2];
+		zend_ast *return_type_ast = ast->child[1];
 		closure_type->return_type = return_type_ast != NULL
 			? zend_compile_typename(return_type_ast, /* force_allow_null */ false)
 			: (zend_type) ZEND_TYPE_INIT_NONE(0);

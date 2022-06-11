@@ -844,10 +844,10 @@ type_without_static:
 ;
 
 closure_type:
-		name closure_type_param_list
-					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $1, $2, NULL); }
-	|	name closure_type_param_list ':' type_expr_without_static
-					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $1, $2, $4); }
+		T_FN closure_type_param_list
+					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $2, NULL); }
+	|	T_FN closure_type_param_list ':' type_expr_without_static
+					{ $$ = zend_ast_create(ZEND_AST_TYPE_CALLABLE, $2, $4); }
 ;
 
 closure_type_param_list:

@@ -18,86 +18,86 @@ function test(string $closureType) {
     }
 }
 
-test('\\Closure()');
-test('\\Closure(): void');
-test('\\Closure(): string');
-test('\\Closure(): int|bool');
-test('\\Closure(): \\Closure(): void');
-test('\\Closure(\Closure())');
-test('\\Closure(): ?float');
-test('\\Closure(): Foo&Bar');
-test('\\Closure(): Foo|Bar');
-test('\\Closure(int)');
-test('\\Closure(string)');
-test('\\Closure(float)');
-test('\\Closure(array)');
-test('\\Closure(object)');
-test('\\Closure(bool)');
-test('\\Closure(Foo)');
-test('\\Closure(Foo, Bar)');
-test('\\Closure(Foo, Bar,)');
-test('\\Closure ()');
-test('\\Closure(Foo&)');
-test('\\Closure(Foo, Bar&)');
-test('\\Closure(Foo...)');
-test('\\Closure(Foo&...)');
-test('\\Closure(,)');
-test('\\Closure: int');
-test('\\Closure(): ');
-test('\\Closure(');
+test('fn()');
+test('fn(): void');
+test('fn(): string');
+test('fn(): int|bool');
+test('fn(): fn(): void');
+test('fn(fn())');
+test('fn(): ?float');
+test('fn(): Foo&Bar');
+test('fn(): Foo|Bar');
+test('fn(int)');
+test('fn(string)');
+test('fn(float)');
+test('fn(array)');
+test('fn(object)');
+test('fn(bool)');
+test('fn(Foo)');
+test('fn(Foo, Bar)');
+test('fn(Foo, Bar,)');
+test('fn ()');
+test('fn(Foo&)');
+test('fn(Foo, Bar&)');
+test('fn(Foo...)');
+test('fn(Foo&...)');
+test('fn(,)');
+test('fn: int');
+test('fn(): ');
+test('fn(');
 
 ?>
 --EXPECT--
-\Closure()
-\Closure()
-\Closure(): void
-\Closure(): void
-\Closure(): string
-\Closure(): string
-\Closure(): int|bool
-\Closure(): int|bool
-\Closure(): \Closure(): void
-\Closure(): \Closure(): void
-\Closure(\Closure())
-\Closure(\Closure())
-\Closure(): ?float
-\Closure(): ?float
-\Closure(): Foo&Bar
-\Closure(): Foo&Bar
-\Closure(): Foo|Bar
-\Closure(): Foo|Bar
-\Closure(int)
-\Closure(int)
-\Closure(string)
-\Closure(string)
-\Closure(float)
-\Closure(float)
-\Closure(array)
-\Closure(array)
-\Closure(object)
-\Closure(object)
-\Closure(bool)
-\Closure(bool)
-\Closure(Foo)
-\Closure(Foo)
-\Closure(Foo, Bar)
-\Closure(Foo, Bar)
-\Closure(Foo, Bar)
-\Closure(Foo, Bar)
-\Closure()
-\Closure()
+fn()
+fn()
+fn(): void
+fn(): void
+fn(): string
+fn(): string
+fn(): int|bool
+fn(): int|bool
+fn(): fn(): void
+fn(): fn(): void
+fn(fn())
+fn(fn())
+fn(): ?float
+fn(): ?float
+fn(): Foo&Bar
+fn(): Foo&Bar
+fn(): Foo|Bar
+fn(): Foo|Bar
+fn(int)
+fn(int)
+fn(string)
+fn(string)
+fn(float)
+fn(float)
+fn(array)
+fn(array)
+fn(object)
+fn(object)
+fn(bool)
+fn(bool)
+fn(Foo)
+fn(Foo)
+fn(Foo, Bar)
+fn(Foo, Bar)
+fn(Foo, Bar)
+fn(Foo, Bar)
+fn()
+fn()
 syntax error, unexpected token ")"
 syntax error, unexpected token ")"
 syntax error, unexpected token ")"
 syntax error, unexpected token ")"
-\Closure(Foo...)
-\Closure(Foo...)
+fn(Foo...)
+fn(Foo...)
 syntax error, unexpected token "&", expecting ")"
 syntax error, unexpected token "&", expecting ")"
 syntax error, unexpected token ","
 syntax error, unexpected token ","
-syntax error, unexpected token ":", expecting variable
-syntax error, unexpected token ":", expecting "{"
+syntax error, unexpected token ":"
+syntax error, unexpected token ":"
 syntax error, unexpected variable "$c"
 syntax error, unexpected token "{"
 syntax error, unexpected variable "$c"
