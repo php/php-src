@@ -477,7 +477,7 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(const char *formal_tzname, const t
 /* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
-	if (new_value && ZSTR_VAL(new_value) && !timelib_timezone_id_is_valid(ZSTR_VAL(new_value), DATE_TIMEZONEDB)) {
+	if (new_value && !timelib_timezone_id_is_valid(ZSTR_VAL(new_value), DATE_TIMEZONEDB)) {
 		php_error_docref(
 			NULL, E_WARNING,
 			"Invalid date.timezone value '%s', using '%s' instead",
