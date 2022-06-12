@@ -10,7 +10,5 @@ function test(true $v): true {
 var_dump(test(true));
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

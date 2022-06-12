@@ -3,9 +3,12 @@ False can be used as a standalone type
 --FILE--
 <?php
 
-function test(): false {}
+function test(false $v): false {
+    return $v;
+}
+
+var_dump(test(false));
 
 ?>
-===DONE===
 --EXPECT--
-===DONE===
+bool(false)

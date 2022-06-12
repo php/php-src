@@ -3,9 +3,11 @@ true can be used as a standalone type even with implicit nullability
 --FILE--
 <?php
 
-function test(true $v = null) {}
+function test(true $v = null) { return $v; }
 
+var_dump(test(true));
+var_dump(test(null));
 ?>
-===DONE===
 --EXPECT--
-===DONE===
+bool(true)
+NULL
