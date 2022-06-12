@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 850d4e63296c95a27cdfc1244d63b1ed496acd54 */
+ * Stub hash: 68f8a530fcec3301925056d167a95ecca365296f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -900,6 +900,12 @@ static zend_class_entry *register_class_OCILob(void)
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zval property_descriptor_default_value;
+	ZVAL_NULL(&property_descriptor_default_value);
+	zend_string *property_descriptor_name = zend_string_init("descriptor", sizeof("descriptor") - 1, 1);
+	zend_declare_property_ex(class_entry, property_descriptor_name, &property_descriptor_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL);
+	zend_string_release(property_descriptor_name);
 
 	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);

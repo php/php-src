@@ -40,6 +40,8 @@
 #define OCI_STMT_CALL 10
 #endif
 
+#define Z_OCILOB_DESCRIPTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+
 #define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
 
 /* {{{ Register a callback function for Oracle Transparent Application Failover (TAF) */
@@ -233,10 +235,7 @@ PHP_FUNCTION(oci_free_descriptor)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -264,10 +263,7 @@ PHP_FUNCTION(oci_lob_save)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -290,10 +286,7 @@ PHP_FUNCTION(oci_lob_import)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -316,10 +309,7 @@ PHP_FUNCTION(oci_lob_load)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -356,10 +346,7 @@ PHP_FUNCTION(oci_lob_read)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -388,10 +375,7 @@ PHP_FUNCTION(oci_lob_eof)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -414,11 +398,7 @@ PHP_FUNCTION(oci_lob_tell)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	RETURN_LONG(descriptor->lob_current_position);
@@ -435,10 +415,7 @@ PHP_FUNCTION(oci_lob_rewind)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -460,10 +437,7 @@ PHP_FUNCTION(oci_lob_seek)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -507,10 +481,7 @@ PHP_FUNCTION(oci_lob_size)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -540,11 +511,7 @@ PHP_FUNCTION(oci_lob_write)
 		data_len = MIN((zend_long) data_len, write_len);
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (data_len <= 0) {
@@ -568,15 +535,8 @@ PHP_FUNCTION(oci_lob_append)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
-
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
+	tmp_dest = Z_OCILOB_DESCRIPTOR_P(z_descriptor_dest);
+	tmp_from = Z_OCILOB_DESCRIPTOR_P(z_descriptor_from);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_dest, descriptor_dest);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
@@ -606,10 +566,7 @@ PHP_FUNCTION(oci_lob_truncate)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	ub_trim_length = (ub4) trim_length;
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
@@ -648,11 +605,7 @@ PHP_FUNCTION(oci_lob_erase)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (php_oci_lob_erase(descriptor, offset, (ub4) length, &bytes_erased)) {
@@ -673,11 +626,7 @@ PHP_FUNCTION(oci_lob_flush)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (descriptor->buffering == PHP_OCI_LOB_BUFFER_DISABLED) {
@@ -703,11 +652,7 @@ PHP_FUNCTION(ocisetbufferinglob)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (php_oci_lob_set_buffering(descriptor, flag)) {
@@ -727,11 +672,7 @@ PHP_FUNCTION(ocigetbufferinglob)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (descriptor->buffering != PHP_OCI_LOB_BUFFER_DISABLED) {
@@ -760,15 +701,8 @@ PHP_FUNCTION(oci_lob_copy)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_dest), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
-
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_from), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
+	tmp_dest = Z_OCILOB_DESCRIPTOR_P(z_descriptor_dest);
+	tmp_from = Z_OCILOB_DESCRIPTOR_P(z_descriptor_from);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_dest, descriptor_dest);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
@@ -791,15 +725,8 @@ PHP_FUNCTION(oci_lob_is_equal)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_first = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_first), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The first argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
-
-	if ((tmp_second = zend_hash_str_find(Z_OBJPROP_P(z_descriptor_second), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property. The second argument should be valid descriptor object");
-		RETURN_FALSE;
-	}
+	tmp_first = Z_OCILOB_DESCRIPTOR_P(z_descriptor_first);
+	tmp_second = Z_OCILOB_DESCRIPTOR_P(z_descriptor_second);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_first, descriptor_first);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_second, descriptor_second);
@@ -846,10 +773,7 @@ PHP_FUNCTION(oci_lob_export)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -928,10 +852,7 @@ PHP_METHOD(OCILob, writeTemporary)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
@@ -952,11 +873,7 @@ PHP_METHOD(OCILob, close)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_descriptor), "descriptor", sizeof("descriptor")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCILOB_DESCRIPTOR_P(z_descriptor);
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (php_oci_lob_close(descriptor)) {
@@ -988,7 +905,7 @@ PHP_FUNCTION(oci_new_descriptor)
 	}
 
 	object_init_ex(return_value, oci_lob_class_entry_ptr);
-	add_property_resource(return_value, "descriptor", descriptor->id);
+	ZVAL_RES(Z_OCILOB_DESCRIPTOR_P(return_value), descriptor->id);
 }
 /* }}} */
 

@@ -42,6 +42,8 @@ typedef ub8 oci_phpsized_int;
 typedef ub4 oci_phpsized_int;
 #endif
 
+#define Z_OCILOB_DESCRIPTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+
 /* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len)
@@ -1161,7 +1163,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		{
 			zval *tmp;
 
-			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "descriptor", sizeof("descriptor")-1)) == NULL) {
+			if (Z_TYPE_P(param) != IS_OBJECT || !(tmp = Z_OCILOB_DESCRIPTOR_P(param))) {
 				php_error_docref(NULL, E_WARNING, "Unable to find descriptor property");
 				return 1;
 			}
@@ -1480,10 +1482,7 @@ sb4 php_oci_bind_out_callback(
 		 * out-bind as the contents would have been changed for in/out
 		 * binds (Bug #46994).
 		 */
-		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(val), "descriptor", sizeof("descriptor")-1)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unable to find object outbind descriptor property");
-			return OCI_ERROR;
-		}
+		tmp = Z_OCILOB_DESCRIPTOR_P(val);
 		PHP_OCI_ZVAL_TO_DESCRIPTOR_EX(tmp, desc);
 		desc->lob_size = -1;	/* force OCI8 to update cached size */
 
