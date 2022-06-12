@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
     (Derick)
 
+- FPM:
+  . Fixed bug #67764 (fpm: syslog.ident don't work). (Jakub Zelenka)
+
 - MBString:
   . Fixed bug GH-8685 (pcre not ready at mbstring startup). (Remi)
 

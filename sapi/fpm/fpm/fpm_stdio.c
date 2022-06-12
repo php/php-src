@@ -88,7 +88,7 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 #ifdef HAVE_SYSLOG_H
 	if (fpm_globals.error_log_fd == ZLOG_SYSLOG) {
-		closelog(); /* ensure to close syslog not to interrupt with PHP syslog code */
+		php_closelog(); /* ensure to close syslog not to interrupt with PHP syslog code */
 	} else
 #endif
 

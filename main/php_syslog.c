@@ -32,6 +32,18 @@
 #define syslog std_syslog
 #endif
 
+void php_openlog(const char *ident, int option, int facility)
+{
+	openlog(ident, option, facility);
+	PG(have_called_openlog) = 1;
+}
+
+void php_closelog()
+{
+	closelog();
+	PG(have_called_openlog) = 0;
+}
+
 #ifdef PHP_WIN32
 PHPAPI void php_syslog(int priority, const char *format, ...) /* {{{ */
 {
