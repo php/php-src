@@ -43,6 +43,7 @@ typedef ub4 oci_phpsized_int;
 #endif
 
 #define Z_OCILOB_DESCRIPTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_OCICOLLECTION_COLLECTION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 
 /* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
@@ -1141,7 +1142,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		{
 			zval *tmp;
 
-			if (Z_TYPE_P(param) != IS_OBJECT || (tmp = zend_hash_str_find(Z_OBJPROP_P(param), "collection", sizeof("collection")-1)) == NULL) {
+			if (Z_TYPE_P(param) != IS_OBJECT || !(tmp = Z_OCICOLLECTION_COLLECTION_P(param))) {
 				php_error_docref(NULL, E_WARNING, "Unable to find collection property");
 				return 1;
 			}

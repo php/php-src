@@ -1085,6 +1085,8 @@ class OCILob {
 
 #[\AllowDynamicProperties]
 class OCICollection {
+    /** @var resource */
+    public readonly $collection;
     /**
      * @alias oci_free_collection
      * @tentative-return-type

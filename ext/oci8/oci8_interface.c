@@ -41,6 +41,7 @@
 #endif
 
 #define Z_OCILOB_DESCRIPTOR_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
+#define Z_OCICOLLECTION_COLLECTION_P(zv) OBJ_PROP_NUM(Z_OBJ_P(zv), 0)
 
 #define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
 
@@ -2014,11 +2015,7 @@ PHP_FUNCTION(oci_free_collection)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	zend_list_close(collection->id);
@@ -2038,11 +2035,7 @@ PHP_FUNCTION(oci_collection_append)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_append(collection, value, (int) value_len)) {
@@ -2063,11 +2056,7 @@ PHP_FUNCTION(oci_collection_element_get)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_element_get(collection, element_index, return_value)) {
@@ -2086,16 +2075,8 @@ PHP_FUNCTION(oci_collection_assign)
 		RETURN_THROWS();
 	}
 
-	if ((tmp_dest = zend_hash_str_find(Z_OBJPROP_P(z_collection_dest), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property. The first argument should be valid collection object");
-		RETURN_FALSE;
-	}
-
-	if ((tmp_from = zend_hash_str_find(Z_OBJPROP_P(z_collection_from), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property. The second argument should be valid collection object");
-		RETURN_FALSE;
-	}
-
+	tmp_dest = Z_OCICOLLECTION_COLLECTION_P(z_collection_dest);
+	tmp_from = Z_OCICOLLECTION_COLLECTION_P(z_collection_from);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp_dest, collection_dest);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp_from, collection_from);
 
@@ -2119,11 +2100,7 @@ PHP_FUNCTION(oci_collection_element_assign)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_element_set(collection, element_index, value, (int) value_len)) {
@@ -2144,11 +2121,7 @@ PHP_FUNCTION(oci_collection_size)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_size(collection, &size)) {
@@ -2169,11 +2142,7 @@ PHP_FUNCTION(oci_collection_max)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_max(collection, &max)) {
@@ -2194,11 +2163,7 @@ PHP_FUNCTION(oci_collection_trim)
 		RETURN_THROWS();
 	}
 
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(z_collection), "collection", sizeof("collection")-1)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to find collection property");
-		RETURN_FALSE;
-	}
-
+	tmp = Z_OCICOLLECTION_COLLECTION_P(z_collection);
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
 	if (php_oci_collection_trim(collection, trim_size)) {
@@ -2225,7 +2190,7 @@ PHP_FUNCTION(oci_new_collection)
 
 	if ( (collection = php_oci_collection_create(connection, tdo, (int) tdo_len, schema, (int) schema_len)) ) {
 		object_init_ex(return_value, oci_coll_class_entry_ptr);
-		add_property_resource(return_value, "collection", collection->id);
+		ZVAL_RES(Z_OCICOLLECTION_COLLECTION_P(return_value), collection->id);
 	}
 	else {
 		RETURN_FALSE;
