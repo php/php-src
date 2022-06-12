@@ -3151,6 +3151,8 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	}
 	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
 		append_type_mask(return_value, MAY_BE_BOOL);
+	} else if (type_mask & MAY_BE_TRUE) {
+		append_type_mask(return_value, MAY_BE_TRUE);
 	} else if (type_mask & MAY_BE_FALSE) {
 		append_type_mask(return_value, MAY_BE_FALSE);
 	}
