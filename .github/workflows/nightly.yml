@@ -7,7 +7,7 @@ jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
     if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       asan-matrix: ${{ steps.set-matrix.outputs.asan-matrix }}
@@ -41,7 +41,7 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.asan-matrix) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - name: git checkout
         uses: actions/checkout@v2
