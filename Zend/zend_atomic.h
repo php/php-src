@@ -19,21 +19,16 @@
 
 #include <stdbool.h>
 
-#define ZEND_GCC_PREREQ(x, y) \
-	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
-
 /* Builtins are used to avoid library linkage */
 #if __has_feature(c_atomic)
 #define	HAVE_C11_ATOMICS 1
-#elif ZEND_GCC_PREREQ(4, 7)
+#elif ZEND_GCC_VERSION >= 4007
 #define	HAVE_GNUC_ATOMICS 1
 #elif defined(__GNUC__)
 #define	HAVE_SYNC_ATOMICS 1
 #elif !defined(ZEND_WIN32)
 #define HAVE_NO_ATOMICS 1
 #endif
-
-#undef ZEND_GCC_PREREQ
 
 /* Treat zend_atomic_* types as opaque. They have definitions only for size
  * and alignment purposes.
