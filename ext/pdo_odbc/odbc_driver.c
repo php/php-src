@@ -478,7 +478,8 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		goto fail;
 	}
 
-	if (strchr(dbh->data_source, ';')) {
+	/* a connection string may have = but not ; - i.e. "DSN=PHP" */
+	if (strchr(dbh->data_source, '=')) {
 		SQLCHAR dsnbuf[1024];
 		SQLSMALLINT dsnbuflen;
 

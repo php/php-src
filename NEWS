@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
     after they had been changed in 8.1.0. (Alex Dowad)
 
+- ODBC:
+  . Fixed handling of single-key connection strings. (Calvin Buckley)
+
 - OPcache:
   . Fixed bug GH-8591 (tracing JIT crash after private instance method change).
     (Arnaud, Dmitry, Oleg Stepanischev)
@@ -33,6 +36,9 @@ PHP                                                                        NEWS
     (Jakub Zelenka, cmb)
   . Fixed bug #81713 (NULL byte injection in several OpenSSL functions working
     with certificates). (Jakub Zelenka)
+
+- PDO_ODBC:
+  . Fixed handling of single-key connection strings. (Calvin Buckley)
 
 09 Jun 2022, PHP 8.1.7
 
