@@ -3151,7 +3151,7 @@ class DocCommentTag {
 
         if ($this->name === "param") {
             preg_match('/^\s*[\w\|\\\\\[\]]+\s*\$(\w+).*$/', $value, $matches);
-        } elseif ($this->name === "prefer-ref" || $this->name === "sensitive-param") {
+        } elseif ($this->name === "prefer-ref") {
             preg_match('/^\s*\$(\w+).*$/', $value, $matches);
         }
 
@@ -3242,7 +3242,6 @@ function parseFunctionLike(
                         break;
 
                     case 'prefer-ref':
-                    case 'sensitive-param':
                         $varName = $tag->getVariableName();
                         if (!isset($paramMeta[$varName])) {
                             $paramMeta[$varName] = [];
@@ -3260,15 +3259,11 @@ function parseFunctionLike(
         foreach ($func->getParams() as $i => $param) {
             $varName = $param->var->name;
             $preferRef = !empty($paramMeta[$varName]['prefer-ref']);
-            $isSensitive = !empty($paramMeta[$varName]['sensitive-param']);
+            $isSensitive = false;
             foreach ($param->attrGroups as $attrGroup) {
                 foreach ($attrGroup->attrs as $attr) {
                     switch ($attr->name->toCodeString()) {
                         case '\\SensitiveParameter':
-                            if ($isSensitive) {
-                                throw new Exception("Redundant  {$attr->name->toCodeString()} declaration.");
-                            }
-
                             $isSensitive = true;
                             break;
                         default:
