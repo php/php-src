@@ -749,8 +749,7 @@ function mysqli_change_user(mysqli $mysql, string $username, string $password, ?
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
 
-/** @return true */
-function mysqli_close(mysqli $mysql): bool {} // TODO make return type void
+function mysqli_close(mysqli $mysql): true {} // TODO make return type void
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
@@ -776,8 +775,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-/** @return true */
-function mysqli_debug(string $options): bool {} // TODO make return type void
+function mysqli_debug(string $options): true {} // TODO make return type void
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -976,8 +974,7 @@ function mysqli_stmt_bind_param(mysqli_stmt $statement, string $types, mixed &..
 
 function mysqli_stmt_bind_result(mysqli_stmt $statement, mixed &...$vars): bool {}
 
-/** @return true */
-function mysqli_stmt_close(mysqli_stmt $statement): bool {}
+function mysqli_stmt_close(mysqli_stmt $statement): true {}
 
 function mysqli_stmt_data_seek(mysqli_stmt $statement, int $offset): void {}
 
@@ -1036,7 +1033,6 @@ function mysqli_stmt_sqlstate(mysqli_stmt $statement): string {}
 /** @refcount 1 */
 function mysqli_sqlstate(mysqli $mysql): string {}
 
-/** @return true */
 function mysqli_ssl_set(
     mysqli $mysql,
     ?string $key,
@@ -1044,7 +1040,7 @@ function mysqli_ssl_set(
     ?string $ca_certificate,
     ?string $ca_path,
     ?string $cipher_algos
-): bool {} // TODO make return type void
+): true {} // TODO make return type void
 
 /** @refcount 1 */
 function mysqli_stat(mysqli $mysql): string|false {}

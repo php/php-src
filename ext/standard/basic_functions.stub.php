@@ -82,11 +82,9 @@ function stream_wrapper_restore(string $protocol): bool {}
 
 function array_push(array &$array, mixed ...$values): int {}
 
-/** @return true */
-function krsort(array &$array, int $flags = SORT_REGULAR): bool {}
+function krsort(array &$array, int $flags = SORT_REGULAR): true {}
 
-/** @return true */
-function ksort(array &$array, int $flags = SORT_REGULAR): bool {}
+function ksort(array &$array, int $flags = SORT_REGULAR): true {}
 
 /** @compile-time-eval */
 function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
@@ -98,25 +96,19 @@ function natsort(array &$array): bool {}
 
 function natcasesort(array &$array): bool {}
 
-/** @return true */
-function asort(array &$array, int $flags = SORT_REGULAR): bool {}
+function asort(array &$array, int $flags = SORT_REGULAR): true {}
 
-/** @return true */
-function arsort(array &$array, int $flags = SORT_REGULAR): bool {}
+function arsort(array &$array, int $flags = SORT_REGULAR): true {}
 
-/** @return true */
-function sort(array &$array, int $flags = SORT_REGULAR): bool {}
+function sort(array &$array, int $flags = SORT_REGULAR): true {}
 
 function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
 
-/** @return true */
-function usort(array &$array, callable $callback): bool {}
+function usort(array &$array, callable $callback): true {}
 
-/** @return true */
-function uasort(array &$array, callable $callback): bool {}
+function uasort(array &$array, callable $callback): true {}
 
-/** @return true */
-function uksort(array &$array, callable $callback): bool {}
+function uksort(array &$array, callable $callback): true {}
 
 function end(array|object &$array): mixed {}
 
@@ -139,11 +131,9 @@ function min(mixed $value, mixed ...$values): mixed {}
 /** @compile-time-eval */
 function max(mixed $value, mixed ...$values): mixed {}
 
-/** @return true */
-function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
+function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
-/** @return true */
-function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): bool {}
+function array_walk_recursive(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
 
 /**
  * @compile-time-eval
@@ -178,8 +168,7 @@ function array_fill_keys(array $keys, mixed $value): array {}
  */
 function range($start, $end, int|float $step = 1): array {}
 
-/** @return true */
-function shuffle(array &$array): bool {}
+function shuffle(array &$array): true {}
 
 function array_pop(array &$array): mixed {}
 
@@ -697,11 +686,9 @@ function sha1_file(string $filename, bool $binary = false): string|false {}
 #ifdef HAVE_SYSLOG_H
 function openlog(string $prefix, int $flags, int $facility): bool {}
 
-/** @return true */
-function closelog(): bool {}
+function closelog(): true {}
 
-/** @return true */
-function syslog(int $priority, string $message): bool {} // TODO make return type void
+function syslog(int $priority, string $message): true {} // TODO make return type void
 #endif
 
 #ifdef HAVE_INET_NTOP
@@ -1424,8 +1411,7 @@ function getimagesizefromstring(string $string, &$image_info = null): array|fals
 
 /* info.c */
 
-/** @return true */
-function phpinfo(int $flags = INFO_ALL): bool {} // make return type void
+function phpinfo(int $flags = INFO_ALL): true {} // make return type void
 
 /**
  * @compile-time-eval
@@ -1433,8 +1419,7 @@ function phpinfo(int $flags = INFO_ALL): bool {} // make return type void
  */
 function phpversion(?string $extension = null): string|false {}
 
-/** @return true */
-function phpcredits(int $flags = CREDITS_ALL): bool {}
+function phpcredits(int $flags = CREDITS_ALL): true {}
 
 /**
  * @compile-time-eval
