@@ -2273,6 +2273,8 @@ class ClassInfo {
     /** @var bool */
     public $isStrictProperties;
     /** @var bool */
+    public $allowsDynamicProperties;
+    /** @var bool */
     public $isNotSerializable;
     /** @var Name[] */
     public $extends;
@@ -2305,6 +2307,7 @@ class ClassInfo {
         ?SimpleType $enumBackingType,
         bool $isDeprecated,
         bool $isStrictProperties,
+        bool $allowsDynamicProperties,
         bool $isNotSerializable,
         array $extends,
         array $implements,
@@ -2321,6 +2324,7 @@ class ClassInfo {
         $this->enumBackingType = $enumBackingType;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
+        $this->allowsDynamicProperties = $allowsDynamicProperties;
         $this->isNotSerializable = $isNotSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
@@ -2409,6 +2413,10 @@ class ClassInfo {
             $code .= $property->getDeclaration($allConstInfos);
         }
 
+        if ($this->allowsDynamicProperties) {
+            $code .= "\tzend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);\n";
+        }
+
         if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
             $code .= "\n" . $attributeInitializationCode;
         }
@@ -2450,6 +2458,10 @@ class ClassInfo {
 
         if ($this->isStrictProperties) {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
+        }
+
+        if ($this->allowsDynamicProperties) {
+            $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
         }
 
         if ($this->isNotSerializable) {
@@ -3273,6 +3285,7 @@ function parseClass(
     $isDeprecated = false;
     $isStrictProperties = false;
     $isNotSerializable = false;
+    $allowsDynamicProperties = false;
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -3285,6 +3298,18 @@ function parseClass(
                 $isStrictProperties = true;
             } else if ($tag->name === 'not-serializable') {
                 $isNotSerializable = true;
+            }
+        }
+    }
+
+    foreach ($class->attrGroups as $attrGroup) {
+        foreach ($attrGroup->attrs as $attr) {
+            switch ($attr->name->toCodeString()) {
+                case '\\AllowDynamicProperties':
+                    $allowsDynamicProperties = true;
+                    break;
+                default:
+                    throw new Exception("Unhandled attribute {$attr->name->toCodeString()}.");
             }
         }
     }
@@ -3319,6 +3344,7 @@ function parseClass(
             ? SimpleType::fromNode($class->scalarType) : null,
         $isDeprecated,
         $isStrictProperties,
+        $allowsDynamicProperties,
         $isNotSerializable,
         $extends,
         $implements,
