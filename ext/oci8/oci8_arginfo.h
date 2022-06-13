@@ -801,12 +801,12 @@ static const zend_function_entry class_OCICollection_methods[] = {
 
 static void register_oci8_symbols(int module_number)
 {
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_new_connect", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "ocinlogon", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_connect", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "ocilogon", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_pconnect", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "ociplogon", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_new_connect", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocinlogon", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_connect", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "ocilogon", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "oci_pconnect", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "ociplogon", 1);
 }
 
 static zend_class_entry *register_class_OCILob(void)

@@ -394,6 +394,6 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_odbc_symbols(int module_number)
 {
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_connect", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_pconnect", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_connect", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "odbc_pconnect", 2);
 }

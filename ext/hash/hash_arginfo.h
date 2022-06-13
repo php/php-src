@@ -212,15 +212,15 @@ static const zend_function_entry class_HashContext_methods[] = {
 
 static void register_hash_symbols(int module_number)
 {
-    REGISTER_LONG_CONSTANT("HASH_HMAC", PHP_HASH_HMAC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("HASH_HMAC", PHP_HASH_HMAC, CONST_CS | CONST_PERSISTENT);
 
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac_file", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_init", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_pbkdf2", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 0);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 1);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hkdf", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hmac_file", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_init", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_pbkdf2", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 0);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_equals", 1);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "hash_hkdf", 1);
 }
 
 static zend_class_entry *register_class_HashContext(void)

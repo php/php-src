@@ -488,12 +488,12 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 
 static void register_php_zip_symbols(int module_number, zend_class_entry *class_entry_ZipArchive)
 {
-    zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setpassword", 0);
+	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setpassword", 0);
 #if defined(HAVE_ENCRYPTION)
-    zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionname", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionname", 2);
 #endif
 #if defined(HAVE_ENCRYPTION)
-    zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionindex", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry_ZipArchive->function_table, "setencryptionindex", 2);
 #endif
 }
 

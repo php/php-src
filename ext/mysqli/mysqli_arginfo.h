@@ -1027,13 +1027,13 @@ static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 
 static void register_mysqli_symbols(int module_number, zend_class_entry *class_entry_mysqli)
 {
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_change_user", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_connect", 2);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_real_connect", 3);
-    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "__construct", 2);
-    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "change_user", 1);
-    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "connect", 2);
-    zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "real_connect", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_change_user", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_connect", 2);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "mysqli_real_connect", 3);
+	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "__construct", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "change_user", 1);
+	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "connect", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry_mysqli->function_table, "real_connect", 2);
 }
 
 static zend_class_entry *register_class_mysqli_driver(void)

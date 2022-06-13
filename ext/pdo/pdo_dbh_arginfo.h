@@ -97,7 +97,7 @@ static const zend_function_entry class_PDO_methods[] = {
 
 static void register_pdo_dbh_symbols(int module_number, zend_class_entry *class_entry_PDO)
 {
-    zend_mark_function_parameter_as_sensitive(&class_entry_PDO->function_table, "__construct", 2);
+	zend_mark_function_parameter_as_sensitive(&class_entry_PDO->function_table, "__construct", 2);
 }
 
 static zend_class_entry *register_class_PDO(void)

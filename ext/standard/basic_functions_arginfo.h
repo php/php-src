@@ -3517,11 +3517,11 @@ static const zend_function_entry class_AssertionError_methods[] = {
 
 static void register_basic_functions_symbols(int module_number)
 {
-    REGISTER_DOUBLE_CONSTANT("M_E", M_E, CONST_CS | CONST_PERSISTENT);
-    ZEND_ASSERT(M_E == 2.7182818284590451);
+	REGISTER_DOUBLE_CONSTANT("M_E", M_E, CONST_CS | CONST_PERSISTENT);
+	ZEND_ASSERT(M_E == 2.7182818284590451);
 
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "password_hash", 0);
-    zend_mark_function_parameter_as_sensitive(CG(function_table), "password_verify", 0);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "password_hash", 0);
+	zend_mark_function_parameter_as_sensitive(CG(function_table), "password_verify", 0);
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)

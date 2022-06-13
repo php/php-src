@@ -1381,7 +1381,7 @@ class FuncInfo {
             return null;
         }
 
-        return "    F" . $this->return->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
+        return "\tF" . $this->return->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -1918,23 +1918,23 @@ class ConstInfo extends VariableLike
             $flags .= " | CONST_DEPRECATED";
         }
         if ($value->type->isNull()) {
-            return "    REGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
+            return "\tREGISTER_NULL_CONSTANT(\"$constName\", $flags);\n";
         }
 
         if ($value->type->isBool()) {
-            return "    REGISTER_BOOL_CONSTANT(\"$constName\", " . ($cConstValue ?: ($constValue ? "true" : "false")) . ", $flags);\n";
+            return "\tREGISTER_BOOL_CONSTANT(\"$constName\", " . ($cConstValue ?: ($constValue ? "true" : "false")) . ", $flags);\n";
         }
 
         if ($value->type->isInt()) {
-            return "    REGISTER_LONG_CONSTANT(\"$constName\", " . ($cConstValue ?: (int) $constValue) . ", $flags);\n";
+            return "\tREGISTER_LONG_CONSTANT(\"$constName\", " . ($cConstValue ?: (int) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isFloat()) {
-            return "    REGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cConstValue ?: (float) $constValue) . ", $flags);\n";
+            return "\tREGISTER_DOUBLE_CONSTANT(\"$constName\", " . ($cConstValue ?: (float) $constValue) . ", $flags);\n";
         }
 
         if ($value->type->isString()) {
-            return "    REGISTER_STRING_CONSTANT(\"$constName\", " . ($cConstValue ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
+            return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cConstValue ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
         throw new Exception("Unimplemented constant type");}
@@ -1969,27 +1969,27 @@ class ConstInfo extends VariableLike
         $constValue = $value->value;
 
         if ($value->type->isNull()) {
-            return "    ZEND_ASSERT($cName == NULL);\n";
+            return "\tZEND_ASSERT($cName == NULL);\n";
         }
 
         if ($value->type->isBool()) {
             $cValue = $constValue ? "true" : "false";
-            return "    ZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cName == $cValue);\n";
         }
 
         if ($value->type->isInt()) {
             $cValue = (int) $constValue;
-            return "    ZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cName == $cValue);\n";
         }
 
         if ($value->type->isFloat()) {
             $cValue = (float) $constValue;
-            return "    ZEND_ASSERT($cName == $cValue);\n";
+            return "\tZEND_ASSERT($cName == $cValue);\n";
         }
 
         if ($value->type->isString()) {
             $cValue = '"' . addslashes($constValue) . '"';
-            return "    ZEND_ASSERT(strcmp($cName, $cValue) == 0);\n";
+            return "\tZEND_ASSERT(strcmp($cName, $cValue) == 0);\n";
         }
 
         throw new Exception("Unimplemented constant type");
@@ -3777,7 +3777,7 @@ function generateAttributeInitialization(FileInfo $fileInfo, array &$classEntrie
                     $functionTable = "CG(function_table)";
                 }
 
-                $code .= "    zend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", $index);\n";
+                $code .= "\tzend_mark_function_parameter_as_sensitive($functionTable, \"" . $funcInfo->name->getNameForAttributes() . "\", $index);\n";
             }
 
             return $code;
