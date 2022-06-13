@@ -18,7 +18,16 @@ $preferences = [
 
 $result = iconv_mime_encode("Subject", "Prüfung", $preferences);
 var_dump($result);
+
+$preferences["input-charset"] = "ISO-8859-1";
+$preferences["output-charset"] = "UTF-8".$extra;
+
+$result = iconv_mime_encode("Subject", "Prüfung", $preferences);
+var_dump($result);
 ?>
 --EXPECTF--
+Warning: iconv_mime_encode(): Encoding parameter exceeds the maximum allowed length of %d characters in %s on line %d
+bool(false)
+
 Warning: iconv_mime_encode(): Encoding parameter exceeds the maximum allowed length of %d characters in %s on line %d
 bool(false)
