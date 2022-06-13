@@ -3261,6 +3261,21 @@ function parseFunctionLike(
             $varName = $param->var->name;
             $preferRef = !empty($paramMeta[$varName]['prefer-ref']);
             $isSensitive = !empty($paramMeta[$varName]['sensitive-param']);
+            foreach ($param->attrGroups as $attrGroup) {
+                foreach ($attrGroup->attrs as $attr) {
+                    switch ($attr->name->toCodeString()) {
+                        case '\\SensitiveParameter':
+                            if ($isSensitive) {
+                                throw new Exception("Redundant  {$attr->name->toCodeString()} declaration.");
+                            }
+
+                            $isSensitive = true;
+                            break;
+                        default:
+                            throw new Exception("Unhandled attribute {$attr->name->toCodeString()}.");
+                    }
+                }
+            }
             unset($paramMeta[$varName]);
 
             if (isset($varNameSet[$varName])) {
