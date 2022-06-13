@@ -75,8 +75,7 @@ namespace {
     function ftp_ssl_connect(string $hostname, int $port = 21, int $timeout = 90): FTP\Connection|false {}
     #endif
 
-    /** @sensitive-param $password */
-    function ftp_login(FTP\Connection $ftp, string $username, string $password): bool {}
+    function ftp_login(FTP\Connection $ftp, string $username, #[\SensitiveParameter] string $password): bool {}
     function ftp_pwd(FTP\Connection $ftp): string|false {}
     function ftp_cdup(FTP\Connection $ftp): bool {}
     function ftp_chdir(FTP\Connection $ftp, string $directory): bool {}

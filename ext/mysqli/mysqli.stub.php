@@ -126,11 +126,10 @@ class mysqli
      */
     public int $warning_count;
 
-    /** @sensitive-param $password */
     public function __construct(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -149,11 +148,10 @@ class mysqli
     public function begin_transaction(int $flags = 0, ?string $name = null): bool {}
 
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_change_user
      */
-    public function change_user(string $username, string $password, ?string $database): bool {}
+    public function change_user(string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
     /**
      * @tentative-return-type
@@ -175,7 +173,6 @@ class mysqli
     public function commit(int $flags = 0, ?string $name = null): bool {}
 
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_connect
      * @no-verify
@@ -183,7 +180,7 @@ class mysqli
     public function connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null
@@ -294,14 +291,13 @@ class mysqli
     public function query(string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
     /**
-     * @sensitive-param $password
      * @tentative-return-type
      * @alias mysqli_real_connect
      */
     public function real_connect(
         ?string $hostname = null,
         ?string $username = null,
-        ?string $password = null,
+        #[\SensitiveParameter] ?string $password = null,
         ?string $database = null,
         ?int $port = null,
         ?string $socket = null,
@@ -748,8 +744,7 @@ function mysqli_autocommit(mysqli $mysql, bool $enable): bool {}
 
 function mysqli_begin_transaction(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
-/** @sensitive-param $password */
-function mysqli_change_user(mysqli $mysql, string $username, string $password, ?string $database): bool {}
+function mysqli_change_user(mysqli $mysql, string $username, #[\SensitiveParameter] string $password, ?string $database): bool {}
 
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
@@ -760,12 +755,11 @@ function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): boo
 
 /**
  * @refcount 1
- * @sensitive-param $password
  */
 function mysqli_connect(
     ?string $hostname = null,
     ?string $username = null,
-    ?string $password = null,
+    #[\SensitiveParameter] ?string $password = null,
     ?string $database = null,
     ?int $port = null,
     ?string $socket = null
@@ -937,11 +931,11 @@ function mysqli_report(int $flags): bool {}
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
 
-/** @sensitive-param $password */
 function mysqli_real_connect(
     mysqli $mysql,
     ?string $hostname = null,
     ?string $username = null,
+    #[\SensitiveParameter]
     ?string $password = null,
     ?string $database = null,
     ?int $port = null,

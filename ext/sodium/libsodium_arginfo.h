@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ba84ba9ace7a751935d7beead34e3fbb9a511cc7 */
+ * Stub hash: 6b0ca95e37b504c23938bc08511ead9671cd8996 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

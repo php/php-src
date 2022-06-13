@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f3728c451a9cd130e9ffdf48389e2f68b4f82423 */
+ * Stub hash: 626d7a2c3ba884188722a07c4c273dbca0b86242 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ftp_connect, 0, 1, FTP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)

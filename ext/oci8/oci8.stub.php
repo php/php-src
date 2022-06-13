@@ -295,46 +295,40 @@ function oci_close($connection): ?bool {}
 function ocilogoff($connection): ?bool {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  */
-function oci_new_connect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function oci_new_connect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  * @alias oci_new_connect
  * @deprecated
  */
-function ocinlogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ocinlogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  */
-function oci_connect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function oci_connect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  * @alias oci_connect
  * @deprecated
  */
-function ocilogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ocilogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  */
-function oci_pconnect(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function oci_pconnect(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
- * @sensitive-param $password
  * @return resource|false
  * @alias oci_pconnect
  * @deprecated
  */
-function ociplogon(string $username, string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
+function ociplogon(string $username, #[\SensitiveParameter] string $password, ?string $connection_string = null, string $encoding = "", int $session_mode = OCI_DEFAULT) {}
 
 /**
  * @param resource|null $connection_or_statement
