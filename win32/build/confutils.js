@@ -1093,7 +1093,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 		if (thanks == null) {
 			thanks = "";
 		} else {
-			thanks = "Thanks to " + thanks;
+			thanks = "Thanks to " + thanks.replace(/([<>&|%])/g, "^$1").replace(/"/g, '\\"\\"');
 		}
 		credits.Close();
 	}
