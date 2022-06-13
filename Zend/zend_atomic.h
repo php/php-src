@@ -89,13 +89,13 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
 static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
-	bool prev = false;
+	bool prev;
 	__atomic_exchange(&obj->value, &desired, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
 
 static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
-	bool prev = false;
+	bool prev;
 	__atomic_load(&obj->value, &prev, __ATOMIC_SEQ_CST);
 	return prev;
 }
