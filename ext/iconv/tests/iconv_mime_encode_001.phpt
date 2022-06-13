@@ -1,5 +1,5 @@
 --TEST--
-iconv_mime_encode(): Encoding parameter exceeds the maximum allowed for preference "input-charset"
+iconv_mime_encode(): Encoding parameter exceeds the maximum allowed for preference "input-charset" and "output-charset"
 --EXTENSIONS--
 iconv
 --INI--
