@@ -58,10 +58,9 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 	return InterlockedExchange8(&obj->value, desired);
 }
 
-/* On this platform it is non-const due to Iterlocked API*/
-static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	/* Or'ing with false won't change the value. */
-	return InterlockedOr8(&obj->value, false);
+	return InterlockedOr8(&((zend_atomic_bool *) obj)->value, false);
 }
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
@@ -118,9 +117,9 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 	return prev;
 }
 
-static zend_always_inline bool zend_atomic_bool_load_ex(zend_atomic_bool *obj) {
+static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
 	/* Or'ing false won't change the value */
-	return __sync_fetch_and_or(&obj->value, false);
+	return __sync_fetch_and_or(&((zend_atomic_bool *) obj)->value, false);
 }
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
@@ -154,13 +153,7 @@ static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *ob
 ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired);
 ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired);
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
-
-#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
-/* On these platforms it is non-const due to underlying APIs. */
-ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
-#else
 ZEND_API bool zend_atomic_bool_load(const zend_atomic_bool *obj);
-#endif
 
 END_EXTERN_C()
 
