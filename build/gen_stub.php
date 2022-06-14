@@ -3314,6 +3314,10 @@ function parseClass(
         }
     }
 
+    if ($isStrictProperties && $allowsDynamicProperties) {
+        throw new Exception("A class may not have '@strict-properties' and '#[\\AllowDynamicProperties]' at the same time.");
+    }
+
     $extends = [];
     $implements = [];
 
