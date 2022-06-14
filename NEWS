@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.21
 
+- COM:
+  . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
+    (cmb)
+
 - Curl:
   . Fixed CURLOPT_TLSAUTH_TYPE is not treated as a string option. (Pierrick)
 
