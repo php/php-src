@@ -3253,7 +3253,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 						tmp |= t1 & (MAY_BE_RC1|MAY_BE_RCN);
 					}
 					if (opline->op2_type == IS_UNUSED) {
-						if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+						if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 							key_type |= MAY_BE_ARRAY_PACKED;
 						}
 						if (t1 & MAY_BE_ARRAY) {
