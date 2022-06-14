@@ -3660,6 +3660,16 @@ static int zend_jit_update_regs(dasm_State **Dst, uint32_t var, zend_jit_addr sr
 		} else {
 			ZEND_UNREACHABLE();
 		}
+	} else if (Z_MODE(dst) == IS_REG && Z_STORE(dst)) {
+		dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
+		if (!zend_jit_spill_store(Dst, src, dst, info,
+				JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+				JIT_G(current_frame) == NULL ||
+				STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var)) == IS_UNKNOWN ||
+				(1 << STACK_MEM_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(var))) != (info & MAY_BE_ANY)
+		)) {
+			return 0;
+		}
 	}
 	return 1;
 }
