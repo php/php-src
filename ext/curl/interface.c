@@ -1414,8 +1414,10 @@ PHP_MINIT_FUNCTION(curl)
 	curl_share_register_handlers();
 
 #if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
-	curl_url_ce = register_class_CurlUrl(zend_ce_stringable);
+	curl_CURLUrl_ce = register_class_CurlUrl(zend_ce_stringable);
 	curl_url_register_handlers();
+
+	curl_CURLUrlException_ce = register_class_CurlUrlException(zend_ce_exception);
 #endif
 
 	curlfile_register_class();
@@ -3349,7 +3351,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 	/* CurlUrl object */
 #if LIBCURL_VERSION_NUM >= 0x073f00 /* Available since 7.63.0 */
 		case CURLOPT_CURLU:
-			if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_url_ce) {
+			if (Z_TYPE_P(zvalue) == IS_OBJECT && Z_OBJCE_P(zvalue) == curl_CURLUrl_ce) {
 				php_curlurl *uh = Z_CURL_URL_P(zvalue);
 				curl_easy_setopt(ch->cp, CURLOPT_CURLU, uh->url);
 

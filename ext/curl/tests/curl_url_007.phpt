@@ -8,7 +8,9 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 ?>
 --FILE--
 <?php
-echo curl_url('https://www.example.com/');
+echo curl_url('https://www.example.com/'), PHP_EOL;
+echo new CurlUrl('https://www.php.net/');
 ?>
 --EXPECT--
 https://www.example.com/
+https://www.php.net/

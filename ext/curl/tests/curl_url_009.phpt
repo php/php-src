@@ -1,5 +1,5 @@
 --TEST--
-curl_url_set() and CurlUrl::set() with errors
+curl_url_get() and CurlUrl::get() with errors
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -11,20 +11,20 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 $url = curl_url();
 var_dump(curl_url_errno($url));
 try {
-	curl_url_set($url, CURLUPART_SCHEME, 'foobar');
+    curl_url_get($url, CURLUPART_SCHEME);
 } catch (CurlUrlException $e) {
-	var_dump($e->getCode() == CURLUE_UNSUPPORTED_SCHEME);
+    var_dump($e->getCode() == CURLUE_NO_SCHEME);
 }
-var_dump(curl_url_errno($url) == CURLUE_UNSUPPORTED_SCHEME);
+var_dump(curl_url_errno($url) == CURLUE_NO_SCHEME);
 
 $url = new CurlUrl();
 var_dump($url->getErrno());
 try {
-    $url->set(CURLUPART_SCHEME, 'foobar');
+    $url->get(CURLUPART_SCHEME);
 } catch (CurlUrlException $e) {
-    var_dump($e->getCode() == CURLUE_UNSUPPORTED_SCHEME);
+    var_dump($e->getCode() == CURLUE_NO_SCHEME);
 }
-var_dump($url->getErrno() == CURLUE_UNSUPPORTED_SCHEME);
+var_dump($url->getErrno() == CURLUE_NO_SCHEME);
 ?>
 --EXPECT--
 int(0)

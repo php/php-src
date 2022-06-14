@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a11dc582f28ba5c81b3e404b02e5845f6e2d2212 */
+ * Stub hash: a12c4851e99952e9bb65c6a3c33b59b19a6c82e2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -142,7 +142,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_set, 0, 3, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_set, 0, 3, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, url, CurlUrl, 0)
 	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
@@ -151,7 +151,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_url_get, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_get, 0, 2, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, url, CurlUrl, 0)
 	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
@@ -172,6 +172,32 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CurlUrl___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, url, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl_get, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl_set, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl_getErrno, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl___toString, 0, 0, IS_STRING, 0)
@@ -229,6 +255,9 @@ ZEND_FUNCTION(curl_url_errno);
 ZEND_FUNCTION(curl_url_strerror);
 #endif
 ZEND_FUNCTION(curl_version);
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_METHOD(CurlUrl, __construct);
+#endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_METHOD(CurlUrl, __toString);
 #endif
@@ -306,7 +335,18 @@ static const zend_function_entry class_CurlShareHandle_methods[] = {
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 static const zend_function_entry class_CurlUrl_methods[] = {
+	ZEND_ME(CurlUrl, __construct, arginfo_class_CurlUrl___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(get, curl_url_get, arginfo_class_CurlUrl_get, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set, curl_url_set, arginfo_class_CurlUrl_set, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrno, curl_url_errno, arginfo_class_CurlUrl_getErrno, ZEND_ACC_PUBLIC)
 	ZEND_ME(CurlUrl, __toString, arginfo_class_CurlUrl___toString, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+#endif
+
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+static const zend_function_entry class_CurlUrlException_methods[] = {
 	ZEND_FE_END
 };
 #endif
@@ -353,6 +393,19 @@ static zend_class_entry *register_class_CurlUrl(zend_class_entry *class_entry_St
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
+
+	return class_entry;
+}
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+static zend_class_entry *register_class_CurlUrlException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlUrlException", class_CurlUrlException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }

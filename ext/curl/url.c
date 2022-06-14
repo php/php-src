@@ -28,22 +28,18 @@
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
 /* CurlUrl class */
-zend_class_entry *curl_url_ce;
+zend_class_entry *curl_CURLUrl_ce;
+zend_class_entry *curl_CURLUrlException_ce;
 
 static zend_result php_curl_url_set(php_curlurl *uh, zend_long option, const char *str, const size_t len, unsigned int flags)
 {
-	if (strlen(str) != len) {
-		zend_value_error("%s(): string must not contain any null bytes", get_active_function_name());
-		return FAILURE;
-	}
-
 	CURLUcode error = curl_url_set(uh->url, option, str, flags);
 	SAVE_CURL_ERROR(uh, error);
 
 	return error == CURLUE_OK ? SUCCESS : FAILURE;
 }
 
-PHP_FUNCTION(curl_url)
+static void php_curl_url_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	php_curlurl *uh;
 	zend_string *url = NULL;
@@ -53,17 +49,38 @@ PHP_FUNCTION(curl_url)
 		Z_PARAM_STR_OR_NULL(url)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (NULL != url && strlen(ZSTR_VAL(url)) != ZSTR_LEN(url)) {
+		zend_argument_error(curl_CURLUrlException_ce, 1, "must not contain any null bytes");
+		zval_ptr_dtor(return_value);
+		RETURN_THROWS();
+	}
 
-	object_init_ex(return_value, curl_url_ce);
 	uh = Z_CURL_URL_P(return_value);
 	uh->url = curl_url();
 
 	if (url) {
 		if (php_curl_url_set(uh, CURLUPART_URL, ZSTR_VAL(url), ZSTR_LEN(url), 0) == FAILURE) {
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+			zend_throw_exception(curl_CURLUrlException_ce, curl_url_strerror(uh->err.no), uh->err.no);
+#else
+			zend_throw_exception(curl_CURLUrlException_ce, "Unable to create CurlUrl", uh->err.no);
+#endif
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
+}
+
+PHP_METHOD(CurlUrl, __construct)
+{
+	return_value = ZEND_THIS;
+	php_curl_url_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+PHP_FUNCTION(curl_url)
+{
+	object_init_ex(return_value, curl_CURLUrl_ce);
+	php_curl_url_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_FUNCTION(curl_url_set)
@@ -73,20 +90,23 @@ PHP_FUNCTION(curl_url_set)
 	php_curlurl *uh;
 	zend_string *content;
 
-	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_OBJECT_OF_CLASS(zid, curl_url_ce)
-		Z_PARAM_LONG(part)
-		Z_PARAM_STR(content)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "OlS|l", &zid, curl_CURLUrl_ce, &part, &content, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (content && strlen(ZSTR_VAL(content)) != ZSTR_LEN(content)) {
+		zend_argument_error(curl_CURLUrlException_ce, getThis() ? 2 : 3, "must not contain any null bytes");
+		RETURN_THROWS();
+	}
 
 	uh = Z_CURL_URL_P(zid);
 
 	if (php_curl_url_set(uh, part, ZSTR_VAL(content), ZSTR_LEN(content), flags) == FAILURE) {
-		RETURN_FALSE;
-	} else {
-		RETURN_TRUE;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+		zend_throw_exception(curl_CURLUrlException_ce, curl_url_strerror(uh->err.no), uh->err.no);
+#else
+		zend_throw_exception(curl_CURLUrlException_ce, "Unable to set CurlUrl part", uh->err.no);
+#endif
 	}
 }
 
@@ -97,24 +117,24 @@ PHP_FUNCTION(curl_url_get)
 	php_curlurl *uh;
 	char *value;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_OBJECT_OF_CLASS(zid, curl_url_ce)
-		Z_PARAM_LONG(part)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol|l", &zid, curl_CURLUrl_ce, &part, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	uh = Z_CURL_URL_P(zid);
 
  	CURLUcode res = curl_url_get(uh->url, part, &value, flags);
 	if (res != CURLUE_OK) {
 		SAVE_CURL_ERROR(uh, res);
-		RETURN_FALSE;
+#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
+		zend_throw_exception(curl_CURLUrlException_ce, curl_url_strerror(uh->err.no), uh->err.no);
+#else
+		zend_throw_exception(curl_CURLUrlException_ce, "Unable to get CurlUrl part", uh->err.no);
+#endif
+	} else {
+		RETVAL_STRING(value);
+		curl_free(value);
 	}
-
-	RETVAL_STRING(value);
-
-	curl_free(value);
 }
 
 PHP_FUNCTION(curl_url_errno)
@@ -122,9 +142,9 @@ PHP_FUNCTION(curl_url_errno)
 	zval *zid;
 	php_curlurl  *uh;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_OBJECT_OF_CLASS(zid, curl_url_ce)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &zid, curl_CURLUrl_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	uh = Z_CURL_URL_P(zid);
 
@@ -158,30 +178,25 @@ static zend_object *curl_url_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
-static zend_function *curl_url_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct CurlUrl, use curl_url() instead");
-	return NULL;
-}
-
 static zend_object *curl_url_clone_obj(zend_object *object) {
-    php_curlurl *uh;
-    CURLU *url;
-    zend_object *clone_object;
-    php_curlurl *clone_uh;
+	php_curlurl *uh;
+	CURLU *url;
+	zend_object *clone_object;
+	php_curlurl *clone_uh;
 
-    clone_object = curl_url_create_object(curl_url_ce);
-    clone_uh = curl_url_from_obj(clone_object);
+	clone_object = curl_url_create_object(curl_CURLUrl_ce);
+	clone_uh = curl_url_from_obj(clone_object);
 
 	uh = curl_url_from_obj(object);
-    url = curl_url_dup(uh->url);
-    if (!url) {
-        zend_throw_exception(NULL, "Failed to clone CurlUrl", 0);
-        return &clone_uh->std;
-    }
+	url = curl_url_dup(uh->url);
+	if (!url) {
+		zend_throw_exception(NULL, "Failed to clone CurlUrl", 0);
+		return &clone_uh->std;
+	}
 
-    clone_uh->url = url;
+	clone_uh->url = url;
 
-    return &clone_uh->std;
+	return &clone_uh->std;
 }
 
 void curl_url_free_obj(zend_object *object)
@@ -192,12 +207,11 @@ void curl_url_free_obj(zend_object *object)
 }
 
 void curl_url_register_handlers(void) {
-	curl_url_ce->create_object = curl_url_create_object;
+	curl_CURLUrl_ce->create_object = curl_url_create_object;
 
 	memcpy(&curl_url_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	curl_url_handlers.offset = XtOffsetOf(php_curlurl, std);
 	curl_url_handlers.free_obj = curl_url_free_obj;
-	curl_url_handlers.get_constructor = curl_url_get_constructor;
 	curl_url_handlers.clone_obj = curl_url_clone_obj;
 	curl_url_handlers.compare = zend_objects_not_comparable;
 }

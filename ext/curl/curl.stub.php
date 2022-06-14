@@ -33,7 +33,28 @@ final class CurlShareHandle
  */
 final class CurlUrl implements Stringable
 {
+    public function __construct(?string $url = null) {}
+
+    /**
+     * @alias curl_url_get
+     */
+    public function get(int $part, int $flags = 0): string {}
+
+    /**
+     * @alias curl_url_set
+     */
+        public function set(int $part, string $content, int $flags = 0): void {}
+
+    /**
+     * @alias curl_url_errno
+     */
+    public function getErrno(): int {}
+
     public function __toString(): string {}
+}
+
+final class CurlUrlException extends Exception
+{
 }
 #endif
 
@@ -123,9 +144,9 @@ function curl_strerror(int $error_code): ?string {}
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 function curl_url(?string $url = null): CurlUrl|false {}
 
-function curl_url_set(CurlUrl $url, int $part, string $content, int $flags = 0): bool {}
+function curl_url_set(CurlUrl $url, int $part, string $content, int $flags = 0): void {}
 
-function curl_url_get(CurlUrl $url, int $part, int $flags = 0): string|false {}
+function curl_url_get(CurlUrl $url, int $part, int $flags = 0): string {}
 
 function curl_url_errno(CurlUrl $url): int {}
 #endif
