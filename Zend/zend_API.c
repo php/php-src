@@ -4211,6 +4211,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	if (is_persistent_class(ce)) {
 		zend_type *single_type;
 		ZEND_TYPE_FOREACH(property_info->type, single_type) {
+			// TODO Add support and test cases when gen_stub support added
+			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
 			if (ZEND_TYPE_HAS_NAME(*single_type)) {
 				zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*single_type));
 				ZEND_TYPE_SET_PTR(*single_type, name);
