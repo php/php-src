@@ -1884,3 +1884,14 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);
 }
+
+#if defined(__x86_64__) && defined(__linux__)
+/* This is the 'lighthouse' function specially hosted in PHP .text segment,
+   which is used by opcache.so to locate PHP .text segment address
+   for JIT buffer relocation.
+*/
+ZEND_API void* php_text_lighthouse(void) {
+    void* addr = php_text_lighthouse;
+    return addr;
+}
+#endif /* __x86_64__ && __linux__ */
