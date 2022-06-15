@@ -51,7 +51,6 @@ static void php_curl_url_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (NULL != url && strlen(ZSTR_VAL(url)) != ZSTR_LEN(url)) {
 		zend_argument_error(curl_CURLUrlException_ce, 1, "must not contain any null bytes");
-		zval_ptr_dtor(return_value);
 		RETURN_THROWS();
 	}
 
@@ -65,8 +64,7 @@ static void php_curl_url_ctor(INTERNAL_FUNCTION_PARAMETERS)
 #else
 			zend_throw_exception(curl_CURLUrlException_ce, "Unable to create CurlUrl", uh->err.no);
 #endif
-			zval_ptr_dtor(return_value);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 }
