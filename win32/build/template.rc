@@ -27,7 +27,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif
 
 #ifndef URL
-#define URL "http://www.php.net/"
+#define URL "https://www.php.net/"
 #endif
 
 #ifndef EXT_VERSION

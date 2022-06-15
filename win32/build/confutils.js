@@ -1077,7 +1077,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	var thanks = "";
 	var logo = "";
 	var debug = "";
-	var project_url = "http://www.php.net";
+	var project_url = "https://www.php.net";
 	var project_header = creditspath + "/php_" + basename + ".h";
 	var versioning = "";
 
@@ -1105,7 +1105,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 
 	if (creditspath.match(new RegExp("pecl"))) {
 		/* PECL project url - this will eventually work correctly for all */
-		project_url = "http://pecl.php.net/" + basename;
+		project_url = "https://pecl.php.net/" + basename;
 
 		/* keep independent versioning PECL-specific for now */
 		if (FSO.FileExists(project_header)) {
