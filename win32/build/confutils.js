@@ -450,14 +450,9 @@ can be built that way. \
 	}
 
 	var snapshot_build_exclusions = new Array(
-		'debug', 'lzf-better-compression',
-		 'php-build', 'snapshot-template', 'ereg',
-		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
-		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
-		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 'pgi', 'pgo', 'all-shared', 'config-profile',
-		 'sanitizer'
-		);
+		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
+		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer'
+	);
 	var force;
 
 	// Now set any defaults we might have missed out earlier
