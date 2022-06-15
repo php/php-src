@@ -766,8 +766,8 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 			}
 
 			if (strlen(*path) > strlen("$prefix")) {
-				free(*path);
 				tmp = strdup((*path) + strlen("$prefix"));
+				free(*path);
 				*path = tmp;
 			} else {
 				free(*path);
