@@ -51,7 +51,7 @@ $API_params = array(
 /** reports an error, according to its level */
 function error($str, $level = 0)
 {
-    global $current_file, $current_function, $line;
+    global $current_file, $current_function, $line, $error_reported;
 
     if ($level <= REPORT_LEVEL) {
         if (strpos($current_file,PHPDIR) === 0) {
@@ -60,6 +60,7 @@ function error($str, $level = 0)
             $filename = $current_file;
         }
         echo $filename , " [$line] $current_function : $str\n";
+        $error_reported = true;
     }
 }
 
@@ -372,6 +373,9 @@ foreach($dirs as $dir) {
     }
 }
 
+$error_reported = false;
 foreach ($dirs as $dir) {
     recurse(realpath($dir));
 }
+
+exit($error_reported === false ? 0 : 2);
