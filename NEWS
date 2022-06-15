@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed errorInfo() result on successful PDOStatement->execute(). (Yurunsoft)
   . Fixed handling of single-key connection strings. (Calvin Buckley)
 
+- Zip:
+  . Fixed bug GH-8781 (ZipArchive::close deletes zip file without updating stat
+    cache). (Remi)
+
 09 Jun 2022, PHP 8.0.20
 
 - CLI:
