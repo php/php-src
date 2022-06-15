@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
     (Derick)
 
+- FPM:
+  . Fixed zlog message prepend, free on incorrect address. (Heiko Weber)
+
 - GD:
   . Fixed bug GH-8848 (imagecopyresized() error refers to the wrong argument).
     (cmb)
