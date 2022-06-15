@@ -1012,7 +1012,7 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 		return NULL;
 	}
 	if (sapi_module.getenv) {
-		char *value, *tmp = sapi_module.getenv(name, name_len);
+		char *value = NULL, *tmp = sapi_module.getenv(name, name_len);
 		if (tmp) {
 			value = estrdup(tmp);
 #ifdef PHP_WIN32
@@ -1024,7 +1024,7 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 		} else {
 			return NULL;
 		}
-		if (sapi_module.input_filter) {
+		if (value && sapi_module.input_filter) {
 			sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL);
 		}
 		return value;
