@@ -382,13 +382,13 @@ static void php_binary_init(void)
 				free(binary_location);
 				binary_location = NULL;
 			}
-		} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
+		} else if (binary_location && !VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
 			free(binary_location);
 			binary_location = NULL;
 		}
 	}
-#endif
 	PG(php_binary) = binary_location;
+#endif
 }
 /* }}} */
 
