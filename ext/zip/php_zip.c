@@ -1571,6 +1571,9 @@ PHP_METHOD(ZipArchive, close)
 		ze_obj->err_sys = 0;
 	}
 
+	/* clear cache as empty zip are not created but deleted */
+	php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
+
 	efree(ze_obj->filename);
 	ze_obj->filename = NULL;
 	ze_obj->filename_len = 0;
