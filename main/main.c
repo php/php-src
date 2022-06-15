@@ -359,7 +359,7 @@ static void php_binary_init(void)
 	}
 #else
 	if (sapi_module.executable_location) {
-		binary_location = (char *)pemalloc(MAXPATHLEN);
+		binary_location = (char *)pemalloc(MAXPATHLEN, 1);
 		if (!strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			int found = 0;
