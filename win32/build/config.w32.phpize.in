@@ -128,6 +128,12 @@ DEFINE("PHP_DIR", PHP_DIR);
 ARG_WITH("codegen-arch", "Architecture for code generation", "no");
 toolset_setup_codegen_arch();
 
+ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
+		into the build dir and used to automatically load the shared extensions.", "no");
+
+ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
+		be excluded from the test.ini", "no");
+
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
 	Available optimization names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
 	SSE and SSE2 are enabled by default. The best optimization specified will \

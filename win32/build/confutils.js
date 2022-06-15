@@ -2083,9 +2083,7 @@ function generate_files()
 	}
 
 	STDOUT.WriteLine("Generating files...");
-	if (!MODE_PHPIZE) {
-		generate_tmp_php_ini();
-	}
+	generate_tmp_php_ini();
 	generate_makefile();
 	if (!MODE_PHPIZE) {
 		generate_internal_functions();
@@ -2528,11 +2526,9 @@ function generate_makefile()
 		handle_analyzer_makefile_flags(MF, keys[i], val);
 	}
 
-	if (!MODE_PHPIZE) {
-		var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
-		/* Be sure it's done after generate_tmp_php_ini(). */
-		MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
-	}
+	var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
+	/* Be sure it's done after generate_tmp_php_ini(). */
+	MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
 
 	MF.WriteBlankLines(1);
 	if (MODE_PHPIZE) {
