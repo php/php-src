@@ -714,7 +714,10 @@ static zend_always_inline zend_result zend_forbid_dynamic_call(void)
 	ZEND_ASSERT(ex != NULL && ex->func != NULL);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_DYNAMIC) {
-		zend_throw_error(NULL, "Cannot call %s() dynamically", get_active_function_name());
+		zend_string *function_or_method_name = get_active_function_or_method_name();
+		zend_throw_error(NULL, "Cannot call %.*s() dynamically",
+			(int) ZSTR_LEN(function_or_method_name), ZSTR_VAL(function_or_method_name));
+		zend_string_release(function_or_method_name);
 		return FAILURE;
 	}
 
