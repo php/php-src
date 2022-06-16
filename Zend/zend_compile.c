@@ -10473,6 +10473,9 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 		case ZEND_AST_NAMED_ARG:
 			zend_eval_const_expr(&ast->child[1]);
 			return;
+		case ZEND_AST_CONST_ENUM_INIT:
+			zend_eval_const_expr(&ast->child[2]);
+			return;
 		default:
 			return;
 	}
