@@ -281,6 +281,9 @@ ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_clas
 			return FAILURE;
 		}
 	}
+	if (!ce->backed_enum_table) {
+		goto not_found;
+	}
 
 	zval *case_name_zv;
 	if (ce->enum_backing_type == IS_LONG) {
@@ -292,6 +295,7 @@ ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_clas
 	}
 
 	if (case_name_zv == NULL) {
+not_found:
 		if (try) {
 			*result = NULL;
 			return SUCCESS;
