@@ -209,8 +209,12 @@ static void sapi_read_post_data(void)
 		SG(request_info).post_entry = NULL;
 		if (!sapi_module.default_post_reader) {
 			/* no default reader ? */
-			SG(request_info).content_type_dup = NULL;
+			if (SG(request_info).content_type_dup) {
+				efree(SG(request_info).content_type_dup);
+				SG(request_info).content_type_dup = NULL;
+			}
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -218,6 +222,9 @@ static void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	if (SG(request_info).content_type_dup) {
+		efree(SG(request_info).content_type_dup);
+	}
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -466,6 +473,9 @@ SAPI_API void sapi_activate(void)
 			 * depending on given content type */
 			sapi_read_post_data();
 		} else {
+			if (SG(request_info).content_type_dup) {
+				efree(SG(request_info).content_type_dup);
+			}
 			SG(request_info).content_type_dup = NULL;
 		}
 
