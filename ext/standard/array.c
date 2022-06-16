@@ -2598,10 +2598,10 @@ PHP_FUNCTION(array_fill)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (EXPECTED(num > 0)) {
-		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
+		if (sizeof(num) > 4 && UNEXPECTED(num >INT_MAX)) {
 			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
-		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
+		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num)) {
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
 		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
