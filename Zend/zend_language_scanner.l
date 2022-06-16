@@ -1731,7 +1731,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 /* Don't treat "readonly(" as a keyword, to allow using it as a function name. */
 <ST_IN_SCRIPTING>"readonly"[ \n\r\t]*"(" {
-	yyless(strlen("readonly"));
+	yyless(8);
 	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
 
