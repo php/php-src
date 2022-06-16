@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71d8e1e6e5a997e9b443fbce4136d0025b67830b */
+ * Stub hash: 2d42ea64a5114eae618a6dfb642c2640f568f5db */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -114,6 +114,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override arginfo_zend_test_parameter_with_attribute
 
+#define arginfo_class_ZendTestForbidDynamicCall_call arginfo_zend_test_void_return
+
+#define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
+
 #define arginfo_class_ZendTestNS_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
@@ -153,6 +157,8 @@ static ZEND_METHOD(ZendTestParameterAttribute, __construct);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
+static ZEND_METHOD(ZendTestForbidDynamicCall, call);
+static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
@@ -231,6 +237,13 @@ static const zend_function_entry class_ZendTestClassWithMethodWithParameterAttri
 
 static const zend_function_entry class_ZendTestChildClassWithMethodWithParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestChildClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -404,6 +417,17 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 
 	INIT_CLASS_ENTRY(ce, "ZendTestChildClassWithMethodWithParameterAttribute", class_ZendTestChildClassWithMethodWithParameterAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ZendTestClassWithMethodWithParameterAttribute);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestForbidDynamicCall(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestForbidDynamicCall", class_ZendTestForbidDynamicCall_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }
