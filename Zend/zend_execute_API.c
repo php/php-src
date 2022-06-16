@@ -346,6 +346,12 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 				}
 			}
 
+			if (ce->type == ZEND_USER_CLASS && ce->backed_enum_table) {
+				ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_IMMUTABLE));
+				zend_hash_release(ce->backed_enum_table);
+				ce->backed_enum_table = NULL;
+			}
+
 			if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
 				zend_op_array *op_array;
 				ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {

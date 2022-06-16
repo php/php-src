@@ -187,6 +187,7 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 {
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_ENUM);
+	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_IMMUTABLE));
 	ZEND_ASSERT(ce->type == ZEND_USER_CLASS);
 
 	uint32_t backing_type = ce->enum_backing_type;
