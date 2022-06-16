@@ -199,7 +199,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 
 	zend_string *name;
 	zval *val;
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&ce->constants_table, name, val) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(CE_CONSTANTS_TABLE(ce), name, val) {
 		zend_class_constant *c = Z_PTR_P(val);
 		if ((ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE) == 0) {
 			continue;
