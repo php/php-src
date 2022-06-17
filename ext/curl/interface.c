@@ -2363,7 +2363,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		case CURLOPT_RTSP_REQUEST:
 		case CURLOPT_RTSP_SERVER_CSEQ:
 		case CURLOPT_WILDCARDMATCH:
-		case CURLOPT_TLSAUTH_TYPE:
 		case CURLOPT_GSSAPI_DELEGATION:
 		case CURLOPT_ACCEPTTIMEOUT_MS:
 		case CURLOPT_SSL_OPTIONS:
@@ -2482,6 +2481,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool i
 		case CURLOPT_MAIL_FROM:
 		case CURLOPT_RTSP_STREAM_URI:
 		case CURLOPT_RTSP_TRANSPORT:
+		case CURLOPT_TLSAUTH_TYPE:
 		case CURLOPT_TLSAUTH_PASSWORD:
 		case CURLOPT_TLSAUTH_USERNAME:
 		case CURLOPT_ACCEPT_ENCODING:

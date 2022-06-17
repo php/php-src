@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
 
+- Curl:
+  . Fixed CURLOPT_TLSAUTH_TYPE is not treated as a string option. (Pierrick)
+
 - Date:
   . Fixed bug #72963 (Null-byte injection in CreateFromFormat and related
     functions). (Derick)
