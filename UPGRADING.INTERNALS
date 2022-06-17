@@ -29,6 +29,9 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * A new ZEND_THREEWAY_COMPARE() macro has been introduced which does a
   three-way comparison of two integers and returns -1, 0 or 1 if the LHS is
   smaller, equal or larger than the RHS
+* Deprecated zend_atoi() and zend_atol(). Use ZEND_STRTOL() for general purpose
+  string to long conversion, or a variant of zend_ini_parse_quantity() for
+  parsing ini quantities.
 
 ========================
 2. Build system changes

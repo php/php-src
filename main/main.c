@@ -263,7 +263,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	size_t value;
 	if (new_value) {
-		value = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		value = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}

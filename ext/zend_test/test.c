@@ -380,6 +380,40 @@ static ZEND_FUNCTION(zend_get_unit_enum)
 	RETURN_OBJ_COPY(zend_enum_get_case_cstr(zend_test_unit_enum, "Foo"));
 }
 
+static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity)
+{
+	zend_string *str;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG(zend_ini_parse_quantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+
+static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity)
+{
+	zend_string *str;
+	zend_string *errstr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETVAL_LONG((zend_long)zend_ini_parse_uquantity(str, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
+}
+
 static ZEND_FUNCTION(namespaced_func)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -571,6 +605,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.print_stderr_mshutdown", "0", PHP_INI_SYSTEM, OnUpdateBool, print_stderr_mshutdown, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.quantity_value", "0", PHP_INI_ALL, OnUpdateLong, quantity_value, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);
@@ -768,7 +803,10 @@ ZEND_GET_MODULE(zend_test)
 /* The important part here is the ZEND_FASTCALL. */
 PHP_ZEND_TEST_API int ZEND_FASTCALL bug78270(const char *str, size_t str_len)
 {
-	return (int) zend_atol(str, str_len);
+	char * copy = zend_strndup(str, str_len);
+	int r = (int) ZEND_ATOL(copy);
+	free(copy);
+	return r;
 }
 
 PHP_ZEND_TEST_API struct bug79096 bug79096(void)

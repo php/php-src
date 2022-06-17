@@ -342,6 +342,91 @@ PHP 8.2 UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Parsing of some ill-formatted values will now trigger a warning when this was
+  silently ignored before. Interpretation of these values is not changed, for
+  backwards compatibility. This affects the following settings:
+  . bcmath.scale
+  . com.code_page
+  . default_socket_timeout
+  . fiber.stack_size
+  . hard_timeout
+  . intl.error_level
+  . ldap.max_links
+  . max_input_nesting_level
+  . max_input_vars
+  . mbstring.regex_retry_limit
+  . mbstring.regex_stack_limit
+  . mysqli.allow_local_infile
+  . mysqli.allow_persistent
+  . mysqli.default_port
+  . mysqli.max_links
+  . mysqli.max_persistent
+  . mysqli.reconnect
+  . mysqli.rollback_on_cached_plink
+  . mysqlnd.log_mask
+  . mysqlnd.mempool_default_size
+  . mysqlnd.net_read_buffer_size
+  . mysqlnd.net_read_timeout
+  . oci8.default_prefetch
+  . oci8.max_persistent
+  . oci8.persistent_timeout
+  . oci8.ping_interval
+  . oci8.prefetch_lob_size
+  . oci8.privileged_connect
+  . oci8.statement_cache_size
+  . odbc.allow_persistent
+  . odbc.check_persistent
+  . odbc.defaultbinmode
+  . odbc.default_cursortype
+  . odbc.defaultlrl
+  . odbc.max_links
+  . odbc.max_persistent
+  . opcache.consistency_checks
+  . opcache.file_update_protection
+  . opcache.force_restart_timeout
+  . opcache.interned_strings_buffer
+  . opcache.jit_bisect_limit
+  . opcache.jit_blacklist_root_trace
+  . opcache.jit_blacklist_side_trace
+  . opcache.jit_debug
+  . opcache.jit_hot_func
+  . opcache.jit_hot_loop
+  . opcache.jit_hot_return
+  . opcache.jit_hot_side_exit
+  . opcache.jit_max_exit_counters
+  . opcache.jit_max_loop_unrolls
+  . opcache.jit_max_polymorphic_calls
+  . opcache.jit_max_recursive_calls
+  . opcache.jit_max_recursive_returns
+  . opcache.jit_max_root_traces
+  . opcache.jit_max_side_traces
+  . opcache.log_verbosity_level
+  . opcache.max_file_size
+  . opcache.opt_debug_level
+  . opcache.optimization_level
+  . opcache.revalidate_freq
+  . output_buffering
+  . pcre.backtrack_limit
+  . pcre.recursion_limit
+  . pgsql.max_links
+  . pgsql.max_persistent
+  . post_max_size
+  . realpath_cache_size
+  . realpath_cache_ttl
+  . session.cache_expire
+  . session.cookie_lifetime
+  . session.gc_divisor
+  . session.gc_maxlifetime
+  . session.gc_probability
+  . soap.wsdl_cache_limit
+  . soap.wsdl_cache_ttl
+  . unserialize_max_depth
+  . upload_max_filesize
+  . user_ini.cache_ttl
+  . xmlrpc_error_number
+  . zend.assertions
+  . zlib.output_compression_level
+
 ========================================
 12. Windows Support
 ========================================
