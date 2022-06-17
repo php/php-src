@@ -150,6 +150,11 @@ static avifBool isAvifError(avifResult result, const char *msg) {
 }
 
 
+typedef struct avifIOCtxReader {
+	avifIO io; // this must be the first member for easy casting to avifIO*
+	avifROData rodata;
+} avifIOCtxReader;
+
 /*
 	<readfromCtx> implements the avifIOReadFunc interface by calling the relevant functions
 	in the gdIOCtx. Our logic is inspired by avifIOMemoryReaderRead() and avifIOFileReaderRead().
@@ -165,8 +170,8 @@ static avifBool isAvifError(avifResult result, const char *msg) {
 */
 static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, size_t size, avifROData *out)
 {
-	void *dataBuf = NULL;
 	gdIOCtx *ctx = (gdIOCtx *) io->data;
+	avifIOCtxReader *reader = (avifIOCtxReader *) io;
 
 	// readFlags is unsupported
 	if (readFlags != 0) {
@@ -182,28 +187,34 @@ static avifResult readFromCtx(avifIO *io, uint32_t readFlags, uint64_t offset, s
 	if (!ctx->seek(ctx, (int) offset))
 		return AVIF_RESULT_IO_ERROR;
 
-	dataBuf = avifAlloc(size);
-	if (!dataBuf) {
+	if (size > reader->rodata.size) {
+		reader->rodata.data = gdRealloc((void *) reader->rodata.data, size);
+		reader->rodata.size = size;
+	}
+	if (!reader->rodata.data) {
 		gd_error("avif error - couldn't allocate memory");
 		return AVIF_RESULT_UNKNOWN_ERROR;
 	}
 
 	// Read the number of bytes requested.
 	// If getBuf() returns a negative value, that means there was an error.
-	int charsRead = ctx->getBuf(ctx, dataBuf, (int) size);
+	int charsRead = ctx->getBuf(ctx, (void *) reader->rodata.data, (int) size);
 	if (charsRead < 0) {
-		avifFree(dataBuf);
 		return AVIF_RESULT_IO_ERROR;
 	}
 
-	out->data = dataBuf;
+	out->data = reader->rodata.data;
 	out->size = charsRead;
 	return AVIF_RESULT_OK;
 }
 
 // avif.h says this is optional, but it seemed easy to implement.
 static void destroyAvifIO(struct avifIO *io) {
-	gdFree(io);
+	avifIOCtxReader *reader = (avifIOCtxReader *) io;
+	if (reader->rodata.data != NULL) {
+		gdFree((void *) reader->rodata.data);
+	}
+	gdFree(reader);
 }
 
 /* Set up an avifIO object.
@@ -217,21 +228,23 @@ static void destroyAvifIO(struct avifIO *io) {
 
 // TODO: can we get sizeHint somehow?
 static avifIO *createAvifIOFromCtx(gdIOCtx *ctx) {
-	avifIO *io;
+	struct avifIOCtxReader *reader;
 
-	io = gdMalloc(sizeof(*io));
-	if (io == NULL)
+	reader = gdMalloc(sizeof(*reader));
+	if (reader == NULL)
 		return NULL;
 
 	// TODO: setting persistent=FALSE is safe, but it's less efficient. Is it necessary?
-	io->persistent = AVIF_FALSE;
-	io->read = readFromCtx;
-	io->write = NULL; // this function is currently unused; see avif.h
-	io->destroy = destroyAvifIO;
-	io->sizeHint = 0; // sadly, we don't get this information from the gdIOCtx.
-	io->data = ctx;
+	reader->io.persistent = AVIF_FALSE;
+	reader->io.read = readFromCtx;
+	reader->io.write = NULL; // this function is currently unused; see avif.h
+	reader->io.destroy = destroyAvifIO;
+	reader->io.sizeHint = 0; // sadly, we don't get this information from the gdIOCtx.
+	reader->io.data = ctx;
+	reader->rodata.data = NULL;
+	reader->rodata.size = 0;
 
-	return io;
+	return (avifIO *) reader;
 }
 
 
@@ -576,6 +589,9 @@ cleanup:
 
 	if (avifOutput.data)
 		avifRWDataFree(&avifOutput);
+
+	if (avifIm)
+		avifImageDestroy(avifIm);
 }
 
 void gdImageAvifEx(gdImagePtr im, FILE *outFile, int quality, int speed)
