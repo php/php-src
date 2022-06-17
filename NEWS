@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     warning). (ilutov)
   . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
     enums). (ilutov)
+  . Fixed bug GH-8810 (Incorrect lineno in backtrace of multi-line function
+    calls). (ilutov)
 
 - Curl:
   . Added new constants from cURL 7.62 to 7.80. (Pierrick)
