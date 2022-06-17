@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Added new constants from cURL 7.62 to 7.80. (Pierrick)
   . New function curl_upkeep(). (Pierrick)
 
-GD:
+- GD:
   . Fixed imagecreatefromavif() memory leak. (cmb)
 
 - MBString:
