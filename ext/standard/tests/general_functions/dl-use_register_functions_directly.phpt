@@ -3,7 +3,7 @@ dl(): use zend_register_functions() directly
 --ENV--
 PHP_DL_TEST_USE_REGISTER_FUNCTIONS_DIRECTLY=1
 --SKIPIF--
-<?php require __DIR__ . "/skip.inc"; ?>
+<?php require dirname(__DIR__, 3) . "/dl_test/tests/skip.inc"; ?>
 --FILE--
 <?php
 
