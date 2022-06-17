@@ -1640,7 +1640,8 @@ class EvaluatedValue
         if ($this->type->isNull()) {
             $code .= "\tZVAL_NULL(&$zvalName);\n";
         } elseif ($this->type->isBool()) {
-            $code .= "\tZVAL_BOOL(&$zvalName, " . ($cConstValue ?: ($this->value ? "true" : "false")) . ");\n";
+            $boolType = $this->value ? 'TRUE' : 'FALSE';
+            $code .= "\tZVAL_$boolType(&$zvalName);\n";
         } elseif ($this->type->isInt()) {
             $code .= "\tZVAL_LONG(&$zvalName, " . ($cConstValue ?: $this->value) . ");\n";
         } elseif ($this->type->isFloat()) {
