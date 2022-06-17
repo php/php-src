@@ -75,13 +75,7 @@ PHP_METHOD(CurlUrl, __construct)
 	php_curl_url_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-PHP_FUNCTION(curl_url)
-{
-	object_init_ex(return_value, curl_CURLUrl_ce);
-	php_curl_url_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-PHP_FUNCTION(curl_url_set)
+PHP_METHOD(CurlUrl, set)
 {
 	zval *zid;
 	zend_long part, flags = 0;
@@ -108,7 +102,7 @@ PHP_FUNCTION(curl_url_set)
 	}
 }
 
-PHP_FUNCTION(curl_url_get)
+PHP_METHOD(CurlUrl, get)
 {
 	zval *zid;
 	zend_long part, flags = 0;
@@ -135,7 +129,7 @@ PHP_FUNCTION(curl_url_get)
 	}
 }
 
-PHP_FUNCTION(curl_url_errno)
+PHP_METHOD(CurlUrl, getErrno)
 {
 	zval *zid;
 	php_curlurl  *uh;
@@ -212,24 +206,5 @@ void curl_url_register_handlers(void) {
 	curl_url_handlers.free_obj = curl_url_free_obj;
 	curl_url_handlers.clone_obj = curl_url_clone_obj;
 	curl_url_handlers.compare = zend_objects_not_comparable;
-}
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
-PHP_FUNCTION(curl_url_strerror)
-{
-	zend_long code;
-	const char *str;
-
-	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_LONG(code)
-	ZEND_PARSE_PARAMETERS_END();
-
-	str = curl_url_strerror(code);
-	if (str) {
-		RETURN_STRING(str);
-	} else {
-		RETURN_NULL();
-	}
 }
 #endif

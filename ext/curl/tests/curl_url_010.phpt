@@ -1,16 +1,22 @@
 --TEST--
-curl_url_strerror()
+CurlUrl::set() with string containing null byte
 --EXTENSIONS--
 curl
 --SKIPIF--
 <?php
-if (curl_version()['version_number'] < 0x075000) die('skip requires curl >= 7.80.0');
+if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62.0');
 ?>
 --FILE--
 <?php
+$invalidUrl = "http://www.example.com\0http://google.com";
+$url = new CurlUrl();
 
-echo curl_url_strerror(CURLUE_BAD_SCHEME);
+try {
+	$url->set(CURLUPART_URL, $invalidUrl);
+} catch (CurlUrlException $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 --EXPECT--
-Bad scheme
+CurlUrl::set(): Argument #2 ($content) must not contain any null bytes

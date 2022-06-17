@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a12c4851e99952e9bb65c6a3c33b59b19a6c82e2 */
+ * Stub hash: 91867597b2d54e9e17e4ecb19d7eaefcf431c26a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -135,41 +135,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_curl_strerror arginfo_curl_multi_strerror
 
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_curl_url, 0, 0, CurlUrl, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, url, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_set, 0, 3, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO(0, url, CurlUrl, 0)
-	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-ZEND_END_ARG_INFO()
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_get, 0, 2, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, url, CurlUrl, 0)
-	ZEND_ARG_TYPE_INFO(0, part, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
-ZEND_END_ARG_INFO()
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_errno, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, url, CurlUrl, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_url_strerror, 0, 1, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, error_code, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
@@ -239,24 +204,18 @@ ZEND_FUNCTION(curl_share_init);
 ZEND_FUNCTION(curl_share_setopt);
 ZEND_FUNCTION(curl_share_strerror);
 ZEND_FUNCTION(curl_strerror);
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_FUNCTION(curl_url);
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_FUNCTION(curl_url_set);
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_FUNCTION(curl_url_get);
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_FUNCTION(curl_url_errno);
-#endif
-#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
-ZEND_FUNCTION(curl_url_strerror);
-#endif
 ZEND_FUNCTION(curl_version);
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_METHOD(CurlUrl, __construct);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_METHOD(CurlUrl, get);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_METHOD(CurlUrl, set);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_METHOD(CurlUrl, getErrno);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_METHOD(CurlUrl, __toString);
@@ -298,21 +257,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_setopt, arginfo_curl_share_setopt)
 	ZEND_FE(curl_share_strerror, arginfo_curl_share_strerror)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-	ZEND_FE(curl_url, arginfo_curl_url)
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-	ZEND_FE(curl_url_set, arginfo_curl_url_set)
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-	ZEND_FE(curl_url_get, arginfo_curl_url_get)
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-	ZEND_FE(curl_url_errno, arginfo_curl_url_errno)
-#endif
-#if LIBCURL_VERSION_NUM >= 0x075000 /* Available since 7.80.0 */
-	ZEND_FE(curl_url_strerror, arginfo_curl_url_strerror)
-#endif
 	ZEND_FE(curl_version, arginfo_curl_version)
 	ZEND_FE_END
 };
@@ -336,9 +280,9 @@ static const zend_function_entry class_CurlShareHandle_methods[] = {
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 static const zend_function_entry class_CurlUrl_methods[] = {
 	ZEND_ME(CurlUrl, __construct, arginfo_class_CurlUrl___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(get, curl_url_get, arginfo_class_CurlUrl_get, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set, curl_url_set, arginfo_class_CurlUrl_set, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrno, curl_url_errno, arginfo_class_CurlUrl_getErrno, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlUrl, get, arginfo_class_CurlUrl_get, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlUrl, set, arginfo_class_CurlUrl_set, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlUrl, getErrno, arginfo_class_CurlUrl_getErrno, ZEND_ACC_PUBLIC)
 	ZEND_ME(CurlUrl, __toString, arginfo_class_CurlUrl___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

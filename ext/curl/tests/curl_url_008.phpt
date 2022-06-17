@@ -1,5 +1,5 @@
 --TEST--
-CurlUrl constructor
+CurlUrl::get() with errors
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -9,16 +9,15 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 --FILE--
 <?php
 
-$url1 = new CurlUrl();
-$url2 = new CurlUrl(null);
-$url3 = new CurlUrl('https://www.google.com');
+$url = new CurlUrl();
 
-var_dump($url1, $url2, $url3);
+try {
+    $url->get(CURLUPART_SCHEME);
+} catch (CurlUrlException $e) {
+    var_dump($e->getCode() == CURLUE_NO_SCHEME);
+}
+
+
 ?>
 --EXPECT--
-object(CurlUrl)#1 (0) {
-}
-object(CurlUrl)#2 (0) {
-}
-object(CurlUrl)#3 (0) {
-}
+bool(true)

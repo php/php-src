@@ -1,5 +1,5 @@
 --TEST--
-curl_url() function
+CurlUrl constructor
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -8,8 +8,17 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 ?>
 --FILE--
 <?php
-var_dump(curl_url());
+
+$url1 = new CurlUrl();
+$url2 = new CurlUrl(null);
+$url3 = new CurlUrl('https://www.google.com');
+
+var_dump($url1, $url2, $url3);
 ?>
 --EXPECT--
 object(CurlUrl)#1 (0) {
+}
+object(CurlUrl)#2 (0) {
+}
+object(CurlUrl)#3 (0) {
 }
