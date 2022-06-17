@@ -3623,7 +3623,7 @@ ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc)
 }
 /* }}} */
 
-static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
+static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc, uint32_t lineno) /* {{{ */
 {
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
@@ -3660,6 +3660,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 	if (may_have_extra_named_args) {
 		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
 	}
+	opline->lineno = lineno;
 	zend_do_extended_fcall_end();
 	return false;
 }
@@ -3678,7 +3679,7 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 }
 /* }}} */
 
-static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
+static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
 {
 	zend_op *opline = get_next_op();
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
@@ -3687,11 +3688,11 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 		Z_STR(name_node->u.constant));
 	opline->result.num = zend_alloc_cache_slot();
 
-	zend_compile_call_common(result, args_ast, NULL);
+	zend_compile_call_common(result, args_ast, NULL, lineno);
 }
 /* }}} */
 
-static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
+static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
 {
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
 		const char *colon;
@@ -3721,7 +3722,7 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 		zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);
 	}
 
-	zend_compile_call_common(result, args_ast, NULL);
+	zend_compile_call_common(result, args_ast, NULL, lineno);
 }
 /* }}} */
 
@@ -4015,7 +4016,7 @@ static zend_result zend_compile_func_cuf(znode *result, zend_ast_list *args, zen
 }
 /* }}} */
 
-static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
+static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc, uint32_t lineno) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
 		znode name_node;
@@ -4050,7 +4051,7 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 			zend_ast_list_add((zend_ast *) args, arg);
 		}
 
-		zend_compile_call_common(result, (zend_ast*)args, fbc);
+		zend_compile_call_common(result, (zend_ast*)args, fbc, lineno);
 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
@@ -4377,7 +4378,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	if (name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(name_ast)) != IS_STRING) {
 		zend_compile_expr(&name_node, name_ast);
-		zend_compile_dynamic_call(result, &name_node, args_ast);
+		zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
 		return;
 	}
 
@@ -4386,9 +4387,9 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
 					&& !is_callable_convert) {
-				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
 			} else {
-				zend_compile_ns_call(result, &name_node, args_ast);
+				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
 			}
 			return;
 		}
@@ -4405,7 +4406,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
-			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc);
+			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
@@ -4417,7 +4418,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
 		) {
 			zend_string_release_ex(lcname, 0);
-			zend_compile_dynamic_call(result, &name_node, args_ast);
+			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
 			return;
 		}
 
@@ -4436,7 +4437,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();
 
-		zend_compile_call_common(result, args_ast, fbc);
+		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}
 }
 /* }}} */
@@ -4500,7 +4501,7 @@ static void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
-	if (zend_compile_call_common(result, args_ast, fbc)) {
+	if (zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(method_ast))) {
 		if (short_circuiting_checkpoint != zend_short_circuiting_checkpoint()) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot combine nullsafe operator with Closure creation");
@@ -4597,7 +4598,7 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		}
 	}
 
-	zend_compile_call_common(result, args_ast, fbc);
+	zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(method_ast));
 }
 /* }}} */
 
@@ -4629,7 +4630,7 @@ static void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		SET_NODE(opline->op1, &class_node);
 	}
 
-	zend_compile_call_common(&ctor_result, args_ast, NULL);
+	zend_compile_call_common(&ctor_result, args_ast, NULL, ast->lineno);
 	zend_do_free(&ctor_result);
 }
 /* }}} */
