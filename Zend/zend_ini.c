@@ -728,10 +728,10 @@ ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string 
 }
 /* }}} */
 
-ZEND_API zend_long zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting) /* {{{ */
+ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_string *setting) /* {{{ */
 {
 	zend_string *errstr;
-	zend_long retval = zend_ini_parse_uquantity(value, &errstr);
+	zend_ulong retval = zend_ini_parse_uquantity(value, &errstr);
 
 	if (errstr) {
 		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
