@@ -3171,8 +3171,18 @@ PHP_FUNCTION(iterator_to_array)
 	zval  *obj;
 	bool use_keys = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, zend_ce_traversable, &use_keys) == FAILURE) {
-		RETURN_THROWS();
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ITERABLE(obj)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(use_keys)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(obj) == IS_ARRAY) {
+		if (use_keys) {
+			RETURN_COPY(obj);
+		} else {
+			RETURN_ARR(zend_array_to_list(Z_ARRVAL_P(obj)));
+		}
 	}
 
 	array_init(return_value);
