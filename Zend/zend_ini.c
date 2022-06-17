@@ -546,7 +546,7 @@ typedef enum {
 	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
 } zend_ini_parse_quantity_signed_result_t;
 
-static zend_long zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
+static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
 	char *str = ZSTR_VAL(value);
@@ -676,7 +676,7 @@ static zend_long zend_ini_parse_quantity_internal(zend_string *value, zend_ini_p
 		smart_str_free(&interpreted);
 		smart_str_free(&chr);
 
-		return (zend_long) retval;
+		return retval;
 	}
 
 end:
@@ -704,13 +704,13 @@ end:
 
 ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr);
+	return (zend_long) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr);
 }
 /* }}} */
 
 ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return (zend_ulong) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr);
+	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr);
 }
 /* }}} */
 
