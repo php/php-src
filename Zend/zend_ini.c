@@ -541,7 +541,12 @@ ZEND_API bool zend_ini_parse_bool(zend_string *str)
 	}
 }
 
-static zend_long zend_ini_parse_quantity_internal(zend_string *value, bool signed_result, zend_string **errstr) /* {{{ */
+typedef enum {
+	ZEND_INI_PARSE_QUANTITY_SIGNED,
+	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
+} zend_ini_parse_quantity_signed_result_t;
+
+static zend_long zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
 	char *str = ZSTR_VAL(value);
@@ -568,7 +573,7 @@ static zend_long zend_ini_parse_quantity_internal(zend_string *value, bool signe
 	zend_ulong retval;
 	errno = 0;
 
-	if (signed_result) {
+	if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
 		retval = (zend_ulong) ZEND_STRTOL(digits, &digits_end, 0);
 	} else {
 		retval = ZEND_STRTOUL(digits, &digits_end, 0);
@@ -576,7 +581,7 @@ static zend_long zend_ini_parse_quantity_internal(zend_string *value, bool signe
 
 	if (errno == ERANGE) {
 		overflow = true;
-	} else if (!signed_result) {
+	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_UNSIGNED) {
 		/* ZEND_STRTOUL() does not report a range error when the subject starts
 		 * with a minus sign, so we check this here. Ignore "-1" as it is
 		 * commonly used as max value, for instance in memory_limit=-1. */
@@ -641,7 +646,7 @@ static zend_long zend_ini_parse_quantity_internal(zend_string *value, bool signe
 	}
 
 	if (!overflow) {
-		if (signed_result) {
+		if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
 			zend_long sretval = (zend_long)retval;
 			if (sretval > 0) {
 				overflow = (zend_long)retval > ZEND_LONG_MAX / (zend_long)factor;
@@ -689,23 +694,23 @@ end:
 		smart_str_free(&interpreted);
 		smart_str_free(&chr);
 
-		return (zend_long) retval;
+		return retval;
 	}
 
 	*errstr = NULL;
-	return (zend_long) retval;
+	return retval;
 }
 /* }}} */
 
 ZEND_API zend_long zend_ini_parse_quantity(zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return zend_ini_parse_quantity_internal(value, true, errstr);
+	return zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_SIGNED, errstr);
 }
 /* }}} */
 
 ZEND_API zend_ulong zend_ini_parse_uquantity(zend_string *value, zend_string **errstr) /* {{{ */
 {
-	return (zend_ulong) zend_ini_parse_quantity_internal(value, false, errstr);
+	return (zend_ulong) zend_ini_parse_quantity_internal(value, ZEND_INI_PARSE_QUANTITY_UNSIGNED, errstr);
 }
 /* }}} */
 
