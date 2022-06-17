@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2022, PHP 8.0.21
 
+- Curl:
+  . Fixed CURLOPT_TLSAUTH_TYPE is not treated as a string option. (Pierrick)
+
 - Date:
   . Fixed bug #74671 (DST timezone abbreviation has incorrect offset). (Derick)
   . Fixed bug #77243 (Weekdays are calculated incorrectly for negative years).
