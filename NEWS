@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #78139 (timezone_open accepts invalid timezone string argument).
     (Derick)
 
-GD:
+- GD:
   . Fixed imagecreatefromavif() memory leak. (cmb)
 
 - MBString:
