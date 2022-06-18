@@ -7,6 +7,9 @@ PHP                                                                        NEWS
     IP-relative calls and jumps.
     (Su Tao, Wang Xue, Chen Hu, Lizhen Lizhen, Dmitry)
 
+- Sockets:
+  . Added TCP_CONGESTION socket option. (David Carlier)
+
 - Zip:
 
   . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
