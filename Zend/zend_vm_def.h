@@ -1500,6 +1500,9 @@ ZEND_VM_HELPER(zend_pre_inc_helper, VAR|CV, ANY)
 			}
 		}
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1552,6 +1555,9 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 			}
 		}
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1606,6 +1612,9 @@ ZEND_VM_HELPER(zend_post_inc_helper, VAR|CV, ANY)
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	FREE_OP1();
@@ -1654,6 +1663,9 @@ ZEND_VM_HELPER(zend_post_dec_helper, VAR|CV, ANY)
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	FREE_OP1();
