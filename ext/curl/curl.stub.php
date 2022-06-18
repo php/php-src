@@ -39,8 +39,6 @@ final class CurlUrl implements Stringable
 
     public function set(int $part, string $content, int $flags = 0): void {}
 
-    public function getErrno(): int {}
-
     public function __toString(): string {}
 }
 

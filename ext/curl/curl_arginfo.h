@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 91867597b2d54e9e17e4ecb19d7eaefcf431c26a */
+ * Stub hash: 83b3f38765c519be81759ac9590cbe76ebee13f8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -160,11 +160,6 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl_getErrno, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlUrl___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -213,9 +208,6 @@ ZEND_METHOD(CurlUrl, get);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_METHOD(CurlUrl, set);
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-ZEND_METHOD(CurlUrl, getErrno);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_METHOD(CurlUrl, __toString);
@@ -282,7 +274,6 @@ static const zend_function_entry class_CurlUrl_methods[] = {
 	ZEND_ME(CurlUrl, __construct, arginfo_class_CurlUrl___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(CurlUrl, get, arginfo_class_CurlUrl_get, ZEND_ACC_PUBLIC)
 	ZEND_ME(CurlUrl, set, arginfo_class_CurlUrl_set, ZEND_ACC_PUBLIC)
-	ZEND_ME(CurlUrl, getErrno, arginfo_class_CurlUrl_getErrno, ZEND_ACC_PUBLIC)
 	ZEND_ME(CurlUrl, __toString, arginfo_class_CurlUrl___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

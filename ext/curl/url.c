@@ -87,7 +87,7 @@ PHP_METHOD(CurlUrl, set)
 	}
 
 	if (content && strlen(ZSTR_VAL(content)) != ZSTR_LEN(content)) {
-		zend_argument_error(curl_CURLUrlException_ce, getThis() ? 2 : 3, "must not contain any null bytes");
+		zend_argument_error(curl_CURLUrlException_ce, 2, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
@@ -127,20 +127,6 @@ PHP_METHOD(CurlUrl, get)
 		RETVAL_STRING(value);
 		curl_free(value);
 	}
-}
-
-PHP_METHOD(CurlUrl, getErrno)
-{
-	zval *zid;
-	php_curlurl  *uh;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &zid, curl_CURLUrl_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	uh = Z_CURL_URL_P(zid);
-
-	RETURN_LONG(uh->err.no);
 }
 
 PHP_METHOD(CurlUrl, __toString)
