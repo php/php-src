@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
 
+- COM:
+  . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
+    (cmb)
+
 - Curl:
   . Fixed CURLOPT_TLSAUTH_TYPE is not treated as a string option. (Pierrick)
 
