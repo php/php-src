@@ -452,7 +452,11 @@ static int com_object_cast(zend_object *readobj, zval *writeobj, int type)
 	switch(type) {
 		case IS_LONG:
 		case _IS_NUMBER:
-			vt = VT_INT;
+#if SIZEOF_ZEND_LONG == 4
+			vt = VT_I4;
+#else
+			vt = VT_I8;
+#endif
 			break;
 		case IS_DOUBLE:
 			vt = VT_R8;

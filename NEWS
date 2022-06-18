@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
     enums). (ilutov)
 
+- COM:
+  . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
+    (cmb)
+
 - Curl:
   . Added new constants from cURL 7.62 to 7.80. (Pierrick)
   . New function curl_upkeep(). (Pierrick)
