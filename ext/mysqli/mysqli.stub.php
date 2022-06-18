@@ -494,11 +494,13 @@ const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
 /**
  * @var int
  * @cname SERVER_QUERY_NO_GOOD_INDEX_USED
+ * @deprecated
  */
 const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
 /**
  * @var int
  * @cname SERVER_QUERY_NO_INDEX_USED
+ * @deprecated
  */
 const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
 #ifdef SERVER_QUERY_WAS_SLOW
