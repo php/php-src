@@ -7,9 +7,7 @@ static const func_info_t func_infos[] = {
 	F1("get_class_methods", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_included_files", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	FN("set_error_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_NULL),
-	F0("restore_error_handler", MAY_BE_TRUE),
 	FN("set_exception_handler", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT|MAY_BE_NULL),
-	F0("restore_exception_handler", MAY_BE_TRUE),
 	F1("get_declared_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_traits", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("get_declared_interfaces", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -268,10 +266,8 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("mysqli_affected_rows", MAY_BE_LONG|MAY_BE_STRING),
 	F1("mysqli_character_set_name", MAY_BE_STRING),
-	F0("mysqli_close", MAY_BE_TRUE),
 	F1("mysqli_connect", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("mysqli_connect_error", MAY_BE_STRING|MAY_BE_NULL),
-	F0("mysqli_debug", MAY_BE_TRUE),
 	F1("mysqli_error", MAY_BE_STRING),
 	F1("mysqli_error_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("mysqli_fetch_field", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -300,7 +296,6 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_real_escape_string", MAY_BE_STRING),
 	F1("mysqli_reap_async_query", MAY_BE_OBJECT|MAY_BE_BOOL),
 	F1("mysqli_stmt_affected_rows", MAY_BE_LONG|MAY_BE_STRING),
-	F0("mysqli_stmt_close", MAY_BE_TRUE),
 	F1("mysqli_stmt_error", MAY_BE_STRING),
 	F1("mysqli_stmt_error_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("mysqli_stmt_get_result", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -311,7 +306,6 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_stmt_result_metadata", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("mysqli_stmt_sqlstate", MAY_BE_STRING),
 	F1("mysqli_sqlstate", MAY_BE_STRING),
-	F0("mysqli_ssl_set", MAY_BE_TRUE),
 	F1("mysqli_stat", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mysqli_store_result", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("mysqli_use_result", MAY_BE_OBJECT|MAY_BE_FALSE),
@@ -438,7 +432,6 @@ static const func_info_t func_infos[] = {
 	F1("socket_addrinfo_explain", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY),
 	FN("sodium_crypto_kx_client_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	FN("sodium_crypto_kx_server_session_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
-	F0("sodium_crypto_generichash_update", MAY_BE_TRUE),
 #if defined(crypto_secretstream_xchacha20poly1305_ABYTES)
 	FN("sodium_crypto_secretstream_xchacha20poly1305_init_push", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
@@ -455,20 +448,9 @@ static const func_info_t func_infos[] = {
 	F1("ob_get_clean", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("ob_list_handlers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("ob_get_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY),
-	F0("krsort", MAY_BE_TRUE),
-	F0("ksort", MAY_BE_TRUE),
-	F0("asort", MAY_BE_TRUE),
-	F0("arsort", MAY_BE_TRUE),
-	F0("sort", MAY_BE_TRUE),
-	F0("usort", MAY_BE_TRUE),
-	F0("uasort", MAY_BE_TRUE),
-	F0("uksort", MAY_BE_TRUE),
-	F0("array_walk", MAY_BE_TRUE),
-	F0("array_walk_recursive", MAY_BE_TRUE),
 	F1("compact", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	FN("array_fill", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
-	F0("shuffle", MAY_BE_TRUE),
 	F1("array_replace", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("array_replace_recursive", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	FN("array_keys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -544,12 +526,6 @@ static const func_info_t func_infos[] = {
 	F1("md5_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("sha1", MAY_BE_STRING),
 	F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
-#if defined(HAVE_SYSLOG_H)
-	F0("closelog", MAY_BE_TRUE),
-#endif
-#if defined(HAVE_SYSLOG_H)
-	F0("syslog", MAY_BE_TRUE),
-#endif
 #if defined(HAVE_INET_NTOP)
 	F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
@@ -639,9 +615,7 @@ static const func_info_t func_infos[] = {
 	F1("image_type_to_extension", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("getimagesize", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("getimagesizefromstring", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-	F0("phpinfo", MAY_BE_TRUE),
 	F1("phpversion", MAY_BE_STRING|MAY_BE_FALSE),
-	F0("phpcredits", MAY_BE_TRUE),
 	F1("php_sapi_name", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("php_uname", MAY_BE_STRING),
 	F1("php_ini_scanned_files", MAY_BE_STRING|MAY_BE_FALSE),

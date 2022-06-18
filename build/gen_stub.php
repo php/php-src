@@ -188,6 +188,11 @@ class SimpleType {
                 return new SimpleType($node->toLowerString(), true);
             }
 
+            if ($node->toLowerString() === 'true') {
+                // TODO PHP-Parser doesn't yet recognize true as a stand-alone built-in type
+                return new SimpleType($node->toLowerString(), true);
+            }
+
             if ($node->toLowerString() === 'self') {
                 throw new Exception('The exact class name must be used instead of "self"');
             }
@@ -380,6 +385,8 @@ class SimpleType {
                 return "IS_NULL";
             case "false":
                 return "IS_FALSE";
+            case "true":
+                return "IS_TRUE";
             default:
                 throw new Exception("Not implemented: $this->name");
         }
@@ -393,6 +400,8 @@ class SimpleType {
                 return "MAY_BE_NULL";
             case "false":
                 return "MAY_BE_FALSE";
+            case "true":
+                return "MAY_BE_TRUE";
             case "bool":
                 return "MAY_BE_BOOL";
             case "int":
@@ -443,6 +452,8 @@ class SimpleType {
                 return "MAY_BE_ARRAY_OF_NULL";
             case "false":
                 return "MAY_BE_ARRAY_OF_FALSE";
+            case "true":
+                return "MAY_BE_ARRAY_OF_TRUE";
             case "bool":
                 return "MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE";
             case "int":
@@ -472,8 +483,6 @@ class SimpleType {
         }
 
         switch ($this->name) {
-            case "true":
-                return "MAY_BE_TRUE";
             case "resource":
                 return "MAY_BE_RESOURCE";
             case "callable":

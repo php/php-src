@@ -152,8 +152,7 @@ function sodium_crypto_generichash_keygen(): string {}
 /** @sensitive-param $key */
 function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
-/** @return true */
-function sodium_crypto_generichash_update(string &$state, string $message): bool {}
+function sodium_crypto_generichash_update(string &$state, string $message): true {}
 
 function sodium_crypto_generichash_final(string &$state, int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
