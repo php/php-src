@@ -1,11 +1,11 @@
 --TEST--
-iconv_strpos() - test against PHP's defaults internal encoding. Non windows systems.
+iconv_strpos() - test against PHP's defaults internal encoding. Windows systems only.
 --EXTENSIONS--
 iconv
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == "WIN" ) {
-    die("skip test is not for windows systems only");
+if (substr(PHP_OS, 0, 3) !== "WIN" ) {
+    die("skip test is for windows systems only");
 }
 ?>
 --FILE--
@@ -15,9 +15,5 @@ ini_set("default_charset", $large_enconding);
 var_dump(iconv_strpos('Hello, world', 'world', -2));
 ?>
 --EXPECTF--
-Warning: ini_set(): Unknown encoding %s
-
-Warning: ini_set(): INI setting contains invalid encoding %s
-
 Warning: iconv_strpos(): Wrong encoding, conversion from %s
 bool(false)
