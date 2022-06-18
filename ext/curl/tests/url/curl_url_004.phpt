@@ -9,11 +9,10 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 --FILE--
 <?php
 $url = new CurlUrl();
-
-$url->set(CURLUPART_HOST, 'www.php.net');
-$url->set(CURLUPART_SCHEME, 'foobar', CURLU_NON_SUPPORT_SCHEME);
-echo $url->get(CURLUPART_URL);
+echo $url->set('https://www.php.net')->get(), PHP_EOL;
+echo $url->set('foobar://www.php.net', CurlUrl::NON_SUPPORT_SCHEME)->get(), PHP_EOL;
 
 ?>
 --EXPECT--
+https://www.php.net/
 foobar://www.php.net/

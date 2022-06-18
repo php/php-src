@@ -1,5 +1,5 @@
 --TEST--
-CurlUrl::set() with errors
+CurlUrl::get() with errors
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -10,12 +10,16 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 <?php
 
 $url = new CurlUrl();
+
 try {
-    $url->set(CURLUPART_SCHEME, 'foobar');
+    $url->get();
 } catch (CurlUrlException $e) {
-    var_dump($e->getCode() == CURLUE_UNSUPPORTED_SCHEME);
+    var_dump($e->getMessage());
 }
 
+
 ?>
---EXPECT--
-bool(true)
+--EXPECTF--
+string(%d) "Unable to get URL%s"
+
+

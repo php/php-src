@@ -26,27 +26,6 @@ final class CurlShareHandle
 {
 }
 
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-/**
- * @strict-properties
- * @not-serializable
- */
-final class CurlUrl implements Stringable
-{
-    public function __construct(?string $url = null) {}
-
-    public function get(int $part, int $flags = 0): string {}
-
-    public function set(int $part, string $content, int $flags = 0): void {}
-
-    public function __toString(): string {}
-}
-
-final class CurlUrlException extends Exception
-{
-}
-#endif
-
 function curl_close(CurlHandle $handle): void {}
 
 /** @refcount 1 */

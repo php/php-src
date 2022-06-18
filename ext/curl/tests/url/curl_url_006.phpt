@@ -11,7 +11,7 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 $url = new CurlUrl('https://www.example.com/');
 $url2 = clone $url;
 unset($url);
-echo $url2->get(CURLUPART_URL);
+echo $url2->get();
 ?>
 --EXPECT--
 https://www.example.com/

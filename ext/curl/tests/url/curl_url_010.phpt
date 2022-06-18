@@ -1,5 +1,5 @@
 --TEST--
-Create CurlUrl object with string containing null byte
+CurlUrl::set() with string containing null byte
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -9,13 +9,14 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 --FILE--
 <?php
 $invalidUrl = "http://www.example.com\0http://google.com";
+$url = new CurlUrl();
 
 try {
-    new CurlUrl($invalidUrl);
-} catch (CurlUrlException $e) {
+	$url->set($invalidUrl);
+} catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
 --EXPECT--
-CurlUrl::__construct(): Argument #1 ($url) must not contain any null bytes
+CurlUrl::set(): Argument #1 ($url) must not contain any null bytes
