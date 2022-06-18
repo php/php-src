@@ -20,6 +20,7 @@
 #include "zend_API.h"
 #include "zend_compile.h"
 #include "zend_enum_arginfo.h"
+#include "zend_interfaces_arginfo.h"
 #include "zend_interfaces.h"
 #include "zend_enum.h"
 
@@ -81,10 +82,13 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__set, "__set");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unset, "__unset");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__isset, "__isset");
-	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__debugInfo, "__debugInfo");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
+
+	if (ce->enum_backing_type != IS_STRING) {
+		ZEND_ENUM_DISALLOW_MAGIC_METHOD(__tostring, "__toString");
+	}
 
 	const char *forbidden_methods[] = {
 		"__sleep",
@@ -169,6 +173,10 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	ce->num_interfaces++;
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->num_interfaces++;
+
+		if (ce->enum_backing_type == IS_STRING) {
+			ce->num_interfaces++;
+		}
 	}
 
 	ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
@@ -181,6 +189,11 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
 		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
+
+		if (ce->enum_backing_type == IS_STRING) {
+			ce->interface_names[num_interfaces_before + 2].name = zend_string_copy(zend_ce_stringable->name);
+			ce->interface_names[num_interfaces_before + 2].lc_name = zend_string_init("stringable", sizeof("stringable") - 1, 0);	
+		}
 	}
 }
 
@@ -394,6 +407,16 @@ static ZEND_NAMED_FUNCTION(zend_enum_try_from_func)
 	zend_enum_from_base(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
+static ZEND_NAMED_FUNCTION(zend_enum_tostring_func)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval *value = zend_enum_fetch_case_value(Z_OBJ_P(ZEND_THIS));
+	ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
+
+	RETURN_COPY(value);
+}
+
 void zend_enum_register_funcs(zend_class_entry *ce)
 {
 	const uint32_t fn_flags =
@@ -446,6 +469,28 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 				&ce->function_table, ZSTR_KNOWN(ZEND_STR_TRYFROM_LOWERCASE), try_from_function)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot redeclare %s::tryFrom()", ZSTR_VAL(ce->name));
+		}
+
+		if (ce->enum_backing_type == IS_STRING) {
+			zend_internal_function *tostring_function =
+				zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
+			memset(tostring_function, 0, sizeof(zend_internal_function));
+			tostring_function->type = ZEND_INTERNAL_FUNCTION;
+			tostring_function->module = EG(current_module);
+			tostring_function->handler = zend_enum_tostring_func;
+			tostring_function->function_name = ZSTR_KNOWN(ZEND_STR_TOSTRING);
+			tostring_function->scope = ce;
+			tostring_function->fn_flags = ZEND_ACC_PUBLIC|ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_ARENA_ALLOCATED;
+			tostring_function->num_args = 0;
+			tostring_function->required_num_args = 0;
+			tostring_function->arg_info = (zend_internal_arg_info *) (arginfo_class_Stringable___toString + 1);
+			if (!zend_hash_add_ptr(
+					&ce->function_table, ZSTR_KNOWN(ZEND_STR_TOSTRING_LOWERCASE), tostring_function)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot redeclare %s::__toString()", ZSTR_VAL(ce->name));
+			}
+
+			ce->__tostring = (zend_function *) tostring_function;
 		}
 	}
 }
