@@ -2936,7 +2936,7 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 # endif
 
 # if defined(MAP_HUGETLB) || defined(MADV_HUGEPAGE)
-static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
+static zend_result accel_remap_huge_pages(void *start, size_t size, size_t real_size, const char *name, size_t offset)
 {
 	void *ret = MAP_FAILED;
 	void *mem;
@@ -2949,7 +2949,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 	}
 	memcpy(mem, start, real_size);
 
@@ -2974,7 +2974,7 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 			zend_error(E_WARNING,
 				ACCELERATOR_PRODUCT_NAME " huge_code_pages: madvise(HUGEPAGE) failed: %s (%d)",
 				strerror(errno), errno);
-			return -1;
+			return FAILURE;
 		}
 #  else
 		memcpy(start, mem, real_size);
@@ -2983,17 +2983,18 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 #  endif
 	}
 
-	if (ret == start) {
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
-	}
+	// Given the MAP_FIXED flag the address can never diverge
+	ZEND_ASSERT(ret == start);
+	memcpy(start, mem, real_size);
+	mprotect(start, size, PROT_READ | PROT_EXEC);
+
 	munmap(mem, size);
 
-	return (ret == start) ? 0 : -1;
+	return SUCCESS;
 }
 
 static void accel_move_code_to_huge_pages(void)
