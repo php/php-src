@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed imagecreatefromavif() memory leak. (cmb)
 
+- FPM:
+  . Fixed bug #67764 (fpm: syslog.ident don't work). (Jakub Zelenka)
+
 - MBString:
   . mb_detect_encoding recognizes all letters in Czech alphabet (alexdowad)
   . mb_detect_encoding recognizes all letters in Hungarian alphabet (alexdowad)
