@@ -71,6 +71,8 @@ PHP 8.2 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/null-false-standalone-types
   . Added support for readonly classes.
     RFC: https://wiki.php.net/rfc/readonly_classes
+  . Added support for true type.
+    RFC: https://wiki.php.net/rfc/true-type
 
 
 - Curl:
