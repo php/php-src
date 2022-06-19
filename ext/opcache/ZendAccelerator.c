@@ -2984,19 +2984,19 @@ static int accel_remap_huge_pages(void *start, size_t size, size_t real_size, co
 		zend_error(E_WARNING,
 			ACCELERATOR_PRODUCT_NAME " huge_code_pages: mmap(HUGETLB) failed: %s (%d)",
 			strerror(errno), errno);
-		return -1;
+		return FAILURE;
 #  endif
 	}
 
+	// Given the MAP_FIXED flag the address can never diverge
+	ZEND_ASSERT(ret == start);
 	zend_mmap_set_name(start, size, "zend_huge_code_pages");
+	memcpy(start, mem, real_size);
+	mprotect(start, size, PROT_READ | PROT_EXEC);
 
-	if (ret == start) {
-		memcpy(start, mem, real_size);
-		mprotect(start, size, PROT_READ | PROT_EXEC);
-	}
 	munmap(mem, size);
 
-	return (ret == start) ? 0 : -1;
+	return SUCCESS;
 }
 
 static void accel_move_code_to_huge_pages(void)
