@@ -88,7 +88,7 @@ final class CurlUrl implements Stringable
     public function __construct(?string $url = null, int $flags = 0) {}
 
     public function get(int $flags = 0): string {}
-    public function set(string $url, int $flags = 0): CurlUrl {}
+    public function set(?string $url, int $flags = 0): CurlUrl {}
 
     public function getHost(): ?string {}
     public function setHost(?string $host): CurlUrl {}

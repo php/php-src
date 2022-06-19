@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 30e7220ecdbf1bd0eacb03192546cd9bf45f236c */
+ * Stub hash: 609ad9cb6c90c95eb728c12da7c831b54204597a */
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CurlUrl___construct, 0, 0, 0)
@@ -16,7 +16,7 @@ ZEND_END_ARG_INFO()
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlUrl_set, 0, 1, CurlUrl, 0)
-	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 #endif

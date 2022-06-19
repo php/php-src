@@ -13,14 +13,23 @@ $url = new CurlUrl();
 
 var_dump($url->getQuery());
 
-$url->setQuery("foo=bar");
+$url->setQuery('foo=bar');
 var_dump($url->getQuery());
 
-$url->setQuery("foo=bar baz", CurlUrl::URLENCODE);
+$url->setQuery('foo=bar baz', CurlUrl::URLENCODE);
 var_dump($url->getQuery());
 var_dump($url->getQuery(CurlUrl::URLDECODE));
 
 $url->setQuery(NULL);
+var_dump($url->getQuery());
+
+$url->setQuery('foo=bar');
+$url->setQuery('bar=baz&baz=qux', CurlUrl::APPENDQUERY);
+var_dump($url->getQuery());
+
+$url->setQuery(NULL);
+$url->setQuery('foo=bar');
+$url->setQuery('bar=baz&baz=qux', CurlUrl::APPENDQUERY | CurlUrl::URLENCODE);
 var_dump($url->getQuery());
 
 ?>
@@ -30,3 +39,5 @@ string(7) "foo=bar"
 string(13) "foo%3dbar+baz"
 string(11) "foo=bar baz"
 NULL
+string(23) "foo=bar&bar=baz&baz=qux"
+string(27) "foo=bar&bar=baz%26baz%3dqux"
