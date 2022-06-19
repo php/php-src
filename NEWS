@@ -10,32 +10,15 @@ PHP                                                                        NEWS
   . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
     enums). (ilutov)
 
-- COM:
-  . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
-    (cmb)
-
 - Curl:
   . Added new constants from cURL 7.62 to 7.80. (Pierrick)
   . New function curl_upkeep(). (Pierrick)
-
-- GD:
-  . Fixed imagecreatefromavif() memory leak. (cmb)
-
-- MBString:
-  . Backwards-compatible mappings for 0x5C/0x7E in Shift-JIS are restored,
-    after they had been changed in 8.1.0. (Alex Dowad)
-
-- ODBC:
-  . Fixed handling of single-key connection strings. (Calvin Buckley)
 
 - OpenSSL:
   . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
 
 - PCRE:
   . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
-
-- PDO_ODBC:
-  . Fixed handling of single-key connection strings. (Calvin Buckley)
 
 - Standard:
   . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
