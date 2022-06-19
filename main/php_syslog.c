@@ -77,7 +77,7 @@ void php_openlog(const char *ident, int option, int facility)
 	PG(have_called_openlog) = 1;
 }
 
-void php_closelog()
+void php_closelog(void)
 {
 	closelog();
 	PG(have_called_openlog) = 0;

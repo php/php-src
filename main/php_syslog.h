@@ -38,7 +38,7 @@ BEGIN_EXTERN_C()
 PHPAPI void php_syslog_str(int priority, const zend_string* message);
 PHPAPI void php_syslog(int, const char *format, ...);
 PHPAPI void php_openlog(const char *, int, int);
-PHPAPI void php_closelog();
+PHPAPI void php_closelog(void);
 END_EXTERN_C()
 
 #endif
