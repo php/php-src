@@ -295,7 +295,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R &&
-					    src->opcode != ZEND_NEW) {
+					    src->opcode != ZEND_NEW &&
+					    src->opcode != ZEND_FETCH_THIS) {
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
 						++(*opt_count);
