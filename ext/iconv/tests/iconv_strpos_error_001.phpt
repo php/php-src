@@ -15,9 +15,6 @@ ini_set("default_charset", $large_enconding);
 var_dump(iconv_strpos('Hello, world', 'world', -2));
 ?>
 --EXPECTF--
-Warning: ini_set(): Unknown encoding %s
-
-Warning: ini_set(): INI setting contains invalid encoding %s
-
+%A
 Warning: iconv_strpos(): Wrong encoding, conversion from %s
 bool(false)
