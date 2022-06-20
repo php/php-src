@@ -57,6 +57,7 @@
 #include "zend_operators.h"
 #include "zend_multiply.h"
 #include "zend_bitset.h"
+#include "zend_mmap.h"
 #include <signal.h>
 
 #ifdef HAVE_UNISTD_H
@@ -475,6 +476,7 @@ static void *zend_mm_mmap(size_t size)
 #endif
 		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, mflags, fd, 0);
 		if (ptr != MAP_FAILED) {
+			zend_mmap_set_name(ptr, size, "zend_alloc");
 			return ptr;
 		}
 	}
@@ -488,6 +490,7 @@ static void *zend_mm_mmap(size_t size)
 #endif
 		return NULL;
 	}
+	zend_mmap_set_name(ptr, size, "zend_alloc");
 	return ptr;
 #endif
 }
