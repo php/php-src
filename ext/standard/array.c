@@ -2601,7 +2601,7 @@ PHP_FUNCTION(array_fill)
 		if (sizeof(num) > 4 && UNEXPECTED(num >INT_MAX)) {
 			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
-		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num)) {
+		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
 			RETURN_THROWS();
 		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
