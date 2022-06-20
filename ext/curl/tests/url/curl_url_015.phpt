@@ -16,20 +16,20 @@ var_dump($url->getQuery());
 $url->setQuery('foo=bar');
 var_dump($url->getQuery());
 
-$url->setQuery('foo=bar baz', CurlUrl::URLENCODE);
+$url->setQuery('foo=bar baz', CurlUrl::URL_ENCODE);
 var_dump($url->getQuery());
-var_dump($url->getQuery(CurlUrl::URLDECODE));
+var_dump($url->getQuery(CurlUrl::URL_DECODE));
 
 $url->setQuery(NULL);
 var_dump($url->getQuery());
 
 $url->setQuery('foo=bar');
-$url->setQuery('bar=baz&baz=qux', CurlUrl::APPENDQUERY);
+$url->setQuery('bar=baz&baz=qux', CurlUrl::APPEND_QUERY);
 var_dump($url->getQuery());
 
 $url->setQuery(NULL);
 $url->setQuery('foo=bar');
-$url->setQuery('bar=baz&baz=qux', CurlUrl::APPENDQUERY | CurlUrl::URLENCODE);
+$url->setQuery('bar=baz&baz=qux', CurlUrl::APPEND_QUERY | CurlUrl::URL_ENCODE);
 var_dump($url->getQuery());
 
 ?>

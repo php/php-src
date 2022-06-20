@@ -24,7 +24,7 @@ try {
 var_dump($url->getScheme());
 
 try {
-	$url->setScheme('foobar', CurlUrl::NON_SUPPORT_SCHEME);
+	$url->setScheme('foobar', CurlUrl::ALLOW_UNSUPPORTED_SCHEME);
 } catch (CurlUrlException $e) {
 	var_dump($e->getCode() == CurlUrlException::UNSUPPORTED_SCHEME);
 }

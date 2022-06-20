@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 609ad9cb6c90c95eb728c12da7c831b54204597a */
+ * Stub hash: 36f24eb2bf05e40500e1c588f39652c34b16526f */
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CurlUrl___construct, 0, 0, 0)
@@ -265,11 +265,11 @@ static zend_class_entry *register_class_CurlUrl(zend_class_entry *class_entry_St
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
-	zval const_APPENDQUERY_value;
-	ZVAL_LONG(&const_APPENDQUERY_value, CURLU_APPENDQUERY);
-	zend_string *const_APPENDQUERY_name = zend_string_init_interned("APPENDQUERY", sizeof("APPENDQUERY") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_APPENDQUERY_name, &const_APPENDQUERY_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_APPENDQUERY_name);
+	zval const_APPEND_QUERY_value;
+	ZVAL_LONG(&const_APPEND_QUERY_value, CURLU_APPENDQUERY);
+	zend_string *const_APPEND_QUERY_name = zend_string_init_interned("APPEND_QUERY", sizeof("APPEND_QUERY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_APPEND_QUERY_name, &const_APPEND_QUERY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_APPEND_QUERY_name);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
@@ -313,11 +313,11 @@ static zend_class_entry *register_class_CurlUrl(zend_class_entry *class_entry_St
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
-	zval const_NON_SUPPORT_SCHEME_value;
-	ZVAL_LONG(&const_NON_SUPPORT_SCHEME_value, CURLU_NON_SUPPORT_SCHEME);
-	zend_string *const_NON_SUPPORT_SCHEME_name = zend_string_init_interned("NON_SUPPORT_SCHEME", sizeof("NON_SUPPORT_SCHEME") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_NON_SUPPORT_SCHEME_name, &const_NON_SUPPORT_SCHEME_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_NON_SUPPORT_SCHEME_name);
+	zval const_ALLOW_UNSUPPORTED_SCHEME_value;
+	ZVAL_LONG(&const_ALLOW_UNSUPPORTED_SCHEME_value, CURLU_NON_SUPPORT_SCHEME);
+	zend_string *const_ALLOW_UNSUPPORTED_SCHEME_name = zend_string_init_interned("ALLOW_UNSUPPORTED_SCHEME", sizeof("ALLOW_UNSUPPORTED_SCHEME") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ALLOW_UNSUPPORTED_SCHEME_name, &const_ALLOW_UNSUPPORTED_SCHEME_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ALLOW_UNSUPPORTED_SCHEME_name);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
@@ -329,19 +329,19 @@ static zend_class_entry *register_class_CurlUrl(zend_class_entry *class_entry_St
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
-	zval const_URLDECODE_value;
-	ZVAL_LONG(&const_URLDECODE_value, CURLU_URLDECODE);
-	zend_string *const_URLDECODE_name = zend_string_init_interned("URLDECODE", sizeof("URLDECODE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_URLDECODE_name, &const_URLDECODE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_URLDECODE_name);
+	zval const_URL_DECODE_value;
+	ZVAL_LONG(&const_URL_DECODE_value, CURLU_URLDECODE);
+	zend_string *const_URL_DECODE_name = zend_string_init_interned("URL_DECODE", sizeof("URL_DECODE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_URL_DECODE_name, &const_URL_DECODE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_URL_DECODE_name);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
-	zval const_URLENCODE_value;
-	ZVAL_LONG(&const_URLENCODE_value, CURLU_URLENCODE);
-	zend_string *const_URLENCODE_name = zend_string_init_interned("URLENCODE", sizeof("URLENCODE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_URLENCODE_name, &const_URLENCODE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_URLENCODE_name);
+	zval const_URL_ENCODE_value;
+	ZVAL_LONG(&const_URL_ENCODE_value, CURLU_URLENCODE);
+	zend_string *const_URL_ENCODE_name = zend_string_init_interned("URL_ENCODE", sizeof("URL_ENCODE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_URL_ENCODE_name, &const_URL_ENCODE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_URL_ENCODE_name);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */ && LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
 
@@ -372,14 +372,6 @@ static zend_class_entry *register_class_CurlUrlException(zend_class_entry *class
 	INIT_CLASS_ENTRY(ce, "CurlUrlException", class_CurlUrlException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
-#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
-
-	zval const_BAD_PARTPOINTER_value;
-	ZVAL_LONG(&const_BAD_PARTPOINTER_value, CURLUE_BAD_PARTPOINTER);
-	zend_string *const_BAD_PARTPOINTER_name = zend_string_init_interned("BAD_PARTPOINTER", sizeof("BAD_PARTPOINTER") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_BAD_PARTPOINTER_name, &const_BAD_PARTPOINTER_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_BAD_PARTPOINTER_name);
-#endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
 	zval const_BAD_PORT_NUMBER_value;
@@ -414,11 +406,11 @@ static zend_class_entry *register_class_CurlUrlException(zend_class_entry *class
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 
-	zval const_URLDECODE_value;
-	ZVAL_LONG(&const_URLDECODE_value, CURLUE_URLDECODE);
-	zend_string *const_URLDECODE_name = zend_string_init_interned("URLDECODE", sizeof("URLDECODE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_URLDECODE_name, &const_URLDECODE_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_URLDECODE_name);
+	zval const_URL_DECODING_FAILED_value;
+	ZVAL_LONG(&const_URL_DECODING_FAILED_value, CURLUE_URLDECODE);
+	zend_string *const_URL_DECODING_FAILED_name = zend_string_init_interned("URL_DECODING_FAILED", sizeof("URL_DECODING_FAILED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_URL_DECODING_FAILED_name, &const_URL_DECODING_FAILED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_URL_DECODING_FAILED_name);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 

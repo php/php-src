@@ -13,7 +13,7 @@ final class CurlUrl implements Stringable
      * @var int
      * @cname CURLU_APPENDQUERY
      */
-    public const APPENDQUERY = UNKNOWN;
+    public const APPEND_QUERY = UNKNOWN;
 
     /**
      * @var int
@@ -34,7 +34,7 @@ final class CurlUrl implements Stringable
     public const DISALLOW_USER = UNKNOWN;
 
     /**
-     * @var int 
+     * @var int
      * @cname CURLU_GUESS_SCHEME
      */
     public const GUESS_SCHEME = UNKNOWN;
@@ -49,7 +49,7 @@ final class CurlUrl implements Stringable
      * @var int
      * @cname CURLU_NON_SUPPORT_SCHEME
      */
-    public const NON_SUPPORT_SCHEME = UNKNOWN;
+    public const ALLOW_UNSUPPORTED_SCHEME = UNKNOWN;
 
     /**
      * @var int
@@ -61,13 +61,13 @@ final class CurlUrl implements Stringable
      * @var int
      * @cname CURLU_URLDECODE
      */
-    public const URLDECODE = UNKNOWN;
+    public const URL_DECODE = UNKNOWN;
 
     /**
      * @var int
      * @cname CURLU_URLENCODE
      */
-    public const URLENCODE = UNKNOWN;
+    public const URL_ENCODE = UNKNOWN;
 
 #if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
     /**
@@ -76,7 +76,7 @@ final class CurlUrl implements Stringable
      */
     public const NO_AUTHORITY = UNKNOWN;
 #endif
-      
+
 #if LIBCURL_VERSION_NUM >= 0x074e00 /* Available since 7.78.0 */
     /**
      * @var int
@@ -121,18 +121,12 @@ final class CurlUrl implements Stringable
     public function getZoneId(int $flags = 0): ?string {}
     public function setZoneId(?string $zoneid, int $flags = 0): CurlUrl {}
 #endif
- 
+
     public function __toString(): string {}
 }
 
 final class CurlUrlException extends Exception
 {
-    /**
-     * @var int
-     * @cname CURLUE_BAD_PARTPOINTER
-     */
-    public const BAD_PARTPOINTER = UNKNOWN;
-
     /**
      * @var int
      * @cname CURLUE_BAD_PORT_NUMBER
@@ -161,7 +155,7 @@ final class CurlUrlException extends Exception
      * @var int
      * @cname CURLUE_URLDECODE
      */
-    public const URLDECODE = UNKNOWN;
+    public const URL_DECODING_FAILED = UNKNOWN;
 
     /**
      * @var int

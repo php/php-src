@@ -16,9 +16,9 @@ var_dump($url->getFragment());
 $url->setFragment("foobar");
 var_dump($url->getFragment());
 
-$url->setFragment("foo bar", CurlUrl::URLENCODE);
+$url->setFragment("foo bar", CurlUrl::URL_ENCODE);
 var_dump($url->getFragment());
-var_dump($url->getFragment(CurlUrl::URLDECODE));
+var_dump($url->getFragment(CurlUrl::URL_DECODE));
 
 $url->setFragment(NULL);
 var_dump($url->getFragment());

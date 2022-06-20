@@ -16,9 +16,9 @@ var_dump($url->getPath());
 $url->setPath("path");
 var_dump($url->getPath());
 
-$url->setPath("Hello world", CurlUrl::URLENCODE);
+$url->setPath("Hello world", CurlUrl::URL_ENCODE);
 var_dump($url->getPath());
-var_dump($url->getPath(CurlUrl::URLDECODE));
+var_dump($url->getPath(CurlUrl::URL_DECODE));
 
 $url->setPath(NULL);
 var_dump($url->getPath());

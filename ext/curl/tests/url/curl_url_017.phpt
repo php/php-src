@@ -16,9 +16,9 @@ var_dump($url->getUser());
 $url->setUser("foobar");
 var_dump($url->getUser());
 
-$url->setUser("foo bar", CurlUrl::URLENCODE);
+$url->setUser("foo bar", CurlUrl::URL_ENCODE);
 var_dump($url->getUser());
-var_dump($url->getUser(CurlUrl::URLDECODE));
+var_dump($url->getUser(CurlUrl::URL_DECODE));
 
 $url->setUser(NULL);
 var_dump($url->getUser());

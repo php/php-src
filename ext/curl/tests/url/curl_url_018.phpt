@@ -16,9 +16,9 @@ var_dump($url->getPassword());
 $url->setPassword("foobar");
 var_dump($url->getPassword());
 
-$url->setPassword("foo bar", CurlUrl::URLENCODE);
+$url->setPassword("foo bar", CurlUrl::URL_ENCODE);
 var_dump($url->getPassword());
-var_dump($url->getPassword(CurlUrl::URLDECODE));
+var_dump($url->getPassword(CurlUrl::URL_DECODE));
 
 $url->setPassword(NULL);
 var_dump($url->getPassword());

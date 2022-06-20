@@ -16,9 +16,9 @@ var_dump($url->getOptions());
 $url->setOptions("foobar");
 var_dump($url->getOptions());
 
-$url->setOptions("foo bar", CurlUrl::URLENCODE);
+$url->setOptions("foo bar", CurlUrl::URL_ENCODE);
 var_dump($url->getOptions());
-var_dump($url->getOptions(CurlUrl::URLDECODE));
+var_dump($url->getOptions(CurlUrl::URL_DECODE));
 
 $url->setOptions(NULL);
 var_dump($url->getOptions());
