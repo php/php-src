@@ -52,6 +52,35 @@ PHPAPI zend_class_entry *spl_ce_GlobIterator;
 PHPAPI zend_class_entry *spl_ce_SplFileObject;
 PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
+/* Object helper */
+static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
+}
+/* }}} */
+#define Z_SPLFILESYSTEM_P(zv)  spl_filesystem_from_obj(Z_OBJ_P((zv)))
+
+/* define an overloaded iterator structure */
+typedef struct {
+	zend_object_iterator  intern;
+	zval                  current;
+	void                 *object;
+} spl_filesystem_iterator;
+
+static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
+{
+	spl_filesystem_iterator    *it;
+
+	it = ecalloc(1, sizeof(spl_filesystem_iterator));
+	it->object = (void *)obj;
+	zend_iterator_init(&it->intern);
+	return it;
+}
+
+static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
+{
+	return (spl_filesystem_object*)it->object;
+}
+
 #define CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(spl_filesystem_object_pointer) \
 	if (!(spl_filesystem_object_pointer)->u.file.stream) { \
 		zend_throw_error(NULL, "Object not initialized"); \
