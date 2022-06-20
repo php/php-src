@@ -1007,13 +1007,13 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 
 SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
-	char *value = NULL, *tmp;
+	char *value, *tmp;
 	
-	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
-		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
+	if (!sapi_module.getenv) {
 		return NULL;
 	}
-	if (!sapi_module.getenv) {
+	if (!strncasecmp(name, "HTTP_PROXY", name_len)) {
+		/* Ugly fix for HTTP_PROXY issue, see bug #72573 */
 		return NULL;
 	}
 	tmp = sapi_module.getenv(name, name_len);
@@ -1027,7 +1027,7 @@ SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 		free(tmp);
 	}
 #endif
-	if (value && sapi_module.input_filter) {
+	if (sapi_module.input_filter) {
 		sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL);
 	}
 	return value;
