@@ -4,8 +4,10 @@ PHP                                                                        NEWS
 
 - CLI:
   . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
-  . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
-    environment variable. (yiyuaner)
+  . Fixed potential overflow for the builtin server via the
+    PHP_CLI_SERVER_WORKERS environment variable. (yiyuaner)
+  . Fixed GH-8575 by changing STDOUT, STDERR and STDIN to not close on resource
+    destruction. (Jakub Zelenka)
 
 - Core:
   . Reduced the memory footprint of strings returned by var_export(),

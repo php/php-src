@@ -475,6 +475,11 @@ PHP 8.2 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- CLI:
+  . The STDOUT, STDERR and STDIN are no longer closed on resource destruction
+    which is mostly when the CLI finishes. It is however still possible to
+    explicitly close those streams using fclose and similar.
+
 - Core:
   . The iterable type is now a built-in compile time alias for array|Traversable.
     Error messages relating to iterable will therefore now use array|Traversable.
