@@ -348,15 +348,15 @@ static void php_binary_init(void)
 {
 	char *binary_location = NULL;
 #ifdef PHP_WIN32
-	binary_location = (char *)malloc(MAXPATHLEN);
-	if (binary_location && GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
-		free(binary_location);
-		PG(php_binary) = NULL;
+	binary_location = (char *)pemalloc(MAXPATHLEN, 1);
+	if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
+		pefree(binary_location, 1);
+		binary_location = NULL;
 	}
 #else
 	if (sapi_module.executable_location) {
-		binary_location = (char *)malloc(MAXPATHLEN);
-		if (binary_location && !strchr(sapi_module.executable_location, '/')) {
+		binary_location = (char *)pemalloc(MAXPATHLEN, 1);
+		if (!strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			int found = 0;
 
@@ -379,11 +379,11 @@ static void php_binary_init(void)
 				efree(path);
 			}
 			if (!found) {
-				free(binary_location);
+				pefree(binary_location, 1);
 				binary_location = NULL;
 			}
 		} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
-			free(binary_location);
+			pefree(binary_location, 1);
 			binary_location = NULL;
 		}
 	}

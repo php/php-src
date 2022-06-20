@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     extension code. (Sara)
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
     references). (Nicolas Grekas)
+  . Fixed potential use after free in php_binary_init(). (Heiko Weber)
 
 - COM:
   . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
