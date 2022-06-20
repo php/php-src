@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed potential use after free in php_binary_init(). (Heiko Weber)
 
+- CLI:
+  . Fixed GH-8827 (Intentionally closing std handles no longer possible). (cmb)
+
 - COM:
   . Fixed bug GH-8778 (Integer arithmethic with large number variants fails).
     (cmb)
