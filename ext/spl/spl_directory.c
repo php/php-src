@@ -334,6 +334,9 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 		return FAILURE;
 	}
 
+	/* prevent closing the stream outside of SplFileObject */
+	intern->u.file.stream->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+
 	/*
 	if (intern->u.file.zcontext) {
 		//zend_list_addref(Z_RES_VAL(intern->u.file.zcontext));
