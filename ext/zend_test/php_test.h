@@ -51,7 +51,6 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	HashTable global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
-	bool print_stderr_mshutdown;
 	zend_test_fiber *active_fiber;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
