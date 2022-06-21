@@ -3205,12 +3205,16 @@ PHP_FUNCTION(iterator_count)
 	zval  *obj;
 	zend_long  count = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &obj, zend_ce_traversable) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ITERABLE(obj)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {
-		return;
+	if (Z_TYPE_P(obj) == IS_ARRAY) {
+		count =  zend_hash_num_elements(Z_ARRVAL_P(obj));
+	} else {
+		if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {
+			return;
+		}
 	}
 
 	RETURN_LONG(count);
