@@ -266,6 +266,11 @@ const DISP_E_OVERFLOW = UNKNOWN;
 const DISP_E_BADINDEX = UNKNOWN;
 /**
  * @var int
+ * @cname PHP_DISP_E_PARAMNOTFOUND
+ */
+const DISP_E_PARAMNOTFOUND = UNKNOWN;
+/**
+ * @var int
  * @cname PHP_MK_E_UNAVAILABLE
  */
 const MK_E_UNAVAILABLE = UNKNOWN;

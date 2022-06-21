@@ -10,6 +10,9 @@ PHP                                                                        NEWS
     json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
     http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
 
+- COM:
+  . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
+
 - FPM:
   . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
   . Added access.suppress_path pool option to filter access log entries.

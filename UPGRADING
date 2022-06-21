@@ -264,6 +264,7 @@ PHP 8.2 UPGRADE NOTES
 ========================================
 
 - COM_DOTNET:
+  . DISP_E_PARAMNOTFOUND
   . LOCALE_NEUTRAL
 
 - Curl:
