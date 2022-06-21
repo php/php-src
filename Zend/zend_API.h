@@ -1319,8 +1319,8 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_ARRAY_OR_NULL,		"of type ?array") \
 	_(Z_EXPECTED_ARRAY_OR_LONG,		"of type array|int") \
 	_(Z_EXPECTED_ARRAY_OR_LONG_OR_NULL, "of type array|int|null") \
-	_(Z_EXPECTED_ITERABLE,				"of type iterable") \
-	_(Z_EXPECTED_ITERABLE_OR_NULL,		"of type ?iterable") \
+	_(Z_EXPECTED_ITERABLE,				"of type Traversable|array") \
+	_(Z_EXPECTED_ITERABLE_OR_NULL,		"of type Traversable|array|null") \
 	_(Z_EXPECTED_FUNC,				"a valid callback") \
 	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
 	_(Z_EXPECTED_RESOURCE,			"of type resource") \
