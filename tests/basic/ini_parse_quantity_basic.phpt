@@ -1,9 +1,12 @@
 --TEST--
 ini_parse_quantity() function - basic test for ini_parse_quantity()
+--INI--
+error_reporting = E_ALL ^ E_WARNING
 --FILE--
 <?php
 foreach (array(
     '-1',
+    '-0x412',
     '0',
     '1',
     '1b',
@@ -20,6 +23,7 @@ foreach (array(
 ?>
 --EXPECT--
 -1
+-1042
 0
 1
 1
