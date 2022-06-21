@@ -30,6 +30,7 @@
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
+#include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -1974,14 +1975,19 @@ PHP_FUNCTION(highlight_string)
 /* {{{ Get interpreted size from the ini shorthand syntax */
 PHP_FUNCTION(ini_parse_quantity)
 {
-	char *shorthand;
-	size_t shorthand_len;
+	zend_string *shorthand;
+	zend_string *errstr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(shorthand, shorthand_len)
+		Z_PARAM_STR(shorthand)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_LONG(zend_atol(shorthand, shorthand_len));
+	RETVAL_LONG(zend_ini_parse_quantity(shorthand, &errstr));
+
+	if (errstr) {
+		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
+		zend_string_release(errstr);
+	}
 }
 /* }}} */
 
