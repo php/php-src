@@ -10,8 +10,8 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 <?php
 
 var_dump(
-		(new CurlUrl('https://www.example.com/'))->get(),
-		(new CurlUrl('https://www.example.com/'))->get(CurlUrl::DEFAULT_PORT),
+        (new CurlUrl('https://www.example.com/'))->get(),
+        (new CurlUrl('https://www.example.com/'))->get(CurlUrl::DEFAULT_PORT),
 );  
  
 ?> 

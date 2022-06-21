@@ -10,9 +10,9 @@ if (curl_version()['version_number'] < 0x073e00) die('skip requires curl >= 7.62
 <?php
 echo new CurlUrl('https://www.php.net/'), PHP_EOL;
 try {
-	echo new CurlUrl();
+    echo new CurlUrl();
 } catch (CurlUrlException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --EXPECTF--

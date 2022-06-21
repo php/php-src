@@ -10,9 +10,9 @@ if (curl_version()['version_number'] < 0x075000) die('skip requires curl >= 7.80
 <?php
 
 try {
-	new CurlUrl('foobar://php.net');
+    new CurlUrl('foobar://php.net');
 } catch (CurlUrlException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>

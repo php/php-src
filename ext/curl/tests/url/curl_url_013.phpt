@@ -18,9 +18,9 @@ $url->setPort(443);
 var_dump($url->getPort());
 
 try {
-	$url->setPort(0);
+    $url->setPort(0);
 } catch (CurlUrlException $e) {
-	var_dump($e->getCode() == CurlUrlException::BAD_PORT_NUMBER);
+    var_dump($e->getCode() == CurlUrlException::BAD_PORT_NUMBER);
 }
 var_dump($url->getPort());
 var_dump($url->getPort(CurlUrl::NO_DEFAULT_PORT));

@@ -12,7 +12,7 @@ $invalidUrl = "http://www.example.com\0http://google.com";
 $url = new CurlUrl();
 
 try {
-	$url->set($invalidUrl);
+    $url->set($invalidUrl);
 } catch (ValueError $e) {
     echo $e->getMessage() . "\n";
 }

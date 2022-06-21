@@ -17,16 +17,16 @@ $url->setScheme('https');
 var_dump($url->getScheme());
 
 try {
-	$url->setScheme('foobar');
+    $url->setScheme('foobar');
 } catch (CurlUrlException $e) {
-	var_dump($e->getCode() == CurlUrlException::UNSUPPORTED_SCHEME);
+    var_dump($e->getCode() == CurlUrlException::UNSUPPORTED_SCHEME);
 }
 var_dump($url->getScheme());
 
 try {
-	$url->setScheme('foobar', CurlUrl::ALLOW_UNSUPPORTED_SCHEME);
+    $url->setScheme('foobar', CurlUrl::ALLOW_UNSUPPORTED_SCHEME);
 } catch (CurlUrlException $e) {
-	var_dump($e->getCode() == CurlUrlException::UNSUPPORTED_SCHEME);
+    var_dump($e->getCode() == CurlUrlException::UNSUPPORTED_SCHEME);
 }
 var_dump($url->getScheme());
 $url->setScheme(null);
