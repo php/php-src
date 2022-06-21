@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0alpha2
+?? ??? ????, PHP 8.2.0alpha3
+
+23 Jun 2022, PHP 8.2.0alpha2
 
 - Core:
   . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
