@@ -89,22 +89,24 @@ static zend_result _php_curl_url_set(php_curlurl *uh, zend_long option, const ch
 
 static void php_curl_url_set_nullable_string(INTERNAL_FUNCTION_PARAMETERS, zend_long part, zend_bool has_flags)
 {
-	zval *zid;
 	zend_long flags = 0;
 	php_curlurl *uh;
 	zend_string *content = NULL;
 	zend_result res;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), has_flags ? "OS!|l": "OS!", &zid, curl_CURLUrl_ce, &content, &flags) == FAILURE) {
-		RETURN_THROWS();
+	if (has_flags) {
+		ZEND_PARSE_PARAMETERS_START(1,2)
+			Z_PARAM_PATH_STR_OR_NULL(content)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(flags)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1,1)
+			Z_PARAM_PATH_STR_OR_NULL(content)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
-	if (content && strlen(ZSTR_VAL(content)) != ZSTR_LEN(content)) {
-		zend_argument_value_error(1, "must not contain any null bytes");
-		RETURN_THROWS();
-	}
-
-	uh = Z_CURL_URL_P(zid);
+	uh = Z_CURL_URL_P(getThis());
 
 	if (content) {
 		res = _php_curl_url_set(uh, part, ZSTR_VAL(content), ZSTR_LEN(content), flags);
@@ -119,7 +121,6 @@ static void php_curl_url_set_nullable_string(INTERNAL_FUNCTION_PARAMETERS, zend_
 
 static void php_curl_url_set_nullable_int(INTERNAL_FUNCTION_PARAMETERS, zend_long part, zend_bool has_flags)
 {
-	zval *zid;
 	zend_long flags = 0;
 	php_curlurl *uh;
 	zend_long content = 0;
@@ -127,11 +128,19 @@ static void php_curl_url_set_nullable_int(INTERNAL_FUNCTION_PARAMETERS, zend_lon
 	zend_result res;
 	smart_str str = {0};
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), has_flags ? "Ol!|l" : "Ol!", &zid, curl_CURLUrl_ce, &content, &content_is_null, &flags) == FAILURE) {
-		RETURN_THROWS();
+	if (has_flags) {
+		ZEND_PARSE_PARAMETERS_START(1,2)
+			Z_PARAM_LONG_OR_NULL(content, content_is_null)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(flags)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1,1)
+			Z_PARAM_LONG_OR_NULL(content, content_is_null)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
-	uh = Z_CURL_URL_P(zid);
+	uh = Z_CURL_URL_P(getThis());
 
 	if (content_is_null) {
 		res = _php_curl_url_set(uh, part, NULL, 0, flags);
@@ -153,16 +162,18 @@ static void php_curl_url_set_nullable_int(INTERNAL_FUNCTION_PARAMETERS, zend_lon
 
 static void php_curl_url_get_nullable_string(INTERNAL_FUNCTION_PARAMETERS, zend_long part, zend_bool has_flags, long no_value)
 {
-	zval *zid;
 	zend_long flags = 0;
 	php_curlurl *uh;
 	char *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), has_flags ? "O|l" : "O", &zid, curl_CURLUrl_ce, &flags) == FAILURE) {
-		RETURN_THROWS();
-	}
+	if (has_flags) {
+		ZEND_PARSE_PARAMETERS_START(0,1)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(flags)
+		ZEND_PARSE_PARAMETERS_END();
+	} 
 
-	uh = Z_CURL_URL_P(zid);
+	uh = Z_CURL_URL_P(getThis());
 
  	CURLUcode res = curl_url_get(uh->url, part, &value, flags);
 	if (res == no_value && res != CURLUE_OK) {
@@ -178,16 +189,18 @@ static void php_curl_url_get_nullable_string(INTERNAL_FUNCTION_PARAMETERS, zend_
 
 static void php_curl_url_get_nullable_int(INTERNAL_FUNCTION_PARAMETERS, zend_long part, zend_bool has_flags, long no_value)
 {
-	zval *zid;
 	zend_long flags = 0;
 	php_curlurl *uh;
 	char *value;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), has_flags ? "O|l" : "O", &zid, curl_CURLUrl_ce, &flags) == FAILURE) {
-		RETURN_THROWS();
+	if (has_flags) {
+		ZEND_PARSE_PARAMETERS_START(0,1)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_LONG(flags)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
-	uh = Z_CURL_URL_P(zid);
+	uh = Z_CURL_URL_P(getThis());
 
  	CURLUcode res = curl_url_get(uh->url, part, &value, flags);
 	if (res == no_value && res != CURLUE_OK) {
@@ -209,14 +222,9 @@ PHP_METHOD(CurlUrl, __construct)
 
 	ZEND_PARSE_PARAMETERS_START(0,2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(url)
+		Z_PARAM_PATH_STR_OR_NULL(url)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (NULL != url && strlen(ZSTR_VAL(url)) != ZSTR_LEN(url)) {
-		zend_argument_value_error(1, "must not contain any null bytes");
-		RETURN_THROWS();
-	}
 
 	return_value = ZEND_THIS;
 	uh = Z_CURL_URL_P(return_value);
