@@ -2272,8 +2272,8 @@ class ClassInfo {
     public $isDeprecated;
     /** @var bool */
     public $isStrictProperties;
-    /** @var bool */
-    public $allowsDynamicProperties;
+    /** @var array{0: string, 1: \PhpParser\Node\Arg[]}[] */
+    public $attributes;
     /** @var bool */
     public $isNotSerializable;
     /** @var Name[] */
@@ -2292,6 +2292,7 @@ class ClassInfo {
     public $cond;
 
     /**
+     * @param array{0: string, 1: \PhpParser\Node\Arg[]}[] $attributes
      * @param Name[] $extends
      * @param Name[] $implements
      * @param ConstInfo[] $constInfos
@@ -2307,7 +2308,7 @@ class ClassInfo {
         ?SimpleType $enumBackingType,
         bool $isDeprecated,
         bool $isStrictProperties,
-        bool $allowsDynamicProperties,
+        array $attributes,
         bool $isNotSerializable,
         array $extends,
         array $implements,
@@ -2324,7 +2325,7 @@ class ClassInfo {
         $this->enumBackingType = $enumBackingType;
         $this->isDeprecated = $isDeprecated;
         $this->isStrictProperties = $isStrictProperties;
-        $this->allowsDynamicProperties = $allowsDynamicProperties;
+        $this->attributes = $attributes;
         $this->isNotSerializable = $isNotSerializable;
         $this->extends = $extends;
         $this->implements = $implements;
@@ -2413,9 +2414,7 @@ class ClassInfo {
             $code .= $property->getDeclaration($allConstInfos);
         }
 
-        if ($this->allowsDynamicProperties) {
-            $code .= "\tzend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);\n";
-        }
+        $code .= generateAttributesCode($this->attributes, "zend_add_class_attribute(class_entry", "class_$escapedName", $allConstInfos);
 
         if ($attributeInitializationCode = generateAttributeInitialization($this->funcInfos, $this->cond)) {
             $code .= "\n" . $attributeInitializationCode;
@@ -2460,8 +2459,10 @@ class ClassInfo {
             $flags[] = "ZEND_ACC_NO_DYNAMIC_PROPERTIES";
         }
 
-        if ($this->allowsDynamicProperties) {
-            $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+        foreach ($this->attributes as list($name)) {
+            if ($name === "AllowDynamicProperties") {
+                $flags[] = "ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES";
+            }
         }
 
         if ($this->isNotSerializable) {
@@ -2979,6 +2980,30 @@ class DocCommentTag {
     }
 }
 
+/**
+ * @param array{0: string, 1: \PhpParser\Node\Arg[]}[] $attributes
+ * @param iterable<ConstInfo> $allConstInfos
+ */
+function generateAttributesCode(array $attributes, string $invocation, string $nameSuffix, iterable $allConstInfos): string {
+    $code = "";
+    foreach ($attributes as list($name, $args)) {
+        $escapedAttributeName = strtr($name, '\\', '_');
+        $code .= "\tzend_string *attribute_name_{$escapedAttributeName}_$nameSuffix = zend_string_init(\"" . addcslashes($name, "\\") . "\", sizeof(\"" . addcslashes($name, "\\") . "\") - 1, 1);\n";
+        $code .= "\t" . ($args ? "zend_attribute *attribute_{$escapedAttributeName}_$nameSuffix = " : "") . "$invocation, attribute_name_{$escapedAttributeName}_$nameSuffix, " . count($args) . ");\n";
+        $code .= "\tzend_string_release(attribute_name_{$escapedAttributeName}_$nameSuffix);\n";
+        foreach ($args as $i => $arg) {
+            $value = EvaluatedValue::createFromExpression($arg->value, null, null, $allConstInfos);
+            $zvalName = "attribute_{$escapedAttributeName}_{$nameSuffix}_arg$i";
+            $code .= $value->initializeZval($zvalName, $allConstInfos);
+            $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
+            if ($arg->name) {
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+            }
+        }
+    }
+    return $code;
+}
+
 /** @return DocCommentTag[] */
 function parseDocComment(DocComment $comment): array {
     $commentText = substr($comment->getText(), 2, -2);
@@ -3286,6 +3311,7 @@ function parseClass(
     $isStrictProperties = false;
     $isNotSerializable = false;
     $allowsDynamicProperties = false;
+    $attributes = [];
 
     if ($comment) {
         $tags = parseDocComment($comment);
@@ -3304,12 +3330,11 @@ function parseClass(
 
     foreach ($class->attrGroups as $attrGroup) {
         foreach ($attrGroup->attrs as $attr) {
-            switch ($attr->name->toCodeString()) {
-                case '\\AllowDynamicProperties':
+            $attributes[] = [$attr->name->toString(), $attr->args];
+            switch ($attr->name->toString()) {
+                case 'AllowDynamicProperties':
                     $allowsDynamicProperties = true;
                     break;
-                default:
-                    throw new Exception("Unhandled attribute {$attr->name->toCodeString()}.");
             }
         }
     }
@@ -3348,7 +3373,7 @@ function parseClass(
             ? SimpleType::fromNode($class->scalarType) : null,
         $isDeprecated,
         $isStrictProperties,
-        $allowsDynamicProperties,
+        $attributes,
         $isNotSerializable,
         $extends,
         $implements,

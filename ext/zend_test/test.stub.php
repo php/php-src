@@ -41,10 +41,12 @@ namespace {
         public function testMethod(): bool {}
     }
 
+    #[Attribute(Attribute::TARGET_ALL)]
     final class ZendTestAttribute {
 
     }
 
+    #[Attribute(Attribute::TARGET_PARAMETER)]
     final class ZendTestParameterAttribute {
         public string $parameter;
 

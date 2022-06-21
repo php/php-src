@@ -816,7 +816,9 @@ static zend_class_entry *register_class_OCILob(void)
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
-	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
+	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCILob);
 
 	return class_entry;
 }
@@ -828,7 +830,9 @@ static zend_class_entry *register_class_OCICollection(void)
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
-	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
+	zend_string *attribute_name_AllowDynamicProperties_class_OCICollection = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCICollection, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_OCICollection);
 
 	return class_entry;
 }

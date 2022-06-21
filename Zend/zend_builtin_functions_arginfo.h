@@ -354,7 +354,9 @@ static zend_class_entry *register_class_stdClass(void)
 	INIT_CLASS_ENTRY(ce, "stdClass", class_stdClass_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
-	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
+	zend_string *attribute_name_AllowDynamicProperties_class_stdClass = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass);
 
 	return class_entry;
 }

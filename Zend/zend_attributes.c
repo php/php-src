@@ -317,27 +317,31 @@ static void free_internal_attribute(zval *v)
 	pefree(Z_PTR_P(v), 1);
 }
 
-ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags)
+ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce)
 {
 	zend_internal_attribute *internal_attr;
+	zend_attribute *attr;
 
 	if (ce->type != ZEND_INTERNAL_CLASS) {
 		zend_error_noreturn(E_ERROR, "Only internal classes can be registered as compiler attribute");
 	}
 
-	internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
-	internal_attr->ce = ce;
-	internal_attr->flags = flags;
-	internal_attr->validator = NULL;
+	ZEND_HASH_FOREACH_PTR(ce->attributes, attr) {
+		if (zend_string_equals(attr->name, zend_ce_attribute->name)) {
+			internal_attr = pemalloc(sizeof(zend_internal_attribute), 1);
+			internal_attr->ce = ce;
+			internal_attr->flags = Z_LVAL(attr->args[0].value);
+			internal_attr->validator = NULL;
 
-	zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
+			zend_string *lcname = zend_string_tolower_ex(ce->name, 1);
+			zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
+			zend_string_release(lcname);
 
-	zend_hash_update_ptr(&internal_attributes, lcname, internal_attr);
-	zend_attribute *attr = zend_add_class_attribute(ce, zend_ce_attribute->name, 1);
-	ZVAL_LONG(&attr->args[0].value, flags);
-	zend_string_release(lcname);
+			return internal_attr;
+		}
+	} ZEND_HASH_FOREACH_END();
 
-	return internal_attr;
+	zend_error_noreturn(E_ERROR, "Classes must be first marked as attribute before being able to be registered as internal attribute class");
 }
 
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname)
@@ -352,27 +356,18 @@ void zend_register_attribute_ce(void)
 	zend_hash_init(&internal_attributes, 8, NULL, free_internal_attribute, 1);
 
 	zend_ce_attribute = register_class_Attribute();
-	attr = zend_internal_attribute_register(zend_ce_attribute, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr = zend_internal_attribute_register(zend_ce_attribute);
 	attr->validator = validate_attribute;
 
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS"), ZEND_ATTRIBUTE_TARGET_CLASS);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_FUNCTION"), ZEND_ATTRIBUTE_TARGET_FUNCTION);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_METHOD"), ZEND_ATTRIBUTE_TARGET_METHOD);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PROPERTY"), ZEND_ATTRIBUTE_TARGET_PROPERTY);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_CLASS_CONSTANT"), ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_PARAMETER"), ZEND_ATTRIBUTE_TARGET_PARAMETER);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("TARGET_ALL"), ZEND_ATTRIBUTE_TARGET_ALL);
-	zend_declare_class_constant_long(zend_ce_attribute, ZEND_STRL("IS_REPEATABLE"), ZEND_ATTRIBUTE_IS_REPEATABLE);
-
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
-	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute, ZEND_ATTRIBUTE_TARGET_METHOD);
+	zend_internal_attribute_register(zend_ce_return_type_will_change_attribute);
 
 	zend_ce_allow_dynamic_properties = register_class_AllowDynamicProperties();
-	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties, ZEND_ATTRIBUTE_TARGET_CLASS);
+	attr = zend_internal_attribute_register(zend_ce_allow_dynamic_properties);
 	attr->validator = validate_allow_dynamic_properties;
 
 	zend_ce_sensitive_parameter = register_class_SensitiveParameter();
-	attr = zend_internal_attribute_register(zend_ce_sensitive_parameter, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	zend_internal_attribute_register(zend_ce_sensitive_parameter);
 
 	memcpy(&attributes_object_handlers_sensitive_parameter_value, &std_object_handlers, sizeof(zend_object_handlers));
 	attributes_object_handlers_sensitive_parameter_value.get_properties_for = attributes_sensitive_parameter_value_get_properties_for;

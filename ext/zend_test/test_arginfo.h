@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a23b7473e5b4525352445545c6b3ab374c4e949 */
+ * Stub hash: 7c78cce33ecdd481c76ebd97cbc163730a47dd4c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -390,6 +390,12 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	INIT_CLASS_ENTRY(ce, "ZendTestAttribute", class_ZendTestAttribute_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	zend_string *attribute_name_Attribute_class_ZendTestAttribute = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttribute, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestAttribute);
+	zval attribute_Attribute_class_ZendTestAttribute_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttribute->args[0].value, &attribute_Attribute_class_ZendTestAttribute_arg0);
 
 	return class_entry;
 }
@@ -407,6 +413,12 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
+	zend_string *attribute_name_Attribute_class_ZendTestParameterAttribute = zend_string_init("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestParameterAttribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestParameterAttribute, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestParameterAttribute);
+	zval attribute_Attribute_class_ZendTestParameterAttribute_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestParameterAttribute_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestParameterAttribute->args[0].value, &attribute_Attribute_class_ZendTestParameterAttribute_arg0);
 
 	return class_entry;
 }
