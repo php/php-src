@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.8
+23 Jun 2022, PHP 8.1.8RC1
 
 - Core:
   . Fixed bug GH-8338 (Intel CET is disabled unintentionally). (Chen, Hu)
