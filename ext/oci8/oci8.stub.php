@@ -560,6 +560,7 @@ function oci_register_taf_callback($connection, ?callable $callback): bool {}
 /** @param resource $connection */
 function oci_unregister_taf_callback($connection): bool {}
 
+#[\AllowDynamicProperties]
 class OCILob {
     /**
      * @alias oci_lob_save
@@ -688,6 +689,7 @@ class OCILob {
     public function free(): bool {}
 }
 
+#[\AllowDynamicProperties]
 class OCICollection {
     /**
      * @alias oci_free_collection

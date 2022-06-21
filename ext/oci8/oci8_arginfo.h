@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: db170b61403c53d4d420d0095031944f3d036508 */
+ * Stub hash: 592fbc9718ff272e1cb182025963683541a7a646 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -815,6 +815,8 @@ static zend_class_entry *register_class_OCILob(void)
 
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
 
 	return class_entry;
 }
@@ -825,6 +827,8 @@ static zend_class_entry *register_class_OCICollection(void)
 
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
 
 	return class_entry;
 }
