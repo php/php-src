@@ -2,12 +2,6 @@
 iconv_strpos() - test against PHP's defaults internal encoding. Non windows systems.
 --EXTENSIONS--
 iconv
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == "WIN" ) {
-    die("skip test is not for windows systems only");
-}
-?>
 --FILE--
 <?php
 $large_enconding = str_repeat("X", 256);
