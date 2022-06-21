@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 76bd9190ad3f5e8fc3f6d6e0b5561f935c73efd3 */
+ * Stub hash: 68fe5f30db7563b073a663397e5b804d81e8d9fb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_set, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, variant, variant, 0)
@@ -116,6 +116,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_variant___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codepage, IS_LONG, 0, "CP_ACP")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_variant_createError, 0, 1, variant, 0)
+	ZEND_ARG_TYPE_INFO(0, scode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_com___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, module_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, server_name, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
@@ -165,6 +169,7 @@ ZEND_FUNCTION(com_print_typeinfo);
 ZEND_FUNCTION(com_message_pump);
 ZEND_FUNCTION(com_load_typelib);
 ZEND_METHOD(variant, __construct);
+ZEND_METHOD(variant, createError);
 ZEND_METHOD(com, __construct);
 #if HAVE_MSCOREE_H
 ZEND_METHOD(dotnet, __construct);
@@ -210,6 +215,7 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_variant_methods[] = {
 	ZEND_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(variant, createError, arginfo_class_variant_createError, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -292,6 +298,7 @@ static void register_com_extension_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("DISP_E_DIVBYZERO", PHP_DISP_E_DIVBYZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DISP_E_OVERFLOW", PHP_DISP_E_OVERFLOW, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DISP_E_BADINDEX", PHP_DISP_E_BADINDEX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DISP_E_PARAMNOTFOUND", PHP_DISP_E_PARAMNOTFOUND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MK_E_UNAVAILABLE", PHP_MK_E_UNAVAILABLE, CONST_CS | CONST_PERSISTENT);
 #if SIZEOF_ZEND_LONG == 8
 	REGISTER_LONG_CONSTANT("VT_UI8", VT_UI8, CONST_CS | CONST_PERSISTENT);

@@ -491,6 +491,21 @@ PHP_METHOD(variant, __construct)
 }
 /* }}} */
 
+PHP_METHOD(variant, createError)
+{
+	zend_long scode;
+	VARIANT vres;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scode)) {
+		RETURN_THROWS();
+	}
+
+	VariantInit(&vres);
+	V_VT(&vres) = VT_ERROR;
+	V_ERROR(&vres) = scode;
+	php_com_wrap_variant(return_value, &vres, CP_ACP);
+}
+
 /* {{{ Assigns a new value for a variant object */
 PHP_FUNCTION(variant_set)
 {

@@ -266,6 +266,11 @@ const DISP_E_OVERFLOW = UNKNOWN;
 const DISP_E_BADINDEX = UNKNOWN;
 /**
  * @var int
+ * @cname PHP_DISP_E_PARAMNOTFOUND
+ */
+const DISP_E_PARAMNOTFOUND = UNKNOWN;
+/**
+ * @var int
  * @cname PHP_MK_E_UNAVAILABLE
  */
 const MK_E_UNAVAILABLE = UNKNOWN;
@@ -351,6 +356,7 @@ function com_load_typelib(string $typelib, bool $case_insensitive = true): bool 
 class variant
 {
     public function __construct(mixed $value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
+    public static function createError(int $scode): variant {}
 }
 
 class com extends variant
