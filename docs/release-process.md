@@ -296,7 +296,7 @@ slightly different steps. We'll call attention where the steps differ.
     upload to GitHub and include in the announcement emails.
 
     ```shell
-    ./scripts/dev/gen_verify_stub php-X.Y.ZRCn YOURKEYID > php-X.Y.ZRCn.manifest
+    ./scripts/dev/gen_verify_stub X.Y.ZRCn YOURKEYID > php-X.Y.ZRCn.manifest
     ```
 
 13. If you have the [GitHub command line tool][] installed, run the following to
@@ -569,7 +569,7 @@ slightly different steps. We'll call attention where the steps differ.
     upload to GitHub and include in the announcement emails.
 
     ```shell
-    ./scripts/dev/gen_verify_stub php-X.Y.Z YOURKEYID > php-X.Y.Z.manifest
+    ./scripts/dev/gen_verify_stub X.Y.Z YOURKEYID > php-X.Y.Z.manifest
     ```
 
 12. If you have the [GitHub command line tool][] installed, run the following to
