@@ -22,6 +22,13 @@
 extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry
 
+
+// TODO - enable
+// ZEND_BEGIN_MODULE_GLOBALS(sqlite3)
+// 	char *extension_dir;
+//	int dbconfig_defensive;
+// ZEND_END_MODULE_GLOBALS(sqlite3)
+
 #include "php_version.h"
 #define PHP_PDO_VERSION PHP_VERSION
 
