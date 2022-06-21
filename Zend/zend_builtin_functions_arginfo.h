@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 33a976db268b72cee985011198125f652bc6c86d */
+ * Stub hash: 80355bb52d643177e3a661a515d9ea915bd1e2fc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -353,6 +353,8 @@ static zend_class_entry *register_class_stdClass(void)
 
 	INIT_CLASS_ENTRY(ce, "stdClass", class_stdClass_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	zend_add_class_attribute(class_entry, zend_ce_allow_dynamic_properties->name, 0);
 
 	return class_entry;
 }
