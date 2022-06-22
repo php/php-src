@@ -6281,7 +6281,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMPVAR|CV, ANY, EVAL, SPEC(OBSER
 		}
 	} else if (new_op_array->last == 1
 			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
-			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+			&& new_op_array->opcodes[0].op1_type == IS_CONST
+			&& EXPECTED(zend_execute_ex == execute_ex)) {
 		if (RETURN_VALUE_USED(opline)) {
 			const zend_op *op = new_op_array->opcodes;
 

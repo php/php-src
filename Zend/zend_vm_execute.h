@@ -4843,7 +4843,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HAN
 		}
 	} else if (new_op_array->last == 1
 			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
-			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+			&& new_op_array->opcodes[0].op1_type == IS_CONST
+			&& EXPECTED(zend_execute_ex == execute_ex)) {
 		if (RETURN_VALUE_USED(opline)) {
 			const zend_op *op = new_op_array->opcodes;
 
@@ -4925,7 +4926,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_
 		}
 	} else if (new_op_array->last == 1
 			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
-			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+			&& new_op_array->opcodes[0].op1_type == IS_CONST
+			&& EXPECTED(zend_execute_ex == execute_ex)) {
 		if (RETURN_VALUE_USED(opline)) {
 			const zend_op *op = new_op_array->opcodes;
 
@@ -14445,7 +14447,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HA
 		}
 	} else if (new_op_array->last == 1
 			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
-			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+			&& new_op_array->opcodes[0].op1_type == IS_CONST
+			&& EXPECTED(zend_execute_ex == execute_ex)) {
 		if (RETURN_VALUE_USED(opline)) {
 			const zend_op *op = new_op_array->opcodes;
 
@@ -38830,7 +38833,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLE
 		}
 	} else if (new_op_array->last == 1
 			&& new_op_array->opcodes[0].opcode == ZEND_RETURN
-			&& new_op_array->opcodes[0].op1_type == IS_CONST) {
+			&& new_op_array->opcodes[0].op1_type == IS_CONST
+			&& EXPECTED(zend_execute_ex == execute_ex)) {
 		if (RETURN_VALUE_USED(opline)) {
 			const zend_op *op = new_op_array->opcodes;
 
