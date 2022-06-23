@@ -271,6 +271,11 @@ static int mbfl_filt_conv_jis_wchar_flush(mbfl_convert_filter *filter)
 		 * or else escape sequence was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
