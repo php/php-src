@@ -1977,7 +1977,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 			}
 			return FAILURE;
 		}
-		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(ZEND_THIS), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
+		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(this_ptr), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		if (Z_ISUNDEF(retval)) {
 			return FAILURE;
 		}
