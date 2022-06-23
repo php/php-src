@@ -47,20 +47,20 @@ var_dump(preg_replace_callback_array(
 
 ?>
 --EXPECTF--
-Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line 12
+Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line %d
 NULL
 
-Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line 17
+Warning: preg_replace_callback_array(): Empty regular expression in %spreg_replace_callback_array_error.php on line %d
 NULL
 
-Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line 24
+Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line %d
 NULL
 
-Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line 31
+Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line %d
 NULL
 
-Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line 36
+Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line %d
 NULL
 
-Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line 43
+Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_callback_array_error.php on line %d
 NULL
