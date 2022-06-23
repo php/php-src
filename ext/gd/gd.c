@@ -3013,22 +3013,22 @@ PHP_FUNCTION(imagecopyresized)
 	dstW = DW;
 
 	if (dstW <= 0) {
-		zend_argument_value_error(3, "must be greater than 0");
+		zend_argument_value_error(7, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (dstH <= 0) {
-		zend_argument_value_error(4, "must be greater than 0");
+		zend_argument_value_error(8, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (srcW <= 0) {
-		zend_argument_value_error(5, "must be greater than 0");
+		zend_argument_value_error(9, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (srcH <= 0) {
-		zend_argument_value_error(6, "must be greater than 0");
+		zend_argument_value_error(10, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
