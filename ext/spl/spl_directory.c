@@ -1968,7 +1968,6 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
 	}
 	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
-		zend_execute_data *execute_data = EG(current_execute_data);
 		spl_filesystem_file_free_line(intern);
 
 		if (php_stream_eof(intern->u.file.stream)) {
@@ -1984,7 +1983,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 
 		if (Z_TYPE(retval) != IS_STRING) {
 			zend_type_error("%s::getCurrentLine(): Return value must be of type string, %s returned",
-				ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name), zend_zval_type_name(&retval));
+				ZSTR_VAL(Z_OBJCE_P(this_ptr)->name), zend_zval_type_name(&retval));
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		}
