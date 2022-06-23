@@ -153,6 +153,11 @@ int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
 	filter->cache = 0;
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -241,6 +246,10 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 	} else if (status == 2) {
 		CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 		CK((*filter->output_function)(cache, filter->data));
+	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
 	}
 
 	return 0;
