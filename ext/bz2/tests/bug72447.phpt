@@ -16,4 +16,4 @@ fclose($fp);
 unlink('testfile');
 ?>
 --EXPECTF--
-Warning: stream_filter_append(): Invalid parameter given for number of blocks to allocate. (0) in %s%ebug72447.php on line %d
+Warning: stream_filter_append(): Invalid parameter given for number of blocks to allocate (0) in %s%ebug72447.php on line %d
