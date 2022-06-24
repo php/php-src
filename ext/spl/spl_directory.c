@@ -1038,8 +1038,8 @@ PHP_METHOD(SplFileInfo, getBasename)
 	path = spl_filesystem_object_get_path(intern);
 
 	if (path && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
-		fname = ZSTR_VAL(intern->file_name) + ZSTR_LEN(path) + 1;
-		flen = ZSTR_LEN(intern->file_name) - (ZSTR_LEN(path) + 1);
+		fname = ZSTR_VAL(intern->file_name) + ZSTR_LEN(path);
+		flen = ZSTR_LEN(intern->file_name) - ZSTR_LEN(path);
 	} else {
 		fname = ZSTR_VAL(intern->file_name);
 		flen = ZSTR_LEN(intern->file_name);
