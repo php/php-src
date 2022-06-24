@@ -327,7 +327,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
-					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
+					php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size. (" ZEND_LONG_FMT ")", tmp);
 				} else {
 					windowBits = tmp;
 				}
@@ -359,7 +359,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* Memory Level (1 - 9) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (" ZEND_LONG_FMT ")", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter given for memory level. (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							memLevel = tmp;
 						}
@@ -369,7 +369,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* log-2 base of history window (9 - 15) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size. (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							windowBits = tmp;
 						}
