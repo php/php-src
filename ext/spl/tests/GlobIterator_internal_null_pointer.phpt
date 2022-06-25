@@ -109,7 +109,7 @@ object(GlobIterator)#1 (4) {
   ["fileName":"SplFileInfo":private]=>
   string(0) ""
   ["glob":"DirectoryIterator":private]=>
-  string(%d) "glob://%s/ext/spl/tests/*.abcdefghij"
+  string(%d) "glob://%s"
   ["subPathName":"RecursiveDirectoryIterator":private]=>
   string(0) ""
 }
