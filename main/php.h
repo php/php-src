@@ -179,6 +179,14 @@ END_EXTERN_C()
 #define explicit_bzero php_explicit_bzero
 #endif
 
+#ifndef HAVE_REALLOCARRAY
+BEGIN_EXTERN_C()
+PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz);
+END_EXTERN_C()
+#undef reallocarray
+#define reallocarray php_reallocarray
+#endif
+
 BEGIN_EXTERN_C()
 PHPAPI int php_safe_bcmp(const zend_string *a, const zend_string *b);
 END_EXTERN_C()
