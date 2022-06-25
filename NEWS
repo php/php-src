@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.9
 
+- Date:
+  . Fixed bug #80047 (DatePeriod doesn't warn with custom DateTimeImmutable).
+    (Derick)
+
 - GD:
   . Fixed bug GH-8848 (imagecopyresized() error refers to the wrong argument).
     (cmb)
