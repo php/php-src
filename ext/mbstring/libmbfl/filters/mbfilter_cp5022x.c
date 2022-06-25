@@ -847,11 +847,27 @@ static void mb_wchar_to_cp50220(uint32_t *in, size_t len, mb_convert_buf *buf, b
 	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
 
 	bool consumed = false;
+	uint32_t w;
+
+	if (buf->state & 0xFFFF00) {
+		/* Reprocess cached codepoint */
+		w = buf->state >> 8;
+		buf->state &= 0xFF;
+		goto reprocess_codepoint;
+	}
 
 	while (len--) {
-		uint32_t w = *in++;
+		w = *in++;
+reprocess_codepoint:
 
-		w = mbfl_convert_kana(w, len ? *in : 0, &consumed, NULL, MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE);
+		if (w >= 0xFF61 && w <= 0xFF9F && !len && !end) {
+			/* This codepoint may need to combine with the next one,
+			 * but the 'next one' will come in a separate buffer */
+			buf->state |= w << 8;
+			break;
+		} else {
+			w = mbfl_convert_kana(w, len ? *in : 0, &consumed, NULL, MBFL_HAN2ZEN_KATAKANA | MBFL_HAN2ZEN_GLUE);
+		}
 
 		if (consumed) {
 			/* Two successive codepoints were converted into one */
