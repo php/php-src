@@ -321,6 +321,9 @@ typedef struct _zend_fcall_info_cache {
 #define CE_DEFAULT_PROPERTIES_TABLE(ce) \
 	zend_class_default_properties_table(ce)
 
+#define CE_BACKED_ENUM_TABLE(ce) \
+	zend_class_backed_enum_table(ce)
+
 #define ZEND_FCI_INITIALIZED(fci) ((fci).size != 0)
 
 ZEND_API int zend_next_free_module(void);
@@ -447,6 +450,26 @@ static zend_always_inline zval *zend_class_default_properties_table(zend_class_e
 		return mutable_data->default_properties_table;
 	} else {
 		return ce->default_properties_table;
+	}
+}
+
+static zend_always_inline void zend_class_set_backed_enum_table(zend_class_entry *ce, HashTable *backed_enum_table)
+{
+	if (ZEND_MAP_PTR(ce->mutable_data) && ce->type == ZEND_USER_CLASS) {
+		zend_class_mutable_data *mutable_data = (zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		mutable_data->backed_enum_table = backed_enum_table;
+	} else {
+		ce->backed_enum_table = backed_enum_table;
+	}
+}
+
+static zend_always_inline HashTable *zend_class_backed_enum_table(zend_class_entry *ce)
+{
+	if (ZEND_MAP_PTR(ce->mutable_data) && ce->type == ZEND_USER_CLASS) {
+		zend_class_mutable_data *mutable_data = (zend_class_mutable_data*)ZEND_MAP_PTR_GET_IMM(ce->mutable_data);
+		return mutable_data->backed_enum_table;
+	} else {
+		return ce->backed_enum_table;
 	}
 }
 
