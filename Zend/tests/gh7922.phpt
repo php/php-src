@@ -28,6 +28,44 @@ try {
 } catch (\Throwable $e) {
     echo (string) $e . "\n";
 }
+
+try {
+    $a = new class() extends A {
+        public function __debugInfo(): array
+        {
+            new class() {
+                public function __destruct()
+                {
+                    throw new \Exception('z_wo_assign');
+                }
+            };
+
+            return ['foo' => 2];
+        }
+    };
+    print_r($a);
+} catch (\Throwable $e) {
+    echo (string) $e . "\n";
+}
+
+try {
+    $a = new class() extends A {
+        public function __debugInfo(): array
+        {
+            $o = new class() {
+                public function __destruct()
+                {
+                    throw new \Exception('z_w_assign');
+                }
+            };
+
+            return ['foo' => 2];
+        }
+    };
+    print_r($a);
+} catch (\Throwable $e) {
+    echo (string) $e . "\n";
+}
 ?>
 --EXPECTF--
 Error: x in %s:6
@@ -40,4 +78,16 @@ Exception: y in %s:21
 Stack trace:
 #0 [internal function]: A@anonymous->__debugInfo()
 #1 %s(24): print_r(Object(A@anonymous), true)
+#2 {main}
+
+Exception: z_wo_assign in %s:35
+Stack trace:
+#0 [internal function]: A@anonymous->__destruct()
+#1 %s(42): print_r(Object(A@anonymous))
+#2 {main}
+
+Exception: z_w_assign in %s:54
+Stack trace:
+#0 [internal function]: A@anonymous->__destruct()
+#1 %s(61): print_r(Object(A@anonymous))
 #2 {main}
