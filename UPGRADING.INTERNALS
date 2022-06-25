@@ -32,6 +32,11 @@ PHP 8.2 INTERNALS UPGRADE NOTES
 * Deprecated zend_atoi() and zend_atol(). Use ZEND_STRTOL() for general purpose
   string to long conversion, or a variant of zend_ini_parse_quantity() for
   parsing ini quantities.
+* The return types of the following object handlers has changed from int to zend_result
+  - zend_object_cast_t
+  - zend_object_count_elements_t
+  - zend_object_get_closure_t
+  - zend_object_do_operation_t
 
 ========================
 2. Build system changes

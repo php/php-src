@@ -1443,7 +1443,7 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 	return zend_std_get_properties(object);
 }
 
-int curl_cast_object(zend_object *obj, zval *result, int type)
+zend_result curl_cast_object(zend_object *obj, zval *result, int type)
 {
 	if (type == IS_LONG) {
 		/* For better backward compatibility, make (int) $curl_handle return the object ID,

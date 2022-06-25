@@ -484,7 +484,7 @@ static zend_object *spl_heap_object_clone(zend_object *old_object) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result spl_heap_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	spl_heap_object *intern = spl_heap_from_obj(object);
 

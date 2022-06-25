@@ -276,7 +276,7 @@ static inline void gmp_create(zval *target, mpz_ptr *gmpnum_target) /* {{{ */
 }
 /* }}} */
 
-static int gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
+static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
 	mpz_ptr gmpnum;
 	switch (type) {
@@ -372,7 +372,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	}                                   \
 	return SUCCESS;
 
-static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	switch (opcode) {
 	case ZEND_ADD:
@@ -409,7 +409,7 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 }
 /* }}} */
 
-static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+static zend_result gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	zval op1_copy;
 	int retval;
