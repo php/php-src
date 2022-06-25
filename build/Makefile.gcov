@@ -31,7 +31,7 @@ lcov: lcov-html
 
 php_lcov.info:
 	@echo "Generating lcov data for $@"
-	$(LTP) --capture --no-external --directory . --output-file $@
+	$(LTP) --capture --no-external --directory . --config-file=./.lcovrc --output-file $@
 	@echo "Stripping bundled libraries from $@"
 	$(LTP) --output-file $@ --remove $@ '*/<stdout>' $(LCOV_EXCLUDES)
 
