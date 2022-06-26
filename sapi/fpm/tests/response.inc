@@ -111,19 +111,29 @@ class Response
     }
 
     /**
-     * @param string $errorMessage
+     * @param string|null $errorMessage
      * @return Response
      */
     public function expectError($errorMessage)
     {
         $errorData = $this->getErrorData();
         if ($errorData !== $errorMessage) {
-            $this->error(
-                "The expected error message '$errorMessage' is not equal to returned error '$errorData'"
-            );
+            $expectedErrorMessage = $errorMessage !== null
+                ? "The expected error message '$errorMessage' is not equal to returned error '$errorData'"
+                : "No error message expected but received '$errorData'";
+            $this->error($expectedErrorMessage);
         }
 
         return $this;
+    }
+
+    /**
+     * @param string $errorMessage
+     * @return Response
+     */
+    public function expectNoError()
+    {
+        return $this->expectError(null);
     }
 
     /**
