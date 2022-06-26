@@ -1383,6 +1383,7 @@ phpdbg_main:
 				);
 			}
 			sapi_deactivate();
+			sapi_destroy();
 			sapi_shutdown();
 			php_ini_builder_deinit(&ini_builder);
 			if (ini_override) {

@@ -660,6 +660,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					get_zend_version()
 				);
 				sapi_deactivate();
+				sapi_destroy();
 				goto out;
 
 			case 'm': /* list compiled in modules */
@@ -1147,6 +1148,7 @@ out:
 	return EG(exit_status);
 err:
 	sapi_deactivate();
+	sapi_destroy();
 	zend_ini_deactivate();
 	EG(exit_status) = 1;
 	goto out;

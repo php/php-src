@@ -1853,20 +1853,25 @@ void php_request_shutdown(void *dummy)
 		zend_post_deactivate_modules();
 	} zend_end_try();
 
-	/* 12. SAPI related shutdown (free stuff) */
+	/* 12. SAPI related shutdown */
 	zend_try {
 		sapi_deactivate();
 	} zend_end_try();
 
-	/* 13. free virtual CWD memory */
+	/* 13. SAPI destroying resources */
+	zend_try {
+		sapi_destroy();
+	} zend_end_try();
+
+	/* 14. free virtual CWD memory */
 	virtual_cwd_deactivate();
 
-	/* 14. Destroy stream hashes */
+	/* 15. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes();
 	} zend_end_try();
 
-	/* 15. Free Willy (here be crashes) */
+	/* 16. Free Willy (here be crashes) */
 	zend_arena_destroy(CG(arena));
 	zend_interned_strings_deactivate();
 	zend_try {
@@ -1877,7 +1882,7 @@ void php_request_shutdown(void *dummy)
 	 * At this point, no memory beyond a single chunk should be in use. */
 	zend_set_memory_limit(PG(memory_limit));
 
-	/* 16. Deactivate Zend signals */
+	/* 17. Deactivate Zend signals */
 #ifdef ZEND_SIGNALS
 	zend_signal_deactivate();
 #endif
@@ -2343,6 +2348,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	virtual_cwd_deactivate();
 
 	sapi_deactivate();
+	sapi_destroy();
 	module_startup = false;
 
 	/* Don't leak errors from startup into the per-request phase. */
