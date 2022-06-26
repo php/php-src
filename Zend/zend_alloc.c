@@ -268,11 +268,13 @@ struct _zend_mm_heap {
 	union {
 		struct {
 			void      *(*_malloc)(size_t);
+			void      *(*_malloc_nodump)(size_t);
 			void       (*_free)(void*);
 			void      *(*_realloc)(void*, size_t);
 		} std;
 		struct {
 			void      *(*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+			void      *(*_malloc_nodump)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 			void       (*_free)(void*  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 			void      *(*_realloc)(void*, size_t  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 		} debug;
@@ -683,6 +685,18 @@ static zend_always_inline void zend_mm_hugepage(void* ptr, size_t size)
 	(void)memcntl(ptr, size, MC_HAT_ADVISE, (char *)&m, 0, 0);
 #elif !defined(VM_FLAGS_SUPERPAGE_SIZE_2MB) && !defined(MAP_ALIGNED_SUPER)
 	zend_error_noreturn(E_WARNING, "huge_pages: thp unsupported on this platform");
+#endif
+}
+
+static zend_always_inline void zend_mm_nodump(void* ptr, size_t size)
+{
+#if defined(MADV_DONTDUMP)
+	(void)madvise(ptr, size, MADV_DONTDUMP);
+#elif defined(MADV_NOCORE)
+	(void)madvise(ptr, size, MADV_NOCORE);
+#else
+	(void)ptr;
+	(void)size;
 #endif
 }
 
@@ -2221,6 +2235,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 #if ZEND_MM_CUSTOM
 static void *tracked_malloc(size_t size);
+static void *tracked_malloc_nodump(size_t size);
 static void tracked_free_all(void);
 #endif
 
@@ -2440,6 +2455,15 @@ static ZEND_COLD void* ZEND_FASTCALL _malloc_custom(size_t size ZEND_FILE_LINE_D
 	}
 }
 
+static ZEND_COLD void* ZEND_FASTCALL _malloc_custom_nodump(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		return AG(mm_heap)->custom_heap.debug._malloc_nodump(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else {
+		return AG(mm_heap)->custom_heap.std._malloc_nodump(size);
+	}
+}
+
 static ZEND_COLD void ZEND_FASTCALL _efree_custom(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
@@ -2561,6 +2585,18 @@ ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 	return zend_mm_alloc_heap(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
+ZEND_API void* ZEND_FASTCALL _emalloc_nodump(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+#if ZEND_MM_CUSTOM
+	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
+		return _malloc_custom_nodump(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	}
+#endif
+	void* ptr = zend_mm_alloc_heap(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	zend_mm_nodump(ptr, size);
+	return ptr;
+}
+
 ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 #if ZEND_MM_CUSTOM
@@ -2629,6 +2665,15 @@ ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_D
 	size = zend_safe_address_guarded(nmemb, size, 0);
 	p = _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	memset(p, 0, size);
+	return p;
+}
+
+ZEND_API void* ZEND_FASTCALL _ecalloc_nodump(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	void *p;
+
+	p = _ecalloc(nmemb, size);
+	zend_mm_nodump(p, size);
 	return p;
 }
 
@@ -2800,6 +2845,13 @@ static void *tracked_malloc(size_t size)
 	return ptr;
 }
 
+static void *tracked_malloc_nodump(size_t size)
+{
+	void *ptr = tracked_malloc(size);
+	zend_mm_nodump(ptr, size);
+	return ptr;
+}
+
 static void tracked_free(void *ptr) {
 	if (!ptr) {
 		return;
@@ -2863,11 +2915,13 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		if (!tracked) {
 			/* Use system allocator. */
 			mm_heap->custom_heap.std._malloc = __zend_malloc;
+			mm_heap->custom_heap.std._malloc_nodump = __zend_malloc_nodump;
 			mm_heap->custom_heap.std._free = free;
 			mm_heap->custom_heap.std._realloc = __zend_realloc;
 		} else {
 			/* Use system allocator and track allocations for auto-free. */
 			mm_heap->custom_heap.std._malloc = tracked_malloc;
+			mm_heap->custom_heap.std._malloc = tracked_malloc_nodump;
 			mm_heap->custom_heap.std._free = tracked_free;
 			mm_heap->custom_heap.std._realloc = tracked_realloc;
 			mm_heap->tracked_allocs = malloc(sizeof(HashTable));
@@ -3092,6 +3146,15 @@ ZEND_API void * __zend_malloc(size_t len)
 	zend_out_of_memory();
 }
 
+ZEND_API void * __zend_malloc_nodump(size_t len)
+{
+	void *ptr;
+
+	ptr = __zend_malloc(len);
+	zend_mm_nodump(ptr, len);
+	return ptr;
+}
+
 ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
 {
 	void *tmp;
@@ -3100,6 +3163,15 @@ ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
 	tmp = __zend_malloc(len);
 	memset(tmp, 0, len);
 	return tmp;
+}
+
+ZEND_API void * __zend_calloc_nodump(size_t nmemb, size_t len)
+{
+	void *ptr;
+
+	ptr = __zend_calloc(nmemb, len);
+	zend_mm_nodump(ptr, len);
+	return ptr;
 }
 
 ZEND_API void * __zend_realloc(void *p, size_t len)

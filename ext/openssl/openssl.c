@@ -7333,7 +7333,7 @@ static int php_openssl_validate_iv(const char **piv, size_t *piv_len, size_t iv_
 		return SUCCESS;
 	}
 
-	iv_new = ecalloc(1, iv_required_len + 1);
+	iv_new = ecalloc_nodump(1, iv_required_len + 1);
 
 	if (*piv_len == 0) {
 		/* BC behavior */
@@ -7415,7 +7415,7 @@ static int php_openssl_cipher_init(const EVP_CIPHER *cipher_type,
 			php_error_docref(NULL, E_WARNING, "Key length cannot be set for the cipher algorithm");
 			return FAILURE;
 		}
-		key = emalloc(key_len);
+		key = emalloc_nodump(key_len);
 		memset(key, 0, key_len);
 		memcpy(key, *ppassword, password_len);
 		*ppassword = (char *) key;
