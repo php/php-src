@@ -22,13 +22,13 @@
 
 PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz)
 {
-#ifndef _WIN32
 	size_t r;
+#ifndef _WIN32
 	if (__builtin_mul_overflow(nmb, siz, &r)) {
 #else
-        // nmb an siz must be lower than sqrt SIZE_MAX+1
-        static size_t elim = 1UL << (sizeof(size_t) * CHAR_BIT / 2);
-	if ((nmb >= elim || siz >= elim) && nmb > 0  && SIZE_MAX / nmb < siz) {
+	
+	r = siz * nmb;
+	if (siz != 0 && r / siz != nmb) {
 #endif
 		// EOVERFLOW may have been, arguably, more appropriate
 		// but this is what other implementations set
@@ -36,6 +36,6 @@ PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz)
 		return NULL;
 	}
 
-	return realloc(p, nmb * siz);
+	return realloc(p, r);
 }
 #endif
