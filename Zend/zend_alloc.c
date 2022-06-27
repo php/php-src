@@ -2632,6 +2632,19 @@ ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_D
 	return p;
 }
 
+ZEND_API void* ZEND_FASTCALL _ereallocarray(void* ptr, size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	void *p;
+
+	size = zend_safe_address_guarded(nmemb, size, 0);
+
+	if (!size) {
+		return NULL;
+	}
+	p = _erealloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	return p;
+}
+
 ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t length;
@@ -3109,6 +3122,15 @@ ZEND_API void * __zend_realloc(void *p, size_t len)
 		return p;
 	}
 	zend_out_of_memory();
+}
+
+ZEND_API void * __zend_reallocarray(void *p, size_t nmemb, size_t len)
+{
+	void *tmp;
+
+	len = zend_safe_address_guarded(nmemb, len, 0);
+	tmp = __zend_realloc(p, len);
+	return tmp;
 }
 
 #ifdef ZTS

@@ -1099,7 +1099,7 @@ PHP_FUNCTION(getopt)
 
 		/* the first <len> slots are filled by the one short ops
 		 * we now extend our array and jump to the new added structs */
-		opts = (opt_struct *) erealloc(opts, sizeof(opt_struct) * (len + count + 1));
+		opts = (opt_struct *) ereallocarray(opts, sizeof(opt_struct), (len + count + 1));
 		orig_opts = opts;
 		opts += len;
 
