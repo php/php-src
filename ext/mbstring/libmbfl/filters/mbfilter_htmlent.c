@@ -177,7 +177,8 @@ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
-	int  pos, ent = 0;
+	int pos;
+	unsigned int ent = 0;
 	mbfl_html_entity_entry *entity;
 	char *buffer = (char*)filter->opaque;
 
@@ -215,6 +216,10 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* numeric entity */
 					if (filter->status > 2) {
 						for (pos=2; pos<filter->status; pos++) {
+							if (ent > 0x19999999) {
+								ent = -1;
+								break;
+							}
 							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
@@ -228,7 +233,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 						ent = -1;
 					}
 				}
-				if (ent >= 0 && ent < 0x110000) {
+				if (ent < 0x110000) {
 					CK((*filter->output_function)(ent, filter->data));
 				} else {
 					for (pos = 0; pos < filter->status; pos++) {
@@ -253,13 +258,20 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* decoded */
 					CK((*filter->output_function)(ent, filter->data));
 					filter->status = 0;
-					/*php_error_docref("ref.mbstring", E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
+
 				} else {
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;
-					/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer); */
-					mbfl_filt_conv_html_dec_flush(filter);
+
+					/* flush fragments */
+					pos = 0;
+					while (filter->status--) {
+						int e = (*filter->output_function)(buffer[pos++], filter->data);
+						if (e != 0)
+							return e;
+					}
+					filter->status = 0;
 				}
 			}
 		} else {
@@ -272,8 +284,15 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				if (c=='&')
 					filter->status--;
 				buffer[filter->status] = 0;
-				/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer)l */
-				mbfl_filt_conv_html_dec_flush(filter);
+
+				pos = 0;
+				while (filter->status--) {
+					int e = (*filter->output_function)(buffer[pos++], filter->data);
+					if (e != 0)
+						return e;
+				}
+				filter->status = 0;
+
 				if (c=='&')
 				{
 					buffer[filter->status++] = '&';
