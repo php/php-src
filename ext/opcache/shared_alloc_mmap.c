@@ -43,9 +43,6 @@
 #if defined(__x86_64__) && defined(__linux__)
 #define max(a,b) ((a) > (b) ? (a):(b))
 
-/* This function must exist in PHP .text segment */
-void* php_text_lighthouse(void);
-
 #if defined(MAP_HUGETLB)
 static const size_t huge_page_size = 2 * 1024 * 1024; /* 2MB page size */
 #else
@@ -79,7 +76,8 @@ static size_t map_segment_count(void)
         count = 0;
     }
 
-    fclose(f); f = NULL;
+    fclose(f);
+    f = NULL;
     return count;
 }
 
@@ -130,7 +128,8 @@ static bool parse_map_file(struct map_seg_addresses* map_segments,
         ret = false;
     }
 
-    fclose(f); f = NULL;
+    fclose(f);
+    f = NULL;
     return ret;
 }
 
@@ -222,8 +221,7 @@ static size_t search_candidates(struct map_seg_addresses* combined_segments,
        1) requested buffer size is equal to or greater than 4GB,
        2) PHP .text segment is under 4GB memory address
     */
-    if (requested_size >= size_4GB || php_text_segment->start < addr_4GB)
-    {
+    if (requested_size >= size_4GB || php_text_segment->start < addr_4GB) {
         return 0;
     }
 
@@ -234,8 +232,11 @@ static size_t search_candidates(struct map_seg_addresses* combined_segments,
 
         We only search any candidates BEFORE PHP .text segment. E.g., [hole0],
         [hole1], and [hole2] might be good candidates. Here is why:
-        in standalone PHP, we find that [heap] is closely following PHP .text
-        segment and our buffer might block heap growth if we use [hole3].
+        for standalone PHP, such as PHP command, we find that [heap] is
+        closely following PHP .text segment and our buffer might block heap
+        growth if we use [hole3]. Although for module PHP, such as libphp.so
+        loaded into webserver, [heap] is usually before libphp [.text] segment,
+        our search algorithm still works.
     */
 
     /* go through all segments for available buffer candidates address */
@@ -245,9 +246,10 @@ static size_t search_candidates(struct map_seg_addresses* combined_segments,
         /* check if there is enough space for buffer in the hole before this segment */
         size_t hole_size = seg->start - prev_seg_end;
 
-        if (hole_size - reserved_align_space >= requested_size) {
-           /* make sure we are searching address before PHP .text segment */
-           if (seg->start < php_text_segment->start) {
+        /* requested_size is surely less than 4GB, so no overflow */
+        if (hole_size >= requested_size + reserved_align_space) {
+           /* ensure (candidate) address is before PHP .text segment */
+           if (seg->start <= php_text_segment->start) {
                 /* calculate and align buffer start address */
                 candidate = seg->start - reserved_align_space - requested_size;
                 candidate = ZEND_MM_ALIGNED_SIZE_EX(candidate, reserved_align_space);
@@ -297,9 +299,17 @@ static size_t search_candidates(struct map_seg_addresses* combined_segments,
 static void* create_preferred_segments(size_t requested_size)
 {
     /* If requested_size is larger than 4GB, do not move opcache and jit buffer */
-    if (requested_size >= size_4GB) {
+    if (requested_size >= size_4GB ||
+        requested_size < huge_page_size ||
+        requested_size % huge_page_size != 0)
+    {
         return MAP_FAILED;
     }
+
+    /* We first count the segments in maps file and then use an array in stack
+       to store these segments and do further actions. Using malloc() to
+       allocate memory might change maps file, so here we have to use array.
+    */
 
     /* Get total segments count */
     int segment_count = 0;
@@ -338,14 +348,14 @@ static void* create_preferred_segments(size_t requested_size)
 
     /* Create segments by trying all candidate addresses
        and return immediately if succeed. */
-	void *res;
-	int flags = PROT_READ | PROT_WRITE, fd = -1;
+    void *res;
+    int flags = PROT_READ | PROT_WRITE, fd = -1;
 
     /* Try to get memory from huge pages */
 #if defined(MAP_HUGETLB)
     for(int i = 0; i < candidate_count; i++) {
 		res = mmap((void*)candidates[i], requested_size, flags,
-                   MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, fd, 0);
+                   MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB|MAP_FIXED, fd, 0);
 		if (MAP_FAILED != res) {
 			return res;
 		}
@@ -355,7 +365,7 @@ static void* create_preferred_segments(size_t requested_size)
     /* Try 4KB pages, e.g., huge page allocation is failed or not supported */
     for(int i = 0; i < candidate_count; i++) {
         res = mmap((void*)candidates[i], requested_size, flags,
-                   MAP_SHARED|MAP_ANONYMOUS, fd, 0);
+                   MAP_SHARED|MAP_ANONYMOUS|MAP_FIXED, fd, 0);
 		if (MAP_FAILED != res) {
 			return res;
 		}
@@ -389,6 +399,21 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
+
+#if defined(__x86_64__) && defined(__linux__)
+	/* On 64b Linux, try to allocate segment using preferred address, first try
+       huge pages, then try 4KB pages; if both failed, fall back and continue
+       the previous allocation logic.
+
+       If fallback happens, We cannot do JIT buffer relocation and have no
+       performance gain, but program will go on without failure.
+    */
+	p = create_preferred_segments(requested_size);
+	if (p != MAP_FAILED) {
+		goto success;
+	}
+#endif /* __x86_64__&& __linux__ */
+
 #ifdef MAP_HUGETLB
     size_t huge_page_size = 2 * 1024 * 1024;
 
@@ -403,16 +428,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	 * (boot time config only, but enabled by default on most arches).
 	 */
 	if (requested_size >= huge_page_size && requested_size % huge_page_size == 0) {
-#if defined(__x86_64__) && defined(__linux__)
-		/* On 64b Linux, we first try to allocate preferred segment; if failed,
-		   fall back to previous allocation logic: mmap(NULL, ...)
-		*/
-		p = create_preferred_segments(requested_size);
-		if (p != MAP_FAILED) {
-			goto success;
-		}
-#endif /* __x86_64__ && __linux__ */
-
 # if defined(__x86_64__) && defined(MAP_32BIT)
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
@@ -420,7 +435,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
 			munmap(p, requested_size);
-			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
+			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((uintptr_t)p, huge_page_size));
 			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
@@ -443,16 +458,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		goto success;
 	}
 #endif /* MAP_HUGETLB */
-
-	/* Allocate 4KB pages because huge page is not supported. */
-#if defined(__x86_64__) && defined(__linux__)
-	/* On 64b Linux, try to allocate segment using preferred address;
-	   if failed, fall through to previous logic. */
-	p = create_preferred_segments(requested_size);
-	if (p != MAP_FAILED) {
-		goto success;
-	}
-#endif /* __x86_64__&& __linux__ */
 
 	p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS, fd, 0);
 	if (p == MAP_FAILED) {
