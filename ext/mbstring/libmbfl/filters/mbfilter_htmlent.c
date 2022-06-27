@@ -334,6 +334,11 @@ void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
 }
 
+static bool is_html_entity_char(unsigned char c)
+{
+	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '#';
+}
+
 static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -345,9 +350,9 @@ static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 		if (c == '&') {
 			/* Find terminating ; for HTML entity */
 			unsigned char *terminator = p;
-			while (terminator < e && *terminator != ';')
+			while (terminator < e && is_html_entity_char(*terminator))
 				terminator++;
-			if (terminator < e) {
+			if (terminator < e && *terminator == ';') {
 				if (*p == '#' && (e - p) >= 2) {
 					/* Numeric entity */
 					unsigned int value = 0;
@@ -390,11 +395,11 @@ static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 					*out++ = value;
 					p = terminator + 1;
 					goto next_iteration;
-				}	else {
+				} else if (terminator > p && terminator < e) {
 					/* Named entity */
 					mbfl_html_entity_entry *entity = (mbfl_html_entity_entry*)mbfl_html_entity_list;
 					while (entity->name) {
-						if (!strncmp((char*)p, entity->name, terminator - p)) {
+						if (!strncmp((char*)p, entity->name, terminator - p) && strlen(entity->name) == terminator - p) {
 							*out++ = entity->code;
 							p = terminator + 1;
 							goto next_iteration;
@@ -409,7 +414,7 @@ bad_entity:
 			while (p < terminator && out < limit) {
 				*out++ = *p++;
 			}
-			if (terminator < e && out < limit) {
+			if (terminator < e && *terminator == ';' && out < limit) {
 				*out++ = *p++;
 			}
 		} else {
