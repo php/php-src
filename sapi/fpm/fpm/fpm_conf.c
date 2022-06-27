@@ -39,9 +39,13 @@
 #include "fpm_systemd.h"
 #endif
 
-
+/* Process restart policy to string */
+#define PRS2STR(s) (s == FPM_PROC_RESTART_STRATEGY_ALL ? "all" : "single")
+/* Nullable string to string */
 #define STR2STR(a) (a ? a : "undefined")
+/* Boolean to string */
 #define BOOL2STR(a) (a ? "yes" : "no")
+
 #define GO(field) offsetof(struct fpm_global_config_s, field)
 #define WPO(field) offsetof(struct fpm_worker_pool_config_s, field)
 
@@ -56,6 +60,7 @@ static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_log_level(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset);
+static char *fpm_conf_set_pr_strategy(zval *value, void **config, intptr_t offset);
 #ifdef HAVE_SYSLOG_H
 static char *fpm_conf_set_syslog_facility(zval *value, void **config, intptr_t offset);
 #endif
@@ -67,6 +72,7 @@ struct fpm_global_config_s fpm_global_config = {
 #endif
 	.process_max = 0,
 	.process_priority = 64, /* 64 means unset */
+	.process_restart_strategy = FPM_PROC_RESTART_STRATEGY_ALL,
 #ifdef HAVE_SYSTEMD
 	.systemd_watchdog = 0,
 	.systemd_interval = -1, /* -1 means not set */
@@ -96,6 +102,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "emergency_restart_threshold", &fpm_conf_set_integer,         GO(emergency_restart_threshold) },
 	{ "emergency_restart_interval",  &fpm_conf_set_time,            GO(emergency_restart_interval) },
 	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
+	{ "process_restart_strategy",    &fpm_conf_set_pr_strategy,     GO(process_restart_strategy) },
 	{ "process.max",                 &fpm_conf_set_integer,         GO(process_max) },
 	{ "process.priority",            &fpm_conf_set_integer,         GO(process_priority) },
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
@@ -539,6 +546,24 @@ static char *fpm_conf_set_pm(zval *value, void **config, intptr_t offset) /* {{{
 	} else {
 		return "invalid process manager (static, dynamic or ondemand)";
 	}
+	return NULL;
+}
+/* }}} */
+
+static char *fpm_conf_set_pr_strategy(zval *value, void **config, intptr_t offset) /* {{{ */
+{
+	zend_string *val = Z_STR_P(value);
+	int strategy;
+
+	if (zend_string_equals_literal_ci(val, "all")) {
+		strategy = FPM_PROC_RESTART_STRATEGY_ALL;
+	} else if (zend_string_equals_literal_ci(val, "single")) {
+		strategy = FPM_PROC_RESTART_STRATEGY_SINGLE;
+	} else {
+		return "invalid value for 'process_restart_strategy'";
+	}
+
+	* (int *) ((char *) *config + offset) = strategy;
 	return NULL;
 }
 /* }}} */
@@ -1679,6 +1704,7 @@ static void fpm_conf_dump(void) /* {{{ */
 	zlog(ZLOG_NOTICE, "\temergency_restart_interval = %ds", fpm_global_config.emergency_restart_interval);
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
+	zlog(ZLOG_NOTICE, "\tprocess_restart_strategy = %s",    PRS2STR(fpm_global_config.process_restart_strategy));
 	zlog(ZLOG_NOTICE, "\tprocess.max = %d",                 fpm_global_config.process_max);
 	if (fpm_global_config.process_priority == 64) {
 		zlog(ZLOG_NOTICE, "\tprocess.priority = undefined");

@@ -44,6 +44,7 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue);
 static struct fpm_event_module_s *module;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
+static struct fpm_event_s child_bury_timer;
 static struct fpm_event_s children_bury_timer;
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
@@ -53,21 +54,25 @@ static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg)
 {
 	fpm_children_bury();
 }
-/* }}} */
+
+static void fpm_postponed_child_bury(struct fpm_event_s *ev, short which, void *arg)
+{
+	fpm_child_bury((intptr_t) arg);
+}
 
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
-	char c;
+	struct fpm_signal_event_s sig_event;
 	int res, ret;
 	int fd = ev->fd;
 
 	do {
 		do {
-			res = read(fd, &c, 1);
+			res = read(fd, &sig_event, sizeof(struct fpm_signal_event_s));
 		} while (res == -1 && errno == EINTR);
 
 		if (res <= 0) {
@@ -77,15 +82,20 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 			return;
 		}
 
-		switch (c) {
+		switch (sig_event.sig_char) {
 			case 'C' :                  /* SIGCHLD */
 				zlog(ZLOG_DEBUG, "received SIGCHLD");
 				/* epoll_wait() may report signal fd before read events for a finished child
 				 * in the same bunch of events. Prevent immediate free of the child structure
 				 * and so the fpm_event_s instance. Otherwise use after free happens during
 				 * attempt to process following read event. */
-				fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
-				fpm_event_add(&children_bury_timer, 0);
+				if (fpm_global_config.process_restart_strategy == FPM_PROC_RESTART_STRATEGY_ALL) {
+					fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
+					fpm_event_add(&children_bury_timer, 0);
+				} else {
+					fpm_event_set_timer(&child_bury_timer, 0, &fpm_postponed_child_bury, (void *) (intptr_t) sig_event.pid);
+					fpm_event_add(&child_bury_timer, 0);
+				}
 				break;
 			case 'I' :                  /* SIGINT  */
 				zlog(ZLOG_DEBUG, "received SIGINT");

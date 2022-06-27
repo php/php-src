@@ -79,6 +79,14 @@
 ; Default Value: 0
 ;process_control_timeout = 0
 
+; Policy used to restart a child process when it is killed.
+; Possible Values:
+;   all  - all killed child processes are iterated and restarted when a single
+;          child process is killed.
+;   single - only a killed child process is restarted when it is killed.
+; Default Value: all
+;process_restart_policy = single
+
 ; The maximum number of processes FPM will fork. This has been designed to control
 ; the global number of processes when using dynamic PM within a lot of pools.
 ; Use it with caution.

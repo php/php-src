@@ -5,6 +5,11 @@
 
 #include <signal.h>
 
+struct fpm_signal_event_s {
+	char sig_char;
+	pid_t pid;
+};
+
 int fpm_signals_init_main(void);
 int fpm_signals_init_child(void);
 int fpm_signals_get_fd(void);

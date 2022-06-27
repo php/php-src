@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "php.h"
 
+/* Process manager to string */
 #define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : (a == PM_STYLE_DYNAMIC ? "dynamic" : "ondemand"))
 
 #define FPM_CONF_MAX_PONG_LENGTH 64
@@ -36,6 +37,7 @@ struct fpm_global_config_s {
 	int process_control_timeout;
 	int process_max;
 	int process_priority;
+	int process_restart_strategy;
 	int daemonize;
 	int rlimit_files;
 	int rlimit_core;
@@ -115,6 +117,11 @@ enum {
 	PM_STYLE_STATIC = 1,
 	PM_STYLE_DYNAMIC = 2,
 	PM_STYLE_ONDEMAND = 3
+};
+
+enum {
+	FPM_PROC_RESTART_STRATEGY_ALL = 1,
+	FPM_PROC_RESTART_STRATEGY_SINGLE = 2,
 };
 
 int fpm_conf_init_main(int test_conf, int force_daemon);
