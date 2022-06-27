@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 90093c63384f7ba56b1c4073b60219cb82843b98 */
+ * Stub hash: 978052ddd734a50694d59f6e92bbf5f1cc946bd2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -486,10 +486,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_string, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_get, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_bytes, 0, 1, MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -2367,10 +2363,10 @@ ZEND_FUNCTION(highlight_file);
 ZEND_FUNCTION(php_strip_whitespace);
 ZEND_FUNCTION(highlight_string);
 ZEND_FUNCTION(ini_get);
-ZEND_FUNCTION(ini_bytes);
 ZEND_FUNCTION(ini_get_all);
 ZEND_FUNCTION(ini_set);
 ZEND_FUNCTION(ini_restore);
+ZEND_FUNCTION(ini_parse_quantity);
 ZEND_FUNCTION(set_include_path);
 ZEND_FUNCTION(get_include_path);
 ZEND_FUNCTION(print_r);
@@ -2999,11 +2995,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(php_strip_whitespace, arginfo_php_strip_whitespace)
 	ZEND_FE(highlight_string, arginfo_highlight_string)
 	ZEND_FE(ini_get, arginfo_ini_get)
-	ZEND_FE(ini_bytes, arginfo_ini_bytes)
 	ZEND_FE(ini_get_all, arginfo_ini_get_all)
 	ZEND_FE(ini_set, arginfo_ini_set)
 	ZEND_FALIAS(ini_alter, ini_set, arginfo_ini_alter)
 	ZEND_FE(ini_restore, arginfo_ini_restore)
+	ZEND_FE(ini_parse_quantity, arginfo_ini_parse_quantity)
 	ZEND_FE(set_include_path, arginfo_set_include_path)
 	ZEND_FE(get_include_path, arginfo_get_include_path)
 	ZEND_FE(print_r, arginfo_print_r)
