@@ -2558,6 +2558,11 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval z_copy;
 
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
+		zend_readonly_property_modification_error(prop_info);
+		return;
+	}
+
 	ZVAL_DEREF(zptr);
 	/* Make sure that in-place concatenation is used if the LHS is a string. */
 	if (binary_op == concat_function && Z_TYPE_P(zptr) == IS_STRING) {
