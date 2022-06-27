@@ -94,6 +94,13 @@
 ; Default Value: no set
 ; process.priority = -19
 
+
+; Process restart batch size is the maximal number of children awaited after
+; a single child process is killed.
+; Note: A value of 0 means number of running childer + 1
+; Default Value: 0
+; process.restart_batch_size = 2
+
 ; Send FPM to background. Set to 'no' to keep FPM in foreground for debugging.
 ; Default Value: yes
 ;daemonize = yes

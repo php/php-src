@@ -153,7 +153,7 @@ static void sig_soft_quit(int signo) /* {{{ */
 }
 /* }}} */
 
-static void sig_handler(int signo) /* {{{ */
+static void sig_action(int sig, siginfo_t *info, void *ucontext)
 {
 	static const char sig_chars[NSIG + 1] = {
 		[SIGTERM] = 'T',
@@ -163,7 +163,7 @@ static void sig_handler(int signo) /* {{{ */
 		[SIGQUIT] = 'Q',
 		[SIGCHLD] = 'C'
 	};
-	char s;
+	struct fpm_signal_event_s sig_event;
 	int saved_errno;
 
 	if (fpm_globals.parent_pid != getpid()) {
@@ -176,11 +176,11 @@ static void sig_handler(int signo) /* {{{ */
 	}
 
 	saved_errno = errno;
-	s = sig_chars[signo];
-	zend_quiet_write(sp[1], &s, sizeof(s));
+	sig_event.sig_char = sig_chars[sig];
+	sig_event.pid = info->si_pid;
+	zend_quiet_write(sp[1], &sig_event, sizeof(struct fpm_signal_event_s));
 	errno = saved_errno;
 }
-/* }}} */
 
 int fpm_signals_init_main() /* {{{ */
 {
@@ -202,7 +202,8 @@ int fpm_signals_init_main() /* {{{ */
 	}
 
 	memset(&act, 0, sizeof(act));
-	act.sa_handler = sig_handler;
+	act.sa_sigaction = sig_action;
+	act.sa_flags = SA_SIGINFO;
 	sigfillset(&act.sa_mask);
 
 	if (0 > sigaction(SIGTERM,  &act, 0) ||

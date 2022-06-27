@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "php.h"
 
+/* Process manager to string */
 #define PM2STR(a) (a == PM_STYLE_STATIC ? "static" : (a == PM_STYLE_DYNAMIC ? "dynamic" : "ondemand"))
 
 #define FPM_CONF_MAX_PONG_LENGTH 64
@@ -36,6 +37,7 @@ struct fpm_global_config_s {
 	int process_control_timeout;
 	int process_max;
 	int process_priority;
+	int process_restart_batch_size;
 	int daemonize;
 	int rlimit_files;
 	int rlimit_core;

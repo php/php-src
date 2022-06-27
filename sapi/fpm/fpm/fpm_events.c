@@ -34,7 +34,6 @@
 #define fpm_event_set_timeout(ev, now) timeradd(&(now), &(ev)->frequency, &(ev)->timeout);
 
 static void fpm_event_cleanup(int which, void *arg);
-static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg);
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg);
 static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue, struct fpm_event_s *ev);
 static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_event_s *ev);
@@ -53,21 +52,20 @@ static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg)
 {
-	fpm_children_bury();
+	fpm_children_bury((intptr_t) arg);
 }
-/* }}} */
 
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
-	char c;
+	struct fpm_signal_event_s sig_event;
 	int res, ret;
 	int fd = ev->fd;
 
 	do {
 		do {
-			res = read(fd, &c, 1);
+			res = read(fd, &sig_event, sizeof(struct fpm_signal_event_s));
 		} while (res == -1 && errno == EINTR);
 
 		if (res <= 0) {
@@ -77,14 +75,16 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 			return;
 		}
 
-		switch (c) {
+		switch (sig_event.sig_char) {
 			case 'C' :                  /* SIGCHLD */
 				zlog(ZLOG_DEBUG, "received SIGCHLD");
 				/* epoll_wait() may report signal fd before read events for a finished child
 				 * in the same bunch of events. Prevent immediate free of the child structure
 				 * and so the fpm_event_s instance. Otherwise use after free happens during
 				 * attempt to process following read event. */
-				fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
+				fpm_event_set_timer(
+					&children_bury_timer, 0, &fpm_postponed_children_bury,
+					(void *) (intptr_t) sig_event.pid);
 				fpm_event_add(&children_bury_timer, 0);
 				break;
 			case 'I' :                  /* SIGINT  */
