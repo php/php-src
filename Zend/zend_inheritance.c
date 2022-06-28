@@ -1153,15 +1153,18 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		} while (0);
 	}
 
-	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-	if (!checked && check_visibility
-			&& (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
+	/* Prevent derived classes from restricting access that was available in parent classes
+	 * (except deriving from non-abstract ctors). */
+	uint32_t ppp_mask = ZEND_ACC_PPP_MASK;
+	if (!checked && check_visibility && (child_flags & ppp_mask) > (parent_flags & ppp_mask)) {
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Access level to %s::%s() must be %s (as in class %s)%s",
-			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name),
+			zend_visibility_string(parent_flags & ZEND_ACC_PPP_MASK),
+			ZEND_FN_SCOPE_NAME(parent), (parent_flags & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
 
 	if (!checked) {
@@ -1192,6 +1195,16 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 		if (is_interface && UNEXPECTED(func == parent)) {
 			/* The same method in interface may be inherited few times */
 			return;
+		}
+
+		if (!checked && is_interface && (func->common.fn_flags & ZEND_ACC_DEFAULT_METHOD)) {
+			if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && parent->common.fn_flags & ZEND_ACC_DEFAULT_METHOD) {
+				// TODO: improve error
+				zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(func), func_lineno(func),
+				                       "Type %s already has default method %s::%s(); cannot override it with another from %s",
+				                       ZSTR_VAL(ce->name), ZEND_FN_SCOPE_NAME(func), ZSTR_VAL(func->common.function_name),
+				                       ZEND_FN_SCOPE_NAME(parent));
+			}
 		}
 
 		if (checked) {

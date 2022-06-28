@@ -7369,17 +7369,18 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface method "
 				"%s::%s() must not be abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
-		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
+
+		/* Interface methods with bodies are called "default methods"
+		 * and this feature is proposed for PHP 8.3.
+		 */
+		op_array->fn_flags |= has_body
+			? (ZEND_ACC_DEFAULT_METHOD | ZEND_ACC_PUBLIC)
+			: ZEND_ACC_ABSTRACT;
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
 		if ((op_array->fn_flags & ZEND_ACC_PRIVATE) && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
-				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		}
-
-		if (has_body) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
 
