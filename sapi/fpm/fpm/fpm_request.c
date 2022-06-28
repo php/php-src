@@ -225,6 +225,11 @@ void fpm_request_finished() /* {{{ */
 }
 /* }}} */
 
+static inline int fpm_request_proc_is_idle(struct fpm_scoreboard_proc_s *proc) {
+	// with keepalive, FPM_REQUEST_READING_HEADERS represents a worker waiting for the second and any further reqs
+	return proc->request_stage == FPM_REQUEST_ACCEPTING || proc->request_stage == FPM_REQUEST_READING_HEADERS;
+}
+
 void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s proc, *proc_p;
@@ -247,7 +252,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 	}
 #endif
 
-	if (proc.request_stage > FPM_REQUEST_ACCEPTING && ((proc.request_stage < FPM_REQUEST_END) || track_finished)) {
+	if (!fpm_request_proc_is_idle(&proc) &&
+		proc.request_stage > FPM_REQUEST_ACCEPTING &&
+		((proc.request_stage < FPM_REQUEST_END) || track_finished)) {
 		char purified_script_filename[sizeof(proc.script_filename)];
 		struct timeval tv;
 
@@ -294,7 +301,7 @@ int fpm_request_is_idle(struct fpm_child_s *child) /* {{{ */
 		return 0;
 	}
 
-	return proc->request_stage == FPM_REQUEST_ACCEPTING;
+	return fpm_request_proc_is_idle(proc);
 }
 /* }}} */
 
