@@ -1630,6 +1630,36 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 }
 /* }}} */
 
+static zend_always_inline bool check_trait_property_or_constant_value_compatibility(zend_class_entry *ce, zval *op1, zval *op2) /* {{{ */
+{
+	bool is_compatible;
+	zval op1_tmp, op2_tmp;
+
+	/* if any of the values is a constant, we try to resolve it */
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
+		ZVAL_COPY_OR_DUP(&op1_tmp, op1);
+		zval_update_constant_ex(&op1_tmp, ce);
+		op1 = &op1_tmp;
+	}
+	if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
+		ZVAL_COPY_OR_DUP(&op2_tmp, op2);
+		zval_update_constant_ex(&op2_tmp, ce);
+		op2 = &op2_tmp;
+	}
+
+	is_compatible = fast_is_identical_function(op1, op2);
+
+	if (op1 == &op1_tmp) {
+		zval_ptr_dtor_nogc(&op1_tmp);
+	}
+	if (op2 == &op2_tmp) {
+		zval_ptr_dtor_nogc(&op2_tmp);
+	}
+
+	return is_compatible;
+}
+/* }}} */
+
 static bool do_inherit_constant_check(
 	zend_class_entry *ce, zend_class_constant *parent_constant, zend_string *name
 ) {
@@ -2174,7 +2204,103 @@ static void zend_do_traits_method_binding(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
-static zend_class_entry* find_first_definition(zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *prop_name, zend_class_entry *colliding_ce) /* {{{ */
+static zend_class_entry* find_first_constant_definition(zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *constant_name, zend_class_entry *colliding_ce) /* {{{ */
+{
+	/* This function is used to show the place of the existing conflicting
+	 * definition in error messages when conflicts occur. Since trait constants
+	 * are flattened into the constants table of the composing class, and thus
+	 * we lose information about which constant was defined in which trait, a
+	 * process like this is needed to find the location of the first definition
+	 * of the constant from traits.
+	 */
+	size_t i;
+
+	if (colliding_ce == ce) {
+		for (i = 0; i < current_trait; i++) {
+			if (traits[i]
+				&& zend_hash_exists(&traits[i]->constants_table, constant_name)) {
+				return traits[i];
+			}
+		}
+	}
+	/* Traits don't have it, then the composing class (or trait) itself has it. */
+	return colliding_ce;
+}
+/* }}} */
+
+static bool do_trait_constant_check(zend_class_entry *ce, zend_class_constant *trait_constant, zend_string *name, zend_class_entry **traits, size_t current_trait) /* {{{ */
+{
+	uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_FINAL;
+
+	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
+	if (zv == NULL) {
+		/* No existing constant of the same name, so this one can be added */
+		return true;
+	}
+
+	zend_class_constant *existing_constant = Z_PTR_P(zv);
+
+	if ((ZEND_CLASS_CONST_FLAGS(trait_constant) & flags_mask) != (ZEND_CLASS_CONST_FLAGS(existing_constant) & flags_mask) ||
+	    !check_trait_property_or_constant_value_compatibility(ce, &trait_constant->value, &existing_constant->value)) {
+		/* There is an existing constant of the same name, and it conflicts with the new one, so let's throw a fatal error */
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"%s and %s define the same constant (%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
+			ZSTR_VAL(find_first_constant_definition(ce, traits, current_trait, name, existing_constant->ce)->name),
+			ZSTR_VAL(trait_constant->ce->name),
+			ZSTR_VAL(name),
+			ZSTR_VAL(ce->name));
+	}
+
+	/* There is an existing constant which is compatible with the new one, so no need to add it */
+	return false;
+}
+/* }}} */
+
+static void zend_do_traits_constant_binding(zend_class_entry *ce, zend_class_entry **traits) /* {{{ */
+{
+	size_t i;
+
+	for (i = 0; i < ce->num_traits; i++) {
+		zend_string *constant_name;
+		zend_class_constant *constant;
+
+		if (!traits[i]) {
+			continue;
+		}
+
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->constants_table, constant_name, constant) {
+			if (do_trait_constant_check(ce, constant, constant_name, traits, i)) {
+				zend_class_constant *ct = NULL;
+
+				ct = zend_arena_alloc(&CG(arena),sizeof(zend_class_constant));
+				memcpy(ct, constant, sizeof(zend_class_constant));
+				constant = ct;
+
+				if (Z_TYPE(constant->value) == IS_CONSTANT_AST) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+					ce->ce_flags |= ZEND_ACC_HAS_AST_CONSTANTS;
+				}
+
+				/* Unlike interface implementations and class inheritances,
+				 * access control of the trait constants is done by the scope
+				 * of the composing class. So let's replace the ce here.
+				 */
+				constant->ce = ce;
+
+				Z_TRY_ADDREF(constant->value);
+				constant->doc_comment = constant->doc_comment ? zend_string_copy(constant->doc_comment) : NULL;
+				if (constant->attributes && (!(GC_FLAGS(constant->attributes) & IS_ARRAY_IMMUTABLE))) {
+					GC_ADDREF(constant->attributes);
+				}
+
+				zend_hash_update_ptr(&ce->constants_table, constant_name, constant);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+/* }}} */
+
+static zend_class_entry* find_first_property_definition(zend_class_entry *ce, zend_class_entry **traits, size_t current_trait, zend_string *prop_name, zend_class_entry *colliding_ce) /* {{{ */
 {
 	size_t i;
 
@@ -2198,7 +2324,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 	zend_property_info *colliding_prop;
 	zend_property_info *new_prop;
 	zend_string* prop_name;
-	bool not_compatible;
 	zval* prop_value;
 	zend_string *doc_comment;
 
@@ -2220,15 +2345,14 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
+					bool is_compatible = false;
 					uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
-					not_compatible = 1;
 
 					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
 						property_types_compatible(property_info, colliding_prop) == INHERITANCE_SUCCESS
 					) {
 						/* the flags are identical, thus, the properties may be compatible */
 						zval *op1, *op2;
-						zval op1_tmp, op2_tmp;
 
 						if (flags & ZEND_ACC_STATIC) {
 							op1 = &ce->default_static_members_table[colliding_prop->offset];
@@ -2239,33 +2363,13 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(colliding_prop->offset)];
 							op2 = &traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
-
-						/* if any of the values is a constant, we try to resolve it */
-						if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
-							ZVAL_COPY_OR_DUP(&op1_tmp, op1);
-							zval_update_constant_ex(&op1_tmp, ce);
-							op1 = &op1_tmp;
-						}
-						if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
-							ZVAL_COPY_OR_DUP(&op2_tmp, op2);
-							zval_update_constant_ex(&op2_tmp, ce);
-							op2 = &op2_tmp;
-						}
-
-						not_compatible = fast_is_not_identical_function(op1, op2);
-
-						if (op1 == &op1_tmp) {
-							zval_ptr_dtor_nogc(&op1_tmp);
-						}
-						if (op2 == &op2_tmp) {
-							zval_ptr_dtor_nogc(&op2_tmp);
-						}
+						is_compatible = check_trait_property_or_constant_value_compatibility(ce, op1, op2);
 					}
 
-					if (not_compatible) {
+					if (!is_compatible) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
-								ZSTR_VAL(find_first_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
+								ZSTR_VAL(find_first_property_definition(ce, traits, i, prop_name, colliding_prop->ce)->name),
 								ZSTR_VAL(property_info->ce->name),
 								ZSTR_VAL(prop_name),
 								ZSTR_VAL(ce->name));
@@ -2322,7 +2426,8 @@ static void zend_do_bind_traits(zend_class_entry *ce, zend_class_entry **traits)
 		efree(exclude_tables);
 	}
 
-	/* then flatten the properties into it, to, mostly to notify developer about problems */
+	/* then flatten the constants and properties into it, to, mostly to notify developer about problems */
+	zend_do_traits_constant_binding(ce, traits);
 	zend_do_traits_property_binding(ce, traits);
 }
 /* }}} */
