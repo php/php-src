@@ -651,14 +651,17 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1);
 		path = spl_filesystem_object_get_path(intern);
 
-		if (ZSTR_LEN(path) && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
+		if (path && ZSTR_LEN(path) && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
+			/* +1 to skip the trailing / of the path in the file name */
 			ZVAL_STRINGL(&tmp, ZSTR_VAL(intern->file_name) + ZSTR_LEN(path) + 1, ZSTR_LEN(intern->file_name) - (ZSTR_LEN(path) + 1));
 		} else {
 			ZVAL_STR_COPY(&tmp, intern->file_name);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release_ex(pnstr, /* persistent */ false);
-		zend_string_release_ex(path, /* persistent */ false);
+		if (path) {
+			zend_string_release_ex(path, /* persistent */ false);
+		}
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
@@ -920,9 +923,11 @@ PHP_METHOD(SplFileInfo, getFilename)
 
 	path = spl_filesystem_object_get_path(intern);
 
-	if (path && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
-		size_t path_len = ZSTR_LEN(path);
-		RETVAL_STRINGL(ZSTR_VAL(intern->file_name) + path_len + 1, ZSTR_LEN(intern->file_name) - (path_len + 1));
+	ZEND_ASSERT(path);
+	if (path && ZSTR_LEN(path) && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
+		/* +1 to skip the trailing / of the path in the file name */
+		size_t path_len = ZSTR_LEN(path) + 1;
+		RETVAL_STRINGL(ZSTR_VAL(intern->file_name) + path_len, ZSTR_LEN(intern->file_name) - path_len);
 	} else {
 		RETVAL_STR_COPY(intern->file_name);
 	}
@@ -1037,7 +1042,8 @@ PHP_METHOD(SplFileInfo, getBasename)
 
 	path = spl_filesystem_object_get_path(intern);
 
-	if (path && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
+	if (path && ZSTR_LEN(path) && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
+		/* +1 to skip the trailing / of the path in the file name */
 		fname = ZSTR_VAL(intern->file_name) + ZSTR_LEN(path) + 1;
 		flen = ZSTR_LEN(intern->file_name) - (ZSTR_LEN(path) + 1);
 	} else {
