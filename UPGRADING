@@ -446,6 +446,7 @@ PHP 8.2 UPGRADE NOTES
     --with-oci8-12c and --with-oci8-19 are still supported.
 
 - Zip:
+  . The Zip extension upgraded to version 1.21.0
   . The Zip extension is now built as shared library (DLL) by default.
 
 ========================================

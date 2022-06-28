@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha3
 
+- Zip:
+
+  . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
+
 23 Jun 2022, PHP 8.2.0alpha2
 
 - Core:
