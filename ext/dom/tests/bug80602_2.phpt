@@ -1,5 +1,5 @@
 --TEST--
-Bug #80602 (Segfault when using DOMChildNode::before())
+Bug #80602 (Segfault when using DOMChildNode::after())
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -9,126 +9,126 @@ declare(strict_types=1);
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($target);
+$target->after($target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($target);
+$target->after($target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($doc->documentElement->lastChild);
+$target->after($doc->documentElement->lastChild);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($doc->documentElement->firstChild);
+$target->after($doc->documentElement->firstChild);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($target, $doc->documentElement->lastChild);
+$target->after($target, $doc->documentElement->lastChild);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($doc->documentElement->lastChild, $target);
+$target->after($doc->documentElement->lastChild, $target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($target, $doc->documentElement->firstChild);
+$target->after($target, $doc->documentElement->firstChild);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($doc->documentElement->firstChild, $target);
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->firstChild;
-$target->before('bar','baz');
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->lastChild;
-$target->before('bar','baz');
+$target->after($doc->documentElement->firstChild, $target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($target, 'bar','baz');
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->firstChild;
-$target->before('bar', $target, 'baz');
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->firstChild;
-$target->before('bar', 'baz', $target);
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->lastChild;
-$target->before($target, 'bar','baz');
+$target->after('bar','baz');
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before('bar', $target, 'baz');
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->lastChild;
-$target->before('bar', 'baz', $target);
-echo $doc->saveXML($doc->documentElement).PHP_EOL;
-
-
-
-$doc = new \DOMDocument();
-$doc->loadXML('<a>foo<last/></a>');
-$target = $doc->documentElement->firstChild;
-$target->before('bar', $target, $doc->documentElement->lastChild);
+$target->after('bar','baz');
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($target, 'bar', $doc->documentElement->lastChild);
+$target->after($target, 'bar','baz');
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->firstChild;
+$target->after('bar', $target, 'baz');
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->firstChild;
+$target->after('bar', 'baz', $target);
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->lastChild;
+$target->after($target, 'bar','baz');
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->lastChild;
+$target->after('bar', $target, 'baz');
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->lastChild;
+$target->after('bar', 'baz', $target);
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->firstChild;
+$target->after('bar', $target, $doc->documentElement->lastChild);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->firstChild;
-$target->before($target, $doc->documentElement->lastChild, 'bar');
+$target->after($target, 'bar', $doc->documentElement->lastChild);
+echo $doc->saveXML($doc->documentElement).PHP_EOL;
+
+
+$doc = new \DOMDocument();
+$doc->loadXML('<a>foo<last/></a>');
+$target = $doc->documentElement->firstChild;
+$target->after($target, $doc->documentElement->lastChild, 'bar');
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
@@ -137,35 +137,35 @@ echo $doc->saveXML($doc->documentElement).PHP_EOL;
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before('bar', $doc->documentElement->firstChild, $target);
+$target->after('bar', $doc->documentElement->firstChild, $target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($doc->documentElement->firstChild, 'bar', $target);
+$target->after($doc->documentElement->firstChild, 'bar', $target);
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 
 $doc = new \DOMDocument();
 $doc->loadXML('<a>foo<last/></a>');
 $target = $doc->documentElement->lastChild;
-$target->before($doc->documentElement->firstChild, $target, 'bar');
+$target->after($doc->documentElement->firstChild, $target, 'bar');
 echo $doc->saveXML($doc->documentElement).PHP_EOL;
 
 ?>
 --EXPECTF--
 <a>foo<last/></a>
 <a>foo<last/></a>
-<a><last/>foo</a>
-<a>foo<last/></a>
 <a>foo<last/></a>
 <a><last/>foo</a>
+<a>foo<last/></a>
+<a><last/>foo</a>
 <a><last/>foo</a>
 <a>foo<last/></a>
-<a>barbazfoo<last/></a>
 <a>foobarbaz<last/></a>
+<a>foo<last/>barbaz</a>
 <a>foobarbaz<last/></a>
 <a>barfoobaz<last/></a>
 <a>barbazfoo<last/></a>
@@ -178,4 +178,3 @@ echo $doc->saveXML($doc->documentElement).PHP_EOL;
 <a>barfoo<last/></a>
 <a>foobar<last/></a>
 <a>foo<last/>bar</a>
-
