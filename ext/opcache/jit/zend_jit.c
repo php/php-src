@@ -1107,7 +1107,7 @@ static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int s
 			dst = intervals[dst]->hint->ssa_var;
 		}
 	}
-	if (dst == src) {
+	if (dst != src) {
 		intervals[dst]->hint = intervals[src];
 	}
 }
