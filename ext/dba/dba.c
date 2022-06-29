@@ -139,8 +139,8 @@ static zend_string* php_dba_make_key(HashTable *key)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK(info) \
-	if((info)->mode != DBA_WRITER && (info)->mode != DBA_TRUNC && (info)->mode != DBA_CREAT) { \
-		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+	if ((info)->mode != DBA_WRITER && (info)->mode != DBA_TRUNC && (info)->mode != DBA_CREAT) { \
+		php_error_docref(NULL, E_WARNING, "Cannot perform a modification on a readonly database"); \
 		RETURN_FALSE; \
 	}
 
