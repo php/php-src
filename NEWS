@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-8848 (imagecopyresized() error refers to the wrong argument).
     (cmb)
 
+- OPcache:
+  . Fixed bug GH-8847 (PHP hanging infinitly at 100% cpu when check php
+    syntaxe of a valid file). (Dmitry)
+
 07 Jul 2022, PHP 8.1.8
 
 - Core:
