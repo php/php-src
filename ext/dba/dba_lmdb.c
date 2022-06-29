@@ -46,6 +46,11 @@ DBA_OPEN_FUNC(lmdb)
 
 	ZEND_ASSERT(map_size >= 0);
 
+	/* Add readonly flag if DB is opened in read only mode */
+	if (info->mode == DBA_READER) {
+		flags |= MDB_RDONLY;
+	}
+
 	rc = mdb_env_create(&env);
 	if (rc) {
 		*error = mdb_strerror(rc);
@@ -69,7 +74,7 @@ DBA_OPEN_FUNC(lmdb)
 		return FAILURE;
 	}
 
-	rc = mdb_txn_begin(env, NULL, 0, &txn);
+	rc = mdb_txn_begin(env, NULL, /* flags */ MDB_RDONLY, &txn);
 	if (rc) {
 		mdb_env_close(env);
 		*error = mdb_strerror(rc);
