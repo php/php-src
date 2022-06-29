@@ -1098,21 +1098,17 @@ static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int s
 		src = dst;
 		dst = tmp;
 	}
-	while (1) {
-		if (intervals[dst]->hint) {
-			if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
-				int tmp = src;
-				src = intervals[dst]->hint->ssa_var;
-				dst = tmp;
-			} else {
-				dst = intervals[dst]->hint->ssa_var;
-			}
+	while (dst != src && intervals[dst]->hint) {
+		if (intervals[dst]->hint->range.start < intervals[src]->range.start) {
+			int tmp = src;
+			src = intervals[dst]->hint->ssa_var;
+			dst = tmp;
 		} else {
-			if (dst != src) {
-				intervals[dst]->hint = intervals[src];
-			}
-			return;
+			dst = intervals[dst]->hint->ssa_var;
 		}
+	}
+	if (dst == src) {
+		intervals[dst]->hint = intervals[src];
 	}
 }
 
