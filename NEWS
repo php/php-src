@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 
 - DBA:
   . Fixed LMDB driver memory leak on DB creation failure (Girgias)
+  . Fixed GH-8856 (dba: lmdb: allow to override the MDB_NOSUBDIR flag). (Girgias)
 
 - Random:
   . Fixed bug GH-9067 (random extension is not thread safe). (cmb)

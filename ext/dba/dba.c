@@ -359,6 +359,7 @@ PHP_MINIT_FUNCTION(dba)
 	REGISTER_INI_ENTRIES();
 	le_db = zend_register_list_destructors_ex(dba_close_rsrc, NULL, "dba", module_number);
 	le_pdb = zend_register_list_destructors_ex(dba_close_pe_rsrc, dba_close_rsrc, "dba persistent", module_number);
+	register_dba_symbols(module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -478,10 +479,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	zend_string *handler_str = NULL;
 	zend_long permission = 0644;
 	zend_long map_size = 0;
+	zend_long driver_flags = DBA_DEFAULT_DRIVER_FLAGS;
+	bool is_flags_null = true;
 	zend_string *persistent_resource_key = NULL;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "PS|S!ll", &path, &mode, &handler_str,
-			&permission, &map_size)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "PS|S!lll!", &path, &mode, &handler_str,
+			&permission, &map_size, &driver_flags, &is_flags_null)) {
 		RETURN_THROWS();
 	}
 
@@ -500,6 +503,11 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	// TODO Check Value for permission
 	if (map_size < 0) {
 		zend_argument_value_error(5, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	if (!is_flags_null && driver_flags < 0) {
+		zend_argument_value_error(6, "must be greater or equal than 0");
 		RETURN_THROWS();
 	}
 
@@ -720,6 +728,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	info->mode = modenr;
 	info->file_permission = permission;
 	info->map_size = map_size;
+	info->driver_flags = driver_flags;
 	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL) | (persistent ? DBA_PERSISTENT : 0);
 	info->lock.mode = lock_mode;
 
@@ -835,9 +844,15 @@ restart:
 		}
 	}
 
-	if (error || hptr->open(info, &error) != SUCCESS) {
+	if (error || hptr->open(info, &error) == FAILURE) {
 		dba_close(info);
-		php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
+		if (EXPECTED(!EG(exception))) {
+			if (error) {
+				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s: %s", hptr->name, error);
+			} else {
+				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s", hptr->name);
+			}
+		}
 		FREE_PERSISTENT_RESOURCE_KEY();
 		RETURN_FALSE;
 	}

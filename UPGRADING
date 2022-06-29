@@ -88,6 +88,11 @@ PHP 8.2 UPGRADE NOTES
   . Exposed multiple new constants from libcurl 7.62 to 7.80.
   . Added new function curl_upkeep() to perform any connection upkeep checks.
 
+- DBA:
+  . The LMDB Driver now accepts the DBA_LMDB_USE_SUB_DIR or DBA_LMDB_NO_SUB_DIR
+    flags to determine if it should create a sub directory or not when creating
+    a database file.
+
 - OCI8:
   . Added an oci8.prefetch_lob_size directive and oci_set_prefetch_lob()
     function to tune LOB query performance by reducing the number of
@@ -183,7 +188,7 @@ PHP 8.2 UPGRADE NOTES
 
 - DBA
   . dba_open() and dba_popen() now have the following enforced function signature
-    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0)
+    dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null)
   . dba_fetch()'s optional skip argument is now at the end in line with
     PHP userland semantics its signature now is:
     dba_fetch(string|array $key, $dba, int $skip = 0): string|false
