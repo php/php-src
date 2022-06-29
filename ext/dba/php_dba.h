@@ -44,11 +44,15 @@ typedef struct dba_info {
 	int fd;
 	int file_permission;
 	zend_long map_size;
+	/* -1 for default driver flags */
+	zend_long driver_flags;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;
 	dba_lock lock;
 } dba_info;
+
+#define DBA_DEFAULT_DRIVER_FLAGS -1
 
 #define DBA_LOCK_READER  (0x0001)
 #define DBA_LOCK_WRITER  (0x0002)

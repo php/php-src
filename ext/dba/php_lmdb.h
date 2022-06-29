@@ -4,6 +4,7 @@
 #ifdef DBA_LMDB
 
 #include "php_dba.h"
+#include <lmdb.h>
 
 DBA_FUNCS(lmdb);
 
