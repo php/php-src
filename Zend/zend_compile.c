@@ -6943,14 +6943,6 @@ static void zend_find_minimal_implicit_binds(closure_info *info, zend_op_array *
 				continue;
 			}
 
-			if (!op_array->static_variables) {
-				op_array->static_variables = zend_new_array(8);
-			}
-
-			if (!zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval))) {
-				continue;
-			}
-
 			zend_hash_add_empty_element(&min_uses, var_name);
 		}
 	} ZEND_BITSET_FOREACH_END();
@@ -6977,7 +6969,9 @@ static void zend_compile_implicit_lexical_binds(
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
 		zval *value = zend_hash_find(op_array->static_variables, var_name);
-		ZEND_ASSERT(value);
+		if (!value) {
+			continue;
+		}
 
 		uint32_t offset = (uint32_t)((char*)value - (char*)op_array->static_variables->arData);
 
@@ -7028,16 +7022,18 @@ static void zend_compile_implicit_closure_uses(closure_info *info, zend_op_array
 		return;
 	}
 
-	ZEND_ASSERT(op_array->static_variables);
-
 	zend_string *var_name;
 	ZEND_HASH_MAP_FOREACH_STR_KEY(&info->uses, var_name)
-		zval *value = zend_hash_find(op_array->static_variables, var_name);
-		zend_op *opline;
+		if (!op_array->static_variables) {
+			op_array->static_variables = zend_new_array(8);
+		}
 
-		ZEND_ASSERT(value);
+		zval *value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
+		if (!value) {
+			continue;
+		}
 
-		opline = &op_array->opcodes[opnum];
+		zend_op *opline = &op_array->opcodes[opnum];
 		opline->opcode = ZEND_BIND_STATIC;
 		opline->op1_type = IS_CV;
 		opline->op1.var = lookup_cv(var_name);
@@ -7316,8 +7312,10 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	pass_two(CG(active_op_array));
 
 	if (decl->kind == ZEND_AST_ARROW_FUNC || decl->kind == ZEND_AST_SHORT_CLOSURE) {
-		/* Depends on pass_two() */
-		zend_find_minimal_implicit_binds(&info, op_array);
+		if (decl->kind == ZEND_AST_SHORT_CLOSURE) {
+			/* Depends on pass_two() */
+			zend_find_minimal_implicit_binds(&info, op_array);
+		}
 		zend_compile_implicit_closure_uses(&info, op_array, opnum_bind);
 	}
 

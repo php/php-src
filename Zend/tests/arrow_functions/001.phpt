@@ -32,6 +32,11 @@ $var = 6;
 var_dump((fn() => fn() => $var)()());
 var_dump((fn() => function() use($var) { return $var; })()());
 
+// All literal variables are closed over
+$a = 0;
+$foo = fn() => $a = $var;
+var_dump((new ReflectionFunction($foo))->getStaticVariables());
+
 ?>
 --EXPECT--
 int(1)
@@ -43,3 +48,9 @@ int(6)
 int(5)
 int(6)
 int(6)
+array(2) {
+  ["a"]=>
+  int(0)
+  ["var"]=>
+  int(6)
+}
