@@ -125,8 +125,11 @@ int mbfl_filt_conv_2022kr_wchar(int c, mbfl_convert_filter *filter)
 				}
 			} else {
 				w = (c1 - 0x47)*94 + c - 0x21;
-				ZEND_ASSERT(w < uhc3_ucs_table_size);
-				w = uhc3_ucs_table[w];
+				if (w < uhc3_ucs_table_size) {
+					w = uhc3_ucs_table[w];
+				} else {
+					w = MBFL_BAD_INPUT;
+				}
 			}
 
 			if (w <= 0) {
