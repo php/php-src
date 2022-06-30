@@ -27,7 +27,7 @@ extern char** save_ps_args(int argc, char** argv);
 
 extern int set_ps_title(const char* new_str);
 
-extern int get_ps_title(int* displen, const char** string);
+extern int get_ps_title(size_t* displen, const char** string);
 
 extern const char* ps_title_errno(int rc);
 

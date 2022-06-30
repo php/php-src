@@ -395,7 +395,7 @@ int set_ps_title(const char* title)
  * length into *displen.
  * The return code indicates the error.
  */
-int get_ps_title(int *displen, const char** string)
+int get_ps_title(size_t *displen, const char** string)
 {
     int rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
@@ -421,7 +421,7 @@ int get_ps_title(int *displen, const char** string)
 	free(tmp);
     }
 #endif
-    *displen = (int)ps_buffer_cur_len;
+    *displen = ps_buffer_cur_len;
     *string = ps_buffer;
     return PS_TITLE_SUCCESS;
 }
