@@ -1554,7 +1554,7 @@ PHP_METHOD(ArrayObject, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_NEW_STR(buf.s);
+	RETURN_STR(smart_str_finalize(&buf));
 } /* }}} */
 
 /* {{{ unserialize the object */

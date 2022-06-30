@@ -1037,7 +1037,7 @@ PHP_METHOD(SplDoublyLinkedList, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	RETURN_NEW_STR(buf.s);
+	RETURN_STR(smart_str_finalize(&buf));
 } /* }}} */
 
 /* {{{ Unserializes storage */

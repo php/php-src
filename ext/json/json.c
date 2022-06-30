@@ -212,11 +212,8 @@ PHP_FUNCTION(json_encode)
 		}
 	}
 
-	smart_str_0(&buf); /* copy? */
-	if (buf.s) {
-		RETURN_NEW_STR(buf.s);
-	}
-	RETURN_EMPTY_STRING();
+	smart_str_0(&buf);
+	RETURN_STR(smart_str_finalize(&buf));
 }
 /* }}} */
 
