@@ -2,6 +2,8 @@
 DBA DB4 File Creation open("c") with existing file
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

@@ -2,6 +2,8 @@
 DBA DB4 File open("wl") & Insert Test
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

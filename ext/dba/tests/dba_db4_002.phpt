@@ -2,6 +2,8 @@
 DBA DB4 New File Creation open("n") & Insert Test
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";
