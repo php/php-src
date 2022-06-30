@@ -4,25 +4,52 @@ DBA DB3 handler test
 dba
 --SKIPIF--
 <?php
-    $handler = 'db3';
-    require_once __DIR__ .'/skipif.inc';
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+check_skip('db3');
 ?>
 --FILE--
 <?php
-    $handler = 'db3';
-    require_once __DIR__ .'/test.inc';
-    require_once __DIR__ .'/dba_handler.inc';
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$db_name = 'dba_db3.db';
+
+$handler = 'db3';
+set_up_db($handler, $db_name);
+run_standard_tests($handler, $db_name);
+
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$db_name = 'dba_db3.db';
+cleanup_standard_db($db_name);
 ?>
 --EXPECT--
-database handler: db3
-3NYNYY
-Content String 2
+Remove key 1 and 3
+bool(true)
+bool(true)
+Try to remove key 1 again
+bool(false)
+key2: Content String 2
+key4: Another Content String
+key5: The last content string
+Total keys: 3
+Key 1 exists? N
+Key 2 exists? Y
+Key 3 exists? N
+Key 4 exists? Y
+Key 5 exists? Y
+Replace second key data
+bool(true)
 Content 2 replaced
 Read during write: not allowed
-"key number 6" written
-Failed to write "key number 6" 2nd time
-Content 2 replaced 2nd time
-The 6th value
+Expected: Added a new data entry
+Expected: Failed to insert data for already used key
+Replace second key data
+bool(true)
+Delete "key4"
+bool(true)
+Fetch "key2": Content 2 replaced 2nd time
+Fetch "key number 6": The 6th value
 array(3) {
   ["key number 6"]=>
   string(13) "The 6th value"
@@ -32,14 +59,32 @@ array(3) {
   string(23) "The last content string"
 }
 --NO-LOCK--
-3NYNYY
-Content String 2
+Remove key 1 and 3
+bool(true)
+bool(true)
+Try to remove key 1 again
+bool(false)
+key2: Content String 2
+key4: Another Content String
+key5: The last content string
+Total keys: 3
+Key 1 exists? N
+Key 2 exists? Y
+Key 3 exists? N
+Key 4 exists? Y
+Key 5 exists? Y
+Replace second key data
+bool(true)
 Content 2 replaced
 Read during write: not allowed
-"key number 6" written
-Failed to write "key number 6" 2nd time
-Content 2 replaced 2nd time
-The 6th value
+Expected: Added a new data entry
+Expected: Failed to insert data for already used key
+Replace second key data
+bool(true)
+Delete "key4"
+bool(true)
+Fetch "key2": Content 2 replaced 2nd time
+Fetch "key number 6": The 6th value
 array(3) {
   ["key number 6"]=>
   string(13) "The 6th value"
