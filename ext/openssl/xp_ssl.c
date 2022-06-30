@@ -2399,10 +2399,11 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 				if (sslsock->s.socket == -1) {
 					alive = 0;
-				} else if ((!sslsock->ssl_active && value == 0 && (MSG_DONTWAIT || !sslsock->s.is_blocked)) ||
+				} else if ((value == 0 && ((!sslsock->ssl_active && MSG_DONTWAIT) || !sslsock->s.is_blocked)) ||
 					   php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
-					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
-					/* additionally, we don't use this optimization if SSL is active because in that case, we're not using MSG_DONTWAIT */
+					/* The poll() call is skipped if the socket is non-blocking (or MSG_DONTWAIT is available)
+					 * and if the timeout is zero. Additionally for blocking socket we don't use this
+					 * optimization if SSL is active because in that case we're not using MSG_DONTWAIT. */
 					if (sslsock->ssl_active) {
 						int n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
 						if (n <= 0) {
