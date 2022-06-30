@@ -67,7 +67,7 @@ static void *find_prefered_mmap_base(size_t requested_size)
 				/* the current segment is PHP .text segment itself */
 				if (last_candidate != (uintptr_t)MAP_FAILED) {
 					if (end - last_candidate < UINT32_MAX) {
-						/* we have found a big anough hole before the text segment */
+						/* we have found a big enough hole before the text segment */
 						break;
 					}
 					last_candidate = (uintptr_t)MAP_FAILED;
