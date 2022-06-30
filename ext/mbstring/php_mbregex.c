@@ -1144,11 +1144,11 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 	if (err <= -2) {
 		smart_str_free(&out_buf);
-		RETVAL_FALSE;
+		RETURN_FALSE;
 	}
 
 	smart_str_0(&out_buf);
-	RETVAL_STR(smart_str_finalize(&out_buf));
+	RETURN_STR(smart_str_finalize(&out_buf));
 }
 /* }}} */
 
