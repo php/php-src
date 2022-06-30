@@ -19,6 +19,9 @@ PHP 8.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . Drop support of clang 7 and older.
+
 - Date:
   . DateTime::createFromImmutable() now has a tentative return type of static,
     previously it was DateTime.
