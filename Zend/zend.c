@@ -273,7 +273,7 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 	}
 
 	smart_str_0(&buf);
-	return buf.s;
+	return smart_str_finalize(&buf);
 }
 /* }}} */
 
