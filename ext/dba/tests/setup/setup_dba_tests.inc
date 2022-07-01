@@ -183,7 +183,12 @@ function run_creation_tests_ex(string $handler, string $file_suffix, string $pre
                 assert(file_exists($db_name));
                 $status = dba_insert("key1", "This is a test insert", $db);
                 if ($status) {
-                    echo dba_fetch("key1", $db), \PHP_EOL;
+                    $fetch = dba_fetch("key1", $db);
+                    if ($fetch === false) {
+                        echo 'Cannot fetch insertion', \PHP_EOL;
+                    } else {
+                        echo $fetch, \PHP_EOL;
+                    }
                 } else {
                     echo 'Insertion failed', \PHP_EOL;
                 }
@@ -198,13 +203,14 @@ function run_creation_tests_ex(string $handler, string $file_suffix, string $pre
 
 function run_creation_tests(string $handler): void
 {
+    $extension = $handler === 'tcadb' ? 'tch' : 'db';
     /* Trying to open a non-existing file */
     echo '=== OPENING NON-EXISTING FILE ===', \PHP_EOL;
-    run_creation_tests_ex($handler, '_not_existing.db', '');
+    run_creation_tests_ex($handler, '_not_existing.'.$extension, '');
 
     /* Trying to open an existing db file */
     echo '=== OPENING EXISTING DB FILE ===', \PHP_EOL;
-    run_creation_tests_ex($handler, '_existing.db', 'dba_open($db_name, "n", $handler);');
+    run_creation_tests_ex($handler, '_existing.'.$extension, 'dba_open($db_name, "n", $handler);');
 
     /* Trying to open an existing random file */
     echo '=== OPENING EXISTING RANDOM FILE ===', \PHP_EOL;
