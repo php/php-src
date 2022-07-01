@@ -371,15 +371,15 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	salt_len = MIN(strcspn(salt, "$"), SALT_LEN_MAX);
 	key_len = strlen(key);
 
-	if ((key - (char *) 0) % __alignof__ (uint32_t) != 0) {
+	if ((uintptr_t)key % __alignof__ (uint32_t) != 0) {
 		char *tmp = (char *) alloca(key_len + __alignof__(uint32_t));
-		key = copied_key = memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__(uint32_t), key, key_len);
+		key = copied_key = memcpy(tmp + __alignof__(uint32_t) - (uintptr_t)tmp  % __alignof__(uint32_t), key, key_len);
 	}
 
-	if ((salt - (char *) 0) % __alignof__(uint32_t) != 0) {
+	if ((uintptr_t)salt % __alignof__(uint32_t) != 0) {
 		char *tmp = (char *) alloca(salt_len + 1 + __alignof__(uint32_t));
 		salt = copied_salt =
-		memcpy(tmp + __alignof__(uint32_t) - (tmp - (char *) 0) % __alignof__ (uint32_t), salt, salt_len);
+		memcpy(tmp + __alignof__(uint32_t) - (uintptr_t)tmp % __alignof__ (uint32_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
 	}
 
