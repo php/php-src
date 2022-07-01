@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.0alpha3
 
+- DBA:
+  . Fixed LMDB driver hanging when attempting to delete a non-existing key
+    (Girgias)
+
 - Opcache:
   . Allocate JIT buffer close to PHP .text segemnt to allow using direct
     IP-relative calls and jumps.
