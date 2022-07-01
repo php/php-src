@@ -12,95 +12,14 @@ check_skip('db4');
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
 
 $handler = 'db4';
-
-$modes = ['r', 'w', 'c', 'n'];
-$locks = ['l', 'd', '-', '' /* No lock flag is like 'd' */];
-
-echo '=== OPENING NON-EXISTING FILE ===', \PHP_EOL;
-/* Trying to open a non-existing file */
-$db_name = $handler . '_not_existing.db';
-foreach ($modes as $mode) {
-    foreach ($locks as $lock) {
-        $arg = $mode.$lock;
-        echo 'Mode parameter is "', $arg, '":', \PHP_EOL;
-        $db = dba_open($db_name, $arg, $handler);
-        if ($db !== false) {
-            assert(file_exists($db_name));
-            $status = dba_insert("key1", "This is a test insert", $db);
-            if ($status) {
-                echo dba_fetch("key1", $db), \PHP_EOL;
-            } else {
-                echo 'Insertion failed', \PHP_EOL;
-            }
-            dba_close($db);
-        } else {
-            echo 'Opening DB failed', \PHP_EOL;
-        }
-        cleanup_standard_db($db_name);
-    }
-}
-
-echo '=== OPENING EXISTING DB FILE ===', \PHP_EOL;
-/* Trying to open an existing db file */
-$db_name = $handler . '_existing.db';
-foreach ($modes as $mode) {
-    foreach ($locks as $lock) {
-        dba_open($db_name, 'n', $handler);
-        $arg = $mode.$lock;
-        echo 'Mode parameter is "', $arg, '":', \PHP_EOL;
-        $db = dba_open($db_name, $arg, $handler);
-        if ($db !== false) {
-            assert(file_exists($db_name));
-            $status = dba_insert("key1", "This is a test insert", $db);
-            if ($status) {
-                echo dba_fetch("key1", $db), \PHP_EOL;
-            } else {
-                echo 'Insertion failed', \PHP_EOL;
-            }
-            dba_close($db);
-        } else {
-            echo 'Opening DB failed', \PHP_EOL;
-        }
-        cleanup_standard_db($db_name);
-    }
-}
-
-echo '=== OPENING EXISTING RANDOM FILE ===', \PHP_EOL;
-/* Trying to open an existing random file */
-$db_name = $handler . '_random.txt';
-foreach ($modes as $mode) {
-    foreach ($locks as $lock) {
-        file_put_contents($db_name, "Dummy contents");
-        $arg = $mode.$lock;
-        echo 'Mode parameter is "', $arg, '":', \PHP_EOL;
-        $db = dba_open($db_name, $arg, $handler);
-        if ($db !== false) {
-            assert(file_exists($db_name));
-            $status = dba_insert("key1", "This is a test insert", $db);
-            if ($status) {
-                echo dba_fetch("key1", $db), \PHP_EOL;
-            } else {
-                echo 'Insertion failed', \PHP_EOL;
-            }
-            dba_close($db);
-        } else {
-            echo 'Opening DB failed', \PHP_EOL;
-        }
-        cleanup_standard_db($db_name);
-    }
-}
+run_creation_tests($handler);
 
 ?>
 --CLEAN--
 <?php
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $handler = 'db4';
-$db_name = $handler . '_not_existing.db';
-cleanup_standard_db($db_name);
-$db_name = $handler . '_existing.db';
-cleanup_standard_db($db_name);
-$db_name = $handler . '_random.txt';
-cleanup_standard_db($db_name);
+clean_creation_tests($handler);
 ?>
 --EXPECTF--
 === OPENING NON-EXISTING FILE ===

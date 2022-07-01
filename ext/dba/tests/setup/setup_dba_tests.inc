@@ -168,6 +168,58 @@ function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bo
      */
 }
 
+const MODES = ['r', 'w', 'c', 'n'];
+const LOCKS = ['l', 'd', '-', '' /* No lock flag is like 'd' */];
+function run_creation_tests_ex(string $handler, string $file_suffix, string $pre_req): void
+{
+    $db_name = $handler . $file_suffix;
+    foreach (MODES as $mode) {
+        foreach (LOCKS as $lock) {
+            eval($pre_req);
+            $arg = $mode.$lock;
+            echo 'Mode parameter is "', $arg, '":', \PHP_EOL;
+            $db = dba_open($db_name, $arg, $handler);
+            if ($db !== false) {
+                assert(file_exists($db_name));
+                $status = dba_insert("key1", "This is a test insert", $db);
+                if ($status) {
+                    echo dba_fetch("key1", $db), \PHP_EOL;
+                } else {
+                    echo 'Insertion failed', \PHP_EOL;
+                }
+                dba_close($db);
+            } else {
+                echo 'Opening DB failed', \PHP_EOL;
+            }
+            cleanup_standard_db($db_name);
+        }
+    }
+}
+
+function run_creation_tests(string $handler): void
+{
+    /* Trying to open a non-existing file */
+    echo '=== OPENING NON-EXISTING FILE ===', \PHP_EOL;
+    run_creation_tests_ex($handler, '_not_existing.db', '');
+
+    /* Trying to open an existing db file */
+    echo '=== OPENING EXISTING DB FILE ===', \PHP_EOL;
+    run_creation_tests_ex($handler, '_existing.db', 'dba_open($db_name, "n", $handler);');
+
+    /* Trying to open an existing random file */
+    echo '=== OPENING EXISTING RANDOM FILE ===', \PHP_EOL;
+    run_creation_tests_ex($handler, '_random.txt', 'file_put_contents($db_name, "Dummy contents");');
+}
+
+function clean_creation_tests(string $handler): void {
+    $db_name = $handler . '_not_existing.db';
+    cleanup_standard_db($db_name);
+    $db_name = $handler . '_existing.db';
+    cleanup_standard_db($db_name);
+    $db_name = $handler . '_random.txt';
+    cleanup_standard_db($db_name);
+}
+
 function run_standard_tests(string $handler, string $name): void {
     echo '=== RUNNING WITH FILE LOCK ===', \PHP_EOL;
     ob_start();
