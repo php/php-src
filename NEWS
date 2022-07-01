@@ -10,6 +10,9 @@ PHP                                                                        NEWS
 - Sockets:
   . Added TCP_CONGESTION socket option. (David Carlier)
 
+- Standard:
+  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carier)
+
 - Zip:
 
   . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)

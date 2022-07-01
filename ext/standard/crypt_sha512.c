@@ -411,15 +411,15 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	SET_ALLOCA_FLAG(use_heap_key);
 	SET_ALLOCA_FLAG(use_heap_salt);
 
-	if ((key - (char *) 0) % __alignof__ (uint64_t) != 0) {
-		tmp_key = (char *) do_alloca(key_len + __alignof__ (uint64_t), use_heap_key);
+	if ((uintptr_t)key % __alignof__ (uint64_t) != 0) {
+		char *tmp = (char *) do_alloca (key_len + __alignof__ (uint64_t), use_heap_key);
 		key = copied_key =
-		memcpy(tmp_key + __alignof__(uint64_t) - (tmp_key - (char *) 0) % __alignof__(uint64_t), key, key_len);
+		memcpy(tmp + __alignof__(uint64_t) - (uintptr_t)tmp % __alignof__(uint64_t), key, key_len);
 	}
 
-	if ((salt - (char *) 0) % __alignof__ (uint64_t) != 0) {
-		tmp_salt = (char *) do_alloca(salt_len + 1 + __alignof__(uint64_t), use_heap_salt);
-		salt = copied_salt = memcpy(tmp_salt + __alignof__(uint64_t) - (tmp_salt - (char *) 0) % __alignof__(uint64_t), salt, salt_len);
+	if ((uintptr_t)salt % __alignof__ (uint64_t) != 0) {
+		char *tmp = (char *) do_alloca(salt_len + 1 + __alignof__(uint64_t), use_heap_salt);
+		salt = copied_salt = memcpy(tmp + __alignof__(uint64_t) - (uintptr_t)tmp % __alignof__(uint64_t), salt, salt_len);
 		copied_salt[salt_len] = 0;
 	}
 
