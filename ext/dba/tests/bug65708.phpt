@@ -34,7 +34,8 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'bug65708.db';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 integer
 integer
 integer

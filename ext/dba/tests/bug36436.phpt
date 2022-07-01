@@ -12,7 +12,7 @@ check_skip('db4');
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'bug36436.db';
 
-$db = set_up_db_ex('db4', $db_name, false, true);
+$db = set_up_db_ex('db4', $db_name, LockFlag::DbLock, persistent: true);
 
 var_dump($db, dba_fetch('key1', $db));
 

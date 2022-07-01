@@ -25,6 +25,7 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'legacy_fetch_signature.db';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 This is a test insert
 This is a test insert

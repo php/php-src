@@ -47,7 +47,8 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'array_keys_errors.db';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 Error: dba_insert(): Argument #1 ($key) must have exactly two elements: "key" and "name"
 Error: dba_insert(): Argument #1 ($key) must have exactly two elements: "key" and "name"
 Error: Object of class stdClass could not be converted to string

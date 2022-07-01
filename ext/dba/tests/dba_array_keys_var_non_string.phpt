@@ -31,7 +31,8 @@ require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $db_name = 'array_keys_non_string.db';
 cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 array(2) {
   [0]=>
   int(5)

@@ -4,6 +4,12 @@ function check_skip_any() {
     if (dba_handlers() === []) {
         die('skip no handlers installed');
     }
+    if (dba_handlers() === ['cdb']) {
+        die('skip only cdb installed which is not suitable');
+    }
+    if (dba_handlers() === ['cdb_make']) {
+        die('skip only cdb_make installed which is not suitable');
+    }
 }
 
 function check_skip(string $handler) {
@@ -18,16 +24,29 @@ function check_skip(string $handler) {
 }
 
 function get_any_handler(): string {
-    return dba_handlers()[0];
+    foreach (dba_handlers() as $handler) {
+        // Those are weird
+        if ($handler !== 'cdb' && $handler !== 'cdb_make' && $handler !== 'inifile') {
+            echo 'Using handler: "', $handler, '"', \PHP_EOL;
+            return $handler;
+        }
+    }
+    return 'should_not_happen';
 }
 function get_any_db(string $name) {
     return dba_open($name, 'c', get_any_handler());
 }
 
+enum LockFlag: string {
+    case FileLock = 'l';
+    case DbLock = 'd';
+    case NoLock = '-';
+}
+
 // TODO Test which opens a NON DB file to check for memory leaks (at least LMDB has)
 
-function set_up_db_ex(string $handler, string $name, bool $useLock = true, bool $persistent = false) {
-    $lock_flag = $useLock ? 'l' : '';
+function set_up_db_ex(string $handler, string $name, LockFlag $lock, bool $persistent = false) {
+    $lock_flag = $lock->value;
     // Open file in creation/truncation mode
     $func = $persistent ? 'dba_popen' : 'dba_open';
 
@@ -52,13 +71,13 @@ function set_up_db_ex(string $handler, string $name, bool $useLock = true, bool 
     return $db_file;
 }
 
-function set_up_db(string $handler, string $name, bool $useLock = true) {
-    $db_file = set_up_db_ex($handler, $name, $useLock);
+function set_up_db(string $handler, string $name, LockFlag $lock = LockFlag::FileLock): void {
+    $db_file = set_up_db_ex($handler, $name, $lock);
     // Close creation/truncation handler
     dba_close($db_file);
 }
 
-function run_common_read_only_test($dbHandle) {
+function run_common_read_only_test($dbHandle): void {
     $key = dba_firstkey($dbHandle);
     $result = [];
     while ($key) {
@@ -69,8 +88,10 @@ function run_common_read_only_test($dbHandle) {
     var_dump($result);
 }
 
-function run_standard_tests(string $handler, string $name, bool $useLock = true, bool $persistent = false) {
-    $lock_flag = $useLock ? 'l' : '';
+function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bool $persistent = false): void
+{
+    $lock_flag = $lock->value;
+    set_up_db($handler, $name, $lock);
     $db_writer = dba_open($name, 'w'.$lock_flag, $handler);
     if ($db_writer === false) {
         die("Failed to open DB for write");
@@ -104,7 +125,13 @@ function run_standard_tests(string $handler, string $name, bool $useLock = true,
     var_dump(dba_replace('key2', 'Content 2 replaced', $db_writer));
     echo dba_fetch('key2', $db_writer), \PHP_EOL;
 
-    $db_reader = @dba_open($name, 'r'.$lock_flag.'t', $handler);
+    // Check that read is possible when a lock is used
+    $test_flag = 't';
+    if ($lock === LockFlag::NoLock) {
+        // No point testing when we don't use locks
+        $test_flag = '';
+    }
+    $db_reader = @dba_open($name, 'r'.$lock_flag.$test_flag, $handler);
     if ($db_reader === false) {
         echo 'Read during write: not allowed', \PHP_EOL;
     } else {
@@ -143,17 +170,49 @@ function run_standard_tests(string $handler, string $name, bool $useLock = true,
         }
     }
      */
-    /* If a lock is used, rerun tests without lock */
-    if ($useLock) {
-        echo '--NO-LOCK--', \PHP_EOL;
-        cleanup_standard_db($name);
-        set_up_db($handler, $name, false);
-        run_standard_tests($handler, $name, false);
+}
+
+function run_standard_tests(string $handler, string $name): void {
+    echo '=== RUNNING WITH FILE LOCK ===', \PHP_EOL;
+    ob_start();
+    set_up_db($handler, $name, LockFlag::FileLock);
+    run_standard_tests_ex($handler, $name, LockFlag::FileLock);
+    cleanup_standard_db($name);
+    $run1_output = ob_get_flush();
+    echo '=== RUNNING WITH DB LOCK (default) ===', \PHP_EOL;
+    ob_start();
+    set_up_db($handler, $name, LockFlag::DbLock);
+    run_standard_tests_ex($handler, $name, LockFlag::DbLock);
+    cleanup_standard_db($name);
+    $run2_output = ob_get_clean();
+    if ($run1_output === $run2_output) {
+        echo 'SAME OUTPUT AS PREVIOUS RUN', \PHP_EOL;
+    } else {
+        echo $run2_output;
+    }
+
+    echo '=== RUNNING WITH NO LOCK ===', \PHP_EOL;
+    ob_start();
+    set_up_db($handler, $name, LockFlag::NoLock);
+    run_standard_tests_ex($handler, $name, LockFlag::NoLock);
+    $run3_output = ob_get_clean();
+    if ($run2_output === $run3_output) {
+        echo 'SAME OUTPUT AS PREVIOUS RUN', \PHP_EOL;
+    } else if ($run2_output === str_replace( // If only the fact that the lock prevented reads
+            'Read during write: allowed',
+            'Read during write: not allowed',
+            $run3_output
+        )
+    ) {
+        echo 'SAME OUTPUT AS PREVIOUS RUN (modulo read during write due to no lock)', \PHP_EOL;
+    } else {
+        echo $run3_output;
     }
 }
 
 // TODO Array keys insertion
-function set_up_cdb_db_and_run(string $name) {
+// TODO Run all lock flags
+function set_up_cdb_db_and_run(string $name): void {
     set_up_db('cdb', $name);
 
     $db_file = dba_open($name, 'rl', 'cdb');
@@ -168,8 +227,8 @@ function set_up_cdb_db_and_run(string $name) {
 
     echo '--NO-LOCK--', \PHP_EOL;
     cleanup_standard_db($name);
-    set_up_db('cdb', $name, false);
-    $db_file = dba_open($name, 'r', 'cdb');
+    set_up_db('cdb', $name, LockFlag::NoLock);
+    $db_file = dba_open($name, 'r-', 'cdb');
     if ($db_file === false) {
         die("Failed to reopen DB");
     }
@@ -179,7 +238,7 @@ function set_up_cdb_db_and_run(string $name) {
     run_common_read_only_test($db_file);
 }
 
-function cleanup_standard_db(string $name) {
+function cleanup_standard_db(string $name): void {
     @unlink($name);
     @unlink($name.'.lck');
     @unlink($name.'-lock');
