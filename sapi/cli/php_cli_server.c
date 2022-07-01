@@ -671,10 +671,12 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 
 			strncpy(port, tmp + 1, 8);
 			port[7] = '\0';
-			strncpy(addr, addr_start, addr_end - addr_start);
-			addr[addr_end - addr_start] = '\0';
+			size_t addr_len = addr_end - addr_start;
+			strncpy(addr, addr_start, addr_len);
+			addr[addr_len] = '\0';
+			ZEND_ASSERT(addr_len == strlen(addr));
 			sapi_cli_server_register_known_var_char(track_vars_array,
-				"REMOTE_ADDR", strlen("REMOTE_ADDR"), addr, strlen(addr));
+				"REMOTE_ADDR", strlen("REMOTE_ADDR"), addr, addr_len);
 			sapi_cli_server_register_known_var_char(track_vars_array,
 				"REMOTE_PORT", strlen("REMOTE_PORT"), port, strlen(port));
 		} else {
