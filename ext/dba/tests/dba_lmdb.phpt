@@ -34,7 +34,9 @@ Remove key 1 and 3
 bool(true)
 bool(true)
 Try to remove key 1 again
-TODO Fix über slow LMDB on deletion of non existent key
+
+Warning: dba_delete(): MDB_NOTFOUND: No matching key/data pair found in %s on line %d
+bool(false)
 [key10]name10: Content String 10
 [key30]name30: Content String 30
 key2: Content String 2
@@ -60,7 +62,7 @@ bool(true)
 Fetch "key2": Content 2 replaced 2nd time
 Fetch "key number 6": The 6th value
 
-Notice: dba_open(): Handler lmdb does locking internally in %s on line 1%d
+Notice: dba_open(): Handler lmdb does locking internally in %s on line %d
 array(6) {
   ["[key10]name10"]=>
   string(17) "Content String 10"
@@ -80,7 +82,9 @@ Remove key 1 and 3
 bool(true)
 bool(true)
 Try to remove key 1 again
-TODO Fix über slow LMDB on deletion of non existent key
+
+Warning: dba_delete(): MDB_NOTFOUND: No matching key/data pair found in %s on line %d
+bool(false)
 [key10]name10: Content String 10
 [key30]name30: Content String 30
 key2: Content String 2

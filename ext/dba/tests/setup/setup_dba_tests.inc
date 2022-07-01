@@ -102,11 +102,7 @@ function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bo
     var_dump(dba_delete("key1", $db_writer));
 
     echo 'Try to remove key 1 again', \PHP_EOL;
-    if ($handler !== 'lmdb') {
-        var_dump(dba_delete("key1", $db_writer));
-    } else {
-        echo 'TODO Fix über slow LMDB on deletion of non existent key', \PHP_EOL;
-    }
+    var_dump(dba_delete("key1", $db_writer));
 
     // Fetch data
     $key = dba_firstkey($db_writer);
