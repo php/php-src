@@ -6,9 +6,8 @@ Short closures: static vs capture precedence
 $a = 1;
 $b = 2;
 
-// static $a is initialized with explicitly used $a, as in long closures
-// $b is not auto-captured because it is defined before any use
-$f = fn () use ($a) {
+// $a and $b are not auto-captured because they are defined before any use
+$f = fn () {
     static $a;
     static $b;
     $ret = [$a, $b];
@@ -27,20 +26,20 @@ var_dump($f());
 Captures or statics:
 array(2) {
   ["a"]=>
-  int(1)
+  NULL
   ["b"]=>
   NULL
 }
 Results:
 array(2) {
   [0]=>
-  int(1)
+  NULL
   [1]=>
   NULL
 }
 array(2) {
   [0]=>
-  int(2)
+  int(1)
   [1]=>
   int(1)
 }

@@ -6847,7 +6847,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 		for (i = 0; i < list->children; i++) {
 			find_implicit_binds_recursively(info, list->child[i]);
 		}
-	} else if (ast->kind == ZEND_AST_CLOSURE || ast->kind == ZEND_AST_SHORT_CLOSURE) {
+	} else if (ast->kind == ZEND_AST_CLOSURE) {
 		/* For normal closures add the use() list. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
 		zend_ast *uses_ast = closure_ast->child[1];
@@ -6858,10 +6858,7 @@ static void find_implicit_binds_recursively(closure_info *info, zend_ast *ast) {
 				zend_hash_add_empty_element(&info->uses, zend_ast_get_str(uses_list->child[i]));
 			}
 		}
-		if (ast->kind == ZEND_AST_SHORT_CLOSURE) {
-			find_implicit_binds_recursively(info, closure_ast->child[2]);
-		}
-	} else if (ast->kind == ZEND_AST_ARROW_FUNC) {
+	} else if (ast->kind == ZEND_AST_ARROW_FUNC || ast->kind == ZEND_AST_SHORT_CLOSURE) {
 		/* For arrow functions recursively check the expression. */
 		zend_ast_decl *closure_ast = (zend_ast_decl *) ast;
 		find_implicit_binds_recursively(info, closure_ast->child[2]);

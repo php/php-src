@@ -7,12 +7,12 @@ zend.assertions=1
 
 $a = 1;
 
-assert(#[Attr] fn(DateTime $dt) use($a): DateTime {
+assert(#[Attr] fn(DateTime $dt): DateTime {
     return 1;
 } && false);
 
 --EXPECTF--
-Fatal error: Uncaught AssertionError: assert(#[Attr] fn(DateTime $dt) use($a): DateTime {
+Fatal error: Uncaught AssertionError: assert(#[Attr] fn(DateTime $dt): DateTime {
     return 1;
 } && false) in %s:%d
 Stack trace:

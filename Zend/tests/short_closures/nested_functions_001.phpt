@@ -10,7 +10,7 @@ $d = 4;
 $e = 5;
 
 $f = fn ($x) {
-    $g = fn ($x) use (&$b) { return $a; };
+    $g = fn ($x) { return $a; };
     $h = fn () => $c;
     $i = function () use ($d, &$e) {};
 };
@@ -20,9 +20,7 @@ var_dump((new ReflectionFunction($f))->getStaticVariables());
 
 --EXPECT--
 Captures:
-array(5) {
-  ["b"]=>
-  int(2)
+array(4) {
   ["a"]=>
   int(1)
   ["c"]=>

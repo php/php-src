@@ -1218,11 +1218,6 @@ inline_function:
 			{ $$ = zend_ast_create_decl(ZEND_AST_SHORT_CLOSURE, $2 | $12, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 				  $5, NULL, $10, $7, NULL); CG(extra_fn_flags) = $9; }
-	|	fn returns_ref backup_doc_comment '(' parameter_list ')' T_USE '(' lexical_var_list possible_comma ')' return_type
-		'{' backup_fn_flags inner_statement_list '}' backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_SHORT_CLOSURE, $2 | $17, $1, $3,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
-				  $5, $9, $15, $12, NULL); CG(extra_fn_flags) = $14; }
 ;
 
 fn:

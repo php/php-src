@@ -19,18 +19,6 @@ function printFunctionSignature($f) {
         print '& ';
     }
     print '(...)';
-    $usedVars = $rf->getClosureUsedVariables();
-    if (count($usedVars) > 0) {
-        print ' use (';
-        $n = 0;
-        foreach ($usedVars as $var => $_) {
-            if ($n++ > 0) {
-                print ', ';
-            }
-            print $var;
-        }
-        print ')';
-    }
     $type = $rf->getReturnType();
     if ($type !== null) {
         print ': ' . $type->getName();
@@ -62,16 +50,6 @@ $f = fn (): Foo {
 
 printFunctionSignature($f);
 
-$f = fn () use ($a) {
-};
-
-printFunctionSignature($f);
-
-$f = fn () use ($a): Foo {
-};
-
-printFunctionSignature($f);
-
 $a = 1;
 $f = fn (): Foo {
     return $a;
@@ -89,7 +67,5 @@ fn (...)
 fn & (...)
 static fn (...)
 fn (...): Foo
-fn (...) use (a)
-fn (...) use (a): Foo
-fn (...) use (a): Foo
+fn (...): Foo
 #[Attr] fn (...): Foo
